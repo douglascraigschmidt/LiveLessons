@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">DownloadApplication</string>
+    <string name="title_activity_download">Download</string>
+    <string name="download">Download Image</string>
+    <string name="resetImage">Reset Image</string>
+    <string name="defaultURL">http://www.dre.vanderbilt.edu/~schmidt/ka.png</string>
+    <string name="location">Enter URL:</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
+</resources>
