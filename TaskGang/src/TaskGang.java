@@ -1,5 +1,5 @@
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -25,7 +25,7 @@ public abstract class TaskGang<E> implements Runnable {
     /**
      * Executes submitted Runnable tasks in a Thread pool.
      */
-    private ExecutorService mExecutorService = null;
+    private Executor mExecutor = null;
         
     /**
      * Increment to the next cycle.
@@ -56,17 +56,17 @@ public abstract class TaskGang<E> implements Runnable {
     }
 
     /**
-     * Set the ExecutorService to use to submit/run tasks.
+     * Set the Executor to use to submit/run tasks.
      */
-    protected void setExecutorService(ExecutorService executorService) {
-        mExecutorService = executorService;
+    protected void setExecutor(Executor executor) {
+        mExecutor = executor;
     }
 
     /**
-     * Get the ExecutorService to use to submit/run tasks.
+     * Get the Executor to use to submit/run tasks.
      */
-    protected ExecutorService getExecutorService() {
-        return mExecutorService;
+    protected Executor getExecutor() {
+        return mExecutor;
     }
 
     /**
@@ -142,13 +142,13 @@ public abstract class TaskGang<E> implements Runnable {
     /**
      * Factory method that creates a Runnable task that will process
      * one node of the input List (at location @code index) in a
-     * background Thread provided by the ExecutorService.
+     * background Thread provided by the Executor.
      */
     protected Runnable makeTask(final int index) {
         return new Runnable() {
 
             // This method runs in background Thread provided by the
-            // ExecutorService.
+            // Executor.
             public void run() {
                 try {
                     // Get the input data element associated with

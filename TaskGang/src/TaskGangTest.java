@@ -1,15 +1,18 @@
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @class TaskGangTest
@@ -27,10 +30,11 @@ public class TaskGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        EXECUTOR_ONESHOT,
-        EXECUTOR_CYCLIC,
-        EXECUTOR_FUTURE_ONESHOT,
-        EXECUTOR_COMPLETION_ONESHOT
+        ONESHOT_THREAD_PER_TASK,
+        ONESHOT_EXECUTOR_SERVICE,
+        CYCLIC_EXECUTOR_SERVICE,
+        ONESHOT_EXECUTOR_SERVICE_FUTURE,
+        ONESHOT_EXECUTOR_COMPLETION_SERVICE
     }
 
     /**
@@ -292,25 +296,118 @@ public class TaskGangTest {
          * the gang of Threads to exit.
          */
         protected void awaitTasksDone() {
-            getExecutorService().shutdown();
-            try {
-                // Wait for all the Threads in the pool to exit.
-                getExecutorService().awaitTermination(Long.MAX_VALUE,
-                                                      TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
+            if (getExecutor() instanceof ExecutorService) {
+                ExecutorService executorService = 
+                    (ExecutorService) getExecutor();
+
+                executorService.shutdown();
+                try {
+                    // Wait for all the Threads in the pool to exit.
+                    executorService.awaitTermination(Long.MAX_VALUE,
+                                                     TimeUnit.NANOSECONDS);
+                } catch (InterruptedException e) {
+                }
             }
         }
     }
 
     /**
-     * @class SearchTaskGangExecutorOneShot
+     * @class OneShotThreadPerTask
+     *
+     * @brief Customizes the SearchTaskGangCommon framework to process
+     *        a one-shot List of tasks via an Executor that creates a
+     *        Thread for each task.
+     */
+    static public class OneShotThreadPerTask
+        extends SearchTaskGangCommon {
+
+        /**
+         * The List of worker Threads that were created.
+         */
+        private List<Thread> mWorkerThreads;
+
+        /**
+         * Constructor initializes the superclass and data members.
+         */
+        public OneShotThreadPerTask(String[] wordsToFind,
+                                    String[][] stringsToSearch) {
+            // Pass input to superclass constructor.
+            super(wordsToFind,
+                  stringsToSearch);
+
+            // This List holds Threads so they can be joined.
+            mWorkerThreads = new LinkedList<Thread>();
+        }
+
+        /**
+         * Initiate the TaskGang to run each worker in a separate
+         * Thread.
+         */
+        protected void initiateTaskGang(int inputSize) {
+            // Create a fixed-size Thread pool.
+            if (getExecutor() == null) 
+                // Create an Executor that runs each worker in a
+                // separate Thread.
+                setExecutor (new Executor() {
+                    public void execute(Runnable r) {
+                        Thread thread = new Thread(r);
+                        mWorkerThreads.add (thread);
+                        thread.start();
+                    }
+                });
+
+            // Enqueue each item in the input List for execution in a
+            // separate Thread.
+            for (int i = 0; i < inputSize; ++i) 
+                getExecutor().execute(makeTask(i));
+        }
+
+        /**
+         * Runs in a background Thread and searches the inputData for
+         * all occurrences of the words to find.
+         */
+        @Override
+        protected boolean processInput (String inputData) {
+            // Iterate through each word we're searching for
+            // and try to find it in the inputData.
+            for (String word : mWordsToFind) {
+                SearchResults results = searchForWord(word, 
+                                                      inputData);
+
+                // Each time a match is found the SearchResult.print()
+                // method is called to print the output.  We put this
+                // call in a synchronized block so the output isn't
+                // scrambled.
+                synchronized(mOneShotInputStrings) {
+                    results.print();
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Hook method that uses Thread.join() as an exit barrier to
+         * wait for the gang of Threads to exit.
+         */
+        protected void awaitTasksDone() {
+            for (Thread thread : mWorkerThreads)
+                try {
+                	thread.join();
+                } catch (InterruptedException e) {
+                	printDebugging("awaitTasksDone interrupted");
+                }
+        }
+    }
+
+    /**
+     * @class OneShotExecutorService
      *
      * @brief Customizes the SearchTaskGangCommon framework to process
      *        a one-shot List of tasks via a pool of Threads created
-     *        by the ExecutorService, which is also used to wait for
+     *        by the Executor, which is also used to wait for
      *        all the Threads in the pool to shutdown.
      */
-    static public class SearchTaskGangExecutorOneShot
+    static public class OneShotExecutorService
         extends SearchTaskGangCommon {
         /**
          * Controls when the framework exits.
@@ -331,7 +428,7 @@ public class TaskGangTest {
         /**
          * Constructor initializes the superclass.
          */
-        public SearchTaskGangExecutorOneShot(String[] wordsToFind,
+        public OneShotExecutorService(String[] wordsToFind,
                                       String[][] stringsToSearch) {
             // Pass input to superclass constructor.
             super(wordsToFind,
@@ -340,10 +437,10 @@ public class TaskGangTest {
 
         /**
          * Hook method that initiates the gang of Threads by using a
-         * fixed-size Thread pool managed by the ExecutorService.
+         * fixed-size Thread pool managed by the Executor.
          */
         @Override
-            protected void initiateHook(int inputSize) {
+        protected void initiateHook(int inputSize) {
             printDebugging("@@@ starting cycle "
                            + currentCycle()
                            + " with "
@@ -354,8 +451,8 @@ public class TaskGangTest {
             mExitBarrier = new CountDownLatch(inputSize);
 
             // Create a fixed-size Thread pool.
-            if (getExecutorService() == null) 
-                setExecutorService (Executors.newFixedThreadPool(MAX_THREADS));
+            if (getExecutor() == null) 
+                setExecutor (Executors.newFixedThreadPool(MAX_THREADS));
         }
 
         /**
@@ -370,7 +467,7 @@ public class TaskGangTest {
             // Enqueue each item in the input List for execution in the
             // Executor's Thread pool.
             for (int i = 0; i < inputSize; ++i) 
-                getExecutorService().execute(makeTask(i));
+                getExecutor().execute(makeTask(i));
         }
 
         /**
@@ -408,7 +505,7 @@ public class TaskGangTest {
         }
 
         /**
-         * Hook method that shuts down the ExecutorService's Thread
+         * Hook method that shuts down the Executor's Thread
          * pool and waits for all the Threads to exit before
          * returning.
          */
@@ -431,7 +528,7 @@ public class TaskGangTest {
                 // worth of input.
             } while (advanceTaskToNextCycle());
 
-            // Call up to the super class to await for ExecutorService
+            // Call up to the super class to await for Executor
             // Threads to shutdown.
             super.awaitTasksDone();
         }
@@ -487,19 +584,19 @@ public class TaskGangTest {
     }
 
     /**
-     * @class SearchTaskGangExecutorCyclic
+     * @class CyclicExecutorService
      *
      * @brief Customizes the SearchTaskGangCommon framework to process
      *        a cyclic List of tasks via a pool of Threads created by
-     *        the ExecutorService, which is also used to wait for all
+     *        the Executor, which is also used to wait for all
      *        the Threads in the pool to shutdown.
      */
-    static public class SearchTaskGangExecutorCyclic
-        extends SearchTaskGangExecutorOneShot {
+    static public class CyclicExecutorService
+        extends OneShotExecutorService {
         /**
          * Constructor initializes the superclass.
          */
-        SearchTaskGangExecutorCyclic(String[] wordsToFind,
+        CyclicExecutorService(String[] wordsToFind,
                                      String[][] stringsToSearch) {
             // Pass input to superclass constructor.
             super(wordsToFind,
@@ -526,9 +623,12 @@ public class TaskGangTest {
                 workerCollection.add(Executors.callable(makeTask(i)));
 
             try {
-            // Use invokeAll() to execute all items in the collection
-            // via the Executor's Thread pool.
-                getExecutorService().invokeAll(workerCollection);
+                ExecutorService executorService = 
+                    (ExecutorService) getExecutor();
+
+                // Use invokeAll() to execute all items in the collection
+                // via the Executor's Thread pool.
+                executorService.invokeAll(workerCollection);
             } catch (InterruptedException e) {
                 printDebugging("invokeAll() interrupted");
             }
@@ -554,11 +654,11 @@ public class TaskGangTest {
     }
 
     /**
-     * @class SearchTaskGangExecutorFutureOneShot
+     * @class OneShotExecutorServiceFuture
      * 
      * @brief ...
      */
-    static public class SearchTaskGangExecutorFutureOneShot
+    static public class OneShotExecutorServiceFuture
         extends SearchTaskGangCommon {
         /**
          * A List of Futures that contain SearchResults.
@@ -566,17 +666,17 @@ public class TaskGangTest {
         protected List<Future<SearchResults>> mResultFutures;
 
         /**
-         * Constructor initializes the data members.
+         * Constructor initializes the superclass and data members.
          */
-        protected SearchTaskGangExecutorFutureOneShot(String[] wordsToFind,
-                                                      String[][] stringsToSearch) {
+        protected OneShotExecutorServiceFuture(String[] wordsToFind,
+                                               String[][] stringsToSearch) {
             // Pass input to superclass constructor.
             super(wordsToFind, 
                   stringsToSearch);
 
-            // Initialize the ExecutorService with a cached pool of
+            // Initialize the Executor with a cached pool of
             // Threads.
-            setExecutorService (Executors.newCachedThreadPool());
+            setExecutor (Executors.newCachedThreadPool());
         }
 
         /**
@@ -602,6 +702,8 @@ public class TaskGangTest {
          * Thread from continuing to run).
          */
         protected boolean processInput(final String inputData) {
+            ExecutorService executorService = 
+                (ExecutorService) getExecutor();
 
             // Iterate through each word and submit a Callable that
             // will search concurrently for this word in the
@@ -609,7 +711,7 @@ public class TaskGangTest {
             for (final String word : mWordsToFind) {
                 // Create a Future to store the results.
                 final Future<SearchResults> resultFuture = 
-                    getExecutorService().submit (new Callable<SearchResults>() {
+                    executorService.submit(new Callable<SearchResults>() {
                             @Override
                             public SearchResults call() throws Exception {
                                 return searchForWord(word,
@@ -646,35 +748,35 @@ public class TaskGangTest {
     }
 
     /**
-     * @class SearchTaskGangExecutorCompletionOneShot
+     * @class OneShotExecutorCompletionService
      *
      * @brief ...
      */
-    static public class SearchTaskGangExecutorCompletionOneShot
+    static public class OneShotExecutorCompletionService
         extends SearchTaskGangCommon {
         /**
          * Processes the results of Futures returned from the
-         * ExecutorService.submit() method.
+         * Executor.submit() method.
          */
         protected ExecutorCompletionService<SearchResults> mCompletionService;
 
         /**
-         * Constructor initializes the data members.
+         * Constructor initializes the superclass and data members.
          */
-        protected SearchTaskGangExecutorCompletionOneShot(String[] wordsToFind,
+        protected OneShotExecutorCompletionService(String[] wordsToFind,
                                                           String[][] stringsToSearch) {
             // Pass input to superclass constructor.
             super(wordsToFind, 
                   stringsToSearch);
 
-            // Initialize the ExecutorService with a cached pool of
+            // Initialize the Executor with a cached pool of
             // Threads.
-            setExecutorService (Executors.newCachedThreadPool());
+            setExecutor (Executors.newCachedThreadPool());
 
-            // Connect the ExecutorService with the CompletionService
+            // Connect the Executor with the CompletionService
             // to process SearchResults concurrently. 
             mCompletionService =
-                new ExecutorCompletionService<SearchResults>(getExecutorService());
+                new ExecutorCompletionService<SearchResults>(getExecutor());
         }
 
         /**
@@ -736,7 +838,7 @@ public class TaskGangTest {
              // Enqueue each item in the input List for execution in
              // the Executor's Thread pool.
              for (int i = 0; i < inputSize; ++i) 
-                 getExecutorService().execute(makeTask(i));
+                 getExecutor().execute(makeTask(i));
 
              // Process all the Futures concurrently via the
              // ExecutorCompletionService
@@ -759,18 +861,21 @@ public class TaskGangTest {
     private static SearchTaskGangCommon makeTaskGang(String[] wordList,
                                                      TestsToRun choice) {
         switch(choice) {
-        case EXECUTOR_ONESHOT:
-            return new SearchTaskGangExecutorOneShot(wordList,
-                                                     mOneShotInputStrings);
-        case EXECUTOR_CYCLIC:
-            return new SearchTaskGangExecutorCyclic(wordList,
-                                                    mFixedNumberOfInputStrings);
-        case EXECUTOR_FUTURE_ONESHOT:
-            return new SearchTaskGangExecutorFutureOneShot(wordList,
-                                                           mOneShotInputStrings);
-        case EXECUTOR_COMPLETION_ONESHOT:
-            return new SearchTaskGangExecutorCompletionOneShot(wordList,
-                                                               mOneShotInputStrings);
+        case ONESHOT_THREAD_PER_TASK:
+            return new OneShotThreadPerTask(wordList,
+                                            mOneShotInputStrings);
+        case ONESHOT_EXECUTOR_SERVICE:
+            return new OneShotExecutorService(wordList,
+                                              mOneShotInputStrings);
+        case CYCLIC_EXECUTOR_SERVICE:
+            return new CyclicExecutorService(wordList,
+                                             mFixedNumberOfInputStrings);
+        case ONESHOT_EXECUTOR_SERVICE_FUTURE:
+            return new OneShotExecutorServiceFuture(wordList,
+                                                    mOneShotInputStrings);
+        case ONESHOT_EXECUTOR_COMPLETION_SERVICE:
+            return new OneShotExecutorCompletionService(wordList,
+                                                        mOneShotInputStrings);
         }
         return null;
     }
