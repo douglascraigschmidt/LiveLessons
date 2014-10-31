@@ -13,13 +13,14 @@ class DeadlockTest {
      */
     static class TransferRunnable implements Runnable {
         /**
-         * Transfer contents of src to dest in a synchronized manner since
-         * SimpleQueue lacks have internal synchronization.
+         * Copies contents of src to dest in a synchronized manner
+         * since SimpleQueue lacks have internal synchronization.
          */
         public static void transfer(SimpleQueue<String> src,
                                     SimpleQueue<String> dest)
             throws InterruptedException {
-            // Acquire the locks for src and dest.
+            // Acquire the locks for src and dest.  This causes the
+            // sporadic deadlocks when src and dest are reversed.
             synchronized(src) {
                 synchronized(dest) {
                     // Remove each element from src and put it into dest.
@@ -75,12 +76,12 @@ class DeadlockTest {
      * SimpleQueue (aQueue and bQueue) and two Threads that attempt to
      * transfer the contents of aQueue and bQueue in opposite orders.
      * Although this will work sometimes, it also often deadlocks
-     * since the Deadlock.transfer() method running in one Thread will
-     * acquire aQueue's monitor lock, while the Deadlock.transfer()
-     * method running in another Thread will acquire bQueue's monitor
-     * lock.  At this point, both Threads are waiting to acquire the
-     * other SimpleQueue's monitor lock, which causes a circular wait
-     * that doesn't terminate!
+     * since the TransferRunnable.transfer() method running in one
+     * Thread will acquire aQueue's monitor lock, while the
+     * TransferRunnble.transfer() method running in another Thread
+     * will acquire bQueue's monitor lock.  At this point, both
+     * Threads are waiting to acquire the other SimpleQueue's monitor
+     * lock, which causes a circular wait that doesn't terminate!
      */
     static public void main(String[] args) {
         // Designated the number of iterations to run in each thread.

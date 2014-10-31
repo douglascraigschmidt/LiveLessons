@@ -1,4 +1,4 @@
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
@@ -6,23 +6,23 @@ import java.util.concurrent.ThreadFactory;
  * @class TestExecutor
  *
  * @brief This program demonstrates the difference between a Java user
- *        thread and a daemon thread in the context of ExecutorService
- *        thread pools.  If it's launched with no command-line
- *        parameters the main thread creates a user thread, which can
- *        outlive the main thread (i.e., it continues to run even
- *        after the main thread exits).  If it's launched with a
- *        command-line parameter then it creates a daemon thread,
- *        which exits when the main thread exits.
+ *        thread and a daemon thread in the context of thread pools
+ *        created by the Java Executor framework.  If it's launched
+ *        with no command-line parameters the main thread creates a
+ *        user thread, which can outlive the main thread (i.e., it
+ *        continues to run even after the main thread exits).  If it's
+ *        launched with a command-line parameter then it creates a
+ *        daemon thread, which exits when the main thread exits.
  */
 public class TestExecutor {
     /**
      * Entry point method into the program's main thread, which uses
-     * the Java ExecutorService to create/start a pool of the desired
-     * type of thread (i.e., either "user" or "daemon") and sleeps for
-     * 1 second while threads in the pool run.  If "daemon" threads
-     * are created they will only run as long as the main thread runs.
-     * Conversely, if "user" threads are created they will continue to
-     * run even after the main thread exits.
+     * the Java Executor framework to create/start a pool of the
+     * desired type of thread (i.e., either "user" or "daemon") and
+     * sleeps for 1 second while threads in the pool run.  If "daemon"
+     * threads are created they will only run as long as the main
+     * thread runs.  Conversely, if "user" threads are created they
+     * will continue to run even after the main thread exits.
      */
     public static void main(String[] args) {
         System.out.println("Entering main()");
@@ -53,7 +53,7 @@ public class TestExecutor {
 
         // Create a pool of threads that's will concurrently execute
         // the runnableCommands.
-        final ExecutorService executor = 
+        final Executor executor = 
             Executors.newFixedThreadPool(POOL_SIZE,
                                          threadFactory);
         
@@ -61,9 +61,9 @@ public class TestExecutor {
         for (int i = 0; i < POOL_SIZE; ++i)
             executor.execute(runnableCommand);
 
-        // Sleep for 1 seconds and then exit.
+        // Sleep for 2 seconds and then exit.
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException x) {}
 
         System.out.println("Leaving main()");

@@ -13,10 +13,11 @@ public class TestRunnable {
     /**
      * Entry point method into the program's main thread, which
      * creates/starts the desired type of thread (i.e., either "user"
-     * or "daemon") and sleeps for 3 seconds while that thread runs.
-     * If a "daemon" thread is created it will only run as long as the
-     * main thread runs.  Conversely, if a "user" thread is created it
-     * will continue to run even after the main thread exits.
+     * or "daemon") and sleeps for 1 second while that thread runs in
+     * the background.  If a "daemon" thread is created it will only
+     * run as long as the main thread runs.  Conversely, if a "user"
+     * thread is created it will continue to run even after the main
+     * thread exits.
      */
     public static void main(String[] args) {
         System.out.println("Entering main()");

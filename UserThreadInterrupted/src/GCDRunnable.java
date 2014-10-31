@@ -48,6 +48,7 @@ public class GCDRunnable
                 int number1 = nextInt(); 
                 int number2 = nextInt();
                 
+                // Check to see if the thread's been interrupted.
                 if(Thread.interrupted())
                     throw new InterruptedException();
                 // Print results every 10 million iterations.

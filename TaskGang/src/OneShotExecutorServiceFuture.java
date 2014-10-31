@@ -8,7 +8,13 @@ import java.util.concurrent.Future;
 /**
  * @class OneShotExecutorServiceFuture
  * 
- * @brief ...
+ * @brief Customizes the SearchTaskGangCommon framework to process a
+ *        one-shot List of tasks via a variable-sized pool of Threads
+ *        created by the ExecutorService. The unit of concurrency is a
+ *        "task per search word". The results processing model uses
+ *        the Synchronous Future model, which defers the results
+ *        processing until all words to search for have been
+ *        submitted.
  */
 public class OneShotExecutorServiceFuture
        extends SearchTaskGangCommon {
@@ -26,8 +32,8 @@ public class OneShotExecutorServiceFuture
         super(wordsToFind, 
               stringsToSearch);
 
-        // Initialize the Executor with a cached pool of
-        // Threads.
+        // Initialize the Executor with a cached pool of Threads,
+        // which grow dynamically.
         setExecutor (Executors.newCachedThreadPool());
     }
 
@@ -35,10 +41,12 @@ public class OneShotExecutorServiceFuture
      * Process all the Futures containing search results.
      */
     protected void processFutureResults(List<Future<SearchResults>> resultFutures) {
-        // Iterate through the List of Futures and print the
-        // search results.  
+
+        // Iterate through the List of Futures and print the search
+        // results.
         for (Future<SearchResults> resultFuture : resultFutures) {
             try {
+
                 // The get() call may block if the results aren't
                 // ready yet.
                 resultFuture.get().print();
@@ -49,22 +57,24 @@ public class OneShotExecutorServiceFuture
     }
 
     /**
-     * Hook method that performs work a background Task.  Returns true
+     * Hook method that performs work a background task.  Returns true
      * if all goes well, else false (which will stop the background
-     * Thread from continuing to run).
+     * task from continuing to run).
      */
     protected boolean processInput(final String inputData) {
         ExecutorService executorService = 
             (ExecutorService) getExecutor();
 
-        // Iterate through each word and submit a Callable that
-        // will search concurrently for this word in the
-        // inputData.
+        // Iterate through each word.
         for (final String word : mWordsToFind) {
-            // Create a Future to store the results.
+
+            // Submit a Callable that will search concurrently for
+            // this word in the inputData & create a Future to store
+            // the results.
             final Future<SearchResults> resultFuture = 
                 executorService.submit(new Callable<SearchResults>() {
                         @Override
+                        // call() runs in a background task.
                         public SearchResults call() throws Exception {
                             return searchForWord(word,
                                                  inputData);
@@ -79,8 +89,8 @@ public class OneShotExecutorServiceFuture
     }
 
     /**
-     * Initiate the TaskGang to process each word as a separate
-     * task in the Thread pool.
+     * Initiate the TaskGang to process each word as a separate task
+     * in the ExecutorService's Thread pool.
      */
     protected void initiateTaskGang(int inputSize) {
         // Preallocate the List of Futures to hold all the
@@ -89,8 +99,9 @@ public class OneShotExecutorServiceFuture
             new ArrayList<Future<SearchResults>> 
             (inputSize * mWordsToFind.length);
 
-        // Process each String of inputData via the
-        // processInput() method.
+        // Process each String of inputData via the processInput()
+        // method.  Note that input Strings aren't run concurrently,
+        // just eacd word that's being searched for.
         for (final String inputData : getInput())
             processInput(inputData);
 

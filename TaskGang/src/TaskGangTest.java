@@ -2,13 +2,11 @@
 /**
  * @class TaskGangTest
  *
- * @brief This program tests various subclassses of the TaskGang
+ * @brief This program tests various subclasses of the TaskGang
  *        framework, which use different Java concurrency and
- *        synchronization mechanisms to implement an "embarraassingly
+ *        synchronization mechanisms to implement an "embarrassingly
  *        parallel" application that concurrently searches for words
  *        in a List of Strings.
- *
- * @@ NS: Need to improve the documentation.
  */
 public class TaskGangTest {
     /**
@@ -17,7 +15,6 @@ public class TaskGangTest {
     enum TestsToRun {
         ONESHOT_THREAD_PER_TASK,
         ONESHOT_EXECUTOR_SERVICE,
-        CYCLIC_EXECUTOR_SERVICE,
         ONESHOT_EXECUTOR_SERVICE_FUTURE,
         ONESHOT_EXECUTOR_COMPLETION_SERVICE
     }
@@ -26,10 +23,7 @@ public class TaskGangTest {
      * If this is set to true then lots of debugging output will be
      * generated.
      */
-    public static boolean diagnosticsEnabled = true
-        ;
-    // @@ NS: Need to get this data from files rather than from
-    // hard-coded strings!
+    public static boolean diagnosticsEnabled = true;
 
     /**
      * This input array is used by the one-shot tests that search for
@@ -37,29 +31,6 @@ public class TaskGangTest {
      */
     private final static String[][] mOneShotInputStrings = {
         {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"}
-    };
-
-    /**
-     * This input array is used by the cyclic test that continues to
-     * search a fixed number of words/Threads concurrently until
-     * there's no more input to process.
-     */
-    private final static String[][] mFixedNumberOfInputStrings = {
-        {"xdoodoo", "xreo", "xmiomio", "xfao", "xsoosoo", "xlao", "xtiotio", "xdoo"},
-        {"xdoo", "xreoreo", "xmio", "xfaofao", "xsoo", "xlaolao", "xtio", "xdoodoo"}
-    };
-
-    /**
-     * This input array is used by the cyclic test that continues to
-     * search a variable number of words/Threads concurrently until
-     * there's no more input to process.
-     */
-    private final static String[][] mVariableNumberOfInputStrings = {
-        {"xfaofao"},
-        {"xsoo", "xlaolao", "xtio", "xdoodoo"},
-        {"xdoo", "xreoreo"},
-        {"xreoreo", "xdoo"},
-        {"xdoodoo", "xreo", "xmiomio"}
     };
 
     /**
@@ -95,9 +66,6 @@ public class TaskGangTest {
         case ONESHOT_EXECUTOR_SERVICE:
             return new OneShotExecutorService(wordList,
                                               mOneShotInputStrings);
-        case CYCLIC_EXECUTOR_SERVICE:
-            return new CyclicExecutorService(wordList,
-                                             mFixedNumberOfInputStrings);
         case ONESHOT_EXECUTOR_SERVICE_FUTURE:
             return new OneShotExecutorServiceFuture(wordList,
                                                     mOneShotInputStrings);

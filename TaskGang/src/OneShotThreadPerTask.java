@@ -5,9 +5,11 @@ import java.util.concurrent.Executor;
 /**
  * @class OneShotThreadPerTask
  *
- * @brief Customizes the SearchTaskGangCommon framework to process
- *        a one-shot List of tasks via an Executor that creates a
- *        Thread for each task.
+ * @brief Customizes the SearchTaskGangCommon framework to process a
+ *        one-shot List of tasks via an Executor that creates a Thread
+ *        for each task. The Executor model is a Thread per task. The
+ *        unit of concurrency is each input String. The results
+ *        processing model is synchronous.
  */
 public class OneShotThreadPerTask
        extends SearchTaskGangCommon {
@@ -36,8 +38,8 @@ public class OneShotThreadPerTask
     protected void initiateTaskGang(int inputSize) {
         // Create a fixed-size Thread pool.
         if (getExecutor() == null) 
-            // Create an Executor that runs each worker in a
-            // separate Thread.
+            // Create an Executor that runs each worker in a separate
+            // Thread.
             setExecutor (new Executor() {
                     public void execute(Runnable r) {
                         Thread thread = new Thread(r);
@@ -53,13 +55,13 @@ public class OneShotThreadPerTask
     }
 
     /**
-     * Runs in a background Thread and searches the inputData for
-     * all occurrences of the words to find.
+     * Runs in a background Thread and searches the inputData for all
+     * occurrences of the words to find.
      */
     @Override
     protected boolean processInput (String inputData) {
-        // Iterate through each word we're searching for
-        // and try to find it in the inputData.
+        // Iterate through each word we're searching for and try to
+        // find it in the inputData.
         for (String word : mWordsToFind) {
             SearchResults results = searchForWord(word, 
                                                   inputData);
@@ -76,8 +78,8 @@ public class OneShotThreadPerTask
     }
 
     /**
-     * Hook method that uses Thread.join() as an exit barrier to
-     * wait for the gang of Threads to exit.
+     * Hook method that uses Thread.join() as an exit barrier to wait
+     * for the gang of tasks to exit.
      */
     protected void awaitTasksDone() {
         for (Thread thread : mWorkerThreads)

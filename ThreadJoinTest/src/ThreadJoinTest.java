@@ -5,10 +5,10 @@ import java.util.LinkedList;
 /**
  * @class ThreadJoinTest
  *
- * @brief This program tests various subclassses of the ThreadGang
- *        framework, which use different Java barrier synchronizers to
- *        implement an "embarraassingly parallel" application that
- *        concurrently searches for words in a Vector of Strings.
+ * @brief Demonstrates the use of Java Thread.join() as a simple
+ *        barrier synchronizer to implement an "embarrassingly
+ *        parallel" application that concurrently searches for words
+ *        in a List of Strings.
  */
 public class ThreadJoinTest {
     /**
@@ -17,11 +17,8 @@ public class ThreadJoinTest {
      */
     public static boolean diagnosticsEnabled = true;
 
-    // @@ NS: Need to get this data from files rather than from
-    // hard-coded strings!
-
     /**
-     * This input array is used by the one-shot tests that search for
+     * This input array is used by the ThreadJoinTest to search for
      * the words concurrently in multiple threads.
      */
     private final static String[] mOneShotInputStrings = 
@@ -40,12 +37,11 @@ public class ThreadJoinTest {
     /**
      * @class SearchOneShotThreadGangJoin
      *
-     * @brief Customizes the SearchThreadGangCommon framework to spawn
-     *        a Thread for each element in the Vector of input Strings
-     *        and uses Thread.join() to wait for all the Threads to
-     *        finish.  This implementation doesn't require any Java
-     *        synchronization mechanisms other than what's provided by
-     *        Thread.
+     * @brief Starts a Thread for each element in the List of input
+     *        Strings and uses Thread.join() to wait for all the
+     *        Threads to finish.  This implementation doesn't require
+     *        any Java synchronization mechanisms other than what's
+     *        provided by Thread.
      */
     static public class SearchOneShotThreadJoin {
         /**
@@ -68,10 +64,11 @@ public class ThreadJoinTest {
          */
         public SearchOneShotThreadJoin(String[] wordsToFind,
                                        String[] inputStrings) {
+        	// Initialize the data members.
             mWordsToFind = wordsToFind;
             mInput = Arrays.asList(inputStrings);
 
-            // This List holds Threads so they can be joined.
+            // This List holds Threads so they can be joined when their processing is done.
             mWorkerThreads = new LinkedList<Thread>();
 
             // Create and start a Thread for each element in the
@@ -79,10 +76,12 @@ public class ThreadJoinTest {
             for (int i = 0; i < mInput.size(); ++i) {
                 // Each Thread performs the processing designated by
                 // the processInput() method of the worker Runnable.
-                Thread t = new Thread(makeWorker(i));
+                Thread t = new Thread(makeTask(i));
                 
                 // Add to the List of Threads to join.
                 mWorkerThreads.add(t);
+                
+                // Start the Thread to process its input in the background.
                 t.start();
             }        
 
@@ -91,30 +90,32 @@ public class ThreadJoinTest {
                 try {
                     thread.join();
                 } catch (InterruptedException e) {
+                	printDebugging("join() interrupted");
                 }
         }
 
-        private Runnable makeWorker(final int index) {
+        /**
+         * Factory method that creates a Runnable task that will
+         * process one node of the input List (at location @code
+         * index) in a background Thread .
+         */
+        private Runnable makeTask(final int index) {
             return new Runnable() {
                 // This method runs in background Thread.
                 public void run() {
-                    try {
-                        // Get the input data element associated with
-                        // this index.
-                        String element = mInput.get(index);
+                    // Get the input data element associated with
+                    // this index.
+                    String element = mInput.get(index);
 
-                        // Process input data element.
-                        if (processInput(element) == false)
-                            return;
-                    } catch (IndexOutOfBoundsException e) {
-                        return;
-                    }
+                    // Process input data element.
+                    if (processInput(element) == false)
+                      return;
                 }
             };
         }
 
         /**
-         * Runs in a background Thread and searches the inputData for
+         * Run in a background Thread and search the inputData for
          * all occurrences of the words to find.  Each time a match is
          * found the processResults() hook method is called to handle
          * the results.
@@ -144,7 +145,6 @@ public class ThreadJoinTest {
          * Hook method that processes the results.
          */
         private void processResults(String results) {
-            // @@ NS: Need to do something more interesting here.
             printDebugging(results);
         }
     }

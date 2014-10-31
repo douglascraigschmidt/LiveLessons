@@ -4,7 +4,7 @@ import java.util.Random;
  * @class UserOrDaemonThread
  *
  * @brief This class demonstrates the difference between a Java user
- *        thread and a daemon thread.  If it's constructor is passed
+ *        thread and a daemon thread.  If its constructor is passed
  *        "true" it becomes a "daemon" thread, which exits when the
  *        main thread exits.  If it's passed "false" it's a "user"
  *        thread, which can continue to run even after the main thread
@@ -27,7 +27,8 @@ public class UserOrDaemonThread extends Thread  {
      */
     public UserOrDaemonThread(Boolean daemonThread) {
         if (daemonThread) {
-            // Become a daemon thread.
+            // Become a daemon thread (setDaemon() obtained from the
+            // superclass).
             setDaemon(true);
             threadType = "daemon";
         } else
@@ -51,8 +52,7 @@ public class UserOrDaemonThread extends Thread  {
     }
 
     /**
-     * Hook method that runs for MAX_ITERATIONs, sleeping for half a
-     * second at a time.
+     * Hook method that runs for MAX_ITERATIONs.
      */
     public void run() {
         final String threadString = 
@@ -65,12 +65,13 @@ public class UserOrDaemonThread extends Thread  {
                            + threadString);
 
         // Create a new Random number generator.  We need to allocate
-        // a new Random object dyanmically since we can't inherit from
+        // a new Random object dynamically since we can't inherit from
         // Random since we already inherit from Thread and Java only
         // allows single inheritance.
         Random random = new Random();
 
         try {
+            // Iterate for the given # of iterations.
             for (int i = 0; i < MAX_ITERATIONS; ++i) {
                 // Generate two random numbers.
                 int number1 = random.nextInt(); 

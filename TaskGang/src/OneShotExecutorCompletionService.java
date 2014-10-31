@@ -6,7 +6,12 @@ import java.util.concurrent.Future;
 /**
  * @class OneShotExecutorCompletionService
  *
- * @brief ...
+ * @brief Customizes the SearchTaskGangCommon framework to process a
+ *        one-shot List of tasks via a variable-sized pool of Threads
+ *        created by the ExecutorService. The units of concurrency are
+ *        a "task per search word" *and* the input Strings. The
+ *        results processing model uses an Asynchronous Future model,
+ *        which starts processing results immediately.
  */
 public class OneShotExecutorCompletionService
        extends SearchTaskGangCommon {
@@ -25,8 +30,8 @@ public class OneShotExecutorCompletionService
         super(wordsToFind, 
               stringsToSearch);
 
-        // Initialize the Executor with a cached pool of
-        // Threads.
+        // Initialize the Executor with a cached pool of Threads,
+        // which grow dynamically.
         setExecutor (Executors.newCachedThreadPool());
 
         // Connect the Executor with the CompletionService
@@ -36,15 +41,16 @@ public class OneShotExecutorCompletionService
     }
 
     /**
-     * Uses the ExecutorCompletionService to concurrently process
-     * all the queued Futures.
+     * Uses the ExecutorCompletionService to concurrently process all
+     * the queued Futures.
      */
     protected void concurrentlyProcessQueuedFutures() {
-        // Need to account for all the input data and all the
-        // words that were searched for.
+        // Need to account for all the input data and all the words
+        // that were searched for.
         final int count = 
             getInput().size() * mWordsToFind.length;
 
+        // Loop for the designated number of results.
         for (int i = 0; i < count; ++i) 
             try {
                 // Take the next ready Future off the
@@ -54,7 +60,8 @@ public class OneShotExecutorCompletionService
                     mCompletionService.take();
 
                 // The get() call will not block since the results
-                // should be ready.
+                // should be ready before they are added to the
+                // completion queue.
                 resultFuture.get().print();
             } catch (Exception e) {
                 System.out.println("get() exception");
@@ -62,22 +69,23 @@ public class OneShotExecutorCompletionService
     }
 
     /**
-     * Hook method that performs work a background Task.  Returns true
+     * Hook method that performs work a background task.  Returns true
      * if all goes well, else false (which will stop the background
-     * Thread from continuing to run).
+     * task from continuing to run).
      */
     protected boolean processInput(final String inputData) {
 
-        // Iterate through each word and submit a Callable that
-        // will search concurrently for this word in the
-        // inputData.
+        // Iterate through each word and submit a Callable that will
+        // search concurrently for this word in the inputData.
         for (final String word : mWordsToFind) {
+
             // This submit() call stores the Future result in the
-            // ExecutorCompletionService for concurrent
+            // ExecutorCompletionService for concurrent results
             // processing.
             mCompletionService.submit (new Callable<SearchResults>() {
                     @Override
-                        public SearchResults call() throws Exception {
+                    // call() runs in a background task.
+                    public SearchResults call() throws Exception {
                         return searchForWord(word,
                                              inputData);
                     }
@@ -87,17 +95,17 @@ public class OneShotExecutorCompletionService
     }
 
     /**
-     * Initiate the TaskGang to process each word as a separate
-     * task in the Thread pool.
+     * Initiate the TaskGang to process each input String as a
+     * separate task in the Thread pool.
      */
     protected void initiateTaskGang(int inputSize) {
-        // Enqueue each item in the input List for execution in
-        // the Executor's Thread pool.
+        // Enqueue each item in the input List for execution in the
+        // Executor's Thread pool.
         for (int i = 0; i < inputSize; ++i) 
             getExecutor().execute(makeTask(i));
 
         // Process all the Futures concurrently via the
-        // ExecutorCompletionService
+        // ExecutorCompletionService's completion queue.
         concurrentlyProcessQueuedFutures();
     }
 }

@@ -9,13 +9,13 @@ import javax.naming.directory.SearchResult;
 /**
  * @class SearchTaskGangCommon
  * 
- * @brief This helper class factors out the common code used by
- *        all the implementations of TaskGang below.  It
- *        customizes the TaskGang framework to concurrently search
- *        an array of Strings for an array of words to find.
+ * @brief This helper class factors out the common code used by all
+ *        the implementations of TaskGang below.  It customizes the
+ *        TaskGang framework to concurrently search an array of
+ *        Strings for an array of words to find.
  */
 public abstract class SearchTaskGangCommon
-    extends TaskGang<String> {
+                extends TaskGang<String> {
     /**
      * The array of words to find.
      */
@@ -31,6 +31,7 @@ public abstract class SearchTaskGangCommon
      */
     protected SearchTaskGangCommon(String[] wordsToFind,
                                    String[][] stringsToSearch) {
+        // Store the words to search for.
         mWordsToFind = wordsToFind;
 
         // Create an Iterator for the array of Strings to search.
@@ -38,11 +39,11 @@ public abstract class SearchTaskGangCommon
     }
 
     /**
-     * Factory method that returns the next List of Strings to
-     * be searched concurrently by the TaskGang.
+     * Factory method that returns the next List of Strings to be
+     * searched concurrently by the TaskGang.
      */
     @Override
-        protected List<String> getNextInput() {
+    protected List<String> getNextInput() {
         if (mInputIterator.hasNext()) {
             // Note that we're starting a new cycle.
             incrementCycle();
@@ -81,17 +82,23 @@ public abstract class SearchTaskGangCommon
     }
 
     /**
-     * Hook method that can be used as an exit barrier to wait for
-     * the gang of Threads to exit.
+     * Hook method that can be used as an exit barrier to wait for the
+     * gang of tasks to exit.
      */
     protected void awaitTasksDone() {
+        // Only call the shutdown() and awaitTermination() methods if
+        // we've actually got an ExecutorService (as opposed to just
+        // an Executor).
         if (getExecutor() instanceof ExecutorService) {
             ExecutorService executorService = 
                 (ExecutorService) getExecutor();
 
+            // Tell the ExecutorService to initiate a graceful
+            // shutdown.
             executorService.shutdown();
             try {
-                // Wait for all the Threads in the pool to exit.
+                // Wait for all the tasks/threads in the pool to
+                // complete.
                 executorService.awaitTermination(Long.MAX_VALUE,
                                                  TimeUnit.NANOSECONDS);
             } catch (InterruptedException e) {

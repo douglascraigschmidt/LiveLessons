@@ -4,11 +4,12 @@ import java.util.Random;
  * @class GCDRunnable
  *
  * @brief Computes the greatest common divisor (GCD) of two numbers.
+ *        This implementation is identical to the one in
+ *        UserOrDaemonRunnable.
  */
 public class GCDRunnable
        extends Random // Inherits random number generation capabilities.
-       implements Runnable    
-{
+       implements Runnable {
     /**
      * Keep track of whether this is a "user" or a "daemon" thread.
      */
@@ -58,8 +59,10 @@ public class GCDRunnable
                            + threadString);
 
         try {
+            // Iterate for the give number of times.
             for (int i = 0; i < MAX_ITERATIONS; ++i) {
-                // Generate two random numbers.
+                // Generate two random numbers (nextInt() obtained
+                // from Random superclass).
                 int number1 = nextInt(); 
                 int number2 = nextInt();
                 
