@@ -24,7 +24,7 @@ public abstract class TaskGang<E> implements Runnable {
     /**
      * Keeps track of which cycle is currently active.
      */
-    private final AtomicLong mCurrentCycle = 
+    final AtomicLong mCurrentCycle = 
         new AtomicLong(0);
     
     /**

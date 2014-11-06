@@ -1,4 +1,5 @@
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Phaser;
 
 /**
  * @class CyclicSearchWithPhaser
@@ -72,7 +73,9 @@ public class CyclicSearchWithPhaser
                         // was no change to the size of the input
                         // List.
                         if (mReconfiguration == 0) 
-                            printDebugging("@@@@@ Started cycle "
+                        	// had to add 'TaskGangBarrierTest.' because [printDebugging(string)
+                        	// is not part of the ancestry of this class
+                            TaskGangBarrierTest.printDebugging("@@@@@ Started cycle "
                                            + mCurrentCycle.get()
                                            + " with same # of Threads ("
                                            + newSize
@@ -81,7 +84,7 @@ public class CyclicSearchWithPhaser
                         // A reconfiguration is needed since the size
                         // of the input List changed.
                         else {
-                            printDebugging("@@@@@ Started cycle "
+                        	TaskGangBarrierTest.printDebugging("@@@@@ Started cycle "
                                            + mCurrentCycle.get()
                                            + " with "
                                            + newSize
