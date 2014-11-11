@@ -7,9 +7,10 @@ import java.util.concurrent.CountDownLatch;
  * @class SearchTaskGangCommon
  * 
  * @brief This helper class factors out the common code used by all
- *        the implementations of TaskGang below.  It customizes the
- *        TaskGang framework to concurrently search an array of
- *        Strings for an array of words to find.
+ *        instantiations of the TaskGang framework in the BarrierTaskGang 
+ *        project.  It customizes the TaskGang framework to concurrently 
+ *        search one or more arrays of input Strings for words provided 
+ *        in an array of words to find.
  */
 public abstract class SearchTaskGangCommon
                 extends TaskGang<String> {
@@ -19,15 +20,16 @@ public abstract class SearchTaskGangCommon
     protected final String[] mWordsToFind;
 
     /**
-     * Controls when the framework exits.
-     */
-    protected CountDownLatch mExitBarrier = null;
-        
-    /**
      * An Iterator for the array of Strings to search.
      */
     private final Iterator<String[]> mInputIterator;
 
+    /**
+     * Exit barrier that controls when the framework and test object 
+     * complete their concurrent processing.
+     */
+    protected CountDownLatch mExitBarrier = null;
+        
     /**
      * Constructor initializes the data members.
      */
@@ -38,6 +40,79 @@ public abstract class SearchTaskGangCommon
 
         // Create an Iterator for the array of Strings to search.
         mInputIterator = Arrays.asList(stringsToSearch).iterator();
+    }
+
+    /**
+     * Factory method that returns the next List of Strings to be
+     * searched concurrently by the TaskGang.
+     */
+    @Override
+    protected List<String> getNextInput() {
+        if (!mInputIterator.hasNext())
+        	return null;
+        else {
+            // Note that we're starting a new cycle.
+            incrementCycle();
+
+            // Return a List containing the Strings to search
+            // concurrently.
+            return Arrays.asList(mInputIterator.next());
+        }
+    }
+
+    /**
+     * Hook method that initiates the gang of Tasks.
+     */
+    @Override
+    protected void initiateTaskGang(int size) {
+    	// Hook method called back to perform custom initializations 
+    	// before the Threads in the gang are spawned.
+        initiateHook(size);
+
+        // Create and start a Thread for each element in the input
+        // List.  Each Thread performs the processing designated by
+        // the processInput() hook method defined above.
+        for (int i = 0; i < size; ++i) 
+            new Thread(makeTask(i)).start();
+    }
+
+    /**
+     * Factory method that creates a Runnable task that will process
+     * one data element of the input List (at location @code index) in
+     * a background task run by a Java Thread.
+     */
+    protected Runnable makeTask(final int index) {
+        return new Runnable() {
+
+            // This method runs in background task provided by a Java Thread.
+            public void run() {
+            	// Since this task runs in a distinct Thread it can
+            	// block in a loop.
+                do {
+                    try {
+                        // Get the input data element associated with
+                        // this index.
+                        String element = getInput().get(index);
+
+                        // Process the input data element.
+                        if (processInput(element))
+                            // Success indicates the Thread is
+                            // done with this iteration cycle.
+                            taskDone(index);
+                        else
+                            // A problem occurred, so return.
+                            return;
+
+                    } catch (IndexOutOfBoundsException e) {
+                        // If an exception occurred then return from
+                        // this Thread.
+                        return;
+                    }
+                // Keep looping until all the iteration cycles are
+                // done.
+                } while (advanceTaskToNextCycle());
+            }
+        };
     }
 
     /**
@@ -53,9 +128,9 @@ public abstract class SearchTaskGangCommon
                                                   inputData);
 
             // Each time a match is found the SearchResult.print()
-            // method is called to print the output.  We put this
-            // call in a synchronized block so the output isn't
-            // scrambled.
+            // method is called to print the output.  We put this call
+            // in a synchronized statement so the output isn't all
+            // scrambled up in different Threads.
             synchronized(System.out) {
                 results.print();
             }
@@ -64,40 +139,8 @@ public abstract class SearchTaskGangCommon
     }
 
     /**
-     * Hook method that initiates the gang of Tasks.
-     */
-    protected void initiateTaskGang(int size) {
-        initiateHook(size);
-
-        // Create and start a Thread for each element in the input
-        // Vector - each Thread performs the processing designated
-        // by the doWorkInBackgroundThread() hook method.
-        for (int i = 0; i < size; ++i) 
-            new Thread(makeTask(i)).start();
-    }
-
-    /**
-     * Factory method that returns the next List of Strings to be
-     * searched concurrently by the TaskGang.
-     */
-    @Override
-        protected List<String> getNextInput() {
-        if (mInputIterator.hasNext()) {
-            // Note that we're starting a new cycle.
-            incrementCycle();
-
-            // Return a Vector containing the Strings to search
-            // concurrently.
-            return Arrays.asList(mInputIterator.next());
-        }
-        else 
-            return null;
-    }
-
-    /**
-     * Search for all instances of @code word in @code inputData
-     * and return a list of all the @code SearchData results (if
-     * any).
+     * Search for all instances of @code word in @code inputData and
+     * return a list of all the @code SearchData results (if any).
      */
     protected SearchResults searchForWord(String word, 
                                           String inputData) {
@@ -118,52 +161,19 @@ public abstract class SearchTaskGangCommon
         }
         return results;
     }
-
+    
     /**
-     * Hook method that uses the CountDownLatch as an exit barrier
-     * to wait for the gang of Threads to exit.
+     * Hook method that uses the CountDownLatch as an exit barrier to
+     * wait for the gang of Threads to exit.
      */
     @Override
-        protected void awaitTasksDone() {
-        // processQueuedResults(mExitBarrier);
+    protected void awaitTasksDone() {
         try {
+            // Blocks until all the tasks are done.
             mExitBarrier.await();
         } catch (InterruptedException e) {
         }
     }
 
-    /**
-     * Factory method that creates a Runnable task that will process
-     * one node of the input List (at location @code index) in a
-     * background task provided by the Executor.
-     */
-    protected Runnable makeTask(final int index) {
-        return new Runnable() {
-
-            // This method runs in background task provided by the
-            // Executor.
-            public void run() {
-                do {
-                    try {
-                        // Get the input data element associated with
-                        // this index.
-                        String element = getInput().get(index);
-
-                        // Process input data element.
-                        if (processInput(element))
-                            // Success indicates the worker task is done
-                            // with this cycle.
-                            taskDone(index);
-                        else
-                            // A problem occurred, so return.
-                            return;
-
-                    } catch (IndexOutOfBoundsException e) {
-                        return;
-                    }
-                } while (advanceTaskToNextCycle());
-            }
-        };
-    }
 }
 

@@ -1,32 +1,18 @@
-import java.util.Iterator;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-// import java.util.concurrent.Phaser;
-import java.util.concurrent.TimeUnit;
-
 /**
- * @class TaskGangBarrierTest
+ * @class BarrierTaskGangTest
  *
- * @brief This program tests various subclassses of the TaskGang
- *        framework that use different Java barrier synchronizers to
- *        implement an "embarraassingly parallel" application that
- *        concurrently searches for words in a List of Strings.
+ * @brief This test driver show cases how various subclasses of the 
+ *        TaskGang framework  use different Java barrier synchronizers 
+ *        to implement an "embarrassingly parallel" application that
+ *        concurrently searches for words in one or more Lists of Strings.
  */
-public class TaskGangBarrierTest {
+public class BarrierTaskGangTest {
     /**
      * Enumerate the tests to run.
      */
     enum TestsToRun {
         COUNTDOWNLATCH,
-        CYCLIC,
+        CYCLIC_BARRIER,
         PHASER
     }
 
@@ -34,8 +20,16 @@ public class TaskGangBarrierTest {
      * If this is set to true then lots of debugging output will be
      * generated.
      */
-    public static boolean diagnosticsEnabled = true
-;
+    public static boolean diagnosticsEnabled = true;
+
+    /**
+     * Print debugging output if @code diagnosticsEnabled is true.
+     */
+    static void printDebugging(String output) {
+        if (diagnosticsEnabled)
+            System.out.println(output);
+    }
+
     /**
      * Array of words to search for in the input.
      */
@@ -49,16 +43,16 @@ public class TaskGangBarrierTest {
                                                "do"};
         
     /**
-     * This input array is used by the one-shot tests that search for
-     * the words concurrently in multiple threads.
+     * This input array is used by the OneShotSearchWithCountDownLatch test that 
+     * searches for the words concurrently in multiple threads.
      */
     private final static String[][] mOneShotInputStrings = {
         {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"}
     };
 
     /**
-     * This input array is used by the cyclic test that continues to
-     * search a fixed number of words/Threads concurrently until
+     * This input array is used by the CyclicSearchWithCyclicBarrier test that 
+     * continues to search a fixed number of words/Threads concurrently until
      * there's no more input to process.
      */
     private final static String[][] mFixedNumberOfInputStrings = {
@@ -67,9 +61,9 @@ public class TaskGangBarrierTest {
     };
 
     /**
-     * This input array is used by the cyclic test that continues to
-     * search a variable number of words/Threads concurrently until
-     * there's no more input to process.
+     * This input array is used by the CyclicSearchWithPhaser test that continues to
+     * search a variable number of words/Threads concurrently until there's no more 
+     * input to process.
      */
     private final static String[][] mVariableNumberOfInputStrings = {
         {"xfaofao"},
@@ -78,14 +72,6 @@ public class TaskGangBarrierTest {
         {"xreoreo", "xdoo"},
         {"xdoodoo", "xreo", "xmiomio"}
     };
-
-    /**
-     * Print debugging output if @code diagnosticsEnabled is true.
-     */
-    static void printDebugging(String output) {
-        if (diagnosticsEnabled)
-            System.out.println(output);
-    }
 
     /**
      * Factory method that creates the desired type of
@@ -98,7 +84,7 @@ public class TaskGangBarrierTest {
         case COUNTDOWNLATCH:
             return new OneShotSearchWithCountDownLatch(wordList,
                                                       mOneShotInputStrings);
-        case CYCLIC:
+        case CYCLIC_BARRIER:
             return new CyclicSearchWithCyclicBarrier(wordList,
                                                      mFixedNumberOfInputStrings);
         case PHASER:
@@ -112,7 +98,7 @@ public class TaskGangBarrierTest {
      * This is the entry point into the test program.  
      */
     static public void main(String[] args) {
-        printDebugging("Starting TaskGangBarrierTest");
+        printDebugging("Starting BarrierTaskGangTest");
         
         // Create/run appropriate type of TaskGang to search for words
         // concurrently.
@@ -125,6 +111,6 @@ public class TaskGangBarrierTest {
                            + test);
         }
 
-        printDebugging("Ending TaskGangBarrierTest");
+        printDebugging("Ending BarrierTaskGangTest");
     }
 }

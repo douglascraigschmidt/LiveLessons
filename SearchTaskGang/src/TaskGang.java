@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @brief Defines a framework for spawning and running a "gang" of
  *        tasks that concurrently process input from a generic List of
- *        elements E for one or more cycles.
+ *        elements E for one or more iteration cycles.
  */
 public abstract class TaskGang<E> implements Runnable {
     /**

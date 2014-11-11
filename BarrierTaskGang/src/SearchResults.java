@@ -111,10 +111,13 @@ public class SearchResults {
         if (!isEmpty()) {
             System.out.print(toString());
 
+            // Iterate through the list of indices that matched the
+            // search word and print them out.
             for (Result result : mList)
-                System.out.print ("["
-                                  + result.mIndex
-                                  + "]");
+                System.out.print
+                    ("["
+                     + result.mIndex
+                     + "]");
             System.out.println("");
         }
     }
