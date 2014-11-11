@@ -1,0 +1,78 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+  <LinearLayout
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal">
+
+    <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:text="@string/location" />
+
+    <EditText
+       android:id="@+id/mUrlEditText"
+       android:layout_height="wrap_content"
+       android:layout_width="fill_parent"
+       android:layout_weight="1"
+       android:inputType="text|textMultiLine"
+       android:hint="@string/defaultURL" />
+  </LinearLayout>
+
+  <LinearLayout
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal"
+     android:gravity="center_horizontal">
+
+    <Button
+       android:id="@+id/runnable_button"
+       android:layout_width="0dip"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textSize="14dp"
+       android:onClick="handleButtonClick"
+       android:text="@string/runRunnable" />
+
+    <Button
+       android:id="@+id/messages_button"
+       android:layout_width="0dip"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textSize="14dp"
+       android:onClick="handleButtonClick"
+       android:text="@string/runMessages" />
+
+    <Button
+       android:id="@+id/async_task_button"
+       android:layout_width="0dip"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textSize="14dp"
+       android:onClick="handleButtonClick"
+       android:text="@string/runAsyncTask" />
+
+    <Button
+       android:id="@+id/reset_image_button"
+       android:layout_width="0dip"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textSize="14dp"
+       android:onClick="handleButtonClick"
+       android:text="@string/resetImage" />
+
+  </LinearLayout>
+
+  <ImageView
+     android:id="@+id/mImageView"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"  
+     android:src="@drawable/ic_icon" >
+  </ImageView>
+
+</LinearLayout>
