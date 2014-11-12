@@ -2,11 +2,11 @@
 /**
  * @class TaskGangTest
  *
- * @brief This program tests various subclasses of the TaskGang
- *        framework, which use different Java concurrency and
+ * @brief This test driver showcases how various subclasses customize
+ *        the TaskGang framework with different Java concurrency and
  *        synchronization mechanisms to implement an "embarrassingly
  *        parallel" application that concurrently searches for words
- *        in a List of Strings.
+ *        in a List of input Strings.
  */
 public class TaskGangTest {
     /**
@@ -18,20 +18,6 @@ public class TaskGangTest {
         ONESHOT_EXECUTOR_SERVICE_FUTURE,
         ONESHOT_EXECUTOR_COMPLETION_SERVICE
     }
-
-    /**
-     * If this is set to true then lots of debugging output will be
-     * generated.
-     */
-    public static boolean diagnosticsEnabled = true;
-
-    /**
-     * This input array is used by the one-shot tests that search for
-     * the words concurrently in multiple threads.
-     */
-    private final static String[][] mOneShotInputStrings = {
-        {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"}
-    };
 
     /**
      * Array of words to search for in the input.
@@ -46,6 +32,20 @@ public class TaskGangTest {
                                                "do"};
         
     /**
+     * This input array is used by the one-shot tests that search for
+     * the words concurrently in multiple threads.
+     */
+    private final static String[][] mOneShotInputStrings = {
+        {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"}
+    };
+
+    /**
+     * If this is set to true then lots of debugging output will be
+     * generated.
+     */
+    public static boolean diagnosticsEnabled = true;
+
+    /**
      * Print debugging output if @code diagnosticsEnabled is true.
      */
     private static void printDebugging(String output) {
@@ -54,11 +54,11 @@ public class TaskGangTest {
     }
 
     /**
-     * Factory method that creates the desired type of
-     * SearchTaskGangCommon subclass implementation.
+     * Factory method that creates the desired type of TaskGang
+     * subclass implementation.
      */
-    private static SearchTaskGangCommon makeTaskGang(String[] wordList,
-                                                     TestsToRun choice) {
+    private static Runnable makeTaskGang(String[] wordList,
+                                         TestsToRun choice) {
         switch(choice) {
         case ONESHOT_THREAD_PER_TASK:
             return new OneShotThreadPerTask(wordList,

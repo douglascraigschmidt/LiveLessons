@@ -1,10 +1,11 @@
 /**
  * @class BarrierTaskGangTest
  *
- * @brief This test driver show cases how various subclasses of the 
- *        TaskGang framework  use different Java barrier synchronizers 
+ * @brief This test driver showcases how various subclasses of the
+ *        TaskGang framework use different Java barrier synchronizers
  *        to implement an "embarrassingly parallel" application that
- *        concurrently searches for words in one or more Lists of Strings.
+ *        concurrently searches for words in one or more Lists of
+ *        input Strings.
  */
 public class BarrierTaskGangTest {
     /**
@@ -74,12 +75,11 @@ public class BarrierTaskGangTest {
     };
 
     /**
-     * Factory method that creates the desired type of
-     * SearchTaskGangCommon subclass implementation.
+     * Factory method that creates the desired type of TaskGang
+     * subclass implementation.
      */
-    private static SearchTaskGangCommon 
-        makeTaskGang(String[] wordList,
-                     TestsToRun choice) {
+    private static Runnable makeTaskGang(String[] wordList,
+                                         TestsToRun choice) {
         switch(choice) {
         case COUNTDOWNLATCH:
             return new OneShotSearchWithCountDownLatch(wordList,
