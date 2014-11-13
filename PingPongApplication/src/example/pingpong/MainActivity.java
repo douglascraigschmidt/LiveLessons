@@ -1,8 +1,9 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
+import android.R;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -19,7 +20,7 @@ import android.widget.TextView;
  * @brief Main Activity for the Android version of the PingPong
  *        application.
  */
-public class AndroidActivity extends Activity {
+public class MainActivity extends Activity {
     /** TextView that PingPong will be "played" upon. */
     private TextView mPingPongTextViewLog;
     private TextView mPingPongColorOutput;

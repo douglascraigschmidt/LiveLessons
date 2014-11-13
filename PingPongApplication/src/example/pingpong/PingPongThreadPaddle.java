@@ -1,6 +1,6 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
- /**
+/**
   * @class PingPongThreadPaddle
   * 
   * @brief This class uses the PingPongPaddle class to implement the
@@ -13,7 +13,6 @@ public class PingPongThreadPaddle extends PingPongThread {
      * These PingPongPaddle objects handle synchronization between
      * our thread and the other Thread.
      */
-    // TODO - You fill in here.
     private final BallPaddle mMine;
     private final BallPaddle mOther;
 
@@ -25,7 +24,6 @@ public class PingPongThreadPaddle extends PingPongThread {
                          BallPaddle other,
                          int maxIterations) {
         super(stringToPrint, maxIterations);
-        // TODO - You fill in here.
         mMine = mine;
         mOther = other;
     }
@@ -37,7 +35,6 @@ public class PingPongThreadPaddle extends PingPongThread {
     void acquire() {
         // Block until we receive the pingpong ball.
 
-        // TODO - You fill in here.
         mOther.awaitBall();
     }
 
@@ -48,7 +45,6 @@ public class PingPongThreadPaddle extends PingPongThread {
     void release() {
         // Hit the pingball back.
 
-        // TODO - You fill in here.
         mMine.returnBall();
     }
 

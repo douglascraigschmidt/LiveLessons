@@ -1,4 +1,4 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -18,7 +18,6 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      * simulate conditional waiting and calling put() on our
      * thread to simulate notifying a waiter.
      */
-    // TODO - You fill in here.
     private final LinkedBlockingQueue<Object> mMine;
     private final LinkedBlockingQueue<Object> mOther;
 
@@ -27,7 +26,6 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      * which avoids having to allocate memory dynamically each
      * time control is passed.
      */
-    // TODO - You fill in here.
     private Object mPingPongBall;
 
     /**
@@ -38,7 +36,6 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
                                 LinkedBlockingQueue<Object> other,
                                 Object pingPongBall,
                                 int maxIterations) {
-        // TODO - You fill in here.
         super(stringToPrint, maxIterations);
         mMine = mine;
         mOther = other;
@@ -50,12 +47,11 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      */
     @Override
     void acquire() {
-        // TODO - You fill in here.
-
         // Since the binary semaphore above ignores exceptions, so
         // will we.
         try {
-            // Block until there's an item in the queue.
+            // Block until there's an item to take from the other
+            // BlockingQueue.
             mPingPongBall = mOther.take();
         } catch (InterruptedException e) {
         }
@@ -63,9 +59,8 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
 
     @Override
     void release() {
-        // TODO - You fill in here.
-
         try {
+            // Put the ball back in the other BlockingQueue.
             mMine.put(mPingPongBall);
         } catch (InterruptedException e) {
         }

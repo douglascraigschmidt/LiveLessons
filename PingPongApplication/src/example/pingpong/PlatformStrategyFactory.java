@@ -1,4 +1,4 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.util.HashMap;
 

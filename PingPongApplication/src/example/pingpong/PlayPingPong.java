@@ -1,4 +1,4 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -121,7 +121,6 @@ public class PlayPingPong implements Runnable {
         }
         // Use a pair of Java LinkedBlockingQueue objects.
         else if (schedMechanism.equals("QUEUE")) {
-            // TODO - You fill in here.
             LinkedBlockingQueue<Object> pingQueue =
                 new LinkedBlockingQueue<Object>();
             LinkedBlockingQueue<Object> pongQueue =
@@ -151,7 +150,6 @@ public class PlayPingPong implements Runnable {
         }
         // Use a pair of BallPaddles
         else if (schedMechanism.equals("PADDLE")) {
-            // TODO - You fill in here.
             BallPaddle pingBall =
                 new BallPaddle(true); // Start with the ball.
             BallPaddle pongBall =

@@ -1,4 +1,4 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
@@ -21,21 +21,20 @@ public class AndroidPlatformStrategy extends PlatformStrategy {
     private CountDownLatch mLatch = null;
 
     /** Define a WeakReference to avoid memory leaks. */
-    private final WeakReference<AndroidActivity> mOuterClass;
+    private final WeakReference<MainActivity> mOuterClass;
 
     /**
      * Constructor initializes the data member.
      */
     public AndroidPlatformStrategy(final Object output) {
         /** The current activity window (succinct or verbose). */
-        mOuterClass = new WeakReference<AndroidActivity>
-            ((AndroidActivity) output);
+        mOuterClass = new WeakReference<MainActivity>
+            ((MainActivity) output);
     }
 
     /** Do any initialization needed to start a new game. */
     public void begin() {
         /** (Re)initialize the CountDownLatch. */
-        // TODO - You fill in here.
         mLatch = new CountDownLatch(NUMBER_OF_THREADS);
     }
 
@@ -48,9 +47,8 @@ public class AndroidPlatformStrategy extends PlatformStrategy {
          * thread via another Thread that blocks for 0.5 seconds to
          * let the user see what's going on.
          */
-        // TODO - You fill in here.
 
-        final AndroidActivity output = mOuterClass.get();
+        final MainActivity output = mOuterClass.get();
             
         if (output == null)
             return;
@@ -66,8 +64,7 @@ public class AndroidPlatformStrategy extends PlatformStrategy {
 
     /** Indicate that a game thread has finished running. */
     public void done() {
-        // TODO - You fill in here.
-        final AndroidActivity output =
+        final MainActivity output =
             mOuterClass.get();
             
         if (output == null)
@@ -86,7 +83,6 @@ public class AndroidPlatformStrategy extends PlatformStrategy {
 
     /** Barrier that waits for all the game threads to finish. */
     public void awaitDone() {
-        // TODO - You fill in here.
         try {
             mLatch.await();
         } catch(java.lang.InterruptedException e) {

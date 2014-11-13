@@ -1,16 +1,15 @@
-package edu.vuum.mocca;
-
-import java.util.concurrent.Semaphore;
+package example.pingpong;
 
 /**
- * @class PingPongThreadSema
- *
- * @brief This class uses Java Semaphores to implement the acquire()
- *        and release() hook methods that schedule the ping/pong
+ * @class PingPongThreadMonObj
+ * 
+ * @brief This class uses Binary Semaphores (implelemented as Java
+ *        built-in monitor objects) to implement the acquire() and
+ *        release() hook methods that schedule the ping/pong
  *        algorithm. It plays the role of the "Concrete Class" in the
  *        Template Method pattern.
  */
-class PingPongThreadSema extends PingPongThread {
+class PingPongThreadMonObj extends PingPongThread {
     /**
      * Max number of ping pong semaphores.
      */
@@ -19,19 +18,20 @@ class PingPongThreadSema extends PingPongThread {
     /**
      * Semaphores that schedule the ping/pong algorithm.
      */
-    private final Semaphore mSemas[] =
-        new Semaphore[MAX_PING_PONG_SEMAS];
+    private final BinarySemaphore mSemas[] =
+        new BinarySemaphore[MAX_PING_PONG_SEMAS];
 
     /**
-     * Consts to distinguish between ping and pong Semaphores.
+     * Consts to distinguish between ping and pong BinarySemaphores.
      */
     private final static int FIRST_SEMA = 0;
     private final static int SECOND_SEMA = 1;
 
-    PingPongThreadSema(String stringToPrint, 
-                       Semaphore firstSema,
-                       Semaphore secondSema,
-                       int maxIterations) {
+    PingPongThreadMonObj(String stringToPrint,
+                         BinarySemaphore firstSema,
+                         BinarySemaphore secondSema,
+                         boolean isOwner,
+                         int maxIterations) {
         super(stringToPrint, maxIterations);
         mSemas[FIRST_SEMA] = firstSema;
         mSemas[SECOND_SEMA] = secondSema;
@@ -43,7 +43,8 @@ class PingPongThreadSema extends PingPongThread {
     @Override
     void acquire() {
         // Block until we acquire the semaphore.
-        mSemas[FIRST_SEMA].acquireUninterruptibly();
+
+        mSemas[FIRST_SEMA].acquire();
     }
 
     /**
@@ -52,6 +53,7 @@ class PingPongThreadSema extends PingPongThread {
     @Override
     void release() {
         // Release the other semaphore.
+
         mSemas[SECOND_SEMA].release();
     }
 }

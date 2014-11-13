@@ -1,12 +1,12 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 /**
- * @class ConsoleMain
+ * @class MainConsole
  *
  * @brief This class is the main entry point for a console version of
  *        the PlayPingPong app.
  */
-public class ConsoleMain {
+public class MainConsole {
     /**
      * The Java virtual machine requires the instantiation of a main
      * method to run the console version of the PlayPingPong app.

@@ -1,4 +1,4 @@
-package edu.vuum.mocca;
+package example.pingpong;
 
 import java.util.concurrent.CountDownLatch;
 import java.io.PrintStream;
@@ -31,14 +31,12 @@ public class ConsolePlatformStrategy extends PlatformStrategy
     /** Do any initialization needed to start a new game. */
     public void begin()
     {
-        // TODO - You fill in here.
         mLatch = new CountDownLatch(NUMBER_OF_THREADS);
     }
 
     /** Print the outputString to the display. */
     public void print(String outputString)
     {
-        // TODO - You fill in here.
         /** Print to the console window. */
         mOutput.println(outputString);
     }
@@ -46,14 +44,12 @@ public class ConsolePlatformStrategy extends PlatformStrategy
     /** Indicate that a game thread has finished running. */
     public void done()
     {
-        // TODO - You fill in here.
         mLatch.countDown();
     }
     
     /** Barrier that waits for all the game threads to finish. */
     public void awaitDone()
     {
-        // TODO - You fill in here.
         try {
             mLatch.await();
         } catch(java.lang.InterruptedException e) {
