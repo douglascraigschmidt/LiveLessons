@@ -83,7 +83,7 @@ public class BarrierTaskGangTest {
         switch(choice) {
         case COUNTDOWNLATCH:
             return new OneShotSearchWithCountDownLatch(wordList,
-                                                      mOneShotInputStrings);
+                                                       mOneShotInputStrings);
         case CYCLIC_BARRIER:
             return new CyclicSearchWithCyclicBarrier(wordList,
                                                      mFixedNumberOfInputStrings);

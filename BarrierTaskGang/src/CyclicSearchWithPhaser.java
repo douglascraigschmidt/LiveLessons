@@ -9,7 +9,7 @@ import java.util.concurrent.Phaser;
  *        concurrently until there's no more input to process.
  */
 public class CyclicSearchWithPhaser 
-              extends SearchTaskGangCommonCyclic {
+             extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
      * Thread must await on mPhaser for all the other Threads to
@@ -28,7 +28,7 @@ public class CyclicSearchWithPhaser
     /**
      * Synchronizes all Threads during a reconfiguration.
      */
-    volatile CyclicBarrier mReconfigurationBarrier;
+    volatile CyclicBarrier mReconfigurationCyclicBarrier;
 
     /**
      * Constructor initializes the data members and superclass.
@@ -40,18 +40,19 @@ public class CyclicSearchWithPhaser
               stringsToSearch);
         mReconfiguration = 0;
 
-        // Create a Phaser that controls how Threads synchronize on a
-        // dynamically reconfigurable barrier.  The number of Threads
-        // may vary on each iteration cycle, depending on the number
-        // of Strings provided as input.
+        // Create a Phaser that controls how Threads in the task gang
+        // synchronize on a dynamically reconfigurable barrier.  The
+        // number of Threads may vary on each iteration cycle,
+        // depending on the number of Strings provided as input during
+        // that cycle.
         mPhaser = new Phaser() {
-            // Hook method that perform the actions upon
-            // impending phase advance.
+            // Hook method that performs actions prior to an impending
+            // phase advance.
             protected boolean onAdvance(int phase,
                                         int registeredParties) {
-                // Record the old input size to see if we need to
-                // reconfigure or not.
-                int oldSize = getInput().size();
+                // Record the size of the previous input List to see
+                // if a reconfiguration is needed or not.
+                int prevSize = getInput().size();
 
                 // Get the new input Strings to process.
                 setInput(getNextInput());
@@ -65,7 +66,7 @@ public class CyclicSearchWithPhaser
 
                     // See if we need to reconfigure the Phaser due to
                     // changes in the size of the input List.
-                    mReconfiguration = newSize - oldSize;
+                    mReconfiguration = newSize - prevSize;
 
                     // No reconfiguration needed since there was no
                     // change to the size of the input List.
@@ -87,15 +88,15 @@ public class CyclicSearchWithPhaser
                                                            + " with "
                                                            + newSize
                                                            + " vs "
-                                                           + oldSize
+                                                           + prevSize
                                                            + " Threads @@@@@");
 
                         // Create a new CyclicBarrier to manage the
                         // reconfiguration.  We can use a
                         // CyclicBarrier here since there are a fixed
                         // number of Threads involved.
-                        mReconfigurationBarrier = new CyclicBarrier
-                            (oldSize,
+                        mReconfigurationCyclicBarrier = new CyclicBarrier
+                            (prevSize,
                              // Create the barrier action.
                              new Runnable() {
                                  public void run() {
@@ -103,8 +104,8 @@ public class CyclicSearchWithPhaser
                                      // the input List than last time
                                      // create/run new worker Threads
                                      // to process them.
-                                     if (oldSize < newSize)
-                                         for (int i = oldSize; i < newSize; ++i)
+                                     if (prevSize < newSize)
+                                         for (int i = prevSize; i < newSize; ++i)
                                              new Thread(makeTask(i)).start();
 
                                      // Indicate that reconfiguration
@@ -117,6 +118,22 @@ public class CyclicSearchWithPhaser
                 }
             }
         };
+    }
+
+    /**
+     * Factory method that creates a Runnable task that processes one
+     * element of the input List (at location @code index) in a
+     * background Thread.
+     */
+    @Override
+    protected Runnable makeTask(final int index) {
+        // Register ourselves with the Phaser so we're included in the
+        // set of registered parties.
+        mPhaser.register();
+
+        // Forward the rest of the processing to the superclass's
+        // makeTask() factory method.
+        return super.makeTask(index);
     }
 
     /**
@@ -135,16 +152,16 @@ public class CyclicSearchWithPhaser
     }
 
     /**
-     * Each Thread in the gang uses a call to the Phaser
-     * arriveAndAwaitAdvance() method to wait for all the other
-     * Threads to complete their current cycle.
+     * Each Thread in the gang uses the Phaser arriveAndAwaitAdvance()
+     * method to wait for all the other Threads to complete their
+     * current cycle.
      */
     @Override
     protected void taskDone(int index) throws IndexOutOfBoundsException {
         boolean throwException = false;
         try {
             // Wait until all other Threads are done with their
-            // cycle.
+            // iteration cycle before attempting to advance.
             mPhaser.arriveAndAwaitAdvance();
 
             // Check to see if a reconfiguration is needed.
@@ -152,10 +169,10 @@ public class CyclicSearchWithPhaser
                 try {
                     // Wait for all existing threads to reach this
                     // barrier.
-                    mReconfigurationBarrier.await();
+                    mReconfigurationCyclicBarrier.await();
 
-                    // Check to see if this worker is no longer
-                    // needed, i.e., due to the input List shrinking
+                    // Check to see if this Thread is no longer
+                    // needed, i.e., if the new input List shrank
                     // relative to the previous input List.
                     if (index >= getInput().size()) {
                         // Remove ourselves from the count of parties
@@ -179,22 +196,6 @@ public class CyclicSearchWithPhaser
         // to exit.
         if (throwException)
             throw new IndexOutOfBoundsException();                
-    }
-
-    /**
-     * Factory method that creates a Runnable worker that will
-     * process one element of the input List (at location @code
-     * index) in a background Thread.
-     */
-    @Override
-    protected Runnable makeTask(final int index) {
-        // Register ourselves with the Phaser so we're included in
-        // it's set of registered parties.
-        mPhaser.register();
-
-        // Forward the rest of the processing to the superclass's
-        // makeTask() factory method.
-        return super.makeTask(index);
     }
 }
 

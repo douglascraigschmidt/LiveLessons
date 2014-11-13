@@ -3,11 +3,12 @@ import java.util.concurrent.CountDownLatch;
 /**
  * @class SearchTaskGangCommonCyclic
  * 
- * @brief This helper class factors out the common code used by
- *        the cyclic TaskGang implementations below.
+ * @brief This helper class extends SearchTaskGangCommon and factors
+ *        out the common code used by the cyclic TaskGang
+ *        implementations.
  */
 public abstract class SearchTaskGangCommonCyclic
-                       extends SearchTaskGangCommon {
+                      extends SearchTaskGangCommon {
     /**
      * Constructor initializes the data members.
      */
@@ -18,7 +19,8 @@ public abstract class SearchTaskGangCommonCyclic
                stringsToSearch);
 
         // Initialize the exit barrier to 1, which causes
-        // awaitTasksDone() to block until the test is finished.
+        // awaitTasksDone() hook method to block until the test is
+        // finished.
         mExitBarrier = new CountDownLatch(1);
     }
 
@@ -29,7 +31,7 @@ public abstract class SearchTaskGangCommonCyclic
      * to run.
      */
     @Override
-        protected boolean advanceTaskToNextCycle() {
+    protected boolean advanceTaskToNextCycle() {
         if (getInput() == null) {
             mExitBarrier.countDown();
             return false;

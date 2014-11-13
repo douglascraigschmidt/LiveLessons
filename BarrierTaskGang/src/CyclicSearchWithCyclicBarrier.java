@@ -4,16 +4,16 @@ import java.util.concurrent.CyclicBarrier;
  * @class CyclicSearchWithCyclicBarrier
  *
  * @brief Customizes the SearchTaskGangCommon framework with a
- *        CyclicBarrier to continue searching a fixed number of
- *        input Strings via a fixed number of Threads until
- *        there's no more input to process.
+ *        CyclicBarrier to define a test that continues searching a
+ *        fixed number of input Strings via a fixed number of Threads
+ *        until there's no more input to process.
  */
 public class CyclicSearchWithCyclicBarrier 
               extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
-     * Thread must await on mCyclicBarrier for all the other Threads
-     * to complete their processing before they all attempt to move to
+     * Thread must wait on mCyclicBarrier for all the other Threads to
+     * complete their processing before they all attempt to move to
      * the next iteration cycle en masse.
      */
     protected CyclicBarrier mCyclicBarrier;
@@ -43,7 +43,7 @@ public class CyclicSearchWithCyclicBarrier
     }
 
     /**
-     * Hook method called back by initiateTaskGang() to perform custom
+     * Hook method invoked by initiateTaskGang() to perform custom
      * initializations before the Threads in the gang are spawned.
      */
     @Override
