@@ -11,7 +11,7 @@ abstract class PingPongThread extends Thread {
     /**
      * Number of iterations to ping/pong.
      */
-    private int mMaxIterations;
+    private final int mMaxIterations;
 
     /**
      * Data member that indicates the string to print (typically a
@@ -34,12 +34,6 @@ abstract class PingPongThread extends Thread {
      */
     abstract void acquire();
     abstract void release();
-
-    /**
-     * Sets the id of the other thread.
-     */
-    void setOtherThreadId(long id) {
-    }
 
     /**
      * This method runs in a separate thread of control and implements

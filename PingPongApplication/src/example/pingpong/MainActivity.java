@@ -3,7 +3,6 @@ package example.pingpong;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
-import android.R;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,24 +20,34 @@ import android.widget.TextView;
  *        application.
  */
 public class MainActivity extends Activity {
-    /** TextView that PingPong will be "played" upon. */
+    /** 
+     * A plain TextView that PingPong will be "played" upon. 
+     */
     private TextView mPingPongTextViewLog;
+
+    /** 
+     * A more colorful TextView that prints "Ping" or "Pong" to the
+     * display.
+     */
     private TextView mPingPongColorOutput;
 
-    /** Button that allows playing and resetting of the game. */
+    /** 
+     * Button that allows playing and resetting of the game. 
+     */
     private Button mPlayButton;
     
     /** 
-     * Instance of DelayedOutputThread that's used in the manner
-     * described above.
+     * Variables used to track state of the game.
      */
-    private DelayedOutputThread mDelayedOutputThread;
-
-    /** Variables to track state of the game */
-    private static int PLAY = 0;
-    private static int RESET = 1;
+    private final static int PLAY = 0;
+    private final static int RESET = 1;
     private int mGameState = PLAY;
 
+    /** 
+     * Instance of DelayedOutputThread that's described below.
+     */
+    private DelayedOutputThread mDelayedOutputThread;
+    
     /*
      * @class DelayedOutputThread
      *
@@ -46,20 +55,20 @@ public class MainActivity extends Activity {
      *        handling messages so the "ping" and "pong" output is
      *        visually discernable by the user.
      */
-    static class DelayedOutputThread extends HandlerThread {
+    class DelayedOutputThread extends HandlerThread {
         /**
          * Handler that's used to post Runnables to the
          * HandlerThread's Looper.
          */
-        private Handler mDelayedOutputHandler;
+        public Handler mDelayedOutputHandler;
 
         /**
-         * Constructor initializes the superclass.
+         * Constructor initializes the super class.
          */
-        public DelayedOutputThread() {
-            super("DelayedOutputThread");
+        DelayedOutputThread() {
+            super ("DelayedOutputThread");
         }
-
+            
         /**
          * Hook method called back by HandlerThread.run() after the
          * Looper is initialized.
@@ -105,11 +114,15 @@ public class MainActivity extends Activity {
         Options.instance().parseArgs(null);
     }
 
-    /** Sets the action of the button on click state. */
+    /** 
+     * Sets the action of the button on click state. 
+     */
     public void playButtonClicked(View view) {
-        if (mGameState == PLAY) {
+        switch(mGameState) {
+        case PLAY:
         	
-            // Start the Thread that handles calls to print();
+            // Create and start the Thread that handles calls to
+            // print() and done().
             mDelayedOutputThread = new DelayedOutputThread();
             mDelayedOutputThread.start();
         	
@@ -125,7 +138,8 @@ public class MainActivity extends Activity {
 
             mPlayButton.setText(R.string.reset_button);
             mGameState = RESET;
-        } else if (mGameState == RESET) {
+            break;
+        case RESET:
             // Stop the thread that handles calls to print();
             mDelayedOutputThread.interrupt();
         	
@@ -137,7 +151,8 @@ public class MainActivity extends Activity {
             mPingPongTextViewLog.setText(R.string.empty_string);
             mPlayButton.setText(R.string.play_button);
             mGameState = PLAY;
-        } else {
+            break;
+        default:
             // Notify the player that something has gone wrong and
             // reset.
             mPingPongTextViewLog.setText("Unknown State entered!");
@@ -146,12 +161,13 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Use a CountDownLatch to indicate that a game thread has
-     * finished running.
+     * Post a Runnable task that uses a CountDownLatch to indicate a
+     * game thread has finished running.
      */
     public void done(final CountDownLatch latch) {
-        // Put a task on the queue that decrements the CountDownLatch
-        // by one.
+        // Post a Runnable task that decrements the CountDownLatch by
+        // one.  This task's run() hook method will be dispatched
+        // after all previous tasks ahead of it in the MessageQueue.
     	mDelayedOutputThread.runOnDelayedOutputThread(new Runnable() {
                 public void run() {
                     latch.countDown();                        
@@ -167,12 +183,13 @@ public class MainActivity extends Activity {
      * 
      * A call to this function will not block. However, the code to
      * display this output will be posted to a thread in such a way
-     * that any changes to the UI will be spaced out by 0.5
-     * seconds. This way the user has an appropriate amount of time to
-     * appreciate the ping'ing and the pong'ing that is happening.
+     * that any changes to the UI will be spaced out by 0.5 seconds so
+     * the user has an appropriate amount of time to appreciate the
+     * ping'ing and the pong'ing that is happening.
      */
     public void print(final String output) {
-        // Put a task on the queue that prints the output.
+        // Post a Runnable task that prints the output with a 0.5
+        // second delay between displaying the output.
     	mDelayedOutputThread.runOnDelayedOutputThread(new Runnable() {
             @Override
             public void run() {

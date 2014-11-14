@@ -12,7 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
  *        threads, Ping and Pong, to alternately print "Ping" and
  *        "Pong", respectively, on the display. It uses the Template
  *        Method, Strategy, and Factory Method patterns to factor out
- *        common code and simplify the program design.
+ *        common code, enhance portability, and simplify the program
+ *        design.
  */
 public class PlayPingPong implements Runnable {
     /**
@@ -20,14 +21,11 @@ public class PlayPingPong implements Runnable {
      */
     private volatile int mMaxIterations;
 
-    /** Maximum number of iterations per "turn" (defaults to 1). */
-    private volatile int mMaxTurns = 1;
-
     /**
      * Which synchronization to use, e.g., "SEMA", "COND", "MONOBJ",
-     * "QUEUE", and "PADDLE".  Defaults to "PADDLE".
+     * "QUEUE".
      */
-    private String mSyncMechanism = "PADDLE";
+    private final String mSyncMechanism;
 
     /**
      * Maximum number of ping pong threads.
@@ -50,10 +48,15 @@ public class PlayPingPong implements Runnable {
         mMaxIterations = maxIterations;
 
         // Which synchronization to use (e.g., "SEMA", "COND",
-        // "MONOBJ", "QUEUE", or "PADDLE").
+        // "MONOBJ", or "QUEUE").
         mSyncMechanism = syncMechanism;
     }
 
+    /**
+     * Factory method that creates the designated instances of the
+     * PingPongThread subclass based on the @code schedMechanism
+     * parameter.
+     */
     private void makePingPongThreads(String schedMechanism,
                                      PingPongThread[] pingPongThreads) {
         // Use a pair of Java Semaphores.
@@ -74,37 +77,42 @@ public class PlayPingPong implements Runnable {
                                        pingSema,
                                        mMaxIterations);
         }
-        // Use a pair of Java ConditionObjects.
+        // Use a pair of Java ConditionObjects associated with a
+        // single ReentrantLock.
         else if (schedMechanism.equals("COND")) {
             ReentrantLock lock = new ReentrantLock();
             Condition pingCond = lock.newCondition();
             Condition pongCond = lock.newCondition();
-            int numberOfTurnsEach = 2;
 
-            pingPongThreads[PING_THREAD] = 
+            PingPongThreadCond pingThread =
                 new PingPongThreadCond("ping",
                                        lock,
                                        pingCond,
                                        pongCond,
                                        true,
                                        mMaxIterations);
-            pingPongThreads[PONG_THREAD] =
+            PingPongThreadCond pongThread = 
                 new PingPongThreadCond("pong",
                                        lock,
                                        pongCond,
                                        pingCond,
                                        false,
                                        mMaxIterations);
-            pingPongThreads[PING_THREAD]
-                .setOtherThreadId(pingPongThreads[PONG_THREAD].getId());
-            pingPongThreads[PONG_THREAD]
-                .setOtherThreadId(pingPongThreads[PING_THREAD].getId());
+            // Exchange Thread IDs.
+            pingThread.setOtherThreadId(pongThread.getId());
+            pongThread.setOtherThreadId(pingThread.getId());
+
+            pingPongThreads[PING_THREAD] = pingThread;
+            pingPongThreads[PONG_THREAD] = pongThread;
+
         }
-        // Use a pair of Java BinarySemaphores implemented as monitor
-        // objects.
+        // Use a pair of BinarySemaphores implemented as Java build-in
+        // monitor objects.
         else if (schedMechanism.equals("MONOBJ")) {
-            BinarySemaphore pingSema = new BinarySemaphore(false);
-            BinarySemaphore pongSema = new BinarySemaphore(true);
+            PingPongThreadMonObj.BinarySemaphore pingSema =
+                new PingPongThreadMonObj.BinarySemaphore(true); // Start out unlocked.
+            PingPongThreadMonObj.BinarySemaphore pongSema =
+                new PingPongThreadMonObj.BinarySemaphore(false);
 
             pingPongThreads[PING_THREAD] =
                 new PingPongThreadMonObj("ping",
@@ -139,32 +147,12 @@ public class PlayPingPong implements Runnable {
                 new PingPongThreadBlockingQueue("ping",
                                                 pingQueue,
                                                 pongQueue,
-                                                ball,
                                                 mMaxIterations);
             pingPongThreads[PONG_THREAD] = 
                 new PingPongThreadBlockingQueue("pong",
                                                 pongQueue,
                                                 pingQueue,
-                                                ball,
                                                 mMaxIterations);
-        }
-        // Use a pair of BallPaddles
-        else if (schedMechanism.equals("PADDLE")) {
-            BallPaddle pingBall =
-                new BallPaddle(true); // Start with the ball.
-            BallPaddle pongBall =
-                new BallPaddle(false);
-
-            pingPongThreads[PING_THREAD] = 
-                new PingPongThreadPaddle("ping",
-                                         pingBall, 
-                                         pongBall,
-                                         mMaxIterations);
-            pingPongThreads[PONG_THREAD] =
-                new PingPongThreadPaddle("pong",
-                                         pongBall,
-                                         pingBall,
-                                         mMaxIterations);
         }
     }
 
@@ -182,19 +170,16 @@ public class PlayPingPong implements Runnable {
         // Create the ping and pong threads. 
         PingPongThread pingPongThreads[] =
             new PingPongThread[MAX_PING_PONG_THREADS];
-        pingPongThreads[PING_THREAD] = null;
-        pingPongThreads[PONG_THREAD] = null;
 
         // Create the appropriate type of threads with the designated
-        // scheduling mechanism (e.g., "SEMA" for Semaphores, "COND"
-        // for ConditionObjects, "MONOBJ" for monitor objects, etc.).
+        // scheduling mechanism.
         makePingPongThreads(mSyncMechanism,
                             pingPongThreads);
 
         // Start ping and pong threads, which calls their run()
         // methods.
-        pingPongThreads[PING_THREAD].start();
-        pingPongThreads[PONG_THREAD].start();
+        for (PingPongThread thread : pingPongThreads)
+            thread.start();
 
         // Barrier synchronization to wait for all work to be done
         // before exiting play().

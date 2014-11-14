@@ -15,7 +15,7 @@ public class PlatformStrategyFactory {
      * This interface uses the Command pattern to create @a
      * PlatformStrategy implementations at runtime.
      */
-    private static interface IPlatformStrategyFactoryStrategy {
+    private interface IPlatformStrategyFactoryStrategy {
         public PlatformStrategy execute();
     }
 
@@ -40,8 +40,9 @@ public class PlatformStrategyFactory {
         new HashMap<PlatformType, IPlatformStrategyFactoryStrategy>();
 
     /**
-     * Ctor that stores the objects that perform output for a particular
-     * platform, such as ConsolePlatformStrategy or the AndroidPlatformStrategy.
+     * Ctor that stores the objects that perform output for a
+     * particular platform, such as PlatformStrategyConsole or the
+     * PlatformStrategyAndroid.
      */
     public PlatformStrategyFactory(final Object output) {
         // Cache this value in the constructor since it won't change
@@ -52,15 +53,15 @@ public class PlatformStrategyFactory {
 
         /**
          * The "The Android Project" string maps to a command object that
-         * creates an @a AndroidPlatformStrategy implementation.
+         * creates an @a PlatformStrategyAndroid implementation.
          */
         mPlatformStrategyMap.put(PlatformType.ANDROID,
                                  new IPlatformStrategyFactoryStrategy() {
                                      /**
-                                      * Creates the AndroidPlatformStrategy.
+                                      * Creates the PlatformStrategyAndroid.
                                       */
                                      public PlatformStrategy execute() {
-                                         return new AndroidPlatformStrategy(output);
+                                         return new PlatformStrategyAndroid(output);
                                      }
                                  });
 
@@ -70,11 +71,11 @@ public class PlatformStrategyFactory {
          */
         mPlatformStrategyMap.put(PlatformType.PLAIN_JAVA,
                                  /*
-                                  * Creates the AndroidPlatformStrategy.
+                                  * Creates the PlatformStrategyAndroid.
                                   */
                                  new IPlatformStrategyFactoryStrategy() {
                                      public PlatformStrategy execute() {
-                                         return new ConsolePlatformStrategy(output);
+                                         return new PlatformStrategyConsole(output);
                                      }
                                  });
     }

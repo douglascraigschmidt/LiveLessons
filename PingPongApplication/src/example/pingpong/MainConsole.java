@@ -18,14 +18,15 @@ public class MainConsole {
          * ConsolePlatform.
          */
         PlatformStrategy.instance
-            (new PlatformStrategyFactory(System.out).makePlatformStrategy());
+            (new PlatformStrategyFactory
+             (System.out).makePlatformStrategy());
 
         /** Initializes the Options singleton. */
         Options.instance().parseArgs(args);
 
         /**
-         * Create a PlayPingPong object to run the designated number of
-         * iterations.
+         * Create a PlayPingPong object to run the designated number
+         * of iterations.
          */
         PlayPingPong pingPong =
             new PlayPingPong(Options.instance().maxIterations(),

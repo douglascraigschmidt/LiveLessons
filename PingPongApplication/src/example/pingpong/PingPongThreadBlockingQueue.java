@@ -26,7 +26,7 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      * which avoids having to allocate memory dynamically each
      * time control is passed.
      */
-    private Object mPingPongBall;
+    private Object mPingPongBall = null;
 
     /**
      * Constructor initializes the various fields.
@@ -34,12 +34,10 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
     PingPongThreadBlockingQueue(String stringToPrint,
                                 LinkedBlockingQueue<Object> mine,
                                 LinkedBlockingQueue<Object> other,
-                                Object pingPongBall,
                                 int maxIterations) {
         super(stringToPrint, maxIterations);
         mMine = mine;
         mOther = other;
-        mPingPongBall = pingPongBall;
     }
 
     /**
@@ -47,13 +45,12 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      */
     @Override
     void acquire() {
-        // Since the binary semaphore above ignores exceptions, so
-        // will we.
         try {
             // Block until there's an item to take from the other
             // BlockingQueue.
             mPingPongBall = mOther.take();
         } catch (InterruptedException e) {
+            // Ignore InterruptedExceptions.
         }
     }
 
@@ -63,6 +60,7 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
             // Put the ball back in the other BlockingQueue.
             mMine.put(mPingPongBall);
         } catch (InterruptedException e) {
+            // Ignore InterruptedExceptions.
         }
     }
 }

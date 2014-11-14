@@ -10,8 +10,7 @@ import java.util.*;
  * @brief This class implements the Singleton pattern to handle
  *        command-line option processing.
  */
-public class Options
-{
+public class Options {
     /** The singleton @a Options instance. */
     private static Options mUniqueInstance = null;
 
@@ -26,9 +25,9 @@ public class Options
 
     /**
      * Which synchronization to use, e.g., "SEMA", "COND", "MONOBJ",
-     * "QUEUE", and "PADDLE".  Defaults to "PADDLE".
+     * and "QUEUE".  Defaults to "SEMA".
      */
-    private String mSyncMechanism = "PADDLE";
+    private String mSyncMechanism = "SEMA";
 
     /** Method to return the one and only singleton uniqueInstance. */
     public static Options instance() {

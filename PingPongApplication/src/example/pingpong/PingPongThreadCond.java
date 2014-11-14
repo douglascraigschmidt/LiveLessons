@@ -13,15 +13,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class PingPongThreadCond extends PingPongThread {
     /**
-     * Max number of ping pong conditions.
-     */
-    private final static int MAX_PING_PONG_CONDS = 2;
-
-    /**
      * Conditions that are used to schedule the ping/pong algorithm.
      */
-    private final Condition mConds[] =
-        new Condition[MAX_PING_PONG_CONDS];
+    private final Condition mMine;
+    private final Condition mOther;
 
     /**
      * Monitor lock.
@@ -38,28 +33,25 @@ class PingPongThreadCond extends PingPongThread {
      */
     private static long mTurnOwner;
 
-    /**
-     * Consts to distinguish between ping and pong conditions.
-     */
-    private final static int FIRST_COND = 0;
-    private final static int SECOND_COND = 1;
-
     PingPongThreadCond(String stringToPrint,
                        ReentrantLock lock,
-                       Condition firstCond,
-                       Condition secondCond,
+                       Condition mine,
+                       Condition other,
                        boolean isOwner,
                        int maxIterations) {
         super(stringToPrint, maxIterations);
         mLock = lock;
-        mConds[FIRST_COND] = firstCond;
-        mConds[SECOND_COND] = secondCond;
+        mMine = mine;
+        mOther = other;
         if (isOwner)
             mTurnOwner = this.getId();
     }
 
+    /**
+     * Keep track of the ID of the other Thread.
+     */
     public void setOtherThreadId(long otherThreadId) {
-        this.mOtherThreadId = otherThreadId;
+        mOtherThreadId = otherThreadId;
     }
 
     /**
@@ -69,11 +61,13 @@ class PingPongThreadCond extends PingPongThread {
     void acquire() {
         mLock.lock();
 
-        while (mTurnOwner != this.getId()) {
-            mConds[FIRST_COND].awaitUninterruptibly();
+        try {
+            // Wait until we're the turn owner.
+            while (mTurnOwner != this.getId()) 
+                mMine.awaitUninterruptibly();
+        } finally {
+            mLock.unlock();
         }
-
-        mLock.unlock();
     }
 
     /**
@@ -83,9 +77,14 @@ class PingPongThreadCond extends PingPongThread {
     void release() {
         mLock.lock();
 
-        mTurnOwner = mOtherThreadId;
-        mConds[SECOND_COND].signal();
-        mLock.unlock();
+        try {
+            // Make the other Thread the turn owner and signal it to
+            // wake up.
+            mTurnOwner = mOtherThreadId;
+            mOther.signal();
+        } finally {
+            mLock.unlock();
+        }
     }
 }
 
