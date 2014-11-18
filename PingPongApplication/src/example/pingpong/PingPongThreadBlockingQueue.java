@@ -5,10 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * @class PingPongThreadBlockingQueue
  * 
- * @brief This class uses blocking queues to implement the
- *        acquire() and release() hook methods that schedule the
- *        ping/pong algorithm. It plays the role of the "Concrete
- *        Class" in the Template Method pattern.
+ * @brief This class uses blocking queues to implement the acquire()
+ *        and release() hook methods that synchronize the ping/pong
+ *        algorithm. It plays the role of the "Concrete Class" in the
+ *        Template Method pattern.
  */
 public class PingPongThreadBlockingQueue extends PingPongThread {
     /**
@@ -31,10 +31,10 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
     /**
      * Constructor initializes the various fields.
      */
-    PingPongThreadBlockingQueue(String stringToPrint,
-                                LinkedBlockingQueue<Object> mine,
-                                LinkedBlockingQueue<Object> other,
-                                int maxIterations) {
+    public PingPongThreadBlockingQueue(String stringToPrint,
+                                       LinkedBlockingQueue<Object> mine,
+                                       LinkedBlockingQueue<Object> other,
+                                       int maxIterations) {
         super(stringToPrint, maxIterations);
         mMine = mine;
         mOther = other;
@@ -44,7 +44,7 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
      * Hook method for ping/pong acquire.
      */
     @Override
-    void acquire() {
+    protected void acquire() {
         try {
             // Block until there's an item to take from the other
             // BlockingQueue.
@@ -55,9 +55,10 @@ public class PingPongThreadBlockingQueue extends PingPongThread {
     }
 
     @Override
-    void release() {
+    protected void release() {
         try {
-            // Put the ball back in the other BlockingQueue.
+            // Put the ball back in the other BlockingQueue to notify
+            // it to wakeup and run.
             mMine.put(mPingPongBall);
         } catch (InterruptedException e) {
             // Ignore InterruptedExceptions.

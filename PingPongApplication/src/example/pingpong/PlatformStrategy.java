@@ -3,12 +3,14 @@ package example.pingpong;
 /** 
  * @class PlatformStrategy
  *
- * @brief Provides methods that define a platform-independent API for
- *        output data to the display and synchronizing on thread
- *        completion in the ping/pong game.  This class is a singleton
- *        that also plays the role of the "Strategy" in the Strategy
- *        pattern.  Each platform (e.g., Android, command-line, etc.)
- *        subclasses from this singleton.
+ * @brief Provides methods that define a platform-independent
+ *        mechanism for outputting data to the display and
+ *        synchronizing on Thread completion in the ping/pong
+ *        application.  This class is a singleton that also plays the
+ *        role of the "Strategy" in the Strategy pattern and the
+ *        Product in the Factory Method pattern.  Both the
+ *        PlatformStrategyConsole and PlatformStrategyAndroid
+ *        subclasses extend this class.
  */
 public abstract class PlatformStrategy
 {
@@ -38,22 +40,25 @@ public abstract class PlatformStrategy
     }
 
     /** 
-     * Do any initialization needed to start a new game. 
+     * Perform any initialization needed to start running the
+     * ping/pong algorithm.
      */
     public abstract void begin();
 
     /** 
-     * Print the outputString to the display. 
+     * Outputs the string parameter to the display. 
      */
     public abstract void print(String outputString);
 
     /** 
-     * Indicate that a game thread has finished running. 
+     * Indicates a Thread has finished running the ping/pong
+     * algorithm.
      */
     public abstract void done();
 
     /** 
-     * Barrier that waits for all the game threads to finish. 
+     * Barrier that waits for all Threads to finish running the
+     * ping/pong algorithm.
      */
     public abstract void awaitDone();
 

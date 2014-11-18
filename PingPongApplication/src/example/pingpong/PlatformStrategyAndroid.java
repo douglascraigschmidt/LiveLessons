@@ -8,9 +8,9 @@ import android.util.Log;
 /**
  * @class PlatformStrategyAndroid
  * 
- * @brief Provides methods that define a platform-independent API for
- *        output data to Android UI thread and synchronizing on thread
- *        completion in the ping/pong game. It plays the role of the
+ * @brief Implements a platform-independent API for outputting data to
+ *        Android UI thread and synchronizing on thread completion in
+ *        the ping/pong application. It plays the role of the
  *        "Concrete Strategy" in the Strategy pattern.
  */
 public class PlatformStrategyAndroid extends PlatformStrategy {
@@ -35,7 +35,8 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
     }
 
     /**
-     * Do any initialization needed to start a new game. 
+     * Do any initialization needed to start a new running the
+     * ping/pong algorithm.
      */
     public void begin() {
         /** (Re)initialize the CountDownLatch. */
@@ -43,22 +44,31 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
     }
 
     /** 
-     * Print the outputString to the display.
+     * Barrier that waits for all the Threads to finish. 
+     */
+    public void awaitDone() {
+        try {
+            // Wait until the CountDownLatch reaches 0.
+            mLatch.await();
+        } catch(java.lang.InterruptedException e) {
+            errorLog("PlatformStrategyAndroid",
+                     e.getMessage());
+        }
+    }
+
+    /** 
+     * Output the string to the Android display managed by the UI Thread.
      */
     public void print(final String outputString) {
-        /**
-         * Create a Runnable that's ultimately posted to the UI looper
-         * thread via another Thread that blocks for 0.5 seconds to
-         * let the user see what's going on.
-         */
-
         final MainActivity output = mOuterClass.get();
             
         if (output == null)
             return;
         try {
-            // Use the PingPongInterface to make it a "1 liner" and
-            // eliminates need for temp TextView variables, etc.
+            // Calls the MainActivity.print() method, which create a
+            // Runnable that's ultimately posted to the UI Thread via
+            // another Thread that sleeps for 0.5 seconds to let the
+            // user see what's going on.
             output.print(outputString + "\n");
         } catch (NullPointerException ex) {
             errorLog("PlatformStrategyAndroid",
@@ -67,7 +77,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
     }
 
     /** 
-     * Indicate that a game thread has finished running. 
+     * Indicate that a Thread has finished running. 
      */
     public void done() {
         final MainActivity output =
@@ -77,25 +87,15 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
             return;
 
         try {
-            // Forward to the done() method, which posts a Runnable
-            // whose run() method calls mLatch.countDown() on the UI
-            // Thread after all other processing is complete.
+            // Forward to the MainActivity.done() method, which
+            // ultimately posts a Runnable on the UI Thread. This
+            // Runnable's run() method calls mLatch.countDown() in the
+            // context of the UI Thread after all other processing is
+            // complete.
             output.done(mLatch);
         } catch (NullPointerException ex) {
             errorLog("PlatformStrategyAndroid",
                      "print Failed b/c of null Activity");
-        }
-    }
-
-    /** 
-     * Barrier that waits for all the game threads to finish. 
-     */
-    public void awaitDone() {
-        try {
-            // Wait for the value of the CountDownLatch to reach 0.
-            mLatch.await();
-        } catch(java.lang.InterruptedException e) {
-            errorLog( "PlatformStrategyAndroid", e.getMessage());
         }
     }
 

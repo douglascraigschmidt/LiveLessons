@@ -5,7 +5,7 @@ package example.pingpong;
  * 
  * @brief This class uses Binary Semaphores (implemented as Java
  *        built-in monitor objects) to implement the acquire() and
- *        release() hook methods that schedule the ping/pong
+ *        release() hook methods that synchronize the ping/pong
  *        algorithm. It plays the role of the "Concrete Class" in the
  *        Template Method pattern.
  */
@@ -20,13 +20,13 @@ class PingPongThreadMonObj extends PingPongThread {
         /**
          * Keeps track of whether the semaphore is unlocked or locked.
          */
-        private Boolean mUnLocked;
+        private boolean mUnLocked;
     
         /**
          * Constructor sets the boolean data member to start out
          * locked or unlocked.
          */
-        public BinarySemaphore(Boolean unlocked) {
+        public BinarySemaphore(boolean unlocked) {
             mUnLocked = unlocked;
         }
 
@@ -66,11 +66,10 @@ class PingPongThreadMonObj extends PingPongThread {
     private final BinarySemaphore mMine;
     private final BinarySemaphore mOther;
 
-    PingPongThreadMonObj(String stringToPrint,
-                         BinarySemaphore mine,
-                         BinarySemaphore other,
-                         boolean isOwner,
-                         int maxIterations) {
+    public PingPongThreadMonObj(String stringToPrint,
+                                BinarySemaphore mine,
+                                BinarySemaphore other,
+                                int maxIterations) {
         super(stringToPrint, maxIterations);
         mMine = mine; 
         mOther = other; 
@@ -80,7 +79,7 @@ class PingPongThreadMonObj extends PingPongThread {
      * Hook method for ping/pong acquire.
      */
     @Override
-        void acquire() {
+    protected void acquire() {
         // Block until we acquire the semaphore.
 
         mMine.acquire();
@@ -90,7 +89,7 @@ class PingPongThreadMonObj extends PingPongThread {
      * Hook method for ping/pong release.
      */
     @Override
-        void release() {
+    protected void release() {
         // Release the other semaphore.
 
         mOther.release();

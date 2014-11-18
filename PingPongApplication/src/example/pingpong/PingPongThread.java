@@ -4,8 +4,9 @@ package example.pingpong;
  * @Brief PingPongThread
  *
  * @class This class implements the core ping/pong algorithm, but
- *        defers the scheduling aspect to subclasses. It plays the
- *        role of the "Abstract Class" in the Template Method pattern.
+ *        defers the synchronization aspects to subclasses. It plays
+ *        the role of the "Abstract Class" in the Template Method
+ *        pattern.
  */
 abstract class PingPongThread extends Thread {
     /**
@@ -22,8 +23,8 @@ abstract class PingPongThread extends Thread {
     /**
      * Constructor initializes the various fields.
      */
-    PingPongThread(String stringToPrint,
-                   int maxIterations) {
+    public PingPongThread(String stringToPrint,
+                          int maxIterations) {
         mStringToPrint = stringToPrint;
         mMaxIterations = maxIterations;
     }
@@ -32,8 +33,8 @@ abstract class PingPongThread extends Thread {
      * Abstract hook methods that determine the ping/pong scheduling
      * protocol in the run() template method.
      */
-    abstract void acquire();
-    abstract void release();
+    protected abstract void acquire();
+    protected abstract void release();
 
     /**
      * This method runs in a separate thread of control and implements

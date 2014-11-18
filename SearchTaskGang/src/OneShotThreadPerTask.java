@@ -32,8 +32,7 @@ public class OneShotThreadPerTask
     }
 
     /**
-     * Initiate the TaskGang to run each worker in a separate
-     * Thread.
+     * Initiate the TaskGang to run each task in a separate Thread.
      */
     protected void initiateTaskGang(int inputSize) {
         // Create a fixed-size Thread pool.

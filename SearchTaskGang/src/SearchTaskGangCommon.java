@@ -48,11 +48,12 @@ public abstract class SearchTaskGangCommon
             // Note that we're starting a new cycle.
             incrementCycle();
 
-            // Return a Vector containing the Strings to search
+            // Return a List containing the Strings to search
             // concurrently.
             return Arrays.asList(mInputIterator.next());
         }
         else 
+            // Indicate that we're done.
             return null;
     }
 

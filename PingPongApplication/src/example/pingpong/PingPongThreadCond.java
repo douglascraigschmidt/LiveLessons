@@ -8,8 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * 
  * @brief This class uses Java Conditions and ConditionObjects to
  *        implement the acquire() and release() hook methods that
- *        schedule the ping/pong algorithm. It plays the role of the
- *        "Concrete Class" in the Template Method pattern.
+ *        synchronize the ping/pong algorithm. It plays the role of
+ *        the "Concrete Class" in the Template Method pattern.
  */
 class PingPongThreadCond extends PingPongThread {
     /**
@@ -33,12 +33,12 @@ class PingPongThreadCond extends PingPongThread {
      */
     private static long mTurnOwner;
 
-    PingPongThreadCond(String stringToPrint,
-                       ReentrantLock lock,
-                       Condition mine,
-                       Condition other,
-                       boolean isOwner,
-                       int maxIterations) {
+    public PingPongThreadCond(String stringToPrint,
+                              ReentrantLock lock,
+                              Condition mine,
+                              Condition other,
+                              boolean isOwner,
+                              int maxIterations) {
         super(stringToPrint, maxIterations);
         mLock = lock;
         mMine = mine;
@@ -48,17 +48,10 @@ class PingPongThreadCond extends PingPongThread {
     }
 
     /**
-     * Keep track of the ID of the other Thread.
-     */
-    public void setOtherThreadId(long otherThreadId) {
-        mOtherThreadId = otherThreadId;
-    }
-
-    /**
      * Hook method for ping/pong acquire.
      */
     @Override
-    void acquire() {
+    protected void acquire() {
         mLock.lock();
 
         try {
@@ -74,7 +67,7 @@ class PingPongThreadCond extends PingPongThread {
      * Hook method for ping/pong release.
      */
     @Override
-    void release() {
+    protected void release() {
         mLock.lock();
 
         try {
@@ -85,6 +78,13 @@ class PingPongThreadCond extends PingPongThread {
         } finally {
             mLock.unlock();
         }
+    }
+
+    /**
+     * Keep track of the ID of the other Thread.
+     */
+    public void setOtherThreadId(long otherThreadId) {
+        mOtherThreadId = otherThreadId;
     }
 }
 

@@ -54,8 +54,7 @@ public class OneShotExecutorCompletionService
         for (int i = 0; i < count; ++i) 
             try {
                 // Take the next ready Future off the
-                // CompletionService's queue and print the search
-                // results.
+                // CompletionService's queue.
                 final Future<SearchResults> resultFuture =
                     mCompletionService.take();
 

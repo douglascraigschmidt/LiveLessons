@@ -6,10 +6,10 @@ import java.io.PrintStream;
 /**
  * @class PlatformStrategyConsole
  *
- * @brief Provides methods that define a platform-independent API for
- *        output data to the console window and synchronizing on
- *        thread completion in the ping/pong game.  It plays the role
- *        of the "Concrete Strategy" in the Strategy pattern.
+ * @brief Implements a platform-independent API for outputting data to
+ *        the console window and synchronizing on thread completion in
+ *        the ping/pong application.  It plays the role of the
+ *        "Concrete Strategy" in the Strategy pattern.
  */
 public class PlatformStrategyConsole extends PlatformStrategy {
     /**
@@ -31,7 +31,8 @@ public class PlatformStrategyConsole extends PlatformStrategy {
     }
 	
     /** 
-     * Do any initialization needed to start a new game. 
+     * Perform any initialization needed to start running the
+     * ping/pong algorithm.
      */
     public void begin() {
         mLatch = new CountDownLatch(NUMBER_OF_THREADS);
@@ -46,21 +47,23 @@ public class PlatformStrategyConsole extends PlatformStrategy {
     }
 
     /** 
-     * Indicate that a game thread has finished running. 
+     * Indicate that a Thread has finished running.
      */
     public void done() {
-        // Decrement the CountDownLatcy by one.
+        // Decrement the CountDownLatch by one.
         mLatch.countDown();
     }
     
     /** 
-     * Barrier that waits for all the game threads to finish. 
+     * Barrier that waits for all the Threads to finish.
      */
     public void awaitDone() {
         try {
             // Wait until the CountDownLatch reaches 0.
             mLatch.await();
         } catch(java.lang.InterruptedException e) {
+            errorLog("PlatformStrategyConsole",
+                     e.getMessage());
         }
     }
 

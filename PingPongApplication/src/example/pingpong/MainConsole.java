@@ -3,8 +3,8 @@ package example.pingpong;
 /**
  * @class MainConsole
  *
- * @brief This class is the main entry point for a console version of
- *        the PlayPingPong app.
+ * @brief This class is the main entry point for a Java console
+ *        version of the PingPong application.
  */
 public class MainConsole {
     /**
