@@ -172,13 +172,13 @@ public class MainActivity extends Activity {
      * Post a Runnable task that uses a CountDownLatch to indicate a
      * Thread has finished running.
      */
-    public void done(final CountDownLatch latch) {
+    public void done(final CountDownLatch exitBarrier) {
         // Post a Runnable task that decrements the CountDownLatch by
         // one.  This task's run() hook method will be dispatched
         // after all previous tasks ahead of it in the MessageQueue.
     	mDelayedOutputThread.runOnDelayedOutputThread(new Runnable() {
                 public void run() {
-                    latch.countDown();                        
+                    exitBarrier.countDown();                        
                 }
             });
     }

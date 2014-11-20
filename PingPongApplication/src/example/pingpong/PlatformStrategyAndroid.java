@@ -15,10 +15,10 @@ import android.util.Log;
  */
 public class PlatformStrategyAndroid extends PlatformStrategy {
     /**
-     * Latch to decrement each time a thread exits to control when the
-     * play() method returns.
+     * An exit barrier that's decremented each time a thread exits,
+     * which control when the PlayPingPong run() hook method returns.
      */
-    private CountDownLatch mLatch = null;
+    private CountDownLatch mExitBarrier = null;
 
     /** 
      * Define a WeakReference to avoid memory leaks. 
@@ -40,7 +40,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
      */
     public void begin() {
         /** (Re)initialize the CountDownLatch. */
-        mLatch = new CountDownLatch(NUMBER_OF_THREADS);
+        mExitBarrier = new CountDownLatch(NUMBER_OF_THREADS);
     }
 
     /** 
@@ -49,7 +49,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
     public void awaitDone() {
         try {
             // Wait until the CountDownLatch reaches 0.
-            mLatch.await();
+            mExitBarrier.await();
         } catch(java.lang.InterruptedException e) {
             errorLog("PlatformStrategyAndroid",
                      e.getMessage());
@@ -89,10 +89,10 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
         try {
             // Forward to the MainActivity.done() method, which
             // ultimately posts a Runnable on the UI Thread. This
-            // Runnable's run() method calls mLatch.countDown() in the
+            // Runnable's run() method calls mExitBarrier.countDown() in the
             // context of the UI Thread after all other processing is
             // complete.
-            output.done(mLatch);
+            output.done(mExitBarrier);
         } catch (NullPointerException ex) {
             errorLog("PlatformStrategyAndroid",
                      "print Failed b/c of null Activity");

@@ -1,3 +1,4 @@
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +23,104 @@ public class LeasePoolStrategyStampedLock<Resource>
     /**
      * Constructor for the resources passed as a parameter.
      */
-    LeasePoolStrategyStampedLock(List<Resource> resources) {
+    LeasePoolStrategyStampedLock
+        (List<Resource> resources,
+         AbstractMap<Resource, LeaseState> resourceMap) {
         // Call the superclass constructor.
-        super(resources);
+        super(resources,
+              resourceMap);
 
         // Initialize the StampedLock.
         mStampedLock = new StampedLock();
+    }
+
+    /**
+     * Hook method that acquires a resource from the @a LeasePool.
+     */
+    protected Resource acquireHook(long leaseDurationInMillis) {
+        // This implementation demonstrates StampedLock's
+        // support for upgrading a readLock to a writeLock.
+
+        // Start out with a readLock.
+        long stamp = mStampedLock.readLock();
+        try {
+            // Iterate through the HashMap, with readLock initially
+            // held.
+            for (Iterator<Map.Entry<Resource, LeaseState>> entries =
+                     mResourceMap.entrySet().iterator();
+                 entries.hasNext();
+                 ) {
+                // Get the next entry in the HashMap.
+                Map.Entry<Resource, LeaseState> entry = entries.next();
+
+                // Check to see if the entry is in use.
+                if (entry.getValue() == mNotInUse) {
+                    // Get the resource key with readLock (or
+                    // writeLock) held.
+                    final Resource resource = entry.getKey();
+
+                    // Attempt to upgrade to a writeLock.
+                    long writeStamp =
+                        mStampedLock.tryConvertToWriteLock(stamp);
+
+                    // If the upgrade to a writeLock worked then we
+                    // can initialize the LeaseState since the critical
+                    // section is protected from concurrent access.
+                    if (writeStamp != 0) {
+                        stamp = writeStamp;
+                        // Initialize LeaseState and return the resource.
+                        entry.setValue(new LeaseState(leaseDurationInMillis));
+                        return resource;
+                    } 
+                    // Otherwise, fall back to using writeLock.
+                    else {
+                        // Release the readLock.
+                        mStampedLock.unlockRead(stamp);
+
+                        // Acquire a writeLock (this call may block).
+                        stamp = mStampedLock.writeLock();
+
+                        // Restart at the beginning of the HashMap
+                        // since its state may have changed during the
+                        // window of time when the readLock was
+                        // released and the writeLock was acquired.
+                        entries = mResourceMap.entrySet().iterator();
+                    }
+                }
+            }
+        } finally {
+            // Unlock either the writeLock or the readLock, depending
+            // on the value of stamp.
+            mStampedLock.unlock(stamp);
+        }
+
+        // Should not be reached.
+        return null;
+    }
+
+    /**
+     * Hook method that releases the @code resource back to
+     * the @LeasePool.
+     */
+    protected boolean releaseHook(Resource resource) {
+        // Acquire a writeLock.
+        long stamp = mStampedLock.writeLock();
+
+        // Put the mNotInUse value back into ConcurrentHashMap
+        // for the resource key, which also atomically returns the
+        // LeaseState associated with the resource.
+        try (LeaseState values = mResourceMap.put(resource,
+                                                  mNotInUse)) {
+            // Return false if the @resource parameter was
+            // previously the mNotInUse.
+            return values != mNotInUse;
+        } finally {
+            // Release the writeLock.
+            mStampedLock.unlockWrite(stamp);
+
+            // close() method of LeaseState clean ups the values
+            // associated with a resource in the HashMap.
+        }
     }
 
     /**
@@ -46,8 +139,8 @@ public class LeasePoolStrategyStampedLock<Resource>
             // If not, then return the duration.
             return remainingDuration;
         } else {
-            // Otherwise, acquire a readLock and get the remaining
-            // lease duration.
+            // Otherwise, acquire a readLock (which may block) and get
+            // the remaining lease duration.
             stamp = mStampedLock.readLock();
             try {
                 return remainingLeaseDurationUnlocked(resource);
@@ -57,89 +150,5 @@ public class LeasePoolStrategyStampedLock<Resource>
             }
         }
     }
-
-    /**
-     * Hook method that acquires a resource from the @a LeasePool.
-     */
-    protected Resource acquireHook(long leaseDurationInMillis) {
-        // Start out with a readLock.
-        long stamp = mStampedLock.readLock();
-        try {
-            // Iterate through the HashMap, with readLock initially
-            // held.
-            for (Iterator<Map.Entry<Resource, Values>> entries =
-                     mResourceMap.entrySet().iterator();
-                 entries.hasNext();
-                 ) {
-                // Get the next entry in the HashMap.
-                Map.Entry<Resource, Values> entry = entries.next();
-
-                // Not currently in use.
-                if (!entry.getValue().mInUse) {
-                    // Get the resource key with readLock (or
-                    // writeLock) held.
-                    final Resource resource = entry.getKey();
-
-                    // Attempt to upgrade to a writeLock.
-                    long writeStamp =
-                        mStampedLock.tryConvertToWriteLock(stamp);
-
-                    // If the upgrade to a writeLock worked then we
-                    // can initialize the Values since the critical
-                    // section is protected from concurrent access.
-                    if (writeStamp != 0) {
-                        stamp = writeStamp;
-                        // Initialize Values and return the resource.
-                        entry.getValue().acquire(leaseDurationInMillis);
-                        return resource;
-                    } 
-                    // Otherwise, fall back to using writeLock.
-                    else {
-                        // Release the readLock.
-                        mStampedLock.unlockRead(stamp);
-
-                        // Acquire a writeLock (this call may block).
-                        stamp = mStampedLock.writeLock();
-
-                        // Restart at the beginning of the HashMap
-                        // since its state may have changed between
-                        // the point where the readLock was released
-                        // and the writeLock was acquired.
-                        entries = mResourceMap.entrySet().iterator();
-                    }
-                }
-            }
-        } finally {
-            // Unlock either the writeLock or the readLock, depending
-            // on the value of stamp.
-            mStampedLock.unlock(stamp);
-        }
-        return null;
-    }
-
-    /**
-     * Hook method that releases the @code resource back to
-     * the @LeasePool.
-     */
-    protected boolean releaseHook(Resource resource) {
-        // Acquire a writeLock.
-        long stamp = mStampedLock.writeLock();
-
-        try {
-            // Get the Values associated with the resource.
-            Values values = mResourceMap.get(resource);
-            if (values == null)
-                // Return false if the @resource parameter is invalid.
-                return false;
-            else {
-                // Cleanup the values associated with a Resource key
-                // in the HashMap.
-                values.release();
-                return true;
-            }
-        } finally {
-            // Release the writeLock.
-            mStampedLock.unlockWrite(stamp);
-        }
-    }
 }
+

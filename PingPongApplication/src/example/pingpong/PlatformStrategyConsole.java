@@ -13,10 +13,10 @@ import java.io.PrintStream;
  */
 public class PlatformStrategyConsole extends PlatformStrategy {
     /**
-     * Latch to decrement each time a thread exits to control when the
-     * play() method returns.
+     * An exit barrier that's decremented each time a thread exits,
+     * which control when the PlayPingPong run() hook method returns.
      */
-    private CountDownLatch mLatch = null;
+    private CountDownLatch mExitBarrier = null;
 
     /**
      * Contains information for printing output to the console window.
@@ -35,7 +35,7 @@ public class PlatformStrategyConsole extends PlatformStrategy {
      * ping/pong algorithm.
      */
     public void begin() {
-        mLatch = new CountDownLatch(NUMBER_OF_THREADS);
+        mExitBarrier = new CountDownLatch(NUMBER_OF_THREADS);
     }
 
     /** 
@@ -51,7 +51,7 @@ public class PlatformStrategyConsole extends PlatformStrategy {
      */
     public void done() {
         // Decrement the CountDownLatch by one.
-        mLatch.countDown();
+        mExitBarrier.countDown();
     }
     
     /** 
@@ -60,7 +60,7 @@ public class PlatformStrategyConsole extends PlatformStrategy {
     public void awaitDone() {
         try {
             // Wait until the CountDownLatch reaches 0.
-            mLatch.await();
+            mExitBarrier.await();
         } catch(java.lang.InterruptedException e) {
             errorLog("PlatformStrategyConsole",
                      e.getMessage());

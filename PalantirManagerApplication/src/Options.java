@@ -5,8 +5,8 @@ import java.util.*;
 /**
  * @class Options
  * 
- * @brief This class implements the Singleton pattern to handle
- *        command-line option processing.
+ * @brief This class implements the Singleton pattern to handle the
+ *        processing of command-line options.
  */
 public class Options {
     /** The singleton @a Options instance. */
@@ -33,6 +33,12 @@ public class Options {
      * Number of gazing iterations for each Being (defaults to 10).
      */
     private int mGazingIterations = 10;
+
+    /**
+     * Controls whether debugging output will be generated (defaults
+     * to false).
+     */
+    public boolean mDiagnosticsEnabled = false;
 
     /** 
      * Method to return the one and only singleton uniqueInstance. 
@@ -73,6 +79,13 @@ public class Options {
     }
 
     /**
+     * Returns whether debugging output is generated.
+     */
+    public boolean diagnosticsEnabled() {
+        return mDiagnosticsEnabled;
+    }
+
+    /**
      * Parse command-line arguments and set the appropriate values.
      */
     public boolean parseArgs(String argv[]) {
@@ -80,6 +93,8 @@ public class Options {
             for (int argc = 0; argc < argv.length; argc += 2)
                 if (argv[argc].equals("-b"))
                     mNumberOfBeings = Integer.parseInt(argv[argc + 1]);
+                else if (argv[argc].equals("-d"))
+                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
                 else if (argv[argc].equals("-i"))
                     mGazingIterations = Integer.parseInt(argv[argc + 1]);
                 else if (argv[argc].equals("-l"))
@@ -102,9 +117,10 @@ public class Options {
         System.out.println("Help Invoked on Options [-bhlp] \n");
         System.out.println("Usage: ");
         System.out.println("-b number-of-Beings");
+        System.out.println("-d [true|false]");
         System.out.println("-h: invoke help");
-        System.out.println("-i: gazing iterations");
-        System.out.println("-l lease duration");
+        System.out.println("-i: gazing-iterations");
+        System.out.println("-l lease-duration");
         System.out.println("-p number-of-Palantiri");
     }
 
