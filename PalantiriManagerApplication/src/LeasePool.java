@@ -80,9 +80,9 @@ public class LeasePool<Resource> {
      * Returns the amount of time (in milliseconds) remaining on the
      * lease held on the @a resource.
      */
-    public long remainingLeaseDuration(Resource resource) {
+    public long remainingTime(Resource resource) {
         // Simply forward to the corresponding implementor method.
-        return mLeasePoolStrategy.remainingLeaseDuration(resource);
+        return mLeasePoolStrategy.remainingTime(resource);
     }
 }
 

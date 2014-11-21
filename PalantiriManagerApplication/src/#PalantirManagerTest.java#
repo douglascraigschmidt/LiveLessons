@@ -13,9 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @brief This program demonstrates the use of the LeasePool resource
  *        manager that limits the number of Beings from Middle-Earth
- *        who can concurrently gaze into a Palantir (see
+ *        who can concurrently gaze into Palantiri (see
  *        http://en.wikipedia.org/wiki/Palantir for more information
- *        on Palantirs if you're not a Lord of the Ring's fan yet
+ *        on Palantiri if you're not a Lord of the Ring's fan yet
  *        ;-)).
  */
 public class PalantirManagerTest {
@@ -258,7 +258,7 @@ public class PalantirManagerTest {
                         
                     // Check to see if the lease has expired.
                     long remainingDuration =
-                        mPalantirManager.remainingLeaseDuration(palantir);
+                        mPalantirManager.remainingTime(palantir);
                     if (remainingDuration <= 0)
                         printDebugging(Thread.currentThread().getName()
                                        + " lease has expired for palantir "

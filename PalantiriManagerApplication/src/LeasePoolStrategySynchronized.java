@@ -75,10 +75,10 @@ public class LeasePoolStrategySynchronized<Resource>
     /**
      * Returns the amount of time remaining on the lease.
      */
-    public long remainingLeaseDuration(Resource resource) {
+    public long remainingTime(Resource resource) {
         // Hold the intrinsic lock for the duration of this call.
         synchronized(this) {
-            return remainingLeaseDurationUnlocked(resource);
+            return remainingTimeUnlocked(resource);
         }
     }
 }

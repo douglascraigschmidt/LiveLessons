@@ -68,10 +68,10 @@ public class LeasePoolStrategyConcurrentHashMap<Resource>
     /**
      * Returns the amount of time remaining on the lease.
      */
-    public long remainingLeaseDuration(Resource resource) {
+    public long remainingTime(Resource resource) {
         // This call doesn't require a lock since the
         // ConcurrentHashMap handles the synchronization.
-        return remainingLeaseDurationUnlocked(resource);
+        return remainingTimeUnlocked(resource);
     }
 }
 

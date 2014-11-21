@@ -109,11 +109,11 @@ public class LeasePoolStrategyRWLock<Resource>
     /**
      * Returns the amount of time remaining on the lease.
      */
-    public long remainingLeaseDuration(Resource resource) {
+    public long remainingTime(Resource resource) {
         mRWLock.readLock().lock();
         try {
             // Hold a read lock for the duration of this call.
-            return remainingLeaseDurationUnlocked(resource);
+            return remainingTimeUnlocked(resource);
         } finally {
             mRWLock.readLock().unlock();
         }

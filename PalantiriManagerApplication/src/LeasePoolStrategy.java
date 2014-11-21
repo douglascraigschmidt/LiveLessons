@@ -123,7 +123,7 @@ abstract public class LeasePoolStrategy<Resource> {
         /**
          * Return the remaining lease duration.
          */
-        public long remainingLeaseDuration() {
+        public long remainingTime() {
             return mLeaseDuration - System.currentTimeMillis();
         }
     }
@@ -228,7 +228,7 @@ abstract public class LeasePoolStrategy<Resource> {
      * Returns the amount of time remaining on the lease in
      * milliseconds.
      */
-    public abstract long remainingLeaseDuration(Resource resource);
+    public abstract long remainingTime(Resource resource);
 
     /**
      * Returns the amount of time remaining on the lease in
@@ -236,10 +236,10 @@ abstract public class LeasePoolStrategy<Resource> {
      * subclasses of @a LeasePoolStrategy, which hold different types
      * of locks when this method is called.
      */
-    protected long remainingLeaseDurationUnlocked(Resource resource) {
+    protected long remainingTimeUnlocked(Resource resource) {
         // Get the LeaseState associated with the resource.
         LeaseState values = mResourceMap.get(resource);
         // Compute the remaining lease duration.
-        return values.remainingLeaseDuration();
+        return values.remainingTime();
     }
 }

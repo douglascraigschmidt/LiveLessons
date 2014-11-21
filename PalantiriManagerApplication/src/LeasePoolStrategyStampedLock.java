@@ -126,13 +126,13 @@ public class LeasePoolStrategyStampedLock<Resource>
     /**
      * Returns the amount of time remaining on the lease.
      */
-    public long remainingLeaseDuration(Resource resource) {
+    public long remainingTime(Resource resource) {
         // Do an optimistic read.
         long stamp = mStampedLock.tryOptimisticRead();
 
         // No lock is actually held during this call.
         long remainingDuration =
-            remainingLeaseDurationUnlocked(resource);
+            remainingTimeUnlocked(resource);
 
         // Check to see if a write lock has been acquired.
         if (mStampedLock.validate(stamp)) {
@@ -143,7 +143,7 @@ public class LeasePoolStrategyStampedLock<Resource>
             // the remaining lease duration.
             stamp = mStampedLock.readLock();
             try {
-                return remainingLeaseDurationUnlocked(resource);
+                return remainingTimeUnlocked(resource);
             } finally {
                 // Release the readlock.
                 mStampedLock.unlockRead(stamp);
