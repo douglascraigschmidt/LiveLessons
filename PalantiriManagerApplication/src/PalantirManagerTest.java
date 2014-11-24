@@ -23,7 +23,7 @@ public class PalantirManagerTest {
      * Defines a pool of Threads that allow Beings to gaze at a fixed
      * number of Palantiri.
      */
-    private static ExecutorService mExecutorService;
+    private static ExecutorService mExecutor;
 
     /**
      * A ThreadFactory object that spawns an appropriately named
@@ -119,7 +119,7 @@ public class PalantirManagerTest {
         Options.instance().parseArgs(args);
 
         // Create a ThreadPoolExecutor that runs the Being tasks.
-        mExecutorService =
+        mExecutor =
             Executors.newFixedThreadPool
                 (Options.instance().numberOfBeings(),
                  mThreadFactory);
@@ -195,9 +195,9 @@ public class PalantirManagerTest {
                                          CountDownLatch exitBarrier) {
         // Start all Beings tasks that gaze into the Palantiri.
         for (int i = 0; i < beingCount; ++i) {
-            mExecutorService.execute(makeBeingRunnable(i, 
-                                                       entryBarrier,
-                                                       exitBarrier));
+            mExecutor.execute(makeBeingRunnable(i, 
+                                                entryBarrier,
+                                                exitBarrier));
         }
     }
 
