@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="${relativePackage}.${activityClass}" >
+    
+    <LinearLayout
+		android:id="@+id/buttonLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+    
+	    <Button android:id="@+id/useDefault"
+	        android:layout_weight="2"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/use_default_urls"
+	        android:onClick="useDefaultURLs"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	    <Button android:id="@+id/addList"
+	        android:layout_weight="2"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/add_urls"
+	        android:onClick="addURLs"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	    <Button android:id="@+id/clear"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/clear_dirs"
+	        android:onClick="clearFilterDirectories"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	</LinearLayout>
+	
+    
+    <ScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/buttonLayout" >
+	    
+        <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical" >
+		    
+			<LinearLayout
+			    android:id="@+id/listOfURLLists"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="vertical" >	
+			    
+			</LinearLayout>
+	
+		    <Button android:id="@+id/runGang"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/run_image_taskgang"
+		        android:onClick="runImageTaskGang"
+		        android:visibility="invisible"
+		        style="?android:attr/borderlessButtonStyle" />
+		    
+	    </LinearLayout>
+	    
+    </ScrollView>
+
+</RelativeLayout>
