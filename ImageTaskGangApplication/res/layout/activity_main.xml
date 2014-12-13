@@ -10,12 +10,12 @@
 		android:layout_height="wrap_content"
 		android:orientation="horizontal" >
     
-	    <Button android:id="@+id/useDefault"
+	    <Button android:id="@+id/runWithDefaultURLs"
 	        android:layout_weight="2"
 	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
 	        android:text="@string/use_default_urls"
-	        android:onClick="useDefaultURLs"
+	        android:onClick="runWithDefaultURLs"
 	        style="?android:attr/borderlessButtonStyle" />
 	    
 	    <Button android:id="@+id/addList"
@@ -55,11 +55,11 @@
 			    
 			</LinearLayout>
 	
-		    <Button android:id="@+id/runGang"
+		    <Button android:id="@+id/runWithUserURLs"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:text="@string/run_image_taskgang"
-		        android:onClick="runImageTaskGang"
+		        android:text="@string/run_with_user_urls"
+		        android:onClick="runWithUserURLs"
 		        android:visibility="invisible"
 		        style="?android:attr/borderlessButtonStyle" />
 		    

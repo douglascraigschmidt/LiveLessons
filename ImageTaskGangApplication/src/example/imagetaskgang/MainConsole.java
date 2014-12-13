@@ -13,18 +13,18 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MainConsole {
     /**
-     * Array of Filters to apply to the downloaded images.
-     */
-    private static Filter[] FILTERS = {
-        new NullFilter(),
-        new GrayScaleFilter()
-    };
-
-    /**
      * The JVM requires the instantiation of a main() method to run
      * the console version of the ImageTaskGang application.
      */
     public static void main(String[] args) {
+        /**
+         * Array of Filters to apply to the downloaded images.
+         */
+        final Filter[] filters = {
+            new NullFilter(),
+            new GrayScaleFilter()
+        };
+
         // Initializes the Platform singleton with the appropriate
         // PlatformStrategy, which in this case will be the
         // ConsolePlatform.
@@ -32,15 +32,15 @@ public class MainConsole {
             (new PlatformStrategyFactory
              (System.out).makePlatformStrategy());
 
-        // Initializes the Options singleton.
-        Options.instance().parseArgs(args);
-
         PlatformStrategy.instance().errorLog("MainConsole", 
                                              "Starting ImageTaskGangTest");
 
+        // Initializes the Options singleton.
+        Options.instance().parseArgs(args);
+
         // Create an exit barrier with a count of one to synchronize
-        // with the completion of the image downloading and processing
-        // in the TaskGang.
+        // with the completion of image downloading, processing, and
+        // storing in the TaskGang.
         final CountDownLatch mExitBarrier = 
             new CountDownLatch(1);
 
@@ -50,6 +50,9 @@ public class MainConsole {
             new Runnable() {
                 @Override
                 public void run() {
+                    // Cause the main Thread to return from the
+                    // blocking await() call on the exit barrier
+                    // below.
                     mExitBarrier.countDown();
                 }
             };
@@ -63,13 +66,13 @@ public class MainConsole {
 
         // Create an anonymous Thread to run a new instance of
         // ImageTaskGang.
-        new Thread(new ImageTaskGang(FILTERS,
+        new Thread(new ImageTaskGang(filters,
                                      urlIterator,
                                      completionHook)).start();
 
         try {
-            // Barrier synchronizer that wait for the ImageTaskGang to
-            // finish all its processing.
+            // Exit barrier synchronizer waits for the ImageTaskGang
+            // to finish all its processing.
             mExitBarrier.await();
         } catch (InterruptedException e) {
             PlatformStrategy.instance().errorLog("MainConsole", 

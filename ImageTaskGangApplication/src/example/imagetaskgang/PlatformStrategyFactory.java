@@ -53,29 +53,30 @@ public class PlatformStrategyFactory {
      * PlatformStrategyConsole or PlatformStrategyAndroid.
      */
     public PlatformStrategyFactory(final Object output) {
-        /**
-         * Map the PlatformType of ANDROID to a command object that
-         * creates an @a PlatformStrategyAndroid implementation.
-         */
-        mPlatformStrategyMap.put(PlatformType.ANDROID,
-                                 new IPlatformStrategyFactoryCommand() {
-                                     // Creates the PlatformStrategyAndroid.
-                                     public PlatformStrategy execute() {
-                                         return new PlatformStrategyAndroid(output);
-                                     }
-                                 });
-
-        /**
-         * Map the PlatformType of PLAIN_JAVA to a command object that
-         * creates an @a ConsolePlatformStrategy implementation.
-         */
-        mPlatformStrategyMap.put(PlatformType.PLAIN_JAVA,
-                                 new IPlatformStrategyFactoryCommand() {
-                                     // Creates the PlatformStrategyConsole.
-                                     public PlatformStrategy execute() {
-                                         return new PlatformStrategyConsole(output);
-                                     }
-                                 });
+        if (mPlatformType == PlatformType.ANDROID)
+            /**
+             * Map the PlatformType of ANDROID to a command object that
+             * creates an @a PlatformStrategyAndroid implementation.
+             */
+            mPlatformStrategyMap.put(PlatformType.ANDROID,
+                                     new IPlatformStrategyFactoryCommand() {
+                                         // Creates the PlatformStrategyAndroid.
+                                         public PlatformStrategy execute() {
+                                             return new PlatformStrategyAndroid(output);
+                                         }
+                                     });
+        else if (mPlatformType == PlatformType.PLAIN_JAVA)
+                 /**
+                  * Map the PlatformType of PLAIN_JAVA to a command object that
+                  * creates an @a ConsolePlatformStrategy implementation.
+                  */
+                 mPlatformStrategyMap.put(PlatformType.PLAIN_JAVA,
+                                          new IPlatformStrategyFactoryCommand() {
+                                              // Creates the PlatformStrategyConsole.
+                                              public PlatformStrategy execute() {
+                                                  return new PlatformStrategyConsole(output);
+                                              }
+                                          });
     }
 
     /**

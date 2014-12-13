@@ -51,7 +51,7 @@ public class PalantirManagerTest {
      * LeasePool that controls the access of multiple Middle-Earth
      * Beings to a fixed number of available Palantiri.
      */
-    private static LeasePool<Palantir> mPalantirManager;
+    private static LeasePool<Palantir> mPalantiriManager;
 
     /**
      * Factory method that generates a List of Palantiri with random
@@ -110,10 +110,10 @@ public class PalantirManagerTest {
     }
 
     /**
-     * Main entry point into the PalantirManagerTest.
+     * Main entry point into the PalantiriManagerTest.
      */
     static public void main(String[] args) {
-        printDebugging("Starting PalantirManagerTest");
+        printDebugging("Starting PalantiriManagerTest");
 
         // Initialize the Options singleton.
         Options.instance().parseArgs(args);
@@ -144,7 +144,7 @@ public class PalantirManagerTest {
                                + " test");
         }
 
-        printDebugging("Finishing PalantirManagerTest");
+        printDebugging("Finishing PalantiriManagerTest");
     }
 
     /**
@@ -157,8 +157,8 @@ public class PalantirManagerTest {
                                  LeasePool.SyncStrategy syncStrategy) {
         // Create a LeasePool that is used to control concurrent
         // access to the List of Palantiri.
-        mPalantirManager = new LeasePool<Palantir>(palantiri,
-                                                   syncStrategy);
+        mPalantiriManager = new LeasePool<Palantir>(palantiri,
+                                                    syncStrategy);
 
         // A CyclicBarrier ensures all Threads start as a group.
         CyclicBarrier entryBarrier =
@@ -171,7 +171,7 @@ public class PalantirManagerTest {
         // Create and start Threads for all the Beings so they can run
         // the gazing logic, which attempts to acquire a lease on a
         // Palantir and gaze into it.
-        beginBeingGazing(numberOfBeings,
+        beginBeingsGazing(numberOfBeings,
                          entryBarrier,
                          exitBarrier);
 
@@ -190,7 +190,7 @@ public class PalantirManagerTest {
      * Create and start Threads for all the Beings so they can attempt
      * to acquire a lease on a Palantir and gaze into it.
      */
-    private static void beginBeingGazing(int beingCount,
+    private static void beginBeingsGazing(int beingCount,
                                          CyclicBarrier entryBarrier,
                                          CountDownLatch exitBarrier) {
         // Start all Beings tasks that gaze into the Palantiri.
@@ -236,7 +236,7 @@ public class PalantirManagerTest {
                     // of milliseconds. This call will block until a
                     // Palantir is available.
                     Palantir palantir =
-                        mPalantirManager.acquire
+                        mPalantiriManager.acquire
                         (Options.instance().leaseDuration());
 
                     printDebugging(Thread.currentThread().getName()
@@ -258,7 +258,7 @@ public class PalantirManagerTest {
                         
                     // Check to see if the lease has expired.
                     long remainingDuration =
-                        mPalantirManager.remainingTime(palantir);
+                        mPalantiriManager.remainingTime(palantir);
                     if (remainingDuration <= 0)
                         printDebugging(Thread.currentThread().getName()
                                        + " lease has expired for palantir "
@@ -272,7 +272,7 @@ public class PalantirManagerTest {
 
                     // Return the Palantir back to the LeasePool
                     // so other Beings can gaze at it.
-                    mPalantirManager.release(palantir);
+                    mPalantiriManager.release(palantir);
                 }
 
                 // Indicate to the main Thread that this Being Thread

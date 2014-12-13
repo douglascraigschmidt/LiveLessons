@@ -41,15 +41,74 @@ public abstract class PlatformStrategy {
     }
 
     /**
-     * Return an Iterator over a list of input URL lists.
+     * Return an Iterator over one or more input URL Lists.
      */
     public abstract Iterator<List<URL>> getUrlIterator(InputSource source);
     
     /**
+     * Return the path for the directory where images are stored.
+     */
+    public abstract String getDirectoryPath();
+
+    /**
+     * Factory method that creates an @a Image from a byte array.
+     */
+    public abstract Image makeImage(byte[] imageData);
+
+    /**
+     * Apply a grayscale filter to the @a imageEntity and return it.
+     */
+    public abstract ImageEntity grayScaleFilter(ImageEntity imageEntity);
+
+    /**
+     * Store the @a image in the given @outputFile.
+     */
+    public abstract void storeImage(Image image,
+                                    FileOutputStream outputFile);
+
+    /**
+     * Error log formats the message and displays it for debugging
+     * purposes.
+     */
+    public abstract void errorLog(String javaFile,
+                                  String errorMessage);
+    
+    /**
+     * Make the constructor protected to ensure singleton access.
+     */
+    protected PlatformStrategy() {}
+
+    /**
+     * An enumeration of each different input source.
+     */
+    public static enum InputSource {
+    	DEFAULT, // The default input source that's shared between
+                 // platforms.
+        USER,    // Input from a user-defined source, such as the
+                 // Android UI or console command-line.
+        FILE,    // Input from a delimited file.
+        ERROR    // Returned if source is unrecognized.
+    }
+    
+    /**
+     * Takes a string input and returns the corresponding InputSource.
+     */
+    public InputSource getInputSource(String inputSource) {
+        if (inputSource.equalsIgnoreCase("DEFAULT")) 
+            return InputSource.DEFAULT;
+        else if (inputSource.equalsIgnoreCase("USER")) 
+            return InputSource.USER;
+        else if (inputSource.equalsIgnoreCase("FILE")) 
+            return InputSource.FILE;
+        else 
+            return InputSource.ERROR;
+    }
+
+    /**
      * Returns a List of default URL Lists that is usable in either
      * platform.
      */
-    protected List<List<URL>> getDefaultList() throws MalformedURLException {
+    protected List<List<URL>> getDefaultUrlList() throws MalformedURLException {
     	final List<List<URL>> variableNumberOfInputURLs = 
                 new ArrayList<List<URL>>();
 
@@ -68,63 +127,4 @@ public abstract class PlatformStrategy {
 
     	return variableNumberOfInputURLs;
     }
-    
-    /**
-     * Takes a string input and returns the corresponding InputSource.
-     */
-    public InputSource getInputSource(String inputSource) {
-        if (inputSource.equalsIgnoreCase("DEFAULT")) 
-            return InputSource.DEFAULT;
-        else if (inputSource.equalsIgnoreCase("USER")) 
-            return InputSource.USER;
-        else if (inputSource.equalsIgnoreCase("FILE")) 
-            return InputSource.FILE;
-        else 
-            return InputSource.ERROR;
-    }
-
-    /**
-     * Return the path for the directory where images are stored.
-     */
-    public abstract String getDirectoryPath();
-
-    /**
-     * Factory method that creates an @a Image from a byte array.
-     */
-    public abstract Image makeImage(byte[] imageData);
-
-    /**
-     * Apply a grayscale filter to the @a inputEntity and return it.
-     */
-    public abstract InputEntity applyGrayscaleFilter(InputEntity inputEntity);
-
-    /**
-     * Store the @a image in the given @outputFile.
-     */
-    public abstract void storeImage(Image image,
-                                    FileOutputStream outputFile);
-
-    /**
-     * Error log formats the message and displays it for the debugging
-     * purposes.
-     */
-    public abstract void errorLog(String javaFile,
-                                  String errorMessage);
-    
-    /**
-     * An enumeration of each different input source.
-     */
-    public static enum InputSource {
-    	DEFAULT, // The default input source that's shared between
-                 // platforms.
-        USER,    // Input from a user-defined source, such as the
-                 // Android UI or console command-line.
-        FILE,    // Input from a delimited file.
-        ERROR    // Returned if source is unrecognized.
-    }
-    
-    /**
-     * Make the constructor protected to ensure singleton access.
-     */
-    protected PlatformStrategy() {}
 }

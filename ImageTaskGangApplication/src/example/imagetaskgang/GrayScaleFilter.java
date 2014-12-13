@@ -30,9 +30,9 @@ public class GrayScaleFilter extends Filter {
      * conversion using a pixel-by-pixel coloring algorithm.
      */
     @Override
-    protected InputEntity applyFilter(InputEntity inputEntity) {
+    protected ImageEntity applyFilter(ImageEntity imageEntity) {
         // Forward to the platform-specific implementation of this
         // filter.
-        return PlatformStrategy.instance().applyGrayscaleFilter(inputEntity);
+        return PlatformStrategy.instance().grayScaleFilter(imageEntity);
     }
 }

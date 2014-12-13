@@ -58,7 +58,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
             // the default list of URL lists. Works on both console
             // and Android platforms
             case DEFAULT:
-                variableNumberOfInputURLs = super.getDefaultList();
+                variableNumberOfInputURLs = super.getDefaultUrlList();
                 break;
 	            
             // Take input from the Android UI
@@ -121,11 +121,11 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
     }
 
     /**
-     * Apply a grayscale filter to the @a inputEntity and return it.
+     * Apply a grayscale filter to the @a imageEntity and return it.
      */
-    public InputEntity applyGrayscaleFilter(InputEntity inputEntity) {
+    public ImageEntity grayScaleFilter(ImageEntity imageEntity) {
         Image imageAdapter =
-            ((ImageEntity) inputEntity).getImage();
+            ((ImageEntity) imageEntity).getImage();
         Bitmap originalImage =
             ((BitmapImage) imageAdapter).mBitmap;
 
@@ -166,7 +166,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
             new BitmapImage(grayScaleImage);
 
         // Return an ImageEntity containing the filtered image.
-        return new ImageEntity(inputEntity.getSourceURL(),
+        return new ImageEntity(imageEntity.getSourceURL(),
                                bitmapImage);
     }
     

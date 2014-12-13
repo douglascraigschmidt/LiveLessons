@@ -3,17 +3,17 @@ package example.imagetaskgang;
 /**
  * @class Filter
  *
- * @brief An abstract class that defines a means to apply filtering
- *        operations to an Image. It has a name and an abstract Filter
- *        method whose implementation must be overridden by a
- *        subclass.  Plays the role of the "Abstract Class" in the
- *        Template Method pattern and the role of the "Component" in
- *        the Decorator pattern.
+ * @brief An abstract class that defines an interface for applying
+ *        filtering operations to an Image. Each Filter has a name and
+ *        an abstract method whose implementation must be overridden
+ *        by a subclass.  Plays the role of the "Abstract Class" in
+ *        the Template Method pattern and the role of the "Component"
+ *        in the Decorator pattern.
  */
 public abstract class Filter {
     /**
-     * The name of the filter. Defaults to the Canonical Name of the
-     * derived filter.
+     * The name of the filter, which defaults to the "canonical name"
+     * of the subclass Filter instance.
      */
     protected String mName;
 
@@ -28,15 +28,34 @@ public abstract class Filter {
     /**
      * Constructs the filter with a custom name.
      */
-    public Filter(String name) {
-        mName = name;
+    public Filter(String filterName) {
+        mName = filterName;
+    }
+
+    /**
+     * This abstract hook method must be overridden by a subclass to
+     * define the logic for processing the given @a imageEntity.
+     */
+    protected abstract ImageEntity applyFilter(ImageEntity imageEntity);
+
+    /**
+     * This template method calls the applyFilter() hook method (which
+     * must be defined by a subclass) to filter the @a imageEntity
+     * parameter and sets the filterName of the result to the name of
+     * the filter.
+     */
+    public ImageEntity filter(ImageEntity imageEntity) {
+        // Call the applyFilter() hook method.
+        ImageEntity filteredResult = applyFilter(imageEntity);
+        filteredResult.setFilterName(this);
+        return filteredResult;
     }
 
     /**
      * Sets the name of the filter.
      */
-    public void setName(String name) {
-        mName = name;
+    public void setName(String filterName) {
+        mName = filterName;
     }
 
     /**
@@ -45,23 +64,4 @@ public abstract class Filter {
     public String getName() {
         return mName;
     }
-
-    /**
-     * This template method calls the applyFilter() hook method (which
-     * must be defined by a subclass) to filter the @a inputEntity
-     * parameter and sets the filterName of the result to the name of
-     * the filter.
-     */
-    public InputEntity filter(InputEntity inputEntity) {
-        // Call the applyFilter() hook method.
-        InputEntity filteredResult = applyFilter(inputEntity);
-        filteredResult.setFilterName(this);
-        return filteredResult;
-    }
-
-    /**
-     * This abstract hook method must be overridden by a subclass to
-     * define the logic for processing the given @a inputEntity.
-     */
-    protected abstract InputEntity applyFilter(InputEntity inputEntity);
 }

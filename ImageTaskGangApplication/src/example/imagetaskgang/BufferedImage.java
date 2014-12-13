@@ -1,5 +1,7 @@
 package example.imagetaskgang;
 
+// import javax.imageio.ImageIO;
+
 /**
  * @class BufferedImage
  *
@@ -12,7 +14,6 @@ class BufferedImage implements Image {
      */
     // @@ Need to fix 
 	//public java.awt.image.BufferedImage mBufferedImage;
-	//import javax.imageio.ImageIO;
 
     /**
      * Constructor that converts an @a imageData of raw bytes into a

@@ -37,8 +37,8 @@ public class OneShotThreadPerTask
     protected void initiateTaskGang(int inputSize) {
         // Create a fixed-size Thread pool.
         if (getExecutor() == null) 
-            // Create an Executor that runs each worker in a separate
-            // Thread.
+            // Create an Executor that runs each worker task in a
+            // separate Thread.
             setExecutor (new Executor() {
                     public void execute(Runnable r) {
                         Thread thread = new Thread(r);

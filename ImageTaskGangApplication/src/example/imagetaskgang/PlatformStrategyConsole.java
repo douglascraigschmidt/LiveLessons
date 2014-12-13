@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// @@ import javax.imageio.ImageIO;
+
 /**
  * @class PlatformStrategyConsole
  *
@@ -22,6 +24,7 @@ import java.util.List;
  *        processing, and storing URLs.  It plays the role of the
  *        "Concrete Strategy" in the Strategy pattern.
  */
+@SuppressLint("NewApi")
 public class PlatformStrategyConsole extends PlatformStrategy {
     /**
      * Contains information for printing output to the console window.
@@ -46,41 +49,44 @@ public class PlatformStrategyConsole extends PlatformStrategy {
     	
     	try {
             switch (source) {
-            
-            // If the user selects the defaults source, return
-            // the default list of URL lists. Works on both console
-            // and Android platforms
+            // If the user selects the defaults source, return the
+            // default list of URL lists. Works on both console and
+            // Android platforms.
             case DEFAULT:
-                variableNumberOfInputURLs = super.getDefaultList();
+                variableNumberOfInputURLs =
+                    super.getDefaultUrlList();
                 break;
 	           
-            // Read a list of URL lists from a delimited file
+            // Read a list of URL lists from a delimited file.
             case FILE:
-                try (BufferedReader urlReader = new BufferedReader(
-                		new FileReader(Options.instance().getURLFilePathname()))) {
-
-                    List<URL> currentUrls = new ArrayList<URL>();
+                try (BufferedReader urlReader = 
+                     new BufferedReader
+                     (new FileReader
+                      (Options.instance().getURLFilePathname()))) {
+                        List<URL> currentUrls = new ArrayList<URL>();
                     
-                    // Iterator over each line in the file
-                    for (String url; 
-                         (url = urlReader.readLine()) != null;
-                         ) {
+                        // Iterator over each line in the file
+                        for (String url; 
+                             (url = urlReader.readLine()) != null;
+                             ) {
                     	
-                    	// If the line is the dedicated delimiter, add the current
-                    	// list to the main list, and start a new list.
-                        if (url.equalsIgnoreCase(Options.instance().getSeparator())) {
-                            variableNumberOfInputURLs.add(currentUrls);
-                            currentUrls = new ArrayList<URL>();
+                            // If the line is the dedicated delimiter,
+                            // add the current list to the main list,
+                            // and start a new list.
+                            if (url.equalsIgnoreCase
+                                (Options.instance().getSeparator())) {
+                                variableNumberOfInputURLs.add(currentUrls);
+                                currentUrls = new ArrayList<URL>();
+                            }
+                            // Otherwise, add the URL to current list.
+                            else
+                                currentUrls.add(new URL(url));
                         }
-                        // Otherwise, add the url to the current list
-                        else
-                            currentUrls.add(new URL(url));
-                    }
                     
-                    // Add the final list to the main list
-                    variableNumberOfInputURLs.add(currentUrls);
+                        // Add the final list to the main list.
+                        variableNumberOfInputURLs.add(currentUrls);
 			    	
-                } catch (FileNotFoundException e) {
+                    } catch (FileNotFoundException e) {
                     mOutput.println("URL file not found");
                     return null;
                 } catch (IOException e) {
@@ -98,7 +104,7 @@ public class PlatformStrategyConsole extends PlatformStrategy {
             return null;
     	}
     	
-    	// Return an iterator over the list of URL lists
+    	// Return an iterator over the list of URL lists.
         return variableNumberOfInputURLs.iterator();
     }
 	
@@ -113,52 +119,63 @@ public class PlatformStrategyConsole extends PlatformStrategy {
      * Factory method that creates an @a Image from a byte array.
      */
     public Image makeImage(byte[] imageData){
-        return new BufferedImage(imageData);
+        // @@ return new BufferedImage(imageData);
+    	return null;
     }
      
     /**
-     * Apply a grayscale filter to the @a inputEntity and return it.
+     * Apply a grayscale filter to the @a imageEntity and return it.
      */
-    public InputEntity applyGrayscaleFilter(InputEntity inputEntity) {
-        //    	Image imageAdapter = ((ImageEntity) inputEntity).getImage();
-        //    	java.awt.image.BufferedImage originalImage = ((BufferedImage) imageAdapter).mBufferedImage;
-        //        java.awt.image.BufferedImage grayScaleImg =
-        //        		new java.awt.image.BufferedImage(originalImage.getColorModel(),
-        //                                  originalImage.copyData(null),
-        //                                  originalImage.getColorModel().isAlphaPremultiplied(),
-        //                                  null);
-        //
-        //        boolean hasTransparent = grayScaleImg.getColorModel().hasAlpha();
-        //        int width = grayScaleImg.getWidth();
-        //        int height = grayScaleImg.getHeight();
-        //
-        //        // A common pixel-by-pixel grayscale conversion algorithm 
-        //        // using values obtained from http://en.wikipedia.org/wiki/Grayscale
-        //        for (int i = 0; i < height; ++i) {
-        //            for (int j = 0; j < width; ++j) {
-        //            	
-        //            	// Check if the pixel is transparent in the original
-        //                if (hasTransparent 
-        //                    && (grayScaleImg.getRGB(j, i) >> 24) == 0x00) {
-        //                    continue;
-        //                }
-        //                
-        //                // Convert the pixel to grayscale
-        //                Color c = new Color(grayScaleImg.getRGB(j, i));
-        //                int grayConversion = (int) (c.getRed() * 0.299)
-        //                    + (int) (c.getGreen() * 0.587)
-        //                    + (int) (c.getBlue() * 0.114);
-        //                Color grayScale = new Color(grayConversion, grayConversion,
-        //                                            grayConversion);
-        //                grayScaleImg.setRGB(j, i, grayScale.getRGB());
-        //            }
-        //        }
-        //   	
-        //    	  BufferedImage grayScaleImage = new BufferedImage(grayScaleImg);
-        //
-        //        return new ImageEntity(processResult.getSourceURL(),
-        //                               grayScaleImage);
-    	return inputEntity;
+    public ImageEntity grayScaleFilter(ImageEntity imageEntity) {
+        /* @@
+    	Image imageAdapter =
+            ((ImageEntity) imageEntity).getImage();
+        java.awt.image.BufferedImage originalImage = 
+            ((BufferedImage) imageAdapter).mBufferedImage;
+        java.awt.image.BufferedImage grayScaleImg =
+            new java.awt.image.BufferedImage
+            (originalImage.getColorModel(),
+             originalImage.copyData(null),
+             originalImage.getColorModel().isAlphaPremultiplied(),
+             null);
+    
+        boolean hasTransparent =
+            grayScaleImg.getColorModel().hasAlpha();
+        int width = grayScaleImg.getWidth();
+        int height = grayScaleImg.getHeight();
+    
+        // A common pixel-by-pixel grayscale conversion algorithm
+        // using values obtained from en.wikipedia.org/wiki/Grayscale.
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+            	
+            	// Check if the pixel is transparent in the original.
+                if (hasTransparent 
+                    && (grayScaleImg.getRGB(j,
+                                            i) >> 24) == 0x00) 
+                    continue;
+                
+                // Convert the pixel to grayscale.
+                Color c = new Color(grayScaleImg.getRGB(j,
+                                                        i));
+                int grayConversion =
+                    (int) (c.getRed() * 0.299)
+                    + (int) (c.getGreen() * 0.587)
+                    + (int) (c.getBlue() * 0.114);
+                Color grayScale = new Color(grayConversion,
+                                            grayConversion,
+                                            grayConversion);
+                grayScaleImg.setRGB(j, i, grayScale.getRGB());
+            }
+        }
+   	
+    	BufferedImage grayScaleImage = 
+            new BufferedImage(grayScaleImg);
+
+        return new ImageEntity(imageEntity.getSourceURL(),
+                               grayScaleImage);
+        */
+        return null;
     }
     
     /**
@@ -166,10 +183,17 @@ public class PlatformStrategyConsole extends PlatformStrategy {
      */
     public void storeImage(Image imageAdapter,
                            FileOutputStream outputFile) {
-    	// Write the image to the appropriate directory
-        //    	ImageIO.write(((BufferedImage) imageAdapter).mBufferedImage,
-        //                	  "png",
-        //                	  outputFile);
+        /* @@
+    	// Write the image to the appropriate directory.
+        try {
+            ImageIO.write(((BufferedImage) imageAdapter).mBufferedImage,
+                          "png",
+                          outputFile);
+        } catch (IOException e) {
+            mOutput.println("ImageIO write failure");
+            e.printStackTrace();
+        }
+        */
     }
 
     /**
@@ -182,4 +206,3 @@ public class PlatformStrategyConsole extends PlatformStrategy {
                         + errorMessage);
     }
 }
-

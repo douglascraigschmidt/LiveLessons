@@ -123,7 +123,8 @@ public abstract class TaskGang<E> implements Runnable {
     protected abstract boolean processInput(E inputData);
 
     /**
-     * Template method that creates/runs all the tasks in the gang.
+     * Template method that creates/executes all the tasks in the
+     * gang.
      */
     @Override
     public void run() {

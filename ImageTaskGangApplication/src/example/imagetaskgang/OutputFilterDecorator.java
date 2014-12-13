@@ -7,63 +7,61 @@ import java.io.FileOutputStream;
 /**
  * @class OutputFilterDecorator
  *
- * @brief A Decorator that applies the filter passed to its
- *        constructor and then writes the results to an output file.
- *        Plays the role of the "Concrete Decorator" in the Decorator
+ * @brief A Decorator whose inherited applyFilter() template method
+ *        calls the filter() method on the Filter object passed to its
+ *        constructor and whose decorate() hook method then writes the
+ *        results of the filtered image to an output file.  Plays the
+ *        role of the "Concrete Decorator" in the Decorator pattern
+ *        and the role of the "Concrete Class" in the Template Method
  *        pattern.
  */
 public class OutputFilterDecorator extends FilterDecorator {
     /**
-     * Constructs the filter decorator with the @a filter to apply.
+     * Constructor passes the @a filter parameter up to the superclass
+     * constructor, which stores it in a data member for subsequent
+     * use in applyFilter(), which is both a hook method and a
+     * template method.
      */
     public OutputFilterDecorator(Filter filter) {
     	super(filter);
     }
 
     /**
-     * The hook method that is called on the InputEntity once it has
-     * been filtered with mFilter.  This method stores the filtered
-     * InputEntity in a file by delegating the storing to the
-     * platform- specific implementation of storeImage(...).
+     * This hook method is called with the @a imageEntity parameter
+     * after it has been filtered with mFilter in the inherited
+     * applyFilter() method.  decorate() stores the filtered
+     * ImageEntity in a file.
      */
     @SuppressLint("NewApi")
     @Override
-    protected InputEntity decorate(InputEntity inputEntity) {
-        if (android.os.Environment.getExternalStorageState().equals
-            (android.os.Environment.MEDIA_MOUNTED)) {
-            // Call the applyFilter() hook method.
-            ImageEntity result = (ImageEntity) inputEntity;
-		
-            // Make a directory for the filter if it does not already
-            // exist.
-            File externalFile = 
-                new File(PlatformStrategy.instance().getDirectoryPath(),
-                         this.getName());
-            externalFile.mkdirs();
+    protected ImageEntity decorate(ImageEntity imageEntity) {
+        // Make a directory for the filtered image if it does not
+        // exist already.
+        File externalFile = 
+            new File(PlatformStrategy.instance().getDirectoryPath(),
+                     this.getName());
+        externalFile.mkdirs();
         
-            // We will store the filtered image as its original filename,
-            // within the appropriate filter directory to organize the
-            // filtered results.
-            File newImage = 
-                new File(externalFile, 
-                         result.getFileName());
+        // Store the filtered image as its filename (which is derived
+        // from its URL), within the appropriate filter directory to
+        // organize the filtered results.
+        File newImage = 
+            new File(externalFile, 
+                     imageEntity.getFileName());
         
-            // Write the compressed image to the appropriate directory.
-            try (FileOutputStream outputFile = new FileOutputStream(newImage)) {
-                    PlatformStrategy.instance().storeImage(result.getImage(),
-                                                           outputFile);
-                } catch (Exception e) {
-                // Try-with-resources will clean up resources.
-                e.printStackTrace();
-                return null;
-            }
-
-            return result;
-        } else {
-            PlatformStrategy.instance().errorLog
-                ("OutoutFileDecorator",
-                 "sdcard isn't mounted");
+        // Write the image to the file in the appropriate directory.
+        // The close() method of the outputFile is automatically
+        // called via the Java "try-with-resources" feature.
+        try (FileOutputStream outputFile =
+             new FileOutputStream(newImage)) {
+                PlatformStrategy.instance().storeImage
+                    (imageEntity.getImage(),
+                     outputFile);
+            } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
+
+        return imageEntity;
     }
 }

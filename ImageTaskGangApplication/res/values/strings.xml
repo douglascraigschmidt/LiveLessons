@@ -5,7 +5,7 @@
     <string name="add_urls">Add URLs</string>
     <string name="use_default_urls">Default URLs</string>
     <string name="url_prompt">List of URLs separated by commas</string>
-    <string name="run_image_taskgang">Run</string>
+    <string name="run_with_user_urls">Run</string>
     <string name="go_back">Go Back</string>
     <string name="img_desc">A Large View</string>
     <string name="clear_dirs">Clear</string>

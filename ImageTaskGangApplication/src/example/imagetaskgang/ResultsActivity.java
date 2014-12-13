@@ -24,8 +24,8 @@ import android.widget.LinearLayout;
 /**
  * @class ResultsActivity
  *
- * @brief Shows the results Images downloaded by the ImageTaskGang in
- *        on the Android platform.
+ * @brief Allows the user to browse the processed images stored by the
+ *        ImageTaskGang.
  */
 public class ResultsActivity extends Activity {
     /**
