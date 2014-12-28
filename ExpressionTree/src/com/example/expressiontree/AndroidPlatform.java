@@ -157,9 +157,9 @@ public class AndroidPlatform extends Platform
 		
         if(verbose) 
             words = buttonToggled() + " " + editTextInput.getText().toString();
-        
         else 
             words = editTextInput.getText().toString();
+
         words = words.trim();
         
         if(verbose)
@@ -249,41 +249,28 @@ public class AndroidPlatform extends Platform
     /** Activates the designated menu item. */
     public void outputMenu(String numeral, String option, String selection) 
     {
-    	boolean enable;
-    	if(numeral.contains("1")||numeral.contains("c"))
-            enable = true;
-    	else
-            enable = false;
-    	
+    	boolean enable = numeral.startsWith("1") || option.equals("quit");
         menu.get(option).select(enable);
     }
 
     /** Disables the RadioButtons and unchecks them. */
-    public void disableAll( boolean verbose) 
+    public void disableAll(boolean verbose) 
     {
         if(verbose) 
             {
                 errorLog("AndroidPlatform","disableAll true");
-                RadioGroup rg1= (RadioGroup) activity.findViewById(R.id.rad1);
-                RadioGroup rg2= (RadioGroup) activity.findViewById(R.id.rad2);
-                RadioGroup rg3= (RadioGroup) activity.findViewById(R.id.rad3);
+                disable((RadioGroup) activity.findViewById(R.id.rad1));
+                disable((RadioGroup) activity.findViewById(R.id.rad2));
+                disable((RadioGroup) activity.findViewById(R.id.rad3));
                 EditText et = (EditText) activity.findViewById(R.id.et);
-			
                 et.setEnabled(false);
-            
-                for(int i = 0;
-                    i < rg3.getChildCount();
-                    ++i)
-                    {
-                        (rg3.getChildAt(i)).setEnabled(false);
-                        (rg1.getChildAt(i)).setEnabled(false);
-                        (rg2.getChildAt(i)).setEnabled(false);
-				
-                        //((RadioButton) (rg1.getChildAt(i))).setChecked(false);
-                        ((RadioButton) (rg2.getChildAt(i))).setChecked(false);
-                        ((RadioButton) (rg3.getChildAt(i))).setChecked(false);
-                    }
             }
+    }
+
+    /** Disables all radio buttons of a radio group */
+    private void disable(RadioGroup rg) {
+    	for (int i = 0; i < rg.getChildCount(); i++)
+    		rg.getChildAt(i).setEnabled(false);
     }
     
     /** Enables the option specified. */

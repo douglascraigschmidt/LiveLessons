@@ -39,7 +39,7 @@ public class CalculatorGUISuccinct extends Activity {
     private static EditText edittext;
 		
     /** 
-     * EditText object intakes user input for the interpreter. 
+     * Button 'Enter' triggers the evaluation of the expression. 
      */
     private static Button b;
 		
@@ -113,17 +113,17 @@ public class CalculatorGUISuccinct extends Activity {
             intent = new Intent(getApplicationContext(),
                                 CalculatorGUISuccinct.class);
             break;
-            /* TBD
-               case R.id.Verbose:
-               Toast.makeText(getApplicationContext(),
-               "Switching to verbose mode",
-               Toast.LENGTH_SHORT).show();
-               // Sets an intent for switching between the verbose
-               // and succinct activities.
-               intent = new Intent(getApplicationContext(),
-               CalculatorGUIVerbose.class);
-               break;
+       case R.id.Verbose:
+           Toast.makeText(getApplicationContext(),
+				           "Switching to verbose mode",
+				           Toast.LENGTH_SHORT).show();
+           /** 
+            * Sets an intent for switching between the verbose
+            * and succinct activities.
             */
+           intent = new Intent(getApplicationContext(),
+        		   				CalculatorGUIVerbose.class);
+           break;
         }
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -169,12 +169,10 @@ public class CalculatorGUISuccinct extends Activity {
 		
     /** Back button removes character from input field. */
     public void backButtonClicked(View view) {
-    	if(!edittext.getText().toString().equals("")) {
-            String textMinusLastChar = 
-                edittext.getText().toString().substring
-                (0, 
-                 edittext.getText().length() - 1);
-
+    	String text = edittext.getText().toString();
+    	
+    	if(!text.equals("")) {
+            String textMinusLastChar = text.substring(0, text.length() - 1);
             edittext.setText(textMinusLastChar);
         }
     }

@@ -39,7 +39,7 @@ public class CalculatorGUIVerbose extends Activity {
     /** EditText object intakes user input for the interpreter. */
     private static EditText edittext;
 		
-    /** @@ Jon, please document what purpose this button serves. */
+    /** Button 'Enter' triggers the evaluation of the expression. */
     private static Button b;
 		
     /** RadioGroup. */
@@ -92,7 +92,7 @@ public class CalculatorGUIVerbose extends Activity {
 		
         /** RadioGroup Format. */
         rg1 = (RadioGroup) findViewById(R.id.rad1);
-
+        
         /** RadioGroup Eval. */
         rg2 = (RadioGroup) findViewById(R.id.rad2);
 
@@ -141,17 +141,17 @@ public class CalculatorGUIVerbose extends Activity {
             intent = new Intent(getApplicationContext(),
                                 CalculatorGUISuccinct.class);
             break;
-            /* TBD 
-               case R.id.Verbose:
-               Toast.makeText(getApplicationContext(),
-               "Switching to verbose mode",
-               Toast.LENGTH_SHORT).show();
-               // Sets an intent for switching between the verbose
-               // and succinct activities.
-               intent = new Intent(getApplicationContext(),
-               CalculatorGUIVerbose.class);
-               break;
+       case R.id.Verbose:
+           Toast.makeText(getApplicationContext(),
+        		   		  "Switching to verbose mode",
+    		   			  Toast.LENGTH_SHORT).show();
+           /** 
+            * Sets an intent for switching between the verbose
+            * and succinct activities.
             */
+           intent = new Intent(getApplicationContext(),
+        		   			   CalculatorGUIVerbose.class);
+           break;
         }
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -176,18 +176,15 @@ public class CalculatorGUIVerbose extends Activity {
     /** Clears the EditText or input view. */
     public void clearButtonClicked(View view) {
         unCheckAll();
-        textview.setText("");	
+        enableAllRadioGroups(true);
+        enableCheckbox(true);
+        textview.setText("");
         edittext.setText("");
     }
 		
     /** Inputs a Character into the EditText. */
     public void characterButtonClicked(View view) {
         edittext.setText(edittext.getText().toString() +((Button)view).getText());
-    }
-		
-    /** Clears the EditText.*/
-    public void clrButtonClicked(View view) {
-        edittext.setText("");
     }
 		
     /** 
@@ -205,12 +202,10 @@ public class CalculatorGUIVerbose extends Activity {
 		
     /** Back button removes character from input field. */
     public void backButtonClicked(View view) {
-    	if(!edittext.getText().toString().equals("")) {
-            String textMinusLastChar = 
-                edittext.getText().toString().substring
-                (0, 
-                 edittext.getText().length() - 1);
-
+    	String text = edittext.getText().toString();
+    	
+    	if(!text.equals("")) {
+            String textMinusLastChar = text.substring(0, text.length() - 1);
             edittext.setText(textMinusLastChar);
         }
     }
@@ -220,7 +215,17 @@ public class CalculatorGUIVerbose extends Activity {
      * the group.
      */
     public void formatRadioButtonClick(View view) {
-        disableOthers(rg1);
+        /** A short toast appears on the screen. */
+        Toast.makeText(this,
+                       "Format " + textOfSelectedRadioButton(rg1),
+                       Toast.LENGTH_SHORT).show();
+
+    	/** Disable other GUI Fields */
+        enableOtherRadioGroups(rg1, false);
+    	enableCheckbox(false);
+    	
+        /** Process the user input expression. */
+        InputDispatcher.instance().dispatchOneInput();
     }
 		
     /** 
@@ -228,7 +233,17 @@ public class CalculatorGUIVerbose extends Activity {
      * the group.
      */
     public void printRadioButtonClick(View view) {
-        disableOthers(rg2);
+        /** A short toast appears on the screen. */
+        Toast.makeText(this,
+                       "Print " + textOfSelectedRadioButton(rg2),
+                       Toast.LENGTH_SHORT).show();
+    	
+    	/** Disable other GUI Fields */
+        enableOtherRadioGroups(rg2, false);
+    	enableCheckbox(false);
+    	
+        /** Process the user input expression. */
+        InputDispatcher.instance().dispatchOneInput();
     }
 		
     /** 
@@ -236,31 +251,63 @@ public class CalculatorGUIVerbose extends Activity {
      * the group.
      */
     public void evalRadioButtonClick(View view) {
-        disableOthers(rg3);
+        /** A short toast appears on the screen. */
+        Toast.makeText(this,
+                       "Eval " + textOfSelectedRadioButton(rg3),
+                       Toast.LENGTH_SHORT).show();
+
+    	/** Disable other GUI Fields */
+        enableOtherRadioGroups(rg3, false);
+    	enableCheckbox(false);
+    	
+        /** Process the user input expression. */
+        InputDispatcher.instance().dispatchOneInput();
     }
 		
     /** Set action of the checkbox to disable others not in the group. */
     public void setCheckBoxClick(View view) {
-        disableOthers(null);
+    	/** Disable all Radio Groups */
+    	enableAllRadioGroups(false);
     }
 		
-    /** Disables every other radio group. */
-    public void disableOthers(RadioGroup rg) {
-        if (!rg1.equals(rg)) 
-            for (int i = 0; i < rg1.getChildCount(); i++)
-                ((RadioButton) (rg1.getChildAt(i))).setChecked(false);
-        if (!rg2.equals(rg)) 
-            for (int i = 0; i < rg2.getChildCount(); i++)
-                ((RadioButton) (rg2.getChildAt(i))).setChecked(false);
-        if (!rg3.equals(rg)) 
-            for (int i = 0; i < rg3.getChildCount(); i++)
-                ((RadioButton) (rg3.getChildAt(i))).setChecked(false);
-        if (rg!=null) {
-            CheckBox cb = (CheckBox) findViewById(R.id.cb);
-            cb.setChecked(false);
-        }
+    /** Enables/Disables every other radio group besides the given one */
+    private void enableOtherRadioGroups(RadioGroup rg, boolean enable) {
+    	if (!rg1.equals(rg))
+    		enableRadioGroup(rg1, enable);
+    	
+    	if (!rg2.equals(rg))
+    		enableRadioGroup(rg2, enable);
+    	
+    	if (!rg3.equals(rg))
+    		enableRadioGroup(rg3, enable);
     }
-		
+    
+    /** Enables/Disables all radio buttons of a radio group */
+    private void enableRadioGroup(RadioGroup rg, boolean enable) {
+    	for (int i = 0; i < rg.getChildCount(); i++)
+    		rg.getChildAt(i).setEnabled(enable);
+    }
+
+    /** Enables/Disables all radio groups */
+    private void enableAllRadioGroups(boolean enable) {
+		enableRadioGroup(rg1, enable);
+		enableRadioGroup(rg2, enable);
+		enableRadioGroup(rg3, enable);
+    }
+    
+    /** Enables/Disables the Check Box */
+    private void enableCheckbox(boolean enable) {
+    	CheckBox cb = (CheckBox) findViewById(R.id.cb);
+    	cb.setEnabled(enable);
+    }
+    
+    /** Returns the text of the selected radio button in a given radio group */
+    private String textOfSelectedRadioButton (RadioGroup rg) {
+    	int selectedId = rg.getCheckedRadioButtonId();
+    	RadioButton selected = (RadioButton) findViewById (selectedId);
+    	return selected.getText().toString();
+    }
+    
     /** Enables every button (debugging).*/
     private void enableAll() {
         for(int i = 0; i < rg3.getChildCount(); i++) {
@@ -289,17 +336,21 @@ public class CalculatorGUIVerbose extends Activity {
 		
     /** Resets the GUI. */
     public void unCheckAll() {
-        disableOthers(null);	
-        CheckBox cb = (CheckBox)findViewById(R.id.cb);
+    	checkRadioGroup(rg1, false);
+    	checkRadioGroup(rg2, false);
+    	checkRadioGroup(rg3, false);
+        CheckBox cb = (CheckBox) findViewById(R.id.cb);
         cb.setChecked(false);
     }
-		
+	
+    /** Checks/Unckecks the radio buttons of a radio group */
+    private void checkRadioGroup(RadioGroup rg, boolean check) {
+    	for(int i = 0; i < rg.getChildCount(); i++)
+    		((RadioButton) (rg.getChildAt(i))).setChecked(check);
+    }
+    
     /** Returns true if GUI is verbose. */
     public boolean returnVerbose() {
         return Options.instance().verbose();
     }
 }	
-		
-		
-			
-

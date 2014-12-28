@@ -14,31 +14,31 @@ public class PrintVisitor implements Visitor {
 
     /** Visits a @a LeafNode and prints it contents. */
     public void visit(LeafNode node) {
-        Platform.instance().outputString(node.item() + " " );
+        Platform.instance().addString(node.item() + " ");
     }
 
     /** Visit a @a CompositeNegateNode and prints its contents. */
     public void visit(CompositeNegateNode node) {
-        Platform.instance().outputString("-");
+        Platform.instance().addString("-");
     }
 
     /** Visit a @a CompositeAddNode and prints its contents. */
     public void visit(CompositeAddNode node) {
-        Platform.instance().outputString("+ ");
+        Platform.instance().addString("+ ");
     }
 
     /** Visit a @a CompositeSubtractNode and prints its contents. */
     public void visit(CompositeSubtractNode node) {
-        Platform.instance().outputString("- ");
+        Platform.instance().addString("- ");
     }
 
     /** Visit a @a CompositeDivideNode and prints its contents. */
     public void visit(CompositeDivideNode node) {
-        Platform.instance().outputString("/ ");
+        Platform.instance().addString("/ ");
     }
 
     /** Visit a @a CompositeMultiplyNode and print its contents. */
     public void visit(CompositeMultiplyNode node) {
-        Platform.instance().outputString("* ");
+        Platform.instance().addString("* ");
     }
 }

@@ -69,25 +69,21 @@ public class MainActivity extends Activity  {
                              }
                          });
 
-        /* TBD
-        // Formats the verbose button. 
+        /** Formats the verbose button. */ 
         dialog.setButton(AlertDialog.BUTTON_POSITIVE,
-        "Verbose",
-        new DialogInterface.OnClickListener() 
-        {
-        public void onClick(DialogInterface dialog,
-        int which) 
-        {
-        // Sets an intent for launching the
-        // verbose activity.
-        Intent intent = 
-        new Intent(getApplicationContext(),
-        CalculatorGUIVerbose.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        }
-        });
-        */
+					     "Verbose",
+					     new DialogInterface.OnClickListener() {
+					         public void onClick(DialogInterface dialog, int which) {
+						         /**
+						          *  Sets an intent for launching the 
+						          *  verbose activity.
+						          */
+						         Intent intent = new Intent(getApplicationContext(),
+						         CalculatorGUIVerbose.class);
+						         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+						         startActivity(intent);
+						     }
+					     });
 	
         /** Displays dialog to screen. */
         dialog.show();

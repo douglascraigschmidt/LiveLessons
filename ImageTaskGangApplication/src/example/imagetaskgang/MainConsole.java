@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
  * @class MainConsole
  *
  * @brief This class is the main entry point for a Java console
- *        version of the PingPong application.
+ *        version of the ImageTaskGang application.
  */
 public class MainConsole {
     /**

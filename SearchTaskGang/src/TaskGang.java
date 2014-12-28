@@ -110,7 +110,7 @@ public abstract class TaskGang<E> implements Runnable {
      * conjunction with a one-shop or cyclic barrier to wait for all
      * the other tasks to complete their current cycle.  It's passed
      * the index of the work that's done.  Returns true if the wait
-     * was successfuly or throws the IndexOutOfBoundsException if the
+     * was successfully or throws the IndexOutOfBoundsException if the
      * item has been removed.
      */
     protected void taskDone(int index) throws IndexOutOfBoundsException {

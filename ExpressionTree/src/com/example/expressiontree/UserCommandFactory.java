@@ -131,7 +131,7 @@ public class UserCommandFactory {
      * Create a new @a UserCommand object based on the caller's
      * designated @a inputString.
      */
-    public UserCommand makeUserCommand(String inputString) {	
+    public UserCommand makeUserCommand(String inputString) {
         String parameters = "";
         String commandRequest = inputString;
 

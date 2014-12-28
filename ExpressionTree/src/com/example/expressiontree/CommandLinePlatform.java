@@ -88,7 +88,7 @@ public class CommandLinePlatform extends Platform {
 
     /** 
      * Same as outputChar in commandLine platform, 
-     * but serves seperate purpose for android implementation. 
+     * but serves separate purpose for android implementation. 
      */
     public String addString(String output) {
         this.output.print(output);
