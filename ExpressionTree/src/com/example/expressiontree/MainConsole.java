@@ -1,12 +1,12 @@
 package com.example.expressiontree;
 
 /**
- * @class Main
+ * @class MainConsole
  *
  * @brief This class is the main entry point for the command-line
  *        version of the expression tree processing app.
  */
-public class Main {
+public class MainConsole {
     /**
      * The Java virtual machine requires the instantiation of a main
      * method to run the command line version of the encapsulated

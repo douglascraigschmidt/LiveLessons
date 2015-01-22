@@ -23,7 +23,7 @@ public abstract class InputHandler {
     /** Classifies the Handler as verbose. */
     static boolean verboseField;
 	
-    /** An activity object for the verbose mode event handler. */
+    /** An Activity object for the verbose mode event handler. */
     public static Object activityField;
 	
     /** The context where the expression tree state resides. */

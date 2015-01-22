@@ -17,9 +17,9 @@ public class SimpleAtomicLongRWL {
     /**
      * The ReentrantReadWriteLock used to serialize access to mValue.
      */
-    private ReentrantReadWriteLock mRWLock = new ReentrantReadWriteLock();
-    private Lock mReadLock = mRWLock.readLock();
-    private Lock mWriteLock = mRWLock.writeLock();
+    private final ReentrantReadWriteLock mRWLock = new ReentrantReadWriteLock();
+    private final Lock mReadLock = mRWLock.readLock();
+    private final Lock mWriteLock = mRWLock.writeLock();
 
     /**
      * Creates a new SimpleAtomicLong with the given initial value.
