@@ -153,8 +153,8 @@ public class ThreadJoinTest {
      * Print debugging output if @code diagnosticsEnabled is true.
      */
     static void printDebugging(String output) {
-        if (diagnosticsEnabled)
-            System.out.println(output);
+        if (diagnosticsEnabled) 
+            System.out.println(output);                
     }
 
     /**

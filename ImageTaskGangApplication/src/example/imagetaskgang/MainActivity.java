@@ -8,6 +8,8 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -261,14 +263,24 @@ public class MainActivity extends Activity {
      * Delete the previously downloaded pictures and directories.
      */
     public void clearFilterDirectories(View view) {
-    	setButtonsEnabled(false);
-        for (Filter filter : mFilters) {
-            deleteSubFolders
-                (new File(PlatformStrategy.instance().getDirectoryPath(), 
-                          filter.getName()).getAbsolutePath());
-        }
-        setButtonsEnabled(true);
-        showToast("Previously downloaded files deleted");
+        new AsyncTask<Filter[], Void, Void>() {
+            protected void onPreExecute() {
+                setButtonsEnabled(false);
+            }
+
+            protected Void doInBackground(Filter[] ...filters) {
+                for (Filter filter : filters[0]) 
+                    deleteSubFolders
+                        (new File(PlatformStrategy.instance().getDirectoryPath(), 
+                                  filter.getName()).getAbsolutePath());
+                return null;
+            }
+
+            protected void onPostExecute(Void v) {
+                setButtonsEnabled(true);
+                showToast("Previously downloaded files deleted");
+            }
+        }.execute(mFilters);
     }
 	
     /**

@@ -46,7 +46,6 @@ public class OneShotExecutorServiceFuture
         // results.
         for (Future<SearchResults> resultFuture : resultFutures) {
             try {
-
                 // The get() call may block if the results aren't
                 // ready yet.
                 resultFuture.get().print();
