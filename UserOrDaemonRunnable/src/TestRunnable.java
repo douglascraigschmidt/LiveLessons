@@ -31,7 +31,7 @@ public class TestRunnable {
         GCDRunnable runnableCommand =
             new GCDRunnable(daemonThread ? "daemon" : "user");
 
-        // Create a new Thread that's will execute the runnableCommand
+        // Create a new Thread that will execute the runnableCommand
         // concurrently.
         Thread thr = new Thread(runnableCommand);
 
