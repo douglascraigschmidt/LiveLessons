@@ -1,4 +1,4 @@
-package example;
+package imagestream;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -35,26 +35,26 @@ public class ImageStreamSequential extends ImageStream {
 
         // Sequentially process each filter in the mFilters List.
         getInput().stream()
-	    	// transform URL -> ImageEntity
-	    	.map(url -> makeImageEntity(url))
-	    	// Check to see if the download was successful
-	    	.peek(image -> 
-	    		PlatformStrategy.instance().errorLog
-	                         ("ImageStreamParallel",
-	                          "Operations"
-	                          + (image.getSucceeded() == true 
-	                             ? " succeeded" 
-	                             : " failed")
-	                          + " on file " 
-	                          + image.getSourceURL()))
-	        // collect each image and apply each filter in parallel
-	    	.forEach(image -> {
-	    		mFilters.stream()
-	    			// decorate each filter to write the images to files
-	    			.map(filter -> new OutputFilterDecorator(filter))
-	    			// filter the image
-	    			.forEach(decoratedFilter -> 
-	    				decoratedFilter.filter(image));
+            // transform URL -> ImageEntity
+            .map(url -> makeImageEntity(url))
+            // Check to see if the download was successful.
+            .peek(image -> 
+                  PlatformStrategy.instance().errorLog
+                  ("ImageStreamParallel",
+                   "Operations"
+                   + (image.getSucceeded() == true 
+                      ? " succeeded" 
+                      : " failed")
+                   + " on file " 
+                   + image.getSourceURL()))
+            // collect each image and apply each filter in parallel
+            .forEach(image -> {
+                    mFilters.stream()
+                        // decorate each filter to write the images to files
+                        .map(filter -> new OutputFilterDecorator(filter))
+                        // filter the image
+                        .forEach(decoratedFilter -> 
+                                 decoratedFilter.filter(image));
 	    	});
 
         // Indicate all computations in this iteration are done.

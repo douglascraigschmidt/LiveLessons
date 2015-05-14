@@ -1,4 +1,4 @@
-package example;
+package imagestream;
 
 import java.net.URL;
 import java.util.Iterator;

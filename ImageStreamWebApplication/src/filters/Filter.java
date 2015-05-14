@@ -1,6 +1,6 @@
 package filters;
 
-import example.ImageEntity;
+import imagestream.ImageEntity;
 
 /**
  * @class Filter

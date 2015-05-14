@@ -1,4 +1,4 @@
-package example;
+package imagestream;
 
 import java.awt.Color;
 import java.io.BufferedReader;

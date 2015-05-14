@@ -1,7 +1,7 @@
 package filters;
 
-import example.ImageEntity;
-import example.PlatformStrategy;
+import imagestream.ImageEntity;
+import imagestream.PlatformStrategy;
 
 /**
  * @class Filter

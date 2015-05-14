@@ -1,4 +1,4 @@
-package example;
+package imagestream;
 
 import java.io.File;
 import java.io.FileOutputStream;

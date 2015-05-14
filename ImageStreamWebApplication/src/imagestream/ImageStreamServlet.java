@@ -1,4 +1,4 @@
-package example;
+package imagestream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,7 @@ import filters.GrayScaleFilter;
 import filters.NullFilter;
 
 /**
- * Servlet implementation class ImageStreamServlet
+ * Servlet implementation class ImageStreamServlet.
  */
 @WebServlet("/ImageStreamServlet")
 public class ImageStreamServlet extends HttpServlet {
