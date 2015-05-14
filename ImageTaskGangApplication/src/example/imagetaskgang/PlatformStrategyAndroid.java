@@ -5,9 +5,9 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -43,15 +43,15 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
         mOuterClass = new WeakReference<MainActivity>
             ((MainActivity) output);
     }
-
+    
     /**
-     * Gets an iterator over a list of lists of URLs from which
+     * Gets the list of lists of URLs from which
      * we want to download images.
      */
-    public Iterator<List<URL>> getUrlIterator(InputSource source) {
+    public List<List<URL>> getUrlLists(InputSource source) {
     	List<List<URL>> variableNumberOfInputURLs = 
-            new ArrayList<List<URL>>();
-    	
+                new ArrayList<List<URL>>();
+        	
     	try {
             switch (source) {
             // If the user selects the defaults source, return
@@ -102,8 +102,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
             return null;
     	}
     	
-    	// Return an iterator over the list of URL lists
-        return variableNumberOfInputURLs.iterator();
+    	return variableNumberOfInputURLs;
     }
 
     /**

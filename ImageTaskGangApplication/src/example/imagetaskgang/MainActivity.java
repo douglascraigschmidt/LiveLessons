@@ -1,16 +1,30 @@
 package example.imagetaskgang;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.filters.GrayScaleFilter;
+import example.imagetaskgang.filters.NullFilter;
+import example.imagetaskgang.servermodel.FilterData;
+import example.imagetaskgang.servermodel.ImageData;
+import example.imagetaskgang.servermodel.ImageStreamService;
+import example.imagetaskgang.servermodel.ServerResponse;
+
+import retrofit.RestAdapter;
+import retrofit.client.Request;
+import retrofit.client.UrlConnectionClient;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -33,9 +47,19 @@ public class MainActivity extends Activity {
     protected LinearLayout mListUrlGroups;
     
     /**
-     * The button to run the ImageTaskGang using the user input.
+     * The button to run the ImageTaskGang locally using the user input.
      */
-    private Button mRunButton;
+    private Button mRunLocalButton;
+    
+    /**
+     * The button to run the ImageTaskGang on the server using the user input.
+     */
+    private Button mRunServerButton;
+    
+    /**
+     * The button to clear the lists of user input.
+     */
+    private Button mClearListsButton;
 	
     /**
      * Array of Filters to apply to the downloaded images.
@@ -44,6 +68,19 @@ public class MainActivity extends Activity {
         new NullFilter(),
         new GrayScaleFilter()
     };
+    
+    /**
+     * An enumeration representing where the image processing
+     * will take place, locally to the phone or on the server
+     */
+    public static enum ProcessingContext {
+    	LOCAL, SERVER
+    }
+	
+    /**
+     * The retrofit service that handles requests
+     */
+    private ImageStreamService mImageService;
 	
     /**
      * Define a completion hook that's called back to display the
@@ -59,21 +96,21 @@ public class MainActivity extends Activity {
                 // so that the ResultsActivity is launched in that
                 // context.
                 MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setButtonsEnabled(true);
-                            displayImages();
-                        }
-                    });
+                    @Override
+                    public void run() {
+                        goToResultActivity();
+                    }
+                });
             }
         };
-
+        
+    	
     /**
      * Hook method called when the Activity is first launched to
      * initialize the content view and various data members.
      */
     @Override
-        protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Set the main content view.
@@ -85,10 +122,13 @@ public class MainActivity extends Activity {
         mListUrlGroups =
             (LinearLayout) findViewById(R.id.listOfURLLists);
         
-        // Cache a reference to the button to run the ImageTaskGang on
-        // a list of URLs entered by the user, which becomes visible
-        // when a valid input is given.
-        mRunButton = (Button) findViewById(R.id.runWithUserURLs);
+        // Cache references to the buttons which become visible
+        // when a valid USER input is given.
+        mRunLocalButton = (Button) findViewById(R.id.runWithUserURLsLocal);
+        
+        mRunServerButton = (Button) findViewById(R.id.runWithUserURLsServer);
+        
+        mClearListsButton = (Button) findViewById(R.id.clearLists);
 
         // Initialize the Platform singleton with the appropriate
         // Platform strategy, which in this case will be the
@@ -99,19 +139,91 @@ public class MainActivity extends Activity {
 
         // Initialize the Options singleton.
         Options.instance().parseArgs(null);
+        
+        // Configure the restAdapter to create the ImageStreamService
+        RestAdapter restAdapter =
+        		new RestAdapter.Builder()
+					.setClient(new ExtendedTimeoutUrlConnectionClient())
+					.setEndpoint("10.0.0.2/ImageStreamWeb/")
+					.build();
+        
+        mImageService = restAdapter.create(ImageStreamService.class);
     }
     
     /**
-     * Run the gang using a default set of URL lists hard-coded into
-     * the application, rather than prompting the user for the input
-     * URLs.
+     * Run the gang locally using a default set of URL lists
      */
-    public void runWithDefaultURLs(View view) {
-        new Thread(new ImageTaskGang(mFilters,
-                                     PlatformStrategy.instance().getUrlIterator
-                                     (PlatformStrategy.InputSource.DEFAULT),
-                                     mCompletionHook)).start();
-        setButtonsEnabled(false);
+    public void runWithDefaultURLsLocal(View view) {
+    	runURLs(view, 
+    		    PlatformStrategy.InputSource.DEFAULT,
+    			ProcessingContext.LOCAL);
+    }
+    
+    /**
+     * Run the gang on the server using a default set of URL lists
+     */
+    public void runWithDefaultURLsServer(View view) {
+    	runURLs(view, 
+    		    PlatformStrategy.InputSource.DEFAULT,
+    			ProcessingContext.SERVER);
+    }
+    
+    /**
+     * Run the gang locally by reading the input lists of URLs.
+     */
+    public void runWithUserURLsLocal(View view) {
+    	runURLs(view, 
+    		    PlatformStrategy.InputSource.USER,
+    			ProcessingContext.LOCAL);
+    }
+    
+    /**
+     * Run the gang on the server by reading the input lists of URLs.
+     */
+    public void runWithUserURLsServer(View view) {
+    	runURLs(view, 
+    		    PlatformStrategy.InputSource.USER,
+    			ProcessingContext.SERVER);
+    }
+    
+    /**
+     * Helper method to run the appropriate configuration of
+     * inputs and contexts
+     */
+    private void runURLs(View view, 
+    		PlatformStrategy.InputSource inputSource,
+    		ProcessingContext processingContext) {
+    	
+    	// Ensure the desired button was pressed (it must be visible)
+    	if (view.getVisibility() != View.VISIBLE) {
+    		return; // no - op
+    	}
+    	
+        Iterator<List<URL>> iterator =
+            PlatformStrategy.instance().getUrlIterator(inputSource);
+    	
+        // Check to see if the user entered any lists.
+        if (iterator != null) {
+        	if(iterator.hasNext() 
+        	   && (inputSource == PlatformStrategy.InputSource.USER ?
+        			   !isEmpty() : true)) {
+                    switch(processingContext) {
+                    default:
+                    case LOCAL:
+                        new Thread(new ImageTaskGang(mFilters,
+                                                     iterator,
+                                                     mCompletionHook)).start();
+                        break;
+                    case SERVER:
+                        new InvokeServerTask().execute(inputSource);
+                        break;
+                    }
+                    setButtonsEnabled(false);
+	        }
+	        else {
+	            showToast("No list of URLs entered");
+	        }
+        }
     }
 	
     /**
@@ -136,8 +248,18 @@ public class MainActivity extends Activity {
 
         resultsIntent.putExtra(FILTER_EXTRA, 
                                filterNames);
+        
         // Start the ResultsActivity.
         startActivity(resultsIntent);
+    }
+    
+    /**
+     * Helper method to properly transition to the
+     * results activity
+     */
+    private void goToResultActivity() {
+    	setButtonsEnabled(true);
+        displayImages();
     }
 
     /**
@@ -172,7 +294,7 @@ public class MainActivity extends Activity {
      * the context exists and will not throw a NullPointerException.
      */
     @Override
-        protected void onStart() {
+    protected void onStart() {
     	super.onStart();
         mSuggestions = 
             new ArrayAdapter<String>(this,
@@ -186,7 +308,7 @@ public class MainActivity extends Activity {
      * iteration cycles by the ImageTaskGang).
      */
     @SuppressLint("InflateParams")
-        public void addURLs(View view) {
+    public void addURLs(View view) {
     	
     	// Create the new list from R.layout.list_item
         AutoCompleteTextView newList = 
@@ -202,30 +324,10 @@ public class MainActivity extends Activity {
         mListUrlGroups.addView(newList);
         mListUrlGroups.invalidate();
         
-        // Set the "Run" button to visible
-        mRunButton.setVisibility(View.VISIBLE);
-    }
-	
-    /**
-     * Run the gang by reading the input lists of URLs.
-     */
-    public void runWithUserURLs(View view) {
-    	if (mRunButton.getVisibility() == View.VISIBLE) {
-            Iterator<List<URL>> iterator =
-                PlatformStrategy.instance().getUrlIterator
-                (PlatformStrategy.InputSource.USER);
-	    	
-            // Check to see if the user entered any lists.
-            if (iterator != null) {
-                if (iterator.hasNext() && !isEmpty()) {
-                    new Thread(new ImageTaskGang(mFilters,
-                                                 iterator,
-                                                 mCompletionHook)).start();
-                    setButtonsEnabled(false);
-                } else 
-                    showToast("No list of URLs entered");
-            }
-    	}
+        // Set the appropriate buttons to visible
+        mRunLocalButton.setVisibility(View.VISIBLE);
+        mRunServerButton.setVisibility(View.VISIBLE);
+        mClearListsButton.setVisibility(View.VISIBLE);
     }
     
     /**
@@ -252,35 +354,49 @@ public class MainActivity extends Activity {
      */
     private void setButtonsEnabled(boolean enabled) {
     	LinearLayout buttonLayout = 
-            (LinearLayout) findViewById(R.id.buttonLayout);
+            (LinearLayout) findViewById(R.id.defaultButtonLayout);
     	int buttonCount = buttonLayout.getChildCount();
     	for (int i = 0; i < buttonCount; ++i) {
             buttonLayout.getChildAt(i).setEnabled(enabled);
     	}
+    	
+    	buttonLayout = 
+            (LinearLayout) findViewById(R.id.userButtonLayout);
+    	buttonCount = buttonLayout.getChildCount();
+    	for (int i = 0; i < buttonCount; ++i) {
+            buttonLayout.getChildAt(i).setEnabled(enabled);
+    	}
+    	
+    	buttonLayout =
+            (LinearLayout) findViewById(R.id.buttonLayoutBottom);
+    	buttonCount = buttonLayout.getChildCount();
+    	for (int i = 0; i < buttonCount; ++i) {
+            buttonLayout.getChildAt(i).setEnabled(enabled);
+    	}
+    }
+    
+    public void clearLists(View view) {
+    	mListUrlGroups.removeAllViews();
+    	mListUrlGroups.invalidate();
+    	
+    	// Set the appropriate buttons to visible
+        mRunLocalButton.setVisibility(View.INVISIBLE);
+        mRunServerButton.setVisibility(View.INVISIBLE);
+        mClearListsButton.setVisibility(View.INVISIBLE);
     }
 	
     /**
      * Delete the previously downloaded pictures and directories.
      */
     public void clearFilterDirectories(View view) {
-        new AsyncTask<Filter[], Void, Void>() {
-            protected void onPreExecute() {
-                setButtonsEnabled(false);
-            }
-
-            protected Void doInBackground(Filter[] ...filters) {
-                for (Filter filter : filters[0]) 
-                    deleteSubFolders
-                        (new File(PlatformStrategy.instance().getDirectoryPath(), 
-                                  filter.getName()).getAbsolutePath());
-                return null;
-            }
-
-            protected void onPostExecute(Void v) {
-                setButtonsEnabled(true);
-                showToast("Previously downloaded files deleted");
-            }
-        }.execute(mFilters);
+    	setButtonsEnabled(false);
+        for (Filter filter : mFilters) {
+            deleteSubFolders
+                (new File(PlatformStrategy.instance().getDirectoryPath(), 
+                          filter.getName()).getAbsolutePath());
+        }
+        setButtonsEnabled(true);
+        showToast("Previously downloaded files deleted");
     }
 	
     /**
@@ -313,4 +429,73 @@ public class MainActivity extends Activity {
                        msg,
                        Toast.LENGTH_SHORT).show();
     }
+    
+    
+    /**
+     * An AsyncTask that runs the ImageStream processing
+     * on the server using retrofit and writes the results to files.
+     */
+    private class InvokeServerTask 
+    		extends AsyncTask<PlatformStrategy.InputSource, Void, Boolean> {
+  
+    	@Override
+        protected Boolean doInBackground(
+        		PlatformStrategy.InputSource... inputSources) {
+        	// Make the request, invoking the server to run the ImageStream
+        	// processing. 'response' will hold the POJOs that represent
+        	// the results of the processing
+            ServerResponse response = mImageService.execute(
+            		PlatformStrategy.instance().getUrlLists(inputSources[0]));
+            
+            // Iterate over the results, writing them to appropriate files.
+            // This is analogous to the OutputFilterDecorator functionality.
+            boolean success = true;
+            for(FilterData filterData : response.filterList) {
+            	for(ImageData imageData : filterData.imageData) {
+            		if(!PlatformStrategy.instance()
+	    					.storeExternalImage(
+	    							filterData.filterName,
+								 	imageData.imageName,
+								 	PlatformStrategy.instance()
+								 		.makeImage(Base64.decode(
+								 				   	imageData.image,
+	    											Base64.DEFAULT)))) {
+            			success = false;
+            		}
+            	}
+            }
+            
+            return success;
+        }
+		
+    	// If the request and file writing is successful, display
+    	// the results.
+        @Override
+        protected void onPostExecute(Boolean success) {
+        	if(success)
+        		mCompletionHook.run();
+        	else
+        		showToast("Server failed!");
+        }
+    }
+    
+    /**
+     *  Tailors the URLConnectionClient to remain open while the server
+     *  completes the ImageStreamProcessing
+     */
+    private class ExtendedTimeoutUrlConnectionClient 
+    									extends UrlConnectionClient {
+    	
+    	private final int WAIT_TIME = 30 * 1000;
+    	
+    	@Override 
+    	protected HttpURLConnection openConnection(Request request) 
+    			throws IOException {
+    		HttpURLConnection connection = super.openConnection(request);
+		    connection.setConnectTimeout(WAIT_TIME);
+		    connection.setReadTimeout(WAIT_TIME);
+		    return connection;
+    	}
+    }
+    
 }

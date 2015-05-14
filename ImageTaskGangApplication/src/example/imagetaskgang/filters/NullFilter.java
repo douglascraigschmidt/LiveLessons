@@ -1,4 +1,6 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
+
+import example.imagetaskgang.ImageEntity;
 
 /**
  * @class NullFilter

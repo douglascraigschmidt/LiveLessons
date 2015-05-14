@@ -2,6 +2,8 @@ package example.imagetaskgang;
 
 import java.net.URL;
 
+import example.imagetaskgang.filters.Filter;
+
 /**
  * @class ImageEntity
  *

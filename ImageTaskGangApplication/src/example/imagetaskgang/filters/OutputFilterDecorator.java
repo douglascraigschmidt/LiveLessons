@@ -1,8 +1,7 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
 
-import android.annotation.SuppressLint;
-import java.io.File;
-import java.io.FileOutputStream;
+import example.imagetaskgang.ImageEntity;
+import example.imagetaskgang.PlatformStrategy;
 
 /**
  * @class OutputFilterDecorator
@@ -32,35 +31,16 @@ public class OutputFilterDecorator extends FilterDecorator {
      * applyFilter() method.  decorate() stores the filtered
      * ImageEntity in a file.
      */
-    @SuppressLint("NewApi")
     @Override
     protected ImageEntity decorate(ImageEntity imageEntity) {
-        // Make a directory for the filtered image if it does not
-        // exist already.
-        File externalFile = 
-            new File(PlatformStrategy.instance().getDirectoryPath(),
-                     this.getName());
-        externalFile.mkdirs();
-        
         // Store the filtered image as its filename (which is derived
         // from its URL), within the appropriate filter directory to
-        // organize the filtered results.
-        File newImage = 
-            new File(externalFile, 
-                     imageEntity.getFileName());
-        
-        // Write the image to the file in the appropriate directory.
-        // The close() method of the outputFile is automatically
-        // called via the Java "try-with-resources" feature.
-        try (FileOutputStream outputFile =
-             new FileOutputStream(newImage)) {
-                PlatformStrategy.instance().storeImage
-                    (imageEntity.getImage(),
-                     outputFile);
-            } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        // organize the filtered results and write the image to 
+    	// the file in the appropriate directory.
+        PlatformStrategy.instance()
+        	.storeExternalImage(this.getName(),
+        						imageEntity.getFileName(), 
+        						imageEntity.getImage());
 
         return imageEntity;
     }

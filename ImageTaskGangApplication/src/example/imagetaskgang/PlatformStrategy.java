@@ -1,5 +1,6 @@
 package example.imagetaskgang;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+
+import android.annotation.SuppressLint;
 
 /** 
  * @class PlatformStrategy
@@ -39,16 +43,55 @@ public abstract class PlatformStrategy {
     public static PlatformStrategy instance(PlatformStrategy platform) {
         return sUniqueInstance = platform;
     }
+    
+    /**
+     * Return one or more input URL Lists.
+     */
+    public abstract List<List<URL>> getUrlLists(InputSource source);
 
     /**
      * Return an Iterator over one or more input URL Lists.
      */
-    public abstract Iterator<List<URL>> getUrlIterator(InputSource source);
+    public Iterator<List<URL>> getUrlIterator(InputSource source) {
+    	List<List<URL>> urlLists =
+    			PlatformStrategy.instance().getUrlLists(source);
+    	return (urlLists != null && urlLists.size() > 0) ? 
+    			urlLists.iterator() : null;
+    }
     
     /**
      * Return the path for the directory where images are stored.
      */
     public abstract String getDirectoryPath();
+    
+    /**
+     * A method to make the directories and get a file reference
+     * on the current platform, returning the success or failure
+     */
+    @SuppressLint("NewApi")
+    public boolean storeExternalImage(String pathName,
+    			String fileName, Image image) {
+    	// Ensure that the path exists
+		File externalFile = 
+	            new File(PlatformStrategy.instance().getDirectoryPath(),
+	                     pathName);
+        externalFile.mkdirs();
+        
+        // Get a reference to the file in which the image will be stored
+        File imageFile = new File(externalFile, fileName);
+        
+        // Store the image using try-with-resources
+        try (FileOutputStream outputFile =
+                new FileOutputStream(imageFile)) {
+           PlatformStrategy.instance().storeImage(image, outputFile);
+        }
+        catch (Exception e) {
+	       e.printStackTrace();
+	       return false;
+        }
+        
+        return true;
+	}
 
     /**
      * Factory method that creates an @a Image from a byte array.
@@ -87,6 +130,7 @@ public abstract class PlatformStrategy {
         USER,    // Input from a user-defined source, such as the
                  // Android UI or console command-line.
         FILE,    // Input from a delimited file.
+        NETWORK, // Input from a network call
         ERROR    // Returned if source is unrecognized.
     }
     
@@ -100,6 +144,8 @@ public abstract class PlatformStrategy {
             return InputSource.USER;
         else if (inputSource.equalsIgnoreCase("FILE")) 
             return InputSource.FILE;
+        else if (inputSource.equalsIgnoreCase("NETWORK"))
+        	return InputSource.NETWORK;
         else 
             return InputSource.ERROR;
     }

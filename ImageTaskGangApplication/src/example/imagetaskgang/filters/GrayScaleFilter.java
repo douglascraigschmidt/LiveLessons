@@ -1,4 +1,7 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
+
+import example.imagetaskgang.ImageEntity;
+import example.imagetaskgang.PlatformStrategy;
 
 /**
  * @class Filter
