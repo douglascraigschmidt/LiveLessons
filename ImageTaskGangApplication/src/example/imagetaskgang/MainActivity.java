@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
      */
     public static enum ProcessingContext {
     	LOCAL, SERVER
-    }
+            }
 	
     /**
      * The retrofit service that handles requests
@@ -96,11 +96,11 @@ public class MainActivity extends Activity {
                 // so that the ResultsActivity is launched in that
                 // context.
                 MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        goToResultActivity();
-                    }
-                });
+                        @Override
+                            public void run() {
+                            goToResultActivity();
+                        }
+                    });
             }
         };
         
@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
      * initialize the content view and various data members.
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+        protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Set the main content view.
@@ -142,10 +142,10 @@ public class MainActivity extends Activity {
         
         // Configure the restAdapter to create the ImageStreamService
         RestAdapter restAdapter =
-        		new RestAdapter.Builder()
-					.setClient(new ExtendedTimeoutUrlConnectionClient())
-					.setEndpoint("10.0.0.2/ImageStreamWeb/")
-					.build();
+            new RestAdapter.Builder()
+            .setClient(new ExtendedTimeoutUrlConnectionClient())
+            .setEndpoint("10.0.0.2/ImageStreamWeb/")
+            .build();
         
         mImageService = restAdapter.create(ImageStreamService.class);
     }
@@ -155,8 +155,8 @@ public class MainActivity extends Activity {
      */
     public void runWithDefaultURLsLocal(View view) {
     	runURLs(view, 
-    		    PlatformStrategy.InputSource.DEFAULT,
-    			ProcessingContext.LOCAL);
+                PlatformStrategy.InputSource.DEFAULT,
+                ProcessingContext.LOCAL);
     }
     
     /**
@@ -164,8 +164,8 @@ public class MainActivity extends Activity {
      */
     public void runWithDefaultURLsServer(View view) {
     	runURLs(view, 
-    		    PlatformStrategy.InputSource.DEFAULT,
-    			ProcessingContext.SERVER);
+                PlatformStrategy.InputSource.DEFAULT,
+                ProcessingContext.SERVER);
     }
     
     /**
@@ -173,8 +173,8 @@ public class MainActivity extends Activity {
      */
     public void runWithUserURLsLocal(View view) {
     	runURLs(view, 
-    		    PlatformStrategy.InputSource.USER,
-    			ProcessingContext.LOCAL);
+                PlatformStrategy.InputSource.USER,
+                ProcessingContext.LOCAL);
     }
     
     /**
@@ -182,8 +182,8 @@ public class MainActivity extends Activity {
      */
     public void runWithUserURLsServer(View view) {
     	runURLs(view, 
-    		    PlatformStrategy.InputSource.USER,
-    			ProcessingContext.SERVER);
+                PlatformStrategy.InputSource.USER,
+                ProcessingContext.SERVER);
     }
     
     /**
@@ -191,12 +191,12 @@ public class MainActivity extends Activity {
      * inputs and contexts
      */
     private void runURLs(View view, 
-    		PlatformStrategy.InputSource inputSource,
-    		ProcessingContext processingContext) {
+                         PlatformStrategy.InputSource inputSource,
+                         ProcessingContext processingContext) {
     	
     	// Ensure the desired button was pressed (it must be visible)
     	if (view.getVisibility() != View.VISIBLE) {
-    		return; // no - op
+            return; // no - op
     	}
     	
         Iterator<List<URL>> iterator =
@@ -204,25 +204,25 @@ public class MainActivity extends Activity {
     	
         // Check to see if the user entered any lists.
         if (iterator != null) {
-        	if(iterator.hasNext() 
-        	   && (inputSource == PlatformStrategy.InputSource.USER ?
-        			   !isEmpty() : true)) {
-                    switch(processingContext) {
-                    default:
-                    case LOCAL:
-                        new Thread(new ImageTaskGang(mFilters,
-                                                     iterator,
-                                                     mCompletionHook)).start();
-                        break;
-                    case SERVER:
-                        new InvokeServerTask().execute(inputSource);
-                        break;
-                    }
-                    setButtonsEnabled(false);
-	        }
-	        else {
-	            showToast("No list of URLs entered");
-	        }
+            if(iterator.hasNext() 
+               && (inputSource == PlatformStrategy.InputSource.USER ?
+                   !isEmpty() : true)) {
+                switch(processingContext) {
+                default:
+                case LOCAL:
+                    new Thread(new ImageTaskGang(mFilters,
+                                                 iterator,
+                                                 mCompletionHook)).start();
+                    break;
+                case SERVER:
+                    new InvokeServerTask().execute(inputSource);
+                    break;
+                }
+                setButtonsEnabled(false);
+            }
+            else {
+                showToast("No list of URLs entered");
+            }
         }
     }
 	
@@ -294,7 +294,7 @@ public class MainActivity extends Activity {
      * the context exists and will not throw a NullPointerException.
      */
     @Override
-    protected void onStart() {
+        protected void onStart() {
     	super.onStart();
         mSuggestions = 
             new ArrayAdapter<String>(this,
@@ -308,7 +308,7 @@ public class MainActivity extends Activity {
      * iteration cycles by the ImageTaskGang).
      */
     @SuppressLint("InflateParams")
-    public void addURLs(View view) {
+        public void addURLs(View view) {
     	
     	// Create the new list from R.layout.list_item
         AutoCompleteTextView newList = 
@@ -436,32 +436,32 @@ public class MainActivity extends Activity {
      * on the server using retrofit and writes the results to files.
      */
     private class InvokeServerTask 
-    		extends AsyncTask<PlatformStrategy.InputSource, Void, Boolean> {
+        extends AsyncTask<PlatformStrategy.InputSource, Void, Boolean> {
   
     	@Override
-        protected Boolean doInBackground(
-        		PlatformStrategy.InputSource... inputSources) {
-        	// Make the request, invoking the server to run the ImageStream
-        	// processing. 'response' will hold the POJOs that represent
-        	// the results of the processing
+            protected Boolean doInBackground(
+                                             PlatformStrategy.InputSource... inputSources) {
+            // Make the request, invoking the server to run the ImageStream
+            // processing. 'response' will hold the POJOs that represent
+            // the results of the processing
             ServerResponse response = mImageService.execute(
-            		PlatformStrategy.instance().getUrlLists(inputSources[0]));
+                                                            PlatformStrategy.instance().getUrlLists(inputSources[0]));
             
             // Iterate over the results, writing them to appropriate files.
             // This is analogous to the OutputFilterDecorator functionality.
             boolean success = true;
             for(FilterData filterData : response.filterList) {
             	for(ImageData imageData : filterData.imageData) {
-            		if(!PlatformStrategy.instance()
-	    					.storeExternalImage(
-	    							filterData.filterName,
-								 	imageData.imageName,
-								 	PlatformStrategy.instance()
-								 		.makeImage(Base64.decode(
-								 				   	imageData.image,
-	    											Base64.DEFAULT)))) {
-            			success = false;
-            		}
+                    if(!PlatformStrategy.instance()
+                       .storeExternalImage(
+                                           filterData.filterName,
+                                           imageData.imageName,
+                                           PlatformStrategy.instance()
+                                           .makeImage(Base64.decode(
+                                                                    imageData.image,
+                                                                    Base64.DEFAULT)))) {
+                        success = false;
+                    }
             	}
             }
             
@@ -471,11 +471,11 @@ public class MainActivity extends Activity {
     	// If the request and file writing is successful, display
     	// the results.
         @Override
-        protected void onPostExecute(Boolean success) {
-        	if(success)
-        		mCompletionHook.run();
-        	else
-        		showToast("Server failed!");
+            protected void onPostExecute(Boolean success) {
+            if(success)
+                mCompletionHook.run();
+            else
+                showToast("Server failed!");
         }
     }
     
@@ -484,17 +484,17 @@ public class MainActivity extends Activity {
      *  completes the ImageStreamProcessing
      */
     private class ExtendedTimeoutUrlConnectionClient 
-    									extends UrlConnectionClient {
+        extends UrlConnectionClient {
     	
     	private final int WAIT_TIME = 30 * 1000;
     	
     	@Override 
-    	protected HttpURLConnection openConnection(Request request) 
-    			throws IOException {
-    		HttpURLConnection connection = super.openConnection(request);
-		    connection.setConnectTimeout(WAIT_TIME);
-		    connection.setReadTimeout(WAIT_TIME);
-		    return connection;
+            protected HttpURLConnection openConnection(Request request) 
+            throws IOException {
+            HttpURLConnection connection = super.openConnection(request);
+            connection.setConnectTimeout(WAIT_TIME);
+            connection.setReadTimeout(WAIT_TIME);
+            return connection;
     	}
     }
     
