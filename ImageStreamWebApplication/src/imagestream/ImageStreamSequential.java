@@ -33,26 +33,20 @@ public class ImageStreamSequential extends ImageStream {
         // Create a new barrier for this iteration cycle.
         mIterationBarrier = new CountDownLatch(1);
 
-        // Sequentially process each filter in the mFilters List.
+        // Sequentially process each URL in the input List.
         getInput().stream()
-            // transform URL -> ImageEntity
+            // Transform URL -> ImageEntity (download each image via
+            // its URL).
             .map(url -> makeImageEntity(url))
-            // Check to see if the download was successful.
-            .peek(image -> 
-                  PlatformStrategy.instance().errorLog
-                  ("ImageStreamParallel",
-                   "Operations"
-                   + (image.getSucceeded() == true 
-                      ? " succeeded" 
-                      : " failed")
-                   + " on file " 
-                   + image.getSourceURL()))
-            // collect each image and apply each filter in parallel
+            // Collect each image and apply each filter sequentially
+            // (similar to nested for loops).
             .forEach(image -> {
+                    // Apply each filter to each image.
                     mFilters.stream()
-                        // decorate each filter to write the images to files
+                        // Decorate each filter to write the image to
+                        // a file.
                         .map(filter -> new OutputFilterDecorator(filter))
-                        // filter the image
+                        // Filter image and store in output file.
                         .forEach(decoratedFilter -> 
                                  decoratedFilter.filter(image));
 	    	});

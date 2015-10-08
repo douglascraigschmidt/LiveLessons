@@ -47,11 +47,6 @@ abstract public class LeasePoolStrategy<Resource> {
             = Executors.newScheduledThreadPool(1);
 
         /**
-         * Records which Thread is currently leasing a resource.
-         */
-        private Thread mLeasorThread;
-
-        /**
          * Stores how long a Thread can hold a lease on a resource.
          */
         private long mLeaseDuration;
@@ -68,7 +63,6 @@ abstract public class LeasePoolStrategy<Resource> {
         public LeaseState() {
             mLeaseDuration = 0;
             mFuture = null;
-            mLeasorThread = null;
         }
 
         /**
@@ -86,7 +80,6 @@ abstract public class LeasePoolStrategy<Resource> {
             // Get the current Thread and set it as the Leasor of this
             // resource.
             final Thread leasorThread = Thread.currentThread();
-            mLeasorThread = leasorThread;
 
             // This Runnable command is dispatched by the
             // ScheduledExecutorService after the lease expires to

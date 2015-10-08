@@ -172,8 +172,8 @@ public class PalantirManagerTest {
         // the gazing logic, which attempts to acquire a lease on a
         // Palantir and gaze into it.
         beginBeingsGazing(numberOfBeings,
-                         entryBarrier,
-                         exitBarrier);
+                          entryBarrier,
+                          exitBarrier);
 
         try {
             // Allow all the Being Threads to run the gazing logic.

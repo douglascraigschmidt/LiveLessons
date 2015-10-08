@@ -105,8 +105,8 @@ public class ThreadJoinTest {
                 public void run() {
                     // Get the input data element associated with
                     // this index.
-                    String element = mInput.get(index);
-
+                    final String element = mInput.get(index);
+                    
                     // Process input data element.
                     if (processInput(element) == false)
                       return;

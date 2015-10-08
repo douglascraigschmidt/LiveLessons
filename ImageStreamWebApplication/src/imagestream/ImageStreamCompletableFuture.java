@@ -36,15 +36,15 @@ public class ImageStreamCompletableFuture extends ImageStream {
         // Create a new barrier for this iteration cycle.
         mIterationBarrier = new CountDownLatch(1);
 
-        // Concurrently process each URL in the input.
+        // Concurrently process each URL in the input List.
         getInput().parallelStream()
-            // Submit the url for downloading asynchronously.
+            // Submit the URL for asynchronous downloading.
             .map(url -> CompletableFuture.supplyAsync
                      (() -> makeImageEntity(url),
                       getExecutor()).join())
-            // Map each ImageEntity to a parallel stream of the
-            // filtered versions of the entity.
-            .flatMap(imageEntity ->
+            // Map each image to a parallel stream of the filtered
+            // versions of the entity.
+            .flatMap(image ->
                      mFilters.parallelStream()
                      // Decorate each filter to write the images to
                      // files.
@@ -53,7 +53,7 @@ public class ImageStreamCompletableFuture extends ImageStream {
                      // filtering.
                      .map(decoratedFilter -> 
                           CompletableFuture.supplyAsync
-                              (() -> decoratedFilter.filter(imageEntity),
+                              (() -> decoratedFilter.filter(image),
                                getExecutor()).join())
                      .collect(Collectors.toList()).parallelStream()	
                      )

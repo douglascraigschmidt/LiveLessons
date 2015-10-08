@@ -104,27 +104,6 @@ public abstract class ImageStream extends StreamGang<URL> {
     }
 
     /**
-     * Method that runs in the background to download, process, and
-     * store an image at @a urlToDownload.  It returns the ImageEntity
-     * representing the image.
-     */
-    protected ImageEntity processInput(URL urlToDownload,
-                                       Filter filter) {
-        // Download an image into a new ImageEntity object.
-    	final ImageEntity downloadedImage = 
-            makeImageEntity(urlToDownload);
-
-        // Create an OutputFilterDecorator that encapsulates the
-        // original filter.
-        Filter decoratedFilter =
-            new OutputFilterDecorator(filter);
-
-        // Process the downloaded image, store it
-        // into a file, return the result.
-        return decoratedFilter.filter(downloadedImage);
-    }
-
-    /**
      * Hook method that waits for concurrent processing to complete.
      */
     @Override
