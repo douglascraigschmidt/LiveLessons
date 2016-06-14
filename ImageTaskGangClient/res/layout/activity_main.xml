@@ -1,0 +1,118 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="${relativePackage}.${activityClass}" >
+    
+    <LinearLayout
+		android:id="@+id/defaultButtonLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+    
+	    <Button android:id="@+id/runWithDefaultURLsLocal"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/run_default_urls_local"
+	        android:onClick="runWithDefaultURLsLocal"
+	        android:textSize="13sp"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	    <Button android:id="@+id/runWithDefaultURLsServer"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/run_default_urls_server"
+	        android:onClick="runWithDefaultURLsServer"
+	        android:textSize="13sp"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	    <Button android:id="@+id/addList"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/add_urls"
+	        android:onClick="addURLs"
+	        android:textSize="13sp"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	</LinearLayout>
+	
+    
+    <ScrollView
+        android:id="@+id/urlsScrollView"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/defaultButtonLayout" >
+	    
+        <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical" >
+		    
+			<LinearLayout
+			    android:id="@+id/listOfURLLists"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="vertical" >	
+			    
+			</LinearLayout>
+	
+			<LinearLayout
+			    android:id="@+id/userButtonLayout"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="horizontal" >
+			    
+			    <Button android:id="@+id/runWithUserURLsLocal"
+			        android:layout_weight="1"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+			        android:text="@string/run_user_urls_local"
+			        android:onClick="runWithUserURLsLocal"
+			        android:visibility="invisible"
+			        style="?android:attr/borderlessButtonStyle" />
+			    
+			    <Button android:id="@+id/runWithUserURLsServer"
+			        android:layout_weight="1"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+			        android:text="@string/run_user_urls_server"
+			        android:onClick="runWithUserURLsServer"
+			        android:visibility="invisible"
+			        style="?android:attr/borderlessButtonStyle" />
+			    
+			    <Button android:id="@+id/clearLists"
+			        android:layout_weight="1"
+			        android:layout_width="0dp"
+			        android:layout_height="wrap_content"
+			        android:text="@string/clear_lists"
+			        android:onClick="clearLists"
+			        android:visibility="invisible"
+			        style="?android:attr/borderlessButtonStyle" />
+			    
+		    </LinearLayout>
+		    
+	    </LinearLayout>
+	    
+    </ScrollView>
+    
+    <LinearLayout
+		android:id="@+id/buttonLayoutBottom"
+		android:layout_below="@id/urlsScrollView"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+    
+	    <Button android:id="@+id/clear"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/clear_dirs"
+	        android:onClick="clearFilterDirectories"
+	        style="?android:attr/borderlessButtonStyle" />
+	    
+	</LinearLayout>
+
+</RelativeLayout>

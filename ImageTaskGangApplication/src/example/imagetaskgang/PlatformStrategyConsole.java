@@ -11,8 +11,8 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
 
 // @@ import javax.imageio.ImageIO;
 
@@ -37,15 +37,16 @@ public class PlatformStrategyConsole extends PlatformStrategy {
     public PlatformStrategyConsole(Object output) {
         mOutput = (PrintStream) output;
     }
-    
+	
     /**
      * Overrides the getURLIterator method to return the
      * Console-specific input sources.
      */
-	public List<List<URL>> getUrlLists(InputSource source) {
-		List<List<URL>> variableNumberOfInputURLs = 
-	            new ArrayList<List<URL>>();
-	    	
+    @SuppressLint("NewApi")
+	public Iterator<List<URL>> getUrlIterator(InputSource source) {
+        List<List<URL>> variableNumberOfInputURLs = 
+            new ArrayList<List<URL>>();
+    	
     	try {
             switch (source) {
             // If the user selects the defaults source, return the
@@ -59,13 +60,15 @@ public class PlatformStrategyConsole extends PlatformStrategy {
             // Read a list of URL lists from a delimited file.
             case FILE:
                 try (BufferedReader urlReader = 
-                     new BufferedReader(new FileReader
-                    		 (Options.instance().getURLFilePathname()))) {
+                     new BufferedReader
+                     (new FileReader
+                      (Options.instance().getURLFilePathname()))) {
                         List<URL> currentUrls = new ArrayList<URL>();
                     
                         // Iterator over each line in the file
                         for (String url; 
-                             (url = urlReader.readLine()) != null;) {
+                             (url = urlReader.readLine()) != null;
+                             ) {
                     	
                             // If the line is the dedicated delimiter,
                             // add the current list to the main list,
@@ -101,8 +104,9 @@ public class PlatformStrategyConsole extends PlatformStrategy {
             return null;
     	}
     	
-    	return variableNumberOfInputURLs;
-	}
+    	// Return an iterator over the list of URL lists.
+        return variableNumberOfInputURLs.iterator();
+    }
 	
     /**
      * Return the path for the directory where images are stored.
@@ -201,5 +205,4 @@ public class PlatformStrategyConsole extends PlatformStrategy {
                         + " " 
                         + errorMessage);
     }
-    
 }

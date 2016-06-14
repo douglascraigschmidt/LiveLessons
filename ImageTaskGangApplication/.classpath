@@ -5,7 +5,5 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="/Users/nolan-mac/Masters/ex/ImageTaskGang/libs/android-support-v4.jar"/>
-	<classpathentry kind="lib" path="/Users/nolan-mac/Masters/ex/ImageTaskGang/libs/gson-2.3.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

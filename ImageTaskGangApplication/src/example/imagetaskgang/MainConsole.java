@@ -5,10 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import example.imagetaskgang.filters.Filter;
-import example.imagetaskgang.filters.GrayScaleFilter;
-import example.imagetaskgang.filters.NullFilter;
-
 /**
  * @class MainConsole
  *

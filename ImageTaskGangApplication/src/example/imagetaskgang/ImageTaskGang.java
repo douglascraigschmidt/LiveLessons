@@ -16,9 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import example.imagetaskgang.filters.Filter;
-import example.imagetaskgang.filters.OutputFilterDecorator;
-
 import android.annotation.SuppressLint;
 
 /**
@@ -161,8 +158,8 @@ public class ImageTaskGang extends TaskGang<URL> {
                         Filter decoratedFilter =
                             new OutputFilterDecorator(filter);
 
-                        // Filter the downloaded image, store it into
-                        // a file, return the result.
+                        // Process the downloaded image, store it
+                        // into a file, return the result.
                         return decoratedFilter.filter(downloadedImage);
                     }
                 });

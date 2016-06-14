@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ImageStreamGangApplication</string>
+    <string name="add_urls">Add URLs</string>
+    <string name="run_default_urls">Default</string>
+    <string name="url_prompt">List of URLs separated by commas</string>
+    <string name="run_user_urls">Run</string>
+    <string name="go_back">Go Back</string>
+    <string name="img_desc">A Large View</string>
+    <string name="clear_dirs">Clear Downloads</string>
+    <string name="clear_lists">Clear Lists</string>
+    <string name="ok_button">OK</string>
+
+    <!-- M permission request strings (only used for debugging) -->
+    <string name="read_write_permission">External storage read/write permission is required for LeakCanary to save detected memory leaks.</string>
+    <string name="permission_available_external_storage">External storage read/write permissions have been granted.</string>
+    <string name="permissions_not_granted">Permissions were not granted.</string>
+</resources>

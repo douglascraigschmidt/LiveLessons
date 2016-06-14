@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ImageTaskGang</string>
+    <string name="add_urls">Add URLs</string>
+    <string name="run_default_urls_local">Default (Local)</string>
+    <string name="run_default_urls_server">Default (Server)</string>
+    <string name="url_prompt">List of URLs separated by commas</string>
+    <string name="run_user_urls_local">Run (Local)</string>
+    <string name="run_user_urls_server">Run (Server)</string>
+    <string name="go_back">Go Back</string>
+    <string name="img_desc">A Large View</string>
+    <string name="clear_dirs">Clear Downloads</string>
+    <string name="clear_lists">Clear Lists</string>
+
+</resources>
