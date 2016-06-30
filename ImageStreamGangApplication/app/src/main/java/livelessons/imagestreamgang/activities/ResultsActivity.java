@@ -1,4 +1,4 @@
-package livelessons.imagestreamgang;
+package livelessons.imagestreamgang.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -20,6 +20,9 @@ import android.widget.LinearLayout;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import livelessons.imagestreamgang.R;
+import livelessons.imagestreamgang.utils.Options;
 
 /**
  * @class ResultsActivity

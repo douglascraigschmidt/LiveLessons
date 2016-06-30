@@ -1,4 +1,4 @@
-package livelessons.imagestreamgang;
+package livelessons.imagestreamgang.utils;
 
 import java.net.URL;
 

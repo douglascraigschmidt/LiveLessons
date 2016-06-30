@@ -1,9 +1,12 @@
-package livelessons.imagestreamgang;
+package livelessons.imagestreamgang.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -15,13 +18,19 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
+import livelessons.imagestreamgang.R;
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.GrayScaleFilter;
 import livelessons.imagestreamgang.filters.NullFilter;
+import livelessons.imagestreamgang.streams.ImageStream;
+import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture;
+import livelessons.imagestreamgang.streams.ImageStreamParallel;
+import livelessons.imagestreamgang.streams.ImageStreamSequential;
 import livelessons.imagestreamgang.utils.UiUtils;
+import livelessons.imagestreamgang.utils.Options;
 
 /**
- * Main Activity for the Android ImageTaskGang app.
+ * Main Activity for the Android ImageStreamGang app.
  */
 public class MainActivity 
        extends ActivityBase {
@@ -32,7 +41,7 @@ public class MainActivity
     protected LinearLayout mListUrlGroups;
     
     /**
-     * The button to run the ImageTaskGang using the user input.
+     * The button to run the ImageStreamGang using the user input.
      */
     private Button mRunButton;
     
@@ -40,7 +49,18 @@ public class MainActivity
      * The button to clear the lists of user input.
      */
     private Button mClearListsButton;
-	
+
+    /**
+     * Menu on main screen.
+     */
+    private Menu mStreamMenu;
+
+    /**
+     * User selection for the desired stream.  Defaults to the
+     * ImageStreamSequential.
+     */
+    private int mStreamId = R.id.sequential;
+
     /**
      * Array of Filters to apply to the downloaded images.
      */
@@ -77,21 +97,14 @@ public class MainActivity
 	
     /**
      * Define a completion hook that's called back to display the
-     * results after the ImageTaskGang finishes processing and
+     * results after the ImageStreamGang finishes processing and
      * storing Images downloaded from the Lists of URLs.
      */
-    final Runnable mCompletionHook = 
-        new Runnable() {
-            @Override
-                public void run() {
-                // Uses the Android HaMeR concurrency framework to
-                // invoke the displayImages() method in the UI Thread
-                // so that the ResultsActivity is launched in that
-                // context.
-                MainActivity.this.runOnUiThread(() -> goToResultActivity());
-            }
-        };
-        
+    private final Runnable mCompletionHook = () ->
+        // Uses the Android HaMeR concurrency framework to invoke the
+        // displayImages() method in the UI Thread so that the
+        // ResultsActivity is launched in that context.
+        MainActivity.this.runOnUiThread(() -> goToResultActivity());
     	
     /**
      * Hook method called when the Activity is first launched to
@@ -120,7 +133,7 @@ public class MainActivity
     }
     
     /**
-     * Run the ImageTaskGang using a default set of URL lists.
+     * Run the ImageStreamGang using a default set of URL lists.
      */
     public void runWithDefaultURLs(View view) {
     	runURLs(view, 
@@ -157,15 +170,47 @@ public class MainActivity
                 && (inputSource == Options.InputSource.USER
                     ? !isEmpty() 
                     : true)) 
-                new Thread(new ImageTaskGang(mFilters,
-                                               iterator,
-                                               mCompletionHook)).start();
+                new Thread(makeImageStream(mFilters,
+                                           iterator,
+                                           mCompletionHook)).start();
             setButtonsEnabled(false);
         } else 
             UiUtils.showToast(this,
                               "No list of URLs entered");
     }
 	
+    /**
+     * Factory method that creates the ImageStream selected by the
+     * user (or the default value of mStreamId).
+     */
+    private ImageStream makeImageStream(Filter[] filters,
+                                        Iterator<List<URL>> urlListIterator,
+                                        Runnable completionHook) {
+        switch (mStreamId) {
+        case R.id.sequential:
+            UiUtils.showToast(this,
+                              "Sequential stream processing");
+            return new ImageStreamSequential(filters,
+                                             urlListIterator,
+                                             completionHook);
+        case R.id.parallel:
+            UiUtils.showToast(this,
+                              "Parallel stream processing");
+            return new ImageStreamParallel(filters,
+                                           urlListIterator,
+                                           completionHook);
+
+        case R.id.completablefuture:
+            UiUtils.showToast(this,
+                              "CompletableFuture stream processing");
+            return new ImageStreamCompletableFuture(filters,
+                                                    urlListIterator,
+                                                    completionHook);
+        }
+        // This should never happen!
+        return null;
+    }
+
     /**
      * Creates an Intent that's used to start the ResultsActivity,
      * which can be used to view the results.
@@ -221,7 +266,7 @@ public class MainActivity
     /**
      * Adds a List of URLs to the ListView to allow for variable
      * number of URL Lists to process (i.e., variable number of
-     * iteration cycles by the ImageTaskGang).
+     * iteration cycles by the ImageStreamGang).
      */
     @SuppressLint("InflateParams")
     public void addURLs(View view) {
@@ -266,8 +311,8 @@ public class MainActivity
     /**
      * Sets the list of buttons to disabled, which shows that the
      * application is processing visually, and is a (slightly
-     * forceful) way to keep multiple ImageTaskGang objects from being
-     * started accidentally.
+     * forceful) way to keep multiple ImageStreamGang objects from
+     * being started accidentally.
      */
     private void setButtonsEnabled(boolean enabled) {
     	LinearLayout buttonLayout = 
@@ -340,5 +385,31 @@ public class MainActivity
             f.delete();
         }
         currentFolder.delete();
+    }
+
+    /**
+     * Called by Android framework when menu option is clicked.
+     * 
+     * @param item Selected menu item.
+     * @return true
+     */
+    public boolean chooseStream(MenuItem item) {
+        mStreamId = item.getItemId();
+        return true;
+    }
+
+    /**
+     * Inflates the given @a menu.
+     *
+     * @param menu Menu to inflate.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mStreamMenu = menu;
+        getMenuInflater().inflate(R.menu.stream_menu,
+                                  menu);
+
+        // Always call super class method.
+        return super.onCreateOptionsMenu(menu);
     }
 }

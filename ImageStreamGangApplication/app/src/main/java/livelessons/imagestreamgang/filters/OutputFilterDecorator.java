@@ -6,8 +6,8 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import livelessons.imagestreamgang.ImageEntity;
-import livelessons.imagestreamgang.Options;
+import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Options;
 
 /**
  * @class OutputFilterDecorator

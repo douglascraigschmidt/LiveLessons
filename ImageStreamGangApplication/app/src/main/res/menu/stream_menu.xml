@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.MainActivity">
+  <group android:id="@+id/streams">
+    <item android:id="@+id/sequential"
+          android:title="@string/sequential"
+          android:onClick="chooseStream" />
+    <item android:id="@+id/parallel"
+          android:title="@string/parallel"
+          android:onClick="chooseStream"/>
+    <item android:id="@+id/completablefuture"
+          android:title="@string/completablefuture"
+          android:onClick="chooseStream"/>
+  </group>
+</menu>

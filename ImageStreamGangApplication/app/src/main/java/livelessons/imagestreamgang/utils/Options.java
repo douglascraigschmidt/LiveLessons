@@ -1,4 +1,4 @@
-package livelessons.imagestreamgang;
+package livelessons.imagestreamgang.utils;
 
 import android.content.Context;
 import android.os.Environment;
@@ -13,8 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import livelessons.imagestreamgang.utils.UiUtils;
-
 /**
  * @class Options
  * 
@@ -28,7 +26,7 @@ public class Options {
     /**
      * An enumeration of each different input source.
      */
-    public static enum InputSource {
+    public enum InputSource {
     	DEFAULT, // The default input source.
         USER,    // Input from a user-defined source, such as the Android UI
         FILE,    // Input from a delimited file.

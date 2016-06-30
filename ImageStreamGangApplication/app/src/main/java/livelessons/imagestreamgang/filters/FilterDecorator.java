@@ -1,6 +1,6 @@
 package livelessons.imagestreamgang.filters;
 
-import livelessons.imagestreamgang.ImageEntity;
+import livelessons.imagestreamgang.utils.ImageEntity;
 
 /**
  * @class FilterDecorator

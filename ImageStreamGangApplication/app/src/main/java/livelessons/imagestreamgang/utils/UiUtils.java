@@ -15,6 +15,9 @@ public final class UiUtils {
      */
     private static final String TAG = "UiUtils";
 
+    private UiUtils() {
+    }
+
     /**
      * Helper to show a short toast message.
      *

@@ -3,8 +3,8 @@ package livelessons.imagestreamgang.filters;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import livelessons.imagestreamgang.ImageEntity;
-import livelessons.imagestreamgang.BitmapImage;
+import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.BitmapImage;
 
 /**
  * @class Filter
