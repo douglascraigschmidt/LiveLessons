@@ -1,6 +1,6 @@
 package filters;
 
-import imagestream.ImageEntity;
+import imagestream.Image;
 import imagestream.PlatformStrategy;
 
 /**
@@ -20,13 +20,13 @@ public class OutputFilterDecorator extends FilterDecorator {
     }
 
     /**
-     * The hook method that is called on the ImageEntity once it has
+     * The hook method that is called on the Image once it has
      * been filtered with mFilter.  This method stores the filtered
-     * ImageEntity in a file by delegating the storing to the
+     * Image in a file by delegating the storing to the
      * platform- specific implementation of storeImage(...).
      */
     @Override
-    protected ImageEntity decorate(ImageEntity imageEntity) {
+    protected Image decorate(Image imageEntity) {
     	// Store the filtered image as its filename (which is derived
         // from its URL), within the appropriate filter directory to
         // organize the filtered results and write the image to 

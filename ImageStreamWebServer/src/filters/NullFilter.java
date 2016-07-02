@@ -1,6 +1,6 @@
 package filters;
 
-import imagestream.ImageEntity;
+import imagestream.Image;
 
 /**
  * @class NullFilter
@@ -24,11 +24,11 @@ public class NullFilter extends Filter {
     }
 	
     /**
-     * Constructs a new ImageEntity that does not change the original
+     * Constructs a new Image that does not change the original
      * at all.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
+    protected Image applyFilter(Image imageEntity) {
         return imageEntity;
     }
 }

@@ -5,9 +5,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Defines a framework for spawning and running various types of
- * Streams that process input from a generic List of elements E for
- * one or more cycles.
+ * Defines a framework for initiating Streams that process input from
+ * a generic List of elements E for one or more cycles.
  */
 public abstract class StreamGang<E> 
        implements Runnable {

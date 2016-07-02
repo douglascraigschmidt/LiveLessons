@@ -35,9 +35,9 @@ public class ImageStreamSequential extends ImageStream {
 
         // Sequentially process each URL in the input List.
         getInput().stream()
-            // Transform URL -> ImageEntity (download each image via
+            // Transform URL -> Image (download each image via
             // its URL).
-            .map(url -> makeImageEntity(url))
+            .map(url -> makeImage(url))
             // Collect each image and apply each filter sequentially
             // (similar to nested for loops).
             .forEach(image -> {

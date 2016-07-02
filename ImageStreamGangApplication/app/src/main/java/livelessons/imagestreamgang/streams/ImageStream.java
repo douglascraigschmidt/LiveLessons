@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.utils.NetUtils;
-import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * This abstract class customizes the StreamGang framework to use Java
@@ -146,10 +146,18 @@ public abstract class ImageStream
 
     /**
      * Factory method that retrieves the image associated with the @a
-     * urlToDownload and creates an ImageEntity to encapsulate it.
+     * urlToDownload and creates an Image to encapsulate it.
      */
-    protected ImageEntity makeImageEntity(URL urlToDownload) {
-        return new ImageEntity(urlToDownload,
+    protected Image makeImage(URL urlToDownload) {
+        return new Image(urlToDownload,
                                NetUtils.downloadContent(urlToDownload));
     }
+
+    /**
+     * Factory method that makes a new @a OutputDecoratedFilter.
+     */
+    protected Filter makeFilter(Filter filter) {
+        return new OutputFilterDecorator(filter);
+    }
 }
+

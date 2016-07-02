@@ -6,7 +6,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Image;
 import livelessons.imagestreamgang.utils.Options;
 
 /**
@@ -33,13 +33,13 @@ public class OutputFilterDecorator
     }
 
     /**
-     * This hook method is called with the @a imageEntity parameter
+     * This hook method is called with the @a image parameter
      * after it has been filtered with mFilter in the inherited
      * applyFilter() method.  decorate() stores the filtered
      * ImageEntity in a file.
      */
     @Override
-    protected ImageEntity decorate(ImageEntity imageEntity) {
+    protected ImageEntity decorate(Image image) {
         // Store the filtered image as its filename (which is derived
         // from its URL), within the appropriate filter directory to
         // organize the filtered results and write the image to 
@@ -51,12 +51,12 @@ public class OutputFilterDecorator
         externalFile.mkdirs();
         
         // Get a reference to the file in which the image will be stored
-        File imageFile = new File(externalFile, imageEntity.getFileName());
+        File imageFile = new File(externalFile, image.getFileName());
         
         // Store the image using try-with-resources
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
-                Bitmap image = imageEntity.getImage().getBitmap();
+                Bitmap image = image.getImage().getBitmap();
                 if (image == null)
                     Log.e(TAG, "null Bitmap");
                 else
@@ -68,6 +68,6 @@ public class OutputFilterDecorator
             return null;
         }
         
-        return imageEntity;
+        return image;
     }
 }

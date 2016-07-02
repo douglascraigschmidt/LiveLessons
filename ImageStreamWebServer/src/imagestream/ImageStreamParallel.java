@@ -40,9 +40,9 @@ public class ImageStreamParallel extends ImageStream {
 
         // Concurrently process each URL in the input List.
         getInput().parallelStream()
-            // Transform URL -> ImageEntity (download each image via
+            // Transform URL -> Image (download each image via
             // its URL).
-            .map(url -> makeImageEntity(url))
+            .map(url -> makeImage(url))
             // Collect each image and apply each filter in
             // concurrently.
             .forEach(image -> {

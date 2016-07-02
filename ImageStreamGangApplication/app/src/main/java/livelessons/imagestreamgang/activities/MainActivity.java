@@ -33,7 +33,7 @@ import livelessons.imagestreamgang.utils.Options;
  * Main Activity for the Android ImageStreamGang app.
  */
 public class MainActivity 
-       extends ActivityBase {
+       extends MainActivityBase {
     /**
      * A LinearLayout where each element is an AutoCompleteTextview
      * that holds a comma-separated list of URLs to download.

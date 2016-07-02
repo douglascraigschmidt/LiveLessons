@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import livelessons.imagestreamgang.filters.Filter;
-import livelessons.imagestreamgang.filters.OutputFilterDecorator;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * @class ImageStreamParallel
@@ -41,20 +41,12 @@ public class ImageStreamParallel
 
         // Concurrently process each URL in the input List.
         getInput().parallelStream()
-            // Transform URL -> ImageEntity (download each image via
+            // Transform URL -> Image (download each image via
             // its URL).
-            .map(url -> makeImageEntity(url))
+            .map(url -> makeImage(url))
             // Collect each image and apply each filter in
             // concurrently.
-            .forEach(image -> {
-                     mFilters.parallelStream()
-                        // Decorate each filter to write the image to
-                        // a file.
-                        .map(filter -> new OutputFilterDecorator(filter))
-                        // Filter image and store in output file.
-                        .forEach(decoratedFilter -> 
-                                 decoratedFilter.filter(image));
-        	});
+            .forEach(image -> applyFilters(image));
 
         // Indicate all computations in this iteration are done.
         try {
@@ -62,5 +54,18 @@ public class ImageStreamParallel
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } 
+    }
+
+    /**
+     * Apply the filters in parallel to each @a image.
+     */
+    private void applyFilters(Image image) {
+        mFilters.parallelStream()
+            // Decorate each filter to write the image to
+            // a file.
+            .map(filter -> makeFilter(filter))
+            // Filter image and store in output file.
+            .forEach(decoratedFilter -> 
+                     decoratedFilter.filter(image));
     }
 }

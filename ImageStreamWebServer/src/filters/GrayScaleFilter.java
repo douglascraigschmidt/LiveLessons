@@ -1,6 +1,6 @@
 package filters;
 
-import imagestream.ImageEntity;
+import imagestream.Image;
 import imagestream.PlatformStrategy;
 
 /**
@@ -33,7 +33,7 @@ public class GrayScaleFilter extends Filter {
      * conversion using a pixel-by-pixel coloring algorithm.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
+    protected Image applyFilter(Image imageEntity) {
         // Forward to the platform-specific implementation of this
         // filter.
         return PlatformStrategy.instance().grayScaleFilter(imageEntity);

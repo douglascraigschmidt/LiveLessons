@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import livelessons.imagestreamgang.filters.Filter;
-import livelessons.imagestreamgang.filters.OutputFilterDecorator;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * Customizes ImageStream to use a Java 8 stream to download, process,
@@ -34,21 +34,12 @@ public class ImageStreamSequential
 
         // Sequentially process each URL in the input List.
         getInput().stream()
-            // Transform URL -> ImageEntity (download each image via
+            // Transform URL -> Image (download each image via
             // its URL).
-            .map(url -> makeImageEntity(url))
+            .map(url -> makeImage(url))
             // Collect each image and apply each filter sequentially
             // (similar to nested for loops).
-            .forEach(image -> {
-                    // Apply each filter to each image.
-                    mFilters.stream()
-                        // Decorate each filter to write the image to
-                        // a file.
-                        .map(filter -> new OutputFilterDecorator(filter))
-                        // Filter image and store in output file.
-                        .forEach(decoratedFilter -> 
-                                 decoratedFilter.filter(image));
-	    	});
+            .forEach(image -> applyFilters(image));
 
         // Indicate all computations in this iteration are done.
         try {
@@ -56,5 +47,18 @@ public class ImageStreamSequential
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } 
+    }
+
+    /**
+     * Apply the filters in parallel to each @a image.
+     */
+    private void applyFilters(Image image) {
+        mFilters.stream()
+            // Decorate each filter to write the image to
+            // a file.
+            .map(filter -> makeFilter(filter))
+            // Filter image and store in output file.
+            .forEach(decoratedFilter -> 
+                     decoratedFilter.filter(image));
     }
 }

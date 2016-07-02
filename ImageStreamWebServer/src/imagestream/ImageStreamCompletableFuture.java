@@ -40,7 +40,7 @@ public class ImageStreamCompletableFuture extends ImageStream {
         getInput().parallelStream()
             // Submit the URL for asynchronous downloading.
             .map(url -> CompletableFuture.supplyAsync
-                     (() -> makeImageEntity(url),
+                     (() -> makeImage(url),
                       getExecutor()).join())
             // Map each image to a parallel stream of the filtered
             // versions of the entity.

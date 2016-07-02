@@ -1,6 +1,6 @@
 package filters;
 
-import imagestream.ImageEntity;
+import imagestream.Image;
 
 /**
  * @class FilterDecorator
@@ -30,7 +30,7 @@ public abstract class FilterDecorator extends Filter {
      * @a imageEntity parameter.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
+    protected Image applyFilter(Image imageEntity) {
         return decorate(mFilter.filter(imageEntity));
     }
     
@@ -39,5 +39,5 @@ public abstract class FilterDecorator extends Filter {
      * filter, which is applied to the imageEntity after it's been
      * filtered.
      */
-    protected abstract ImageEntity decorate(ImageEntity imageEntity);
+    protected abstract Image decorate(Image imageEntity);
 }

@@ -41,7 +41,7 @@ public class ImageStreamCompletableFuture
         getInput().parallelStream()
             // Submit the URL for asynchronous downloading.
             .map(url -> CompletableFuture.supplyAsync
-                     (() -> makeImageEntity(url),
+                     (() -> makeImage(url),
                       getExecutor()).join())
             // Map each image to a parallel stream of the filtered
             // versions of the entity.
@@ -49,7 +49,7 @@ public class ImageStreamCompletableFuture
                      mFilters.parallelStream()
                      // Decorate each filter to write the images to
                      // files.
-                     .map(filter -> new OutputFilterDecorator(filter))
+                     .map(filter -> makeFilter(filter))
                      // Submit the imageEntity for asynchronous
                      // filtering.
                      .map(decoratedFilter -> 
