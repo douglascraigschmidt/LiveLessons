@@ -1,5 +1,7 @@
 package livelessons.imagestreamgang.utils;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,5 +52,24 @@ public final class NetUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Returns a filename form of the @a url.
+     */
+    public static String getFileNameForUrl(URL url) {
+        // Just use the host and "filename".
+        String uriName = url.getHost() + url.getFile();
+
+        // Replace useless chareacters with UNDERSCORE
+        String fileName = uriName.replace(".", "_").replace("/", "_");
+
+        // Replace last underscore with a dot
+        fileName = fileName.substring(0,
+                                          fileName.lastIndexOf('_'))
+            + "."
+            + fileName.substring(fileName.lastIndexOf('_') + 1,
+                                   fileName.length());
+        return fileName;
     }
 }

@@ -3,8 +3,7 @@ package livelessons.imagestreamgang.filters;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import livelessons.imagestreamgang.utils.ImageEntity;
-import livelessons.imagestreamgang.utils.BitmapImage;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * @class Filter
@@ -37,11 +36,11 @@ public class GrayScaleFilter
      * conversion using a pixel-by-pixel coloring algorithm.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
+    protected Image applyFilter(Image image) {
         // Forward to the platform-specific implementation of this
         // filter.
-        BitmapImage image = imageEntity.getImage();
-        Bitmap originalImage = image.getBitmap();
+        Bitmap bitmap = image.getImage();
+        Bitmap originalImage = bitmap;
 
         Bitmap grayScaleImage =
             originalImage.copy(originalImage.getConfig(), true);
@@ -74,13 +73,8 @@ public class GrayScaleFilter
             }
         }
 
-        // Encapsulate the Android-specific Bitmap object within a
-        // platform-independent BitMapImage object.
-        BitmapImage bitmapImage =
-            new BitmapImage(grayScaleImage);
-
-        // Return an ImageEntity containing the filtered image.
-        return new ImageEntity(imageEntity.getSourceURL(),
-                               bitmapImage);
+        // Return an Image containing the filtered image.
+        return new Image(image.getSourceURL(),
+                         grayScaleImage);
     }
 }

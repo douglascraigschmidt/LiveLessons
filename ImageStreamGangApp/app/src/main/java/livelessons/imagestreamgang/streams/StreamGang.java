@@ -11,6 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class StreamGang<E> 
        implements Runnable {
     /**
+     * Debugging tag
+     */
+    protected String TAG = this.getClass().getName();
+
+    /**
      * The input List that's processed, which can be initialized via
      * the @code makeInputList() factory method.
      */

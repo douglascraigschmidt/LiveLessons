@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
-import livelessons.imagestreamgang.filters.OutputFilterDecorator;
+import livelessons.imagestreamgang.utils.Image;
+import livelessons.imagestreamgang.utils.NetUtils;
 
 /**
  * Customizes ImageStream to use Java 8 CompletableFutures to
@@ -28,53 +30,60 @@ public class ImageStreamCompletableFuture
     }
 
     /**
-     * Initiate the ImageStream processing, which uses Java 8
+     * Perform the ImageStream processing, which uses Java 8
      * CompletableFutures to download, process, and store images
      * concurrently.
      */
     @Override
-    protected void initiateStream() {
-        // Create a new barrier for this iteration cycle.
-        mIterationBarrier = new CountDownLatch(1);
+    protected void processStream() {
+        getInput()
+            // Concurrently process each URL in the input List.
+            .parallelStream()
 
-        // Concurrently process each URL in the input List.
-        getInput().parallelStream()
-            // Submit the URL for asynchronous downloading.
-            .map(url -> CompletableFuture.supplyAsync
-                     (() -> makeImage(url),
-                      getExecutor()).join())
-            // Map each image to a parallel stream of the filtered
-            // versions of the entity.
-            .flatMap(image ->
-                     mFilters.parallelStream()
-                     // Decorate each filter to write the images to
-                     // files.
-                     .map(filter -> makeFilter(filter))
-                     // Submit the imageEntity for asynchronous
-                     // filtering.
-                     .map(decoratedFilter -> 
-                          CompletableFuture.supplyAsync
-                              (() -> decoratedFilter.filter(image),
-                               getExecutor()).join())
-                     .collect(Collectors.toList()).parallelStream())
-            // Report the success of the pipeline for each filtered
-            // entity.
-            .forEach(image -> Log.e
-                     ("CompletableFuture",
-                      "Operations"
-                      + (image.getSucceeded() == true
-                         ? " succeeded" 
-                         : " failed")
-                      + " on file " 
-                      + image.getSourceURL())
-                     );
+            // Filter out URLs that are already cached.
+            .filter(this::urlNotCached)
 
+            // Submit the URLs for asynchronous downloading.
+            .map(url ->
+                 CompletableFuture.supplyAsync(() ->
+                                               makeImage(url),
+                                               getExecutor()))
+            // Wait for all async operations to finish.
+            .map(CompletableFuture::join)
 
-        // Indicate all computations in this iteration are done.
-        try {
-            mIterationBarrier.countDown();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        } 
+            // Map each image to a stream containing the filtered
+            // versions of the image.
+            .flatMap(this::applyFilters)
+
+            // Terminate the stream.
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Apply the filters in parallel to each @a image.
+     */
+    private Stream<Image> applyFilters(Image image) {
+        return mFilters.parallelStream()
+            // Create an OutputDecoratedFilter for each image.
+            .map(this::makeFilter)
+
+            // Debugging output.
+            .map(filter -> {
+                    Log.e(TAG,
+                          "Applying filter "
+                          + filter.getName()
+                          + " on file "
+                          + NetUtils.getFileNameForUrl(image.getSourceURL()));
+                return filter;
+                })
+
+            // Asynchronously filter the image and store it in an
+            // output file.
+            .map(decoratedFilter -> 
+                 CompletableFuture.supplyAsync(() ->
+                                               decoratedFilter.filter(image),
+                                               getExecutor()))
+            // Wait for all async operations to finish.
+            .map(CompletableFuture::join);
     }
 }

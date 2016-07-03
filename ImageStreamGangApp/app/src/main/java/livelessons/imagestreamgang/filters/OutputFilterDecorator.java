@@ -33,17 +33,16 @@ public class OutputFilterDecorator
     }
 
     /**
-     * This hook method is called with the @a image parameter
-     * after it has been filtered with mFilter in the inherited
-     * applyFilter() method.  decorate() stores the filtered
-     * ImageEntity in a file.
+     * This hook method is called with the @a image parameter after it
+     * has been filtered with mFilter in the inherited applyFilter()
+     * method.  decorate() stores the filtered Image in a file.
      */
     @Override
-    protected ImageEntity decorate(Image image) {
+    protected Image decorate(Image image) {
         // Store the filtered image as its filename (which is derived
         // from its URL), within the appropriate filter directory to
-        // organize the filtered results and write the image to 
-    	// the file in the appropriate directory.
+        // organize the filtered results and write the image to the
+        // file in the appropriate directory.
 
     	// Ensure that the path exists.
         File externalFile = new File(Options.instance().getDirectoryPath(),
@@ -56,13 +55,13 @@ public class OutputFilterDecorator
         // Store the image using try-with-resources
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
-                Bitmap image = image.getImage().getBitmap();
-                if (image == null)
+                Bitmap bitmap = image.getImage();
+                if (bitmap == null)
                     Log.e(TAG, "null Bitmap");
                 else
-                    image.compress(Bitmap.CompressFormat.PNG,
-                                   100,
-                                   outputFile);
+                    bitmap.compress(Bitmap.CompressFormat.PNG,
+                                    100,
+                                    outputFile);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

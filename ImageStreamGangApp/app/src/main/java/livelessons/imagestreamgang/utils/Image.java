@@ -1,7 +1,11 @@
 package livelessons.imagestreamgang.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.net.URL;
 
+import livelessons.imagestreamgang.utils.NetUtils;
 import livelessons.imagestreamgang.filters.Filter;
 
 /**
@@ -135,8 +139,7 @@ public class Image {
      * constructed from.
      */
     public String getFileName() {
-        return mSourceUrl.getFile().substring
-            (mSourceUrl.getFile().lastIndexOf('/'));
+        return NetUtils.getFileNameForUrl(mSourceUrl);
     }
 
     /**

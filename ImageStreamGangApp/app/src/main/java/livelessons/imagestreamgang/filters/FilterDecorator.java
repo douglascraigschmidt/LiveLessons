@@ -1,6 +1,6 @@
 package livelessons.imagestreamgang.filters;
 
-import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * @class FilterDecorator
@@ -31,14 +31,14 @@ public abstract class FilterDecorator
      * An abstract hook method that "decorates" the Filter data member
      * by being applied to the imageEntity after it's been filtered.
      */
-    protected abstract ImageEntity decorate(ImageEntity imageEntity);
+    protected abstract Image decorate(Image imageEntity);
 
     /**
      * This hook method is also a template method that forwards to the
      * decorated filter to filter the @a imageEntity parameter.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
-        return decorate(mFilter.filter(imageEntity));
+    protected Image applyFilter(Image image) {
+        return decorate(mFilter.filter(image));
     }
 }

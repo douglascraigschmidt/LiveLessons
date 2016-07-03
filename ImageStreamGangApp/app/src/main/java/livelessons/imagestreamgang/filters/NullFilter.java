@@ -1,6 +1,6 @@
 package livelessons.imagestreamgang.filters;
 
-import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * The NullFilter will return the image as it was downloaded.
@@ -26,11 +26,11 @@ public class NullFilter
     }
 	
     /**
-     * Constructs a new ImageEntity that does not change the original
+     * Constructs a new Image that does not change the original
      * at all.
      */
     @Override
-    protected ImageEntity applyFilter(ImageEntity imageEntity) {
-        return imageEntity;
+    protected Image applyFilter(Image image) {
+        return image;
     }
 }

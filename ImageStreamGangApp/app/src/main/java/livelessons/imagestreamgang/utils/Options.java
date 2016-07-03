@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * @class Options
- * 
- * @brief This class implements the Singleton pattern to handle
- *        command-line option processing.
+ * This class implements the Singleton pattern to handle
+ * command-line option processing.
  */
 public class Options {
     /** The singleton @a Options instance. */
@@ -45,12 +43,6 @@ public class Options {
      */
     private String mSeparator = "";
     
-    /**
-     * Input Source selection. Determines where the list
-     * of URL lists will come from
-     */
-    private String mInputSource = "DEFAULT";
-
     /**
      * Controls whether debugging output will be generated (defaults
      * to false).
@@ -130,22 +122,21 @@ public class Options {
      * platform.
      */
     protected List<List<URL>> getDefaultUrlList() throws MalformedURLException {
-    	List<List<URL>> variableNumberOfInputURLs = 
-            new ArrayList<List<URL>>();
-
         URL[] urls1 = {        
             new URL("http://www.dre.vanderbilt.edu/~schmidt/ka.png"),
             new URL("http://www.dre.vanderbilt.edu/~schmidt/uci.png"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/douglass.jpg")
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg")
         };
         URL[] urls2 = {
             new URL("http://www.cs.wustl.edu/~schmidt/gifs/lil-doug.jpg"),
             new URL("http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg"),
             new URL("http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg")
         };
+
+    	List<List<URL>> variableNumberOfInputURLs = 
+            new ArrayList<List<URL>>();
         variableNumberOfInputURLs.add(Arrays.asList(urls1));
         variableNumberOfInputURLs.add(Arrays.asList(urls2));
-
     	return variableNumberOfInputURLs;
     }
 
@@ -225,8 +216,6 @@ public class Options {
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
                 else if (argv[argc].equals("-s"))
                 	mSeparator = argv[argc + 1];
-                else if (argv[argc].equals("-i"))
-                	mInputSource = argv[argc + 1];
                 else {
                     printUsage();
                     return false;

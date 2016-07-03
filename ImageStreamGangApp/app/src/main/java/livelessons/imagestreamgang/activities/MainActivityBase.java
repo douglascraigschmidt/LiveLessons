@@ -15,7 +15,7 @@ import livelessons.imagestreamgang.utils.PermissionRequest;
 /**
  * Super class that handles permissions.
  */
-public class ActivityBase
+public class MainActivityBase
         extends Activity {
     /**
      * Available for sub-classes to set with PermissionRequest#with() call.

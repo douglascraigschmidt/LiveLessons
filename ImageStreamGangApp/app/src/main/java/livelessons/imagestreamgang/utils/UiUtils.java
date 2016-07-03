@@ -24,7 +24,6 @@ public final class UiUtils {
      * @param context activity context
      * @param text    string to display
      */
-    @SuppressWarnings({"SameParameterValue", "unused"})
     @UiThread
     public static void showToast(Context context, String text) {
         if (text == null || text.isEmpty()) {

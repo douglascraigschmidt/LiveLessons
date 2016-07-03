@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -26,8 +25,8 @@ import livelessons.imagestreamgang.streams.ImageStream;
 import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture;
 import livelessons.imagestreamgang.streams.ImageStreamParallel;
 import livelessons.imagestreamgang.streams.ImageStreamSequential;
-import livelessons.imagestreamgang.utils.UiUtils;
 import livelessons.imagestreamgang.utils.Options;
+import livelessons.imagestreamgang.utils.UiUtils;
 
 /**
  * Main Activity for the Android ImageStreamGang app.
@@ -51,15 +50,10 @@ public class MainActivity
     private Button mClearListsButton;
 
     /**
-     * Menu on main screen.
-     */
-    private Menu mStreamMenu;
-
-    /**
      * User selection for the desired stream.  Defaults to the
      * ImageStreamSequential.
      */
-    private int mStreamId = R.id.sequential;
+    private int mStreamId = R.id.parallel;
 
     /**
      * Array of Filters to apply to the downloaded images.
@@ -355,36 +349,42 @@ public class MainActivity
     public void clearFilterDirectories(View view) {
     	setButtonsEnabled(false);
 
+        int deletedFiles = 0;
+
         for (Filter filter : mFilters) 
-            deleteSubFolders
+            deletedFiles += deleteSubFolders
                 (new File(Options.instance().getDirectoryPath(), 
                           filter.getName()).getAbsolutePath());
 
         setButtonsEnabled(true);
         UiUtils.showToast(this,
-                          "Previously downloaded files deleted");
+                          deletedFiles
+                          + " previously downloaded file(s) deleted");
     }
 	
     /**
      * A helper method that recursively deletes files in a specified
      * directory. 
      */
-    private void deleteSubFolders(String path) {
+    private int deleteSubFolders(String path) {
+        int deletedFiles = 0;
         File currentFolder = new File(path);        
         File files[] = currentFolder.listFiles();
 
         if (files == null) 
-            return;
+            return 0;
 
         // Android does not allow you to delete a directory with child
         // files, so we need to write code that handles this
         // recursively.
         for (File f : files) {          
             if (f.isDirectory()) 
-                deleteSubFolders(f.toString());
+                deletedFiles += deleteSubFolders(f.toString());
             f.delete();
+            deletedFiles++;
         }
         currentFolder.delete();
+        return deletedFiles;
     }
 
     /**
@@ -394,6 +394,7 @@ public class MainActivity
      * @return true
      */
     public boolean chooseStream(MenuItem item) {
+        // Record the user's menu choice.
         mStreamId = item.getItemId();
         return true;
     }
@@ -405,7 +406,6 @@ public class MainActivity
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        mStreamMenu = menu;
         getMenuInflater().inflate(R.menu.stream_menu,
                                   menu);
 

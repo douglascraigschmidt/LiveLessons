@@ -1,6 +1,6 @@
 package livelessons.imagestreamgang.filters;
 
-import livelessons.imagestreamgang.utils.ImageEntity;
+import livelessons.imagestreamgang.utils.Image;
 
 /**
  * @class Filter
@@ -43,7 +43,7 @@ public abstract class Filter {
      * This abstract hook method must be overridden by a subclass to
      * define the logic for processing the given @a imageEntity.
      */
-    protected abstract ImageEntity applyFilter(ImageEntity imageEntity);
+    protected abstract Image applyFilter(Image imageEntity);
 
     /**
      * This template method calls the applyFilter() hook method (which
@@ -51,9 +51,9 @@ public abstract class Filter {
      * parameter and sets the filterName of the result to the name of
      * the filter.
      */
-    public ImageEntity filter(ImageEntity imageEntity) {
+    public Image filter(Image image) {
         // Call the applyFilter() hook method.
-        ImageEntity filteredResult = applyFilter(imageEntity);
+        Image filteredResult = applyFilter(image);
         filteredResult.setFilterName(this);
         return filteredResult;
     }

@@ -1,8 +1,8 @@
 package livelessons.imagestreamgang.streams;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import android.util.Log;
+
+import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,8 +13,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import livelessons.imagestreamgang.filters.Filter;
-import livelessons.imagestreamgang.utils.NetUtils;
+import livelessons.imagestreamgang.filters.OutputFilterDecorator;
 import livelessons.imagestreamgang.utils.Image;
+import livelessons.imagestreamgang.utils.NetUtils;
+import livelessons.imagestreamgang.utils.Options;
 
 /**
  * This abstract class customizes the StreamGang framework to use Java
@@ -79,22 +81,37 @@ public abstract class ImageStream
     }
 
     /**
-     * Factory method that returns the next List of URLs to download
-     * and process concurrently by the ImageStream.
+     * Hook method that must be overridden by subclasses to perform
+     * the ImageStream processing.
+     */
+    protected abstract void processStream();
+
+    /**
+     * Initiate the ImageStream processing, which uses a Java 8 stream
+     * to download, process, and store images sequentially.
      */
     @Override
-    protected List<URL> getNextInput() {
-        if (mUrlListIterator.hasNext()) {
-            // Note that we're starting a new cycle.
-            incrementCycle();
+    protected void initiateStream() {
+        // Create a new barrier for this iteration cycle.
+        mIterationBarrier = new CountDownLatch(1);
 
-            // Return a List containing the URLs to download
-            // concurrently.
-            return mUrlListIterator.next();
-        }
-        else
-            // Indicate that we're done.
-            return null;
+        long start = System.nanoTime();
+
+        // Start the Stream processing.
+        processStream();
+
+        long duration = (System.nanoTime() - start) / 1_000_000;
+        Log.d(TAG,
+              "Done in " 
+              + duration
+              + " msecs");
+
+        // Indicate all computations in this iteration are done.
+        try {
+            mIterationBarrier.countDown();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } 
     }
 
     /**
@@ -145,12 +162,31 @@ public abstract class ImageStream
     }
 
     /**
+     * Factory method that returns the next List of URLs to download
+     * and process concurrently by the ImageStream.
+     */
+    @Override
+    protected List<URL> getNextInput() {
+        if (mUrlListIterator.hasNext()) {
+            // Note that we're starting a new cycle.
+            incrementCycle();
+
+            // Return a List containing the URLs to download
+            // concurrently.
+            return mUrlListIterator.next();
+        }
+        else
+            // Indicate that we're done.
+            return null;
+    }
+
+    /**
      * Factory method that retrieves the image associated with the @a
      * urlToDownload and creates an Image to encapsulate it.
      */
     protected Image makeImage(URL urlToDownload) {
         return new Image(urlToDownload,
-                               NetUtils.downloadContent(urlToDownload));
+                         NetUtils.downloadContent(urlToDownload));
     }
 
     /**
@@ -158,6 +194,38 @@ public abstract class ImageStream
      */
     protected Filter makeFilter(Filter filter) {
         return new OutputFilterDecorator(filter);
+    }
+
+    /**
+     * @return true if the @a url is not already in the cache, else false.
+     */
+    protected boolean urlNotCached(URL url, String filterName) {
+        // Construct the subdirectory for the filter.
+        File externalFile = new File(Options.instance().getDirectoryPath(),
+                                     filterName);
+        // Construct the filename for the URL.
+        File imageFile = new File(externalFile,
+                                  NetUtils.getFileNameForUrl(url));
+        // If the image file does not already exist then the URL is
+        // not cached.
+        return !imageFile.exists();
+    }
+
+    /**
+     * @return true if the @a url is not already in the cache, else
+     * false.
+     */
+    protected boolean urlNotCached(URL url) {
+        // Iterate through the list of filters and concurrently check
+        // to see which ones are already cached.
+        long count = mFilters
+            .parallelStream()
+            .filter(filter -> 
+                    urlNotCached(url, filter.getName()))
+            .count();
+
+        // A count > 0 means the url was not already in the cache.
+        return count > 0;
     }
 }
 
