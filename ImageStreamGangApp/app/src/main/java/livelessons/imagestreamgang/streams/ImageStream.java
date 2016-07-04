@@ -192,7 +192,7 @@ public abstract class ImageStream
     /**
      * Factory method that makes a new @a OutputDecoratedFilter.
      */
-    protected Filter makeFilter(Filter filter) {
+    protected Filter makeFilterDecorator(Filter filter) {
         return new OutputFilterDecorator(filter);
     }
 

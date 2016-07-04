@@ -11,5 +11,6 @@
     <string name="ok_button">OK</string>
     <string name="sequential">Sequential</string>
     <string name="parallel">Parallel</string>
-    <string name="completablefuture">CompletableFuture</string>
+    <string name="completablefuture1">CompletableFuture1</string>
+    <string name="completablefuture2">CompletableFuture2</string>
 </resources>

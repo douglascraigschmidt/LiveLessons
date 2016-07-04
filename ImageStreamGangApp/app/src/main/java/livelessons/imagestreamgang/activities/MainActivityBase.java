@@ -3,10 +3,12 @@ package livelessons.imagestreamgang.activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import livelessons.imagestreamgang.R;
@@ -17,6 +19,11 @@ import livelessons.imagestreamgang.utils.PermissionRequest;
  */
 public class MainActivityBase
         extends Activity {
+    /**
+     * Debugging tag
+     */
+    protected String TAG = this.getClass().getName();
+
     /**
      * Available for sub-classes to set with PermissionRequest#with() call.
      */
@@ -70,5 +77,21 @@ public class MainActivityBase
                     requestCode, permissions, grantResults);
             mPermissionRequest = null; // request no longer needed
         }
+    }
+
+    /**
+     * Hook method invoked when the screen orientation changes.
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Logs the orientation of the screen, but doesn't do anything else.
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 
+            Log.d(TAG,
+                  "Now running in landscape mode");
+        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+            Log.d(TAG,
+                  "Now running in portrait mode");
     }
 }

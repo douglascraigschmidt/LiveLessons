@@ -18,12 +18,12 @@ import livelessons.imagestreamgang.utils.NetUtils;
  * Customizes ImageStream to use Java 8 CompletableFutures to
  * download, process, and store images concurrently.
  */
-public class ImageStreamCompletableFuture 
+public class ImageStreamCompletableFuture1
        extends ImageStream {
     /**
      * Constructor initializes the superclass and data members.
      */
-    public ImageStreamCompletableFuture(Filter[] filters,
+    public ImageStreamCompletableFuture1(Filter[] filters,
                                         Iterator<List<URL>> urlListIterator,
                                         Runnable completionHook) {
         super(filters, urlListIterator, completionHook);
@@ -65,7 +65,7 @@ public class ImageStreamCompletableFuture
     private Stream<Image> applyFilters(Image image) {
         return mFilters.parallelStream()
             // Create an OutputDecoratedFilter for each image.
-            .map(this::makeFilter)
+            .map(this::makeFilterDecorator)
 
             // Debugging output.
             .map(filter -> {

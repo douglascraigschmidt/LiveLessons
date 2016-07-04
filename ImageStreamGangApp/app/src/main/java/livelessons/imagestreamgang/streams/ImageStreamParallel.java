@@ -66,7 +66,7 @@ public class ImageStreamParallel
             .parallelStream()
 
             // Create an OutputDecoratedFilter for each image.
-            .map(this::makeFilter)
+            .map(this::makeFilterDecorator)
 
             // Filter the image and store it in an output file.
             .map(decoratedFilter -> 

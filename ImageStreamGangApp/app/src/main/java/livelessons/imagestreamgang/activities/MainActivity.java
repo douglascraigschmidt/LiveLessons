@@ -22,7 +22,8 @@ import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.GrayScaleFilter;
 import livelessons.imagestreamgang.filters.NullFilter;
 import livelessons.imagestreamgang.streams.ImageStream;
-import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture;
+import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture1;
+import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture2;
 import livelessons.imagestreamgang.streams.ImageStreamParallel;
 import livelessons.imagestreamgang.streams.ImageStreamSequential;
 import livelessons.imagestreamgang.utils.Options;
@@ -53,7 +54,7 @@ public class MainActivity
      * User selection for the desired stream.  Defaults to the
      * ImageStreamSequential.
      */
-    private int mStreamId = R.id.parallel;
+    private int mStreamId = R.id.completablefuture2;
 
     /**
      * Array of Filters to apply to the downloaded images.
@@ -194,10 +195,17 @@ public class MainActivity
                                            urlListIterator,
                                            completionHook);
 
-        case R.id.completablefuture:
+        case R.id.completablefuture1:
             UiUtils.showToast(this,
-                              "CompletableFuture stream processing");
-            return new ImageStreamCompletableFuture(filters,
+                              "CompletableFuture1 stream processing");
+            return new ImageStreamCompletableFuture1(filters,
+                                                    urlListIterator,
+                                                    completionHook);
+
+        case R.id.completablefuture2:
+            UiUtils.showToast(this,
+                              "CompletableFuture2 stream processing");
+            return new ImageStreamCompletableFuture2(filters,
                                                     urlListIterator,
                                                     completionHook);
         }

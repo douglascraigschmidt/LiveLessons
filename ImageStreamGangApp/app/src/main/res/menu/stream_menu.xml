@@ -9,8 +9,11 @@
     <item android:id="@+id/parallel"
           android:title="@string/parallel"
           android:onClick="chooseStream"/>
-    <item android:id="@+id/completablefuture"
-          android:title="@string/completablefuture"
+    <item android:id="@+id/completablefuture1"
+          android:title="@string/completablefuture1"
+          android:onClick="chooseStream"/>
+    <item android:id="@+id/completablefuture2"
+          android:title="@string/completablefuture2"
           android:onClick="chooseStream"/>
   </group>
 </menu>
