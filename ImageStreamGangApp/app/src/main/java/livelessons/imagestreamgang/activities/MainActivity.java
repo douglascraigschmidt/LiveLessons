@@ -3,6 +3,7 @@ package livelessons.imagestreamgang.activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -121,6 +122,9 @@ public class MainActivity
         // when a valid USER input is given.
         mRunButton = (Button) findViewById(R.id.runWithUserURLs);
         mClearListsButton = (Button) findViewById(R.id.clearLists);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         // Initialize the Options singleton.
         Options.instance().parseArgs(null);
