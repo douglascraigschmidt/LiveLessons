@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'android-N'
-    buildToolsVersion "24.0.0-rc3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
     defaultConfig {
         applicationId "livelessons.imagestreamgang"
-        minSdkVersion 'N'
-        targetSdkVersion 'N'
+        minSdkVersion 18
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         jackOptions {

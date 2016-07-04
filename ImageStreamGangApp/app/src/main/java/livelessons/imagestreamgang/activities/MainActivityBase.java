@@ -2,13 +2,13 @@ package livelessons.imagestreamgang.activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 
 import livelessons.imagestreamgang.R;
@@ -18,7 +18,7 @@ import livelessons.imagestreamgang.utils.PermissionRequest;
  * Super class that handles permissions.
  */
 public class MainActivityBase
-        extends Activity {
+       extends AppCompatActivity {
     /**
      * Debugging tag
      */
