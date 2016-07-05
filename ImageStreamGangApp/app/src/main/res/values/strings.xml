@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ImageStreamGangApplication</string>
+    <string name="app_name">ImageStreamGangApp</string>
     <string name="add_urls">Add URLs</string>
     <string name="run_default_urls">Default</string>
     <string name="url_prompt">List of URLs separated by commas</string>

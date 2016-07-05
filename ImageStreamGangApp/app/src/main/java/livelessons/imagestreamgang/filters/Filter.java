@@ -3,14 +3,11 @@ package livelessons.imagestreamgang.filters;
 import livelessons.imagestreamgang.utils.Image;
 
 /**
- * @class Filter
- *
- * @brief An abstract class that defines an interface for applying
- *        filtering operations to an Image. Each Filter has a name and
- *        an abstract method whose implementation must be overridden
- *        by a subclass.  Plays the role of the "Abstract Class" in
- *        the Template Method pattern and the role of the "Component"
- *        in the Decorator pattern.
+ * An abstract class that defines an interface for applying filtering
+ * operations to an Image. Each Filter has a name and an abstract
+ * method whose implementation must be overridden by a subclass.
+ * Plays the role of the "Abstract Class" in the Template Method
+ * pattern and the role of the "Component" in the Decorator pattern.
  */
 public abstract class Filter {
     /**

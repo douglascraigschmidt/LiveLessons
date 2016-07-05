@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import livelessons.imagestreamgang.filters.Filter;
+import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.filters.OutputFilterDecorator;
 import livelessons.imagestreamgang.utils.Image;
 import livelessons.imagestreamgang.utils.NetUtils;
@@ -190,10 +191,12 @@ public abstract class ImageStream
     }
 
     /**
-     * Factory method that makes a new @a OutputDecoratedFilter.
+     * Factory method that makes a new @a FilterDecoratorWithImage.
      */
-    protected Filter makeFilterDecorator(Filter filter) {
-        return new OutputFilterDecorator(filter);
+    protected FilterDecoratorWithImage makeFilterDecoratorWithImage(Filter filter,
+                                                                    Image image) {
+        return new FilterDecoratorWithImage(new OutputFilterDecorator(filter),
+                                            image);
     }
 
     /**

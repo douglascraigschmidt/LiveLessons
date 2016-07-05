@@ -6,10 +6,7 @@ import android.graphics.Color;
 import livelessons.imagestreamgang.utils.Image;
 
 /**
- * @class Filter
- *
- * @brief A Filter sublcass that converts a downloaded image to
- *        grayscale.
+ * A Filter sublcass that converts a downloaded image to grayscale.
  */
 public class GrayScaleFilter 
        extends Filter {

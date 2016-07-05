@@ -64,24 +64,14 @@ public class ImageStreamCompletableFuture1
      */
     private Stream<Image> applyFilters(Image image) {
         return mFilters.parallelStream()
-            // Create an OutputDecoratedFilter for each image.
-            .map(this::makeFilterDecorator)
-
-            // Debugging output.
-            .map(filter -> {
-                    Log.e(TAG,
-                          "Applying filter "
-                          + filter.getName()
-                          + " on file "
-                          + NetUtils.getFileNameForUrl(image.getSourceURL()));
-                return filter;
-                })
+            // Create a FilterDecoratorWithImage for each filter/image
+            // combo.
+            .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
             // Asynchronously filter the image and store it in an
             // output file.
-            .map(decoratedFilter -> 
-                 CompletableFuture.supplyAsync(() ->
-                                               decoratedFilter.filter(image),
+            .map(decoratedFilterWithImage -> 
+                 CompletableFuture.supplyAsync(decoratedFilterWithImage::run,
                                                getExecutor()))
             // Wait for all async operations to finish.
             .map(CompletableFuture::join);

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
+import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
 
 /**
@@ -66,10 +67,9 @@ public class ImageStreamParallel
             .parallelStream()
 
             // Create an OutputDecoratedFilter for each image.
-            .map(this::makeFilterDecorator)
+            .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
             // Filter the image and store it in an output file.
-            .map(decoratedFilter -> 
-                 decoratedFilter.filter(image));
+            .map(FilterDecoratorWithImage::run);
     }
 }

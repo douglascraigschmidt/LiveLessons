@@ -10,15 +10,12 @@ import livelessons.imagestreamgang.utils.Image;
 import livelessons.imagestreamgang.utils.Options;
 
 /**
- * @class OutputFilterDecorator
- *
- * @brief A Decorator whose inherited applyFilter() template method
- *        calls the filter() method on the Filter object passed to its
- *        constructor and whose decorate() hook method then writes the
- *        results of the filtered image to an output file.  Plays the
- *        role of the "Concrete Decorator" in the Decorator pattern
- *        and the role of the "Concrete Class" in the Template Method
- *        pattern.
+ * A Decorator whose inherited applyFilter() template method calls the
+ * filter() method on the Filter object passed to its constructor and
+ * whose decorate() hook method then writes the results of the
+ * filtered image to an output file.  Plays the role of the "Concrete
+ * Decorator" in the Decorator pattern and the role of the "Concrete
+ * Class" in the Template Method pattern.
  */
 public class OutputFilterDecorator 
        extends FilterDecorator {

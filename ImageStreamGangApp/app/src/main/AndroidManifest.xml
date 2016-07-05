@@ -10,8 +10,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     
     <uses-sdk
-        android:minSdkVersion="23"
-        android:targetSdkVersion="23" />
+        android:minSdkVersion="24"
+        android:targetSdkVersion="24" />
 
     <application
         android:allowBackup="true"

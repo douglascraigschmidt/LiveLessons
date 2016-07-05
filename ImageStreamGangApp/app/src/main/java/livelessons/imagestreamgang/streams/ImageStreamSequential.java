@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import livelessons.imagestreamgang.filters.Filter;
+import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
 
 /**
@@ -74,10 +75,9 @@ public class ImageStreamSequential
             .stream()
 
             // Create an OutputDecoratedFilter for each image.
-            .map(this::makeFilterDecorator)
+            .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
             // Filter the image and store it in an output file.
-            .forEach(decoratedFilter -> 
-                     decoratedFilter.filter(image));
+            .forEach(FilterDecoratorWithImage::run);
     }
 }
