@@ -1,11 +1,8 @@
 package livelessons.imagestreamgang.streams;
 
-import android.util.Log;
-
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
@@ -36,37 +33,37 @@ public class ImageStreamSequential
             // Sequentially process each URL in the input List.
             .stream()
 
-            // Filter out URLs that are already cached.
-            .filter(this::urlNotCached)
+            // Only include URLs that have not been already cached.
+            .filter(not(this::urlCached))
 
             // Transform URL -> Image (download each image via
             // its URL).
             .map(this::makeImage)
 
-            // Each all filters to each image sequentially (similar to
+            // Apply all filters to each image sequentially (similar to
             // a nested for loop).
             .forEach(this::applyFilters);
     }
 
     /**
-     * @return false if the @a url is already in the cache, else true;
+     * @return true if the @a url is already in the cache, else false.
      */
     @Override
-    protected boolean urlNotCached(URL url) {
+    protected boolean urlCached(URL url) {
         // Iterate through the list of filters and sequentially check
         // to see which ones are already cached.
         long count = mFilters
             .stream()
             .filter(filter ->
-                    urlNotCached(url, filter.getName()))
+                    urlCached(url, filter.getName()))
             .count();
 
-        // A count > 0 means the url was not already in the cache.
+        // A count > 0 means the url has already been cached.
         return count > 0;
     }
 
     /**
-     * Apply the filters to each @a image sequencially.
+     * Apply the filters to each @a image sequentially.
      */
     private void applyFilters(Image image) {
         mFilters

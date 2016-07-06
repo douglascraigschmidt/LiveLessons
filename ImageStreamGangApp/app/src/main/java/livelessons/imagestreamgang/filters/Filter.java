@@ -25,8 +25,8 @@ public abstract class Filter {
      * Constructs the filter with the default name.
      */
     public Filter() {
-    	String baseName = this.getClass().getCanonicalName();
-        mName = baseName.substring(baseName.lastIndexOf(".") + 1);
+        // Default uses the class name without the package prefix.
+    	mName = this.getClass().getSimpleName();
     }
 
     /**

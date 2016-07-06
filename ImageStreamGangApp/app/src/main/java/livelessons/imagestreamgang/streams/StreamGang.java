@@ -99,7 +99,7 @@ public abstract class StreamGang<E>
         // Invoke hook method to get initial List of input data to
         // process.
         if (setInput(getNextInput()) != null) {
-            // Invoke hook method to initate Stream processing.
+            // Invoke hook method to initiate Stream processing.
             initiateStream();
 
             // Invoke hook method to wait for all the tasks to exit.

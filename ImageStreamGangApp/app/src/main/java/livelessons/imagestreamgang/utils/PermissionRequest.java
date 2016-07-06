@@ -180,7 +180,7 @@ public class PermissionRequest {
     /**
      * Uses either Snackbar or Toast depending on snackbar snackbar setting.
      *
-     * @param id
+     * @param id A string resource to display.
      */
     @MainThread
     private void showMessage(@StringRes int id) {

@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
@@ -200,35 +201,43 @@ public abstract class ImageStream
     }
 
     /**
-     * @return true if the @a url is not already in the cache, else false.
+     * @return true if the @a url is in the cache, else false.
      */
-    protected boolean urlNotCached(URL url, String filterName) {
+    protected boolean urlCached(URL url, String filterName) {
         // Construct the subdirectory for the filter.
         File externalFile = new File(Options.instance().getDirectoryPath(),
                                      filterName);
         // Construct the filename for the URL.
         File imageFile = new File(externalFile,
                                   NetUtils.getFileNameForUrl(url));
-        // If the image file does not already exist then the URL is
-        // not cached.
-        return !imageFile.exists();
+        // If the image file exists then the URL is cached.
+        return imageFile.exists();
     }
 
     /**
-     * @return true if the @a url is not already in the cache, else
-     * false.
+     * @return true if the @a url is in the cache, else false.
      */
-    protected boolean urlNotCached(URL url) {
+    protected boolean urlCached(URL url) {
         // Iterate through the list of filters and concurrently check
         // to see which ones are already cached.
         long count = mFilters
             .parallelStream()
             .filter(filter -> 
-                    urlNotCached(url, filter.getName()))
+                    urlCached(url, filter.getName()))
             .count();
 
-        // A count > 0 means the url was not already in the cache.
+        // A count > 0 means the url has already been cached.
         return count > 0;
+    }
+
+    /**
+     * A generic negation predicate that can be used to negate the
+     * return value of urlCached (used by Collection.filter() calls).
+     *
+     * @return The negation of the input predicate.
+     */
+    static<T> Predicate<T> not(Predicate<T> p) {
+        return t -> !p.test(t);
     }
 }
 
