@@ -1,5 +1,7 @@
 package livelessons.imagestreamgang.streams;
 
+import android.util.Log;
+
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -36,23 +38,27 @@ public class ImageStreamParallel
      */
     @Override
     protected void processStream() {
-        getInput()
-            // Concurrently process each URL in the input List.
-            .parallelStream()
+        List<Image> collect = getInput()
+                // Concurrently process each URL in the input List.
+                .parallelStream()
 
-            // Only include URLs that have not been already cached.
-            .filter(not(this::urlCached))
+                // Only include URLs that have not been already cached.
+                .filter(not(this::urlCached))
 
-            // Transform URL -> Image (download each image via
-            // its URL).
-            .map(this::makeImage)
+                // Transform URL -> Image (download each image via
+                // its URL).
+                .map(this::makeImage)
 
-            // Map each image to a stream containing the filtered
-            // versions of the image.
-            .flatMap(this::applyFilters)
+                // Map each image to a stream containing the filtered
+                // versions of the image.
+                .flatMap(this::applyFilters)
 
-            // Terminate the stream.
-            .collect(Collectors.toList());
+                // Terminate the stream.
+                .collect(Collectors.toList());
+
+        Log.d(TAG, "processing of "
+                + (collect != null ? collect.size() : "0")
+                + " image(s) is complete");
     }
 
     /**

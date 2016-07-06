@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default permission strings -->
-    <string name="permission_rationale" formatted="false">This activity requires the following permissions: %s</string>
+    <string name="permission_rationale">This activity requires the following permissions: </string>
     <string name="permissions_granted">Permissions were granted.</string>
     <string name="permissions_denied">Permissions were not granted.</string>
     <string name="permissions_ok_button">OK</string>
