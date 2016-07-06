@@ -1,19 +1,11 @@
 package livelessons.imagestreamgang.streams;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.util.Log;
 
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
@@ -48,8 +40,8 @@ public class ImageStreamCompletableFuture2
             // Concurrently process each URL in the input List.
             .parallelStream()
 
-            // Filter out URLs that are already cached.
-            .filter(this::urlNotCached)
+            // Only include URLs that have not been already cached.
+            .filter(not(this::urlCached))
 
             // Submit non-cached URLs for asynchronous downloading,
             // which returns a stream of unfiltered Image futures.
@@ -62,7 +54,7 @@ public class ImageStreamCompletableFuture2
             .map(imageFuture ->
                  imageFuture.thenApply(this::makeFilterDecoratorsWithImage))
 
-            // After each future completes the compose the results
+            // After each future completes then compose the results
             // with the applyFiltersAsync() method, which returns a
             // list of filtered Image futures.
             .map(listFilterDecoratorsFuture ->

@@ -1,11 +1,8 @@
 package livelessons.imagestreamgang.streams;
 
-import android.util.Log;
-
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +31,7 @@ public class ImageStreamParallel
 
     /**
      * Perform the ImageStream processing, which uses a Java 8
-     * parallelstream to download, process, and store images
+     * parallel stream to download, process, and store images
      * concurrently.
      */
     @Override
@@ -43,8 +40,8 @@ public class ImageStreamParallel
             // Concurrently process each URL in the input List.
             .parallelStream()
 
-            // Filter out URLs that are already cached.
-            .filter(this::urlNotCached)
+            // Only include URLs that have not been already cached.
+            .filter(not(this::urlCached))
 
             // Transform URL -> Image (download each image via
             // its URL).

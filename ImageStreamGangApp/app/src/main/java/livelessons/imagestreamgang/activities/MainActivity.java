@@ -166,9 +166,7 @@ public class MainActivity
         // Check to see if the user entered any lists.
         if (iterator != null) {
             if (iterator.hasNext() 
-                && (inputSource == Options.InputSource.USER
-                    ? !isEmpty() 
-                    : true)) 
+                && (inputSource != Options.InputSource.USER || !isEmpty()))
                 new Thread(makeImageStream(mFilters,
                                            iterator,
                                            mCompletionHook)).start();

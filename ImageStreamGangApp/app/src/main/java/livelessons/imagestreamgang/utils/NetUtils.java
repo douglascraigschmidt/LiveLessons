@@ -1,7 +1,5 @@
 package livelessons.imagestreamgang.utils;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +37,7 @@ public final class NetUtils {
         
         // Creates an InputStream from the inputUrl from which to read
     	// the image data.
-        try (InputStream istream = (InputStream) url.openStream()) {
+        try (InputStream istream = url.openStream()) {
             // While there is unread data from the inputStream,
             // continue writing data to the byte array.
             while ((bytes = istream.read(readBuffer)) > 0) 
