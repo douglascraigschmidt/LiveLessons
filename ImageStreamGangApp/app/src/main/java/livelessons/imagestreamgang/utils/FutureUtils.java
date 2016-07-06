@@ -9,6 +9,12 @@ import static java.util.stream.Collectors.toList;
  */
 public class FutureUtils {
     /**
+     * A utility class should always define a private constructor.
+     */
+    private FutureUtils() {
+    }
+
+    /**
      * Waits for all of the CompletableFutures in @a futures to finish
      * and then returns a CompletableFuture containing a List with all
      * the results.

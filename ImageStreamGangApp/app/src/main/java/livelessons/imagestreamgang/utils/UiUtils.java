@@ -15,6 +15,9 @@ public final class UiUtils {
      */
     private static final String TAG = "UiUtils";
 
+    /**
+     * A utility class should always define a private constructor.
+     */
     private UiUtils() {
     }
 

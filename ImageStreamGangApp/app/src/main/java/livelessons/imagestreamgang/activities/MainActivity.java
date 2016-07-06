@@ -57,8 +57,9 @@ public class MainActivity
     private Button mDefaultButton;
 
     /**
-     * Long-press of mDefaultButton will toggle this boolean value which
-     * is used to determine if local or remote default images are loaded.
+     * Long-press of mDefaultButton will toggle this boolean value,
+     * which is used to determine if local or remote default images
+     * are loaded.
      */
     private boolean mLocalDefaultMode;
 
@@ -82,19 +83,6 @@ public class MainActivity
      * output into groups for viewing the results more clearly.
      */
     static final String FILTER_EXTRA = "filter_extra";
-    
-    /**
-     * Suggestions of default URLs that are supposed to be presented
-     * to the user via AutoCompleteTextView.
-     */
-    private final String[] sSUGGESTIONS = new String[] {        
-        "http://www.dre.vanderbilt.edu/~schmidt/ka.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/uci.png,"
-        + "http://www.cs.wustl.edu/~schmidt/gifs/douglass.jpg", 
-        "http://www.cs.wustl.edu/~schmidt/gifs/lil_dougjpg,"
-        + "http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg,"
-        + "http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg"
-    };
     
     /**
      * The adapter responsible for recommending suggestions of URLs to
@@ -146,10 +134,9 @@ public class MainActivity
         // url loading.
         mDefaultButton.setOnLongClickListener(view -> {
             mLocalDefaultMode = !mLocalDefaultMode;
-            ((Button)view).setText(
-                    getString(mLocalDefaultMode
-                            ? R.string.default_local_button
-                            : R.string.default_button));
+            ((Button)view).setText(getString(mLocalDefaultMode
+                                             ? R.string.default_local_button
+                                             : R.string.default_button));
             return true;
         });
     }
@@ -160,10 +147,10 @@ public class MainActivity
     public void runWithDefaultURLs(View view) {
         //
     	runURLs(view,
-                ((Button)view).getText().equals(
-                        getString(R.string.default_button))
-                                ? Options.InputSource.DEFAULT
-                                : Options.InputSource.DEFAULT_LOCAL);
+                ((Button)view).getText()
+                              .equals(getString(R.string.default_button))
+                ? Options.InputSource.DEFAULT
+                : Options.InputSource.DEFAULT_LOCAL);
     }
     
     /**
@@ -291,7 +278,7 @@ public class MainActivity
         mSuggestions = 
             new ArrayAdapter<String>(this,
                                      R.layout.suggestion_item,
-                                     sSUGGESTIONS);
+                                     Options.instance().getSuggestions());
     }
 	
     /**

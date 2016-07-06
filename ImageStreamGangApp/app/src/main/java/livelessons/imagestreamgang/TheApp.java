@@ -3,7 +3,11 @@ package livelessons.imagestreamgang;
 import android.app.Application;
 import android.content.Context;
 
-public class TheApp extends Application {
+/**
+ * The Application class for the ImageStreamGangApp.
+ */
+public class TheApp 
+       extends Application {
     /**
      * Static self-reference for static helpers.
      */

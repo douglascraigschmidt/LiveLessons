@@ -44,12 +44,6 @@ public class Options {
     private String mPathname = "defaultUrls.txt";
 
     /**
-     * Separator that indicates the division of lists in the
-     * URL file. Defaults to an empty line
-     */
-    private String mSeparator = "";
-
-    /**
      * Controls whether debugging output will be generated (defaults
      * to false).
      */
@@ -58,9 +52,22 @@ public class Options {
     /**
      * The path to the external storage directory in Android.
      */
-    final static String EXTERNAL_PATH =
+    private final static String EXTERNAL_PATH =
         Environment.getExternalStorageDirectory().toString();
 
+    /**
+     * Suggestions of default URLs that are supposed to be presented
+     * to the user via AutoCompleteTextView.
+     */
+    private final String[] sSUGGESTIONS = new String[] {        
+        "http://www.dre.vanderbilt.edu/~schmidt/ka.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/uci.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg",
+        "http://www.cs.wustl.edu/~schmidt/gifs/lil-doug.jpg,"
+        + "http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg,"
+        + "http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg"
+    };
+    
     /**
      * Method to return the one and only singleton uniqueInstance.
      */
@@ -69,6 +76,13 @@ public class Options {
             mUniqueInstance = new Options();
 
         return mUniqueInstance;
+    }
+
+    /**
+     * Return the suggestions.
+     */
+    public String[] getSuggestions() {
+        return sSUGGESTIONS;
     }
 
     /**
@@ -84,14 +98,6 @@ public class Options {
     public String getDirectoryPath() {
         return EXTERNAL_PATH;
     }
-
-    /**
-     * Return the separator the indicates the break between
-     * different lists in the input URL file
-     */
-    public String getSeparator() {
-		return mSeparator;
-	}
 
     /**
      * Takes a string input and returns the corresponding InputSource.
@@ -125,7 +131,12 @@ public class Options {
             : null;
     }
 
-    protected List<List<URL>> getDefaultUrlList(Context context, boolean local)
+    /**
+     * Returns the appropriate list of URLs, i.e., either pointing to
+     * the local device or to a remote server.
+     */
+    protected List<List<URL>> getDefaultUrlList(Context context,
+                                                boolean local)
         throws MalformedURLException {
         return local
                ? getDefaultResourceUrlList(context)
@@ -138,20 +149,13 @@ public class Options {
      */
     protected List<List<URL>> getDefaultUrlList()
             throws MalformedURLException {
-        URL[] urls1 = {
-            new URL("http://www.dre.vanderbilt.edu/~schmidt/ka.png"),
-            new URL("http://www.dre.vanderbilt.edu/~schmidt/uci.png"),
-            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs_small.jpg")
-        };
-        URL[] urls2 = {
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/lil_doug.jpg"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg")
-        };
-
     	List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
-        variableNumberOfInputURLs.add(Arrays.asList(urls1));
-        variableNumberOfInputURLs.add(Arrays.asList(urls2));
+
+        // Convert all the suggestion strings into URLs.
+        for (String suggestedUrls : sSUGGESTIONS)
+            variableNumberOfInputURLs.add
+                (convertStringToUrls(suggestedUrls));
+
     	return variableNumberOfInputURLs;
     }
 
@@ -161,20 +165,28 @@ public class Options {
      */
     protected List<List<URL>> getDefaultResourceUrlList(Context context)
             throws MalformedURLException {
-        URL[] urls1 = {
+        // Create a two-dimensional array of URLs to images on the local device.
+        URL[][] urlsArray = new URL[][] {
+            {
                 new URL(getResourcesUrl(context, R.raw.ka)),
                 new URL(getResourcesUrl(context, R.raw.uci)),
                 new URL(getResourcesUrl(context, R.raw.dougs_small))
-        };
-        URL[] urls2 = {
+            },
+            {    
                 new URL(getResourcesUrl(context, R.raw.lil_doug)),
                 new URL(getResourcesUrl(context, R.raw.wm)),
                 new URL(getResourcesUrl(context, R.raw.ironbound))
+            }
         };
 
         List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
-        variableNumberOfInputURLs.add(Arrays.asList(urls1));
-        variableNumberOfInputURLs.add(Arrays.asList(urls2));
+
+        for (URL[] urls : urlsArray) {
+            // Create a new List of URLs containing the next URLs from
+            // the array.
+            variableNumberOfInputURLs.add(Arrays.asList(urls));
+        }
+
         return variableNumberOfInputURLs;
     }
 
@@ -186,7 +198,7 @@ public class Options {
                                        LinearLayout listUrlGroups,
                                        InputSource source) {
     	List<List<URL>> variableNumberOfInputURLs =
-            new ArrayList<List<URL>>();
+            new ArrayList<>();
 
     	try {
             switch (source) {
@@ -208,21 +220,15 @@ public class Options {
                 // holds the list of URL lists.
                 int numChildViews =
                     listUrlGroups.getChildCount();
+
                 for (int i = 0; i < numChildViews; ++i) {
                     AutoCompleteTextView child = (AutoCompleteTextView)
                         listUrlGroups.getChildAt(i);
 
-                    // Create a new URL list and add each URL
-                    // separated by commas to the list
-                    List<URL> urls = new ArrayList<URL>();
-                    StringTokenizer tokenizer =
-                        new StringTokenizer(child.getText().toString(), ", ");
-
-                    while (tokenizer.hasMoreTokens())
-                        urls.add(new URL(tokenizer.nextToken().trim()));
-
-                    // Add the list of URLs to the main list
-                    variableNumberOfInputURLs.add(urls);
+                    // Convert the input string into a list of URLs
+                    // and add it to the main list.
+                    variableNumberOfInputURLs.add
+                        (convertStringToUrls(child.getText().toString()));
                 }
 
                 break;
@@ -242,6 +248,29 @@ public class Options {
     }
 
     /**
+     * Create a new URL list from a @a stringOfUrls that contains a
+     * list of URLs separated by commas and add them to the URL list
+     * that's returned.
+     */
+    private List<URL> convertStringToUrls(String stringOfUrls) {
+        List<URL> urls = new ArrayList<>();
+
+        for (StringTokenizer tokenizer =
+                 new StringTokenizer(stringOfUrls, ", ");
+             tokenizer.hasMoreTokens();
+             )
+            try {
+                // Create a new URL containing the next URL from the
+                // stream.
+                urls.add(new URL(tokenizer.nextToken().trim()));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+        return urls;
+    }
+
+    /**
      * Returns whether debugging output is generated.
      */
     public boolean diagnosticsEnabled() {
@@ -254,12 +283,8 @@ public class Options {
     public boolean parseArgs(String argv[]) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
-                if (argv[argc].equals("-f"))
-                    mPathname = argv[argc + 1];
-                else if (argv[argc].equals("-d"))
+                if (argv[argc].equals("-d"))
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                else if (argv[argc].equals("-s"))
-                	mSeparator = argv[argc + 1];
                 else {
                     printUsage();
                     return false;
@@ -273,16 +298,8 @@ public class Options {
      * Print out usage and default values.
      */
     public void printUsage() {
-        System.out.println("\nHelp Invoked on ");
-        System.out.println("[-hfs] ");
-        System.out.println("");
-
         System.out.println("Usage: ");
         System.out.println("-d [true|false]");
-        System.out.println("-f URL-file-pathame");
-        System.out.println("-h: invoke help");
-        System.out.println("-i: URL-list-input-source [ DEFAULT | DEFAULT_LOCAL | USER | FILE ]");
-        System.out.println("-s URL-list-separator");
     }
 
     /**
