@@ -210,9 +210,8 @@ public class PermissionRequest {
                 permissionStrings += "\n" + permission;
             }
 
-            msg = String.format(
-                    mActivity.getString(R.string.permission_rationale),
-                    permissionStrings);
+            msg = mActivity.getString(R.string.permission_rationale)
+                    + permissionStrings;
         } else {
             // App supplied rationale.
             msg = mActivity.getString(mRationaleId);

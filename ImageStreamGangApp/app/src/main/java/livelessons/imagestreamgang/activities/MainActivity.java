@@ -45,11 +45,22 @@ public class MainActivity
      * The button to run the ImageStreamGang using the user input.
      */
     private Button mRunButton;
-    
+
     /**
      * The button to clear the lists of user input.
      */
     private Button mClearListsButton;
+
+    /**
+     * The button to load default images.
+     */
+    private Button mDefaultButton;
+
+    /**
+     * Long-press of mDefaultButton will toggle this boolean value which
+     * is used to determine if local or remote default images are loaded.
+     */
+    private boolean mLocalDefaultMode;
 
     /**
      * User selection for the desired stream.  Defaults to the
@@ -80,7 +91,7 @@ public class MainActivity
         "http://www.dre.vanderbilt.edu/~schmidt/ka.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/uci.png,"
         + "http://www.cs.wustl.edu/~schmidt/gifs/douglass.jpg", 
-        "http://www.cs.wustl.edu/~schmidt/gifs/lil-doug.jpg,"
+        "http://www.cs.wustl.edu/~schmidt/gifs/lil_dougjpg,"
         + "http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg,"
         + "http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg"
     };
@@ -123,20 +134,36 @@ public class MainActivity
         // when a valid USER input is given.
         mRunButton = (Button) findViewById(R.id.runWithUserURLs);
         mClearListsButton = (Button) findViewById(R.id.clearLists);
+        mDefaultButton = (Button) findViewById(R.id.runWithDefaultURLs);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         // Initialize the Options singleton.
         Options.instance().parseArgs(null);
+
+        // Setup a long-click callback to toggle between local and remote
+        // url loading.
+        mDefaultButton.setOnLongClickListener(view -> {
+            mLocalDefaultMode = !mLocalDefaultMode;
+            ((Button)view).setText(
+                    getString(mLocalDefaultMode
+                            ? R.string.default_local_button
+                            : R.string.default_button));
+            return true;
+        });
     }
     
     /**
      * Run the ImageStreamGang using a default set of URL lists.
      */
     public void runWithDefaultURLs(View view) {
-    	runURLs(view, 
-                Options.InputSource.DEFAULT);
+        //
+    	runURLs(view,
+                ((Button)view).getText().equals(
+                        getString(R.string.default_button))
+                                ? Options.InputSource.DEFAULT
+                                : Options.InputSource.DEFAULT_LOCAL);
     }
     
     /**
