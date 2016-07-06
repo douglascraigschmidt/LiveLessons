@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
  * download, process, and store images concurrently.
  */
 public class ImageStreamCompletableFuture2
-       extends ImageStream {
+       extends ImageStreamCompletableFutureBase {
     /**
      * Constructor initializes the superclass and data members.
      */
@@ -84,15 +84,6 @@ public class ImageStreamCompletableFuture2
     }
 
     /**
-     * Asynchronously download an Image from the @a url parameter.
-     */
-    private CompletableFuture<Image> makeImageAsync(URL url) {
-        // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> makeImage(url),
-                                             getExecutor());
-    }
-
-    /**
      * Create a List of FilterDecoratorWithImage objects corresponding
      * to the @a image parameter.
      */
@@ -118,9 +109,7 @@ public class ImageStreamCompletableFuture2
             .stream()
 
             // Asynchronously apply a filter to an Image.
-            .map(decoratedFilterWithImage ->
-                 CompletableFuture.supplyAsync(decoratedFilterWithImage::run,
-                                               getExecutor()))
+            .map(this::filterImageAsync)
 
             // Collect the list of futures.
             .collect(toList());

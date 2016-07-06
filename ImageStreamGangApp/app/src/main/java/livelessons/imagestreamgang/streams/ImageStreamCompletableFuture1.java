@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
+import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
 
 /**
@@ -17,7 +18,7 @@ import livelessons.imagestreamgang.utils.Image;
  * and store images concurrently.
  */
 public class ImageStreamCompletableFuture1
-        extends ImageStream {
+        extends ImageStreamCompletableFutureBase {
     /**
      * Constructor initializes the superclass and data members.
      */
@@ -36,7 +37,7 @@ public class ImageStreamCompletableFuture1
     protected void processStream() {
         List<Image> collect = getInput()
                 // Concurrently process each URL in the input List.
-                .parallelStream()
+                .stream()
 
                 // Only include URLs that have not been already cached.
                 .filter(not(this::urlCached))
@@ -63,27 +64,16 @@ public class ImageStreamCompletableFuture1
      * Apply the filters in parallel to each @a image.
      */
     private Stream<Image> applyFilters(Image image) {
-        return mFilters.parallelStream()
+        return mFilters.stream()
                 // Create a FilterDecoratorWithImage for each filter/image
                 // combo.
                 .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
                 // Asynchronously filter the image and store it in an
                 // output file.
-                .map(decoratedFilterWithImage ->
-                             CompletableFuture.supplyAsync(
-                                     decoratedFilterWithImage::run,
-                                     getExecutor()))
+                .map(this::filterImageAsync)
+
                 // Wait for all async operations to finish.
                 .map(CompletableFuture::join);
-    }
-
-    /**
-     * Asynchronously download an Image from the @a url parameter.
-     */
-    private CompletableFuture<Image> makeImageAsync(URL url) {
-        // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> makeImage(url),
-                                             getExecutor());
     }
 }
