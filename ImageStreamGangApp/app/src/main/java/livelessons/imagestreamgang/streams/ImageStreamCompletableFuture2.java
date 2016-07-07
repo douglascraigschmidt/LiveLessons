@@ -69,14 +69,15 @@ public class ImageStreamCompletableFuture2
         final CompletableFuture<List<List<CompletableFuture<Image>>>> allImagesDone =
                 FutureUtils.joinAll(listOfFutures);
         try {
-            // The call to get() is essential here since it blocks the
-            // calling thread until all the futures have been
-            // completed.
-            long count = allImagesDone.get().stream().count();
+            final long[] count = {0};
+            
+            // The call to get() is needed here to blocks the calling
+            // thread until all the futures have been completed.
+            allImagesDone.get().stream().forEach(list -> count[0] += list.size());
 
             Log.d(TAG,
                   "processing of "
-                  + count
+                  + count[0]
                   + " image(s) is complete");
         } catch (Exception e) {
             e.printStackTrace();
