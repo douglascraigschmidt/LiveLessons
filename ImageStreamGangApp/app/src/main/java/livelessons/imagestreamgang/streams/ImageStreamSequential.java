@@ -1,12 +1,17 @@
 package livelessons.imagestreamgang.streams;
 
+import android.util.Log;
+
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes ImageStream to use a Java 8 stream to download, process,
@@ -29,7 +34,7 @@ public class ImageStreamSequential
      */
     @Override
     protected void processStream() {
-        getInput()
+        List<Image> collect = getInput()
             // Sequentially process each URL in the input List.
             .stream()
 
@@ -40,9 +45,16 @@ public class ImageStreamSequential
             // its URL).
             .map(this::makeImage)
 
-            // Apply all filters to each image sequentially (similar to
-            // a nested for loop).
-            .forEach(this::applyFilters);
+            // Map each image to a stream containing the filtered
+            // versions of the image.
+            .flatMap(this::applyFilters)
+
+            // Terminate the stream.
+            .collect(toList());
+
+        Log.d(TAG, "processing of "
+                + (collect != null ? collect.size() : "0")
+                + " image(s) is complete");
     }
 
     /**
@@ -65,8 +77,8 @@ public class ImageStreamSequential
     /**
      * Apply the filters to each @a image sequentially.
      */
-    private void applyFilters(Image image) {
-        mFilters
+    private Stream<Image> applyFilters(Image image) {
+        return mFilters
             // Iterate through the list of filters and apply each
             // filter sequentially.
             .stream()
@@ -75,6 +87,6 @@ public class ImageStreamSequential
             .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
             // Filter the image and store it in an output file.
-            .forEach(FilterDecoratorWithImage::run);
+            .map(FilterDecoratorWithImage::run);
     }
 }
