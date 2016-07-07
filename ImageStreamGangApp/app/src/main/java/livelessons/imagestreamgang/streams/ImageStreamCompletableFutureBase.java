@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
-import livelessons.imagestreamgang.utils.FutureUtils;
+import livelessons.imagestreamgang.utils.StreamsUtils;
 import livelessons.imagestreamgang.utils.Image;
 
 import static java.util.stream.Collectors.toList;

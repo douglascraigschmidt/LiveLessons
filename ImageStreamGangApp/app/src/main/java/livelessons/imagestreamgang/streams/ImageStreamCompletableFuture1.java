@@ -45,9 +45,6 @@ public class ImageStreamCompletableFuture1
                 // Submit the URLs for asynchronous downloading.
                 .map(this::makeImageAsync)
 
-                // Wait for all async operations to finish.
-                .map(CompletableFuture::join)
-
                 // Map each image to a stream containing the filtered
                 // versions of the image.
                 .flatMap(this::applyFilters)
@@ -66,14 +63,27 @@ public class ImageStreamCompletableFuture1
     /**
      * Apply the filters in parallel to each @a image.
      */
-    private Stream<CompletableFuture<Image>> applyFilters(Image image) {
+    private Stream<CompletableFuture<Image>> applyFilters(CompletableFuture<Image> imageFuture) {
         return mFilters.stream()
                 // Create a FilterDecoratorWithImage for each filter/image
                 // combo.
-                .map(filter -> makeFilterDecoratorWithImage(filter, image))
+                .map(filter ->
+                     imageFuture.thenApply(image -> makeFilterDecoratorWithImage(filter,
+                                                                                 image)))
 
                 // Asynchronously filter the image and store it in an
                 // output file.
-                .map(this::filterImageAsync);
+                .map(this::filterFutureImageAsync);
+    }
+
+    /**
+     * Asynchronously filter the image and store it in an output file.
+     */
+    protected CompletableFuture<Image> filterFutureImageAsync
+        (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
+        // Asynchronously filter the image and store it in an output
+        // file.
+        return filterDecoratorWithImageFuture.thenCompose(filter -> CompletableFuture.supplyAsync(filter::run,
+                                                                                         getExecutor()));
     }
 }

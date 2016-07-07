@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.AnyRes;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 
@@ -14,9 +13,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.R;
+
+import static java.util.stream.Collectors.toList;
+import static livelessons.imagestreamgang.utils.ExceptionUtils.rethrowFunction;
 
 /**
  * This class implements the Singleton pattern to handle
@@ -247,12 +250,31 @@ public class Options {
     	return variableNumberOfInputURLs;
     }
 
+
     /**
      * Create a new URL list from a @a stringOfUrls that contains a
      * list of URLs separated by commas and add them to the URL list
      * that's returned.
      */
     private List<URL> convertStringToUrls(String stringOfUrls) {
+        // Create a Function that returns a new URL object when applied.
+        Function<String, URL> urlFactory = rethrowFunction(URL::new);
+        return
+            // Convert the stringOfUrls parameter into a Stream.
+            Stream.of(stringOfUrls)
+
+            // Split the stringOfUrls into a string[].
+            .map(s -> s.split(","))
+
+            // Convert the string[] into a flatted Stream<String>.
+            .flatMap(Arrays::stream)
+
+            // Convert each String in the Stream to a URL.
+            .map(s -> (urlFactory.apply(s)))
+
+            // Create a list of URLs.
+            .collect(toList());
+        /*
         List<URL> urls = new ArrayList<>();
 
         for (StringTokenizer tokenizer =
@@ -266,8 +288,7 @@ public class Options {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-
-        return urls;
+        */
     }
 
     /**
@@ -316,7 +337,7 @@ public class Options {
      * @return A String URL that maps to the specified resource
      * @throws Resources.NotFoundException
      */
-    private static String getResourcesUrl(Context context, @AnyRes int resId)
+    private static String getResourcesUrl(Context context, int resId)
             throws Resources.NotFoundException {
         return getResourcesUri(context, resId).toString();
     }
@@ -329,7 +350,7 @@ public class Options {
      * @return A Uri that maps to the specified resource
      * @throws Resources.NotFoundException
      */
-    private static Uri getResourcesUri(Context context, @AnyRes int resId) {
+    private static Uri getResourcesUri(Context context, int resId) {
         return Uri.parse(NetUtils.RESOURCE_BASE
                 + context.getResources().getResourcePackageName(resId)
                 + '/'

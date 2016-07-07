@@ -2,16 +2,19 @@ package livelessons.imagestreamgang.utils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import static java.util.stream.Collectors.toList;
 
 /**
- * Helpful methods for manipulating CompletableFutures.
+ * Helpful methods for manipulating various Java 8 Streams features.
  */
-public class FutureUtils {
+public class StreamsUtils {
     /**
      * A utility class should always define a private constructor.
      */
-    private FutureUtils() {
+    private StreamsUtils() {
     }
 
     /**
