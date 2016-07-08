@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.R;
@@ -260,6 +261,20 @@ public class Options {
         // Create a Function that returns a new URL object when applied.
         Function<String, URL> urlFactory = rethrowFunction(URL::new);
         return
+            // Create a regular expression for the "," separator.
+            Pattern.compile(",")
+
+            // Use the regular expression to split the strongOfUrls into a Stream<String>.
+            .splitAsStream(stringOfUrls)
+
+            // Convert each String in the Stream to a URL.
+            .map(urlFactory::apply)
+
+            // Create a list of URLs.
+            .collect(toList());
+        /*
+
+        return
             // Convert the stringOfUrls parameter into a Stream.
             Stream.of(stringOfUrls)
 
@@ -269,11 +284,12 @@ public class Options {
             // Convert the string[] into a flatted Stream<String>.
             .flatMap(Arrays::stream)
 
-            // Convert each String in the Stream to a URL.
+
             .map(s -> (urlFactory.apply(s)))
 
             // Create a list of URLs.
             .collect(toList());
+            */
         /*
         List<URL> urls = new ArrayList<>();
 

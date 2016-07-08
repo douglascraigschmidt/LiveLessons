@@ -5,6 +5,7 @@ import android.util.Log;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
@@ -53,7 +54,7 @@ public class ImageStreamSequential
             .collect(toList());
 
         Log.d(TAG, "processing of "
-                + (collect != null ? collect.size() : "0")
+                + collect.size()
                 + " image(s) is complete");
     }
 

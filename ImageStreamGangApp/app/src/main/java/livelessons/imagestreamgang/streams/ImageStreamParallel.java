@@ -57,7 +57,7 @@ public class ImageStreamParallel
                 .collect(Collectors.toList());
 
         Log.d(TAG, "processing of "
-                + (collect != null ? collect.size() : "0")
+                + collect.size()
                 + " image(s) is complete");
     }
 
