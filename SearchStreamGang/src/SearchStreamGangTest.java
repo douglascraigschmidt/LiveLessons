@@ -1,6 +1,4 @@
-import java.util.Spliterators;
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 /**
  * This test driver showcases how various subclasses of the StreamGang
@@ -87,10 +85,14 @@ public class SearchStreamGangTest {
             printDebugging("Starting SearchStreamGangTest");
                      
             // Create/run appropriate type of StreamGang to search for words.
-            for (TestsToRun test : TestsToRun.values()) {
-                printDebugging("Starting " + test); 
-                makeStreamGang(mWordList, test).run(); printDebugging("Ending " + test); 
-            }
+            // for (TestsToRun test : TestsToRun.values()) {
+
+            Stream.of(TestsToRun.values())
+                  .forEach(test -> {
+                           printDebugging("Starting " + test); 
+                           makeStreamGang(mWordList, test).run(); 
+                           printDebugging("Ending " + test);
+                   });
                       
             printDebugging("Ending SearchStreamGangTest");             
 	}
