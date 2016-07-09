@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
+import livelessons.imagestreamgang.utils.StreamsUtils;
 
 import static java.util.stream.Collectors.toList;
 
@@ -40,7 +41,7 @@ public class ImageStreamSequential
             .stream()
 
             // Only include URLs that have not been already cached.
-            .filter(not(this::urlCached))
+            .filter(StreamsUtils.not(this::urlCached))
 
             // Transform URL -> Image (download each image via
             // its URL).

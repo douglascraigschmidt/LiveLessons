@@ -219,7 +219,7 @@ public abstract class ImageStream
      */
     protected boolean urlCached(URL url) {
         // Iterate through the list of filters and concurrently check
-        // to see which ones are already cached.
+        // to see which images are already cached.
         long count = mFilters
             .parallelStream()
             .filter(filter -> 
@@ -228,16 +228,6 @@ public abstract class ImageStream
 
         // A count > 0 means the url has already been cached.
         return count > 0;
-    }
-
-    /**
-     * A generic negation predicate that can be used to negate the
-     * return value of urlCached (used by Collection.filter() calls).
-     *
-     * @return The negation of the input predicate.
-     */
-    static<T> Predicate<T> not(Predicate<T> p) {
-        return t -> !p.test(t);
     }
 }
 

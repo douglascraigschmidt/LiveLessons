@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
 import livelessons.imagestreamgang.utils.Image;
+import livelessons.imagestreamgang.utils.StreamsUtils;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes ImageStream to use Java 8 CompletableFutures to download, process,
@@ -40,7 +43,7 @@ public class ImageStreamCompletableFuture1
                 .stream()
 
                 // Only include URLs that have not been already cached.
-                .filter(not(this::urlCached))
+                .filter(StreamsUtils.not(this::urlCached))
 
                 // Submit the URLs for asynchronous downloading.
                 .map(this::makeImageAsync)
@@ -53,10 +56,10 @@ public class ImageStreamCompletableFuture1
                 .map(CompletableFuture::join)
 
                 // Terminate the stream.
-                .collect(Collectors.toList());
+                .collect(toList());
 
         Log.d(TAG, "processing of "
-                + (collect != null ? collect.size() : "0")
+                + collect.size()
                 + " image(s) is complete");
     }
 
@@ -83,7 +86,8 @@ public class ImageStreamCompletableFuture1
         (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
         // Asynchronously filter the image and store it in an output
         // file.
-        return filterDecoratorWithImageFuture.thenCompose(filter -> CompletableFuture.supplyAsync(filter::run,
-                                                                                         getExecutor()));
+        return filterDecoratorWithImageFuture.thenCompose(filter ->
+                                                          CompletableFuture.supplyAsync(filter::run,
+                                                                                        getExecutor()));
     }
 }

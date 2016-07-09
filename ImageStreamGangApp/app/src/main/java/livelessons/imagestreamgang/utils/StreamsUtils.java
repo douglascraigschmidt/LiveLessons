@@ -3,6 +3,7 @@ package livelessons.imagestreamgang.utils;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
@@ -30,5 +31,15 @@ public class StreamsUtils {
                                        futures.stream()
                                        .map(CompletableFuture::join)
                                        .collect(toList()));
+    }
+
+    /**
+     * A generic negation predicate that can be used to negate the
+     * return value of urlCached (used by Collection.filter() calls).
+     *
+     * @return The negation of the input predicate.
+     */
+    public static<T> Predicate<T> not(Predicate<T> p) {
+        return t -> !p.test(t);
     }
 }

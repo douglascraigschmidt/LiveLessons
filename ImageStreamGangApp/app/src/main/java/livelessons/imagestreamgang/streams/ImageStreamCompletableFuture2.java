@@ -41,7 +41,7 @@ public class ImageStreamCompletableFuture2
             .parallelStream()
 
             // Only include URLs that have not been already cached.
-            .filter(not(this::urlCached))
+            .filter(StreamsUtils.not(this::urlCached))
 
             // Submit non-cached URLs for asynchronous downloading,
             // which returns a stream of unfiltered Image futures.
@@ -68,20 +68,17 @@ public class ImageStreamCompletableFuture2
         // complete.
         final CompletableFuture<List<List<CompletableFuture<Image>>>> allImagesDone =
                 StreamsUtils.joinAll(listOfFutures);
-        try {
-            final long[] count = {0};
-            
-            // The call to get() is needed here to blocks the calling
-            // thread until all the futures have been completed.
-            allImagesDone.get().stream().forEach(list -> count[0] += list.size());
+        // The call to join() is needed here to blocks the calling
+        // thread until all the futures have been completed.
+        int imagesProcessed = allImagesDone.join()
+                                           .stream()
+                                           .mapToInt(List::size)
+                                           .sum();
 
-            Log.d(TAG,
-                  "processing of "
-                  + count[0]
-                  + " image(s) is complete");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Log.d(TAG,
+              "processing of "
+              + imagesProcessed
+              + " image(s) is complete");
     }
 
     /**
