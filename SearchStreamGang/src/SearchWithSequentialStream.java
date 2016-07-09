@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use a sequential
- * Java Stream to search the input for an array of words to find. It
- * only runs for a single iteration cycle.
+ * Java Stream to search the input data for each word in an array of
+ * words.
  */
 public class SearchWithSequentialStream
              extends SearchStreamGangCommon {
@@ -21,8 +21,8 @@ public class SearchWithSequentialStream
     }
 
     /**
-     * Perform the ImageStream processing, which uses a Java 8 stream
-     * to download, process, and store images concurrently.
+     * Perform the processing, which uses a Java 8 Stream to
+     * sequentially search for words in the input data.
      */
     @Override
     protected void processStream() {
