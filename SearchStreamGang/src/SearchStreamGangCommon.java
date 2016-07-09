@@ -181,7 +181,7 @@ public abstract class SearchStreamGangCommon
      * This Spliterator is used to create a Stream of matches to
      * a word in the input data.
      */
-    private static class WordMatchItr
+    private static class WordMatcherItr
                    extends Spliterators.AbstractSpliterator<Integer> {
         /**
          * Matches a word in the input data.
@@ -228,7 +228,7 @@ public abstract class SearchStreamGangCommon
         StreamSupport
             // Create a stream of Integers indicating the indices of
             // all places (if any) where the word matched the input data.
-            .stream(new WordMatchItr(new WordMatcher(word).with(inputData)), 
+            .stream(new WordMatcherItr(new WordMatcher(word).with(inputData)), 
                     false)
                     
             // Add any matches to the results object.
