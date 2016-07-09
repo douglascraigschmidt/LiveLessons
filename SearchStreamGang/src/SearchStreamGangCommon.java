@@ -191,7 +191,7 @@ public abstract class SearchStreamGangCommon
         /**
          * Constructor initializes the field and super class.
          */
-        WordMatchItr(WordMatcher matcher) {
+        WordMatcherItr(WordMatcher matcher) {
             super(Long.MAX_VALUE, ORDERED | NONNULL);
             mMatcher = matcher;
         }
