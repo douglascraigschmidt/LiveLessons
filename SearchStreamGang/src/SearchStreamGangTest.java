@@ -1,10 +1,10 @@
 import java.util.stream.Stream;
 
 /**
- * This test driver showcases how various subclasses of the StreamGang
- * framework use different Java barrier synchronizers to implement an
- * "embarrassingly parallel" application that concurrently searches
- * for words in one or more Lists of input Strings.
+ * This test driver showcases how various subclasses customize the
+ * StreamGang framework with different Java concurrency and
+ * synchronization mechanisms to implement an "embarrassingly
+ * parallel" program that searches for words in a list of input data.
  */
 public class SearchStreamGangTest {
 	/**
@@ -85,8 +85,6 @@ public class SearchStreamGangTest {
             printDebugging("Starting SearchStreamGangTest");
                      
             // Create/run appropriate type of StreamGang to search for words.
-            // for (TestsToRun test : TestsToRun.values()) {
-
             Stream.of(TestsToRun.values())
                   .forEach(test -> {
                            printDebugging("Starting " + test); 
