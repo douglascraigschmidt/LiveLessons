@@ -55,7 +55,7 @@ public abstract class SearchStreamGangCommon
      * Hook method that must be overridden by subclasses to perform
      * the Stream processing.
      */
-    protected abstract void processStream();
+    protected abstract List<SearchResults> processStream();
 
     /**
      * Initiate the Stream processing, which uses a Java 8 stream to
@@ -66,16 +66,28 @@ public abstract class SearchStreamGangCommon
         // Create a new barrier for this iteration cycle.
         mIterationBarrier = new CountDownLatch(1);
 
+        // Note the start time.
         long start = System.nanoTime();
 
         // Start the Stream processing.
-        processStream();
+        List<SearchResults> searchResults = processStream();
 
+        // Note the end time.
         long duration = (System.nanoTime() - start) / 1_000_000;
         System.out.println(TAG + 
-        				   ": Done in " 
-        				   + duration
-        				   + " msecs");
+                           ": Done in " 
+                           + duration
+                           + " msecs");
+
+        // Print the results.
+        searchResults.stream().forEach(SearchResults::print);
+  
+        System.out.println(TAG 
+                           + ": The search returned "
+                           + searchResults.stream().mapToInt(SearchResults::size).sum()
+                           + " word matches for " 
+                           + getInput().size() 
+                           + " input strings");
 
         // Indicate all computations in this iteration are done.
         try {
@@ -152,6 +164,9 @@ public abstract class SearchStreamGangCommon
          */
         public WordMatcher with(String inputData) {
             mInputData = inputData;
+
+            // Try to find the match (if any) of the word in the input
+            // data.
             mCurrentPosition = mInputData.indexOf(mWord, 0);
             return this;
         }

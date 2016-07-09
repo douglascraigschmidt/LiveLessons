@@ -12,6 +12,7 @@ public class SearchStreamGangTest {
 	 */
 	enum TestsToRun {
 		SEQUENTIAL_STREAM,
+		PARALLEL_STREAM
 	}
 
 	/**
@@ -61,6 +62,8 @@ public class SearchStreamGangTest {
 		switch (choice) {
 		case SEQUENTIAL_STREAM:
 			return new SearchWithSequentialStream(wordList, mInputStrings);
+		case PARALLEL_STREAM:
+			return new SearchWithParallelStream(wordList, mInputStrings);
 		}
 		return null;
 	}

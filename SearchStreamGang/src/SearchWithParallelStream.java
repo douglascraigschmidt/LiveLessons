@@ -4,16 +4,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use a sequential
+ * Customizes the SearchStreamGangCommon framework to use a parallel
  * Java Stream to search the input data for each word in an array of
  * words.
  */
-public class SearchWithSequentialStream
+public class SearchWithParallelStream
              extends SearchStreamGangCommon {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithSequentialStream(String[] wordsToFind,
+    SearchWithParallelStream(String[] wordsToFind,
                                String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
@@ -22,14 +22,14 @@ public class SearchWithSequentialStream
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * sequentially search for words in the input data.
+     * concurrently search for words in the input data.
      */
     @Override
     protected List<SearchResults> processStream() {
     	// Get the input.
         getInput()
-            // Sequentially process each String in the input list.
-            .stream()
+            // Concurrently process each String in the input list.
+            .parallelStream()
 
             // Map each String to a Stream containing the words found
             // in the input.
