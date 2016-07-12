@@ -111,12 +111,6 @@ public class MainActivity
         MainActivity.this.runOnUiThread(() -> goToResultActivity());
 
     /**
-     * Animations used to show/hide mini floating action buttons from bigger add fab
-     */
-    private Animation default_fab_show, default_fab_hide, clear_fab_show, clear_fab_hide,
-            default_fab_local_show, default_fab_local_hide;
-
-    /**
      * Hook method called when the Activity is first launched to
      * initialize the content view and various data members.
      */
