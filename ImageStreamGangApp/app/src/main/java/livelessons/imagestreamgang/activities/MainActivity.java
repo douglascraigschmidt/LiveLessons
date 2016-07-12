@@ -3,14 +3,20 @@ package livelessons.imagestreamgang.activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.io.File;
@@ -40,28 +46,31 @@ public class MainActivity
      * that holds a comma-separated list of URLs to download.
      */
     protected LinearLayout mListUrlGroups;
-    
-    /**
-     * The button to run the ImageStreamGang using the user input.
-     */
-    private Button mRunButton;
 
     /**
-     * The button to clear the lists of user input.
+     * The floating action button used to add urls
      */
-    private Button mClearListsButton;
+    private FloatingActionButton mAddFab;
 
     /**
-     * The button to load default images.
+     * The floating action button used to run the ImageStreamGang using the user input
      */
-    private Button mDefaultButton;
+    private FloatingActionButton mRunFab;
 
     /**
-     * Long-press of mDefaultButton will toggle this boolean value,
-     * which is used to determine if local or remote default images
-     * are loaded.
+     * Boolean uesd to keep track so we know which addFab animation to use
      */
-    private boolean mLocalDefaultMode;
+    private boolean mAnimatetoX;
+
+    /**
+     * Menu used to show/hide menu items
+     */
+    private Menu mMenu;
+
+    /**
+     * Menu item used to show/hide delete action bar item
+     */
+    private MenuItem mDeleteIcon;
 
     /**
      * User selection for the desired stream.  Defaults to the
@@ -100,7 +109,13 @@ public class MainActivity
         // displayImages() method in the UI Thread so that the
         // ResultsActivity is launched in that context.
         MainActivity.this.runOnUiThread(() -> goToResultActivity());
-    	
+
+    /**
+     * Animations used to show/hide mini floating action buttons from bigger add fab
+     */
+    private Animation default_fab_show, default_fab_hide, clear_fab_show, clear_fab_hide,
+            default_fab_local_show, default_fab_local_hide;
+
     /**
      * Hook method called when the Activity is first launched to
      * initialize the content view and various data members.
@@ -111,46 +126,26 @@ public class MainActivity
 
         // Set the main content view.
         setContentView(R.layout.main_activity);
+
+        // Set mAnimatetoX to true so that we know we have to animate addFab from + to X
+        mAnimatetoX = true;
 		
         // Cache a LinearLayout where each element is an
         // AutoCompleteTextview that holds a comma-separated list of
         // URLs to download.
         mListUrlGroups =
             (LinearLayout) findViewById(R.id.listOfURLLists);
-        
-        // Cache references to the buttons which become visible
-        // when a valid USER input is given.
-        mRunButton = (Button) findViewById(R.id.runWithUserURLs);
-        mClearListsButton = (Button) findViewById(R.id.clearLists);
-        mDefaultButton = (Button) findViewById(R.id.runWithDefaultURLs);
+
+        // Cache references to the buttons
+        mAddFab = (FloatingActionButton) findViewById(R.id.add_fab);
+        mRunFab = (FloatingActionButton) findViewById(R.id.run_fab);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
+
         // Initialize the Options singleton.
         Options.instance().parseArgs(null);
-
-        // Setup a long-click callback to toggle between local and remote
-        // url loading.
-        mDefaultButton.setOnLongClickListener(view -> {
-            mLocalDefaultMode = !mLocalDefaultMode;
-            ((Button)view).setText(getString(mLocalDefaultMode
-                                             ? R.string.default_local_button
-                                             : R.string.default_button));
-            return true;
-        });
-    }
-    
-    /**
-     * Run the ImageStreamGang using a default set of URL lists.
-     */
-    public void runWithDefaultURLs(View view) {
-        //
-    	runURLs(view,
-                ((Button)view).getText()
-                              .equals(getString(R.string.default_button))
-                ? Options.InputSource.DEFAULT
-                : Options.InputSource.DEFAULT_LOCAL);
     }
     
     /**
@@ -168,8 +163,8 @@ public class MainActivity
     private void runURLs(View view, 
                          Options.InputSource inputSource) {
     	// Ensure the desired button was pressed (it must be visible).
-    	if (view.getVisibility() != View.VISIBLE) 
-            return; // no - op
+    	/*if (view.getVisibility() != View.VISIBLE)                             // Need to comment this out if using mini floating action buttons
+            return; // no - op*/
     	
         // Create an iterator containing the URL to download.
         Iterator<List<URL>> iterator =
@@ -181,9 +176,14 @@ public class MainActivity
         if (iterator != null) {
             if (iterator.hasNext() 
                 && (inputSource != Options.InputSource.USER || !isEmpty()))
+
                 new Thread(makeImageStream(mFilters,
                                            iterator,
                                            mCompletionHook)).start();
+
+            // Make the delete menu item visible
+            menuVisible();
+
             setButtonsEnabled(false);
         } else 
             UiUtils.showToast(this,
@@ -280,19 +280,93 @@ public class MainActivity
                                      R.layout.suggestion_item,
                                      Options.instance().getSuggestions());
     }
-	
+
+    /**
+     * FAB animator that displays the FAB.
+     * @param fab The FAB to be displayed
+     */
+    public static void showFab(FloatingActionButton fab) {
+        fab.show();
+        fab.animate()
+                .translationY(0)
+                .setInterpolator(new DecelerateInterpolator(2))
+                .start();
+    }
+
+    /**
+     * FAB animator that hides the FAB.
+     * @param fab The FAB to be hidden
+     */
+    public static void hideFab (FloatingActionButton fab) {
+        fab.hide();
+        fab.animate()
+                .translationY(fab.getHeight() + 100)
+                .setInterpolator(new AccelerateInterpolator(2))
+                .start();
+    }
+
+    /**
+     * Uses addURLs to inflate autocompleteview while changing the FAB icon
+     */
+    public void fabAdd(View view) {
+        if (mAnimatetoX) {
+            // Rotate the FAB from + to 'X'.
+            int animRedId = R.anim.fab_rotate_forward;
+
+            // Load and start the animation.
+            mAddFab.startAnimation(AnimationUtils.loadAnimation(this,
+                    animRedId));
+
+            // Call the addURLs method to inflate the autocompletetextview
+            int id = addURLs(view);
+
+            // Set aAnimateX accordingly
+            mAnimatetoX = false;
+
+            // Reveal mRunFab
+            showFab(mRunFab);
+
+        } else {
+            // Hide the add fab
+            hideAddFab(view);
+        }
+    }
+
+    /**
+     * Hides the add fab
+     */
+    public void hideAddFab(View view) {
+        // We need to rotate the other way and set mAnimateX accordingly
+        mAnimatetoX = true;
+
+        // Rotate the FAB from 'X' to '+'.
+        int animRedId = R.anim.fab_rotate_backward;
+
+        // Load and start the animation.
+        mAddFab.startAnimation(AnimationUtils.loadAnimation(this,
+                animRedId));
+
+        clearLists(view);
+
+        // Hide mRunFab
+        hideFab(mRunFab);
+    }
+
     /**
      * Adds a List of URLs to the ListView to allow for variable
      * number of URL Lists to process (i.e., variable number of
      * iteration cycles by the ImageStreamGang).
      */
     @SuppressLint("InflateParams")
-    public void addURLs(View view) {
+    public int addURLs(View view) {
     	// Create the new list from R.layout.list_item.
         AutoCompleteTextView newList = 
             (AutoCompleteTextView) 
             LayoutInflater.from(this).inflate (R.layout.list_item,
                                                null);
+
+        // Generate id for view so that it can be referenced later
+        newList.setId(view.generateViewId());
         
         // Set the adapter to the given suggestions.
         newList.setAdapter(mSuggestions);
@@ -301,10 +375,9 @@ public class MainActivity
         // redrawn by the framework.
         mListUrlGroups.addView(newList);
         mListUrlGroups.invalidate();
-        
-        // Set the appropriate buttons to visible
-        mRunButton.setVisibility(View.VISIBLE);
-        mClearListsButton.setVisibility(View.VISIBLE);
+
+        // Return the id
+        return newList.getId();
     }
     
     /**
@@ -340,19 +413,12 @@ public class MainActivity
     	for (int i = 0; i < buttonCount; ++i) 
             buttonLayout.getChildAt(i).setEnabled(enabled);
     	
-    	buttonLayout = 
-            (LinearLayout) findViewById(R.id.userButtonLayout);
-    	buttonCount = buttonLayout.getChildCount();
-
-    	for (int i = 0; i < buttonCount; ++i) 
-            buttonLayout.getChildAt(i).setEnabled(enabled);
-    	
-    	buttonLayout =
+    	/*buttonLayout =
             (LinearLayout) findViewById(R.id.buttonLayoutBottom);
     	buttonCount = buttonLayout.getChildCount();
 
     	for (int i = 0; i < buttonCount; ++i) 
-            buttonLayout.getChildAt(i).setEnabled(enabled);
+            buttonLayout.getChildAt(i).setEnabled(enabled);*/
     }
 
     /**
@@ -361,29 +427,6 @@ public class MainActivity
     public void clearLists(View view) {
     	mListUrlGroups.removeAllViews();
     	mListUrlGroups.invalidate();
-    	
-    	// Set the appropriate buttons to visible
-        mRunButton.setVisibility(View.INVISIBLE);
-        mClearListsButton.setVisibility(View.INVISIBLE);
-    }
-	
-    /**
-     * Delete the previously downloaded pictures and directories.
-     */
-    public void clearFilterDirectories(View view) {
-    	setButtonsEnabled(false);
-
-        int deletedFiles = 0;
-
-        for (Filter filter : mFilters) 
-            deletedFiles += deleteSubFolders
-                (new File(Options.instance().getDirectoryPath(), 
-                          filter.getName()).getAbsolutePath());
-
-        setButtonsEnabled(true);
-        UiUtils.showToast(this,
-                          deletedFiles
-                          + " previously downloaded file(s) deleted");
     }
 	
     /**
@@ -412,6 +455,43 @@ public class MainActivity
     }
 
     /**
+     * This method checks whether there are files present that need to be deleted
+     * @return Returns a boolean indicating whether such files are present or not
+     */
+    public boolean filesPresent() {
+        int filesToDelete = 0;
+
+        for (Filter filter : mFilters)
+            filesToDelete += filesInSubDirectoriesPresent
+                    (new File(Options.instance().getDirectoryPath(),
+                            filter.getName()).getAbsolutePath());
+
+        return filesToDelete > 0;
+    }
+
+    /**
+     * A helper method that checks whether there are files to be deleted recursively
+     */
+    public int filesInSubDirectoriesPresent(String path) {
+        int filesToDelete = 0;
+        File currentFolder = new File(path);
+        File files[] = currentFolder.listFiles();
+
+        if (files == null)
+            return 0;
+
+        // Android does not allow you to delete a directory with child
+        // files, so we need to write code that handles this
+        // recursively.
+        for (File f : files) {
+            if (f.isDirectory())
+                filesToDelete += deleteSubFolders(f.toString());
+            filesToDelete++;
+        }
+        return filesToDelete;
+    }
+
+    /**
      * Called by Android framework when menu option is clicked.
      * 
      * @param item Selected menu item.
@@ -424,16 +504,104 @@ public class MainActivity
     }
 
     /**
+     * Called by Android framework when menu option is clicked.
+     *
+     * @param item Selected menu item.
+     */
+    public void runWithDefaultURLs(MenuItem item) {
+        // Record the user's menu choice.
+        runURLs(item.getActionView(), Options.InputSource.DEFAULT);
+    }
+
+    /**
+     * Called by Android framework when menu option is clicked.
+     *
+     * @param item Selected menu item.
+     */
+    public void runWithDefaultLocal(MenuItem item) {
+        // Record the user's menu choice.
+        runURLs(item.getActionView(), Options.InputSource.DEFAULT_LOCAL);
+    }
+
+    /**
+     * Clears the directories on the click of the menu item without animating the mini fab
+     */
+    public void clearFilterDirectories(MenuItem item) {
+
+        setButtonsEnabled(false);
+
+        int deletedFiles = 0;
+
+        for (Filter filter : mFilters)
+            deletedFiles += deleteSubFolders
+                    (new File(Options.instance().getDirectoryPath(),
+                            filter.getName()).getAbsolutePath());
+
+        setButtonsEnabled(true);
+        UiUtils.showToast(this,
+                deletedFiles
+                        + " previously downloaded file(s) deleted");
+
+        // Make the delete menu item invisible
+        menuInvisible();
+    }
+
+    /**
      * Inflates the given @a menu.
      *
      * @param menu Menu to inflate.
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Cache menu
+        mMenu = menu;
+
         getMenuInflater().inflate(R.menu.stream_menu,
                                   menu);
 
         // Always call super class method.
         return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Is called before inflating menu bar
+     * @param menu Menu to inflate
+     * @return true to inflate the menu bar or false to leave it
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (filesPresent()) {
+            menu.findItem(R.id.delete_menu).setVisible(true);
+        }
+        else {
+            menu.findItem(R.id.delete_menu).setVisible(false);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        item.setChecked(true);
+        chooseStream(item);
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Makes the delete menu item visible
+     */
+    public void menuVisible() {
+        mDeleteIcon = mMenu.findItem(R.id.delete_menu);
+        mDeleteIcon.setVisible(true);
+        //this.invalidateOptionsMenu();
+    }
+
+    /**
+     * Makes the delete menu item invisible
+     */
+    public void menuInvisible() {
+        mDeleteIcon = mMenu.findItem(R.id.delete_menu);
+        mDeleteIcon.setVisible(false);
     }
 }
