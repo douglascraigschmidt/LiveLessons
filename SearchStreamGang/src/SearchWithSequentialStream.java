@@ -27,7 +27,7 @@ public class SearchWithSequentialStream
     @Override
     protected List<SearchResults> processStream() {
     	// Get the input.
-        getInput()
+        return getInput()
             // Sequentially process each String in the input list.
             .stream()
 

@@ -27,16 +27,17 @@ public class SearchWithParallelStream
     @Override
     protected List<SearchResults> processStream() {
     	// Get the input.
-        getInput()
-            // Concurrently process each String in the input list.
-            .parallelStream()
+        return
+            getInput()
+                // Concurrently process each String in the input list.
+                .parallelStream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
-            .flatMap(this::processInput)
+                // Map each String to a Stream containing the words found
+                // in the input.
+                .flatMap(this::processInput)
 
-            // Terminate the stream.
-            .collect(Collectors.toList());
+                // Terminate the stream.
+                .collect(Collectors.toList());
     }
 }
 
