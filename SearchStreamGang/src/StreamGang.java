@@ -27,7 +27,7 @@ public abstract class StreamGang<E>
     /**
      * Keeps track of which cycle is currently active.
      */
-    private final AtomicLong mCurrentCycle = new AtomicLong(0);
+    private final AtomicLong mCurrentCycle = new AtomicLong(1);
 
     /**
      * Get the List to use as input.

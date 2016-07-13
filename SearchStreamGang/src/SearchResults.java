@@ -39,9 +39,9 @@ public class SearchResults {
     public String mWord;
 
     /**
-     * The input String used for the search.
+     * The section title this search is associated with.
      */
-    public String mInputData;
+    public String mTitle;
 
     /**
      * The cycle in which the search result was found.
@@ -67,27 +67,32 @@ public class SearchResults {
     public SearchResults(long threadId,
                          long cycle,
                          String word,
-                         String inputData) {
+                         String title) {
         mThreadId = threadId;
         mCycle = cycle;
         mWord = word;
-        mInputData = inputData;
+        mTitle = title;
         mList = new ArrayList<Result>();
     }
 
+    public String getTitle() {
+        return mTitle;
+    }
+
     /**
-     * Convert to String form.
+     * Convert to header to String form.
      */
-    public String toString() {
+    public String headerToString() {
         return 
             "["
             + mThreadId
             + "|"
             + mCycle
             + "] "
+            + mTitle
+            + ": \""
             + mWord
-            + " at "
-            + mInputData;
+            + "\" at";
     }
 
     /**
@@ -108,22 +113,33 @@ public class SearchResults {
         return mList.size();
     }
 
-    /**
-     * Print the results.
-     */
-    void print() {
-        if (!isEmpty()) synchronized(System.out) {
-            System.out.print(toString());
+    @Override
+    public String toString() {
+        String output = new String("");
+
+        if (!isEmpty()) {
+            output += headerToString();
 
             // Iterate through the list of indices that matched the
             // search word and print them out.
             for (Result result : mList)
-                System.out.print
-                    ("["
-                     + result.mIndex
-                     + "]");
-            System.out.println("");
+                output += 
+                    "["
+                    + result.mIndex
+                    + "]";
         }
+        
+        return output;
+    }
+
+    /**
+     * Print the results.
+     */
+    SearchResults print() {
+        if (!isEmpty()) synchronized(System.out) {
+                System.out.println(toString());
+        }
+        return this;
     }
 }
 

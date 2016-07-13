@@ -7,8 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 /**
@@ -18,12 +17,12 @@ import java.util.stream.StreamSupport;
  * search one or more arrays of input Strings for words provided in an
  * array of words to find.
  */
-public abstract class SearchStreamGangCommon
-                extends StreamGang<String> {
+public class SearchStreamGang
+       extends StreamGang<String> {
     /**
      * The array of words to find.
      */
-    protected final String[] mWordsToFind;
+    protected final List<String> mWordsToFind;
 
     /**
      * An Iterator for the array of Strings to search.
@@ -39,8 +38,8 @@ public abstract class SearchStreamGangCommon
     /**
      * Constructor initializes the data members.
      */
-    protected SearchStreamGangCommon(String[] wordsToFind,
-                                     String[][] stringsToSearch) {
+    protected SearchStreamGang(List<String> wordsToFind,
+                               String[][] stringsToSearch) {
         // Store the words to search for.
         mWordsToFind = wordsToFind;
 
@@ -55,7 +54,10 @@ public abstract class SearchStreamGangCommon
      * Hook method that must be overridden by subclasses to perform
      * the Stream processing.
      */
-    protected abstract List<SearchResults> processStream();
+    protected List<SearchResults> processStream() {
+        // No-op by default.
+        return null; 
+    }
 
     /**
      * Initiate the Stream processing, which uses a Java 8 stream to
@@ -72,15 +74,14 @@ public abstract class SearchStreamGangCommon
         // Start the Stream processing.
         List<SearchResults> searchResults = processStream();
 
-        // Note the end time.
-        long duration = (System.nanoTime() - start) / 1_000_000;
+        // Print the processing time.
         System.out.println(TAG + 
                            ": Done in " 
-                           + duration
+                           + (System.nanoTime() - start) / 1_000_000
                            + " msecs");
 
         // Print the results.
-        searchResults.stream().forEach(SearchResults::print);
+        // searchResults.stream().forEach(SearchResults::print);
   
         System.out.println(TAG 
                            + ": The search returned "
@@ -113,23 +114,6 @@ public abstract class SearchStreamGangCommon
             // concurrently.
             return Arrays.asList(mInputIterator.next());
         }
-    }
-
-    /**
-     * Search the inputData for all occurrences of the words to find.
-     */
-    protected Stream<SearchResults> processInput (String inputData) {
-        // Iterate through each word we're searching for and try to
-        // find it in the inputData.
-        return Stream
-            // Convert the array of words into a Stream.
-            .of(mWordsToFind)
-
-            // Search for all places where the word matches the input data.
-            .map(word -> searchForWord(word, inputData))
-            
-            // Only keep a result that has at least one match.
-            .filter(result -> result.size() > 0);
     }
 
     /**
@@ -227,17 +211,30 @@ public abstract class SearchStreamGangCommon
     }
 
     /**
+     * Return the title
+     */
+    public String getTitle(String inputData) {
+        Pattern p =
+            Pattern.compile("^Act [0-9]+, Scene [0-9]+");
+        Matcher m = p.matcher(inputData);
+        return m.find()
+        	? m.group()
+            : "";
+    }
+
+    /**
      * Search for all instances of @code word in @code inputData and
      * return a list of all the @code SearchData results (if any).
      */
-    protected SearchResults searchForWord(String word, 
-                                          String inputData) {
-    	// Create a SearchResults object that keeps track of relevant info.
+    public SearchResults searchForWord(String word, 
+                                       String inputData,
+                                       String title) {
+    	// Create SearchResults to keep track of relevant info.
         SearchResults results =
             new SearchResults(Thread.currentThread().getId(),
                               currentCycle(),
                               word,
-                              inputData);
+                              title);
         // Use a WordMatchItr to add the indices of all places in the
         // inputData where word matches.
         StreamSupport
