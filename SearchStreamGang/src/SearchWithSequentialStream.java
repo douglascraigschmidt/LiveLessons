@@ -38,9 +38,12 @@ public class SearchWithSequentialStream
     }
     
     /**
-     * Search the inputData for all occurrences of the words to find.
+     * Search the inputString for all occurrences of the words to find.
      */
-    protected Stream<SearchResults> processInput (String inputData) {
+    protected Stream<SearchResults> processInput (String inputString) {
+        // Get the section title.
+        String title = getTitle(inputString);
+
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         return mWordsToFind
@@ -49,7 +52,10 @@ public class SearchWithSequentialStream
             
             // Search for all places where the word matches the input
             // data.
-            .map(word -> searchForWord(word, inputData, ""))
+            .map(word -> searchForWord(word,
+                                       // Skip over the title.
+                                       inputString.substring(title.length()),
+                                       title))
             
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0);

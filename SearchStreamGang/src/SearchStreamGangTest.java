@@ -16,11 +16,11 @@ public class SearchStreamGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        // SEQUENTIAL_STREAM,
-        // PARALLEL_STREAM_WORDS,
-            // PARALLEL_STREAM_INPUTS,
+        SEQUENTIAL_STREAM,
+        PARALLEL_STREAM_WORDS,
+        PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS_AND_INPUTS,
-            COMPLETABLE_FUTURES,
+            //    COMPLETABLE_FUTURES,
     }
 
     /**
@@ -77,7 +77,6 @@ public class SearchStreamGangTest {
                                            String[][] inputData,
                                            TestsToRun choice) {
         switch (choice) {
-            /*
         case SEQUENTIAL_STREAM:
             return new SearchWithSequentialStream(wordList, 
                                                   inputData);
@@ -87,8 +86,6 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS:
             return new SearchWithParallelStreamWords(wordList,
                                                      inputData);
-            */
-
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
@@ -118,7 +115,6 @@ public class SearchStreamGangTest {
         hardCodedStreamsSolution(wordList,
                                  inputData);
 
-        /*
         // Create/run appropriate type of StreamGang to search for words.
         Stream.of(TestsToRun.values())
               .forEach(test -> {
@@ -132,7 +128,7 @@ public class SearchStreamGangTest {
  
                        printDebugging("Ending " + test);
                   });
-        */            
+
         printDebugging("Ending SearchStreamGangTest");             
     }
 
@@ -177,15 +173,17 @@ public class SearchStreamGangTest {
                                 // where the word matches the input data.
                                 .map(word -> 
                                      searchStreamGang.searchForWord(word,
+                                                                    // Skip over the title.
                                                                     inputString.substring(title.length()),
                                                                     title))
 
                                 // Only keep a result that has at least one match.
                                 .filter(result -> result.size() > 0)
 
-                                .sorted(SearchResults::getTitle)
+                                // @@ Fix me!
+                                // .sorted(SearchResults::getTitle)
 
-                                .map(SearchResults::print)                           
+                                // .map(SearchResults::print)                           
 
                                 // Perform a reduce operation that counts
                                 // the number of times each word occurred.
