@@ -73,6 +73,9 @@ public class SearchStreamGang
 
         // Start the Stream processing.
         List<SearchResults> searchResults = processStream();
+        
+        if (searchResults == null)
+        	return;
 
         // Print the processing time.
         System.out.println(TAG + 

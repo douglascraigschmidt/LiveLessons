@@ -1,8 +1,11 @@
+import static java.util.stream.Collectors.toList;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -20,7 +23,7 @@ public class SearchStreamGangTest {
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS_AND_INPUTS,
-            //    COMPLETABLE_FUTURES,
+            // COMPLETABLE_FUTURES,
     }
 
     /**
@@ -89,12 +92,12 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
-
-            /*
-        case COMPLETABLE_FUTURES
+        /*
+        case COMPLETABLE_FUTURES:
             return new SearchWithCompletableFutures(wordList,
                                                     inputData);
             */
+
         }
         return null;
     }
@@ -115,6 +118,7 @@ public class SearchStreamGangTest {
         hardCodedStreamsSolution(wordList,
                                  inputData);
 
+ 
         // Create/run appropriate type of StreamGang to search for words.
         Stream.of(TestsToRun.values())
               .forEach(test -> {
@@ -133,14 +137,15 @@ public class SearchStreamGangTest {
     }
 
     /**
-     * A hard-coded solution.
+     * A hard-coded solution that demonstrates how Java 8 Streams work
+     * without using the StreamGang framework.
      */
     private static void hardCodedStreamsSolution(List<String> wordList,
                                                  String[][] inputData) {
         printDebugging("Starting hardCodedStreamsSolution");
 
-        // Create a SearchStreamGang that's used to find the number of
-        // times each word in wordList appears in the inputData.
+        // Create a SearchStreamGang that's used below to find the #
+        // of times each word in wordList appears in the inputData.
         SearchStreamGang searchStreamGang =
             new SearchStreamGang(wordList,
                                  inputData);
@@ -150,62 +155,88 @@ public class SearchStreamGangTest {
             // Process the stream of input arrays parallel.
             .parallel()
 
-            // Iterate for each array of input data.
-            .forEach(arrayOfInputData -> {
+            // Iterate for each array of input strings.
+            .forEach(arrayOfInputStrings -> {
                     // Note the start time.
                     long start = System.nanoTime();
 
-                    List<Long> results = Stream
-                        .of(arrayOfInputData)
+                    // The results are stored in a list of input
+                    // streams, where each input string is associated
+                    // with a list of SearchResults corresponding to
+                    // words that matched the input string.
+                    List<List<SearchResults>> listOfListOfResults = Stream
+                        .of(arrayOfInputStrings)
                         // Process the stream of input data in parallel.
                         .parallel()
-
-                        // Search the inputData for all occurrences of the words to find.
+                        
+                        // Concurrently search each input string for
+                        // all occurrences of the words to find.
                         .map(inputString -> {
                                 // Get the section title.
                                 String title = searchStreamGang.getTitle(inputString);
 
                                 return wordList
-                                // Process the stream in parallel.
+                                // Process the stream of words in parallel.
                                 .parallelStream()
 
-                                // Concurrently search for all places
-                                // where the word matches the input data.
+                                // Search for all places in the input
+                                // String where the word appears and
+                                // return a SearchResults object.
                                 .map(word -> 
                                      searchStreamGang.searchForWord(word,
                                                                     // Skip over the title.
                                                                     inputString.substring(title.length()),
                                                                     title))
 
-                                // Only keep a result that has at least one match.
+                                // Filter out SearchResults for words
+                                // that don't appear.
                                 .filter(result -> result.size() > 0)
 
-                                // @@ Fix me!
-                                // .sorted(SearchResults::getTitle)
-
-                                // .map(SearchResults::print)                           
-
-                                // Perform a reduce operation that counts
-                                // the number of times each word occurred.
-                                .collect(Collectors.toList()).stream()
-                                .mapToLong(SearchResults::size)
-                                .sum();
+                                // Collect a list of SearchResults for
+                                // each word that matched this input
+                                // string.
+                                .collect(toList());
                             })
-
-                        // Return a list of the number of strings that were processed.
-                        .collect(Collectors.toList());
-
-                    // Print the processing time.
+                                              
+                        // Collect a list of containing the list of
+                        // SearchResults for each input string.
+                        .collect(toList());
+                
+                    // Print the total processing time.
                     System.out.println("hardCodedStreamsSolution" 
                                        + ": Done in " 
                                        + (System.nanoTime() - start) / 1_000_000
                                        + " msecs");
 
+                    // Determine how many word matches we obtained.
+                    int totalWordsMatched = listOfListOfResults
+                        .stream()
+                        .map(listOfSearchResults -> {
+                                // list.stream().forEach(SearchResults::print);
+                        	                      	
+                                // Print the number of words that
+                                // matched for each section.
+                                System.out.println("matched " 
+                                                   + listOfSearchResults.size()
+                                                   + " words in section " 
+                                                   + listOfSearchResults.get(0).getTitle());
+
+                                return listOfSearchResults;
+                            })               
+                        // Compute the total number of times each word
+                        // matched the input string.
+                        .mapToInt(listOfSearchResults -> listOfSearchResults
+                                  .stream()
+                                  .mapToInt(SearchResults::size)
+                                  .sum())
+                        // Sum the results.
+                        .sum();
+
                     System.out.println("hardCodedStreamsSolution"
                                        + "The search returned = "
-                                       + results.stream().mapToLong(Long::longValue).sum()
+                                       + totalWordsMatched
                                        + " word matches for "
-                                       + results.stream().count()
+                                       + listOfListOfResults.stream().count()
                                        + " input strings");
                 });        
 
