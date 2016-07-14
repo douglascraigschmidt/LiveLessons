@@ -10,13 +10,13 @@ import java.util.stream.Stream;
  * Java Stream to search the input data for each word in an array of
  * words.
  */
-public class SearchWithCompletableFutures
+public class SearchWithCompletableFuturesWords
              extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithCompletableFutures(List<String> wordsToFind,
-                                 String[][] stringsToSearch) {
+    SearchWithCompletableFuturesWords(List<String> wordsToFind,
+                                      String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -28,10 +28,13 @@ public class SearchWithCompletableFutures
      */
     @Override
     protected List<SearchResults> processStream() {
+        // Note the start time.
+        long start = System.nanoTime();
+
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         final List<CompletableFuture<List<CompletableFuture<SearchResults>>>> listOfFutures = mWordsToFind
-            .stream()
+            .parallelStream()
 
             .map(this::processWordAsync)
 
@@ -42,9 +45,19 @@ public class SearchWithCompletableFutures
         // complete.
         final CompletableFuture<List<List<CompletableFuture<SearchResults>>>> allDone =
                 joinAll(listOfFutures);
+        // Print the processing time.
+        System.out.println(TAG + 
+                           ": Done in " 
+                           + (System.nanoTime() - start) / 1_000_000
+                           + " msecs");
         // The call to join() is needed here to blocks the calling
         // thread until all the futures have been completed.
+
         List<List<CompletableFuture<SearchResults>>> results = allDone.join();
+        System.out.println(TAG + ": The search returned " 
+                           + results.stream().mapToInt(list -> list.stream().mapToInt(future -> future.join().size()).sum()).sum()
+                           + " word matches");
+
         return null;
     }
 
@@ -55,7 +68,7 @@ public class SearchWithCompletableFutures
         // Get the input.
         List<CompletableFuture<SearchResults>> listOfFutures = getInput()
             // Sequentially process each String in the input list.
-            .stream()
+            .parallelStream()
 
             // Map each String to a Stream containing the words found
             // in the input.

@@ -20,10 +20,11 @@ public class SearchStreamGangTest {
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
-        PARALLEL_STREAM_WORDS,
+        COMPLETABLE_FUTURES_WORDS,
+        COMPLETABLE_FUTURES_INPUTS,
         PARALLEL_STREAM_INPUTS,
+        PARALLEL_STREAM_WORDS,
         PARALLEL_STREAM_WORDS_AND_INPUTS,
-            // COMPLETABLE_FUTURES,
     }
 
     /**
@@ -92,12 +93,12 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
-        /*
-        case COMPLETABLE_FUTURES:
-            return new SearchWithCompletableFutures(wordList,
-                                                    inputData);
-            */
-
+        case COMPLETABLE_FUTURES_WORDS:
+            return new SearchWithCompletableFuturesWords(wordList,
+                                                         inputData);
+        case COMPLETABLE_FUTURES_INPUTS:
+            return new SearchWithCompletableFuturesWords(wordList,
+                                                         inputData);
         }
         return null;
     }
@@ -114,10 +115,11 @@ public class SearchStreamGangTest {
 
         List<String> wordList = getWordList(sWORD_LIST_FILE);
 
+        /*
         // Test a hard-coded streams solution.
         hardCodedStreamsSolution(wordList,
                                  inputData);
-
+        */
  
         // Create/run appropriate type of StreamGang to search for words.
         Stream.of(TestsToRun.values())

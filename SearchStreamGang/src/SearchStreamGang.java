@@ -74,24 +74,24 @@ public class SearchStreamGang
         // Start the Stream processing.
         List<SearchResults> searchResults = processStream();
         
-        if (searchResults == null)
-        	return;
+        if (searchResults != null) {
 
-        // Print the processing time.
-        System.out.println(TAG + 
-                           ": Done in " 
-                           + (System.nanoTime() - start) / 1_000_000
-                           + " msecs");
+            // Print the processing time.
+            System.out.println(TAG + 
+                               ": Done in " 
+                               + (System.nanoTime() - start) / 1_000_000
+                               + " msecs");
 
-        // Print the results.
-        // searchResults.stream().forEach(SearchResults::print);
+            // Print the results.
+            // searchResults.stream().forEach(SearchResults::print);
   
-        System.out.println(TAG 
-                           + ": The search returned "
-                           + searchResults.stream().mapToInt(SearchResults::size).sum()
-                           + " word matches for " 
-                           + getInput().size() 
-                           + " input strings");
+            System.out.println(TAG 
+                               + ": The search returned "
+                               + searchResults.stream().mapToInt(SearchResults::size).sum()
+                               + " word matches for " 
+                               + getInput().size() 
+                               + " input strings");
+        }
 
         // Indicate all computations in this iteration are done.
         try {
