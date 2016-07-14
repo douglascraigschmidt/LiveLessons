@@ -97,8 +97,8 @@ public class SearchStreamGangTest {
             return new SearchWithCompletableFuturesWords(wordList,
                                                          inputData);
         case COMPLETABLE_FUTURES_INPUTS:
-            return new SearchWithCompletableFuturesWords(wordList,
-                                                         inputData);
+            return new SearchWithCompletableFuturesInputs(wordList,
+                                                          inputData);
         }
         return null;
     }
