@@ -1,9 +1,12 @@
+package streamgangs;
+
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import utils.SearchResults;
+import utils.StreamsUtils;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use a parallel
@@ -11,12 +14,12 @@ import java.util.stream.Stream;
  * words.
  */
 public class SearchWithCompletableFuturesWords
-             extends SearchStreamGang {
+    extends SearchStreamGangAsync {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithCompletableFuturesWords(List<String> wordsToFind,
-                                      String[][] stringsToSearch) {
+    public SearchWithCompletableFuturesWords(List<String> wordsToFind,
+                                             String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -27,10 +30,7 @@ public class SearchWithCompletableFuturesWords
      * concurrently search for words in the input data.
      */
     @Override
-    protected List<SearchResults> processStream() {
-        // Note the start time.
-        long start = System.nanoTime();
-
+    protected List<List<CompletableFuture<SearchResults>>> processStream() {
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         final List<CompletableFuture<List<CompletableFuture<SearchResults>>>> listOfFutures = mWordsToFind
@@ -44,22 +44,11 @@ public class SearchWithCompletableFuturesWords
         // Wait for all operations associated with the futures to
         // complete.
         final CompletableFuture<List<List<CompletableFuture<SearchResults>>>> allDone =
-                joinAll(listOfFutures);
-        // Print the processing time.
-        System.out.println(TAG + 
-                           ": Done in " 
-                           + (System.nanoTime() - start) / 1_000_000
-                           + " msecs");
+                StreamsUtils.joinAll(listOfFutures);
+  
         // The call to join() is needed here to blocks the calling
         // thread until all the futures have been completed.
-
-        List<List<CompletableFuture<SearchResults>>> results = allDone.join();
-        /*
-        System.out.println(TAG + ": The search returned " 
-                           + results.stream().mapToInt(list -> list.stream().mapToInt(future -> future.join().size()).sum()).sum()
-                           + " word matches");
-        */
-        return null;
+        return allDone.join();
     }
 
     /**
@@ -94,15 +83,6 @@ public class SearchWithCompletableFuturesWords
             new CompletableFuture<>();
         future.complete(listOfFutures);
         return future;
-    }
-
-    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> futures) {
-        CompletableFuture<Void> allDoneFuture =
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
-        return allDoneFuture.thenApply(v ->
-                                       futures.stream()
-                                       .map(CompletableFuture::join)
-                                       .collect(toList()));
     }
 }
 

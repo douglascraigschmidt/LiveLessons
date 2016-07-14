@@ -1,3 +1,5 @@
+package streamgangs;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +12,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
+import utils.SearchResults;
+import utils.StreamGang;
+
 /**
  * This helper class factors out the common code used by all
  * instantiations of the StreamGang framework in the BarrierStreamGang
@@ -17,7 +22,7 @@ import java.util.stream.StreamSupport;
  * search one or more arrays of input Strings for words provided in an
  * array of words to find.
  */
-public class SearchStreamGang
+public abstract class SearchStreamGang
        extends StreamGang<String> {
     /**
      * The array of words to find.
@@ -48,59 +53,6 @@ public class SearchStreamGang
 
         // Initialize the Executor with a fixed-sized pool of Threads.
         // @@ setExecutor(Executors.newFixedThreadPool(MAX_THREADS));
-    }
-
-    /**
-     * Hook method that must be overridden by subclasses to perform
-     * the Stream processing.
-     */
-    protected List<SearchResults> processStream() {
-        // No-op by default.
-        return null; 
-    }
-
-    /**
-     * Initiate the Stream processing, which uses a Java 8 stream to
-     * download, process, and store images sequentially.
-     */
-    @Override
-    protected void initiateStream() {
-        // Create a new barrier for this iteration cycle.
-        mIterationBarrier = new CountDownLatch(1);
-
-        // Note the start time.
-        long start = System.nanoTime();
-
-        // Start the Stream processing.
-        List<SearchResults> searchResults = processStream();
-        
-        if (searchResults != null) {
-
-            // Print the processing time.
-            System.out.println(TAG + 
-                               ": Done in " 
-                               + (System.nanoTime() - start) / 1_000_000
-                               + " msecs");
-
-            // Print the results.
-            // searchResults.stream().forEach(SearchResults::print);
-  
-            /*
-            System.out.println(TAG 
-                               + ": The search returned "
-                               + searchResults.stream().mapToInt(SearchResults::size).sum()
-                               + " word matches for " 
-                               + getInput().size() 
-                               + " input strings");
-            */
-        }
-
-        // Indicate all computations in this iteration are done.
-        try {
-            mIterationBarrier.countDown();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        } 
     }
 
     /**
@@ -223,7 +175,7 @@ public class SearchStreamGang
             Pattern.compile("^Act [0-9]+, Scene [0-9]+");
         Matcher m = p.matcher(inputData);
         return m.find()
-        	? m.group()
+            ? m.group()
             : "";
     }
 

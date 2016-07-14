@@ -1,10 +1,11 @@
+package utils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @class SearchResults
- *
- * @brief Holds the search results.
+ * Holds results from a search of how many times a word appears in an
+ * input string.
  */
 public class SearchResults {
     /**

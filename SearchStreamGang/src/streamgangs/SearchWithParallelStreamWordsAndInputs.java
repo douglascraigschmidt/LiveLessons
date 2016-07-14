@@ -1,6 +1,10 @@
+package streamgangs;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import utils.SearchResults;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use Java Streams
@@ -9,12 +13,12 @@ import java.util.stream.Stream;
  * data string.
  */
 public class SearchWithParallelStreamWordsAndInputs
-             extends SearchStreamGang {
+       extends SearchStreamGangSync {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithParallelStreamWordsAndInputs(List<String> wordsToFind,
-                                           String[][] stringsToSearch) {
+    public SearchWithParallelStreamWordsAndInputs(List<String> wordsToFind,
+                                                  String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -25,7 +29,7 @@ public class SearchWithParallelStreamWordsAndInputs
      * sequentially search for words in the input data.
      */
     @Override
-    protected List<SearchResults> processStream() {
+    protected List<List<SearchResults>> processStream() {
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         return mWordsToFind
@@ -34,17 +38,17 @@ public class SearchWithParallelStreamWordsAndInputs
             
             // Search for all places where the word matches the input
             // data.
-            .flatMap(this::processWord)
+            .map(this::processWord)
 
             // Terminate the stream.
-            .collect(Collectors.toList());
+            .collect(toList());
    }
     
     /**
      * Concurrently Search the inputData for all occurrences of the
      * words to find.
      */
-    protected Stream<SearchResults> processWord(String word) {
+    protected List<SearchResults> processWord(String word) {
   	// Get the input.
         return getInput()
             // Concurrently process each String in the input list.
@@ -63,7 +67,9 @@ public class SearchWithParallelStreamWordsAndInputs
                         })
             
             // Only keep a result that has at least one match.
-            .filter(result -> result.size() > 0);
+            .filter(result -> result.size() > 0)
+            
+            .collect(toList());
     }
 }
 

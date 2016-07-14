@@ -3,10 +3,18 @@ import static java.util.stream.Collectors.toList;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import streamgangs.SearchStreamGang;
+import streamgangs.SearchStreamGangSync;
+import streamgangs.SearchWithCompletableFuturesInputs;
+import streamgangs.SearchWithCompletableFuturesWords;
+import streamgangs.SearchWithParallelStreamInputs;
+import streamgangs.SearchWithParallelStreamWords;
+import streamgangs.SearchWithParallelStreamWordsAndInputs;
+import streamgangs.SearchWithSequentialStream;
+import utils.SearchResults;
 
 /**
  * This test driver showcases how various subclasses customize the
@@ -20,11 +28,11 @@ public class SearchStreamGangTest {
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
-        COMPLETABLE_FUTURES_INPUTS,
-        COMPLETABLE_FUTURES_WORDS,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAM_WORDS_AND_INPUTS,
+        COMPLETABLE_FUTURES_INPUTS,
+        COMPLETABLE_FUTURES_WORDS,
     }
 
     /**
@@ -106,7 +114,7 @@ public class SearchStreamGangTest {
     /**
      * This is the entry point into the test program.
      */
-    static public void main(String[] args) throws Throwable {
+    public static void main(String[] args) throws Throwable {
         // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "4");
 
         printDebugging("Starting SearchStreamGangTest");
@@ -115,26 +123,36 @@ public class SearchStreamGangTest {
 
         List<String> wordList = getWordList(sWORD_LIST_FILE);
 
-        // Create/run appropriate type of StreamGang to search for words.
-        Stream.of(TestsToRun.values())
-              .forEach(test -> {
-                       printDebugging("Starting " + test); 
-
-                       // Run the next test.
-                       makeStreamGang(wordList,
-                                      inputData,
-                                      test)
-                           .run(); 
- 
-                       printDebugging("Ending " + test);
-                       System.gc();
-                  });
+        // Create/run StreamGangs to search for words.
+        runTests(wordList,
+                 inputData);
 
         // Test a hard-coded streams solution.
-        hardCodedStreamsSolution(wordList,
-                                 inputData);
+        hardCodedStreamsSolution(wordList, inputData);
  
         printDebugging("Ending SearchStreamGangTest");             
+    }
+
+    /**
+     * Create/run appropriate type of StreamGang to search for words.
+     */
+    private static void runTests(List<String> wordList, 
+                                 String[][] inputData) {
+        for (TestsToRun test : TestsToRun.values()) {
+            printDebugging("Starting " + test); 
+
+            // Run the next test.
+            makeStreamGang(wordList,
+                           inputData,
+                           test)
+                .run(); 
+ 
+            printDebugging("Ending " + test);
+
+            // Try to run the garbage collector to avoid
+            // perturbing the test itself.
+            System.gc();
+        }
     }
 
     /**
@@ -148,8 +166,8 @@ public class SearchStreamGangTest {
         // Create a SearchStreamGang that's used below to find the #
         // of times each word in wordList appears in the inputData.
         SearchStreamGang searchStreamGang =
-            new SearchStreamGang(wordList,
-                                 inputData);
+            new SearchStreamGangSync(wordList,
+                                     inputData);
                                  
         // Convert inputData "array of arrays" into Stream of arrays.
         Stream.of(inputData)
@@ -209,20 +227,20 @@ public class SearchStreamGangTest {
                                        + (System.nanoTime() - start) / 1_000_000
                                        + " msecs");
 
-                    /*
                     // Determine how many word matches we obtained.
                     int totalWordsMatched = listOfListOfResults
                         .stream()
                         .map(listOfSearchResults -> {
                                 // list.stream().forEach(SearchResults::print);
                         	                      	
+                                /*
                                 // Print the number of words that
                                 // matched for each section.
                                 System.out.println("matched " 
                                                    + listOfSearchResults.size()
                                                    + " words in section " 
                                                    + listOfSearchResults.get(0).getTitle());
-
+                                */
                                 return listOfSearchResults;
                             })               
                         // Compute the total number of times each word
@@ -240,7 +258,6 @@ public class SearchStreamGangTest {
                                        + " word matches for "
                                        + listOfListOfResults.stream().count()
                                        + " input strings");
-                    */
                 });        
 
         printDebugging("Ending hardCodedStreamsSolution");

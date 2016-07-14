@@ -1,18 +1,22 @@
+package streamgangs;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import utils.SearchResults;
 
 /**
  * Customizes the SearchStreamGang framework to use Java Streams to
  * sequentially search input data for each word in an array of words.
  */
 public class SearchWithSequentialStream
-             extends SearchStreamGang {
+       extends SearchStreamGangSync {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithSequentialStream(List<String> wordsToFind,
-                               String[][] stringsToSearch) {
+    public SearchWithSequentialStream(List<String> wordsToFind,
+                                      String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -23,26 +27,29 @@ public class SearchWithSequentialStream
      * sequentially search for words in the input data.
      */
     @Override
-    protected List<SearchResults> processStream() {
-    	// Get the input.
+    protected List<List<SearchResults>> processStream() {
+    	// Get and process the input.
         return getInput()
             // Sequentially process each String in the input list.
             .stream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
-            .flatMap(this::processInput)
+            // Map each input string to list of SearchResults
+            // containing the words found in the input.
+            .map(this::processInput)
 
             // Terminate the stream.
-            .collect(Collectors.toList());
+            .collect(toList());
     }
     
     /**
      * Search the inputString for all occurrences of the words to find.
      */
-    protected Stream<SearchResults> processInput (String inputString) {
+    protected List<SearchResults> processInput (String inputString) {
         // Get the section title.
         String title = getTitle(inputString);
+
+        // Skip over the title.
+        String input = inputString.substring(title.length());
 
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
@@ -53,12 +60,13 @@ public class SearchWithSequentialStream
             // Search for all places where the word matches the input
             // data.
             .map(word -> searchForWord(word,
-                                       // Skip over the title.
-                                       inputString.substring(title.length()),
+                                       input,
                                        title))
             
             // Only keep a result that has at least one match.
-            .filter(result -> result.size() > 0);
+            .filter(result -> result.size() > 0)
+            
+            .collect(toList());
     }
 }
 

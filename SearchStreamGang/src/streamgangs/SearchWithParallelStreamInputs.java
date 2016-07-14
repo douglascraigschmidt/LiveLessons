@@ -1,6 +1,10 @@
+package streamgangs;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import utils.SearchResults;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use a Java
@@ -9,12 +13,12 @@ import java.util.stream.Stream;
  * input data String.
  */
 public class SearchWithParallelStreamInputs
-             extends SearchStreamGang {
+       extends SearchStreamGangSync {
     /**
      * Constructor initializes the super class.
      */
-    SearchWithParallelStreamInputs(List<String> wordsToFind,
-                                   String[][] stringsToSearch) {
+    public SearchWithParallelStreamInputs(List<String> wordsToFind,
+                                          String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -25,7 +29,7 @@ public class SearchWithParallelStreamInputs
      * concurrently search for words in the input data.
      */
     @Override
-    protected List<SearchResults> processStream() {
+    protected List<List<SearchResults>> processStream() {
     	// Get the input.
         return getInput()
             // Concurrently process each String in the input list.
@@ -33,18 +37,21 @@ public class SearchWithParallelStreamInputs
 
             // Map each String to a Stream containing the words found
             // in the input.
-            .flatMap(this::processInput)
+            .map(this::processInput)
 
             // Terminate the stream.
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     /**
      * Search the inputData for all occurrences of the words to find.
      */
-    protected Stream<SearchResults> processInput (String inputString) {
+    protected List<SearchResults> processInput (String inputString) {
         // Get the section title.
         String title = getTitle(inputString);
+
+        // Skip over the title.
+        String input = inputString.substring(title.length());
 
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
@@ -56,12 +63,13 @@ public class SearchWithParallelStreamInputs
             // matches the input data.
             .map(word -> 
                  searchForWord(word,
-                               // Skip over the title.
-                               inputString.substring(title.length()),
+                               input,
                                title))
             
             // Only keep a result that has at least one match.
-            .filter(result -> result.size() > 0);
+            .filter(result -> result.size() > 0)
+            
+            .collect(toList());
     }
 }
 
