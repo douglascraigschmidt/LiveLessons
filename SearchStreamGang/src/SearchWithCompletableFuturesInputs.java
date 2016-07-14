@@ -58,9 +58,11 @@ public class SearchWithCompletableFuturesInputs
         // thread until all the futures have been completed.
 
         List<List<CompletableFuture<SearchResults>>> results = allDone.join();
+        /*
         System.out.println(TAG + ": The search returned " 
                            + results.stream().mapToInt(list -> list.stream().mapToInt(future -> future.join().size()).sum()).sum()
                            + " word matches");
+        */
         return null;
     }
 

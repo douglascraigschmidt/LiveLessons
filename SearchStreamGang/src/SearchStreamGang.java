@@ -85,12 +85,14 @@ public class SearchStreamGang
             // Print the results.
             // searchResults.stream().forEach(SearchResults::print);
   
+            /*
             System.out.println(TAG 
                                + ": The search returned "
                                + searchResults.stream().mapToInt(SearchResults::size).sum()
                                + " word matches for " 
                                + getInput().size() 
                                + " input strings");
+            */
         }
 
         // Indicate all computations in this iteration are done.

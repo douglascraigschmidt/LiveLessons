@@ -115,12 +115,6 @@ public class SearchStreamGangTest {
 
         List<String> wordList = getWordList(sWORD_LIST_FILE);
 
-        /*
-        // Test a hard-coded streams solution.
-        hardCodedStreamsSolution(wordList,
-                                 inputData);
-        */
- 
         // Create/run appropriate type of StreamGang to search for words.
         Stream.of(TestsToRun.values())
               .forEach(test -> {
@@ -133,8 +127,13 @@ public class SearchStreamGangTest {
                            .run(); 
  
                        printDebugging("Ending " + test);
+                       System.gc();
                   });
 
+        // Test a hard-coded streams solution.
+        hardCodedStreamsSolution(wordList,
+                                 inputData);
+ 
         printDebugging("Ending SearchStreamGangTest");             
     }
 
@@ -210,6 +209,7 @@ public class SearchStreamGangTest {
                                        + (System.nanoTime() - start) / 1_000_000
                                        + " msecs");
 
+                    /*
                     // Determine how many word matches we obtained.
                     int totalWordsMatched = listOfListOfResults
                         .stream()
@@ -240,6 +240,7 @@ public class SearchStreamGangTest {
                                        + " word matches for "
                                        + listOfListOfResults.stream().count()
                                        + " input strings");
+                    */
                 });        
 
         printDebugging("Ending hardCodedStreamsSolution");
