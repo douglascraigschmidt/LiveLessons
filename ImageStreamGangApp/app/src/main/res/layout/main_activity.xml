@@ -19,27 +19,6 @@
         android:layout_below="@id/my_toolbar"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/runWithDefaultURLs"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="runWithDefaultURLs"
-            android:text="@string/run_default_urls"
-            android:textSize="13sp"
-            android:longClickable="true"/>
-
-        <Button
-            android:id="@+id/addList"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="addURLs"
-            android:text="@string/add_urls"
-            android:textSize="13sp"/>
-
     </LinearLayout>
 
 
@@ -62,54 +41,40 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/userButtonLayout"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/runWithUserURLs"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="runWithUserURLs"
-                    android:text="@string/run_user_urls"
-                    android:visibility="invisible"/>
-
-                <Button
-                    android:id="@+id/clearLists"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="clearLists"
-                    android:text="@string/clear_lists"
-                    android:visibility="invisible"/>
-
-            </LinearLayout>
-
         </LinearLayout>
 
     </ScrollView>
 
-    <LinearLayout
-        android:id="@+id/buttonLayoutBottom"
-        android:layout_width="fill_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/urlsScrollView"
-        android:orientation="horizontal">
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
 
-        <Button
-            android:id="@+id/clear"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="0dp"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/run_fab"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="clearFilterDirectories"
-            android:text="@string/clear_dirs"/>
+            android:layout_margin="16dp"
+            android:src="@android:drawable/stat_sys_download"
+            android:tint="@android:color/white"
+            android:layout_alignParentLeft="true"
+            android:onClick="runWithUserURLs"
+            android:visibility="invisible"/>
 
-    </LinearLayout>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/add_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_input_add"
+            android:tint="@android:color/white"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="20dp"
+            android:layout_alignTop="@+id/run_fab"
+            android:layout_alignParentEnd="true"
+            android:onClick="fabAdd"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>
