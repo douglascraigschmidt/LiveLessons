@@ -53,12 +53,14 @@ public class MainActivity
     private FloatingActionButton mAddFab;
 
     /**
-     * The floating action button used to run the ImageStreamGang using the user input
+     * The floating action button used to run the ImageStreamGang
+     * using the user input
      */
     private FloatingActionButton mRunFab;
 
     /**
-     * Boolean uesd to keep track so we know which addFab animation to use
+     * Boolean uesd to keep track so we know which addFab animation to
+     * use
      */
     private boolean mAnimatetoX;
 
@@ -121,7 +123,8 @@ public class MainActivity
         // Set the main content view.
         setContentView(R.layout.main_activity);
 
-        // Set mAnimatetoX to true so that we know we have to animate addFab from + to X
+        // Set mAnimatetoX to true so that we know we have to animate
+        // addFab from + to X
         mAnimatetoX = true;
 		
         // Cache a LinearLayout where each element is an
@@ -137,7 +140,6 @@ public class MainActivity
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-
         // Initialize the Options singleton.
         Options.instance().parseArgs(null);
     }
@@ -151,15 +153,11 @@ public class MainActivity
     }
     
     /**
-     * Helper method to run the appropriate configuration of
-     * inputs and contexts
+     * Helper method to run the appropriate configuration of inputs
+     * and contexts
      */
     private void runURLs(View view, 
                          Options.InputSource inputSource) {
-    	// Ensure the desired button was pressed (it must be visible).
-    	/*if (view.getVisibility() != View.VISIBLE)                             // Need to comment this out if using mini floating action buttons
-            return; // no - op*/
-    	
         // Create an iterator containing the URL to download.
         Iterator<List<URL>> iterator =
             Options.instance().getUrlIterator(this,
@@ -170,12 +168,12 @@ public class MainActivity
         if (iterator != null) {
             if (iterator.hasNext() 
                 && (inputSource != Options.InputSource.USER || !isEmpty()))
-
+                // Create a new ImageStreamGang to process the images.
                 new Thread(makeImageStream(mFilters,
                                            iterator,
                                            mCompletionHook)).start();
 
-            // Make the delete menu item visible
+            // Make the delete menu item visible.
             menuVisible();
 
             setButtonsEnabled(false);
@@ -209,15 +207,15 @@ public class MainActivity
             UiUtils.showToast(this,
                               "CompletableFuture1 stream processing");
             return new ImageStreamCompletableFuture1(filters,
-                                                    urlListIterator,
-                                                    completionHook);
+                                                     urlListIterator,
+                                                     completionHook);
 
         case R.id.completablefuture2:
             UiUtils.showToast(this,
                               "CompletableFuture2 stream processing");
             return new ImageStreamCompletableFuture2(filters,
-                                                    urlListIterator,
-                                                    completionHook);
+                                                     urlListIterator,
+                                                     completionHook);
         }
         // This should never happen!
         return null;
@@ -241,10 +239,9 @@ public class MainActivity
         // extra.
         Intent resultsIntent =
             new Intent(this,
-                       ResultsActivity.class);
-
-        resultsIntent.putExtra(FILTER_EXTRA, 
-                               filterNames);
+                       ResultsActivity.class)
+            .putExtra(FILTER_EXTRA, 
+                      filterNames);
         
         // Start the ResultsActivity.
         startActivity(resultsIntent);
@@ -300,7 +297,8 @@ public class MainActivity
     }
 
     /**
-     * Uses addURLs to inflate autocompleteview while changing the FAB icon
+     * Uses addURLs to inflate autocompleteview while changing the FAB
+     * icon.
      */
     public void fabAdd(View view) {
         if (mAnimatetoX) {
@@ -311,26 +309,27 @@ public class MainActivity
             mAddFab.startAnimation(AnimationUtils.loadAnimation(this,
                     animRedId));
 
-            // Call the addURLs method to inflate the autocompletetextview
+            // Call the addURLs method to inflate the
+            // autocompletetextview.
             int id = addURLs(view);
 
-            // Set aAnimateX accordingly
+            // Set aAnimateX accordingly.
             mAnimatetoX = false;
 
-            // Reveal mRunFab
+            // Reveal mRunFab.
             showFab(mRunFab);
 
-        } else {
-            // Hide the add fab
+        } else 
+            // Hide the add FAB.
             hideAddFab(view);
-        }
     }
 
     /**
-     * Hides the add fab
+     * Hides the add FAB.
      */
     public void hideAddFab(View view) {
-        // We need to rotate the other way and set mAnimateX accordingly
+        // We need to rotate the other way and set mAnimateX
+        // accordingly.
         mAnimatetoX = true;
 
         // Rotate the FAB from 'X' to '+'.
@@ -340,9 +339,10 @@ public class MainActivity
         mAddFab.startAnimation(AnimationUtils.loadAnimation(this,
                 animRedId));
 
+        // Clear the list of URLs.
         clearLists(view);
 
-        // Hide mRunFab
+        // Hide mRunFab.
         hideFab(mRunFab);
     }
 
@@ -404,15 +404,9 @@ public class MainActivity
             (LinearLayout) findViewById(R.id.defaultButtonLayout);
     	int buttonCount = buttonLayout.getChildCount();
 
+        // Enable all the buttons.
     	for (int i = 0; i < buttonCount; ++i) 
             buttonLayout.getChildAt(i).setEnabled(enabled);
-    	
-    	/*buttonLayout =
-            (LinearLayout) findViewById(R.id.buttonLayoutBottom);
-    	buttonCount = buttonLayout.getChildCount();
-
-    	for (int i = 0; i < buttonCount; ++i) 
-            buttonLayout.getChildAt(i).setEnabled(enabled);*/
     }
 
     /**
@@ -425,7 +419,7 @@ public class MainActivity
 	
     /**
      * A helper method that recursively deletes files in a specified
-     * directory. 
+     * directory.
      */
     private int deleteSubFolders(String path) {
         int deletedFiles = 0;
@@ -449,22 +443,27 @@ public class MainActivity
     }
 
     /**
-     * This method checks whether there are files present that need to be deleted
-     * @return Returns a boolean indicating whether such files are present or not
+     * This method checks whether there are files present that need to
+     * be deleted.
+
+     * @return Returns a boolean indicating whether such files are
+     * present or not.
      */
     public boolean filesPresent() {
         int filesToDelete = 0;
 
+        // Determine if there are files to delete.
         for (Filter filter : mFilters)
             filesToDelete += filesInSubDirectoriesPresent
-                    (new File(Options.instance().getDirectoryPath(),
-                            filter.getName()).getAbsolutePath());
+                (new File(Options.instance().getDirectoryPath(),
+                          filter.getName()).getAbsolutePath());
 
         return filesToDelete > 0;
     }
 
     /**
-     * A helper method that checks whether there are files to be deleted recursively
+     * A helper method that checks whether there are files to be
+     * deleted recursively.
      */
     public int filesInSubDirectoriesPresent(String path) {
         int filesToDelete = 0;
@@ -479,6 +478,8 @@ public class MainActivity
         // recursively.
         for (File f : files) {
             if (f.isDirectory())
+                // @@ Rounak, should this be a recursive call to
+                // fileInSubDirectoriesPresent()?!
                 filesToDelete += deleteSubFolders(f.toString());
             filesToDelete++;
         }
@@ -518,10 +519,10 @@ public class MainActivity
     }
 
     /**
-     * Clears the directories on the click of the menu item without animating the mini fab
+     * Clears the directories on the click of the menu item without
+     * animating the mini FAB.
      */
     public void clearFilterDirectories(MenuItem item) {
-
         setButtonsEnabled(false);
 
         int deletedFiles = 0;
@@ -547,10 +548,10 @@ public class MainActivity
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Cache menu
         mMenu = menu;
 
+        // Inflate the menu.
         getMenuInflater().inflate(R.menu.stream_menu,
                                   menu);
 
@@ -559,22 +560,23 @@ public class MainActivity
     }
 
     /**
-     * Is called before inflating menu bar
+     * Is called before inflating menu bar.
      * @param menu Menu to inflate
      * @return true to inflate the menu bar or false to leave it
      */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (filesPresent()) {
+        if (filesPresent()) 
             menu.findItem(R.id.delete_menu).setVisible(true);
-        }
-        else {
+        else 
             menu.findItem(R.id.delete_menu).setVisible(false);
-        }
 
         return true;
     }
 
+    /**
+     * @@ Rounak, please document this method.
+     */ 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         item.setChecked(true);
@@ -583,7 +585,7 @@ public class MainActivity
     }
 
     /**
-     * Makes the delete menu item visible
+     * Makes the delete menu item visible.
      */
     public void menuVisible() {
         mDeleteIcon = mMenu.findItem(R.id.delete_menu);
@@ -592,7 +594,7 @@ public class MainActivity
     }
 
     /**
-     * Makes the delete menu item invisible
+     * Makes the delete menu item invisible.
      */
     public void menuInvisible() {
         mDeleteIcon = mMenu.findItem(R.id.delete_menu);
