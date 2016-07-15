@@ -2,6 +2,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -28,11 +29,11 @@ public class SearchStreamGangTest {
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
+        COMPLETABLE_FUTURES_WORDS,
+        COMPLETABLE_FUTURES_INPUTS,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAM_WORDS_AND_INPUTS,
-        COMPLETABLE_FUTURES_INPUTS,
-        COMPLETABLE_FUTURES_WORDS,
     }
 
     /**
@@ -74,10 +75,10 @@ public class SearchStreamGangTest {
     private static List<String> getWordList(String filename) {
         // The Stream and file will be closed here.
         try {
-        	return Files.readAllLines(Paths.get(ClassLoader.getSystemResource(filename).toURI()));
+            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource(filename).toURI()));
         } catch (Exception e) {
-        	e.printStackTrace();
-        	return null;
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -127,8 +128,11 @@ public class SearchStreamGangTest {
         runTests(wordList,
                  inputData);
 
-        // Test a hard-coded streams solution.
-        hardCodedStreamsSolution(wordList, inputData);
+        // Test a hard-coded parallel streams solution.
+        hardCodedParallelStreamsSolution(wordList, inputData);
+
+        // Test a hard-coded sequential solution.
+        hardCodedSequentialSolution(wordList, inputData);
  
         printDebugging("Ending SearchStreamGangTest");             
     }
@@ -156,12 +160,90 @@ public class SearchStreamGangTest {
     }
 
     /**
-     * A hard-coded solution that demonstrates how Java 8 Streams work
-     * without using the StreamGang framework.
+     * A hard-coded sequential solution.
      */
-    private static void hardCodedStreamsSolution(List<String> wordList,
-                                                 String[][] inputData) {
-        printDebugging("Starting hardCodedStreamsSolution");
+    private static void hardCodedSequentialSolution(List<String> wordList,
+                                                    String[][] inputData) {
+        // Create a SearchStreamGang that's used below to find the #
+        // of times each word in wordList appears in the inputData.
+        SearchStreamGang searchStreamGang =
+            new SearchStreamGangSync(wordList,
+                                     inputData);
+
+        for (String[] arrayOfStrings : inputData) {
+            List<List<SearchResults>> listOfListOfResults = new ArrayList<>();
+
+            // Note the start time.
+            long start = System.nanoTime();
+
+            for (String inputString : arrayOfStrings) {
+                // Get the section title.
+                String title = searchStreamGang.getTitle(inputString);
+
+                // Skip over the title.
+                String input = inputString.substring(title.length());
+
+                List<SearchResults> listOfResults = new ArrayList<>();
+
+                for (String word : wordList) {
+                    SearchResults results = searchStreamGang.searchForWord(word,
+                                                                           input,
+                                                                           title);
+                    if (results.size() > 0)
+                        listOfResults.add(results);
+                }
+                
+                if (listOfResults.size() > 0)
+                    listOfListOfResults.add(listOfResults);
+            }
+
+            // Print the total processing time.
+            System.out.println("hardCodedSequentialSolution"
+                               + ": Done in " 
+                               + (System.nanoTime() - start) / 1_000_000
+                               + " msecs");
+
+            // Determine how many word matches we obtained.
+            int totalWordsMatched = listOfListOfResults
+                .stream()
+                .map(listOfSearchResults -> {
+                        // list.stream().forEach(SearchResults::print);
+                        	                      	
+                        /*
+                        // Print the number of words that
+                        // matched for each section.
+                        System.out.println("matched " 
+                        + listOfSearchResults.size()
+                        + " words in section " 
+                        + listOfSearchResults.get(0).getTitle());
+                        */
+                        return listOfSearchResults;
+                    })               
+                        // Compute the total number of times each word
+                        // matched the input string.
+                        .mapToInt(listOfSearchResults -> listOfSearchResults
+                                  .stream()
+                                  .mapToInt(SearchResults::size)
+                                  .sum())
+                        // Sum the results.
+                        .sum();
+
+            System.out.println("hardCodedStreamsSolution"
+                               + "The search returned = "
+                               + totalWordsMatched
+                               + " word matches for "
+                               + listOfListOfResults.stream().count()
+                               + " input strings");
+        }
+    }
+
+    /**
+     * A hard-coded solution that demonstrates how parallel Java 8
+     * Streams work without using the StreamGang framework.
+     */
+    private static void hardCodedParallelStreamsSolution(List<String> wordList,
+                                                         String[][] inputData) {
+        printDebugging("Starting hardCodedParallelStreamsSolution");
 
         // Create a SearchStreamGang that's used below to find the #
         // of times each word in wordList appears in the inputData.
@@ -194,6 +276,9 @@ public class SearchStreamGangTest {
                                 // Get the section title.
                                 String title = searchStreamGang.getTitle(inputString);
 
+                                // Skip over the title.
+                                String input = inputString.substring(title.length());
+
                                 return wordList
                                 // Process the stream of words in parallel.
                                 .parallelStream()
@@ -203,8 +288,7 @@ public class SearchStreamGangTest {
                                 // return a SearchResults object.
                                 .map(word -> 
                                      searchStreamGang.searchForWord(word,
-                                                                    // Skip over the title.
-                                                                    inputString.substring(title.length()),
+                                                                    input,
                                                                     title))
 
                                 // Filter out SearchResults for words
@@ -222,7 +306,7 @@ public class SearchStreamGangTest {
                         .collect(toList());
                 
                     // Print the total processing time.
-                    System.out.println("hardCodedStreamsSolution" 
+                    System.out.println("hardCodedParallelStreamsSolution"
                                        + ": Done in " 
                                        + (System.nanoTime() - start) / 1_000_000
                                        + " msecs");
@@ -260,6 +344,6 @@ public class SearchStreamGangTest {
                                        + " input strings");
                 });        
 
-        printDebugging("Ending hardCodedStreamsSolution");
+        printDebugging("Ending hardCodedParallelStreamsSolution");
     }    
 }

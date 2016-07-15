@@ -58,9 +58,9 @@ public abstract class ImageStream
     protected CountDownLatch mIterationBarrier = null;
 
     /**
-     * Number of Threads in the fixed-size thread pool.
+     * Maximum number of threads in a fixed-size thread pool.
      */
-    private final int MAX_THREADS = 8;
+    private final int MAX_THREADS = 100;
 
     /**
      * Constructor initializes the superclass and data members.
@@ -77,9 +77,6 @@ public abstract class ImageStream
         // Set the completion hook that's called when all the images
         // are downloaded and processed.
         mCompletionHook = completionHook;
-
-        // Initialize the Executor with a fixed-sized pool of Threads.
-        setExecutor(Executors.newFixedThreadPool(MAX_THREADS));
     }
 
     /**
@@ -96,6 +93,20 @@ public abstract class ImageStream
     protected void initiateStream() {
         // Create a new barrier for this iteration cycle.
         mIterationBarrier = new CountDownLatch(1);
+
+        // The thread pool size is the smaller of (1) the number of
+        // filters times the number of images to download and (2)
+        // MAX_THREADS (which prevents allocating excessive threads).
+        int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
+                                      MAX_THREADS);
+
+        // Initialize the Executor with appropriate pool of threads.
+        setExecutor(Executors.newFixedThreadPool());
+
+        Log.d(TAG,
+              "Creating a new thread pool with "
+              + threadPoolSize
+              + " threads");
 
         long start = System.nanoTime();
 
@@ -132,7 +143,7 @@ public abstract class ImageStream
                 // available to process.
                 if (setInput(getNextInput()) == null)
                     break; // No more input, so we're done.
-                else
+                else 
                     // Invoke this hook method to initialize the gang
                     // of tasks for the next iteration cycle.
                     initiateStream();

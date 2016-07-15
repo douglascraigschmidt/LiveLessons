@@ -38,29 +38,37 @@ public class ImageStreamCompletableFuture1
      */
     @Override
     protected void processStream() {
-        List<Image> collect = getInput()
-                // Concurrently process each URL in the input List.
-                .stream()
+        // Create a list of futures.
+        List<CompletableFuture<Image>> listOfFutures = getInput()
+            // Concurrently process each URL in the input List.
+            .stream()
 
-                // Only include URLs that have not been already cached.
-                .filter(StreamsUtils.not(this::urlCached))
+            // Only include URLs that have not been already cached.
+            .filter(StreamsUtils.not(this::urlCached))
 
-                // Submit the URLs for asynchronous downloading.
-                .map(this::makeImageAsync)
+            // Submit the URLs for asynchronous downloading.
+            .map(this::makeImageAsync)
 
-                // Map each image to a stream containing the filtered
-                // versions of the image.
-                .flatMap(this::applyFilters)
+            // Map each image to a stream containing the filtered
+            // versions of the image.
+            .flatMap(this::applyFilters)
 
-                // Wait for all async operations to finish.
-                .map(CompletableFuture::join)
+            // Terminate the stream.
+            .collect(toList());
 
-                // Terminate the stream.
-                .collect(toList());
+        // Convert the list of futures to a list of images.
+        List<Image> listOfImages = listOfFutures
+            .stream()
+
+            // Wait for all async operations to finish.
+            .map(CompletableFuture::join)
+                
+            // Terminate the stream.
+            .collect(toList());
 
         Log.d(TAG, "processing of "
-                + collect.size()
-                + " image(s) is complete");
+              + listOfImages.size()
+              + " image(s) is complete");
     }
 
     /**
@@ -68,11 +76,12 @@ public class ImageStreamCompletableFuture1
      */
     private Stream<CompletableFuture<Image>> applyFilters(CompletableFuture<Image> imageFuture) {
         return mFilters.stream()
-                // Create a FilterDecoratorWithImage for each filter/image
-                // combo.
+                // Create a FilterDecoratorWithImage for each
+                // filter/image combo.
                 .map(filter ->
-                     imageFuture.thenApply(image -> makeFilterDecoratorWithImage(filter,
-                                                                                 image)))
+                     imageFuture.thenApply(image ->
+                                           makeFilterDecoratorWithImage(filter,
+                                                                        image)))
 
                 // Asynchronously filter the image and store it in an
                 // output file.
@@ -84,10 +93,10 @@ public class ImageStreamCompletableFuture1
      */
     protected CompletableFuture<Image> filterFutureImageAsync
         (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
-        // Asynchronously filter the image and store it in an output
-        // file.
-        return filterDecoratorWithImageFuture.thenCompose(filter ->
-                                                          CompletableFuture.supplyAsync(filter::run,
-                                                                                        getExecutor()));
+        // Asynchronously filter image and store it in an output file.
+        return filterDecoratorWithImageFuture
+            .thenCompose(filter ->
+                         CompletableFuture.supplyAsync(filter::run,
+                                                       getExecutor()));
     }
 }

@@ -66,11 +66,14 @@ public class SearchWithCompletableFuturesWords
                     // Get the section title.
                     String title = getTitle(inputString);
 
-                    return CompletableFuture.supplyAsync(() 
-                                                         -> searchForWord(word, 
-                                                                          // Skip over the title.
-                                                                          inputString.substring(title.length()),
-                                                                          title));
+                    // Skip over the title.
+                    String input = inputString.substring(title.length());
+
+                    return CompletableFuture
+                    .supplyAsync(() 
+                                 -> searchForWord(word, 
+                                                  input
+                                                  title));
                 })
             
             // Only keep a result that has at least one match.
