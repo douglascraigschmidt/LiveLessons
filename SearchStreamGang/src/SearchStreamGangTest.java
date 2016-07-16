@@ -28,12 +28,12 @@ public class SearchStreamGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        SEQUENTIAL_STREAM,
+        // SEQUENTIAL_STREAM,
         COMPLETABLE_FUTURES_WORDS,
         COMPLETABLE_FUTURES_INPUTS,
-        PARALLEL_STREAM_INPUTS,
-        PARALLEL_STREAM_WORDS,
-        PARALLEL_STREAM_WORDS_AND_INPUTS,
+            // PARALLEL_STREAM_INPUTS,
+            //         PARALLEL_STREAM_WORDS,
+            //         PARALLEL_STREAM_WORDS_AND_INPUTS,
     }
 
     /**
@@ -90,6 +90,7 @@ public class SearchStreamGangTest {
                                            String[][] inputData,
                                            TestsToRun choice) {
         switch (choice) {
+            /*
         case SEQUENTIAL_STREAM:
             return new SearchWithSequentialStream(wordList, 
                                                   inputData);
@@ -102,6 +103,7 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
+            */
         case COMPLETABLE_FUTURES_WORDS:
             return new SearchWithCompletableFuturesWords(wordList,
                                                          inputData);
@@ -129,10 +131,10 @@ public class SearchStreamGangTest {
                  inputData);
 
         // Test a hard-coded parallel streams solution.
-        hardCodedParallelStreamsSolution(wordList, inputData);
+        // hardCodedParallelStreamsSolution(wordList, inputData);
 
         // Test a hard-coded sequential solution.
-        hardCodedSequentialSolution(wordList, inputData);
+        // hardCodedSequentialSolution(wordList, inputData);
  
         printDebugging("Ending SearchStreamGangTest");             
     }

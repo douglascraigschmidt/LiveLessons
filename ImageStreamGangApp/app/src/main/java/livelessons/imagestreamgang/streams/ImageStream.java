@@ -101,7 +101,7 @@ public abstract class ImageStream
                                       MAX_THREADS);
 
         // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool());
+        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
 
         Log.d(TAG,
               "Creating a new thread pool with "

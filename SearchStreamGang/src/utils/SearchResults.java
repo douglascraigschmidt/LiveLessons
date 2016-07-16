@@ -136,7 +136,7 @@ public class SearchResults {
     /**
      * Print the results.
      */
-    SearchResults print() {
+    public SearchResults print() {
         if (!isEmpty()) synchronized(System.out) {
                 System.out.println(toString());
         }

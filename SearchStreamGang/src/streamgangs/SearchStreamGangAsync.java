@@ -56,6 +56,7 @@ public class SearchStreamGangAsync
         // Print the results.
         // searchResults.stream().forEach(SearchResults::print);
 
+        if (results != null)
         System.out.println(TAG + ": The search returned " 
                            + results.stream().mapToInt(list ->
                                                        list.stream().mapToInt(future ->

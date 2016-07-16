@@ -2,6 +2,7 @@ package streamgangs;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,6 +32,68 @@ public class SearchWithCompletableFuturesWords
      */
     @Override
     protected List<List<CompletableFuture<SearchResults>>> processStream() {
+        final List<List<CompletableFuture<SearchResults>>> listOfFutures = mWordsToFind
+            // Iterate through each word we're searching for and try to
+            // find it in the inputData.
+            .stream() 
+            .map(word -> {
+                    return getInput()
+                    .stream()
+                    .map(inputString -> {
+                            // Get the section title.
+                            String title = getTitle(inputString);
+
+                            // Skip over the title.
+                            String input = inputString.substring(title.length());
+
+                            return CompletableFuture.supplyAsync(() 
+                                                          -> searchForWord(word, 
+                                                                           input,
+                                                                           title));
+                    })
+                    .collect(toList());   
+            })
+            .collect(toList());
+        
+        System.out.println(TAG + ": first listOfFutures.size() = " + listOfFutures.size());
+            
+        // Wait for all operations associated with the futures to
+        // complete.
+
+        try {
+            CompletableFuture<Void> allDoneFuture =
+                CompletableFuture.allOf(listOfFutures.toArray(new CompletableFuture[listOfFutures.size()]));
+        
+            CompletableFuture<List<List<CompletableFuture<SearchResults>>>> allDone = 
+                allDoneFuture.thenApply(v ->
+                                        listOfFutures.stream()
+                                        .map(CompletableFuture::join)
+                                        .collect(toList()));
+        
+            System.out.println(TAG + ": second listOfFutures.size() = " + listOfFutures.size());
+        
+            // The call to join() is needed here to blocks the calling
+            // thread until all the futures have been completed.
+         
+            List<SearchResults> results = allDone.join();
+        
+            System.out.println(TAG + ": The search returned " 
+                               + results.stream().mapToInt(SearchResults::size).sum()
+                               + " word matches for "
+                               + getInput().size() 
+                               + " input strings with a results list of length "
+                               + results.size());
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
+       
+        return null;
+    }
+}
+
+/*
+    @Override
+    protected List<List<CompletableFuture<SearchResults>>> processStream() {
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         final List<CompletableFuture<List<CompletableFuture<SearchResults>>>> listOfFutures = mWordsToFind
@@ -51,9 +114,6 @@ public class SearchWithCompletableFuturesWords
         return allDone.join();
     }
 
-    /**
-     * Search the inputData for all occurrences of the words to find.
-     */
     protected CompletableFuture<List<CompletableFuture<SearchResults>>> processWordAsync(String word) {
         // Get the input.
         List<CompletableFuture<SearchResults>> listOfFutures = getInput()
@@ -87,5 +147,4 @@ public class SearchWithCompletableFuturesWords
         future.complete(listOfFutures);
         return future;
     }
-}
-
+*/
