@@ -1,5 +1,6 @@
 package streamgangs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +23,7 @@ import utils.StreamGang;
  * search one or more arrays of input Strings for words provided in an
  * array of words to find.
  */
-public abstract class SearchStreamGang
+public class SearchStreamGang
        extends StreamGang<String> {
     /**
      * The array of words to find.
@@ -41,9 +42,19 @@ public abstract class SearchStreamGang
     protected CountDownLatch mIterationBarrier = null;
         
     /**
+     * Keeps track of how long the test has run.
+     */
+    private long mStartTime;
+
+    /**
+     * Keeps track of all the execution times.
+     */
+    private List<Long> mExecutionTimes = new ArrayList<>();
+
+    /**
      * Constructor initializes the data members.
      */
-    protected SearchStreamGang(List<String> wordsToFind,
+    public SearchStreamGang(List<String> wordsToFind,
                                String[][] stringsToSearch) {
         // Store the words to search for.
         mWordsToFind = wordsToFind;
@@ -53,6 +64,72 @@ public abstract class SearchStreamGang
 
         // Initialize the Executor with a fixed-sized pool of Threads.
         // @@ setExecutor(Executors.newFixedThreadPool(MAX_THREADS));
+    }
+
+    /**
+     * Hook method that must be overridden by subclasses to perform
+     * the Stream processing.
+     */
+    protected List<List<SearchResults>> processStream() {
+        // No-op by default.
+        return null; 
+    }
+
+    /**
+     * Start timing the test run.
+     */
+    public void startTiming() {
+        // Note the start time.
+        mStartTime = System.nanoTime();
+    }
+
+    /**
+     * Stop timing the test run.
+     */
+    public void stopTiming() {
+        mExecutionTimes.add(Long.valueOf(System.nanoTime() - mStartTime) / 1_000_000);
+    }
+
+    /**
+     * Return the time needed to execute the test.
+     */
+    public List<Long> executionTimes() {
+        return mExecutionTimes;
+    }
+
+    /**
+     * Initiate the Stream processing, which uses a Java 8 stream to
+     * download, process, and store images sequentially.
+     */
+    @Override
+    protected void initiateStream() {
+        // Create a new barrier for this iteration cycle.
+        mIterationBarrier = new CountDownLatch(1);
+
+        startTiming();
+
+        // Start the Stream processing.
+        List<List<SearchResults>> results = processStream();
+        
+        stopTiming();
+
+        // Print the results.
+        // searchResults.stream().forEach(SearchResults::print);
+
+        /*
+        System.out.println(TAG + ": The search returned " 
+                           + results.stream().mapToInt(list -> list.stream().mapToInt(SearchResults::size).sum()).sum()
+                           + " word matches for "
+                           + getInput().size() 
+                           + " input strings");
+        */
+
+        // Indicate all computations in this iteration are done.
+        try {
+            mIterationBarrier.countDown();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } 
     }
 
     /**

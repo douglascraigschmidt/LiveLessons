@@ -11,7 +11,7 @@ import utils.SearchResults;
  * sequentially search input data for each word in an array of words.
  */
 public class SearchWithSequentialStream
-       extends SearchStreamGangSync {
+       extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */

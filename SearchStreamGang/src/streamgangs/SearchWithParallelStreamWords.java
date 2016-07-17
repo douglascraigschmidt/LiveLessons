@@ -12,7 +12,7 @@ import utils.SearchResults;
  * data.
  */
 public class SearchWithParallelStreamWords
-       extends SearchStreamGangSync {
+       extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */

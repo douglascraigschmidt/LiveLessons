@@ -13,7 +13,7 @@ import utils.SearchResults;
  * input data String.
  */
 public class SearchWithParallelStreamInputs
-       extends SearchStreamGangSync {
+       extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
