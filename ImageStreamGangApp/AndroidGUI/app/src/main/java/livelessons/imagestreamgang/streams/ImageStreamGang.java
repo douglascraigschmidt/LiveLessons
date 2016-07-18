@@ -65,9 +65,9 @@ public abstract class ImageStream
     /**
      * Constructor initializes the superclass and data members.
      */
-    public ImageStream(Filter[] filters,
-                       Iterator<List<URL>> urlListIterator,
-                       Runnable completionHook) {
+    public ImageStreamGang(Filter[] filters,
+                           Iterator<List<URL>> urlListIterator,
+                           Runnable completionHook) {
         // Store the Filters to apply as a List.
         mFilters = Arrays.asList(filters);
 

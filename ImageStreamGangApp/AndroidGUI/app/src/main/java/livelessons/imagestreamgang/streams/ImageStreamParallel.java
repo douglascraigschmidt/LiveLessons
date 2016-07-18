@@ -22,7 +22,7 @@ import livelessons.imagestreamgang.utils.StreamsUtils;
  * pool can be changed using system properties.
  */
 public class ImageStreamParallel 
-       extends ImageStream {
+       extends ImageStreamGang {
     /**
      * Constructor initializes the superclass and data members.
      */

@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
  * and store images sequentially.
  */
 public class ImageStreamSequential 
-       extends ImageStream {
+       extends ImageStreamGang {
     /**
      * Constructor initializes the superclass and data members.
      */

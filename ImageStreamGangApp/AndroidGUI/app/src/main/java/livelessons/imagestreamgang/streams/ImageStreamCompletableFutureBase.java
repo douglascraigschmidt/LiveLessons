@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
  * images concurrently.
  */
 public abstract class ImageStreamCompletableFutureBase
-       extends ImageStream {
+       extends ImageStreamGang {
     /**
      * Constructor initializes the superclass and data members.
      */
