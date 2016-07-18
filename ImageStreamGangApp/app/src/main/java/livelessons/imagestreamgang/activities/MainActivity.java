@@ -478,9 +478,7 @@ public class MainActivity
         // recursively.
         for (File f : files) {
             if (f.isDirectory())
-                // @@ Rounak, should this be a recursive call to
-                // fileInSubDirectoriesPresent()?!
-                filesToDelete += deleteSubFolders(f.toString());
+                filesToDelete += filesInSubDirectoriesPresent(f.toString());
             filesToDelete++;
         }
         return filesToDelete;
@@ -575,7 +573,8 @@ public class MainActivity
     }
 
     /**
-     * @@ Rounak, please document this method.
+     * Sets the checkbox for the item selected from the menu bar 
+     * and selects the selected method to download the images 
      */ 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
