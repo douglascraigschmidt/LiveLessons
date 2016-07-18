@@ -4,12 +4,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import streamgangs.SearchStreamGang;
@@ -375,28 +374,56 @@ public class SearchStreamGangTest {
      * Print out all the timing results.
      */
     private static void printTimingResults() {
-        // @@ There's got to be a cleaner way to do all of this..
-
-        Set<Map.Entry<String, List<Long>>> set = mResultsMap.entrySet();
-        Iterator<Map.Entry<String, List<Long>>> iter = set.iterator();
-        Map.Entry<String, List<Long>> item = iter.next();
-        int numberOfRuns = item.getValue().size();
-        List<TreeMap<Long, String>> list = new ArrayList<>(numberOfRuns);
+        // Determine how many runs of the tests took place.
+        int numberOfRuns =
+            mResultsMap.entrySet().iterator().next().getValue().size();
+        
+        // Create a list of TreeMaps to hold the timing results in
+        // sorted order.
+        List<TreeMap<Long, String>> listOfMaps = 
+            new ArrayList<>(numberOfRuns);
+        
+        // Create a new TreeMap for each element in the list.
         for (int index = 0; index < numberOfRuns; ++index)
-            list.add(index, new TreeMap<Long, String>());
+            listOfMaps.add(new TreeMap<Long, String>());
 
-        for (int i = 0; i < numberOfRuns; ++i)
-            for (Map.Entry<String, List<Long>> entry : mResultsMap.entrySet())
-                list.get(i).put(entry.getValue().get(i), 
-                                entry.getKey());
+        // Initialize the TreeMaps to contain the results from each of
+        // the timing tests.
+        IntStream.range(0, numberOfRuns)
+            // Iterate through each of the test runs.
+            .forEach(treeIndex ->
+                     mResultsMap
+                     // Get the entry set from the map.
+                     .entrySet()
+                     
+                     // Convert to a stream.
+                     .stream()
+                     
+                     // Iterate through each entry in the map and
+                     // store the results into the appropriate tree
+                     // map, whose key is the time in msecs and whose
+                     // value is the test that was run.
+                     .forEach(entry -> 
+                              listOfMaps.get(treeIndex).put(entry.getValue()
+                            		                             .get(treeIndex), 
+                                                            entry.getKey())));
 
-        int n = 1;
-        for (Map<Long, String> map : list) {
-            System.out.println("\nPrinting results for input file " + n++ + " from fastest to slowest");
-
-            for (Map.Entry<Long, String> entry : map.entrySet()) {
-                System.out.println("" + entry.getValue() + " executed in " + entry.getKey() + " msecs");
-            }
-        }
+        // Iterate through each of the timing tests and print the
+        // results from fastest to slowest.
+        IntStream.range(0, numberOfRuns)
+            .forEach(treeIndex -> {
+                    System.out.println("\nPrinting results for input file " 
+                                       + (treeIndex + 1)
+                                       + " from fastest to slowest");
+                    listOfMaps
+                        .get(treeIndex)
+                        .entrySet()
+                        .forEach (entry ->
+                                  System.out.println("" 
+                                                     + entry.getValue() 
+                                                     + " executed in " 
+                                                     + entry.getKey() 
+                                                     + " msecs"));
+            });
     }
 }
