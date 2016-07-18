@@ -371,7 +371,8 @@ public class SearchStreamGangTest {
     }    
 
     /**
-     * Print out all the timing results.
+     * Print out all the timing results for all the test runs in order
+     * from fastest to slowest.
      */
     private static void printTimingResults() {
         // Determine how many runs of the tests took place.
@@ -387,8 +388,8 @@ public class SearchStreamGangTest {
         for (int index = 0; index < numberOfRuns; ++index)
             listOfMaps.add(new TreeMap<Long, String>());
 
-        // Initialize the TreeMaps to contain the results from each of
-        // the timing tests.
+        // Initialize the TreeMaps to contain the results from each
+        // timing test.
         IntStream.range(0, numberOfRuns)
             // Iterate through each of the test runs.
             .forEach(treeIndex ->
@@ -403,27 +404,34 @@ public class SearchStreamGangTest {
                      // store the results into the appropriate tree
                      // map, whose key is the time in msecs and whose
                      // value is the test that was run.
-                     .forEach(entry -> 
-                              listOfMaps.get(treeIndex).put(entry.getValue()
-                            		                             .get(treeIndex), 
+                     .forEach(entry ->
+                              listOfMaps.get(treeIndex).put(entry
+                                                            .getValue()
+                                                            .get(treeIndex), 
                                                             entry.getKey())));
 
-        // Iterate through each of the timing tests and print the
-        // results from fastest to slowest.
+        // Print the results of the test runs from fastest to slowest.
         IntStream.range(0, numberOfRuns)
+            // Iterate through each of the test runs.
             .forEach(treeIndex -> {
                     System.out.println("\nPrinting results for input file " 
                                        + (treeIndex + 1)
                                        + " from fastest to slowest");
                     listOfMaps
+                        // Get the appropriate TreeMap.
                         .get(treeIndex)
+                        
+                        // Get the entry set from the map.
                         .entrySet()
+
+                        // Print results of test run with name of the
+                        // test first followed by time in msecs.
                         .forEach (entry ->
                                   System.out.println("" 
                                                      + entry.getValue() 
                                                      + " executed in " 
                                                      + entry.getKey() 
                                                      + " msecs"));
-            });
+                });
     }
 }
