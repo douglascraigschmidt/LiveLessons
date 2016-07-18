@@ -36,7 +36,7 @@ public class ImageStreamCompletableFuture2
      */
     @Override
     protected void processStream() {
-        final List<CompletableFuture<List<CompletableFuture<Image>>>> listOfFutures = getInput()
+        final List<CompletableFuture<List<Image>>> listOfFutures = getInput()
             // Concurrently process each URL in the input List.
             .parallelStream()
 
@@ -66,7 +66,7 @@ public class ImageStreamCompletableFuture2
 
         // Wait for all operations associated with the futures to
         // complete.
-        final CompletableFuture<List<List<CompletableFuture<Image>>>> allImagesDone =
+        final CompletableFuture<List<List<Image>>> allImagesDone =
                 StreamsUtils.joinAll(listOfFutures);
         // The call to join() is needed here to blocks the calling
         // thread until all the futures have been completed.
@@ -99,7 +99,7 @@ public class ImageStreamCompletableFuture2
     /**
      * Asynchronously filter the image and store it in an output file.
      */
-    private CompletableFuture<List<CompletableFuture<Image>>> applyFiltersAsync
+    private CompletableFuture<List<Image>> applyFiltersAsync
                 (List<FilterDecoratorWithImage> decoratedFiltersWithImage) {
         List<CompletableFuture<Image>> listOfFutures = decoratedFiltersWithImage
             // Iterate through all the configured filters.
@@ -111,10 +111,9 @@ public class ImageStreamCompletableFuture2
             // Collect the list of futures.
             .collect(toList());
 
-        // Create a future to hold the results.
-        CompletableFuture<List<CompletableFuture<Image>>> future =
-            new CompletableFuture<>();
-        future.complete(listOfFutures);
-        return future;
+        // Return a CompletableFuture to a list of Image objects that
+        // will be available when all the CompletableFutures in the
+        // listOfFutures have completed.
+        return StreamsUtils.joinAll(listOfFutures);
     }
 }
