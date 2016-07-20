@@ -53,9 +53,9 @@ public class ImageStreamSequential
             .collect(toList());
 
         System.out.println(TAG
-        		+ "processing of "
-                + collect.size()
-                + " image(s) is complete");
+                           + ": processing of "
+                           + collect.size()
+                           + " image(s) is complete");
     }
 
     /**

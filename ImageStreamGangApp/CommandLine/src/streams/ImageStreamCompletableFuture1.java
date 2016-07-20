@@ -64,7 +64,7 @@ public class ImageStreamCompletableFuture1
             .collect(toList());
 
         System.out.println(TAG 
-                           + "processing of "
+                           + ": processing of "
                            + listOfImages.size()
                            + " image(s) is complete");
     }

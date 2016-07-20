@@ -74,9 +74,9 @@ public class ImageStreamCompletableFuture2
                                            .sum();
 
         System.out.println(TAG
-              + "processing of "
-              + imagesProcessed
-              + " image(s) is complete");
+                           + ": processing of "
+                           + imagesProcessed
+                           + " image(s) is complete");
     }
 
     /**
