@@ -58,6 +58,6 @@ public class StreamsUtils {
      * @return The negation of the input predicate.
      */
     public static<T> Predicate<T> not(Predicate<T> p) {
-        return t -> !p.test(t);
+        return p.negate();
     }
 }
