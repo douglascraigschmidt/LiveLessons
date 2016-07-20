@@ -8,6 +8,6 @@ references, Streams, and CompletableFutures:
 
 AndroidGUI -- This folder provides an Android GUI-based versions of the app that integrates Java 8 with Android's "Material Design" model.
 
-CommandLine -- This folder provides a command-line version of the app that focuses on comparing/contrasting different concurrency models.
+CommandLine -- This folder provides a command-line version of the app that focuses on comparing/contrasting the performance of different concurrency models based on Parallel Streams and CompletableFutures.
 
 
