@@ -6,8 +6,8 @@ Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava/)
 LiveLessons tutorial using Java 8 features, such as lambdas, method
 references, Streams, and CompletableFutures:
 
-CommandLine -- This folder provides a command-line version of the app.
+AndroidGUI -- This folder provides an Android GUI-based versions of the app that integrates Java 8 with Android's "Material Design" model.
 
-AndroidGUI -- This folder provides an Android GUI-based versions of the app.
+CommandLine -- This folder provides a command-line version of the app that focuses on comparing/contrasting different concurrency models.
 
 
