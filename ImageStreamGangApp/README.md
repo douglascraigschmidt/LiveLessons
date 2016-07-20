@@ -1,5 +1,5 @@
 This folder contains source code for the following two apps that
-implement variants of the
+implement pattern-oriented variants of the
 [ImageTaskGangApplication](https://github.com/douglascraigschmidt/LiveLessons/tree/master/ImageTaskGangApplication)
 from my [Java
 Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava/)
