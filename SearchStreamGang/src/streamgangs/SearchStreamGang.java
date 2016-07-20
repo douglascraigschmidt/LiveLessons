@@ -106,11 +106,13 @@ public class SearchStreamGang
         // Create a new barrier for this iteration cycle.
         mIterationBarrier = new CountDownLatch(1);
 
+        // Start timing the test run.
         startTiming();
 
         // Start the Stream processing.
         List<List<SearchResults>> results = processStream();
         
+        // Stop timing the test run.
         stopTiming();
 
         // Print the results.

@@ -13,11 +13,6 @@ import java.util.stream.Stream;
 
 import streamgangs.SearchStreamGang;
 import streamgangs.SearchWithCompletableFuturesInputs;
-import streamgangs.SearchWithCompletableFuturesWords;
-import streamgangs.SearchWithParallelStreamInputs;
-import streamgangs.SearchWithParallelStreamWords;
-import streamgangs.SearchWithParallelStreamWordsAndInputs;
-import streamgangs.SearchWithSequentialStream;
 import utils.SearchResults;
 
 /**
@@ -31,11 +26,11 @@ public class SearchStreamGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        SEQUENTIAL_STREAM,
+        /* SEQUENTIAL_STREAM,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS,
-        PARALLEL_STREAM_WORDS_AND_INPUTS,
-        COMPLETABLE_FUTURES_WORDS,
+        PARALLEL_STREAM_WORDS_AND_INPUTS, 
+        COMPLETABLE_FUTURES_WORDS, */
         COMPLETABLE_FUTURES_INPUTS,
     }
 
@@ -102,6 +97,7 @@ public class SearchStreamGangTest {
                                                          String[][] inputData,
                                                          TestsToRun choice) {
         switch (choice) {
+        /*
         case SEQUENTIAL_STREAM:
             return new SearchWithSequentialStream(wordList, 
                                                   inputData);
@@ -114,12 +110,14 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
-        case COMPLETABLE_FUTURES_INPUTS:
-            return new SearchWithCompletableFuturesInputs(wordList,
-                                                          inputData);
+                                                            
         case COMPLETABLE_FUTURES_WORDS:
             return new SearchWithCompletableFuturesWords(wordList,
                                                          inputData);
+                                                             */                                                        
+        case COMPLETABLE_FUTURES_INPUTS:
+            return new SearchWithCompletableFuturesInputs(wordList,
+                                                          inputData);
         }
         return null;
     }
@@ -152,11 +150,13 @@ public class SearchStreamGangTest {
         for (TestsToRun test : TestsToRun.values()) {
             printDebugging("Starting " + test); 
 
-            // Run the next test.
+            // Make the appropriate SearchStreamGang.
             SearchStreamGang streamGang =
                 makeSearchStreamGang(wordList,
                                      inputData,
                                      test);
+
+            // Run the next test.
             streamGang.run();
 
             // Store the execution times.
@@ -170,13 +170,13 @@ public class SearchStreamGangTest {
         }
 
         // Test a hard-coded parallel streams solution.
-        hardCodedParallelStreamsSolution(wordList, inputData);
+        // hardCodedParallelStreamsSolution(wordList, inputData);
 
         // Test a hard-coded sequential solution.
-        hardCodedSequentialSolution(wordList, inputData);
+        // hardCodedSequentialSolution(wordList, inputData);
 
         // Print out all the timing results.
-        printTimingResults();
+        printTimingResults(mResultsMap);
     }
 
     /**
@@ -370,30 +370,33 @@ public class SearchStreamGangTest {
         printDebugging("Ending hardCodedParallelStreamsSolution");
     }    
 
+
+    
     /**
      * Print out all the timing results for all the test runs in order
      * from fastest to slowest.
      */
-    private static void printTimingResults() {
+    private static void printTimingResults(Map<String, List<Long>> resultsMap) {
         // Determine how many runs of the tests took place.
         int numberOfRuns =
-            mResultsMap.entrySet().iterator().next().getValue().size();
+            resultsMap.entrySet().iterator().next().getValue().size();
+        
+        // This local class is needed to make the Java compiler happy.
+        final class ResultMap extends TreeMap<Long, String> {}
         
         // Create a list of TreeMaps to hold the timing results in
         // sorted order.
-        List<TreeMap<Long, String>> listOfMaps = 
-            new ArrayList<>(numberOfRuns);
-        
-        // Create a new TreeMap for each element in the list.
-        for (int index = 0; index < numberOfRuns; ++index)
-            listOfMaps.add(new TreeMap<Long, String>());
+        List<ResultMap> listOfMaps = 
+        		Stream.generate(ResultMap::new)
+        			  .limit(numberOfRuns)
+        			  .collect(toList());
 
-        // Initialize the TreeMaps to contain the results from each
+           // Initialize the TreeMaps to contain the results from each
         // timing test.
         IntStream.range(0, numberOfRuns)
             // Iterate through each of the test runs.
             .forEach(treeIndex ->
-                     mResultsMap
+                     resultsMap
                      // Get the entry set from the map.
                      .entrySet()
                      

@@ -17,9 +17,7 @@ public class MainConsole {
      * the console version of the ImageTaskGang application.
      */
     public static void main(String[] args) {
-        /**
-         * Array of Filters to apply to the downloaded images.
-         */
+        // Array of Filters to apply to the downloaded images.
         final Filter[] filters = {
             new NullFilter(),
             new GrayScaleFilter()
