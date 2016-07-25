@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
+import static java.util.stream.Collectors.summingInt;
 
 import utils.SearchResults;
 import utils.StreamGang;
@@ -118,13 +119,11 @@ public class SearchStreamGang
         // Print the results.
         // searchResults.stream().forEach(SearchResults::print);
 
-        /*
         System.out.println(TAG + ": The search returned " 
-                           + results.stream().mapToInt(list -> list.stream().mapToInt(SearchResults::size).sum()).sum()
+                           + results.stream().mapToInt(list -> list.stream().collect(summingInt(SearchResults::size))).sum()
                            + " word matches for "
                            + getInput().size() 
                            + " input strings");
-        */
 
         // Indicate all computations in this iteration are done.
         try {
