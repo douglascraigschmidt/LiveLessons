@@ -216,8 +216,8 @@ public class ImageStreamGangTest {
         // sorted order.
         List<ResultMap> listOfMaps = 
         		Stream.generate(ResultMap::new)
-        			  .limit(numberOfRuns)
-        			  .collect(toList());
+                              .limit(numberOfRuns)
+                              .collect(toList());
         
         // Initialize the TreeMaps to contain the results from each
         // timing test.

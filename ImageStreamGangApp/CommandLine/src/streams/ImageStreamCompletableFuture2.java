@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import sun.rmi.runtime.Log;
 import utils.Image;
 import utils.StreamsUtils;
 import filters.Filter;
 import filters.FilterDecoratorWithImage;
+import static java.util.stream.Collectors.summingInt;
 
 /**
  * Customizes ImageStream to use Java 8 CompletableFutures to
@@ -64,14 +64,13 @@ public class ImageStreamCompletableFuture2
 
         // Wait for all operations associated with the futures to
         // complete.
-        final CompletableFuture<List<List<Image>>> allImagesDone =
+        CompletableFuture<List<List<Image>>> allImagesDone =
                 StreamsUtils.joinAll(listOfFutures);
         // The call to join() is needed here to blocks the calling
         // thread until all the futures have been completed.
-        int imagesProcessed = allImagesDone.join()
-                                           .stream()
-                                           .mapToInt(List::size)
-                                           .sum();
+        Integer imagesProcessed = allImagesDone.join()
+                                               .stream()
+                                               .collect(summingInt(List::size));
 
         System.out.println(TAG
                            + ": processing of "
