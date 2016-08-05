@@ -221,7 +221,7 @@ public abstract class ImageStreamGang
      * Factory method that retrieves the image associated with the @a
      * urlToDownload and creates an Image to encapsulate it.
      */
-    protected Image makeImage(URL urlToDownload) {
+    protected static Image makeImage(URL urlToDownload) {
         return new Image(urlToDownload,
                          NetUtils.downloadContent(urlToDownload));
     }
@@ -229,8 +229,8 @@ public abstract class ImageStreamGang
     /**
      * Factory method that makes a new @a FilterDecoratorWithImage.
      */
-    protected FilterDecoratorWithImage makeFilterDecoratorWithImage(Filter filter,
-                                                                    Image image) {
+    protected static FilterDecoratorWithImage makeFilterDecoratorWithImage(Filter filter,
+                                                                           Image image) {
         return new FilterDecoratorWithImage(new OutputFilterDecorator(filter),
                                             image);
     }
@@ -238,7 +238,8 @@ public abstract class ImageStreamGang
     /**
      * @return true if the @a url is in the cache, else false.
      */
-    protected boolean urlCached(URL url, String filterName) {
+    protected static boolean urlCached(URL url, 
+    		                           String filterName) {
         // Construct the subdirectory for the filter.
         File externalFile = new File(Options.instance().getDirectoryPath(),
                                      filterName);

@@ -64,7 +64,6 @@ public class SearchStreamGangTest {
      */
     private static String[] getInputData(String filename,
                                          String splitter) {
-        // The Stream and file will be closed here.
         try {
             return Pattern.compile(splitter)
                           .split(new String(Files.readAllBytes
