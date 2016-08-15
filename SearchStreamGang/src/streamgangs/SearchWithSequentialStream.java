@@ -44,7 +44,7 @@ public class SearchWithSequentialStream
     /**
      * Search the inputString for all occurrences of the words to find.
      */
-    protected List<SearchResults> processInput (String inputString) {
+    private List<SearchResults> processInput(String inputString) {
         // Get the section title.
         String title = getTitle(inputString);
 

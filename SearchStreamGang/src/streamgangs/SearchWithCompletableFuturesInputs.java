@@ -51,7 +51,7 @@ public class SearchWithCompletableFuturesInputs
     /**
      * Search input string for all occurrences of the words to find.
      */
-    protected CompletableFuture<List<SearchResults>> processInputAsync(String inputString) {
+    private CompletableFuture<List<SearchResults>> processInputAsync(String inputString) {
         // Store the title.
         String title = getTitle(inputString);
 
@@ -66,13 +66,11 @@ public class SearchWithCompletableFuturesInputs
 
             // Asynchronously search for each word in the input string
             // and return a CompletableFuture<SearchResults>.
-            .map(word -> {
-                    return CompletableFuture
-                    .supplyAsync(() 
-                                 -> searchForWord(word, 
-                                                  input,
-                                                  title));
-                })
+            .map(word ->
+                 CompletableFuture.supplyAsync(()
+                                               -> searchForWord(word,
+                                                                input,
+                                                                title)))
 
             // Terminate the stream and return a list of
             // CompletableFutures.

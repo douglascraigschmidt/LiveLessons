@@ -2,10 +2,8 @@ package streamgangs;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 import utils.SearchResults;
 import utils.StreamsUtils;
@@ -45,7 +43,7 @@ public class SearchWithCompletableFuturesWords
         return StreamsUtils.joinAll(listOfFutures).join();
     }
 
-    protected CompletableFuture<List<SearchResults>> processWordAsync(String word) {
+    private CompletableFuture<List<SearchResults>> processWordAsync(String word) {
         List<CompletableFuture<SearchResults>> listOfFutures = getInput()
             .stream()
             .map(inputString -> {

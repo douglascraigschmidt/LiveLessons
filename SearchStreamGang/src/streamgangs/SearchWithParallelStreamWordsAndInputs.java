@@ -48,7 +48,7 @@ public class SearchWithParallelStreamWordsAndInputs
      * Concurrently Search the inputData for all occurrences of the
      * words to find.
      */
-    protected List<SearchResults> processWord(String word) {
+    private List<SearchResults> processWord(String word) {
   	// Get the input.
         return getInput()
             // Concurrently process each String in the input list.

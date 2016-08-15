@@ -46,7 +46,7 @@ public class SearchWithParallelStreamInputs
     /**
      * Search the inputData for all occurrences of the words to find.
      */
-    protected List<SearchResults> processInput (String inputString) {
+    private List<SearchResults> processInput(String inputString) {
         // Get the section title.
         String title = getTitle(inputString);
 

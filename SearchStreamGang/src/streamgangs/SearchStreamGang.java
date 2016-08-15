@@ -88,7 +88,7 @@ public class SearchStreamGang
      * Stop timing the test run.
      */
     public void stopTiming() {
-        mExecutionTimes.add(Long.valueOf(System.nanoTime() - mStartTime) / 1_000_000);
+        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 
     /**
@@ -159,17 +159,17 @@ public class SearchStreamGang
         /**
          * The word to match.
          */
-        String mWord;
+        private String mWord;
         
         /**
          * The input data to do the matching.
          */
-        String mInputData;
+        private String mInputData;
         
         /**
          * The current position in the input data.
          */
-        int mCurrentPosition;
+        private int mCurrentPosition;
 
         /**
          * Constructor initializes the object.
@@ -202,7 +202,7 @@ public class SearchStreamGang
          * matched.
          */
         public Integer next() {
-            Integer index = Integer.valueOf(mCurrentPosition);
+            Integer index = mCurrentPosition;
             mCurrentPosition =
                 mInputData.indexOf(mWord, 
                                    mCurrentPosition + mWord.length());

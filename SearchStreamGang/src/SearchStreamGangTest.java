@@ -11,8 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import streamgangs.SearchStreamGang;
-import streamgangs.SearchWithCompletableFuturesInputs;
+import streamgangs.*;
 import utils.SearchResults;
 
 /**
@@ -26,11 +25,11 @@ public class SearchStreamGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        /* SEQUENTIAL_STREAM,
+        SEQUENTIAL_STREAM,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAM_WORDS_AND_INPUTS, 
-        COMPLETABLE_FUTURES_WORDS, */
+        COMPLETABLE_FUTURES_WORDS,
         COMPLETABLE_FUTURES_INPUTS,
     }
 
@@ -96,9 +95,8 @@ public class SearchStreamGangTest {
                                                          String[][] inputData,
                                                          TestsToRun choice) {
         switch (choice) {
-        /*
         case SEQUENTIAL_STREAM:
-            return new SearchWithSequentialStream(wordList, 
+            return new SearchWithSequentialStream(wordList,
                                                   inputData);
         case PARALLEL_STREAM_INPUTS:
             return new SearchWithParallelStreamInputs(wordList,
@@ -109,11 +107,10 @@ public class SearchStreamGangTest {
         case PARALLEL_STREAM_WORDS_AND_INPUTS:
             return new SearchWithParallelStreamWordsAndInputs(wordList,
                                                               inputData);
-                                                            
+
         case COMPLETABLE_FUTURES_WORDS:
             return new SearchWithCompletableFuturesWords(wordList,
                                                          inputData);
-                                                             */                                                        
         case COMPLETABLE_FUTURES_INPUTS:
             return new SearchWithCompletableFuturesInputs(wordList,
                                                           inputData);
@@ -128,7 +125,7 @@ public class SearchStreamGangTest {
         // System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "4");
 
         printDebugging("Starting SearchStreamGangTest");
-                     
+
         String[][] inputData = new String[][] { getInputData(sHAMLET_DATA_FILE, "@"),
                                                 getInputData(sMACBETH_DATA_FILE, "@") };
 
@@ -138,16 +135,16 @@ public class SearchStreamGangTest {
         runTests(wordList,
                  inputData);
 
-        printDebugging("Ending SearchStreamGangTest");             
+        printDebugging("Ending SearchStreamGangTest");
     }
 
     /**
      * Create/run appropriate type of StreamGang to search for words.
      */
-    private static void runTests(List<String> wordList, 
+    private static void runTests(List<String> wordList,
                                  String[][] inputData) {
         for (TestsToRun test : TestsToRun.values()) {
-            printDebugging("Starting " + test); 
+            printDebugging("Starting " + test);
 
             // Make the appropriate SearchStreamGang.
             SearchStreamGang streamGang =
@@ -169,10 +166,10 @@ public class SearchStreamGangTest {
         }
 
         // Test a hard-coded parallel streams solution.
-        // hardCodedParallelStreamsSolution(wordList, inputData);
+        hardCodedParallelStreamsSolution(wordList, inputData);
 
         // Test a hard-coded sequential solution.
-        // hardCodedSequentialSolution(wordList, inputData);
+        hardCodedSequentialSolution(wordList, inputData);
 
         // Print out all the timing results.
         printTimingResults(mResultsMap);
@@ -211,7 +208,7 @@ public class SearchStreamGangTest {
                     if (results.size() > 0)
                         listOfResults.add(results);
                 }
-                
+
                 if (listOfResults.size() > 0)
                     listOfListOfResults.add(listOfResults);
             }
@@ -219,7 +216,7 @@ public class SearchStreamGangTest {
             streamGang.stopTiming();
 
             // Store the execution times.
-            mResultsMap.put("hardCodedSequentialSolution", 
+            mResultsMap.put("hardCodedSequentialSolution",
                             streamGang.executionTimes());
 
             // Determine how many word matches we obtained.
@@ -227,17 +224,17 @@ public class SearchStreamGangTest {
                 .stream()
                 .map(listOfSearchResults -> {
                         // list.stream().forEach(SearchResults::print);
-                        	                      	
+
                         /*
                         // Print the number of words that
                         // matched for each section.
-                        System.out.println("matched " 
+                        System.out.println("matched "
                         + listOfSearchResults.size()
-                        + " words in section " 
+                        + " words in section "
                         + listOfSearchResults.get(0).getTitle());
                         */
                         return listOfSearchResults;
-                    })               
+                    })
                         // Compute the total number of times each word
                         // matched the input string.
                         .mapToInt(listOfSearchResults -> listOfSearchResults
@@ -247,14 +244,12 @@ public class SearchStreamGangTest {
                         // Sum the results.
                         .sum();
 
-            /*
             System.out.println("hardCodedSequentialSolution"
                                + ": The search returned = "
                                + totalWordsMatched
                                + " word matches for "
                                + listOfListOfResults.stream().count()
                                + " input strings");
-            */
         }
     }
 
@@ -271,7 +266,7 @@ public class SearchStreamGangTest {
         SearchStreamGang streamGang =
             new SearchStreamGang(wordList,
                                  inputData);
-                                 
+
         // Convert inputData "array of arrays" into Stream of arrays.
         Stream.of(inputData)
             // Process the stream of input arrays parallel.
@@ -289,7 +284,7 @@ public class SearchStreamGangTest {
                         .of(arrayOfInputStrings)
                         // Process the stream of input data in parallel.
                         .parallel()
-                        
+
                         // Concurrently search each input string for
                         // all occurrences of the words to find.
                         .map(inputString -> {
@@ -306,7 +301,7 @@ public class SearchStreamGangTest {
                                 // Search for all places in the input
                                 // String where the word appears and
                                 // return a SearchResults object.
-                                .map(word -> 
+                                .map(word ->
                                      streamGang.searchForWord(word,
                                                                     input,
                                                                     title))
@@ -320,13 +315,13 @@ public class SearchStreamGangTest {
                                 // string.
                                 .collect(toList());
                             })
-                                              
+
                         // Collect a list of containing the list of
                         // SearchResults for each input string.
                         .collect(toList());
 
                     streamGang.stopTiming();
-                
+
                     // Store the execution times.
                     mResultsMap.put("hardCodedParallelStreamsSolution",
                                     streamGang.executionTimes());
@@ -336,17 +331,17 @@ public class SearchStreamGangTest {
                         .stream()
                         .map(listOfSearchResults -> {
                                 // list.stream().forEach(SearchResults::print);
-                        	                      	
+
                                 /*
                                 // Print the number of words that
                                 // matched for each section.
-                                System.out.println("matched " 
+                                System.out.println("matched "
                                                    + listOfSearchResults.size()
-                                                   + " words in section " 
+                                                   + " words in section "
                                                    + listOfSearchResults.get(0).getTitle());
                                 */
                                 return listOfSearchResults;
-                            })               
+                            })
                         // Compute the total number of times each word
                         // matched the input string.
                         .mapToInt(listOfSearchResults -> listOfSearchResults
@@ -356,21 +351,19 @@ public class SearchStreamGangTest {
                         // Sum the results.
                         .sum();
 
-                    /*
                     System.out.println("hardCodedParallelStreamsSolution"
                                        + ": The search returned = "
                                        + totalWordsMatched
                                        + " word matches for "
                                        + listOfListOfResults.stream().count()
                                        + " input strings");
-                    */
-                });        
+                });
 
         printDebugging("Ending hardCodedParallelStreamsSolution");
-    }    
+    }
 
 
-    
+
     /**
      * Print out all the timing results for all the test runs in order
      * from fastest to slowest.
@@ -379,38 +372,36 @@ public class SearchStreamGangTest {
         // Determine how many runs of the tests took place.
         int numberOfRuns =
             resultsMap.entrySet().iterator().next().getValue().size();
-        
+
         // This local class is needed to make the Java compiler happy.
         final class ResultMap extends TreeMap<Long, String> {}
-        
+
         // Create a list of TreeMaps to hold the timing results in
         // sorted order.
-        List<ResultMap> listOfMaps = 
-        		Stream.generate(ResultMap::new)
-        			  .limit(numberOfRuns)
-        			  .collect(toList());
+        List<ResultMap> listOfMaps =
+            Stream.generate(ResultMap::new)
+            .limit(numberOfRuns)
+            .collect(toList());
 
-           // Initialize the TreeMaps to contain the results from each
+        // Initialize the TreeMaps to contain the results from each
         // timing test.
         IntStream.range(0, numberOfRuns)
-            // Iterate through each of the test runs.
-            .forEach(treeIndex ->
-                     resultsMap
-                     // Get the entry set from the map.
-                     .entrySet()
-                     
-                     // Convert to a stream.
-                     .stream()
-                     
-                     // Iterate through each entry in the map and
-                     // store the results into the appropriate tree
-                     // map, whose key is the time in msecs and whose
-                     // value is the test that was run.
-                     .forEach(entry ->
-                              listOfMaps.get(treeIndex).put(entry
-                                                            .getValue()
-                                                            .get(treeIndex), 
-                                                            entry.getKey())));
+                 // Iterate through each of the test runs.
+                 .forEach(treeIndex ->
+                          // Get the entry set from the map.
+                          resultsMap.entrySet()
+                          // Iterate through each entry in the map.
+                          .forEach(entry -> {
+                                   // Get the appropriate tree map.
+                                   ResultMap map = listOfMaps.get(treeIndex);
+
+                                   // Store results into the tree map,
+                                   // whose key is time in msecs and
+                                   // whose value is test that ran.
+                                   map.put(entry.getValue()
+                                           .get(treeIndex),
+                                           entry.getKey());
+                          }));
 
         // Print the results of the test runs from fastest to slowest.
         IntStream.range(0, numberOfRuns)
