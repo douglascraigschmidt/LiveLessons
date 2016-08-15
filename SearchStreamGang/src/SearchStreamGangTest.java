@@ -390,6 +390,7 @@ public class SearchStreamGangTest {
                  .forEach(treeIndex ->
                           // Get the entry set from the map.
                           resultsMap.entrySet()
+
                           // Iterate through each entry in the map.
                           .forEach(entry -> {
                                    // Get the appropriate tree map.

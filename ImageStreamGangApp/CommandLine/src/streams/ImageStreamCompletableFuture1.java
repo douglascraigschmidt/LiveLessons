@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import sun.rmi.runtime.Log;
 import utils.Image;
 import utils.StreamsUtils;
 import filters.Filter;
@@ -76,10 +75,10 @@ public class ImageStreamCompletableFuture1
         return mFilters.stream()
             // Create a FilterDecoratorWithImage for each
             // filter/image combo.
-            .map(filter -> (CompletableFuture<FilterDecoratorWithImage>) 
-                   		 imageFuture.thenApply(image -> 
-                                makeFilterDecoratorWithImage(filter, 
-                                                             image)))
+            .map(filter ->
+                 imageFuture.thenApply(image ->
+                                       makeFilterDecoratorWithImage(filter,
+                                                                    image)))
                                                  
             // Asynchronously filter the image and store it in an
             // output file.
@@ -89,8 +88,8 @@ public class ImageStreamCompletableFuture1
     /**
      * Asynchronously filter the image and store it in an output file.
      */
-    protected CompletableFuture<Image> filterFutureImageAsync
-        (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
+    private CompletableFuture<Image> filterFutureImageAsync
+                            (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
         // Asynchronously filter image and store it in an output file.
         return filterDecoratorWithImageFuture
             .thenCompose(filter ->

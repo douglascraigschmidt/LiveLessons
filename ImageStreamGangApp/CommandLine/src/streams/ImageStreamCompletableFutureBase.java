@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 
 import filters.Filter;
 import filters.FilterDecoratorWithImage;
-import utils.StreamsUtils;
 import utils.Image;
 
 import static java.util.stream.Collectors.toList;

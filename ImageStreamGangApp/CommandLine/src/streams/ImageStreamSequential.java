@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import sun.rmi.runtime.Log;
 import utils.Image;
 import utils.StreamsUtils;
 import filters.Filter;

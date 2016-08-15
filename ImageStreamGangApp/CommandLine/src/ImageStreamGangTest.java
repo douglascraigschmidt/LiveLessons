@@ -86,16 +86,11 @@ public class ImageStreamGangTest {
 
             // Create a completion hook that decrements the exit
             // barrier by one so its count equals 0.
-            final Runnable completionHook = 
-                new Runnable() {
-                    @Override
-                        public void run() {
-                        // Cause the main Thread to return from the
-                        // blocking await() call on the exit barrier
-                        // below.
-                        mExitBarrier.countDown();
-                    }
-                };
+            // Cause the main Thread to return from the
+            // blocking await() call on the exit barrier
+            // below.
+            final Runnable completionHook =
+                mExitBarrier::countDown;
 
             // Clean any filter directories from the previous run.
             clearFilterDirectories();
@@ -188,13 +183,13 @@ public class ImageStreamGangTest {
     /**
      * Clears the filter directories..
      */
-    public static void clearFilterDirectories() {
+    private static void clearFilterDirectories() {
         int deletedFiles = 0;
 
         for (Filter filter : mFilters)
             deletedFiles += deleteSubFolders
-                    (new File(Options.instance().getDirectoryPath(),
-                            filter.getName()).getAbsolutePath());
+                (new File(Options.instance().getDirectoryPath(),
+                          filter.getName()).getAbsolutePath());
 
         System.out.println(deletedFiles
                            + " previously downloaded file(s) deleted");
@@ -215,31 +210,30 @@ public class ImageStreamGangTest {
         // Create a list of TreeMaps to hold the timing results in
         // sorted order.
         List<ResultMap> listOfMaps = 
-        		Stream.generate(ResultMap::new)
-                              .limit(numberOfRuns)
-                              .collect(toList());
+            Stream.generate(ResultMap::new)
+            .limit(numberOfRuns)
+            .collect(toList());
         
         // Initialize the TreeMaps to contain the results from each
         // timing test.
         IntStream.range(0, numberOfRuns)
             // Iterate through each of the test runs.
             .forEach(treeIndex ->
-                     resultsMap
                      // Get the entry set from the map.
-                     .entrySet()
-                     
-                     // Convert to a stream.
-                     .stream()
-                     
-                     // Iterate through each entry in the map and
-                     // store the results into the appropriate tree
-                     // map, whose key is the time in msecs and whose
-                     // value is the test that was run.
-                     .forEach(entry ->
-                              listOfMaps.get(treeIndex).put(entry
-                                                            .getValue()
-                                                            .get(treeIndex), 
-                                                            entry.getKey())));
+                     resultsMap.entrySet()
+                                                         
+                     // Iterate through each entry in the map.
+                     .forEach(entry -> {
+                                   // Get the appropriate tree map.
+                                   ResultMap map = listOfMaps.get(treeIndex);
+
+                                   // Store results into the tree map,
+                                   // whose key is time in msecs and
+                                   // whose value is test that ran.
+                                   map.put(entry.getValue()
+                                           .get(treeIndex),
+                                           entry.getKey());
+                          }));
 
         // Print the results of the test runs from fastest to slowest.
         IntStream.range(0, numberOfRuns)

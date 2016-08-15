@@ -107,7 +107,7 @@ public abstract class ImageStreamGang
      * Stop timing the test run.
      */
     public void stopTiming() {
-        mExecutionTimes.add(Long.valueOf(System.nanoTime() - mStartTime) / 1_000_000);
+        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 
     /**
