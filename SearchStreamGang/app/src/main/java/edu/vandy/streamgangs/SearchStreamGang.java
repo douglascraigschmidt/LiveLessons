@@ -1,4 +1,4 @@
-package streamgangs;
+package edu.vandy.streamgangs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.summingInt;
 
-import utils.SearchResults;
-import utils.StreamGang;
+import edu.vandy.utils.SearchResults;
+import edu.vandy.utils.StreamGang;
 
 /**
  * This helper class factors out the common code used by all

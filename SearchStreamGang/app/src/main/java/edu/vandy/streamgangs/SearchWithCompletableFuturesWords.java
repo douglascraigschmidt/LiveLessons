@@ -1,12 +1,13 @@
-package streamgangs;
+package edu.vandy.streamgangs;
 
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import utils.SearchResults;
-import utils.StreamsUtils;
+import edu.vandy.utils.SearchResults;
+import edu.vandy.utils.SearchResults;
+import edu.vandy.utils.StreamsUtils;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use

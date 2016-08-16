@@ -1,5 +1,9 @@
+package edu.vandy;
+
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,8 +15,8 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import streamgangs.*;
-import utils.SearchResults;
+import edu.vandy.streamgangs.*;
+import edu.vandy.utils.SearchResults;
 
 /**
  * This test driver showcases how various subclasses customize the
@@ -49,9 +53,9 @@ public class SearchStreamGangTest {
     /*
      * Various input files.
      */
-    private static String sHAMLET_DATA_FILE = "./input/hamlet.txt";
-    private static String sMACBETH_DATA_FILE = "./input/macbeth.txt";
-    private static String sWORD_LIST_FILE = "./input/wordList.txt";
+    private static String sHAMLET_DATA_FILE = "input/hamlet.txt";
+    private static String sMACBETH_DATA_FILE = "input/macbeth.txt";
+    private static String sWORD_LIST_FILE = "input/wordList.txt";
 
     /**
      * Keep track of which SearchStreamGang performed the best.
@@ -65,12 +69,10 @@ public class SearchStreamGangTest {
                                          String splitter) {
         try {
             return Pattern.compile(splitter)
-                          .split(new String(Files.readAllBytes
-                                            (Paths.get(ClassLoader.getSystemResource
-                                                       (filename).toURI()))));
+                          .split(new String(Files.readAllBytes(Paths.get(filename))));
         } catch (Exception e) {
-        	e.printStackTrace();
-        	return null;
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -80,7 +82,7 @@ public class SearchStreamGangTest {
     private static List<String> getWordList(String filename) {
         // The Stream and file will be closed here.
         try {
-            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource(filename).toURI()));
+            return Files.readAllLines(Paths.get(filename));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

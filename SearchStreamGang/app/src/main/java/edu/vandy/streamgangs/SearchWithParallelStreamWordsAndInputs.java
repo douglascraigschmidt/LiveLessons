@@ -1,10 +1,10 @@
-package streamgangs;
+package edu.vandy.streamgangs;
 
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 
-import utils.SearchResults;
+import edu.vandy.utils.SearchResults;
 
 /**
  * Customizes the SearchStreamGangCommon framework to use Java Streams

@@ -1,24 +1,22 @@
-package streamgangs;
+package edu.vandy.streamgangs;
 
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 
-import utils.SearchResults;
+import edu.vandy.utils.SearchResults;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use a Java
- * Stream to concurrently search each input data String and the
- * sequentially looking for each word (from an array of words) in the
- * input data String.
+ * Customizes the SearchStreamGang framework to use Java Streams to
+ * sequentially search input data for each word in an array of words.
  */
-public class SearchWithParallelStreamInputs
+public class SearchWithSequentialStream
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithParallelStreamInputs(List<String> wordsToFind,
-                                          String[][] stringsToSearch) {
+    public SearchWithSequentialStream(List<String> wordsToFind,
+                                      String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -26,25 +24,25 @@ public class SearchWithParallelStreamInputs
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * concurrently search for words in the input data.
+     * sequentially search for words in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-    	// Get the input.
+    	// Get and process the input.
         return getInput()
-            // Concurrently process each String in the input list.
-            .parallelStream()
+            // Sequentially process each String in the input list.
+            .stream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
+            // Map each input string to list of SearchResults
+            // containing the words found in the input.
             .map(this::processInput)
 
             // Terminate the stream.
             .collect(toList());
     }
-
+    
     /**
-     * Search the inputData for all occurrences of the words to find.
+     * Search the inputString for all occurrences of the words to find.
      */
     private List<SearchResults> processInput(String inputString) {
         // Get the section title.
@@ -56,15 +54,14 @@ public class SearchWithParallelStreamInputs
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         return mWordsToFind
-            // Convert the array of words into a parallel stream.
-            .parallelStream()
-
-            // Sequentially search for all places where the word
-            // matches the input data.
-            .map(word -> 
-                 searchForWord(word,
-                               input,
-                               title))
+            // Convert the array of words into a Stream.
+            .stream()
+            
+            // Search for all places where the word matches the input
+            // data.
+            .map(word -> searchForWord(word,
+                                       input,
+                                       title))
             
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0)

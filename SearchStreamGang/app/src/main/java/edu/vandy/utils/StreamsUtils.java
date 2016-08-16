@@ -1,4 +1,4 @@
-package utils;
+package edu.vandy.utils;
 
 import static java.util.stream.Collectors.toList;
 
