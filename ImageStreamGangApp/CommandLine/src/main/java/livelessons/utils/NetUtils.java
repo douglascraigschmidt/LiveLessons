@@ -1,15 +1,13 @@
-package livelessons.imagestreamgang.utils;
-
-import android.content.ContentResolver;
-import android.net.Uri;
-import android.util.Log;
+package livelessons.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import static livelessons.imagestreamgang.TheApp.getApp;
+import sun.rmi.runtime.Log;
+
+import com.sun.jndi.toolkit.url.Uri;
 
 /**
  * Provides some general utility helper methods for network operations.
@@ -77,24 +75,8 @@ public final class NetUtils {
      */
     private static InputStream getInputStream(URL url)
             throws IOException {
-        if (isResourceUrl(url.toString())) {
-            Log.d(TAG, "Loading image from app resources");
-
-            // Both URL and Uri classes will not accept a proper
-            // android resource scheme but will accept the prefix
-            // "file:///android_res/". To get an apk resource input
-            // stream, simply replace this prefix so that the
-            // resulting url can be passed to the application's
-            // content resolver.
-            String resUrl = 
-                url.toString().replace(RESOURCE_BASE,
-                                       ContentResolver.SCHEME_ANDROID_RESOURCE
-                                       + "://");
-            return getApp().getContentResolver().openInputStream(Uri.parse(resUrl));
-        } else {
-            // Normal URL.
-            return url.openStream();
-        }
+       // Normal URL.
+       return url.openStream();
     }
 
     /**
@@ -112,7 +94,7 @@ public final class NetUtils {
         // Just use the host and "filename".
         String uriName = url.getHost() + url.getFile();
 
-        // Replace useless characters with UNDERSCORE
+        // Replace useless characters with UNDERSCORE.
         String fileName = uriName.replace(".", "_").replace("/", "_");
 
         // Replace last underscore with a dot
