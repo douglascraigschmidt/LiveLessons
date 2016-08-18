@@ -6,7 +6,7 @@
 .DS_Store
 /build
 /captures
-
+DownloadImages/
 
 # Built application files
 *.apk
@@ -21,6 +21,7 @@
 # Generated files
 bin/
 gen/
+out/
 
 # Gradle files
 .gradle/
