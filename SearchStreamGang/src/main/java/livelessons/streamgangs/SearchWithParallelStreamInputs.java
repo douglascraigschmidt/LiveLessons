@@ -7,10 +7,10 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use a Java
- * Stream to concurrently search each input data String and the
- * sequentially looking for each word (from an array of words) in the
- * input data String.
+ * Customizes the SearchStreamGang framework to use a Java Stream to
+ * concurrently search each input data String and the sequentially
+ * looking for each word (from an array of words) in the input data
+ * String.
  */
 public class SearchWithParallelStreamInputs
        extends SearchStreamGang {

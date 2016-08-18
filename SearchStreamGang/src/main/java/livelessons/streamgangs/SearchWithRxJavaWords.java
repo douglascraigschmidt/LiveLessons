@@ -12,10 +12,9 @@ import rx.schedulers.Schedulers;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use
- * CompletableFutures in conjunction with Java Streams to search how
- * many times each word in an array of words appears in input data.
- * words.
+ * Customizes the SearchStreamGang framework to use RxJava in
+ * conjunction with Java Streams to search how many times each word in
+ * an array of words appears in input data.
  */
 public class SearchWithRxJavaWords
         extends SearchStreamGang {
@@ -31,23 +30,49 @@ public class SearchWithRxJavaWords
 
    @Override
     protected List<List<SearchResults>> processStream() {
-        return Observable.from(mWordsToFind)
-                .flatMap(val -> Observable.just(val)
-                        .subscribeOn(Schedulers.computation())
-                        .map(this::doSearch))
-                .toList()
-                .toBlocking()
-                .first();
-    }
+       return Observable
+           // Get the input from the list of words.
+           .from(mWordsToFind)
 
-    private List<SearchResults> doSearch(String word) {
-        return getInput().stream()
-                .map(input -> {
-                    String title = getTitle(input);
-                    String data = input.substring(title.length());
-                    return searchForWord(word, data, title);
+           // ...
+           .flatMap(val -> 
+                    // ...
+                    Observable.just(val)
+                    // ...
+                    .subscribeOn(Schedulers.computation())
+                    // ...
+                    .map(this::processWord))
+
+           // ...
+           .toList()
+
+           // ...
+           .toBlocking()
+
+           // ...
+           .first();
+   }
+
+    private List<SearchResults> processWord(String word) {
+     	// Get the input.
+        return getInput()
+            // Sequentially process each String in the input list.
+            .stream()
+
+            // Map each String to a Stream containing the words found
+            // in the input.
+            .map(inputSTring -> {
+                    String title = getTitle(inputString);
+                    return searchForWord(word, 
+                                         // Skip over the title.
+                                         input.substring(title.length()),
+                                         title);
                 })
-                .filter(result -> result.size() > 0)
-                .collect(toList());
+
+            // Only keep a result that has at least one match.
+            .filter(result -> result.size() > 0)
+
+            // Create a list of SearchResults.
+            .collect(toList());
     }
 }

@@ -7,9 +7,8 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use Java Streams
- * to concurrently search for all words in an array of in the input
- * data.
+ * Customizes the SearchStreamGang framework to use Java Streams to
+ * concurrently search for all words in an array of input data.
  */
 public class SearchWithParallelStreamWords
        extends SearchStreamGang {

@@ -9,10 +9,9 @@ import livelessons.utils.StreamsUtils;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use
- * CompletableFutures in conjunction with Java Streams to search how
- * many times each word in an array of words appears in input data.
- * words.
+ * Customizes the SearchStreamGang framework to use CompletableFutures
+ * in conjunction with Java Streams to search how many times each word
+ * in an array of words appears in input data.
  */
 public class SearchWithCompletableFuturesWords
     extends SearchStreamGang {

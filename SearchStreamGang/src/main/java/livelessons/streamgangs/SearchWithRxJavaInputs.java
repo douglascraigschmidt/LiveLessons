@@ -20,9 +20,9 @@ import rx.schedulers.Schedulers;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGangCommon framework to use
- * CompletableFutures in conjunction with Java Streams to search the
- * input data for each word in an array of words.
+ * Customizes the SearchStreamGang framework to use RxJava in
+ * conjunction with Java Streams to search the input data for each
+ * word in an array of words.
  */
 public class SearchWithRxJavaInputs
     extends SearchStreamGang {
