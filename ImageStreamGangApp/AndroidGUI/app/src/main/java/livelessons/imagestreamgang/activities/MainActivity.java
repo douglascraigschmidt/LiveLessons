@@ -10,13 +10,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.io.File;
@@ -28,7 +25,7 @@ import livelessons.imagestreamgang.R;
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.GrayScaleFilter;
 import livelessons.imagestreamgang.filters.NullFilter;
-import livelessons.imagestreamgang.streams.ImageStream;
+import livelessons.imagestreamgang.streams.ImageStreamGang;
 import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture1;
 import livelessons.imagestreamgang.streams.ImageStreamCompletableFuture2;
 import livelessons.imagestreamgang.streams.ImageStreamParallel;
@@ -169,9 +166,9 @@ public class MainActivity
             if (iterator.hasNext() 
                 && (inputSource != Options.InputSource.USER || !isEmpty()))
                 // Create a new ImageStreamGang to process the images.
-                new Thread(makeImageStream(mFilters,
-                                           iterator,
-                                           mCompletionHook)).start();
+                new Thread(makeImageStreamGang(mFilters,
+                                              iterator,
+                                              mCompletionHook)).start();
 
             // Make the delete menu item visible.
             menuVisible();
@@ -186,9 +183,9 @@ public class MainActivity
      * Factory method that creates the ImageStream selected by the
      * user (or the default value of mStreamId).
      */
-    private ImageStream makeImageStream(Filter[] filters,
-                                        Iterator<List<URL>> urlListIterator,
-                                        Runnable completionHook) {
+    private ImageStreamGang makeImageStreamGang(Filter[] filters,
+                                                 Iterator<List<URL>> urlListIterator,
+                                                 Runnable completionHook) {
         switch (mStreamId) {
         case R.id.sequential:
             UiUtils.showToast(this,

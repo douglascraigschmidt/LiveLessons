@@ -29,7 +29,7 @@ import livelessons.imagestreamgang.utils.Options;
  * Subclasses of ImageStream must override the initiateStream() method
  * to download and process the images concurrently.
  */
-public abstract class ImageStream 
+public abstract class ImageStreamGang
        extends StreamGang<URL> {
     /**
      * An iterator to the List of input URLs that are used to download

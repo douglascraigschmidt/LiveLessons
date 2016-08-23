@@ -51,15 +51,15 @@ public class SearchWithRxJavaWords
                     // and then completes.
                     .just(word)
 
-                    // Asynchronously subscribes Observers to this
-                    // Observable on the computation scheduler.
-                    .subscribeOn(Schedulers.computation())
-
                     // Returns an Observable that applies the
                     // processWord() method to each item emitted by
                     // the source Observable and emits a list of
                     // SearchResults.
-                    .map(this::processWord))
+                    .map(this::processWord)
+
+                    // Asynchronously subscribes Observers to this
+                    // Observable on the computation scheduler.
+                    .subscribeOn(Schedulers.computation()))
 
            // Returns an Observable that emits a single item: a list
            // composed of all the items emitted by the source
@@ -70,10 +70,9 @@ public class SearchWithRxJavaWords
            // Observable with blocking operators).
            .toBlocking()
 
-           // Returns an Observable that emits only the very first
-           // item emitted by the source Observable, which is a list
-           // of a list of SearchResults.
-           .first();
+           // When the blocking observable emits the single list of
+           // SearchResults item and completes, return that list.
+           .single();
    }
 
     /**

@@ -131,14 +131,27 @@ public class Options {
      */
     protected List<List<URL>> getDefaultUrlList()
             throws MalformedURLException {
-    	List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
+        return Arrays
+            // Convert the array of strings into a list of strings.
+            .asList(mDefaultUrls)
 
-        // Convert all the suggestion strings into URLs.
-        for (String suggestedUrls : mDefaultUrls)
+            // Convert the list into a stream.
+            .stream()
+
+            // Map each string in the list into a list of URLs.
+            .map(this::convertStringToUrls)
+
+            // Create and return a list of a list of URLs.
+            .collect(toList())
+        /*
+          List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
+
+          // Convert all the suggestion strings into URLs.
+          for (String suggestedUrls : mDefaultUrls)
             variableNumberOfInputURLs.add
                 (convertStringToUrls(suggestedUrls));
-
-    	return variableNumberOfInputURLs;
+          return variableNumberOfInputURLs;
+        */
     }
 
     /**
