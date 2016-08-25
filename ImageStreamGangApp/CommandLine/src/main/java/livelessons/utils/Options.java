@@ -131,6 +131,15 @@ public class Options {
      */
     protected List<List<URL>> getDefaultUrlList()
             throws MalformedURLException {
+        /*
+          List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
+
+          // Convert all the suggestion strings into URLs.
+          for (String suggestedUrls : mDefaultUrls)
+            variableNumberOfInputURLs.add
+                (convertStringToUrls(suggestedUrls));
+          return variableNumberOfInputURLs;
+        */
         return Arrays
             // Convert the array of strings into a list of strings.
             .asList(mDefaultUrls)
@@ -143,15 +152,6 @@ public class Options {
 
             // Create and return a list of a list of URLs.
             .collect(toList())
-        /*
-          List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
-
-          // Convert all the suggestion strings into URLs.
-          for (String suggestedUrls : mDefaultUrls)
-            variableNumberOfInputURLs.add
-                (convertStringToUrls(suggestedUrls));
-          return variableNumberOfInputURLs;
-        */
     }
 
     /**

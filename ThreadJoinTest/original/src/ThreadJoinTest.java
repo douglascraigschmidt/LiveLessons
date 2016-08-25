@@ -64,7 +64,7 @@ public class ThreadJoinTest {
          */
         public SearchOneShotThreadJoin(String[] wordsToFind,
                                        String[] inputStrings) {
-        	// Initialize the data members.
+            // Initialize the data members.
             mWordsToFind = wordsToFind;
             mInput = Arrays.asList(inputStrings);
 
@@ -79,18 +79,19 @@ public class ThreadJoinTest {
                 Thread t = new Thread(makeTask(i));
                 
                 // Add to the List of Threads to join.
-                mWorkerThreads.add(t);
-                
-                // Start the Thread to process its input in the background.
-                t.start();
+                mWorkerThreads.add(t);               
             }        
 
-            // Barrier synchronization.
+            // Start all threads to process input in the background.
+            for (Thread thread : mWorkerThreads)
+                thread.start();
+
+            // Barrier synchronization to wait for threads to finish.
             for (Thread thread : mWorkerThreads)
                 try {
                     thread.join();
                 } catch (InterruptedException e) {
-                	printDebugging("join() interrupted");
+                    printDebugging("join() interrupted");
                 }
         }
 
@@ -108,8 +109,7 @@ public class ThreadJoinTest {
                     final String element = mInput.get(index);
                     
                     // Process input data element.
-                    if (processInput(element) == false)
-                      return;
+                    processInput(element);
                 }
             };
         }
@@ -120,7 +120,7 @@ public class ThreadJoinTest {
          * found the processResults() hook method is called to handle
          * the results.
          */
-        private boolean processInput (String inputData) {
+        private void processInput (String inputData) {
             // Iterate through each word we're searching for.
             for (String word : mWordsToFind) 
                 // Check to see how many times (if any) the word
@@ -138,7 +138,6 @@ public class ThreadJoinTest {
                                    + i
                                    + " in string "
                                    + inputData);
-            return true;
         }
 
         /**
@@ -163,12 +162,9 @@ public class ThreadJoinTest {
     static public void main(String[] args) {
     	printDebugging("Starting ThreadJoinTest");
      
-        // Create/run appropriate type of SearchThreadGang to search
-        // for words concurrently.
-        printDebugging("Starting JOIN");
+        // Create/run an object to search for words concurrently.
         new SearchOneShotThreadJoin(mWordList,
                                     mOneShotInputStrings);
-        printDebugging("Ending JOIN");
 
         printDebugging("Ending ThreadJoinTest");
     }
