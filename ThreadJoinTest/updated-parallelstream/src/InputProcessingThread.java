@@ -45,7 +45,7 @@ public class InputProcessingThread<T>
                           -> {
                               // Get input data associated with this
                               // index and increment the index.
-                              final T element = 
+                              T element = 
                                   mInputData.get(mIndex++);
                                   
                               // Apply the task to process the input

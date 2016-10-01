@@ -69,7 +69,7 @@ public class ThreadJoinTest {
             mInput = Arrays.asList(inputStrings);
 
             // This List holds Threads so they can be joined when their processing is done.
-            mWorkerThreads = new LinkedList<Thread>();
+            mWorkerThreads = new LinkedList<>();
 
             // Create and start a Thread for each element in the
             // mInput.  
@@ -106,7 +106,7 @@ public class ThreadJoinTest {
                 public void run() {
                     // Get the input data element associated with
                     // this index.
-                    final String element = mInput.get(index);
+                    String element = mInput.get(index);
                     
                     // Process input data element.
                     processInput(element);

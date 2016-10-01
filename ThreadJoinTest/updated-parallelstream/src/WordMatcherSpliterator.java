@@ -18,7 +18,7 @@ public class WordMatcherSpliterator
      * Constructor initializes the field and super class.
      */
     public WordMatcherSpliterator(WordMatcher matcher) {
-        super(Long.MAX_VALUE, ORDERED | NONNULL);
+        super(Long.MAX_VALUE, ORDERED | NONNULL | CONCURRENT);
         mMatcher = matcher;
     }
 

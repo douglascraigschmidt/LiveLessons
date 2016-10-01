@@ -115,9 +115,10 @@ public class ThreadJoinTest {
                 // Use the spliterator to add the indices of all
                 // places in the input data where word matches.
                 StreamSupport
-                    // Create Integer stream with indices of all
-                    // places (if any) where word matched input data.
-                    .stream(spliterator, false)
+                    // Create an Integer parallelstream with indices
+                    // indicating all the places (if any) where word
+                    // matched the input data.
+                    .stream(spliterator, true)
 
                     // Iterate through each index in the stream.
                     .forEach(index

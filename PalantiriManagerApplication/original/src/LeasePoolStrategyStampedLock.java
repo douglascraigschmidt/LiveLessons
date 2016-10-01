@@ -106,9 +106,9 @@ public class LeasePoolStrategyStampedLock<Resource>
         // Acquire a writeLock.
         long stamp = mStampedLock.writeLock();
 
-        // Put the mNotInUse value back into ConcurrentHashMap
-        // for the resource key, which also atomically returns the
-        // LeaseState associated with the resource.
+        // Put the mNotInUse value back into HashMap for the resource
+        // key, which also returns the LeaseState associated with the
+        // resource.
         try (LeaseState values = mResourceMap.put(resource,
                                                   mNotInUse)) {
             // Return false if the @resource parameter was
