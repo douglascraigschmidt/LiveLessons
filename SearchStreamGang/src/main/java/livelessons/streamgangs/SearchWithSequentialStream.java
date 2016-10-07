@@ -8,7 +8,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes the SearchStreamGang framework to use Java Streams to
- * sequentially search input data for each word in an array of words.
+ * sequentially search an input data string for each word in an array
+ * of words.
  */
 public class SearchWithSequentialStream
        extends SearchStreamGang {
@@ -28,7 +29,8 @@ public class SearchWithSequentialStream
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-    	// Get and process the input.
+    	// Get, process, and return the input data strings in a
+    	// stream.
         return getInput()
             // Sequentially process each String in the input list.
             .stream()
@@ -53,7 +55,7 @@ public class SearchWithSequentialStream
 
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
-        return mWordsToFind
+        List<SearchResults> results = mWordsToFind
             // Convert the array of words into a Stream.
             .stream()
             
@@ -67,6 +69,9 @@ public class SearchWithSequentialStream
             .filter(result -> result.size() > 0)
             
             .collect(toList());
+            
+        // Return the results;
+        return results;
     }
 }
 
