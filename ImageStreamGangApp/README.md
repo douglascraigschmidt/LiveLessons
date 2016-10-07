@@ -1,10 +1,12 @@
-This folder contains source code for the following two apps that
-implement pattern-oriented variants of the
+This folder contains source code thats implement pattern-oriented
+variants of the
 [ImageTaskGangApplication](https://github.com/douglascraigschmidt/LiveLessons/tree/master/ImageTaskGangApplication)
 from my [Java
 Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava/)
-LiveLessons tutorial using Java 8 features, such as lambdas, method
-references, Streams, and CompletableFutures:
+LiveLessons tutorial using Java 8 features, such as lambda
+expressions, method references, sequential and parallel streams, and
+completable futures, to download, process, store, & display images
+concurrently. The two apps in this folder are defined as follows:
 
 AndroidGUI -- This folder provides an Android Studio GUI-based
 versions of the app that integrates Java 8 with Android's "Material
