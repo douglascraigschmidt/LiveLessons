@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -72,19 +73,17 @@ public class ThreadJoinTest {
             // and run a Thread that searches for all words in each
             // input string.
             InputProcessingThread<String> threadFactory =
-                new InputProcessingThread(task,
-                                          Arrays.asList(inputStrings));
+                new InputProcessingThread<>(task,
+                                            Arrays.asList(inputStrings));
 
             // Create a list list that holds Threads so they can be
             // joined when their processing is done.
-            mWorkerThreads = Stream
+            mWorkerThreads = new ArrayList<>();
+
+            for (int i = 0; i < threadFactory.size(); i++)
                 // Create a Thread for each element in inputStrings to
                 // perform processing designated by processInput().
-                .generate(threadFactory::createThread)
-                .limit(threadFactory.size())
-
-                // Return a list of Threads.
-                .collect(toList());
+                mWorkerThreads.add(threadFactory.createThread());
 
             // Start Thread to process its input in background.
             mWorkerThreads.forEach(Thread::start);
@@ -106,36 +105,22 @@ public class ThreadJoinTest {
          */
         private Void processInput(String inputData) {
             // Iterate through each word we're searching for.
-            for (String word : mWordsToFind) {
-                // This spliterator creates a stream of matches to a
-                // word in the input data.
-                WordMatcherSpliterator spliterator =
-                    new WordMatcherSpliterator(new WordMatcher(word).with(inputData));
-
-                // Use the spliterator to add the indices of all
-                // places in the input data where word matches.
-                StreamSupport
-                    // Create an Integer parallelstream with indices
-                    // indicating all the places (if any) where word
-                    // matched the input data.
-                    .stream(spliterator, true)
-
-                    // Iterate through each index in the stream.
-                    .forEach(index
-                             -> {
-                                 // Each time a match is found call
-                                 // processResults() to handle
-                                 // results.
-                                 processResults("in thread "
-                                                + Thread.currentThread().getId()
-                                                + " "
-                                                + word
-                                                + " was found at offset "
-                                                + index
-                                                + " in string "
-                                                + inputData);
-                             });
-            }
+            for (String word : mWordsToFind) 
+                // Check to see how many times (if any) the word
+                // appears in the input data.
+                for (int i = inputData.indexOf(word, 0);
+                     i != -1;
+                     i = inputData.indexOf(word, i + word.length()))
+                    // Each time a match is found the processResults()
+                    // hook method is called to handle the results.
+                    processResults("in thread " 
+                                   + Thread.currentThread().getId()
+                                   + " "
+                                   + word
+                                   + " was found at offset "
+                                   + i
+                                   + " in string "
+                                   + inputData);
             return null;
         }
 

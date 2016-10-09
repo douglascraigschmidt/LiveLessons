@@ -35,6 +35,22 @@ public class SearchStreamGangTest {
      * If this is set to true then lots of debugging output will be generated.
      */
     private static boolean diagnosticsEnabled = true;
+
+
+    /**
+     * Enumerate the tests to run.
+     */
+    enum TestsToRun {
+        COMPLETABLE_FUTURES_WORDS,
+        COMPLETABLE_FUTURES_INPUTS,
+        RXJAVA_WORDS,
+        RXJAVA_INPUTS,
+        SEQUENTIAL_STREAM,
+        PARALLEL_STREAM_INPUTS,
+        PARALLEL_STREAM_WORDS,
+        PARALLEL_STREAM_WORDS_AND_INPUTS,
+    }
+
     /*
      * Various input files.
      */
@@ -104,7 +120,6 @@ public class SearchStreamGangTest {
             case PARALLEL_STREAM_WORDS_AND_INPUTS:
                 return new SearchWithParallelStreamWordsAndInputs(wordList,
                         inputData);
-
             case COMPLETABLE_FUTURES_WORDS:
                 return new SearchWithCompletableFuturesWords(wordList,
                         inputData);
@@ -429,20 +444,5 @@ public class SearchStreamGangTest {
                                             + entry.getKey()
                                             + " msecs"));
                 });
-    }
-
-
-    /**
-     * Enumerate the tests to run.
-     */
-    enum TestsToRun {
-        RXJAVA_WORDS,
-        RXJAVA_INPUTS,
-        SEQUENTIAL_STREAM,
-        PARALLEL_STREAM_INPUTS,
-        PARALLEL_STREAM_WORDS,
-        PARALLEL_STREAM_WORDS_AND_INPUTS,
-        COMPLETABLE_FUTURES_WORDS,
-        COMPLETABLE_FUTURES_INPUTS,
     }
 }
