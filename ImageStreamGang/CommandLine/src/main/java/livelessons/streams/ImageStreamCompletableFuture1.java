@@ -1,4 +1,4 @@
-package livelessons.streams;
+epackage livelessons.streams;
 
 import static java.util.stream.Collectors.toList;
 

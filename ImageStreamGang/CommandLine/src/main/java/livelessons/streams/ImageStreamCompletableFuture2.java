@@ -1,4 +1,4 @@
-package livelessons.streams;
+epackage livelessons.streams;
 
 import static java.util.stream.Collectors.toList;
 
@@ -35,8 +35,8 @@ public class ImageStreamCompletableFuture2
     @Override
     protected void processStream() {
         final List<CompletableFuture<List<Image>>> listOfFutures = getInput()
-            // Concurrently process each URL in the input List.
-            .parallelStream()
+            // Process each URL in the input List.
+            .stream()
 
             // Only include URLs that have not been already cached.
             .filter(StreamsUtils.not(this::urlCached))
@@ -50,7 +50,7 @@ public class ImageStreamCompletableFuture2
             // List of FilterDecoratorWithImage objects stored in a
             // future.
             .map(imageFuture ->
-                 imageFuture.thenApply(this::makeFilterDecoratorsWithImage))
+                 imageFuture.thenApply(this::makeFilterDecorators))
 
             // After each future completes then compose the results
             // with the applyFiltersAsync() method, which returns a
@@ -81,7 +81,7 @@ public class ImageStreamCompletableFuture2
     /**
      * Apply the filters in parallel to each @a image.
      */
-    private List<FilterDecoratorWithImage> makeFilterDecoratorsWithImage(Image image) {
+    private List<FilterDecoratorWithImage> makeFilterDecorators(Image image) {
         return mFilters
             // Iterate through all the configured filters.
             .stream()
