@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Spliterators;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -64,8 +65,8 @@ public class SearchStreamGang
         // Create an Iterator for the array of Strings to search.
         mInputIterator = Arrays.asList(stringsToSearch).iterator();
 
-        // Initialize the Executor with a fixed-sized pool of Threads.
-        // @@ setExecutor(Executors.newFixedThreadPool(MAX_THREADS));
+        // Initialize the Executor with a ForkJoinPool.
+        setExecutor(Executors.newWorkStealingPool());
     }
 
     /**
