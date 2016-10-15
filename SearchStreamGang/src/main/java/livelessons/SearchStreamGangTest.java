@@ -16,7 +16,7 @@ import livelessons.streamgangs.SearchWithCompletableFuturesInputs;
 import livelessons.streamgangs.SearchWithCompletableFuturesWords;
 import livelessons.streamgangs.SearchWithParallelStreamInputs;
 import livelessons.streamgangs.SearchWithParallelStreamWords;
-import livelessons.streamgangs.SearchWithParallelStreamWordsAndInputs;
+import livelessons.streamgangs.SearchWithParallelStreams;
 import livelessons.streamgangs.SearchWithRxJavaInputs;
 import livelessons.streamgangs.SearchWithRxJavaWords;
 import livelessons.streamgangs.SearchWithSequentialStream;
@@ -48,7 +48,7 @@ public class SearchStreamGangTest {
         SEQUENTIAL_STREAM,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_WORDS,
-        PARALLEL_STREAM_WORDS_AND_INPUTS,
+        PARALLEL_STREAMS
     }
 
     /*
@@ -117,8 +117,8 @@ public class SearchStreamGangTest {
             case PARALLEL_STREAM_WORDS:
                 return new SearchWithParallelStreamWords(wordList,
                         inputData);
-            case PARALLEL_STREAM_WORDS_AND_INPUTS:
-                return new SearchWithParallelStreamWordsAndInputs(wordList,
+            case PARALLEL_STREAMS:
+                return new SearchWithParallelStreams(wordList,
                         inputData);
             case COMPLETABLE_FUTURES_WORDS:
                 return new SearchWithCompletableFuturesWords(wordList,

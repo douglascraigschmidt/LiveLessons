@@ -7,18 +7,17 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGang framework to use Java Streams to
- * concurrently search each input data string and concurrently search
- * for each word (from an array of words) within each input data
- * string.
+ * Customizes the SearchStreamGang framework to use Java parallel
+ * streams to concurrently search each input data string and
+ * concurrently search for each word (from an array of words) within
+ * each input data string.
  */
-public class SearchWithParallelStreamWordsAndInputs
+public class SearchWithParallelStreams
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithParallelStreamWordsAndInputs(List<String> wordsToFind,
-                                                  String[][] stringsToSearch) {
+    public SearchWithParallelStreams(List<String> wordsToFind, String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
