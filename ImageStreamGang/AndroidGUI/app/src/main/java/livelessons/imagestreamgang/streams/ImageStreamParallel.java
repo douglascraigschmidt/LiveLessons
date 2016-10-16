@@ -39,7 +39,7 @@ public class ImageStreamParallel
      */
     @Override
     protected void processStream() {
-        List<Image> collect = getInput()
+        List<Image> filteredImages = getInput()
                 // Concurrently process each URL in the input List.
                 .parallelStream()
 
@@ -58,7 +58,7 @@ public class ImageStreamParallel
                 .collect(Collectors.toList());
 
         Log.d(TAG, "processing of "
-                + collect.size()
+                + filteredImages.size()
                 + " image(s) is complete");
     }
 
