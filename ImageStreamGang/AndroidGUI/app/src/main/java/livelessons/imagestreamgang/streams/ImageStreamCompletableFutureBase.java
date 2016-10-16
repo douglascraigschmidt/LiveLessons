@@ -33,9 +33,9 @@ public abstract class ImageStreamCompletableFutureBase
     /**
      * Asynchronously download an Image from the @a url parameter.
      */
-    protected CompletableFuture<Image> makeImageAsync(URL url) {
+    protected CompletableFuture<Image> downloadImageAsync(URL url) {
         // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> makeImage(url),
+        return CompletableFuture.supplyAsync(() -> downloadImage(url),
                                              getExecutor());
     }
 

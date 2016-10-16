@@ -45,7 +45,7 @@ public class ImageStreamSequential
 
             // Transform URL -> Image (download each image via
             // its URL).
-            .map(this::makeImage)
+            .map(this::downloadImage)
 
             // Map each image to a stream containing the filtered
             // versions of the image.

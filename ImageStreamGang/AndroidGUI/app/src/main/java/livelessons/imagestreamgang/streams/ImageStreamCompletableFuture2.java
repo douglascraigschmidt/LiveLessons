@@ -45,7 +45,7 @@ public class ImageStreamCompletableFuture2
 
             // Submit non-cached URLs for asynchronous downloading,
             // which returns a stream of unfiltered Image futures.
-            .map(this::makeImageAsync)
+            .map(this::downloadImageAsync)
 
             // After each future completes then apply the
             // makeFilterDecoratorWithImage() method, which returns a

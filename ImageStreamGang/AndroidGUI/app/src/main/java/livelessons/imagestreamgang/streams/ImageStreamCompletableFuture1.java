@@ -47,7 +47,7 @@ public class ImageStreamCompletableFuture1
             .filter(StreamsUtils.not(this::urlCached))
 
             // Submit the URLs for asynchronous downloading.
-            .map(this::makeImageAsync)
+            .map(this::downloadImageAsync)
 
             // Map each image to a stream containing the filtered
             // versions of the image.

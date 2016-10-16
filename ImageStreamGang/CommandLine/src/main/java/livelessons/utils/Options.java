@@ -151,7 +151,7 @@ public class Options {
             .map(this::convertStringToUrls)
 
             // Create and return a list of a list of URLs.
-            .collect(toList())
+            .collect(toList());
     }
 
     /**

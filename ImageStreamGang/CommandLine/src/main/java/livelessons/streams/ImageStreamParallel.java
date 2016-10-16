@@ -46,7 +46,7 @@ public class ImageStreamParallel
 
             // Transform URL -> Image (download each image via
             // its URL).
-            .map(ImageStreamGang::makeImage)
+            .map(ImageStreamGang::downloadImage)
 
             // Map each image to a stream containing the filtered
             // versions of the image.

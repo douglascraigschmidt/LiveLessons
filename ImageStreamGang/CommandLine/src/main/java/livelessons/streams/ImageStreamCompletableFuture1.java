@@ -1,4 +1,6 @@
-epackage livelessons.streams;
+package livelessons.streams;
+
+import livelessons.filters.Filter;
 
 import static java.util.stream.Collectors.toList;
 
@@ -10,7 +12,6 @@ import java.util.stream.Stream;
 
 import livelessons.utils.Image;
 import livelessons.utils.StreamsUtils;
-import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
@@ -43,7 +44,7 @@ public class ImageStreamCompletableFuture1
             .filter(StreamsUtils.not(this::urlCached))
 
             // Submit the URLs for asynchronous downloading.
-            .map(this::makeImageAsync)
+            .map(this::downloadImageAsync)
 
             // Map each image to a stream containing the filtered
             // versions of the image.

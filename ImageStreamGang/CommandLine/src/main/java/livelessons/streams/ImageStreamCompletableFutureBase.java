@@ -9,8 +9,6 @@ import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Base class that factors out common code and customizes ImageStream
  * to use Java 8 CompletableFutures to download, process, and store
@@ -30,9 +28,9 @@ public abstract class ImageStreamCompletableFutureBase
     /**
      * Asynchronously download an Image from the @a url parameter.
      */
-    protected CompletableFuture<Image> makeImageAsync(URL url) {
+    protected CompletableFuture<Image> downloadImageAsync(URL url) {
         // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> makeImage(url),
+        return CompletableFuture.supplyAsync(() -> downloadImage(url),
                                              getExecutor());
     }
 

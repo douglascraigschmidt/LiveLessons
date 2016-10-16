@@ -1,15 +1,15 @@
-epackage livelessons.streams;
+package livelessons.streams;
 
+import livelessons.filters.Filter;
+import java.net.URL;
 import static java.util.stream.Collectors.toList;
 
-import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import livelessons.utils.Image;
 import livelessons.utils.StreamsUtils;
-import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 import static java.util.stream.Collectors.summingInt;
 
@@ -43,7 +43,7 @@ public class ImageStreamCompletableFuture2
 
             // Submit non-cached URLs for asynchronous downloading,
             // which returns a stream of unfiltered Image futures.
-            .map(this::makeImageAsync)
+            .map(this::downloadImageAsync)
 
             // After each future completes then apply the
             // makeFilterDecoratorWithImage() method, which returns a
