@@ -26,7 +26,7 @@ public class SearchWithParallelStreamInputs
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * concurrently search for words in the input data.
+     * concurrently search each input string for words to find.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -56,8 +56,8 @@ public class SearchWithParallelStreamInputs
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         return mWordsToFind
-            // Convert the array of words into a parallel stream.
-            .parallelStream()
+            // Convert the array of words into a stream.
+            .stream()
 
             // Sequentially search for all places where the word
             // matches the input data.

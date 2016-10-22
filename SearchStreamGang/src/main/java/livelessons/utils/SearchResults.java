@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds results from a search of how many times a word appears in an
- * input string.
+ * Keeps track of how many times a word appears in an input string.
  */
 public class SearchResults {
     /**

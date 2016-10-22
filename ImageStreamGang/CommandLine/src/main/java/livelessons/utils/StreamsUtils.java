@@ -18,25 +18,28 @@ public class StreamsUtils {
     }
 
     /**
-     * Create a CompletableFuture that when completed will convert all
-     * the completed CompletableFutures in the @a futures parameter
-     * into a list of results.
-     * @param futures A list of completable futures.
-     * @return A CompletableFuture containing a List with all the joined results.
+     * Create a CompletableFuture that, when completed, will convert
+     * all the completed CompletableFutures in the @a futureList
+     * parameter into a list of joined results.
+     * @param futureList A list of completable futures.
+     * @return A CompletableFuture to a list that will contain all the joined results.
      */
-    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> futures) {
-        // Obtain a CompletableFuture that will be complete when all
-        // of the futures have completed.
-        CompletableFuture<Void> allDoneFuture =
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> futureList) {
+        // Obtain a CompletableFuture that will itself be complete
+        // when all CompletableFutures in futureList have completed.
+        CompletableFuture<Void>
+            allDoneFuture = CompletableFuture.allOf
+            (fList.toArray(new CompletableFuture[f.size()]));
 
-        // When all the futures have completed return a list of the
-        // joined elements.
-        return allDoneFuture.thenApply(v ->
-                                       futures
-                                       .stream()
-                                       .map(CompletableFuture::join)
-                                       .collect(toList()));
+        // When all futures have completed get a CompletableFuture to
+        // a list of joined elements.
+        CompletableFuture<List<T>> allDoneList =
+            allDoneFuture.thenApply(v -> futureList.stream()
+                              .map(CompletableFuture::join)
+                              .collect(toList()));
+
+        // Return the CompletableFuture. 
+        return allDoneList;
     }
 
     /**

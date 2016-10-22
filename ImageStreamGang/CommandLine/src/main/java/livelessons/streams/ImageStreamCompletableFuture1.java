@@ -15,8 +15,8 @@ import livelessons.utils.StreamsUtils;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
- * Customizes ImageStream to use Java 8 CompletableFutures to download, process,
- * and store images concurrently.
+ * Customizes ImageStream to use Java 8 CompletableFutures to
+ * download, process, and store images concurrently.
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
@@ -48,53 +48,48 @@ public class ImageStreamCompletableFuture1
 
             // Map each image to a stream containing the filtered
             // versions of the image.
-            .flatMap(this::applyFilters)
+            .flatMap(this::applyFiltersAsync)
 
             // Terminate the stream.
             .collect(toList());
 
-        // Convert the list of futures to a list of images.
-        List<Image> listOfImages = listOfFutures
-            .stream()
+        // Create a CompletableFuture that can be used to wait for all
+        // operations associated with the futures to complete.
+        CompletableFuture<List<Image>> allImagesDone =
+                StreamsUtils.joinAll(listOfFutures);
 
-            // Wait for all async operations to finish.
-            .map(CompletableFuture::join)
-                
-            // Terminate the stream.
-            .collect(toList());
-
+        // Print the results.
         System.out.println(TAG 
                            + ": processing of "
-                           + listOfImages.size()
+                           + allImagesDone.join().size()
                            + " image(s) is complete");
     }
 
     /**
-     * Apply the filters in parallel to each @a image.
+     * Apply filters concurrently to each @a image and store the
+     * results in output files.
      */
-    private Stream<CompletableFuture<Image>> applyFilters(CompletableFuture<Image> imageFuture) {
+    private Stream<CompletableFuture<Image>> applyFiltersAsync(CompletableFuture<Image> imageFuture) {
         return mFilters.stream()
-            // Create a FilterDecoratorWithImage for each
-            // filter/image combo.
+            // Create a FilterDecoratorWithImage for each filter/image
+            // combo.
             .map(filter ->
+                 // Returns a new CompletionStage that, when this
+                 // stage completes normally, is executed with this
+                 // stage's result as the argument to the supplied
+                 // lambda expression.
                  imageFuture.thenApply(image ->
                                        makeFilterDecoratorWithImage(filter,
                                                                     image)))
                                                  
             // Asynchronously filter the image and store it in an
             // output file.
-            .map(this::filterFutureImageAsync);
-    }
-
-    /**
-     * Asynchronously filter the image and store it in an output file.
-     */
-    private CompletableFuture<Image> filterFutureImageAsync
-                            (CompletableFuture<FilterDecoratorWithImage> filterDecoratorWithImageFuture) {
-        // Asynchronously filter image and store it in an output file.
-        return filterDecoratorWithImageFuture
-            .thenCompose(filter ->
-                         CompletableFuture.supplyAsync(filter::run,
-                                                       getExecutor()));
+            .map(filterFuture ->
+                 // Returns a new CompletionStage that, when this stage
+                 // completes normally, is executed with this stage's result as
+                 // the argument to the supplied lambda expression.
+                 filterFuture.thenCompose(filter ->
+                                          CompletableFuture.supplyAsync(filter::run,
+                                                                        getExecutor())));
     }
 }

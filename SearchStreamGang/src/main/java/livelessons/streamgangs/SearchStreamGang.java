@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.summingInt;
 
 /**
  * This helper class factors out the common code used by all
- * instantiations of the StreamGang framework in the BarrierStreamGang
+ * instantiations of the StreamGang framework in the SearchStreamGang
  * project.  It customizes the StreamGang framework to concurrently
  * search one or more arrays of input Strings for words provided in an
  * array of words to find.

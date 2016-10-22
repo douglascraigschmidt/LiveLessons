@@ -31,8 +31,8 @@ public class SearchWithParallelStreamWords
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         return mWordsToFind
-            // Convert the array of words into a parallel stream.
-            .parallelStream()
+            // Convert the array of words into a stream.
+            .stream()
             
             // Search for all places where the word matches the input
             // data.
@@ -49,8 +49,8 @@ public class SearchWithParallelStreamWords
     private List<SearchResults> processWord(String word) {
      	// Get the input.
         return getInput()
-            // Sequentially process each String in the input list.
-            .stream()
+            // Concurrently process each String in the input list.
+            .parallelStream()
 
             // Map each String to a Stream containing the words found
             // in the input.
