@@ -44,10 +44,10 @@ public class ThreadJoinTest {
     }
 
     /**
-     * Starts a Thread for each element in the List of input Strings
-     * and uses Thread.join() to wait for all the Threads to finish.
-     * This implementation doesn't require any Java synchronization
-     * mechanisms other than what's provided by Thread.
+     * This class starts a thread for each element in the list of
+     * input strings and uses Thread.join() to wait for all threads to
+     * finish.  This implementation requires no Java synchronization
+     * mechanisms other than what's provided by thread.
      */
     private static class SearchOneShotThreadJoin 
             implements Runnable {
@@ -57,7 +57,7 @@ public class ThreadJoinTest {
         private final String[] mWordsToFind;
 
         /**
-         * The List of worker Threads that were created.
+         * The List of worker threads that were created.
          */
         private final List<Thread> mWorkerThreads;
         
@@ -69,8 +69,9 @@ public class ThreadJoinTest {
             // Initialize field.
             mWordsToFind = wordsToFind;
 
-            // Create a list that holds Threads so they can be joined
-            // when their processing is done.
+            // Call a factory method to create a list that holds
+            // threads to be joined when their processing is done.
+            // Each thread will run the processInput() method.
             mWorkerThreads =
                 makeWorkerThreads(this::processInput,
                                   Arrays.asList(inputStrings));
@@ -81,11 +82,11 @@ public class ThreadJoinTest {
          */
         @Override
         public void run() {
-            // Start Thread to process its input in background.
+            // Start a thread to process its input in background.
             mWorkerThreads.forEach(Thread::start);
 
-            // The forEach() method iterates through each thread in the list
-            // and uses barrier synchronization to wait for threads to finish.
+            // Iterate through each thread in the list and use barrier
+            // synchronization to wait for threads to finish.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
             /**
@@ -102,26 +103,31 @@ public class ThreadJoinTest {
         }
 
         /**
-         * Create a list that holds Threads so they can be joined when their processing is done.
-         * @param task
-         * @param inputIterator
-         * @return
+         * Create a list that holds threads so they can be joined when their processing is done.
+         *
+         * @param task Function to run in each thread.
+         * @param inputList List of strings to search.
+         * @return List of threads that will run the @a task.
          */
         List<Thread> makeWorkerThreads(Function<String, Void> task,
                                        List<String> inputList) {
+            // Create a new list.
             List<Thread> list = new ArrayList<>();
 
+            // Iterate through all the strings in the inputList.
             for (Iterator<String> inputIterator = inputList.iterator();
                  inputIterator.hasNext();
                  ) {
                 // Get next input data element.
                 String element = inputIterator.next();
 
-                // Create a Thread for each element in inputStrings to
-                // perform processing designated by processInput().
-                list.add(new Thread(() // Create lambda to run in background Thread.
+                // Create a thread for each input string to perform
+                // processing designated by the task parameter.
+                list.add(new Thread(() 
+                                    // Create lambda to run in thread.
                                     ->
-                                    // Apply the task to process the input data elements
+                                    // Apply the task to process the
+                                    // input string.
                                     task.apply(element)));
             }
 
@@ -137,11 +143,13 @@ public class ThreadJoinTest {
         private Void processInput(String inputData) {
             // Iterate through each word we're searching for.
             for (String word : mWordsToFind) 
+
                 // Check to see how many times (if any) the word
                 // appears in the input data.
                 for (int i = inputData.indexOf(word, 0);
                      i != -1;
                      i = inputData.indexOf(word, i + word.length()))
+
                     // Each time a match is found the processResults()
                     // hook method is called to handle the results.
                     processResults("in thread " 
