@@ -24,18 +24,14 @@ public class ThreadJoinTest {
      * This input array is used by the ThreadJoinTest to search for
      * the words concurrently in multiple threads.
      */
-    private final static String[] mOneShotInputStrings = 
-    {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"};
+    private final static String[] mOneShotInputStrings = {
+        "xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"
+    };
 
     // List of words to search for.
-    private final static String[] mWordList = {"do",
-                                               "re",
-                                               "mi",
-                                               "fa",
-                                               "so",
-                                               "la",
-                                               "ti",
-                                               "do"};
+    private final static String[] mWordList = {
+        "do", "re", "mi", "fa", "so", "la", "ti", "do"
+    };
 
     /**
      * This is the entry point into the test program.
@@ -44,7 +40,7 @@ public class ThreadJoinTest {
         System.out.println("Starting ThreadJoinTest");
 
         // Create/run an object to search for words concurrently.
-        new SearchOneShotThreadJoin(mWordList, mOneShotInputStrings);
+        new SearchOneShotThreadJoin(mWordList, mOneShotInputStrings).run();
 
         System.out.println("Ending ThreadJoinTest");
     }
@@ -55,7 +51,8 @@ public class ThreadJoinTest {
      * This implementation doesn't require any Java synchronization
      * mechanisms other than what's provided by Thread.
      */
-    private static class SearchOneShotThreadJoin {
+    private static class SearchOneShotThreadJoin 
+            implements Runnable {
         /**
          * The array of words to find.
          */
@@ -76,26 +73,19 @@ public class ThreadJoinTest {
 
             // Create a list that holds Threads so they can be joined when their processing is done.
             mWorkerThreads = makeWorkerThreads(this::processInput, Arrays.asList(inputStrings));
+        }
 
+        /**
+         * Start the threads and run the test.
+         */
+        @Override
+        public void run() {
             // Start Thread to process its input in background.
             mWorkerThreads.forEach(Thread::start);
 
             // The forEach() method iterates through each thread in the list
             // and uses barrier synchronization to wait for threads to finish.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
-
-            /**
-             * Can also use this solution:
-
-             mWorkerThreads.forEach(thread -> {
-             try {
-             } catch (InterruptedException e) {
-             throw new RuntimeException(e);
-             }
-             });
-
-            */
-
         }
 
         /**
@@ -107,17 +97,20 @@ public class ThreadJoinTest {
         List<Thread> makeWorkerThreads(Function<String, Void> task,
                                        List<String> inputList) {
             final Iterator<String> inputIterator = 
-            		inputList.iterator();
+                inputList.iterator();
 
             // Create a list list that holds Threads so they can be
             // joined when their processing is done.
             return Stream
                 // Create a Thread for each element in inputStrings to
                 // perform processing designated by processInput().
-                .generate(() -> new Thread(() // Create lambda to run in background Thread.
-                                     ->
-                                     // Apply the task to process the input data elements
-                                     task.apply(inputIterator.next())))
+                .generate(() 
+                          // Create lambda to run in background Thread.
+                          -> new Thread(() 
+                                        ->
+                                        // Apply the task to process
+                                        // the input data elements
+                                        task.apply(inputIterator.next())))
                 .limit(inputList.size())
 
                 // Return a list of Threads.

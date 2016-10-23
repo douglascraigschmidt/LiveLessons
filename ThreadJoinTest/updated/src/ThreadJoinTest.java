@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Demonstrates the use of Java Thread.join() as a simple barrier
- * synchronizer to implement an "embarrassingly parallel" application
- * that concurrently searches for words in a List of Strings.
+ * Demonstrates the use of Java 8 functional programming features
+ * (such as lambda expressions, method references, and functional
+ * interfaces) and Thread.join() as a simple barrier synchronizer to
+ * implement an "embarrassingly parallel" application that
+ * concurrently searches for words in a List of Strings.
  */
 public class ThreadJoinTest {
     /**
@@ -20,18 +22,14 @@ public class ThreadJoinTest {
      * This input array is used by the ThreadJoinTest to search for
      * the words concurrently in multiple threads.
      */
-    private final static String[] mOneShotInputStrings = 
-    {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"};
+    private final static String[] mOneShotInputStrings = {
+        "xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"
+    };
 
     // List of words to search for.
-    private final static String[] mWordList = {"do",
-                                         "re",
-                                         "mi",
-                                         "fa",
-                                         "so",
-                                         "la",
-                                         "ti",
-                                         "do"};
+    private final static String[] mWordList = {
+        "do", "re", "mi", "fa", "so", "la", "ti", "do"
+    };
 
     /**
      * This is the entry point into the test program.
@@ -40,7 +38,7 @@ public class ThreadJoinTest {
         System.out.println("Starting ThreadJoinTest");
 
         // Create/run an object to search for words concurrently.
-        new SearchOneShotThreadJoin(mWordList, mOneShotInputStrings);
+        new SearchOneShotThreadJoin(mWordList, mOneShotInputStrings).run();
 
         System.out.println("Ending ThreadJoinTest");
     }
@@ -51,7 +49,8 @@ public class ThreadJoinTest {
      * This implementation doesn't require any Java synchronization
      * mechanisms other than what's provided by Thread.
      */
-    private static class SearchOneShotThreadJoin {
+    private static class SearchOneShotThreadJoin 
+            implements Runnable {
         /**
          * The array of words to find.
          */
@@ -70,9 +69,18 @@ public class ThreadJoinTest {
             // Initialize field.
             mWordsToFind = wordsToFind;
 
-            // Create a list that holds Threads so they can be joined when their processing is done.
-            mWorkerThreads = makeWorkerThreads(this::processInput, Arrays.asList(inputStrings).iterator());
+            // Create a list that holds Threads so they can be joined
+            // when their processing is done.
+            mWorkerThreads =
+                makeWorkerThreads(this::processInput,
+                                  Arrays.asList(inputStrings));
+        }
 
+        /**
+         * Start the threads and run the test.
+         */
+        @Override
+        public void run() {
             // Start Thread to process its input in background.
             mWorkerThreads.forEach(Thread::start);
 
@@ -91,7 +99,6 @@ public class ThreadJoinTest {
              });
 
              */
-
         }
 
         /**
@@ -101,10 +108,12 @@ public class ThreadJoinTest {
          * @return
          */
         List<Thread> makeWorkerThreads(Function<String, Void> task,
-                                       Iterator<String> inputIterator) {
+                                       List<String> inputList) {
             List<Thread> list = new ArrayList<>();
 
-            while (inputIterator.hasNext()) {
+            for (Iterator<String> inputIterator = inputList.iterator();
+                 inputIterator.hasNext();
+                 ) {
                 // Get next input data element.
                 String element = inputIterator.next();
 
