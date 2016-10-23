@@ -100,9 +100,9 @@ public class ThreadJoinTest {
          * @param inputIterator
          * @return
          */
-        ArrayList<Thread> makeWorkerThreads(Function<String, Void> task,
-                                            Iterator<String> inputIterator) {
-            ArrayList<Thread> arrayList = new ArrayList<>();
+        List<Thread> makeWorkerThreads(Function<String, Void> task,
+                                       Iterator<String> inputIterator) {
+            List<Thread> list = new ArrayList<>();
 
             while (inputIterator.hasNext()) {
                 // Get next input data element.
@@ -110,13 +110,13 @@ public class ThreadJoinTest {
 
                 // Create a Thread for each element in inputStrings to
                 // perform processing designated by processInput().
-                arrayList.add(new Thread(() // Create lambda to run in background Thread.
-                              ->
-                              // Apply the task to process the input data elements
-                              task.apply(element)));
+                list.add(new Thread(() // Create lambda to run in background Thread.
+                                    ->
+                                    // Apply the task to process the input data elements
+                                    task.apply(element)));
             }
 
-            return arrayList;
+            return list;
         }
 
         /**
