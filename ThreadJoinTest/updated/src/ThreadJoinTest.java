@@ -78,7 +78,20 @@ public class ThreadJoinTest {
 
             // The forEach() method iterates through each thread in the list
             // and uses barrier synchronization to wait for threads to finish.
-	        mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+            mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+
+            /**
+             * Can also use this solution:
+
+             mWorkerThreads.forEach(thread -> {
+                                    try {
+                                    } catch (InterruptedException e) {
+                                      throw new RuntimeException(e);
+                                    }
+             });
+
+             */
+
         }
 
         /**
