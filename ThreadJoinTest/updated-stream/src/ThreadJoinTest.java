@@ -1,17 +1,19 @@
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
 /**
- * Demonstrates the use of Java Thread.join() as a simple barrier
- * synchronizer to implement an "embarrassingly parallel" application
- * that concurrently searches for words in a List of Strings.
+ * This example implements an "embarrassingly parallel" application
+ * that concurrently searches for words in a List of Strings.  It
+ * demonstrates the use of Java 8 functional programming features
+ * (such as lambda expressions, method references, functional
+ * interfaces, and streams) in conjunction with Thread.start() to run
+ * threads and Thread.join() to wait for all threads to finish
+ * running.
  */
 public class ThreadJoinTest {
     /**
@@ -46,10 +48,10 @@ public class ThreadJoinTest {
     }
 
     /**
-     * Starts a Thread for each element in the List of input Strings
-     * and uses Thread.join() to wait for all the Threads to finish.
-     * This implementation doesn't require any Java synchronization
-     * mechanisms other than what's provided by Thread.
+     * This class starts a thread for each element in the list of
+     * input strings and uses Thread.join() to wait for all threads to
+     * finish.  This implementation requires no Java synchronization
+     * mechanisms other than what's provided by the Thread class.
      */
     private static class SearchOneShotThreadJoin 
             implements Runnable {
@@ -64,42 +66,64 @@ public class ThreadJoinTest {
         private final List<Thread> mWorkerThreads;
         
         /**
-         * Constructor initializes the data members.
+         * The constructor initializes the fields.
          */
         public SearchOneShotThreadJoin(String[] wordsToFind,
                                        String[] inputStrings) {
             // Initialize field.
             mWordsToFind = wordsToFind;
 
-            // Create a list that holds Threads so they can be joined when their processing is done.
-            mWorkerThreads = makeWorkerThreads(this::processInput, Arrays.asList(inputStrings));
+            // Call the makeWorkerThreads() factory method to create a
+            // list of threads that will be joined after they process
+            // the input strings.  Each thread runs the processInput()
+            // method reference passed to makeWorkerThreads().
+            mWorkerThreads =
+                makeWorkerThreads(this::processInput,
+                                  Arrays.asList(inputStrings));
         }
 
         /**
-         * Start the threads and run the test.
+         * Start the threads to perform the concurrent searches.
          */
         @Override
         public void run() {
-            // Start Thread to process its input in background.
+            // Iterate through the list of threads & pass a method
+            // reference that starts a thread for each input string.
             mWorkerThreads.forEach(Thread::start);
 
-            // The forEach() method iterates through each thread in the list
-            // and uses barrier synchronization to wait for threads to finish.
+            // Iterate through the threads and pass the Thread.join()
+            // method reference as a barrier synchronizer to wait for
+            // each thread to finish.  Note how rethrowConsumer()
+            // converts a checked exception to an unchecked exception.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
         }
 
         /**
-         * Create a list that holds Threads so they can be joined when their processing is done.
-         * @param task
-         * @param inputList
-         * @return
+         * This factory method creates a list of threads that can be
+         * joined when their processing is done.
+         *
+         * @param task Function to run in each thread.
+         * @param inputList List of strings to search.
+         * @return List of threads that will run the @a task.
          */
         List<Thread> makeWorkerThreads(Function<String, Void> task,
                                        List<String> inputList) {
-            final Iterator<String> inputIterator = 
-                inputList.iterator();
+            return inputList
+                // Convert the list into a stream.
+                .stream()
 
-            inputList.addAll(inputList.stream().map(element -> new Thread(() -> task.apply(element))).collect(Collectors.toList()));
+                // Create a thread for each input stream element to
+                // perform the processing designed by processInput().
+                .map(element -> new Thread(() -> task.apply(element)))
+ 
+                // Return a list of threads.
+                .collect(toList());
+
+            /*
+            // Here's an alternative solution using Stream.generate():
+
+            final Iterator<String> inputIterator =
+                inputList.iterator();
 
             // Create a list list that holds Threads so they can be
             // joined when their processing is done.
@@ -117,6 +141,7 @@ public class ThreadJoinTest {
 
                 // Return a list of Threads.
                 .collect(toList());
+                */
         }
 
         /**

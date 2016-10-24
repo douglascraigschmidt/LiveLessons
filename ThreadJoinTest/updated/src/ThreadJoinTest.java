@@ -90,24 +90,23 @@ public class ThreadJoinTest {
             // reference that starts a thread for each input string.
             mWorkerThreads.forEach(Thread::start);
 
-            // Iterate through the list of threads and pass the
-            // Thread.join() method reference as a barrier
-            // synchronizer to wait for each thread to finish.  Note
-            // how rethrowConsumer() converts a checked exception to
-            // an unchecked exception.
+            // Iterate through the threads and pass the Thread.join()
+            // method reference as a barrier synchronizer to wait for
+            // each thread to finish.  Note how rethrowConsumer()
+            // converts a checked exception to an unchecked exception.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
             /*
-             This more verbose solution based on a lambda expression
-             can be used instead of rethrowConsumer():
+              // This more verbose solution based on a lambda
+              // expression can be used instead of rethrowConsumer():
 
-             mWorkerThreads.forEach(thread -> {
-                                    try {
-                                        thread.join();
-                                    } catch (InterruptedException e) {
-                                      throw new RuntimeException(e);
-                                    }});
-             */
+              mWorkerThreads.forEach(thread -> {
+                                     try {
+                                         thread.join();
+                                     } catch (InterruptedException e) {
+                                       throw new RuntimeException(e);
+                                     }});
+            */
         }
 
         /**
