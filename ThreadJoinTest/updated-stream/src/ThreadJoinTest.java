@@ -1,8 +1,8 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -91,13 +91,15 @@ public class ThreadJoinTest {
         /**
          * Create a list that holds Threads so they can be joined when their processing is done.
          * @param task
-         * @param inputIterator
+         * @param inputList
          * @return
          */
         List<Thread> makeWorkerThreads(Function<String, Void> task,
                                        List<String> inputList) {
             final Iterator<String> inputIterator = 
                 inputList.iterator();
+
+            inputList.addAll(inputList.stream().map(element -> new Thread(() -> task.apply(element))).collect(Collectors.toList()));
 
             // Create a list list that holds Threads so they can be
             // joined when their processing is done.
@@ -106,7 +108,7 @@ public class ThreadJoinTest {
                 // perform processing designated by processInput().
                 .generate(() 
                           // Create lambda to run in background Thread.
-                          -> new Thread(() 
+                          -> new Thread(()
                                         ->
                                         // Apply the task to process
                                         // the input data elements

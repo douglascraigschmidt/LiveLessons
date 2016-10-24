@@ -1,15 +1,16 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * Demonstrates the use of Java 8 functional programming features
+ * This example implements an "embarrassingly parallel" application
+ * that concurrently searches for words in a List of Strings.  It
+ * demonstrates the use of Java 8 functional programming features
  * (such as lambda expressions, method references, and functional
- * interfaces) and Thread.join() as a simple barrier synchronizer to
- * implement an "embarrassingly parallel" application that
- * concurrently searches for words in a List of Strings.
+ * interfaces) in conjunction with Thread.start() to run threads and
+ * Thread.join() to wait for all threads to finish running.
  */
 public class ThreadJoinTest {
     /**
@@ -26,7 +27,9 @@ public class ThreadJoinTest {
         "xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"
     };
 
-    // List of words to search for.
+    /**
+     * List of words to search for.
+     */
     private final static String[] mWordList = {
         "do", "re", "mi", "fa", "so", "la", "ti", "do"
     };
@@ -47,7 +50,7 @@ public class ThreadJoinTest {
      * This class starts a thread for each element in the list of
      * input strings and uses Thread.join() to wait for all threads to
      * finish.  This implementation requires no Java synchronization
-     * mechanisms other than what's provided by thread.
+     * mechanisms other than what's provided by the Thread class.
      */
     private static class SearchOneShotThreadJoin 
             implements Runnable {
@@ -57,53 +60,59 @@ public class ThreadJoinTest {
         private final String[] mWordsToFind;
 
         /**
-         * The List of worker threads that were created.
+         * The list of worker threads that were created.
          */
         private final List<Thread> mWorkerThreads;
         
         /**
-         * Constructor initializes the data members.
+         * The constructor initializes the fields.
          */
         public SearchOneShotThreadJoin(String[] wordsToFind,
                                        String[] inputStrings) {
             // Initialize field.
             mWordsToFind = wordsToFind;
 
-            // Call a factory method to create a list that holds
-            // threads to be joined when their processing is done.
-            // Each thread will run the processInput() method.
+            // Call the makeWorkerThreads() factory method to create a
+            // list of threads that will be joined after they process
+            // the input strings.  Each thread runs the processInput()
+            // method reference passed to makeWorkerThreads().
             mWorkerThreads =
                 makeWorkerThreads(this::processInput,
                                   Arrays.asList(inputStrings));
         }
 
         /**
-         * Start the threads and run the test.
+         * Start the threads to perform the concurrent searches.
          */
         @Override
         public void run() {
-            // Start a thread to process its input in background.
+            // Iterate through the list of threads & pass a method
+            // reference that starts a thread for each input string.
             mWorkerThreads.forEach(Thread::start);
 
-            // Iterate through each thread in the list and use barrier
-            // synchronization to wait for threads to finish.
+            // Iterate through the list of threads and pass the
+            // Thread.join() method reference as a barrier
+            // synchronizer to wait for each thread to finish.  Note
+            // how rethrowConsumer() converts a checked exception to
+            // an unchecked exception.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
-            /**
-             * Can also use this solution:
+            /*
+             This more verbose solution based on a lambda expression
+             can be used instead of rethrowConsumer():
 
              mWorkerThreads.forEach(thread -> {
                                     try {
+                                        thread.join();
                                     } catch (InterruptedException e) {
                                       throw new RuntimeException(e);
-                                    }
-             });
-
+                                    }});
              */
         }
 
         /**
-         * Create a list that holds threads so they can be joined when their processing is done.
+         * This factory method creates a list of threads that can be
+         * joined when their processing is done.
          *
          * @param task Function to run in each thread.
          * @param inputList List of strings to search.
@@ -114,31 +123,22 @@ public class ThreadJoinTest {
             // Create a new list.
             List<Thread> list = new ArrayList<>();
 
-            // Iterate through all the strings in the inputList.
-            for (Iterator<String> inputIterator = inputList.iterator();
-                 inputIterator.hasNext();
-                 ) {
-                // Get next input data element.
-                String element = inputIterator.next();
-
-                // Create a thread for each input string to perform
-                // processing designated by the task parameter.
-                list.add(new Thread(() 
-                                    // Create lambda to run in thread.
-                                    ->
-                                    // Apply the task to process the
-                                    // input string.
-                                    task.apply(element)));
-            }
+            // Create a thread for each input string to perform
+            // processing designated by the task parameter.
+            for (String element : inputList)
+                list.add(new Thread(()
+                         // Create lambda to run in thread.
+                         ->
+                         // Apply the task to process the
+                         // input string.
+                         task.apply(element)));
 
             return list;
         }
 
         /**
-         * Run in a background thread and search the @a inputData for
-         * all occurrences of the words to find.  Each time a match is
-         * found the processResults() hook method is called to handle
-         * the results.
+         * This method runs in a background thread and searches the @a
+         * inputData for all occurrences of the words to find.
          */
         private Void processInput(String inputData) {
             // Iterate through each word we're searching for.
