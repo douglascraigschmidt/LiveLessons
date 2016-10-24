@@ -1,6 +1,8 @@
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
@@ -98,7 +100,9 @@ public class ThreadJoinTest {
         /**
          * Start a thread to perform the concurrent searches in the
          * background and use Thread.join() to wait for the thread to
-         * finish.
+         * finish.  The use of an extra thread here is overkill - it's
+         * just there to show how to use Thread.join() and to show
+         * how to create a thread using a lambda expression.
          */
         @Override
         public void run() {
@@ -137,7 +141,7 @@ public class ThreadJoinTest {
 
                 // Create a lambda expression runnable for each input
                 // stream element that performs the processing
-                // designed by processInput().
+                // designated by processInput().
                 .map(element -> (Runnable) () -> task.apply(element))
  
                 // Return a list of runnables.
