@@ -73,9 +73,9 @@ public class ThreadJoinTest {
             mWordsToFind = wordsToFind;
 
             // Call the makeWorkerThreads() factory method to create a
-            // list of threads that will be joined after they process
-            // the input strings.  Each thread runs the processInput()
-            // method reference passed to makeWorkerThreads().
+            // list of threads that each runs the processInput()
+            // method reference.  These threads will be joined after
+            // they process the input strings.  
             mWorkerThreads =
                 makeWorkerThreads(this::processInput,
                                   Arrays.asList(inputStrings));
@@ -86,7 +86,7 @@ public class ThreadJoinTest {
          */
         @Override
         public void run() {
-            // Iterate through the list of threads & pass a method
+            // Iterate through the list of threads and pass a method
             // reference that starts a thread for each input string.
             mWorkerThreads.forEach(Thread::start);
 
