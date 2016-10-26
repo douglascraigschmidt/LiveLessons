@@ -31,27 +31,31 @@ public class SearchWithCompletableFuturesInputs
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Convert the input strings into a list of futures.
+        // Convert the input strings into a list of
+        // CompletableFutures.
         List<CompletableFuture<List<SearchResults>>> listOfFutures = getInput()
-            // Create a sequential stream.
+            // Create a sequential stream of input strings.
             .stream()
 
             // Map each input string to a CompletableFuture to a list
             // of SearchResults.
             .map(this::processInputAsync)
             
-            // Create a list of CompletableFutures.
+            // Terminate stream and return a list of
+            // CompletableFutures.
             .collect(toList());
 
         // Convert all the completed CompletableFutures in the
-        // listOfFutures into a list of SearchResults.  The call to
-        // join() blocks the calling thread until all the futures have
-        // been completed.
-        return StreamsUtils.joinAll(listOfFutures).join();
+        // listOfFutures into a list of SearchResults.
+        return StreamsUtils.joinAll(listOfFutures)
+                           // join() blocks the calling thread until
+                           // all the futures have been completed.
+                           .join();
     }
 
     /**
-     * Search input string for all occurrences of the words to find.
+     * Asynchronously search @a inputString for all occurrences of the
+     * words to find.
      */
     private CompletableFuture<List<SearchResults>> processInputAsync(String inputString) {
         // Store the title.
@@ -74,7 +78,7 @@ public class SearchWithCompletableFuturesInputs
                                                                 input,
                                                                 title)))
 
-            // Terminate the stream and return a list of
+            // Terminate stream and return a list of
             // CompletableFutures.
             .collect(toList());
                     

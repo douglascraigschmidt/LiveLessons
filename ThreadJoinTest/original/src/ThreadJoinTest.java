@@ -3,12 +3,10 @@ import java.util.List;
 import java.util.LinkedList;
 
 /**
- * @class ThreadJoinTest
- *
- * @brief Demonstrates the use of Java Thread.join() as a simple
- *        barrier synchronizer to implement an "embarrassingly
- *        parallel" application that concurrently searches for words
- *        in a List of Strings.
+ * This program demonstrates the use of Java Thread.join() as a simple
+ * barrier synchronizer to implement an "embarrassingly parallel"
+ * application that concurrently searches for words in a List of
+ * Strings.
  */
 public class ThreadJoinTest {
     /**
@@ -21,27 +19,33 @@ public class ThreadJoinTest {
      * This input array is used by the ThreadJoinTest to search for
      * the words concurrently in multiple threads.
      */
-    private final static String[] mOneShotInputStrings = 
-    {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"};
+    private final static String[] mOneShotInputStrings = {
+        "xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"
+    };
 
     // List of words to search for.
-    private static String[] mWordList = {"do",
-                                         "re",
-                                         "mi",
-                                         "fa",
-                                         "so",
-                                         "la",
-                                         "ti",
-                                         "do"};
+    private static String[] mWordList = {
+        "do", "re", "mi", "fa", "so", "la", "ti", "do"
+    };
         
     /**
-     * @class SearchOneShotThreadGangJoin
-     *
-     * @brief Starts a Thread for each element in the List of input
-     *        Strings and uses Thread.join() to wait for all the
-     *        Threads to finish.  This implementation doesn't require
-     *        any Java synchronization mechanisms other than what's
-     *        provided by Thread.
+     * This is the entry point into the test program.  
+     */
+    static public void main(String[] args) {
+    	printDebugging("Starting ThreadJoinTest");
+     
+        // Create/run an object to search for words concurrently.
+        new SearchOneShotThreadJoin(mWordList,
+                                    mOneShotInputStrings);
+
+        printDebugging("Ending ThreadJoinTest");
+    }
+
+    /**
+     * Starts a Thread for each element in the List of input Strings
+     * and uses Thread.join() to wait for all the Threads to finish.
+     * This implementation doesn't require any Java synchronization
+     * mechanisms other than what's provided by Thread.
      */
     static public class SearchOneShotThreadJoin {
         /**
@@ -60,7 +64,7 @@ public class ThreadJoinTest {
         private List<Thread> mWorkerThreads;
         
         /**
-         * Constructor initializes the data members.
+         * Constructor initializes the fields and runs the program.
          */
         public SearchOneShotThreadJoin(String[] wordsToFind,
                                        String[] inputStrings) {
@@ -68,11 +72,12 @@ public class ThreadJoinTest {
             mWordsToFind = wordsToFind;
             mInput = Arrays.asList(inputStrings);
 
-            // This List holds Threads so they can be joined when their processing is done.
+            // This List holds Threads so they can be joined when
+            // their processing is done.
             mWorkerThreads = new LinkedList<>();
 
             // Create and start a Thread for each element in the
-            // mInput.  
+            // mInput.
             for (int i = 0; i < mInput.size(); ++i) {
                 // Each Thread performs the processing designated by
                 // the processInput() method of the worker Runnable.
@@ -154,19 +159,6 @@ public class ThreadJoinTest {
     static void printDebugging(String output) {
         if (diagnosticsEnabled) 
             System.out.println(output);                
-    }
-
-    /**
-     * This is the entry point into the test program.  
-     */
-    static public void main(String[] args) {
-    	printDebugging("Starting ThreadJoinTest");
-     
-        // Create/run an object to search for words concurrently.
-        new SearchOneShotThreadJoin(mWordList,
-                                    mOneShotInputStrings);
-
-        printDebugging("Ending ThreadJoinTest");
     }
 }
 

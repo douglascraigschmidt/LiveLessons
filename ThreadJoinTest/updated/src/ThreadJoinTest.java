@@ -5,12 +5,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This example implements an "embarrassingly parallel" application
+ * This program implements an "embarrassingly parallel" application
  * that concurrently searches for words in a List of Strings.  It
  * demonstrates the use of Java 8 functional programming features
  * (such as lambda expressions, method references, and functional
  * interfaces) in conjunction with Thread.start() to run threads and
- * Thread.join() to wait for all threads to finish running.
+ * Thread.join() to wait for all running threads.
  */
 public class ThreadJoinTest {
     /**
@@ -82,7 +82,34 @@ public class ThreadJoinTest {
         }
 
         /**
-         * Start the threads to perform the concurrent searches.
+         * This factory method creates a list of threads that will be
+         * joined when their processing is done.
+         *
+         * @param task Function to run in each thread.
+         * @param inputList List of strings to search.
+         * @return List of threads that will run the @a task.
+         */
+        List<Thread> makeWorkerThreads(Function<String, Void> task,
+                                       List<String> inputList) {
+            // Create a new list.
+            List<Thread> workerThreads = new ArrayList<>();
+
+            // Create a thread for each input string to perform
+            // processing designated by the task parameter.
+            for (String element : inputList)
+                workerThreads.add
+                    (new Thread(()
+                                // Create lambda runnable to run in thread.
+                                ->
+                                // Apply the task to process the input
+                                // string.
+                                task.apply(element)));
+
+            return workerThreads;
+        }
+
+        /**
+         * Start the threads to perform the concurrent word searches.
          */
         @Override
         public void run() {
@@ -92,13 +119,13 @@ public class ThreadJoinTest {
 
             // Iterate through the threads and pass the Thread.join()
             // method reference as a barrier synchronizer to wait for
-            // each thread to finish.  Note how rethrowConsumer()
+            // all threads to finish.  Note how rethrowConsumer()
             // converts a checked exception to an unchecked exception.
             mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
             /*
-              // This more verbose solution based on a lambda
-              // expression can be used instead of rethrowConsumer():
+              // This alternative, (more verbose) solution uses a
+              // lambda expression instead of rethrowConsumer():
 
               mWorkerThreads.forEach(thread -> {
                                      try {
@@ -110,37 +137,11 @@ public class ThreadJoinTest {
         }
 
         /**
-         * This factory method creates a list of threads that can be
-         * joined when their processing is done.
-         *
-         * @param task Function to run in each thread.
-         * @param inputList List of strings to search.
-         * @return List of threads that will run the @a task.
-         */
-        List<Thread> makeWorkerThreads(Function<String, Void> task,
-                                       List<String> inputList) {
-            // Create a new list.
-            List<Thread> list = new ArrayList<>();
-
-            // Create a thread for each input string to perform
-            // processing designated by the task parameter.
-            for (String element : inputList)
-                list.add(new Thread(()
-                         // Create lambda to run in thread.
-                         ->
-                         // Apply the task to process the
-                         // input string.
-                         task.apply(element)));
-
-            return list;
-        }
-
-        /**
          * This method runs in a background thread and searches the @a
          * inputData for all occurrences of the words to find.
          */
         private Void processInput(String inputData) {
-            // Iterate through each word we're searching for.
+            // Iterate through each word to find.
             for (String word : mWordsToFind) 
 
                 // Check to see how many times (if any) the word
@@ -149,8 +150,8 @@ public class ThreadJoinTest {
                      i != -1;
                      i = inputData.indexOf(word, i + word.length()))
 
-                    // Each time a match is found the processResults()
-                    // hook method is called to handle the results.
+                    // Whenever a match is found the processResults()
+                    // method is called to handle the results.
                     processResults("in thread " 
                                    + Thread.currentThread().getId()
                                    + " "
@@ -163,7 +164,7 @@ public class ThreadJoinTest {
         }
 
         /**
-         * Hook method that simple prints the results.
+         * Conditionally print the results.
          */
         private void processResults(String results) {
             printDebugging(results);

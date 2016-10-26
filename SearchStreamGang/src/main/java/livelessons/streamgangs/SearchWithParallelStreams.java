@@ -29,17 +29,18 @@ public class SearchWithParallelStreams
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Iterate through each word we're searching for and try to
-        // find it in the inputData.
+        // Concurrently iterate through each word we're searching for
+        // and try to find it in the input data.
         return mWordsToFind
             // Convert the array of words into a parallel stream.
             .parallelStream()
             
-            // Search for all places where the word matches the input
-            // data.
+            // Concurrently search for all places where the word
+            // matches the input data.
             .map(this::processWord)
 
-            // Terminate the stream.
+            // Terminate stream and return a list of lists of
+            // SearchResults.
             .collect(toList());
    }
     
@@ -53,12 +54,13 @@ public class SearchWithParallelStreams
             // Concurrently process each String in the input list.
             .parallelStream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
+            // Concurrently map each string to a stream containing the
+            // words found in the input.
             .map(inputString -> {
                     // Get the section title.
                     String title = getTitle(inputString);
 
+                    // Find all occurrences of word in the input string.
                     return searchForWord(word, 
                                          // Skip over the title.
                                          inputString.substring(title.length()),
@@ -68,6 +70,7 @@ public class SearchWithParallelStreams
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0)
             
+            // Terminate stream and return a list of SearchResults.
             .collect(toList());
     }
 }

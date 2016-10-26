@@ -24,40 +24,43 @@ public class SearchWithParallelStreamWords
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * sequentially search for words in the input data.
+     * concurrently search for words in the input strings.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Iterate through each word we're searching for and try to
-        // find it in the inputData.
+        // Concurrently iterate through each word we're searching for
+        // and try to find it in the input strings.
         return mWordsToFind
-            // Convert the array of words into a stream.
-            .stream()
+            // Convert the array of words into a parallel stream.
+            .parallelStream()
             
-            // Search for all places where the word matches the input
-            // data.
+            // Concurrently search for all places where the word
+            // matches the input data.
             .map(this::processWord)
 
-            // Terminate the stream.
+            // Terminate the stream and return a list of lists of
+            // SearchResults.
             .collect(toList());
    }
     
     /**
-     * Concurrently Search the inputData for all occurrences of the
-     * words to find.
+     * Sequentially search the input strings for all occurrences of
+     * the word to find.
      */
     private List<SearchResults> processWord(String word) {
      	// Get the input.
         return getInput()
-            // Concurrently process each String in the input list.
-            .parallelStream()
+            // Convert the list of input strings into a sequential
+            // stream.
+            .stream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
+            // Map each string to a stream containing the words found
+            // in each input string.
             .map(inputString -> {
                 // Get the section title.
                 String title = getTitle(inputString);
 
+                // Find all occurrences of word in the input string.
             	return searchForWord(word,
                                      // Skip over the title.
                                      inputString.substring(title.length()),
@@ -67,7 +70,7 @@ public class SearchWithParallelStreamWords
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0)
             
-            // Create a list of SearchResults.
+            // Terminate stream and return a list of SearchResults.
             .collect(toList());
     }
 }

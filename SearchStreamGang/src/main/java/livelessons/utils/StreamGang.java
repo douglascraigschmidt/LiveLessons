@@ -74,13 +74,13 @@ public abstract class StreamGang<E>
     }
 
     /**
-     * Factory method that makes the next List of input to be processed
-     * concurrently by the gang of Tasks.
+     * Factory method that makes the next List of input to be
+     * processed by the gang of Tasks.
      */
     protected abstract List<E> getNextInput();
 
     /**
-     * Initiate the StreamGang processing.
+     * Hook method that starts the StreamGang processing.
      */
     protected abstract void initiateStream();
 
@@ -91,8 +91,8 @@ public abstract class StreamGang<E>
     protected abstract void awaitTasksDone();
 
     /**
-     * Template method that creates/executes all the tasks in the
-     * gang.
+     * Template method that initiates all the tasks in the StreamGang
+     * and waits for them to complete.
      */
     @Override
     public void run() {

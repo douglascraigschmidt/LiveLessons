@@ -39,12 +39,14 @@ public class SearchWithSequentialStream
             // containing the words found in the input.
             .map(this::processInput)
 
-            // Terminate the stream.
+            // Terminate stream and return a list of lists of
+            // SearchResults.
             .collect(toList());
     }
     
     /**
-     * Search the inputString for all occurrences of the words to find.
+     * Sequentially search @a inputString for all occurrences of the
+     * words to find.
      */
     private List<SearchResults> processInput(String inputString) {
         // Get the section title.
@@ -59,8 +61,7 @@ public class SearchWithSequentialStream
             // Convert the array of words into a Stream.
             .stream()
             
-            // Search for all places where the word matches the input
-            // data.
+            // Find all places where word matches the input data.
             .map(word -> searchForWord(word,
                                        input,
                                        title))
@@ -68,9 +69,10 @@ public class SearchWithSequentialStream
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0)
             
+            // Terminate stream and return a list of SearchResults.
             .collect(toList());
             
-        // Return the results;
+        // Return the results.
         return results;
     }
 }

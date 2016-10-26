@@ -32,19 +32,21 @@ public class SearchWithParallelStreamInputs
     protected List<List<SearchResults>> processStream() {
     	// Get the input.
         return getInput()
-            // Concurrently process each String in the input list.
+            // Concurrently process each string in the input list.
             .parallelStream()
 
-            // Map each String to a Stream containing the words found
-            // in the input.
+            // Concurrently map each string to a Stream containing the
+            // words found in the input string.
             .map(this::processInput)
 
-            // Terminate the stream.
+            // Terminate the stream and return a list of lists of
+            // SearchResults.
             .collect(toList());
     }
 
     /**
-     * Search the inputData for all occurrences of the words to find.
+     * Search the @a inputString for all occurrences of the words to
+     * find.
      */
     private List<SearchResults> processInput(String inputString) {
         // Get the section title.
@@ -53,10 +55,10 @@ public class SearchWithParallelStreamInputs
         // Skip over the title.
         String input = inputString.substring(title.length());
 
-        // Iterate through each word we're searching for and try to
-        // find it in the inputData.
+        // Sequentially iterate through each word we're searching for
+        // and try to find it in the inputData.
         return mWordsToFind
-            // Convert the array of words into a stream.
+            // Convert the array of words into a sequential stream.
             .stream()
 
             // Sequentially search for all places where the word
@@ -69,6 +71,8 @@ public class SearchWithParallelStreamInputs
             // Only keep a result that has at least one match.
             .filter(result -> result.size() > 0)
             
+            // Terminate the stream and return a list of
+            // SearchResults.
             .collect(toList());
     }
 }

@@ -20,45 +20,34 @@ import livelessons.utils.StreamGang;
 import static java.util.stream.Collectors.summingInt;
 
 /**
- * This helper class factors out the common code used by all
- * instantiations of the StreamGang framework in the SearchStreamGang
- * project.  It customizes the StreamGang framework to concurrently
- * search one or more arrays of input Strings for words provided in an
- * array of words to find.
+ * This class factors out the common code used by all instantiations
+ * of the StreamGang framework in the SearchStreamGang program.  It
+ * customizes the StreamGang framework to search a list of input
+ * Strings for words provided in a list of words to find.
  */
 public class SearchStreamGang
        extends StreamGang<String> {
     /**
-     * The array of words to find.
+     * The list of words to find.
      */
     protected final List<String> mWordsToFind;
 
     /**
-     * An Iterator for the array of Strings to search.
+     * An Iterator to the list of Strings to search.
      */
     private final Iterator<String[]> mInputIterator;
 
     /**
-     * Exit barrier that controls when the framework and test object 
-     * complete their concurrent processing.
+     * Exit barrier that controls when the framework has completed its
+     * processing.
      */
-    protected CountDownLatch mIterationBarrier = null;
+    protected CountDownLatch mExitBarrier = null;
         
     /**
-     * Keeps track of how long the test has run.
-     */
-    private long mStartTime;
-
-    /**
-     * Keeps track of all the execution times.
-     */
-    private List<Long> mExecutionTimes = new ArrayList<>();
-
-    /**
-     * Constructor initializes the data members.
+     * Constructor initializes the fields.
      */
     public SearchStreamGang(List<String> wordsToFind,
-                               String[][] stringsToSearch) {
+                            String[][] stringsToSearch) {
         // Store the words to search for.
         mWordsToFind = wordsToFind;
 
@@ -70,74 +59,8 @@ public class SearchStreamGang
     }
 
     /**
-     * Hook method that must be overridden by subclasses to perform
-     * the Stream processing.
-     */
-    protected List<List<SearchResults>> processStream() {
-        // No-op by default.
-        return null; 
-    }
-
-    /**
-     * Start timing the test run.
-     */
-    public void startTiming() {
-        // Note the start time.
-        mStartTime = System.nanoTime();
-    }
-
-    /**
-     * Stop timing the test run.
-     */
-    public void stopTiming() {
-        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
-    }
-
-    /**
-     * Return the time needed to execute the test.
-     */
-    public List<Long> executionTimes() {
-        return mExecutionTimes;
-    }
-
-    /**
-     * Initiate the Stream processing, which uses a Java 8 stream to
-     * download, process, and store images sequentially.
-     */
-    @Override
-    protected void initiateStream() {
-        // Create a new barrier for this iteration cycle.
-        mIterationBarrier = new CountDownLatch(1);
-
-        // Start timing the test run.
-        startTiming();
-
-        // Start the Stream processing.
-        List<List<SearchResults>> results = processStream();
-        
-        // Stop timing the test run.
-        stopTiming();
-
-        // Print the results.
-        // searchResults.stream().forEach(SearchResults::print);
-
-        System.out.println(TAG + ": The search returned " 
-                           + results.stream().mapToInt(list -> list.stream().collect(summingInt(SearchResults::size))).sum()
-                           + " word matches for "
-                           + getInput().size() 
-                           + " input strings");
-
-        // Indicate all computations in this iteration are done.
-        try {
-            mIterationBarrier.countDown();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        } 
-    }
-
-    /**
      * Factory method that returns the next List of Strings to be
-     * searched concurrently by the StreamGang.
+     * searched by StreamGang implementation strategies.
      */
     @Override
     protected List<String> getNextInput() {
@@ -147,15 +70,122 @@ public class SearchStreamGang
             // Note that we're starting a new cycle.
             incrementCycle();
 
-            // Return a List containing the Strings to search
-            // concurrently.
+            // Return a List containing the Strings to search.
             return Arrays.asList(mInputIterator.next());
         }
     }
 
     /**
-     * This class is used in conjunction with WordMatchItr to identify
-     * all indices in the input data that match a word.
+     * This template method starts the Java 8 stream processing to
+     * search the list of input strings for the given words to find.
+     */
+    @Override
+    protected void initiateStream() {
+        // Create a new barrier for this iteration cycle.
+        mExitBarrier = new CountDownLatch(1);
+
+        // Start timing the test run.
+        startTiming();
+
+        // Start the stream processing.
+        List<List<SearchResults>> results = processStream();
+        
+        // Stop timing the test run.
+        stopTiming();
+
+        System.out.println(TAG + ": The search returned " 
+                           + results.stream()
+                                    .mapToInt(list 
+                                              -> list.stream()
+                                                     .collect(summingInt(SearchResults::size)))
+                                    .sum()
+                           + " word matches for "
+                           + getInput().size() 
+                           + " input strings");
+
+        // Indicate all computations in this iteration are done.
+        try {
+            mExitBarrier.countDown();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } 
+    }
+
+    /**
+     * Hook method that uses the CountDownLatch as an exit barrier to
+     * wait for the StreamGang iteration to finish processing.
+     */
+    @Override
+    protected void awaitTasksDone() {
+        try {
+            // Loop for each iteration cycle of input strings.
+            for (;;) {
+                // Barrier synchronizer that waits until all the
+                // stream processing in this iteration cycle are done.
+                mExitBarrier.await();
+
+                // Check to see if there's another List of input
+                // strings available to process.
+                if (setInput(getNextInput()) != null)
+                    // Invoke this hook method to initialize the gang
+                    // of tasks for the next iteration cycle.
+                    initiateStream();
+                else
+                    break; // No more input, so we're done.
+            } 
+
+            // Only call the shutdown() and awaitTermination() methods
+            // if we've actually got an ExecutorService (as opposed to
+            // just an Executor).
+            if (getExecutor() instanceof ExecutorService) {
+                ExecutorService executorService = 
+                    (ExecutorService) getExecutor();
+
+                // Tell the ExecutorService to initiate a graceful
+                // shutdown.
+                executorService.shutdown();
+
+                // Wait for all the tasks in the Thread pool to
+                // complete.
+                executorService.awaitTermination(Long.MAX_VALUE,
+                                                 TimeUnit.NANOSECONDS);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Looks for all instances of @code word in @code inputData and
+     * return a list of all the @code SearchResults (if any).
+     */
+    public SearchResults searchForWord(String word,
+                                       String inputData,
+                                       String title) {
+    	// Create SearchResults to keep track of relevant info.
+        SearchResults results =
+            new SearchResults(Thread.currentThread().getId(),
+                              currentCycle(),
+                              word,
+                              title);
+        // Use a WordMatchItr to add the indices of all places in the
+        // inputData where word matches.
+        StreamSupport
+            // Create a sequential stream of Integers that records the
+            // indices (if any) where the word matched the input data.
+            .stream(new WordMatcherSpliterator
+                    (new WordMatcher(word).with(inputData)), 
+                    false)
+                    
+            // Add any matches to the results object.
+            .forEach(results::add);
+
+        return results;
+    }
+    
+    /**
+     * This class is used in conjunction with WordMatcherSpliterator
+     * to identify all indices in the input data that match a word.
      */
     private static class WordMatcher {
         /**
@@ -217,7 +247,7 @@ public class SearchStreamGang
      * This Spliterator is used to create a Stream of matches to
      * a word in the input data.
      */
-    private static class WordMatcherItr
+    private static class WordMatcherSpliterator
                    extends Spliterators.AbstractSpliterator<Integer> {
         /**
          * Matches a word in the input data.
@@ -227,7 +257,7 @@ public class SearchStreamGang
         /**
          * Constructor initializes the field and super class.
          */
-        WordMatcherItr(WordMatcher matcher) {
+        WordMatcherSpliterator(WordMatcher matcher) {
             super(Long.MAX_VALUE, ORDERED | NONNULL);
             mMatcher = matcher;
         }
@@ -248,7 +278,7 @@ public class SearchStreamGang
     }
 
     /**
-     * Return the title
+     * Return the title portion of the @a inputData.
      */
     public String getTitle(String inputData) {
         Pattern p =
@@ -260,78 +290,44 @@ public class SearchStreamGang
     }
 
     /**
-     * Search for all instances of @code word in @code inputData and
-     * return a list of all the @code SearchData results (if any).
+     * Hook method that must be overridden by subclasses to perform
+     * the Stream processing.
      */
-    public SearchResults searchForWord(String word,
-                                       String inputData,
-                                       String title) {
-    	// Create SearchResults to keep track of relevant info.
-        SearchResults results =
-            new SearchResults(Thread.currentThread().getId(),
-                              currentCycle(),
-                              word,
-                              title);
-        // Use a WordMatchItr to add the indices of all places in the
-        // inputData where word matches.
-        StreamSupport
-            // Create a stream of Integers indicating the indices of
-            // all places (if any) where the word matched the input data.
-            .stream(new WordMatcherItr(new WordMatcher(word).with(inputData)), 
-                    false)
-                    
-            // Add any matches to the results object.
-            .forEach(results::add);
-
-        return results;
+    protected List<List<SearchResults>> processStream() {
+        // No-op by default.
+        return null; 
     }
-    
+
     /**
-     * Hook method that uses the CountDownLatch as an exit barrier to
-     * wait for the gang of Threads to exit.
+     * Keeps track of how long the test has run.
      */
-    @Override
-    protected void awaitTasksDone() {
-        try {
-            // Loop for each iteration cycle of input URLs.
-            for (;;) {
-                // Barrier synchronizer that waits until all the
-                // stream processing in this iteration cycle are done.
-                mIterationBarrier.await();
+    private long mStartTime;
 
-                // Check to see if there's another List of URLs
-                // available to process.
-                if (setInput(getNextInput()) == null)
-                    break; // No more input, so we're done.
-                else
-                    // Invoke this hook method to initialize the gang
-                    // of tasks for the next iteration cycle.
-                    initiateStream();
-            } 
+    /**
+     * Keeps track of all the execution times.
+     */
+    private List<Long> mExecutionTimes = new ArrayList<>();
 
-            // Only call the shutdown() and awaitTermination() methods
-            // if we've actually got an ExecutorService (as opposed to
-            // just an Executor).
-            if (getExecutor() instanceof ExecutorService) {
-                ExecutorService executorService = 
-                    (ExecutorService) getExecutor();
+    /**
+     * Start timing the test run.
+     */
+    public void startTiming() {
+        // Note the start time.
+        mStartTime = System.nanoTime();
+    }
 
-                // Tell the ExecutorService to initiate a graceful
-                // shutdown.
-                executorService.shutdown();
+    /**
+     * Stop timing the test run.
+     */
+    public void stopTiming() {
+        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
+    }
 
-                // Wait for all the tasks in the Thread pool to
-                // complete.
-                executorService.awaitTermination(Long.MAX_VALUE,
-                                                 TimeUnit.NANOSECONDS);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Run the completion hook now that all the image downloading,
-        // processing and storing is now complete.
-        // mCompletionHook.run();
+    /**
+     * Return the time needed to execute the test.
+     */
+    public List<Long> executionTimes() {
+        return mExecutionTimes;
     }
 }
 
