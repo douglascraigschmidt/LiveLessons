@@ -10,8 +10,9 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
- * in conjunction with Java Streams to search how many times each word
- * in an array of words appears in input data.
+ * in conjunction with Java Streams to asynchronously search how many
+ * times each word in a list of words appears in a list of input
+ * strings.
  */
 public class SearchWithCompletableFuturesWords
     extends SearchStreamGang {
@@ -46,8 +47,8 @@ public class SearchWithCompletableFuturesWords
             // CompletableFutures.
             .collect(toList());
                     
-        // Wait for all operations associated with the futures to
-        // complete.
+        // Convert all the completed CompletableFutures in the
+        // listOfFutures into a list of lists of SearchResults.
         return StreamsUtils.joinAll(listOfFutures)
                             // join() blocks the calling thread until
                             // all the futures have been completed.
@@ -72,12 +73,12 @@ public class SearchWithCompletableFuturesWords
                     String title = getTitle(inputString);
 
                     // Get the input string (skipping over the title).
-                    String input = inputString.substring(title.length());
+                    String inputData = inputString.substring(title.length());
 
                     // Asynchronously search for the word in the input string.
                     return CompletableFuture.supplyAsync(() 
-                                                         -> searchForWord(word, 
-                                                                          input,
+                                                         -> searchForWord(word,
+                                                                          inputData,
                                                                           title));
                 })
 
@@ -85,9 +86,9 @@ public class SearchWithCompletableFuturesWords
             // CompletableFutures.
             .collect(toList());
 
-        // Return a CompletableFuture to a list of SearchResults.
-        // that will be available when all the CompletableFutures in
-        // the listOfFutures have completed.
+        // Return a CompletableFuture to a list of SearchResults that
+        // will complete when all the CompletableFutures in the
+        // listOfFutures have completed.
         return StreamsUtils.joinAll(listOfFutures);
     }
 }

@@ -25,18 +25,12 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This test driver showcases how various subclasses customize the
- * StreamGang framework with different Java concurrency and
- * synchronization mechanisms to implement an "embarrassingly
- * parallel" program that searches for words in a list of input data.
+ * This test driver showcases how implementation strategies customize
+ * the SearchStreamGang framework with different Java 8 mechanisms to
+ * implement an "embarrassingly parallel" program that searches for
+ * words in a list of input strings.
  */
 public class SearchStreamGangTest {
-    /**
-     * If this is set to true then lots of debugging output will be generated.
-     */
-    private static boolean diagnosticsEnabled = true;
-
-
     /**
      * Enumerate the tests to run.
      */
@@ -50,58 +44,6 @@ public class SearchStreamGangTest {
         RXJAVA_WORDS,
         RXJAVA_INPUTS
    }
-
-    /*
-     * Various input files.
-     */
-    private static String sHAMLET_DATA_FILE = "hamlet.txt";
-    private static String sMACBETH_DATA_FILE = "macbeth.txt";
-    private static String sWORD_LIST_FILE = "wordList.txt";
-    /**
-     * Keep track of which SearchStreamGang performed the best.
-     */
-    private static Map<String, List<Long>> mResultsMap = new HashMap<>();
-
-    /**
-     * Print debugging output if @code diagnosticsEnabled is true.
-     */
-    private static void printDebugging(String output) {
-        if (diagnosticsEnabled)
-            System.out.println(output);
-    }
-
-    /**
-     * Return the input data in the filename as an array of Strings.
-     */
-    private static String[] getInputData(String filename,
-                                         String splitter) {
-        try {
-            // Compile a regular expression that's used to split the
-            // file into an array of strings.
-            return Pattern.compile(splitter)
-                .split(new String(Files.readAllBytes
-                                  (Paths.get(ClassLoader.getSystemResource
-                                             (filename).toURI()))));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Return the word list in the filename as an array of Strings.
-     */
-    private static List<String> getWordList(String filename) {
-        // The Stream and file will be closed here via the
-        // try-with-resources block.
-        try {
-            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource
-                                                (filename).toURI()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     /**
      * Factory method that creates the desired type of StreamGang
@@ -137,6 +79,46 @@ public class SearchStreamGangTest {
                                              inputData);
         }
         return null;
+    }
+
+    /*
+     * Various input files.
+     */
+    private static String sHAMLET_DATA_FILE = "hamlet.txt";
+    private static String sMACBETH_DATA_FILE = "macbeth.txt";
+    private static String sWORD_LIST_FILE = "wordList.txt";
+
+    /**
+     * Return the input data in the filename as an array of Strings.
+     */
+    private static String[] getInputData(String filename,
+                                         String splitter) {
+        try {
+            // Compile a regular expression that's used to split the
+            // file into an array of strings.
+            return Pattern.compile(splitter)
+                .split(new String(Files.readAllBytes
+                                  (Paths.get(ClassLoader.getSystemResource
+                                             (filename).toURI()))));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the word list in the filename as an array of Strings.
+     */
+    private static List<String> getWordList(String filename) {
+        // The Stream and file will be closed here via the
+        // try-with-resources block.
+        try {
+            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource
+                                                (filename).toURI()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -450,5 +432,23 @@ public class SearchStreamGangTest {
                 });
 
         printDebugging("Ending hardCodedParallelStreamsSolution");
+    }
+
+    /**
+     * Keep track of which SearchStreamGang performed the best.
+     */
+    private static Map<String, List<Long>> mResultsMap = new HashMap<>();
+
+    /**
+     * If this is set to true then lots of debugging output will be generated.
+     */
+    private static boolean diagnosticsEnabled = true;
+
+    /**
+     * Print debugging output if @code diagnosticsEnabled is true.
+     */
+    private static void printDebugging(String output) {
+        if (diagnosticsEnabled)
+            System.out.println(output);
     }
 }

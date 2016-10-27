@@ -7,8 +7,10 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGang framework to use Java Streams to
- * concurrently search for all words in an array of input data.
+ * Customizes the SearchStreamGang superclass to use
+ * CompletableFutures in conjunction with Java streams to
+ * asynchronously search the input data for each word in an list of
+ * words.
  */
 public class SearchWithParallelStreamWords
        extends SearchStreamGang {
@@ -31,11 +33,11 @@ public class SearchWithParallelStreamWords
         // Concurrently iterate through each word we're searching for
         // and try to find it in the input strings.
         return mWordsToFind
-            // Convert the array of words into a parallel stream.
+            // Convert the list of words into a parallel stream.
             .parallelStream()
             
             // Concurrently search for all places where the word
-            // matches the input data.
+            // matches the input strings.
             .map(this::processWord)
 
             // Terminate the stream and return a list of lists of
@@ -44,8 +46,8 @@ public class SearchWithParallelStreamWords
    }
     
     /**
-     * Sequentially search the input strings for all occurrences of
-     * the word to find.
+     * Sequentially search the list of input strings for all
+     * occurrences of the @a word passed as a parameter.
      */
     private List<SearchResults> processWord(String word) {
      	// Get the input.
@@ -54,8 +56,8 @@ public class SearchWithParallelStreamWords
             // stream.
             .stream()
 
-            // Map each string to a stream containing the words found
-            // in each input string.
+            // Map each string to a stream containing SearchResults if
+            // the word is found in each input string.
             .map(inputString -> {
                 // Get the section title.
                 String title = getTitle(inputString);

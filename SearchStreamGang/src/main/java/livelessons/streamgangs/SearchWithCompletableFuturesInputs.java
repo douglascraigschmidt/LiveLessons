@@ -10,8 +10,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
- * in conjunction with Java Streams to search the input data for each
- * word in an array of words.
+ * in conjunction with Java streams to asynchronously search the input
+ * data for each word in an list of words.
  */
 public class SearchWithCompletableFuturesInputs
     extends SearchStreamGang {
@@ -26,8 +26,9 @@ public class SearchWithCompletableFuturesInputs
     }
 
     /**
-     * Perform the processing, which uses a Java 8 Stream to
-     * concurrently search for words in the input data.
+     * Perform the processing, which uses a Java 8 Stream in
+     * conjunction with CompletableFutues to asynchronously search for
+     * words in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -46,7 +47,7 @@ public class SearchWithCompletableFuturesInputs
             .collect(toList());
 
         // Convert all the completed CompletableFutures in the
-        // listOfFutures into a list of SearchResults.
+        // listOfFutures into a list of lists of SearchResults.
         return StreamsUtils.joinAll(listOfFutures)
                            // join() blocks the calling thread until
                            // all the futures have been completed.
@@ -62,7 +63,7 @@ public class SearchWithCompletableFuturesInputs
         String title = getTitle(inputString);
 
         // Skip over the title.
-        String input = inputString.substring(title.length());
+        String inputData = inputString.substring(title.length());
 
         // Convert the list of words into a list of CompletableFutures
         // to SearchResults.
@@ -70,21 +71,21 @@ public class SearchWithCompletableFuturesInputs
             // Create a sequential stream of words.
             .stream()
 
-            // Asynchronously search for each word in the input string
-            // and return a CompletableFuture<SearchResults>.
+            // Asynchronously find each word in the input data and
+            // return a CompletableFuture<SearchResults>.
             .map(word ->
                  CompletableFuture.supplyAsync(()
                                                -> searchForWord(word,
-                                                                input,
+                                                                inputData,
                                                                 title)))
 
             // Terminate stream and return a list of
             // CompletableFutures.
             .collect(toList());
                     
-        // Return a CompletableFuture to a list of SearchResults.
-        // that will be available when all the CompletableFutures in
-        // the listOfFutures have completed.
+        // Return a CompletableFuture to a list of SearchResults that
+        // will be complete when all the CompletableFutures in the
+        // listOfFutures have completed.
         return StreamsUtils.joinAll(listOfFutures);
     }
 }
