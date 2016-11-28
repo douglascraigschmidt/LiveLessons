@@ -7,10 +7,9 @@ import livelessons.utils.SearchResults;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Customizes the SearchStreamGang superclass to use
- * CompletableFutures in conjunction with Java streams to
- * asynchronously search the input data for each word in an list of
- * words.
+ * Customizes the SearchStreamGang superclass to use CompletableFutures
+ * in conjunction with Java streams to asynchronously search the input
+ * data for each word in an list of words.
  */
 public class SearchWithParallelStreamWords
        extends SearchStreamGang {

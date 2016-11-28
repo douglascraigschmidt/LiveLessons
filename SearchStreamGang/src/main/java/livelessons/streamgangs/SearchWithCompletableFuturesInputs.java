@@ -27,7 +27,7 @@ public class SearchWithCompletableFuturesInputs
 
     /**
      * Perform the processing, which uses a Java 8 Stream in
-     * conjunction with CompletableFutues to asynchronously search for
+     * conjunction with CompletableFutures to asynchronously search for
      * words in the input data.
      */
     @Override

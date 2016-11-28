@@ -1,5 +1,6 @@
 package livelessons;
 
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,8 +18,6 @@ import livelessons.streamgangs.SearchWithCompletableFuturesWords;
 import livelessons.streamgangs.SearchWithParallelStreamInputs;
 import livelessons.streamgangs.SearchWithParallelStreamWords;
 import livelessons.streamgangs.SearchWithParallelStreams;
-import livelessons.streamgangs.SearchWithRxJavaInputs;
-import livelessons.streamgangs.SearchWithRxJavaWords;
 import livelessons.streamgangs.SearchWithSequentialStream;
 import livelessons.utils.SearchResults;
 
@@ -32,7 +31,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class SearchStreamGangTest {
     /**
-     * Enumerate the tests to run.
+     * Enumerate all the implementation strategies to run.
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
@@ -40,14 +39,12 @@ public class SearchStreamGangTest {
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAMS,
         COMPLETABLE_FUTURES_WORDS,
-        COMPLETABLE_FUTURES_INPUTS,
-        RXJAVA_WORDS,
-        RXJAVA_INPUTS
+        COMPLETABLE_FUTURES_INPUTS
    }
 
     /**
-     * Factory method that creates the desired type of StreamGang
-     * subclass implementation.
+     * Factory method that creates the desired type of
+     * SearchStreamGang subclass implementation strategy.
      */
     private static SearchStreamGang makeSearchStreamGang(List<String> wordList,
                                                          String[][] inputData,
@@ -71,14 +68,42 @@ public class SearchStreamGangTest {
         case COMPLETABLE_FUTURES_INPUTS:
             return new SearchWithCompletableFuturesInputs(wordList,
                                                           inputData);
-        case RXJAVA_INPUTS:
-            return new SearchWithRxJavaInputs(wordList,
-                                              inputData);
-        case RXJAVA_WORDS:
-            return new SearchWithRxJavaWords(wordList,
-                                             inputData);
         }
         return null;
+    }
+
+    /**
+     * Return the input data in the given @a filename as an array of
+     * Strings.
+     */
+    private static String[] getInputData(String filename,
+                                         String splitter) {
+        try {
+            URI uri = ClassLoader.getSystemResource(filename).toURI();
+
+            String bytes = new String(Files.readAllBytes(Paths.get(uri)));
+
+            // Compile a regular expression that's used to split the
+            // file into an array of strings.
+            return Pattern.compile(splitter).split(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the word list in the @a filename as a list of Strings.
+     */
+    private static List<String> getWordList(String filename) {
+        try {
+            // Read all lines from filename and return a list of Strings.
+            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource
+                                                (filename).toURI()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /*
@@ -89,46 +114,13 @@ public class SearchStreamGangTest {
     private static String sWORD_LIST_FILE = "wordList.txt";
 
     /**
-     * Return the input data in the filename as an array of Strings.
-     */
-    private static String[] getInputData(String filename,
-                                         String splitter) {
-        try {
-            // Compile a regular expression that's used to split the
-            // file into an array of strings.
-            return Pattern.compile(splitter)
-                .split(new String(Files.readAllBytes
-                                  (Paths.get(ClassLoader.getSystemResource
-                                             (filename).toURI()))));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Return the word list in the filename as an array of Strings.
-     */
-    private static List<String> getWordList(String filename) {
-        // The Stream and file will be closed here via the
-        // try-with-resources block.
-        try {
-            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource
-                                                (filename).toURI()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * This is the entry point into the test program.
+     * This is the entry point into the test driver program.
      */
     public static void main(String[] args) throws Throwable {
         printDebugging("Starting SearchStreamGangTest");
 
-        // Create the input strings from various Shakespeare plays, using 
-        // the '@' symbol as the "splitter" between scenes.
+        // Create the input strings from famous Shakespeare plays,
+        // using the '@' symbol as the "splitter" between scenes.
         String[][] inputData = new String[][]{getInputData(sHAMLET_DATA_FILE, "@"),
                                               getInputData(sMACBETH_DATA_FILE, "@")};
 
@@ -157,27 +149,29 @@ public class SearchStreamGangTest {
                                      inputData,
                                      test);
 
-            // Run the next test.
+            // Execute the test.
             streamGang.run();
 
             // Store the execution times into the results map.
             mResultsMap.put(test.toString(),
                             streamGang.executionTimes());
 
-            printDebugging("Ending " + test);
-
             // Run the garbage collector to free up memory and
-            // minimize perturbations on each test.
+            // minimize timing perturbations on each test.
             System.gc();
+
+            printDebugging("Ending " + test);
         }
 
-        // Test a hard-coded parallel streams solution.
+        // Measure the performance of a "hard-coded" parallel streams
+        // implementation strategy.
         hardCodedParallelStreamsSolution(wordList, inputData);
 
-        // Test a hard-coded sequential solution.
+        // Measure the performance of a "hard-coded" sequential
+        // streams implementation strategy.
         hardCodedSequentialSolution(wordList, inputData);
 
-        // Print out all the timing results.
+        // Sort and display all the timing results.
         printTimingResults(mResultsMap);
     }
 
