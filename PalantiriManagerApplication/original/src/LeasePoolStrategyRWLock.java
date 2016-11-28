@@ -5,13 +5,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * @class LeasePoolStrategyRWLock
- *
- * @brief This class uses a Java ReentrantReadWriteLock to synchronize
- *        access to the LeasePool's internal state.  It plays the role
- *        of the "Concrete Strategy" in the Strategy pattern, the
- *        "Concrete Implementor" in the Bridge pattern, and the
- *        "Concrete Class" in the Template Method pattern.
+ * This class uses a Java ReentrantReadWriteLock to synchronize access
+ * to the LeasePool's internal state.  It plays the role of the
+ * "Concrete Strategy" in the Strategy pattern, the "Concrete
+ * Implementor" in the Bridge pattern, and the "Concrete Class" in the
+ * Template Method pattern.
  */
 public class LeasePoolStrategyRWLock<Resource>
        extends LeasePoolStrategy<Resource> {

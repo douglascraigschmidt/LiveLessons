@@ -9,14 +9,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @class PalantirManagerTest
- *
- * @brief This program demonstrates the use of the LeasePool resource
- *        manager that limits the number of Beings from Middle-Earth
- *        who can concurrently gaze into Palantiri (see
- *        http://en.wikipedia.org/wiki/Palantir for more information
- *        on Palantiri if you're not a Lord of the Ring's fan yet
- *        ;-)).
+ * This program demonstrates the use of the LeasePool resource manager
+ * that limits the number of Beings from Middle-Earth who can
+ * concurrently gaze into Palantiri (see
+ * http://en.wikipedia.org/wiki/Palantir for more information on
+ * Palantiri if you're not a Lord of the Ring's fan yet ;-)).
  */
 public class PalantirManagerTest {
     /**
@@ -80,19 +77,19 @@ public class PalantirManagerTest {
                     // Gaze into the Palantir for the given gaze
                     // duration (and go into a trance ;-)).
                     @Override
-                    public void gaze() throws InterruptedException {
+                        public void gaze() throws InterruptedException {
                         Thread.sleep(gazeDuration);
                     }
 
                     // The amount of time the gazing will occur.
                     @Override
-                    public long gazeDuration() {
+                        public long gazeDuration() {
                         return gazeDuration;
                     }
 
                     // Return the Palantir's id.
                     @Override
-                    public int getId() {
+                        public int getId() {
                         return id + 1;
                     }
                 });
@@ -121,8 +118,8 @@ public class PalantirManagerTest {
         // Create a ThreadPoolExecutor that runs the Being tasks.
         mExecutor =
             Executors.newFixedThreadPool
-                (Options.instance().numberOfBeings(),
-                 mThreadFactory);
+            (Options.instance().numberOfBeings(),
+             mThreadFactory);
 
         // Create a List with the designated number of Palantiri.
         List<Palantir> palantiri =
@@ -144,7 +141,23 @@ public class PalantirManagerTest {
                                + " test");
         }
 
+        // Shutdown all executors used by this simulation.
+        shutdown();
+        
         printDebugging("Finishing PalantiriManagerTest");
+    }
+
+    /**
+     * Called when the simulation completes to shutdown all executor
+     * services used by this simulation.
+     */
+    public static void shutdown() {
+    	// Shutdown the Fixed Pool executor service used for being threads.
+    	mExecutor.shutdown();
+    	
+    	// Shutdown the scheduled executor service used to allocated threads
+    	// to interrupt being threads when their gazing time has expired.
+    	LeasePoolStrategy.shutdown();
     }
 
     /**
@@ -191,8 +204,8 @@ public class PalantirManagerTest {
      * to acquire a lease on a Palantir and gaze into it.
      */
     private static void beginBeingsGazing(int beingCount,
-                                         CyclicBarrier entryBarrier,
-                                         CountDownLatch exitBarrier) {
+                                          CyclicBarrier entryBarrier,
+                                          CountDownLatch exitBarrier) {
         // Start all Beings tasks that gaze into the Palantiri.
         for (int i = 0; i < beingCount; ++i) {
             mExecutor.execute(makeBeingRunnable(i, 
@@ -210,16 +223,16 @@ public class PalantirManagerTest {
      * @return A Runnable for a Being.
      */
     private static Runnable makeBeingRunnable
-                                (final int beingIndex,
-                                 final CyclicBarrier entryBarrier,
-                                 final CountDownLatch exitBarrier) {
+        (final int beingIndex,
+         final CyclicBarrier entryBarrier,
+         final CountDownLatch exitBarrier) {
         return new Runnable() {
             /**
              * This hook method performs the algorithm used by each
              * Being who wants to gaze into a Palantir.
              */
             @Override
-            public void run() {
+                public void run() {
                 // Wait for all Being Threads to reach this point
                 // before letting any of them proceed.
                 try {

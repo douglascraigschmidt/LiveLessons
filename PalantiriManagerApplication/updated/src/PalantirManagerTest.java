@@ -146,7 +146,23 @@ public class PalantirManagerTest {
                                + " test");
         }
 
+        // Shutdown all executors used by this simulation.
+        shutdown();
+
         printDebugging("Finishing PalantiriManagerTest");
+    }
+
+    /**
+     * Called when the simulation completes to shutdown all executor
+     * services used by this simulation.
+     */
+    public static void shutdown() {
+    	// Shutdown the Fixed Pool executor service used for being threads.
+    	mExecutor.shutdown();
+    	
+    	// Shutdown the scheduled executor service used to allocated threads
+    	// to interrupt being threads when their gazing time has expired.
+    	LeasePoolStrategy.shutdown();
     }
 
     /**

@@ -3,13 +3,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @class LeasePoolStrategySynchronized
- *
- * @brief This class uses Java synchronized statements to synchronize
- *        access to the LeasePool's internal state.  It plays the role
- *        of the "Concrete Strategy" in the Strategy pattern, the
- *        "Concrete Implementor" in the Bridge pattern, and the
- *        "Concrete Class" in the Template Method pattern.
+ * This class uses Java synchronized statements to synchronize access
+ * to the LeasePool's internal state.  It plays the role of the
+ * "Concrete Strategy" in the Strategy pattern, the "Concrete
+ * Implementor" in the Bridge pattern, and the "Concrete Class" in the
+ * Template Method pattern.
  */
 public class LeasePoolStrategySynchronized<Resource>
        extends LeasePoolStrategy<Resource> {

@@ -9,15 +9,13 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @class LeasePoolStrategy
- *
- * @brief Defines the superclass for several sublcasses that provide
- *        differs ways to synchronize access to the internal state of
- *        the LeasePool, which plays the role of the "Abstraction" in
- *        the Bridge pattern.  Likewise, this class plays the role of
- *        the "Strategy" in the Strategy pattern, the root of the
- *        "Implementor" hierarchy in the Bridge pattern, and the role
- *        of the "Abstract Class" in the Template Method pattern.
+ * Defines the superclass for several sublcasses that provide differs
+ * ways to synchronize access to the internal state of the LeasePool,
+ * which plays the role of the "Abstraction" in the Bridge pattern.
+ * Likewise, this class plays the role of the "Strategy" in the
+ * Strategy pattern, the root of the "Implementor" hierarchy in the
+ * Bridge pattern, and the role of the "Abstract Class" in the
+ * Template Method pattern.
  */
 abstract public class LeasePoolStrategy<Resource> {
     /**
@@ -119,6 +117,13 @@ abstract public class LeasePoolStrategy<Resource> {
         public long remainingTime() {
             return mLeaseDuration - System.currentTimeMillis();
         }
+        
+        /**
+         * Cleanly shuts down the scheduled executor service.
+         */
+        protected static void shutdown() {
+        	sScheduledExecutorService.shutdown();
+        }
     }
 
     /**
@@ -154,6 +159,16 @@ abstract public class LeasePoolStrategy<Resource> {
         default:
             throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * Should be called when the simulation completes to perform any
+     * class related cleanup. Currently, this call simply calls the
+     * LeaseState shutdown method that, in turn, shuts down the
+     * scheduled executor service.
+     */
+    static public void shutdown() {
+        LeaseState.shutdown();
     }
 
     /**

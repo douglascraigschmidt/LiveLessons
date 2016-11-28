@@ -2,13 +2,11 @@ import java.util.AbstractMap;
 import java.util.List;
 
 /**
- * @class LeasePoolStrategyConcurrentHashMap
- *
- * @brief This class uses a Java ConcurrentHashMap to synchronize
- *        access to the LeasePool's internal state.  It plays the role
- *        of the "Concrete Strategy" in the Strategy pattern, the
- *        "Concrete Implementor" in the Bridge pattern, and the
- *        "Concrete Class" in the Template Method pattern.
+ * This class uses a Java ConcurrentHashMap to synchronize access to
+ * the LeasePool's internal state.  It plays the role of the "Concrete
+ * Strategy" in the Strategy pattern, the "Concrete Implementor" in
+ * the Bridge pattern, and the "Concrete Class" in the Template Method
+ * pattern.
  */
 public class LeasePoolStrategyConcurrentHashMap<Resource>
        extends LeasePoolStrategy<Resource> {

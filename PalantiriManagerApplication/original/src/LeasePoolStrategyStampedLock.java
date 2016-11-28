@@ -5,13 +5,11 @@ import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * @class LeasePoolStrategyStampedLock
- *
- * @brief This class uses Java 8 StampedLocks to synchronize access to
- *        the LeasePool's internal state.  It plays the role of the
- *        "Concrete Strategy" in the Strategy pattern, the "Concrete
- *        Implementor" in the Bridge pattern, and the "Concrete Class"
- *        in the Template Method pattern.
+ * This class uses Java 8 StampedLocks to synchronize access to the
+ * LeasePool's internal state.  It plays the role of the "Concrete
+ * Strategy" in the Strategy pattern, the "Concrete Implementor" in
+ * the Bridge pattern, and the "Concrete Class" in the Template Method
+ * pattern.
  */
 public class LeasePoolStrategyStampedLock<Resource>
        extends LeasePoolStrategy<Resource> {

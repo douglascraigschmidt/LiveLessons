@@ -3,10 +3,8 @@ import java.nio.*;
 import java.util.*;
 
 /**
- * @class Options
- * 
- * @brief This class implements the Singleton pattern to handle the
- *        processing of command-line options.
+ * This class implements the Singleton pattern to handle the
+ * processing of command-line options.
  */
 public class Options {
     /** The singleton @a Options instance. */

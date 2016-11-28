@@ -1,22 +1,18 @@
 import java.util.List;
 
 /**
- * @class LeasePool
+ * Defines a leasing mechanism that mediates concurrent access to a
+ * fixed number of available resources.  Each resource can be leased
+ * for a designated amount of time.  If the lease expires before the
+ * Thread that acquired it has released it, this Thread will be sent
+ * an interrupt request that will cause it to receive the
+ * InterruptedException so it can release the lease.
  *
- * @brief Defines a leasing mechanism that mediates concurrent access
- *        to a fixed number of available resources.  Each resource can
- *        be leased for a designated amount of time.  If the lease
- *        expires before the Thread that acquired it has released it,
- *        this Thread will be sent an interrupt request that will
- *        cause it to receive the InterruptedException so it can
- *        release the lease.
- *
- *        This class implements a variant of the "Pooling" pattern
- *        (kircher-schwanninger.de/michael/publications/Pooling.pdf).
- *        It plays the role of the "Abstraction" in the GoF Bridge and
- *        uses the Strategy pattern to configure the type of
- *        synchronization mechanism used to protect internal state
- *        from race conditions.
+ * This class implements a variant of the "Pooling" pattern
+ * (kircher-schwanninger.de/michael/publications/Pooling.pdf).  It
+ * plays the role of the "Abstraction" in the GoF Bridge and uses the
+ * Strategy pattern to configure the type of synchronization mechanism
+ * used to protect internal state from race conditions.
  */
 public class LeasePool<Resource> {
     /**

@@ -1,8 +1,6 @@
 /**
- * @class Palantir
- *
- * @brief Defines an interface for gazing into a Palantir and plays
- *        the role of a "Command" in the Command pattern.
+ * Defines an interface for gazing into a Palantir and plays the role
+ * of a "Command" in the Command pattern.
  */
 interface Palantir {
     /**

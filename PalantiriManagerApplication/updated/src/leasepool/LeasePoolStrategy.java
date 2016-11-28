@@ -114,6 +114,13 @@ abstract public class LeasePoolStrategy<Resource> {
         public long remainingTime() {
             return mLeaseDuration - System.currentTimeMillis();
         }
+
+        /**
+         * Cleanly shuts down the scheduled executor service.
+         */
+        protected static void shutdown() {
+        	sScheduledExecutorService.shutdown();
+        }
     }
 
     /**
@@ -149,6 +156,16 @@ abstract public class LeasePoolStrategy<Resource> {
         default:
             throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * Should be called when the simulation completes to perform any
+     * class related cleanup. Currently, this call simply calls the
+     * LeaseState shutdown method that, in turn, shuts down the
+     * scheduled executor service.
+     */
+    static public void shutdown() {
+        LeaseState.shutdown();
     }
 
     /**
