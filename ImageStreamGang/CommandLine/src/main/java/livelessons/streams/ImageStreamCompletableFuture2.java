@@ -14,8 +14,9 @@ import livelessons.filters.FilterDecoratorWithImage;
 import static java.util.stream.Collectors.summingInt;
 
 /**
- * Customizes ImageStream to use Java 8 CompletableFutures to
- * download, process, and store images concurrently.
+ * Customizes the ImageStreamCompletableFutureBase super class to
+ * download, process, and store images concurrently and
+ * asynchronously.
  */
 public class ImageStreamCompletableFuture2
        extends ImageStreamCompletableFutureBase {
@@ -29,8 +30,8 @@ public class ImageStreamCompletableFuture2
     }
 
     /**
-     * Perform the ImageStream processing, which uses Java 8 CompletableFutures
-     * to download, process, and store images concurrently.
+     * Use Java 8 CompletableFutures to download, process, and store
+     * images concurrently.
      */
     @Override
     protected void processStream() {
@@ -101,7 +102,7 @@ public class ImageStreamCompletableFuture2
      * in an output file.
      */
     private CompletableFuture<List<Image>> applyFiltersAsync
-                (CompletableFuture<List<FilterDecoratorWithImage>> decoratedFiltersWithImageFuture) {
+      (CompletableFuture<List<FilterDecoratorWithImage>> decoratedFiltersWithImageFuture) {
         // Returns a new CompletionStage that, when this stage
         // completes normally, is executed with this stage's result as
         // the argument to the supplied lambda expression.

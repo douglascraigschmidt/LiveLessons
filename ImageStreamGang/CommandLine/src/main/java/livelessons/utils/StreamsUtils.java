@@ -21,6 +21,7 @@ public class StreamsUtils {
      * Create a CompletableFuture that, when completed, will convert
      * all the completed CompletableFutures in the @a futureList
      * parameter into a list of joined results.
+     *
      * @param futureList A list of completable futures.
      * @return A CompletableFuture to a list that will contain all the joined results.
      */

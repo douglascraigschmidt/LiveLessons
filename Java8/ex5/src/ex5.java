@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * ...
+ * This example shows how a Java 8 Consumer interface can be used to
+ * print out the values in a list.
  */
 public class ex5 {
     static public void main(String[] argv) {

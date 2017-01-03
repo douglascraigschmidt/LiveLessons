@@ -1,7 +1,10 @@
 import java.util.*;
 
 /**
- * ...
+ * This example shows how a Java 7 BiFunction lambda expression can be
+ * used to replace all the values of all keys in a HashMap.  It also
+ * contrasts the Java 8 BiFunction with a conventional Java 7 solution
+ * using a for-each loop.
  */
 public class ex4 {
     static public void main(String[] argv) {
@@ -21,8 +24,6 @@ public class ex4 {
     		 entry.setValue(entry.getValue() - 50);
     	
     	System.out.println(iqMap);
-
-
     }
 }
 

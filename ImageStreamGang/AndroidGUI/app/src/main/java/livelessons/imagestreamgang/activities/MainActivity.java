@@ -107,7 +107,7 @@ public class MainActivity
         // Uses the Android HaMeR concurrency framework to invoke the
         // displayImages() method in the UI Thread so that the
         // ResultsActivity is launched in that context.
-        MainActivity.this.runOnUiThread(() -> goToResultActivity());
+        MainActivity.this.runOnUiThread(this::goToResultActivity);
 
     /**
      * Hook method called when the Activity is first launched to
@@ -264,9 +264,9 @@ public class MainActivity
         // Set the mSuggestions in onStart() so we are sure the
         // context exists and will not throw a NullPointerException.
         mSuggestions = 
-            new ArrayAdapter<String>(this,
-                                     R.layout.suggestion_item,
-                                     Options.instance().getSuggestions());
+            new ArrayAdapter<>(this,
+                               R.layout.suggestion_item,
+                               Options.instance().getSuggestions());
     }
 
     /**
@@ -357,7 +357,7 @@ public class MainActivity
                                                null);
 
         // Generate id for view so that it can be referenced later
-        newList.setId(view.generateViewId());
+        newList.setId(View.generateViewId());
         
         // Set the adapter to the given suggestions.
         newList.setAdapter(mSuggestions);

@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * ...
+ * This example uses a Java Function-based method reference to sort a
+ * list of threads by their names.
  */
 public class ex3 {
     static public void main(String[] argv) {

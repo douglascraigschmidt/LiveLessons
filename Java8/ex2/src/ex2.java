@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * ...
+ * This example program shows the use of a simple lambda expression in
+ * the context of a Java ArrayList.
  */
 public class ex2 {
     static public void main(String[] argv) {
@@ -10,7 +11,8 @@ public class ex2 {
 
         System.out.println(list);
         
-        // Remove the even numbers from the list.
+        // This lambda expression removes the even numbers from the
+        // list.
         list.removeIf(i -> i % 2 == 0);
         
         System.out.println(list);

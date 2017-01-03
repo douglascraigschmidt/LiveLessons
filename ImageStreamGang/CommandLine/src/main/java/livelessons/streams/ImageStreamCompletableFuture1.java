@@ -15,8 +15,9 @@ import livelessons.utils.StreamsUtils;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
- * Customizes ImageStream to use Java 8 CompletableFutures to
- * download, process, and store images concurrently.
+ * Customizes the ImageStreamCompletableFutureBase super class to
+ * download, process, and store images concurrently and
+ * asynchronously.
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
@@ -30,8 +31,8 @@ public class ImageStreamCompletableFuture1
     }
 
     /**
-     * Perform the ImageStream processing, which uses Java 8 CompletableFutures
-     * to download, process, and store images concurrently.
+     * Use Java 8 CompletableFutures to download, process, and store
+     * images concurrently.
      */
     @Override
     protected void processStream() {
@@ -85,9 +86,10 @@ public class ImageStreamCompletableFuture1
             // Asynchronously filter the image and store it in an
             // output file.
             .map(filterFuture ->
-                 // Returns a new CompletionStage that, when this stage
-                 // completes normally, is executed with this stage's result as
-                 // the argument to the supplied lambda expression.
+                 // Returns a new CompletionStage that, when this
+                 // stage completes normally, is executed with this
+                 // stage's result as the argument to the supplied
+                 // lambda expression.
                  filterFuture.thenCompose(filter ->
                                           CompletableFuture.supplyAsync(filter::run,
                                                                         getExecutor())));

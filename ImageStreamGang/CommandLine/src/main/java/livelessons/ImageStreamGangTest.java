@@ -25,7 +25,7 @@ import livelessons.filters.NullFilter;
 
 /**
  * This class is the main entry point for a Java console version of
- * the ImageStreamGang application.
+ * the ImageStreamGang app.
  */
 public class ImageStreamGangTest {
     /**
@@ -52,8 +52,8 @@ public class ImageStreamGangTest {
     private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 
     /**
-     * The JVM requires the instantiation of a main() method to run
-     * the console version of the ImageStreamGang application.
+     * The JVM requires a main() method to run the console version of
+     * the ImageStreamGang app.
      */
     public static void main(String[] args) {
         System.out.println("Starting ImageStreamGangTest");
@@ -87,17 +87,17 @@ public class ImageStreamGangTest {
                 new CountDownLatch(1);
 
             // Create a completion hook that decrements the exit
-            // barrier by one so its count equals 0.
-            // Cause the main Thread to return from the
-            // blocking await() call on the exit barrier
-            // below.
+            // barrier by one so its count equals 0, at which point
+            // the main thread to return from the blocking await()
+            // call on the exit barrier below.
             final Runnable completionHook =
-                mExitBarrier::countDown;
+                // Treat this method as a method reference.
+                mExitBarrier::countDown; 
 
             // Clean any filter directories from the previous run.
             clearFilterDirectories();
 
-            // Make the appropriate SearchStreamGang.
+            // Call the factory method to make a streamGang object.
             ImageStreamGang streamGang =
                 makeImageStreamGang(mFilters,
                                     urlIterator,
@@ -112,12 +112,12 @@ public class ImageStreamGangTest {
 
             System.out.println("Ending " + test);
 
-            // Try to run the garbage collector to avoid
-            // perturbing the test itself.
+            // Run the garbage collector to avoid perturbing the test.
             System.gc();
+
             try {
-                // Exit barrier synchronizer waits for the ImageStreamGang
-                // to finish all its processing.
+                // Exit barrier synchronizer waits for the
+                // ImageStreamGang to finish all its processing.
                 mExitBarrier.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -158,8 +158,7 @@ public class ImageStreamGangTest {
     }
 
     /**
-     * A helper method that recursively deletes files in a specified
-     * directory.
+     * Recursively delete files in a specified directory.
      */
     private static int deleteSubFolders(String path) {
         int deletedFiles = 0;
@@ -169,25 +168,26 @@ public class ImageStreamGangTest {
         if (files == null) 
             return 0;
 
-        // Java does not allow you to delete a directory with child
-        // files, so we need to write code that handles this
-        // recursively.
+        // Java doesn't delete a directory with child files, so we
+        // need to write code that handles this recursively.
         for (File f : files) {          
             if (f.isDirectory()) 
                 deletedFiles += deleteSubFolders(f.toString());
             f.delete();
             deletedFiles++;
         }
+
         currentFolder.delete();
         return deletedFiles;
     }
 
     /**
-     * Clears the filter directories..
+     * Clears the filter directories.
      */
     private static void clearFilterDirectories() {
         int deletedFiles = 0;
 
+        // Delete all the filter directories.
         for (Filter filter : mFilters)
             deletedFiles += deleteSubFolders
                 (new File(Options.instance().getDirectoryPath(),
