@@ -22,20 +22,20 @@ public class StreamsUtils {
      * all the completed CompletableFutures in the @a futureList
      * parameter into a list of joined results.
      *
-     * @param futureList A list of completable futures.
+     * @param fList A list of completable futures.
      * @return A CompletableFuture to a list that will contain all the joined results.
      */
-    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> futureList) {
+    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> fList) {
         // Obtain a CompletableFuture that will itself be complete
         // when all CompletableFutures in futureList have completed.
         CompletableFuture<Void>
             allDoneFuture = CompletableFuture.allOf
-            (fList.toArray(new CompletableFuture[f.size()]));
+            (fList.toArray(new CompletableFuture[fList.size()]));
 
         // When all futures have completed get a CompletableFuture to
         // a list of joined elements.
         CompletableFuture<List<T>> allDoneList =
-            allDoneFuture.thenApply(v -> futureList.stream()
+            allDoneFuture.thenApply(v -> fList.stream()
                               .map(CompletableFuture::join)
                               .collect(toList()));
 

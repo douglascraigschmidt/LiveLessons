@@ -25,9 +25,8 @@ public class ImageStreamCompletableFuture1
      * Constructor initializes the superclass and data members.
      */
     public ImageStreamCompletableFuture1(Filter[] filters,
-                                         Iterator<List<URL>> urlListIterator,
-                                         Runnable completionHook) {
-        super(filters, urlListIterator, completionHook);
+                                         Iterator<List<URL>> urlListIterator) {
+        super(filters, urlListIterator);
     }
 
     /**

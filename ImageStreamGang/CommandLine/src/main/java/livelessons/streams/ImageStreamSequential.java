@@ -13,23 +13,22 @@ import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
- * Customizes ImageStream to use a Java 8 stream to download, process,
+ * Customizes ImageStreamGang to use a Java 8 stream to download, process,
  * and store images sequentially.
  */
 public class ImageStreamSequential 
        extends ImageStreamGang {
     /**
-     * Constructor initializes the superclass and data members.
+     * Constructor initializes the superclass.
      */
     public ImageStreamSequential(Filter[] filters,
-                                 Iterator<List<URL>> urlListIterator,
-                                 Runnable completionHook) {
-        super(filters, urlListIterator, completionHook);
+                                 Iterator<List<URL>> urlListIterator) {
+        super(filters, urlListIterator);
     }
 
     /**
-     * Perform the ImageStream processing, which uses a Java 8 stream
-     * to download, process, and store images concurrently.
+     * Perform the ImageStreamGang processing, which uses a Java 8 stream
+     * to download, process, and store images sequentially.
      */
     @Override
     protected void processStream() {
@@ -37,18 +36,20 @@ public class ImageStreamSequential
             // Sequentially process each URL in the input List.
             .stream()
 
-            // Only include URLs that have not been already cached.
+            // Use filter() to ignore URLs that are already cached locally,
+            // i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Transform URL -> Image (download each image via
-            // its URL).
+            // Use map() to transform each URL to an image (e.g., download
+            // each image via its URL).
             .map(ImageStreamGang::downloadImage)
 
-            // Map each image to a stream containing the filtered
-            // versions of the image.
+            // Use flatMap() to create a stream containing multiple filtered
+            // versions of each image.
             .flatMap(this::applyFilters)
 
-            // Terminate the stream.
+            // Terminate the stream and collect the results into
+            // list of images.
             .collect(toList());
 
         System.out.println(TAG
@@ -62,8 +63,8 @@ public class ImageStreamSequential
      */
     @Override
     protected boolean urlCached(URL url) {
-        // Iterate through the list of filters and sequentially check
-        // to see which ones are already cached.
+        // Iterate through the list of image filters sequentially and use
+        // the filter aggregate operation to exclude those already cached.
         long count = mFilters
             .stream()
             .filter(filter ->
@@ -79,14 +80,15 @@ public class ImageStreamSequential
      */
     private Stream<Image> applyFilters(Image image) {
         return mFilters
-            // Iterate through the list of filters and apply each
-            // filter sequentially.
+            // Iterate through the list of image filters sequentially and
+            // apply each one to the image.
             .stream()
 
-            // Create an OutputDecoratedFilter for each image.
+            // Use map() to create an OutputFilterDecorator for each image.
             .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
-            // Filter the image and store it in an output file.
+            // Use map() to apply the image filter to each image and store
+            // it in an output file.
             .map(FilterDecoratorWithImage::run);
     }
 }

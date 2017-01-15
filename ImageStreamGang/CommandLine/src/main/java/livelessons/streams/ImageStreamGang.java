@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -14,122 +13,70 @@ import java.util.concurrent.TimeUnit;
 import livelessons.utils.Image;
 import livelessons.utils.NetUtils;
 import livelessons.utils.Options;
-import livelessons.utils.StreamGang;
 import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.filters.OutputFilterDecorator;
 
 /**
  * This abstract class customizes the StreamGang framework to use Java
- * 8 functional programming features to download a List of images from
- * web servers, apply image processing filters to each image, and
- * store the results in files that can be displayed to users via
- * various means defined by the context in which this class is used.
- * Subclasses of ImageStream must override the initiateStream() method
- * to download and process the images concurrently.
+ * 8 functional programming features to download a list of images from
+ * remote web servers (or open them in a local resources directory),
+ * apply image processing filters to each image, and store the results
+ * in files that can be displayed to the user.  ImageStreamGang
+ * subclasses must override the initiateStream() hook method to
+ * download (or open) and process the images concurrently. This class
+ * plays the role of the "Concrete class" in the Template Method
+ * pattern.
  */
 public abstract class ImageStreamGang
        extends StreamGang<URL> {
     /**
      * An iterator to the List of input URLs that are used to download
-     * Images.
+     * (or open) images.
      */
     private Iterator<List<URL>> mUrlListIterator;
 
     /**
-     * The List of filters to apply to the downloaded images.
+     * The List of filters to apply to the images.
      */
     protected List<Filter> mFilters;
 
     /**
-     * Keeps track of how long the test has run.
-     */
-    private long mStartTime;
-
-    /**
-     * Keeps track of all the execution times.
-     */
-    private List<Long> mExecutionTimes = new ArrayList<>();
-
-    /**
-     * Clients of ImageStream supply this hook so they know when the
-     * all the images have been downloaded, processed, and stored, at
-     * which point they can display the stored images.
-     */
-    private Runnable mCompletionHook;
-
-    /**
-     * A barrier synchronizer that's used to coordinate each iteration
-     * cycle, i.e., each call to initiateStream() must initialize and
-     * wait on this barrier for the other tasks to complete their
-     * processing before moving to the next iteration cycle.
-     */
-    protected CountDownLatch mIterationBarrier = null;
-
-    /**
      * Maximum number of threads in a fixed-size thread pool.
      */
-    private final int MAX_THREADS = 100;
+    private final int sMAX_THREADS = 100;
 
     /**
-     * Constructor initializes the superclass and data members.
+     * Constructor initializes the class and fields.
      */
     public ImageStreamGang(Filter[] filters,
-                           Iterator<List<URL>> urlListIterator,
-                           Runnable completionHook) {
+                           Iterator<List<URL>> urlListIterator) {
         // Store the Filters to apply as a List.
         mFilters = Arrays.asList(filters);
 
         // Create an Iterator for the array of URLs to download.
         mUrlListIterator = urlListIterator;
-
-        // Set the completion hook that's called when all the images
-        // are downloaded and processed.
-        mCompletionHook = completionHook;
-    }
-
-    /**
-     * Return the time needed to execute the test.
-     */
-    public List<Long> executionTimes() {
-        return mExecutionTimes;
-    }
-
-    /**
-     * Start timing the test run.
-     */
-    public void startTiming() {
-        // Note the start time.
-        mStartTime = System.nanoTime();
-    }
-
-    /**
-     * Stop timing the test run.
-     */
-    public void stopTiming() {
-        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 
     /**
      * Hook method that must be overridden by subclasses to perform
-     * the ImageStream processing.
+     * the particular implementation strategy.
      */
     protected abstract void processStream();
 
     /**
-     * Initiate the ImageStream processing, which uses a Java 8 stream
-     * to download, process, and store images sequentially.
+     * A hook method that's also a template method. It does some
+     * bookkeeping operations and dispatches the subclass's
+     * processStream() hook method to start the implementation
+     * strategy processing.
      */
     @Override
     protected void initiateStream() {
-        // Create a new barrier for this iteration cycle.
-        mIterationBarrier = new CountDownLatch(1);
-
         // The thread pool size is the smaller of (1) the number of
         // filters times the number of images to download and (2)
-        // MAX_THREADS (which prevents allocating excessive threads).
+        // sMAX_THREADS (which prevents allocating excessive threads).
         int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
-                                      MAX_THREADS);
+                                      sMAX_THREADS);
 
         // Initialize the Executor with appropriate pool of threads.
         setExecutor(Executors.newFixedThreadPool(threadPoolSize));
@@ -137,18 +84,11 @@ public abstract class ImageStreamGang
         // Start timing the test run.
         startTiming();
 
-        // Start the Stream processing.
+        // Perform the stream processing.
         processStream();
 
         // Stop timing the test run.
         stopTiming();
-
-        // Indicate all computations in this iteration are done.
-        try {
-            mIterationBarrier.countDown();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        } 
     }
 
     /**
@@ -159,25 +99,21 @@ public abstract class ImageStreamGang
         try {
             // Loop for each iteration cycle of input URLs.
             for (;;) {
-                // Barrier synchronizer that waits until all the
-                // stream processing in this iteration cycle are done.
-                mIterationBarrier.await();
-
                 // Check to see if there's another List of URLs
                 // available to process.
                 if (setInput(getNextInput()) == null)
                     break; // No more input, so we're done.
-                else 
+                else
                     // Invoke this hook method to initialize the gang
                     // of tasks for the next iteration cycle.
                     initiateStream();
-            } 
+            }
 
             // Only call the shutdown() and awaitTermination() methods
             // if we've actually got an ExecutorService (as opposed to
             // just an Executor).
             if (getExecutor() instanceof ExecutorService) {
-                ExecutorService executorService = 
+                ExecutorService executorService =
                     (ExecutorService) getExecutor();
 
                 // Tell the ExecutorService to initiate a graceful
@@ -192,10 +128,6 @@ public abstract class ImageStreamGang
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        // Run the completion hook now that all the image downloading,
-        // processing and storing is now complete.
-        mCompletionHook.run();
     }
 
     /**
@@ -219,11 +151,11 @@ public abstract class ImageStreamGang
 
     /**
      * Factory method that retrieves the image associated with the @a
-     * urlToDownload and creates an Image to encapsulate it.
+     * url and creates an Image to encapsulate it.
      */
-    protected static Image downloadImage(URL urlToDownload) {
-        return new Image(urlToDownload,
-                         NetUtils.downloadContent(urlToDownload));
+    protected static Image downloadImage(URL url) {
+        return new Image(url,
+                         NetUtils.downloadContent(url));
     }
 
     /**
@@ -238,7 +170,7 @@ public abstract class ImageStreamGang
     /**
      * @return true if the @a url is in the cache, else false.
      */
-    protected static boolean urlCached(URL url, 
+    protected static boolean urlCached(URL url,
     		                           String filterName) {
         // Construct the subdirectory for the filter.
         File externalFile = new File(Options.instance().getDirectoryPath(),
@@ -264,6 +196,38 @@ public abstract class ImageStreamGang
 
         // A count > 0 means the url has already been cached.
         return count > 0;
+    }
+
+    /**
+     * Keeps track of how long a given test has run.
+     */
+    private long mStartTime;
+
+    /**
+     * Keeps track of all the execution times.
+     */
+    private List<Long> mExecutionTimes = new ArrayList<>();
+
+    /**
+     * Return the time needed to execute the test.
+     */
+    public List<Long> executionTimes() {
+        return mExecutionTimes;
+    }
+
+    /**
+     * Start timing the test run.
+     */
+    public void startTiming() {
+        // Note the start time.
+        mStartTime = System.nanoTime();
+    }
+
+    /**
+     * Stop timing the test run.
+     */
+    public void stopTiming() {
+        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 }
 

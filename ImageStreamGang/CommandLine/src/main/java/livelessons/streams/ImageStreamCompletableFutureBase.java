@@ -10,7 +10,7 @@ import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
 
 /**
- * Base class that factors out common code and customizes ImageStream
+ * Super class that factors out common code and customizes ImageStreamGang
  * to use Java 8 CompletableFutures to download, process, and store
  * images concurrently.
  */
@@ -20,9 +20,8 @@ public abstract class ImageStreamCompletableFutureBase
      * Constructor initializes the superclass and data members.
      */
     public ImageStreamCompletableFutureBase(Filter[] filters,
-                                            Iterator<List<URL>> urlListIterator,
-                                            Runnable completionHook) {
-        super(filters, urlListIterator, completionHook);
+                                            Iterator<List<URL>> urlListIterator) {
+        super(filters, urlListIterator);
     }
 
     /**

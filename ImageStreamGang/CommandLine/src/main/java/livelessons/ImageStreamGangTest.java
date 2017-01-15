@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -24,12 +23,12 @@ import livelessons.filters.GrayScaleFilter;
 import livelessons.filters.NullFilter;
 
 /**
- * This class is the main entry point for a Java console version of
+ * This class is the main entry point for the Java console version of
  * the ImageStreamGang app.
  */
 public class ImageStreamGangTest {
     /**
-     * Enumerate the tests to run.
+     * Enumerated type that lists all the implementation strategies to test.
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
@@ -39,7 +38,7 @@ public class ImageStreamGangTest {
     }
     
     /**
-     * Array of Filters to apply to the downloaded images.
+     * Array of Filters to apply to the images.
      */
     private final static Filter[] mFilters = {
         new NullFilter(),
@@ -47,12 +46,14 @@ public class ImageStreamGangTest {
     };
 
     /**
-     * Keep track of which SearchStreamGang performed the best.
+     * Keep track of the timing results of the ImageStreamGang
+     * implementation strategies so they can be sorted and displayed
+     * when the program is finished.
      */
     private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 
     /**
-     * The JVM requires a main() method to run the console version of
+     * The JVM requires a static main() entry point to run the console version of
      * the ImageStreamGang app.
      */
     public static void main(String[] args) {
@@ -68,60 +69,39 @@ public class ImageStreamGangTest {
     }
 
     /**
-     * Create/run appropriate type of StreamGang to search for words.
+     * Iterates through all the implementation strategies to test how
+     * they perform.
      */
     private static void runTests() {
-        // Iterate through all the tests and run them.
+        // Iterate through all the implementation strategies and test
+        // them.
         for (TestsToRun test : TestsToRun.values()) {
             System.out.println("Starting " + test); 
 
             // Create an Iterator that contains all the image URLs to
-            // download and process.
+            // obtain and process.
             Iterator<List<URL>> urlIterator = 
                 Options.instance().getUrlIterator();
 
-            // Create an exit barrier with a count of one to
-            // synchronize with the completion of image downloading,
-            // processing, and storing in the StreamGang.
-            final CountDownLatch mExitBarrier = 
-                new CountDownLatch(1);
+            // Delete any the filtered images from the previous run.
+            deleteFilteredImages();
 
-            // Create a completion hook that decrements the exit
-            // barrier by one so its count equals 0, at which point
-            // the main thread to return from the blocking await()
-            // call on the exit barrier below.
-            final Runnable completionHook =
-                // Treat this method as a method reference.
-                mExitBarrier::countDown; 
-
-            // Clean any filter directories from the previous run.
-            clearFilterDirectories();
-
-            // Call the factory method to make a streamGang object.
+            // Make an ImageStreamGang object via the factory method.
             ImageStreamGang streamGang =
                 makeImageStreamGang(mFilters,
                                     urlIterator,
-                                    completionHook,
                                     test);
 
-            // Run the next test.
+            // Start running the test.
             streamGang.run();
 
             // Store the execution times.
             mResultsMap.put(test.toString(), streamGang.executionTimes());
 
-            System.out.println("Ending " + test);
-
             // Run the garbage collector to avoid perturbing the test.
             System.gc();
 
-            try {
-                // Exit barrier synchronizer waits for the
-                // ImageStreamGang to finish all its processing.
-                mExitBarrier.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Ending " + test);
         }
 
         // Print out all the timing results.
@@ -129,32 +109,43 @@ public class ImageStreamGangTest {
     }
 
     /**
-     * Factory method that creates the desired type of StreamGang
-     * subclass implementation.
+     * Factory method that creates the designated type of
+     * ImageStreamGang subclass implementation.
      */
     private static ImageStreamGang makeImageStreamGang(Filter[] filters,
                                                        Iterator<List<URL>> urlIterator,
-                                                       Runnable completionHook,
                                                        TestsToRun choice) {
         switch (choice) {
         case SEQUENTIAL_STREAM:
             return new ImageStreamSequential(filters, 
-                                             urlIterator,
-                                             completionHook);
+                                             urlIterator);
         case PARALLEL_STREAM:
             return new ImageStreamParallel(filters,
-                                           urlIterator,
-                                           completionHook);
+                                           urlIterator);
         case COMPLETABLE_FUTURES_1:
             return new ImageStreamCompletableFuture1(filters,
-                                                     urlIterator,
-                                                     completionHook);
+                                                     urlIterator);
         case COMPLETABLE_FUTURES_2:
             return new ImageStreamCompletableFuture2(filters,
-                                                     urlIterator,
-                                                     completionHook);
+                                                     urlIterator);
         }
         return null;
+    }
+
+    /**
+     * Clears the filter directories.
+     */
+    private static void deleteFilteredImages() {
+        int deletedFiles = 0;
+
+        // Delete all the filter directories.
+        for (Filter filter : mFilters)
+            deletedFiles += deleteSubFolders
+                (new File(Options.instance().getDirectoryPath(),
+                          filter.getName()).getAbsolutePath());
+
+        System.out.println(deletedFiles
+                           + " previously downloaded file(s) deleted");
     }
 
     /**
@@ -179,22 +170,6 @@ public class ImageStreamGangTest {
 
         currentFolder.delete();
         return deletedFiles;
-    }
-
-    /**
-     * Clears the filter directories.
-     */
-    private static void clearFilterDirectories() {
-        int deletedFiles = 0;
-
-        // Delete all the filter directories.
-        for (Filter filter : mFilters)
-            deletedFiles += deleteSubFolders
-                (new File(Options.instance().getDirectoryPath(),
-                          filter.getName()).getAbsolutePath());
-
-        System.out.println(deletedFiles
-                           + " previously downloaded file(s) deleted");
     }
 
     /**
