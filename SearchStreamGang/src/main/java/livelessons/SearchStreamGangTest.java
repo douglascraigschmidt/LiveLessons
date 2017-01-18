@@ -12,13 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import livelessons.streamgangs.SearchStreamGang;
-import livelessons.streamgangs.SearchWithCompletableFuturesInputs;
-import livelessons.streamgangs.SearchWithCompletableFuturesWords;
-import livelessons.streamgangs.SearchWithParallelStreamInputs;
-import livelessons.streamgangs.SearchWithParallelStreamWords;
-import livelessons.streamgangs.SearchWithParallelStreams;
-import livelessons.streamgangs.SearchWithSequentialStream;
+import livelessons.streamgangs.*;
 import livelessons.utils.SearchResults;
 
 import static java.util.stream.Collectors.toList;
@@ -39,8 +33,10 @@ public class SearchStreamGangTest {
         PARALLEL_STREAM_WORDS,
         PARALLEL_STREAMS,
         COMPLETABLE_FUTURES_WORDS,
-        COMPLETABLE_FUTURES_INPUTS
-   }
+        COMPLETABLE_FUTURES_INPUTS,
+        RXJAVA_WORDS,
+        RXJAVA_INPUTS
+    }
 
     /**
      * Factory method that creates the desired type of
@@ -68,7 +64,11 @@ public class SearchStreamGangTest {
         case COMPLETABLE_FUTURES_INPUTS:
             return new SearchWithCompletableFuturesInputs(wordList,
                                                           inputData);
-        }
+        case RXJAVA_INPUTS:
+            return new SearchWithRxJavaInputs(wordList, inputData);
+        case RXJAVA_WORDS:
+            return new SearchWithRxJavaWords(wordList, inputData); }
+
         return null;
     }
 
