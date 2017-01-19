@@ -10,14 +10,14 @@ import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
 
 /**
- * Super class that factors out common code and customizes ImageStreamGang
- * to use Java 8 CompletableFutures to download, process, and store
- * images concurrently.
+ * Super class that factors out common code so that implementation
+ * strategies can use the Java 8 CompletableFutures framework to
+ * download, process, and store images asynchronously.
  */
 public abstract class ImageStreamCompletableFutureBase
        extends ImageStreamGang {
     /**
-     * Constructor initializes the superclass and data members.
+     * Constructor initializes the superclass.
      */
     public ImageStreamCompletableFutureBase(Filter[] filters,
                                             Iterator<List<URL>> urlListIterator) {
@@ -25,7 +25,9 @@ public abstract class ImageStreamCompletableFutureBase
     }
 
     /**
-     * Asynchronously download an Image from the @a url parameter.
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
      */
     protected CompletableFuture<Image> downloadImageAsync(URL url) {
         // Asynchronously download an Image from the url parameter.
@@ -35,6 +37,8 @@ public abstract class ImageStreamCompletableFutureBase
 
     /**
      * Asynchronously filter the image and store it in an output file.
+     * Returns a CompletableFuture that completes when the image has
+     * been filtered and stored.
      */
     protected CompletableFuture<Image> filterImageAsync
         (FilterDecoratorWithImage filterDecoratorWithImage) {

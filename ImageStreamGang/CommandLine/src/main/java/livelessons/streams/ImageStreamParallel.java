@@ -12,11 +12,12 @@ import livelessons.utils.Image;
 import livelessons.utils.StreamsUtils;
 
 /**
- * Customizes ImageStreamGang to use a Java 8 parallelstream to download,
- * process, and store images concurrently.  A parallelstream uses the
- * default ForkJoinPool, which has as many threads there are processors,
- * as returned by Runtime.getRuntime().availableProcessors().  The size
- * of the pool can be changed using Java system properties.
+ * This implementation strategy customizes ImageStreamGang to use a
+ * Java 8 parallelstream to download, process, and store images
+ * concurrently.  A parallelstream uses the global Java ForkJoinPool,
+ * which has as many threads as there are processors, as returned by
+ * Runtime.getRuntime().availableProcessors().  The size of this
+ * global thread pool can be changed via Java system properties.
  */
 public class ImageStreamParallel 
        extends ImageStreamGang {
@@ -35,15 +36,16 @@ public class ImageStreamParallel
     @Override
     protected void processStream() {
         List<Image> filteredImages = getInput()
-            // Concurrently process each URL in the input List.
+            // Convert the URLs in the input list into a stream and
+            // process them concurrently.
             .parallelStream()
 
             // Use filter() to ignore URLs that are already cached locally,
             // i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Use map() to transform each URL to an image (e.g., download
-            // each image via its URL).
+            // Use map() to transform each URL to an image (i.e.,
+            // synchronously download each image via its URL).
             .map(ImageStreamGang::downloadImage)
 
             // Use flatMap() to create a stream containing multiple filtered

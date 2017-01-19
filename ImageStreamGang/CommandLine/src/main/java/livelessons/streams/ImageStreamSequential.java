@@ -13,8 +13,8 @@ import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
- * Customizes ImageStreamGang to use a Java 8 stream to download, process,
- * and store images sequentially.
+ * This implementation strategy customizes ImageStreamGang to use a
+ * Java 8 stream to download, process, and store images sequentially.
  */
 public class ImageStreamSequential 
        extends ImageStreamGang {
@@ -27,21 +27,22 @@ public class ImageStreamSequential
     }
 
     /**
-     * Perform the ImageStreamGang processing, which uses a Java 8 stream
-     * to download, process, and store images sequentially.
+     * This hook method uses a Java 8 stream to download, process, and
+     * store images sequentially.
      */
     @Override
     protected void processStream() {
         List<Image> collect = getInput()
-            // Sequentially process each URL in the input List.
+            // Convert the URLs in the input list into a stream and
+            // process them sequentially.
             .stream()
 
             // Use filter() to ignore URLs that are already cached locally,
             // i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Use map() to transform each URL to an image (e.g., download
-            // each image via its URL).
+            // Use map() to transform each URL to an image (i.e.,
+            // synchronously download each image via its URL).
             .map(ImageStreamGang::downloadImage)
 
             // Use flatMap() to create a stream containing multiple filtered
@@ -76,7 +77,7 @@ public class ImageStreamSequential
     }
 
     /**
-     * Apply the filters to each @a image sequentially.
+     * Apply the image filters to each @a image sequentially.
      */
     private Stream<Image> applyFilters(Image image) {
         return mFilters
@@ -87,8 +88,8 @@ public class ImageStreamSequential
             // Use map() to create an OutputFilterDecorator for each image.
             .map(filter -> makeFilterDecoratorWithImage(filter, image))
 
-            // Use map() to apply the image filter to each image and store
-            // it in an output file.
+            // Use map() to apply the OutputFilterDecorator to each
+            // image and store it in an output file.
             .map(FilterDecoratorWithImage::run);
     }
 }

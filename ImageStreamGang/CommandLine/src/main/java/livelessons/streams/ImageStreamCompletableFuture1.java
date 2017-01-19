@@ -15,9 +15,10 @@ import livelessons.utils.StreamsUtils;
 import livelessons.filters.FilterDecoratorWithImage;
 
 /**
- * Customizes the ImageStreamCompletableFutureBase super class to
- * download, process, and store images concurrently and
- * asynchronously.
+ * This asynchronous implementation strategy customizes the
+ * ImageStreamCompletableFutureBase super class to download, process,
+ * and store images asynchronously and concurrently in a thread in the
+ * executor's thread pool.
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
@@ -31,26 +32,32 @@ public class ImageStreamCompletableFuture1
 
     /**
      * Use Java 8 CompletableFutures to download, process, and store
-     * images concurrently.
+     * images concurrently and asynchronously.
      */
     @Override
     protected void processStream() {
-        // Create a list of futures.
+        // Create a list of completable futures to images.
         List<CompletableFuture<Image>> listOfFutures = getInput()
-            // Concurrently process each URL in the input List.
+            // Convert the URLs in the input list into a sequential
+            // stream.
             .stream()
 
-            // Only include URLs that have not been already cached.
+            // Use filter() to ignore URLs that are already cached locally,
+            // i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Submit the URLs for asynchronous downloading.
+            // Use map() to transform each URL to a completable future
+            // to an image (i.e., asynchronously download each image
+            // via its URL).
             .map(this::downloadImageAsync)
 
-            // Map each image to a stream containing the filtered
-            // versions of the image.
+            // Use flatMap() to create a stream containing completable
+            // futures to multiple filtered/stored versions of each
+            // image.
             .flatMap(this::applyFiltersAsync)
 
-            // Terminate the stream.
+            // Terminate the stream and collect the results into
+            // list of completable futures to images.
             .collect(toList());
 
         // Create a CompletableFuture that can be used to wait for all
@@ -61,18 +68,24 @@ public class ImageStreamCompletableFuture1
         // Print the results.
         System.out.println(TAG 
                            + ": processing of "
+                           // This call blocks until all the images
+                           // are downloaded, processed, and stored.
                            + allImagesDone.join().size()
                            + " image(s) is complete");
     }
 
     /**
-     * Apply filters concurrently to each @a image and store the
-     * results in output files.
+     * Apply filters asynchronously and concurrently to the @a
+     * imageFuture after it finishes downloading and store the results
+     * in output files on the local computer.
      */
     private Stream<CompletableFuture<Image>> applyFiltersAsync(CompletableFuture<Image> imageFuture) {
-        return mFilters.stream()
-            // Create a FilterDecoratorWithImage for each filter/image
-            // combo.
+        return mFilters
+            // Convert the list of filters to a sequential stream.
+            .stream()
+
+            // Use map() to create a completable future to a
+            // FilterDecoratorWithImage object for each filter/image.
             .map(filter ->
                  // Returns a new CompletionStage that, when this
                  // stage completes normally, is executed with this
