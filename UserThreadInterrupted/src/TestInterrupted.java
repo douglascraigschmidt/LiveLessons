@@ -37,8 +37,8 @@ public class TestInterrupted {
 
         try {
             if(interruptThread) {
-                // Sleep for 4 seconds and then interrupt the Thread.
-                Thread.sleep(4000);
+                // Sleep for 2 seconds and then interrupt the Thread.
+                Thread.sleep(2000);
 
                 System.out.println("interrupting thread " 
                                    + thr.getName());
