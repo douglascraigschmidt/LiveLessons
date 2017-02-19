@@ -91,7 +91,9 @@ public class OneShotExecutorService
                 (ExecutorService) getExecutor();
 
             // Use invokeAll() to execute all items in the collection
-            // via the Executor's Thread pool.
+            // via the Executor's Thread pool.  Note that this
+            // invocation blocks the calling thread until all the
+            // processing is finished.
             executorService.invokeAll(workerCollection);
         } catch (InterruptedException e) {
             System.out.println("invokeAll() interrupted");
