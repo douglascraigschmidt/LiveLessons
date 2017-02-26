@@ -1,6 +1,5 @@
 package edu.vandy;
 
-import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.LinkedList;
 import java.util.Collection;
@@ -17,7 +16,7 @@ class BuggyQueue<E>
     /**
      * The queue consists of a LinkedList of E's.
      */
-    private List<E> mList = new LinkedList<>();
+    private LinkedList<E> mList = new LinkedList<>();
 
     /**
      * The maximum capacity of the queue or Integer.MAX_VALUE if none.
