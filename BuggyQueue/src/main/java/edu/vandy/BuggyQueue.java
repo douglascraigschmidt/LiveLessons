@@ -47,7 +47,10 @@ class BuggyQueue<E>
      * @return the head of this queue, or {@code null} if this queue is empty
      */
     public E poll() {
-        return mList.poll();
+        if (!isEmpty()) {
+            return mList.remove(0);
+        } else
+            return null;
     }
 
     /**
