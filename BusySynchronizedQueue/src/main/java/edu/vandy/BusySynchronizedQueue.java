@@ -86,10 +86,7 @@ class BusySynchronizedQueue<E>
     @Override
     public E poll() {
         synchronized(this) {
-            if (!isEmpty())
-                return mList.remove(0);
-            else
-                return null;
+            mList.poll();
         }
     }
 

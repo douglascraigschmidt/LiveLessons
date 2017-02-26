@@ -100,8 +100,8 @@ public class BusySynchronizedQueueTest {
                 // Try to get the next integer.
                 integer = mQueue.poll();
                         
-                // Only update the state if we get a non-null
-                // value from take().
+                // Only update the state if we get a non-null value
+                // from poll().
                 if (integer != null) {
                     if ((i % (mMaxIterations / 10)) == 0)
                         System.out.println(integer);
