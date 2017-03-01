@@ -55,10 +55,8 @@ class SimpleBlockingBoundedQueue<E>
                 throw new NullPointerException();
 
             // Wait until the queue is not full.
-            while (isFull()) {
-                // System.out.println("BLOCKING ON PUT()");
+            while (isFull()) 
                 wait();
-            }
 
             // Add e to the LinkedList.
             mList.add(e);
@@ -80,17 +78,15 @@ class SimpleBlockingBoundedQueue<E>
     public E take() throws InterruptedException {
         synchronized(this) {
             // Wait until the queue is not empty.
-            while (mList.isEmpty()) {
-                // System.out.println("BLOCKING ON TAKE()");
+            while (mList.isEmpty()) 
                 wait();
-            }
 
-            final E e = mList.poll();
-        
             // Notify that the queue may have changed state, e.g., "no
             // longer full".
             notifyAll();
-            return e;
+
+            // Remove/return first item on the queue.
+            return mList.poll();
         }
     } 
 
