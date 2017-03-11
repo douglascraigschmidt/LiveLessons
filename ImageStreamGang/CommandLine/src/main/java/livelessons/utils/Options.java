@@ -174,6 +174,11 @@ public class Options {
             }
         };
 
+        // Return a list of lists of URLs.
+        return Arrays.stream(urlsArray)
+                     .map(Arrays::asList)
+                     .collect(toList());
+        /*
         List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
 
         for (URL[] urls : urlsArray) {
@@ -183,6 +188,7 @@ public class Options {
         }
 
         return variableNumberOfInputURLs;
+        */
     }
 
     /**
@@ -242,6 +248,7 @@ public class Options {
         // Create a Function that returns a new URL object when
         // applied.
         Function<String, URL> urlFactory = ExceptionUtils.rethrowFunction(URL::new);
+
         return
             // Create a regular expression for the "," separator.
             Pattern.compile(",")

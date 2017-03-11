@@ -187,6 +187,11 @@ public class Options {
             }
         };
 
+        // Return a list of lists of URLs.
+        return Arrays.stream(urlsArray)
+                     .map(Arrays::asList)
+                     .collect(toList());
+        /*
         List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
 
         for (URL[] urls : urlsArray) {
@@ -196,6 +201,7 @@ public class Options {
         }
 
         return variableNumberOfInputURLs;
+        */
     }
 
     /**
