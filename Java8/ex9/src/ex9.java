@@ -11,15 +11,14 @@ public class ex9 {
      * number @a primeCandidate is prime.  Returns 0 if it is prime, or the
      * smallest factor if it is not prime.
      */
-    private static Long primeChecker(Long primeCandidate) {
-        long n = primeCandidate;
+    private static Integer primeChecker(Integer primeCandidate) {
+        int n = primeCandidate;
 
         if (n > 3)
-            for (long factor = 2;
+            for (int factor = 2;
                  factor <= n / 2;
                  ++factor)
-                if ((factor % (n / 1000)) == 0
-                    && Thread.interrupted()) {
+                if (Thread.interrupted()) {
                     System.out.println(""
                                        + Thread.currentThread()
                                        + " Prime checker thread interrupted");
@@ -27,42 +26,49 @@ public class ex9 {
                 } else if (n / factor * factor == n)
                     return factor;
 
-        return 0L;
+        return 0;
     }
 
     /**
      * Number of times each thread iterates computing prime numbers.
      */
-    private static long sMAX = 1000;
+    private static int sMAX = 1000;
 
     /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) {
         // Determine the max number of iterations.
-        long maxIterations = argv.length == 0 ? sMAX : Long.valueOf(argv[0]);
+        int maxIterations = argv.length == 0 ? sMAX : Integer.valueOf(argv[0]);
 
         // Random number generator.
         final Random random = 
             new Random();
 
         // Cache that maps candidate primes to their smallest factor (if they aren't prime) or 0 if they are prime.
-        final ConcurrentMap<Long, Long> primeCache =
+        final ConcurrentMap<Integer, Integer> primeCache =
             new ConcurrentHashMap<>();
 
         // This runnable checks to see if sMAX random numbers are prime.
         Runnable primeChecker = () -> {
             for (long l = 0; l < maxIterations; l++) {
                 // Get the next random number.
-                Long primeCandidate = random.nextLong();
+                Integer primeCandidate = Math.abs(random.nextInt(maxIterations) + 1);
 
                 // Check to see if the factor for this number is already in the cache.
-                Long smallestFactor = primeCache.get(primeCandidate);
+                Integer smallestFactor = primeCache.get(primeCandidate);
 
                 if (smallestFactor == null)
                     // If not, then atomically determine if this number is prime and store it in the cache.
                     smallestFactor = primeCache.computeIfAbsent
                         (primeCandidate, ex9::primeChecker);
+                else /*
+                    System.out.println(""
+                                       + Thread.currentThread()
+                                       + ": retrieved "
+                                       + primeCandidate
+                                       + " from the cache");
+                                       */
 
                 if (smallestFactor != 0)
                     System.out.println(""
