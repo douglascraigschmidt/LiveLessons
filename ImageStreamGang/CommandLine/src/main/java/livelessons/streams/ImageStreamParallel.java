@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import livelessons.filters.Filter;
 import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
+import livelessons.utils.BlockingTask;
 import livelessons.utils.StreamsUtils;
 
 /**
@@ -46,7 +47,8 @@ public class ImageStreamParallel
 
             // Use map() to transform each URL to an image (i.e.,
             // synchronously download each image via its URL).
-            .map(ImageStreamGang::downloadImage)
+            .map(url ->
+                 BlockingTask.callInManagedBlock(() -> ImageStreamGang.downloadImage(url)))
 
             // Use flatMap() to create a stream containing multiple filtered
             // versions of each image.

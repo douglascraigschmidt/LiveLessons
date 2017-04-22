@@ -21,7 +21,7 @@ public final class NetUtils {
     /**
      * Logging tag.
      */
-    private static final String TAG = "NetUtils";
+    private static final String TAG = NetUtils.class.getName();
 
     /**
      * A utility class should always define a private constructor.
