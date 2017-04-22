@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import livelessons.imagestreamgang.filters.Filter;
 import livelessons.imagestreamgang.filters.FilterDecoratorWithImage;
+import livelessons.imagestreamgang.utils.BlockingTask;
 import livelessons.imagestreamgang.utils.Image;
 import livelessons.imagestreamgang.utils.StreamsUtils;
 
@@ -48,7 +49,11 @@ public class ImageStreamParallel
 
                 // Transform URL -> Image (download each image via
                 // its URL).
-                .map(this::downloadImage)
+                .map(url ->
+                     // This call ensures the common fork/join thread pool
+                     // is expanded to handle the blocking image download.
+                     BlockingTask.callInManagedBlock(()
+                                                     -> ImageStreamGang.downloadImage(url)))
 
                 // Map each image to a stream containing the filtered
                 // versions of the image.

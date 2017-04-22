@@ -48,7 +48,10 @@ public class ImageStreamParallel
             // Use map() to transform each URL to an image (i.e.,
             // synchronously download each image via its URL).
             .map(url ->
-                 BlockingTask.callInManagedBlock(() -> ImageStreamGang.downloadImage(url)))
+                 // This call ensures the common fork/join thread pool
+                 // is expanded to handle the blocking image download.
+                 BlockingTask.callInManagedBlock(() 
+                                                 -> ImageStreamGang.downloadImage(url)))
 
             // Use flatMap() to create a stream containing multiple filtered
             // versions of each image.
