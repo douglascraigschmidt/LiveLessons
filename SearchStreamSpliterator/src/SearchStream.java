@@ -47,7 +47,8 @@ public class SearchStream {
             // SearchResults.
             .map(SearchStream::processInput)
 
-            // Flatten the list of lists into a single list.
+            // Flatten the list of lists into a single list of
+            // SearchResults.
             .flatMap(List::stream)
 
             // This terminal operation triggers aggregate operation
