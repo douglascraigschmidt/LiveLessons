@@ -201,19 +201,16 @@ public class SearchStreamGangTest {
             // Iterate through each of the test runs.
             .forEach(treeIndex ->
                      // Get the entry set from the map.
-                     resultsMap.entrySet()
-
                      // Iterate through each entry in the map.
-                     .forEach(entry -> {
+                     resultsMap.forEach((key, value) -> {
                              // Get the appropriate tree map.
                              ResultMap map = listOfMaps.get(treeIndex);
 
-                             // Store results into the tree map,
-                             // whose key is time in msecs and
-                             // whose value is test that ran.
-                             map.put(entry.getValue()
-                                     .get(treeIndex),
-                                     entry.getKey());
+                             // Store results into the tree map, whose
+                             // key is time in msecs and whose value
+                             // is test that ran.
+                             map.put(value.get(treeIndex),
+                                     key);
                          }));
 
         // Print the results of the test runs from fastest to slowest.
@@ -223,21 +220,18 @@ public class SearchStreamGangTest {
                     System.out.println("\nPrinting results for input file "
                                        + (treeIndex + 1)
                                        + " from fastest to slowest");
+                    // Print results of test run with name of the
+                    // test first followed by time in msecs.
                     listOfMaps
                         // Get the appropriate TreeMap.
                         .get(treeIndex)
 
                         // Get the entry set from the map.
-                        .entrySet()
-
-                        // Print results of test run with name of the
-                        // test first followed by time in msecs.
-                        .forEach(entry ->
-                                 System.out.println(""
-                                                    + entry.getValue()
-                                                    + " executed in "
-                                                    + entry.getKey()
-                                                    + " msecs"));
+                        .forEach((key, value) -> System.out.println(""
+                                                                    + value
+                                                                    + " executed in "
+                                                                    + key
+                                                                    + " msecs"));
                 });
     }
 
@@ -254,7 +248,8 @@ public class SearchStreamGangTest {
                                  inputData);
 
         for (String[] arrayOfStrings : inputData) {
-            List<List<SearchResults>> listOfListOfResults = new ArrayList<>();
+            List<SearchResults> listOfSearchResults =
+                new ArrayList<>();
 
             streamGang.startTiming();
 
@@ -265,18 +260,13 @@ public class SearchStreamGangTest {
                 // Skip over the title.
                 String input = inputString.substring(title.length());
 
-                List<SearchResults> listOfResults = new ArrayList<>();
-
                 for (String word : wordList) {
                     SearchResults results = streamGang.searchForWord(word,
                                                                      input,
                                                                      title);
                     if (results.size() > 0)
-                        listOfResults.add(results);
+                        listOfSearchResults.add(results);
                 }
-
-                if (listOfResults.size() > 0)
-                    listOfListOfResults.add(listOfResults);
             }
 
             streamGang.stopTiming();
@@ -285,28 +275,11 @@ public class SearchStreamGangTest {
             mResultsMap.put("hardCodedSequentialSolution",
                             streamGang.executionTimes());
 
-            // Determine how many word matches we obtained.
-            int totalWordsMatched = listOfListOfResults
+            int totalWordsMatched = listOfSearchResults
                 .stream()
-                .map(listOfSearchResults -> {
-                        // list.stream().forEach(SearchResults::print);
-
-                        /*
-                        // Print the number of words that
-                        // matched for each section.
-                        System.out.println("matched "
-                        + listOfSearchResults.size()
-                        + " words in section "
-                        + listOfSearchResults.get(0).getTitle());
-                        */
-                        return listOfSearchResults;
-                    })
                 // Compute the total number of times each word
                 // matched the input string.
-                .mapToInt(listOfSearchResults -> listOfSearchResults
-                          .stream()
-                          .mapToInt(SearchResults::size)
-                          .sum())
+                .mapToInt(SearchResults::size)
                 // Sum the results.
                 .sum();
 
@@ -314,7 +287,7 @@ public class SearchStreamGangTest {
                                + ": The search returned = "
                                + totalWordsMatched
                                + " word matches for "
-                               + listOfListOfResults.stream().count()
+                               + (long) arrayOfStrings.length
                                + " input strings");
         }
     }
@@ -339,14 +312,14 @@ public class SearchStreamGangTest {
             .parallel()
 
             // Iterate for each array of input strings.
-            .forEach(arrayOfInputStrings -> {
+            .forEach((String[] arrayOfInputStrings) -> {
                     streamGang.startTiming();
 
                     // The results are stored in a list of input
                     // streams, where each input string is associated
                     // with a list of SearchResults corresponding to
                     // words that matched the input string.
-                    List<List<SearchResults>> listOfListOfResults = Stream
+                    List<SearchResults> listOfSearchResults = Stream
                         .of(arrayOfInputStrings)
                         // Process the stream of input data in parallel.
                         .parallel()
@@ -382,8 +355,12 @@ public class SearchStreamGangTest {
                                 .collect(toList());
                             })
 
-                        // Collect a list of containing the list of
-                        // SearchResults for each input string.
+                        // Flatten the stream of lists of SearchResults
+                        // into a stream of SearchResults.
+                        .flatMap(List::stream)
+
+                        // Collect a list of containing SearchResults
+                        // for each input string.
                         .collect(toList());
 
                     streamGang.stopTiming();
@@ -393,27 +370,12 @@ public class SearchStreamGangTest {
                                     streamGang.executionTimes());
 
                     // Determine how many word matches we obtained.
-                    int totalWordsMatched = listOfListOfResults
-                        .stream()
-                        .map(listOfSearchResults -> {
-                                // list.stream().forEach(SearchResults::print);
-
-                                /*
-                                // Print the number of words that
-                                // matched for each section.
-                                System.out.println("matched "
-                                + listOfSearchResults.size()
-                                + " words in section "
-                                + listOfSearchResults.get(0).getTitle());
-                                */
-                                return listOfSearchResults;
-                            })
+                // SearchResults::print();
+                int totalWordsMatched = listOfSearchResults
+                    .stream()
                         // Compute the total number of times each word
                         // matched the input string.
-                        .mapToInt(listOfSearchResults -> listOfSearchResults
-                                  .stream()
-                                  .mapToInt(SearchResults::size)
-                                  .sum())
+                        .mapToInt(SearchResults::size)
                         // Sum the results.
                         .sum();
 
@@ -421,7 +383,7 @@ public class SearchStreamGangTest {
                                        + ": The search returned = "
                                        + totalWordsMatched
                                        + " word matches for "
-                                       + listOfListOfResults.stream().count()
+                                       + arrayOfInputStrings.length
                                        + " input strings");
                 });
 
