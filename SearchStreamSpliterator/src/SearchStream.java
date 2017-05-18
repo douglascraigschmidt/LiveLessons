@@ -40,16 +40,12 @@ public class SearchStream {
         // Create a list of SearchResult objects that indicate which
         // words are found in the input strings.
         List<SearchResult> listSearchResults = mInput
-            // Convert the list of input strings into a stream.
-            .stream()
+            // Convert the list of input strings into a parallel stream.
+            .parallelStream()
 
-            // Process each input string to create a list of
+            // Process each input string to create a single stream of
             // SearchResults.
-            .map(SearchStream::processInput)
-
-            // Flatten the list of lists into a single list of
-            // SearchResults.
-            .flatMap(List::stream)
+            .flatMap(SearchStream::processInput)
 
             // This terminal operation triggers aggregate operation
             // processing and returns a list of SearchResults.
@@ -80,27 +76,23 @@ public class SearchStream {
      * This method searches the @a inputData for all occurrences
      * of the words to find.
      */
-    private static List<SearchResult> processInput(String inputData) {
+    private static Stream<SearchResult> processInput(String inputData) {
         return mWordsToFind
             // Convert the list of words to find into a parallel
             // stream.
-            .parallelStream()
+            .stream()
 
             // Return a single stream containing SearchResult objects
             // that match each word (if any).
             .flatMap(word
                      ->
-                     // Create a parallel stream containing a
-                     // SearchResult indicating all places (if any)
-                     // where the word matched the input.
+                     // Create a stream containing a SearchResult
+                     // indicating all places (if any) where the word
+                     // matched the input.
                      StreamSupport.stream(new WordMatcherSpliterator
                                           (new WordMatcher(word,
                                                            inputData)),
-                                          true))
-
-            // Trigger processing and return a list of SearchResult
-            // objects (if any).
-            .collect(toList());
+                                          false));
     }
 }
 
