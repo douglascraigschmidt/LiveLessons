@@ -101,39 +101,47 @@ public class Main {
                            + ": The search returned = "
                            // Count the number of matches.
                            + listOfListOfSearchResults.stream()
-                                                      .mapToInt(List::size)
-                                                      .sum()
+                           .mapToInt(List::size)
+                           .sum()
                            + " phrase matches for the input in "
                            + stopTime
                            + " milliseconds");
 
         // Help the garbage collector.
         System.gc();
-        
-        /*
-          List<SearchResult> listOfSearchResults = listOfListOfSearchResults
-          .stream()
-          .flatMap(List::stream)
-          .collect(toList());
 
-          // Sort the list by thread id.
-          listOfSearchResults.sort(Comparator.comparing(sr
-          -> sr.mThreadId));
+        // Uncomment this to display all the results.
+        // displayResults(listOfListOfSearchResults);
+    }
 
-          // Print all the SearchResult objects.
-          listOfSearchResults
-          .forEach(searchResults
-          -> 
-          // print each SearchResult.
-          System.out.println(" "
-          + searchResults.mPhrase
-          + " was found at offset "
-          + searchResults.mIndex
-          // + " in string "
-          // + searchResults.mInputData
-          + " in thread "
-          + searchResults.mThreadId));
-        */
+    /**
+     * Display all the search results.
+     */
+    private static void displayResults(List<List<SearchResult>> listOfListOfSearchResults) {
+        // Transform the list of lists of results to a simple list of
+        // results.
+        List<SearchResult> listOfSearchResults = listOfListOfSearchResults
+            .stream()
+            .flatMap(List::stream)
+            .collect(toList());
+
+        // Sort the list by the thread id.
+        listOfSearchResults.sort(Comparator.comparing(sr
+                                                      -> sr.mThreadId));
+
+        // Display all the SearchResult objects.
+        listOfSearchResults
+            .forEach(searchResults
+                     -> 
+                     // print each SearchResult.
+                     System.out.println(" "
+                                        + searchResults.mPhrase
+                                        + " was found at offset "
+                                        + searchResults.mIndex
+                                        // + " in string "
+                                        // + searchResults.mInputData
+                                        + " in thread "
+                                        + searchResults.mThreadId));
     }
 }
 
