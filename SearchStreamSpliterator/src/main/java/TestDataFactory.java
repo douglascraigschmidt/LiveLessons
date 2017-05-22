@@ -32,9 +32,9 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the word list in the @a filename as a list of Strings.
+     * Return the phrase list in the @a filename as a list of Strings.
      */
-    public static List<String> getWordsList(String filename) {
+    public static List<String> getPhraseList(String filename) {
         try {
             // Read all lines from filename and return a list of
             // Strings.

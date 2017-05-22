@@ -5,7 +5,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This class searches for words in the works of Shakespeare.  It
+ * This class searches for phrases in the works of Shakespeare.  It
  * demonstrates the use of Java 8 functional programming features,
  * such as lambda expressions, method references, functional
  * interfaces, sequential/parallel streams, a fork/join pool, and a
@@ -18,9 +18,9 @@ public class SearchWithSpliterator {
     private String mInput;
 
     /**
-     * The list of words to find.
+     * The list of phrases to find.
      */
-    private List<String> mWordsToFind;
+    private List<String> mPhrasesToFind;
 
     /**
      * Indicates whether to run the spliterator concurrently.
@@ -31,10 +31,10 @@ public class SearchWithSpliterator {
      * Construtor initializes the fields.
      */
     public SearchWithSpliterator(String input,
-                                 List<String> wordsToFind,
+                                 List<String> phrasesToFind,
                                  boolean parallel) {
         mInput = input;
-        mWordsToFind = wordsToFind;
+        mPhrasesToFind = phrasesToFind;
         mParallel = parallel;
     }
 
@@ -43,13 +43,13 @@ public class SearchWithSpliterator {
      */
     public List<List<SearchResult>> processStream() {
         // Create a list of SearchResult objects that indicate which
-        // words are found in the input string.
+        // phrases are found in the input string.
         return Stream
             // Convert the input string into a stream.
             .of(mInput)
 
             // Process each input string to find all occurrences of
-            // the search words.
+            // the search phrases.
             .flatMap(this::processInput)
 
             // This terminal operation triggers aggregate operation
@@ -59,23 +59,23 @@ public class SearchWithSpliterator {
 
     /**
      * This method searches the @a inputData for all occurrences of
-     * the words to find.
+     * the phrases to find.
      */
     private Stream<List<SearchResult>> processInput(String inputData) {
-        // Find all occurrences of word in the input string.
-        return mWordsToFind
-            // Convert the list of words to find into a stream.
+        // Find all occurrences of phrase in the input string.
+        return mPhrasesToFind
+            // Convert the list of phrases to find into a stream.
             .stream()
 
-            // For each word create a list of SearchResults indicating
-            // all places (if any) where the word matched the input.
-            .map(word 
+            // For each phrase create a list of SearchResults indicating
+            // all places (if any) where the phrase matched the input.
+            .map(phrase 
                  -> StreamSupport
                  // Create a stream of SearchResult objects that match
-                 // the number of times a word appears in an input
+                 // the number of times a phrase appears in an input
                  // string.
-                 .stream(new WordMatchSpliterator(inputData,
-                                                  word),
+                 .stream(new PhraseMatchSpliterator(inputData,
+                                                    phrase),
                          // Indicates whether to run the spliterator
                          // concurrently or not.
                          mParallel)
