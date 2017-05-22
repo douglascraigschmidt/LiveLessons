@@ -1,9 +1,6 @@
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -41,7 +38,7 @@ public class SearchStream {
         // words are found in the input strings.
         List<SearchResult> listSearchResults = mInput
             // Convert the list of input strings into a parallel stream.
-            .parallelStream()
+            .stream()
 
             // Process each input string to create a single stream of
             // SearchResults.
@@ -89,10 +86,9 @@ public class SearchStream {
                      // Create a stream containing a SearchResult
                      // indicating all places (if any) where the word
                      // matched the input.
-                     StreamSupport.stream(new WordMatcherSpliterator
-                                          (new WordMatcher(word,
-                                                           inputData)),
-                                          false));
+                     StreamSupport.stream(new WordMatchSpliterator(inputData,
+                                                                     word),
+                                          true));
     }
 }
 

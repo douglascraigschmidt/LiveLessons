@@ -1,7 +1,7 @@
 /**
  * This class keeps track of state information that's returned by the
- * WordMatcher to the SearchStream.  All the fields are final so
- * objects of this class are immutable.
+ * WordMatchSpliterator to the SearchStream.  All the fields are final
+ * so objects of this class are immutable.
  */
 public class SearchResult {
     /**
@@ -10,12 +10,12 @@ public class SearchResult {
     final String mInputData;
 
     /**
-     * The word that's being searched for in the inputData.
+     * The phrase that's being searched for in the inputData.
      */
-    final String mWord;
+    final String mPhrase;
     
     /**
-     * The index of the word match in the mInputData.
+     * The index of the phrase match in the mInputData.
      */
     final Integer mIndex;
 
@@ -28,9 +28,9 @@ public class SearchResult {
      * Constructor initializes the fields.
      */
     SearchResult(String inputData,
-                  String word,
-                  Integer index) {
-        mWord = word;
+                 String phrase,
+                 Integer index) {
+        mPhrase = phrase;
         mIndex = index;
         mInputData = inputData;
         mThreadId = Thread.currentThread().getId();

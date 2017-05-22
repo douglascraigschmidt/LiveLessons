@@ -30,7 +30,7 @@ public class SearchWithRxJavaInputs
      * Constructor initializes the super class.
      */
     public SearchWithRxJavaInputs(List<String> wordsToFind,
-                                  String[][] stringsToSearch) {
+                                  List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);

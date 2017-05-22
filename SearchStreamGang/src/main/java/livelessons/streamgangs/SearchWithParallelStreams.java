@@ -17,7 +17,8 @@ public class SearchWithParallelStreams
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithParallelStreams(List<String> wordsToFind, String[][] stringsToSearch) {
+    public SearchWithParallelStreams(List<String> wordsToFind,
+                                     List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -29,7 +30,7 @@ public class SearchWithParallelStreams
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Concurrently iterate through each word we're searching for
+         // Concurrently iterate through each word we're searching for
         // and try to find it in the input data.
         return mWordsToFind
             // Convert the array of words into a parallel stream.

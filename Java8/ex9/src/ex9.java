@@ -39,36 +39,34 @@ public class ex9 {
      */
     static public void main(String[] argv) {
         // Determine the max number of iterations.
-        int maxIterations = argv.length == 0 ? sMAX : Integer.valueOf(argv[0]);
+        int maxIterations = argv.length == 0 
+            ? sMAX 
+            : Integer.valueOf(argv[0]);
 
         // Random number generator.
         final Random random = 
             new Random();
 
-        // Cache that maps candidate primes to their smallest factor (if they aren't prime) or 0 if they are prime.
+        // Cache that maps candidate primes to their smallest factor
+        // (if they aren't prime) or 0 if they are prime.
         final ConcurrentMap<Integer, Integer> primeCache =
             new ConcurrentHashMap<>();
 
-        // This runnable checks to see if sMAX random numbers are prime.
+        // This runnable checks to see if sMAX random numbers are
+        // prime.
         Runnable primeChecker = () -> {
             for (long l = 0; l < maxIterations; l++) {
                 // Get the next random number.
-                Integer primeCandidate = Math.abs(random.nextInt(maxIterations) + 1);
+                Integer primeCandidate =
+                    Math.abs(random.nextInt(maxIterations) + 1);
 
-                // Check to see if the factor for this number is already in the cache.
-                Integer smallestFactor = primeCache.get(primeCandidate);
-
-                if (smallestFactor == null)
-                    // If not, then atomically determine if this number is prime and store it in the cache.
+                // computeIfAbsent() first checks to see if the factor
+                // for this number is already in the cache.  If not,
+                // it atomically determine if this number is prime and
+                // store it in the cache.
+                Integer smallestFactor =
                     smallestFactor = primeCache.computeIfAbsent
                         (primeCandidate, ex9::primeChecker);
-                else /*
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + ": retrieved "
-                                       + primeCandidate
-                                       + " from the cache");
-                                       */
 
                 if (smallestFactor != 0)
                     System.out.println(""
@@ -86,7 +84,8 @@ public class ex9 {
             }
         };
 
-        // Create a list of threads each of which running the prime checker algorithm.
+        // Create a list of threads each of which running the prime
+        // checker algorithm.
         List<Thread> threads =
             new ArrayList<>(Arrays.asList(new Thread(primeChecker),
                                           new Thread(primeChecker),

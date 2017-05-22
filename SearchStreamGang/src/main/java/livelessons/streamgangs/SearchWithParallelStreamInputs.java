@@ -18,7 +18,7 @@ public class SearchWithParallelStreamInputs
      * Constructor initializes the super class.
      */
     public SearchWithParallelStreamInputs(List<String> wordsToFind,
-                                          String[][] stringsToSearch) {
+                                          List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);

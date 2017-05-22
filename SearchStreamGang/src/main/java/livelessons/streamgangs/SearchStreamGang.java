@@ -1,7 +1,9 @@
 package livelessons.streamgangs;
 
+import livelessons.utils.SearchResults;
+import livelessons.utils.StreamGang;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterators;
@@ -13,11 +15,6 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
-
-import livelessons.utils.SearchResults;
-import livelessons.utils.StreamGang;
-
-import static java.util.stream.Collectors.summingInt;
 
 /**
  * This class factors out the common code used by all instantiations
@@ -35,7 +32,7 @@ public class SearchStreamGang
     /**
      * An Iterator to the list of Strings to search.
      */
-    private final Iterator<String[]> mInputIterator;
+    private final Iterator<List<String>> mInputIterator;
 
     /**
      * Exit barrier that controls when the framework has completed its
@@ -47,12 +44,12 @@ public class SearchStreamGang
      * Constructor initializes the fields.
      */
     public SearchStreamGang(List<String> wordsToFind,
-                            String[][] stringsToSearch) {
+                            List<List<String>> stringsToSearch) {
         // Store the words to search for.
         mWordsToFind = wordsToFind;
 
         // Create an Iterator for the array of Strings to search.
-        mInputIterator = Arrays.asList(stringsToSearch).iterator();
+        mInputIterator = stringsToSearch.iterator();
 
         // Initialize the Executor with a ForkJoinPool.
         setExecutor(Executors.newWorkStealingPool());
@@ -71,7 +68,7 @@ public class SearchStreamGang
             incrementCycle();
 
             // Return a List containing the Strings to search.
-            return Arrays.asList(mInputIterator.next());
+            return mInputIterator.next();
         }
     }
 
@@ -96,8 +93,7 @@ public class SearchStreamGang
         System.out.println(TAG + ": The search returned " 
                            + results.stream()
                                     .mapToInt(list 
-                                              -> list.stream()
-                                                     .collect(summingInt(SearchResults::size)))
+                                              -> (Integer) list.stream().mapToInt(SearchResults::size).sum())
                                     .sum()
                            + " word matches for "
                            + getInput().size() 

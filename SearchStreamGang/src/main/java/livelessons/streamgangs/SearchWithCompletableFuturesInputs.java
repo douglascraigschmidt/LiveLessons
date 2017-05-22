@@ -19,7 +19,7 @@ public class SearchWithCompletableFuturesInputs
      * Constructor initializes the super class.
      */
     public SearchWithCompletableFuturesInputs(List<String> wordsToFind,
-                                              String[][] stringsToSearch) {
+                                              List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);

@@ -8,7 +8,8 @@ import java.util.function.Predicate;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Helpful methods for manipulating various Java 8 Streams features.
+ * This utility class contains methods for manipulating various Java 8
+ * Streams features.
  */
 public class StreamsUtils {
     /**
