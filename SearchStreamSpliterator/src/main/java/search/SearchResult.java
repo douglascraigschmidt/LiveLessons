@@ -19,7 +19,7 @@ public class SearchResult {
     /**
      * The index of the phrase match in the mInputData.
      */
-    public final Integer mIndex;
+    public final int mIndex;
 
     /**
      * The id of the thread where the search was performed.
@@ -31,7 +31,7 @@ public class SearchResult {
      */
     protected SearchResult(String inputData,
                            String phrase,
-                           Integer index) {
+                           int index) {
         mPhrase = phrase;
         mIndex = index;
         mInputData = inputData;

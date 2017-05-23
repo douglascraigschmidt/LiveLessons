@@ -3,7 +3,6 @@ package utils;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -38,11 +37,11 @@ public class TestDataFactory {
                 // file into a list of strings.
                 Pattern.compile(splitter).splitAsStream(bytes)
 
-                // Filter out any empty strings.
-                .filter(((Predicate<String>) String::isEmpty).negate())
+                        // Filter out any empty strings.
+                        .filter(((Predicate<String>) String::isEmpty).negate())
 
-                // Collect the results into a string.
-                .collect(toList());
+                        // Collect the results into a string.
+                        .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -60,15 +59,16 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the phrase list in the @a filename as a list of
+     * Return the word list in the @a filename as a list of
      * non-empty strings.
      */
-    public static List<String> getPhraseList(String filename) {
+    public static List<String> getWordList(String filename) {
         try {
             return Files
                 // Read all lines from filename.
                 .lines(Paths.get(ClassLoader.getSystemResource
                                         (filename).toURI()))
+
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 

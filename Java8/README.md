@@ -37,3 +37,9 @@ Here's an overview of what's included:
 
 . ex9 - This example uses a Java 8 ConcurrentHashMap and Java 8
   function-based method reference to cache prime numbers.
+
+. ex10 - This program searches seqentially for the occurrence of words
+  in a string.  It demonstrates the use of basic Java 8 functional
+  programming features (such as lambda expressions and method
+  references) in conjunction with Java 8 sequential streams.
+

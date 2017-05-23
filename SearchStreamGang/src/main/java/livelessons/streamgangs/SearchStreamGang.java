@@ -2,6 +2,7 @@ package livelessons.streamgangs;
 
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamGang;
+import livelessons.utils.WordMatchSpliterator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -164,13 +165,13 @@ public class SearchStreamGang
                               currentCycle(),
                               word,
                               title);
-        // Use a WordMatchItr to add the indices of all places in the
-        // inputData where word matches.
+
+        // Use a WordMatchSpliterator to add the indices of all places
+        // in the inputData where word matches.
         StreamSupport
             // Create a sequential stream of Integers that records the
             // indices (if any) where the word matched the input data.
-            .stream(new WordMatcherSpliterator
-                    (new WordMatcher(word).with(inputData)), 
+            .stream(new WordMatchSpliterator(inputData, word),
                     false)
                     
             // Add any matches to the results object.
@@ -179,100 +180,6 @@ public class SearchStreamGang
         return results;
     }
     
-    /**
-     * This class is used in conjunction with WordMatcherSpliterator
-     * to identify all indices in the input data that match a word.
-     */
-    private static class WordMatcher {
-        /**
-         * The word to match.
-         */
-        private String mWord;
-        
-        /**
-         * The input data to do the matching.
-         */
-        private String mInputData;
-        
-        /**
-         * The current position in the input data.
-         */
-        private int mCurrentPosition;
-
-        /**
-         * Constructor initializes the object.
-         */
-        public WordMatcher(String word) {
-            mWord = word;
-        }
-
-        /**
-         * Associate @a inputData with the WordMatcher.
-         */
-        public WordMatcher with(String inputData) {
-            mInputData = inputData;
-
-            // Try to find the match (if any) of the word in the input
-            // data.
-            mCurrentPosition = mInputData.indexOf(mWord, 0);
-            return this;
-        }
-
-        /**
-         * @return true if a match was found.
-         */
-        public boolean find() {
-            return mCurrentPosition != -1;
-        }
-
-        /**
-         * Return the index in the input data of the word that
-         * matched.
-         */
-        public Integer next() {
-            Integer index = mCurrentPosition;
-            mCurrentPosition =
-                mInputData.indexOf(mWord, 
-                                   mCurrentPosition + mWord.length());
-
-            return index;
-        }
-    }
-
-    /**
-     * This Spliterator is used to create a Stream of matches to
-     * a word in the input data.
-     */
-    private static class WordMatcherSpliterator
-                   extends Spliterators.AbstractSpliterator<Integer> {
-        /**
-         * Matches a word in the input data.
-         */
-        private final WordMatcher mMatcher;
-
-        /**
-         * Constructor initializes the field and super class.
-         */
-        WordMatcherSpliterator(WordMatcher matcher) {
-            super(Long.MAX_VALUE, ORDERED | NONNULL);
-            mMatcher = matcher;
-        }
-
-        /**
-         * Attempt to advance the spliterator by one position.
-         */
-        public boolean tryAdvance(Consumer<? super Integer> action) {
-            // If there's no match then we're done with the iteration.
-            if (!mMatcher.find())
-                return false;
-
-            // Store the index of the match in the action and keep the
-            // iteration going.
-            action.accept(mMatcher.next());
-            return true;
-        }
-    }
-
     /**
      * Return the title portion of the @a inputData.
      */

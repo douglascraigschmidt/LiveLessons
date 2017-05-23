@@ -71,12 +71,9 @@ public class PhraseMatchSpliterator
                      mCurrentPos);
 
         // If there's no match then we're done with the iteration.
-        if (mCurrentPos == -1) {
-            // System.out.println("no match for " + mPhrase);
+        if (mCurrentPos == -1) 
             return false;
-        } else {
-            // System.out.println("found a match for " + mPhrase);
-
+        else {
             // Create a new SearchResult with the current position.
             SearchResult searchResult =
                 new SearchResult(mInput, mPhrase, mCurrentPos);
