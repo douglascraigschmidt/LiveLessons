@@ -141,22 +141,22 @@ public class Main {
             // reference that starts a thread for each input string.
             mWorkerThreads.forEach(Thread::start);
 
-            // Iterate through the threads and pass the Thread.join()
-            // method reference as a barrier synchronizer to wait for
-            // all threads to finish.  Note how rethrowConsumer()
-            // converts a checked exception to an unchecked exception.
-            mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
-
-            /*
-              // This alternative, (more verbose) solution uses a
-              // lambda expression instead of rethrowConsumer():
-
-              mWorkerThreads.forEach(thread -> {
+            // Iterate through the list of threads and join with them
+            // all, which is a form of barrier synchronization.
+            mWorkerThreads.forEach(thread -> {
                                      try {
                                          thread.join();
                                      } catch (InterruptedException e) {
                                        throw new RuntimeException(e);
                                      }});
+
+            /*
+            // This alternative, (more concise) solution iterate
+            // through the threads and pass the Thread.join() method
+            // reference as a barrier synchronizer to wait for all
+            // threads to finish.  Note how rethrowConsumer() converts
+            // a checked exception to an unchecked exception.
+            mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
             */
         }
 
