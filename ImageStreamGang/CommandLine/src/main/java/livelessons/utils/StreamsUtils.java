@@ -56,8 +56,8 @@ public class StreamsUtils {
     }
 
     /**
-     * A generic negation predicate that can be used to negate the
-     * return value of urlCached (used by Collection.filter() calls).
+     * A generic negation predicate that can be used to negate a
+     * predicate.
      *
      * @return The negation of the input predicate.
      */

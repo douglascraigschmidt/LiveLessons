@@ -1,3 +1,5 @@
+package search;
+
 import java.util.Spliterator;
 import java.util.function.Consumer;
 

@@ -1,3 +1,7 @@
+import search.SearchResult;
+import search.SearchWithSpliterator;
+import utils.TestDataFactory;
+
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,8 +57,12 @@ public class Main {
     static public void main(String[] args) {
         System.out.println("Starting SearchStream");
 
-        // Create an input string from the works of Shakespeare.
-        mInput = TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE);
+        // Create a single input string from the works of Shakespeare.
+        mInput =
+            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                     // Split using a character that's
+                                     // not in the file.
+                                     "#").get(0);
 
         // Get the list of phrases to find in the works of Shakespeare.
         mPhrasesToFind = TestDataFactory

@@ -5,7 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This utility class contains methods for obtaining test data.
@@ -30,9 +33,16 @@ public class TestDataFactory {
             // Open the file and get all the bytes.
             String bytes = new String(Files.readAllBytes(Paths.get(uri)));
 
-            // Compile a regular expression that's used to split the
-            // file into a list of strings.
-            return Arrays.asList(Pattern.compile(splitter).split(bytes));
+            return
+                // Compile a regular expression that's used to split the
+                // file into a list of strings.
+                Pattern.compile(splitter).splitAsStream(bytes)
+
+                        // Filter out any empty strings.
+                        .filter(((Predicate<String>) String::isEmpty).negate())
+
+                        // Collect the results into a string.
+                        .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -40,14 +50,30 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the word list in the @a filename as a list of Strings.
+     * A generic negation predicate that can be used to negate a
+     * predicate.
+     *
+     * @return The negation of the input predicate.
      */
-    public static List<String> getWordsList(String filename) {
+    public static<T> Predicate<T> not(Predicate<T> p) {
+        return p.negate();
+    }
+
+    /**
+     * Return the phrase list in the @a filename as a list of
+     * non-empty strings.
+     */
+    public static List<String> getPhraseList(String filename) {
         try {
-            // Read all lines from filename and return a list of
-            // Strings.
-            return Files.readAllLines(Paths.get(ClassLoader.getSystemResource
-                                                (filename).toURI()));
+            return Files
+                // Read all lines from filename.
+                .lines(Paths.get(ClassLoader.getSystemResource
+                                        (filename).toURI()))
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
+
+                // Collect the results into a string.
+                .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;

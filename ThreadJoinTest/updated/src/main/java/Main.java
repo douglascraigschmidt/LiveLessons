@@ -53,15 +53,8 @@ public class Main {
         // Shakespeare.
         mInputList = TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "@");
 
-        // This list will hold the list of phrases to find.
-        mPhrasesToFind = new ArrayList<>();
-
-        // Get the list of phrases to find in the works of Shakespeare.
-        //noinspection ConstantConditions
-        for (String phrase : TestDataFactory.getPhraseList(sPHRASE_LIST_FILE))
-            // Only add non-empty phrases to the list.
-            if (phrase.length() > 0)
-                mPhrasesToFind.add(phrase);
+        // Get the list of phrases to find.
+        mPhrasesToFind = TestDataFactory.getPhraseList(sPHRASE_LIST_FILE);
 
         // Create/run an object to search for phrases concurrently.
         new SearchOneShotThreadJoin(mInputList,
