@@ -8,8 +8,5 @@ LiveLesson tutorial.
 
 updated -- This folder provides an updated version of my LiveLessons
 tutorial that uses Java 8 features, such as lambdas and method
-references.
-
-updated-stream -- This folder provides an updated version of my
-LiveLessons tutorial that uses Java 8 streams, including a parallel
-stream with a spliterator.
+references, to search for phrases in the complete works of William
+Shakespeare.
