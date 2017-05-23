@@ -7,7 +7,8 @@ import java.util.List;
  * This program searches seqentially for the occurrence of words in a
  * string.  It demonstrates the use of basic Java 8 functional
  * programming features (such as lambda expressions and method
- * references) in conjunction with Java 8 sequential streams.
+ * references) in conjunction with Java 8 sequential streams and a
+ * spliterator.
  */
 public class Main {
     /*

@@ -9,7 +9,7 @@ public class SearchResult {
     /**
      * The string that's being searched.
      */
-    public final String mInputData;
+    public final String mInput;
 
     /**
      * The word that's being searched for in the inputData.
@@ -24,12 +24,12 @@ public class SearchResult {
     /**
      * Constructor initializes the fields.
      */
-    public SearchResult(String inputData,
+    public SearchResult(String input,
                         String word,
                         int index) {
         mWord = word;
         mIndex = index;
-        mInputData = inputData;
+        mInput = input;
     }
 
     /**

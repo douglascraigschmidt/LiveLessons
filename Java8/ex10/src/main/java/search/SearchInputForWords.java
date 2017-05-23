@@ -1,17 +1,20 @@
 package search;
 
+import utils.WordMatchSpliterator;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.*;
 
 /**
  * This class demonstrates the use of basic Java 8 functional
  * programming features (such as lambda expressions and method
- * references) in conjunction with Java 8 sequential streams to search
- * for words in an input string.
+ * references) in conjunction with Java 8 sequential streams and a
+ * spliterator to search for words in an input string.
  */
 public class SearchInputForWords {
     /**
@@ -27,10 +30,10 @@ public class SearchInputForWords {
     }
 
     /**
-     * Searches the input for all occurrences of the @ wordsToFind and
-     * prints them.
+     * Search the input for all occurrences of the @ wordsToFind and
+     * print the results (if any).
      */
-    public void findAndPrintWords(List<String> wordsToFind) {
+    public void findAndPrintWords(List <String> wordsToFind) {
         // Create a list of lists of SearchResults corresponding to
         // the index where each word occurs in the input string.
         List<List<SearchResult>> results = wordsToFind
@@ -57,21 +60,17 @@ public class SearchInputForWords {
      * a list of all the @code SearchResults (if any).
      */
     private List<SearchResult> searchForWord(String word) {
-        // Create a list to store the results.
-        List<SearchResult> results = 
-            new ArrayList<>();
+        // Return list of SearchResults indicating where the word
+        // matches the input.
+        return StreamSupport
+            // Create a stream of SearchResult objects that record the
+            // indices (if any) where the word matched the input.
+            .stream(new WordMatchSpliterator(mInput, word),
+                    // This is a sequential stream.
+                    false)
 
-        // Check to see how many times (if any) the word appears in
-        // the input.
-        for (int index = mInput.indexOf(word, 0);
-             index != -1;
-             index = mInput.indexOf(word,
-                                    index + word.length())) 
-            // Each time a match is found it's added to the list of
-            // search results.
-            results.add(new SearchResult(mInput, word, index));
-
-        return results;
+            // Collect the stream into a list of SearchResult objects.
+            .collect(toList());
     }
 
     /**
