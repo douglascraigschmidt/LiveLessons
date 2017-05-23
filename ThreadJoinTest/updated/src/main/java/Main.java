@@ -36,7 +36,7 @@ public class Main {
      * The list of strings containing the complete works of
      * Shakespeare.
      */
-    private static List<String> mInput;
+    private static List<String> mInputList;
 
     /**
      * The list of phrases to find.
@@ -51,7 +51,7 @@ public class Main {
 
         // Create a list of input strings containing the works of
         // Shakespeare.
-        mInput = TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "@");
+        mInputList = TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "@");
 
         // This list will hold the list of phrases to find.
         mPhrasesToFind = new ArrayList<>();
@@ -64,7 +64,8 @@ public class Main {
                 mPhrasesToFind.add(phrase);
 
         // Create/run an object to search for phrases concurrently.
-        new SearchOneShotThreadJoin(mInput, mPhrasesToFind).run();
+        new SearchOneShotThreadJoin(mInputList,
+                                    mPhrasesToFind).run();
 
         System.out.println("Ending SearchStream");
     }
@@ -90,7 +91,7 @@ public class Main {
         /**
          * The constructor initializes the fields.
          */
-        SearchOneShotThreadJoin(List<String> input,
+        SearchOneShotThreadJoin(List<String> inputList,
                                 List<String> phrasesToFind) {
             // Initialize field.
             mPhrasesToFind = phrasesToFind;
@@ -101,7 +102,7 @@ public class Main {
             // they process the input strings.
             mWorkerThreads =
                 makeWorkerThreads(this::processInput,
-                                  input);
+                                  inputList);
         }
 
         /**
