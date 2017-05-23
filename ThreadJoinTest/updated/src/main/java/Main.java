@@ -120,14 +120,14 @@ public class Main {
 
             // Create a thread for each input string to perform
             // processing designated by the task parameter.
-            for (String string : inputList)
+            for (String input : inputList)
                 workerThreads.add
                     (new Thread(()
                                 // Create lambda runnable to run in thread.
                                 ->
                                 // Apply the task to process the input
                                 // string.
-                                task.apply(string)));
+                                task.apply(input)));
 
             return workerThreads;
         }
