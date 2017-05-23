@@ -3,18 +3,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * This example uses a Java 8 ConcurrentHashMap and Java 8 Function-based method reference cache prime numbers.
+ * This example uses a Java 8 ConcurrentHashMap and Java 8
+ * Function-based method reference to cache prime numbers.
  */
 public class ex9 {
     /**
      * This method provides a brute-force determination of whether
-     * number @a primeCandidate is prime.  Returns 0 if it is prime, or the
-     * smallest factor if it is not prime.
+     * number @a primeCandidate is prime.  Returns 0 if it is prime,
+     * or the smallest factor if it is not prime.
      */
     private static Integer primeChecker(Integer primeCandidate) {
         int n = primeCandidate;
 
         if (n > 3)
+            // This algorithm is intentionally inefficient to burn
+            // lots of CPU time!
             for (int factor = 2;
                  factor <= n / 2;
                  ++factor)
@@ -62,8 +65,8 @@ public class ex9 {
 
                 // computeIfAbsent() first checks to see if the factor
                 // for this number is already in the cache.  If not,
-                // it atomically determine if this number is prime and
-                // store it in the cache.
+                // it atomically determines if this number is prime
+                // and stores it in the cache.
                 Integer smallestFactor =
                     smallestFactor = primeCache.computeIfAbsent
                         (primeCandidate, ex9::primeChecker);

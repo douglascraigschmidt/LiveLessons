@@ -1,8 +1,8 @@
 import java.util.*;
 
 /**
- * This example program shows the use of a simple lambda expression in
- * the context of a Java ArrayList.
+ * This example shows the use of a simple lambda expression in the
+ * context of a Java List/ArrayList removeIf() method.
  */
 public class ex2 {
     static public void main(String[] argv) {

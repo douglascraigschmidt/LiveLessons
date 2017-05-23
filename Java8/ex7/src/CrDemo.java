@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * This is another example of a Java 8 Supplier interface that's used
+ * This example of shows how the Java 8 Supplier interface can be used
  * in conjunction with a constructor reference.
  */
 public class CrDemo {

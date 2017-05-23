@@ -3,16 +3,16 @@ import java.util.concurrent.CompletableFuture;
 import java.math.BigInteger;
 
 /**
- * This example shows the use of a CompletableFuture to compute the
- * greatest common divisor (GCD) of two BigIntegers.
+ * This example shows the use of a CompletableFuture to concurrently
+ * compute the greatest common divisor (GCD) of two BigIntegers.
  */
 public class ex8 {
     static public void main (String[] argv) {
         CompletableFuture<BigInteger>
             future = new CompletableFuture<>();
 
-        // Create and start a thread to compute the GCD of two big
-        // integers.
+        // Create and start a thread whose runnable lambda computes
+        // the GCD of two big integers.
         new Thread (() -> {
                 BigInteger bi1 =
                     new BigInteger("188027234133482196");
