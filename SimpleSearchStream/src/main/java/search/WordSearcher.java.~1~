@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.*;
  * references) in conjunction with Java 8 sequential streams and a
  * spliterator to search for words in an input string.
  */
-public class SearchInputForWords {
+public class WordSearcher {
     /**
      * Input string to search.
      */
@@ -25,7 +25,7 @@ public class SearchInputForWords {
     /**
      * Constructor initializes the field.
      */
-    public SearchInputForWords(String input) {
+    public WordSearcher(String input) {
         mInput = input;
     }
 

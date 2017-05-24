@@ -1,4 +1,4 @@
-import search.SearchInputForWords;
+import search.WordSearcher;
 import utils.TestDataFactory;
 
 import java.util.List;
@@ -45,11 +45,11 @@ public class Main {
 
         // Create an object that can be used to search for words in
         // the input.
-        SearchInputForWords search =
-            new SearchInputForWords(input);
+        WordSearcher wordSearcher =
+            new WordSearcher(input);
                                                              
         // Print all matching words.
-        search.findAndPrintWords(wordsToFind);
+        wordSearcher.findAndPrintWords(wordsToFind);
 
         System.out.println("Ending WordSearchStream");
     }

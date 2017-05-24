@@ -1,4 +1,4 @@
-package utils;
+package search;
 
 import search.SearchResult;
 
