@@ -82,7 +82,7 @@ public class WordSearcher {
             // Convert the list of lists into a stream of lists.
             .stream()
 
-            // Convert the lists into a stream of SearchResults.
+            // Flatten the lists into a stream of SearchResults.
             .flatMap(List::stream)
 
             // Collect the SearchResults into a Map.

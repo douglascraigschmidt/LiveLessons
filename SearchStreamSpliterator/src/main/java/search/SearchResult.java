@@ -9,7 +9,7 @@ public class SearchResult {
     /**
      * The string that's being searched.
      */
-    public final String mInputData;
+    public final String mInput;
 
     /**
      * The phrase that's being searched for in the inputData.
@@ -29,13 +29,42 @@ public class SearchResult {
     /**
      * Constructor initializes the fields.
      */
-    protected SearchResult(String inputData,
+    protected SearchResult(String input,
                            String phrase,
                            int index) {
         mPhrase = phrase;
         mIndex = index;
-        mInputData = inputData;
+        mInput = input;
         mThreadId = Thread.currentThread().getId();
+    }
+
+    /**
+     * Return the input
+     */
+    public String getInput() {
+        return mInput;
+    }
+
+    /**
+     * Return the word.
+     */
+    public String getPhrase() {
+        return mPhrase;
+    }
+
+    /**
+     * Return the index.
+     */
+    public int getIndex() {
+        return mIndex;
+    }
+
+    /**
+     * Returns a string version of this object.
+     */
+    @Override
+    public String toString() {
+        return "" + mIndex;
     }
 }
 

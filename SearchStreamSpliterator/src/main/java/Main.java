@@ -5,14 +5,12 @@ import utils.TestDataFactory;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -115,37 +113,33 @@ public class Main {
         System.gc();
 
         // Uncomment this to display all the results.
-        // displayResults(listOfListOfSearchResults);
+        displayResults(listOfListOfSearchResults);
     }
 
     /**
      * Display all the search results.
      */
     private static void displayResults(List<List<SearchResult>> listOfListOfSearchResults) {
-        // Transform the list of lists of results to a simple list of
-        // results.
-        List<SearchResult> listOfSearchResults = listOfListOfSearchResults
+        // Create a map that associates words found in the input with
+        // the indices where they were found.
+        Map<String, List<SearchResult>> resultsMap = listOfListOfSearchResults
+            // Convert the list of lists into a stream of lists.
             .stream()
+
+            // Flatten the lists into a stream of SearchResults.
             .flatMap(List::stream)
-            .collect(toList());
 
-        // Sort the list by the thread id.
-        listOfSearchResults.sort(Comparator.comparing(sr
-                                                      -> sr.mThreadId));
+            // Collect the SearchResults into a Map.
+            .collect(groupingBy(SearchResult::getPhrase, toList()));
 
-        // Display all the SearchResult objects.
-        listOfSearchResults
-            .forEach(searchResults
-                     -> 
-                     // print each SearchResult.
-                     System.out.println(" "
-                                        + searchResults.mPhrase
-                                        + " was found at offset "
-                                        + searchResults.mIndex
-                                        // + " in string "
-                                        // + searchResults.mInputData
-                                        + " in thread "
-                                        + searchResults.mThreadId));
+        // Print out the results in the map, where each phrase is
+        // first printed followed by a list of the indices where the
+        // phrase appeared in the input.
+        resultsMap.forEach((key, value)
+                           -> System.out.println("Phrase \""
+                                                 + key
+                                                 + "\" matched at "
+                                                 + value));
     }
 }
 

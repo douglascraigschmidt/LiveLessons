@@ -15,7 +15,7 @@ public class SearchResult {
      * The word that's being searched for in the inputData.
      */
     public final String mWord;
-    
+
     /**
      * The index of the word match in the mInputData.
      */
@@ -52,5 +52,13 @@ public class SearchResult {
     public int getIndex() {
         return mIndex;
     }
- }
+
+    /**
+     * Returns a string version of this object.
+     */
+    @Override
+    public String toString() {
+        return "" + mIndex;
+    }
+}
 
