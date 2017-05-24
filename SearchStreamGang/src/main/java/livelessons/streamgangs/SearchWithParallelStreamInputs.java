@@ -1,8 +1,11 @@
 package livelessons.streamgangs;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import livelessons.utils.SearchResults;
+
+import javax.naming.directory.SearchResult;
 
 import static java.util.stream.Collectors.toList;
 
@@ -69,7 +72,7 @@ public class SearchWithParallelStreamInputs
                                title))
             
             // Only keep a result that has at least one match.
-            .filter(result -> result.size() > 0)
+            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
             
             // Terminate the stream and return a list of
             // SearchResults.

@@ -109,6 +109,9 @@ public class SearchResults {
         return mList.size() == 0;
     }
 
+    /**
+     * Returns the number of results.
+     */
     public int size() {
         return mList.size();
     }

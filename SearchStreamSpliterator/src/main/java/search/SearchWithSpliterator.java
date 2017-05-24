@@ -1,6 +1,7 @@
 package search;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -88,6 +89,6 @@ public class SearchWithSpliterator {
                  .collect(toList()))
 
             // Filter out any list that has no SearchResults.
-            .filter(list -> list.size() > 0);
+            .filter(((Predicate<List>) List::isEmpty).negate());
     }
 }

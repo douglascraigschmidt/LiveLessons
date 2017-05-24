@@ -66,11 +66,7 @@ public class Main {
 
         // Get the list of phrases to find in the works of Shakespeare.
         mPhrasesToFind = TestDataFactory
-            .getPhraseList(sPHRASE_LIST_FILE)
-            .stream()
-            // Remove any empty phrases in the list.
-            .filter(phrase -> phrase.length() > 0)
-            .collect(toList());
+            .getPhraseList(sPHRASE_LIST_FILE);
 
         // Run the tests multiple times to account for any
         // instruction/data caching effects, as well as the time

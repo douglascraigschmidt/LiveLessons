@@ -49,16 +49,6 @@ public class TestDataFactory {
     }
 
     /**
-     * A generic negation predicate that can be used to negate a
-     * predicate.
-     *
-     * @return The negation of the input predicate.
-     */
-    public static<T> Predicate<T> not(Predicate<T> p) {
-        return p.negate();
-    }
-
-    /**
      * Return the word list in the @a filename as a list of
      * non-empty strings.
      */
