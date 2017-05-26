@@ -46,7 +46,7 @@ public class SearchResult {
     }
 
     /**
-     * Return the word.
+     * Return the phrase.
      */
     public String getPhrase() {
         return mPhrase;

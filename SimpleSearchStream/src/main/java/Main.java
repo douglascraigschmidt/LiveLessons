@@ -2,6 +2,11 @@ import search.WordSearcher;
 import utils.TestDataFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * This program searches seqentially for the occurrence of words in a
@@ -32,7 +37,7 @@ public class Main {
      * This is the main entry point into the program.
      */
     static public void main(String[] args) {
-        System.out.println("Starting WordSearchStream");
+        System.out.println("Starting SimpleSearchStream");
 
         // Create an input string containing the lyrics to the
         // do-re-mi song.
@@ -51,7 +56,7 @@ public class Main {
         // Print all matching words.
         wordSearcher.findAndPrintWords(wordsToFind);
 
-        System.out.println("Ending WordSearchStream");
+        System.out.println("Ending SimpleSearchStream");
     }
 }
 

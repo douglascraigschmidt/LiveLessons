@@ -8,50 +8,55 @@ import java.util.List;
  */
 public class SearchResults {
     /**
-     * @class SearchResult
-     *
-     * @brief Holds one search result.
+     * Hold the index of one search result.
      */
-    public class Result {
+    public static class Result {
         /**
          * The index in the search String where the word that was
          * found.
          */
-        public int mIndex;
+        private int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search
-         * result..
+         * result.
          */
         public Result(int index) {
             mIndex = index;
+        }
+
+        /**
+         * Return the index.
+         */
+        public int getIndex() {
+            return mIndex;
         }
     }
 
     /**
      * Id of the Thread that found a search result.
      */
-    public long mThreadId;
+    private long mThreadId;
 
     /**
      * The word that was found.
      */
-    public String mWord;
+    private String mWord;
 
     /**
      * The section title this search is associated with.
      */
-    public String mTitle;
+    private String mTitle;
 
     /**
      * The cycle in which the search result was found.
      */
-    public long mCycle;
+    private long mCycle;
 
     /**
      * The List of Result objects that matched the @code mWord.
      */
-    protected List<Result> mList;
+    private List<Result> mList;
 
     /**
      * Create an empty SearchResults, which is used to shutdown
@@ -59,6 +64,13 @@ public class SearchResults {
      */
     public SearchResults() {
         mList = null;
+    }
+
+    /**
+     * Return the list of Results.
+     */
+    public List<Result> getResultList() {
+        return mList;
     }
 
     /**
@@ -75,6 +87,22 @@ public class SearchResults {
         mList = new ArrayList<Result>();
     }
 
+    /**
+     * Create a SearchResults with values for the various fields.
+     * This constructor is also passed a filled in resultList.
+     */
+    public SearchResults(long threadId,
+                         long cycle,
+                         String word,
+                         String title,
+                         List<Result> resultList) {
+        mThreadId = threadId;
+        mCycle = cycle;
+        mWord = word;
+        mTitle = title;
+        mList = resultList;
+    }
+
     public String getTitle() {
         return mTitle;
     }
@@ -84,15 +112,15 @@ public class SearchResults {
      */
     public String headerToString() {
         return 
-            "["
-            + mThreadId
-            + "|"
-            + mCycle
-            + "] "
-            + mTitle
-            + ": \""
+            // "["
+            // + mThreadId
+            // + "|"
+            // + mCycle
+            // + "] "
+            // + mTitle
+            "  \""
             + mWord
-            + "\" at";
+            + "\" at ";
     }
 
     /**
@@ -116,6 +144,16 @@ public class SearchResults {
         return mList.size();
     }
 
+    /**
+     * Return the word.
+     */
+    public String getWord() {
+        return mWord;
+    }
+
+    /**
+     * Return a string version of the object.
+     */
     @Override
     public String toString() {
         String output = new String("");
@@ -139,8 +177,10 @@ public class SearchResults {
      * Print the results.
      */
     public SearchResults print() {
-        if (!isEmpty()) synchronized(System.out) {
+        if (!isEmpty()) {
+            synchronized(System.out) {
                 System.out.println(toString());
+            }
         }
         return this;
     }

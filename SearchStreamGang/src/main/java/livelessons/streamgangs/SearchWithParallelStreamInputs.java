@@ -69,11 +69,14 @@ public class SearchWithParallelStreamInputs
             .map(word -> 
                  searchForWord(word,
                                input,
-                               title))
-            
+                               title,
+                               false))
+
             // Only keep a result that has at least one match.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
-            
+            // Filtering can also be done as
+            // .filter(result -> result.size() > 0)
+
             // Terminate the stream and return a list of
             // SearchResults.
             .collect(toList());

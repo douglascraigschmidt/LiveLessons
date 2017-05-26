@@ -77,7 +77,8 @@ public class SearchWithCompletableFuturesInputs
                  CompletableFuture.supplyAsync(()
                                                -> searchForWord(word,
                                                                 inputData,
-                                                                title)))
+                                                                title,
+                                                                false)))
 
             // Terminate stream and return a list of
             // CompletableFutures.

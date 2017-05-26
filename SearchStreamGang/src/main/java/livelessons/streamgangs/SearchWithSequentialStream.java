@@ -64,13 +64,16 @@ public class SearchWithSequentialStream
             // Convert the array of words into a Stream.
             .stream()
             
-            // Find all places where word matches the input data.
+            // Find all indices where word matches the input data.
             .map(word -> searchForWord(word,
                                        input,
-                                       title))
+                                       title,
+                                       false))
             
             // Only keep a result that has at least one match.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            // Filtering can also be done as
+            // .filter(result -> result.size() > 0)
             
             // Terminate stream and return a list of SearchResults.
             .collect(toList());

@@ -95,7 +95,8 @@ public class SearchWithRxJavaWords
                     return searchForWord(word, 
                                          // Skip over the title.
                                          inputString.substring(title.length()),
-                                         title);
+                                         title,
+                                         false);
                 })
 
             // Only keep SearchResults with at least one match.

@@ -102,7 +102,10 @@ public class SearchWithRxJavaInputs
             .map(word -> 
                  // Return a SearchResults containing a match for
                  // each time word appears in the input string.
-                 searchForWord(word, input, title))
+                 searchForWord(word, 
+                               input,
+                               title,
+                               false))
 
             // Only keep SearchResults with at least one match.
             .filter(result -> result.size() > 0)

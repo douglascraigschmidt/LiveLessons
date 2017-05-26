@@ -4,10 +4,11 @@ import livelessons.utils.SearchResults;
 import livelessons.utils.StreamGang;
 import livelessons.utils.WordMatchSpliterator;
 
+import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterators;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,9 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class factors out the common code used by all instantiations
@@ -39,7 +43,7 @@ public class SearchStreamGang
      * Exit barrier that controls when the framework has completed its
      * processing.
      */
-    protected CountDownLatch mExitBarrier = null;
+    private CountDownLatch mExitBarrier = null;
         
     /**
      * Constructor initializes the fields.
@@ -91,14 +95,8 @@ public class SearchStreamGang
         // Stop timing the test run.
         stopTiming();
 
-        System.out.println(TAG + ": The search returned " 
-                           + results.stream()
-                                    .mapToInt(list 
-                                              -> (Integer) list.stream().mapToInt(SearchResults::size).sum())
-                                    .sum()
-                           + " word matches for "
-                           + getInput().size() 
-                           + " input strings");
+        // Print the results.
+        printResults(TAG, results);
 
         // Indicate all computations in this iteration are done.
         try {
@@ -153,43 +151,92 @@ public class SearchStreamGang
     }
 
     /**
+     * Print out the search results.
+     */
+    private void printResults(String test,
+                              List<List<SearchResults>> listOfListOfSearchResults) {
+        System.out.println(test +
+                           ": The search returned "
+                           + listOfListOfSearchResults.stream()
+                           .mapToInt(list 
+                                     -> list.stream().mapToInt(SearchResults::size).sum())
+                           .sum()
+                           + " word matches for "
+                           + getInput().size() 
+                           + " input strings");
+
+        // Create a map that associates words found in the input with
+        // the indices where they were found.
+        Map<String, List<SearchResults>> resultsMap = listOfListOfSearchResults
+            // Convert the list of lists into a stream of lists.
+            .stream()
+
+            // Flatten the lists into a stream of SearchResults.
+            .flatMap(List::stream)
+
+            // Collect the SearchResults into a Map.
+            .collect(groupingBy(SearchResults::getTitle));
+
+        // Print out the results in the map, where each phrase is
+        // first printed followed by a list of the indices where the
+        // phrase appeared in the input.
+        resultsMap.forEach((key, value)
+                           -> { System.out.println("Title \""
+                                                 + key
+                                                 + "\" contained");
+                                value.stream().forEach((SearchResults sr) -> sr.print());
+        });
+    }
+
+    /**
      * Looks for all instances of @code word in @code inputData and
      * return a list of all the @code SearchResults (if any).
      */
     public SearchResults searchForWord(String word,
                                        String inputData,
-                                       String title) {
-    	// Create SearchResults to keep track of relevant info.
-        SearchResults results =
-            new SearchResults(Thread.currentThread().getId(),
-                              currentCycle(),
-                              word,
-                              title);
-
-        // Use a WordMatchSpliterator to add the indices of all places
-        // in the inputData where word matches.
-        StreamSupport
-            // Create a sequential stream of Integers that records the
-            // indices (if any) where the word matched the input data.
-            .stream(new WordMatchSpliterator(inputData, word),
-                    false)
+                                       String title,
+                                       boolean parallel) {
+        List<SearchResults.Result> resultList =
+            // Use a WordMatchSpliterator to add the indices of all places
+            // in the inputData where word matches.
+            StreamSupport
+                // Create a stream of Results to record the indices
+                // (if any) where the word matched the input data.
+                .stream(new WordMatchSpliterator(inputData, word),
+                        parallel)
                     
-            // Add any matches to the results object.
-            .forEach(results::add);
+                // This terminal operation triggers aggregate
+                // operation processing and returns a list of Results.
+                .collect(toList());
 
-        return results;
+    	// Create/return SearchResults to keep track of relevant info.
+        return new SearchResults(Thread.currentThread().getId(),
+                                 currentCycle(),
+                                 word,
+                                 title,
+                                 resultList);
     }
     
     /**
      * Return the title portion of the @a inputData.
      */
     public String getTitle(String inputData) {
-        Pattern p =
-            Pattern.compile("^Act [0-9]+, Scene [0-9]+");
+        // This regex matches only the first line in the inputData.
+        Pattern p = Pattern.compile("(?m)^.*$");
+
+        // Create a matcher for this pattern.
         Matcher m = p.matcher(inputData);
+
+        // Find/return the first line in the string.
         return m.find()
             ? m.group()
             : "";
+        /* Could also use
+          
+        int index = inputData.indexOf('\n');
+        return inputData.substring(0,
+                                   index);
+        */
     }
 
     /**
@@ -214,7 +261,7 @@ public class SearchStreamGang
     /**
      * Start timing the test run.
      */
-    public void startTiming() {
+    private void startTiming() {
         // Note the start time.
         mStartTime = System.nanoTime();
     }
@@ -222,7 +269,7 @@ public class SearchStreamGang
     /**
      * Stop timing the test run.
      */
-    public void stopTiming() {
+    private void stopTiming() {
         mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 

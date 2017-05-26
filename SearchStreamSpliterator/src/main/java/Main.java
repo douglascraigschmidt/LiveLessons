@@ -40,9 +40,9 @@ public class Main {
         "phraseList.txt";
 
     /**
-     * The string containing the complete works of Shakespeare.
+     * A List of strings containing the complete works of Shakespeare.
      */
-    private static String mInput;
+    private static List<String> mInput;
 
     /**
      * The list of phrases to find.
@@ -55,14 +55,14 @@ public class Main {
     static public void main(String[] args) {
         System.out.println("Starting SearchStream");
 
-        // Create a single input string from the works of Shakespeare.
+        // Create a list of input strings from the works of
+        // Shakespeare.
         mInput =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                     // Split using a character that's
-                                     // not in the file.
-                                     "#").get(0);
+                                     "#");
 
-        // Get the list of phrases to find in the works of Shakespeare.
+        // Get the list of phrases to find in the works of
+        // Shakespeare.
         mPhrasesToFind = TestDataFactory
             .getPhraseList(sPHRASE_LIST_FILE);
 
@@ -85,35 +85,42 @@ public class Main {
      * or not.
      */
     private static void runTest(boolean parallel) {
-        // Record the start time.
-        long startTime = System.nanoTime();
+        // Iterate through all the input strings.
+        for (int iteration = 0;
+             iteration < mInput.size();
+             iteration++) {
+            // Record the start time.
+            long startTime = System.nanoTime();
 
-        // Search the input looking for phrases that match.
-        List<List<SearchResult>> listOfListOfSearchResults =
-            new SearchWithSpliterator(mInput,
-                                      mPhrasesToFind,
-                                      parallel).processStream();
+            // Search the input looking for phrases that match.
+            List<List<SearchResult>> listOfListOfSearchResults =
+                new SearchWithSpliterator(mInput.get(iteration),
+                                          mPhrasesToFind,
+                                          parallel).processStream();
 
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+            // Record the stop time.
+            long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
-        // Print the number of times each phrase matched the input.
-        System.out.println("SearchStream"
-                           + (parallel ? "(parallel)" : "(sequential)")
-                           + ": The search returned = "
-                           // Count the number of matches.
-                           + listOfListOfSearchResults.stream()
-                           .mapToInt(List::size)
-                           .sum()
-                           + " phrase matches for the input in "
-                           + stopTime
-                           + " milliseconds");
+            // Print the number of times each phrase matched the input.
+            System.out.println("SearchStream"
+                               + (parallel ? "(parallel)" : "(sequential)")
+                               + ": The search returned = "
+                               // Count the number of matches.
+                               + listOfListOfSearchResults.stream()
+                                                          .mapToInt(List::size)
+                                                          .sum()
+                               + " phrase matches for input string "
+                               + iteration + 1
+                               + " in "
+                               + stopTime
+                               + " milliseconds");
 
-        // Help the garbage collector.
-        System.gc();
+            // Run the garbage collector after each test.
+            System.gc();
 
-        // Uncomment this to display all the results.
-        displayResults(listOfListOfSearchResults);
+            // Uncomment this to display all the results.
+            displayResults(listOfListOfSearchResults);
+        }
     }
 
     /**
@@ -130,7 +137,7 @@ public class Main {
             .flatMap(List::stream)
 
             // Collect the SearchResults into a Map.
-            .collect(groupingBy(SearchResult::getPhrase, toList()));
+            .collect(groupingBy(SearchResult::getPhrase));
 
         // Print out the results in the map, where each phrase is
         // first printed followed by a list of the indices where the
@@ -142,4 +149,3 @@ public class Main {
                                                  + value));
     }
 }
-

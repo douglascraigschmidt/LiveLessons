@@ -58,7 +58,7 @@ public class TestDataFactory {
             return Files
                 // Read all lines from filename.
                 .lines(Paths.get(ClassLoader.getSystemResource
-                                        (filename).toURI()))
+                                 (filename).toURI()))
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
