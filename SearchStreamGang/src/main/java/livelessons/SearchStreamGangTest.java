@@ -79,7 +79,7 @@ public class SearchStreamGangTest {
     private static String sSHAKESPEARE_DATA_FILE = "completeWorksOfShakespeare.txt";
     private static String sHAMLET_DATA_FILE = "hamlet.txt";
     private static String sMACBETH_DATA_FILE = "macbeth.txt";
-    private static String sWORD_LIST_FILE = "wordList.txt";
+    private static String sWORD_LIST_FILE = "phraseList.txt";
 
     /**
      * This is the entry point into the test driver program.

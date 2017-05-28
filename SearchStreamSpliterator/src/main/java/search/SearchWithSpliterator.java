@@ -2,6 +2,8 @@ package search;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -16,9 +18,9 @@ import static java.util.stream.Collectors.toList;
  */
 public class SearchWithSpliterator {
     /**
-     * The string to search.
+     * The list of strings to search.
      */
-    private String mInput;
+    private List<String> mInputList;
 
     /**
      * The list of phrases to find.
@@ -33,10 +35,10 @@ public class SearchWithSpliterator {
     /**
      * Construtor initializes the fields.
      */
-    public SearchWithSpliterator(String input,
+    public SearchWithSpliterator(List<String> inputList,
                                  List<String> phrasesToFind,
                                  boolean parallel) {
-        mInput = input;
+        mInputList = inputList;
         mPhrasesToFind = phrasesToFind;
         mParallel = parallel;
     }
@@ -44,16 +46,16 @@ public class SearchWithSpliterator {
     /**
      * Performs stream processing on the input.
      */
-    public List<List<SearchResult>> processStream() {
-        // Create a list of SearchResult objects that indicate which
-        // phrases are found in the input string.
-        return Stream
-            // Convert the input string into a stream.
-            .of(mInput)
+    public List<List<SearchResults>> processStream() {
+        // Create a list of SearchResults that indicate which phrases
+        // are found in the list of input strings.
+        return mInputList
+            // Convert the input list into a stream.
+            .stream()
 
             // Process each input string to find all occurrences of
             // the search phrases.
-            .flatMap(this::processInput)
+            .map(this::processInput)
 
             // This terminal operation triggers aggregate operation
             // processing and returns a list of list of SearchResults.
@@ -61,34 +63,84 @@ public class SearchWithSpliterator {
     }
 
     /**
-     * This method searches the @a inputData for all occurrences of
+     * This method searches the @a inputString for all occurrences of
      * the phrases to find.
      */
-    private Stream<List<SearchResult>> processInput(String inputData) {
+    private List<SearchResults> processInput(String inputString) {
+        // Get the section title.
+        String title = getTitle(inputString);
+
+        // Skip over the title.
+        String input = inputString.substring(title.length());
+
         // Find all occurrences of phrase in the input string.
         return mPhrasesToFind
             // Convert the list of phrases to find into a stream.
             .stream()
 
-            // For each phrase create a list of SearchResults indicating
-            // all places (if any) where the phrase matched the input.
-            .map(phrase 
-                 -> StreamSupport
-                 // Create a stream of SearchResult objects that match
-                 // the number of times a phrase appears in an input
-                 // string.
-                 .stream(new PhraseMatchSpliterator(inputData,
-                                                    phrase),
-                         // Indicates whether to run the spliterator
-                         // concurrently or not.
-                         mParallel)
+            // Find all indices where phrase matches the input data.
+            .map(phrase -> searchForPhrase(phrase,
+                                       input,
+                                       title,
+                                       mParallel))
 
-                 // This terminal operation triggers aggregate
-                 // operation processing and returns a list of
-                 // SearchResults.
-                 .collect(toList()))
+            // Only keep a result that has at least one match.
+            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            // Filtering can also be done as
+            // .filter(result -> result.size() > 0)
 
-            // Filter out any list that has no SearchResults.
-            .filter(((Predicate<List>) List::isEmpty).negate());
+            // Terminate the stream and trigger the processing.
+            .collect(toList());
+    }
+
+    /**
+     * Looks for all instances of @code phrase in @code inputData and
+     * return a list of all the @code SearchResults (if any).
+     */
+    private SearchResults searchForPhrase(String phrase,
+                                          String inputData,
+                                          String title,
+                                          boolean parallel) {
+        List<SearchResults.Result> resultList =
+            // Use a PhraseMatchSpliterator to add the indices of all
+            // places in the inputData where phrase matches.
+            StreamSupport
+                // Create a stream of Results to record the indices
+                // (if any) where the phrase matched the input data.
+                .stream(new PhraseMatchSpliterator(inputData, phrase),
+                        parallel)
+                    
+                // This terminal operation triggers aggregate
+                // operation processing and returns a list of Results.
+                .collect(toList());
+
+    	// Create/return SearchResults to keep track of relevant info.
+        return new SearchResults(Thread.currentThread().getId(),
+                                 1,
+                                 phrase,
+                                 title,
+                                 resultList);
+    }
+
+    /**
+     * Return the title portion of the @a inputData.
+     */
+    private String getTitle(String inputData) {
+        // This regex matches only the first line in the inputData.
+        Pattern p = Pattern.compile("(?m)^.*$");
+
+        // Create a matcher for this pattern.
+        Matcher m = p.matcher(inputData);
+
+        // Find/return the first line in the string.
+        return m.find()
+            ? m.group()
+            : "";
+        /* Could also use
+          
+        int index = inputData.indexOf('\n');
+        return inputData.substring(0,
+                                   index);
+        */
     }
 }

@@ -1,4 +1,5 @@
-import search.SearchResult;
+import search.PhraseMatchSpliterator;
+import search.SearchResults;
 import search.SearchWithSpliterator;
 import utils.TestDataFactory;
 
@@ -59,7 +60,7 @@ public class Main {
         // Shakespeare.
         mInput =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                     "#");
+                                     "@");
 
         // Get the list of phrases to find in the works of
         // Shakespeare.
@@ -85,51 +86,49 @@ public class Main {
      * or not.
      */
     private static void runTest(boolean parallel) {
-        // Iterate through all the input strings.
-        for (int iteration = 0;
-             iteration < mInput.size();
-             iteration++) {
-            // Record the start time.
-            long startTime = System.nanoTime();
+        // Record the start time.
+        long startTime = System.nanoTime();
 
-            // Search the input looking for phrases that match.
-            List<List<SearchResult>> listOfListOfSearchResults =
-                new SearchWithSpliterator(mInput.get(iteration),
-                                          mPhrasesToFind,
-                                          parallel).processStream();
+        // Search the input looking for phrases that match.
+        List<List<SearchResults>> listOfListOfSearchResults =
+            new SearchWithSpliterator(mInput,
+                                      mPhrasesToFind,
+                                      parallel).processStream();
 
-            // Record the stop time.
-            long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
-            // Print the number of times each phrase matched the input.
-            System.out.println("SearchStream"
-                               + (parallel ? "(parallel)" : "(sequential)")
-                               + ": The search returned = "
-                               // Count the number of matches.
-                               + listOfListOfSearchResults.stream()
-                                                          .mapToInt(List::size)
-                                                          .sum()
-                               + " phrase matches for input string "
-                               + iteration + 1
-                               + " in "
-                               + stopTime
-                               + " milliseconds");
+        // Print the results.
+        printResults(parallel,
+                     stopTime,
+                     listOfListOfSearchResults);
 
-            // Run the garbage collector after each test.
-            System.gc();
-
-            // Uncomment this to display all the results.
-            displayResults(listOfListOfSearchResults);
-        }
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**
-     * Display all the search results.
+     * Print out the search results.
      */
-    private static void displayResults(List<List<SearchResult>> listOfListOfSearchResults) {
+    private static void printResults(boolean parallel,
+                                     long stopTime,
+                                     List<List<SearchResults>> listOfListOfSearchResults) {
+        // Print the number of times each phrase matched the input.
+        System.out.println("SearchStreamSpliterator"
+                           + (parallel ? "(parallel)" : "(sequential)")
+                           + ": The search returned = "
+                           // Count the number of matches.
+                           + listOfListOfSearchResults.stream()
+                           .mapToInt(list
+                                     -> list.stream().mapToInt(SearchResults::size).sum())
+                           .sum()
+                           + " phrase matches for input strings in "
+                           + stopTime
+                           + " milliseconds");
+
         // Create a map that associates words found in the input with
         // the indices where they were found.
-        Map<String, List<SearchResult>> resultsMap = listOfListOfSearchResults
+        Map<String, List<SearchResults>> resultsMap = listOfListOfSearchResults
             // Convert the list of lists into a stream of lists.
             .stream()
 
@@ -137,15 +136,16 @@ public class Main {
             .flatMap(List::stream)
 
             // Collect the SearchResults into a Map.
-            .collect(groupingBy(SearchResult::getPhrase));
+            .collect(groupingBy(SearchResults::getTitle));
 
         // Print out the results in the map, where each phrase is
         // first printed followed by a list of the indices where the
         // phrase appeared in the input.
         resultsMap.forEach((key, value)
-                           -> System.out.println("Phrase \""
-                                                 + key
-                                                 + "\" matched at "
-                                                 + value));
+                           -> { System.out.println("Title \""
+                                                   + key
+                                                   + "\" contained");
+                               value.stream().forEach((SearchResults sr) -> sr.print());
+                           });
     }
 }

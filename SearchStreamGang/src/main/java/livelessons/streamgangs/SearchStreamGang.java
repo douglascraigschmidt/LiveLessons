@@ -1,10 +1,9 @@
 package livelessons.streamgangs;
 
+import livelessons.utils.PhraseMatchSpliterator;
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamGang;
-import livelessons.utils.WordMatchSpliterator;
 
-import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -197,12 +195,12 @@ public class SearchStreamGang
                                        String title,
                                        boolean parallel) {
         List<SearchResults.Result> resultList =
-            // Use a WordMatchSpliterator to add the indices of all places
+            // Use a PhraseMatchSpliterator to add the indices of all places
             // in the inputData where word matches.
             StreamSupport
                 // Create a stream of Results to record the indices
                 // (if any) where the word matched the input data.
-                .stream(new WordMatchSpliterator(inputData, word),
+                .stream(new PhraseMatchSpliterator(inputData, word),
                         parallel)
                     
                 // This terminal operation triggers aggregate

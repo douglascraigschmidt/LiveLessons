@@ -2,13 +2,8 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import livelessons.utils.SearchResults;
-import livelessons.utils.WordMatchSpliterator;
-
-import javax.naming.directory.SearchResult;
 
 import static java.util.stream.Collectors.toList;
 
