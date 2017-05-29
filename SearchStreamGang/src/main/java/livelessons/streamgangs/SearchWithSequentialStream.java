@@ -11,24 +11,24 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes the SearchStreamGang framework to use Java Streams to
- * sequentially search an input data string for each word in an array
- * of words.
+ * sequentially search an input data string for each phrase in an array
+ * of phrases.
  */
 public class SearchWithSequentialStream
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithSequentialStream(List<String> wordsToFind,
+    public SearchWithSequentialStream(List<String> phrasesToFind,
                                       List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * sequentially search for words in the input data.
+     * sequentially search for phrases in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -39,7 +39,7 @@ public class SearchWithSequentialStream
             .stream()
 
             // Map each input string to list of SearchResults
-            // containing the words found in the input.
+            // containing the phrases found in the input.
             .map(this::processInput)
 
             // Terminate stream and return a list of lists of
@@ -49,7 +49,7 @@ public class SearchWithSequentialStream
     
     /**
      * Sequentially search @a inputString for all occurrences of the
-     * words to find.
+     * phrases to find.
      */
     private List<SearchResults> processInput(String inputString) {
         // Get the section title.
@@ -58,17 +58,17 @@ public class SearchWithSequentialStream
         // Skip over the title.
         String input = inputString.substring(title.length());
 
-        // Iterate through each word we're searching for and try to
+        // Iterate through each phrase we're searching for and try to
         // find it in the inputData.
-        List<SearchResults> results = mWordsToFind
-            // Convert the array of words into a Stream.
+        List<SearchResults> results = mPhrasesToFind
+            // Convert the array of phrases into a Stream.
             .stream()
             
-            // Find all indices where word matches the input data.
-            .map(word -> searchForWord(word,
-                                       input,
-                                       title,
-                                       false))
+            // Find all indices where phrase matches the input data.
+            .map(phrase -> searchForPhrase(phrase,
+                                           input,
+                                           title,
+                                           false))
             
             // Only keep a result that has at least one match.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())

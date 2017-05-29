@@ -3,6 +3,7 @@ package livelessons.streamgangs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamsUtils;
@@ -14,48 +15,48 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Customizes the SearchStreamGang framework to use RxJava in
- * conjunction with Java Streams to search how many times each word in
- * an array of words appears in input data.
+ * conjunction with Java Streams to search how many times each phrase in
+ * an array of phrases appears in input data.
  */
-public class SearchWithRxJavaWords
+public class SearchWithRxJavaPhrases
         extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithRxJavaWords(List<String> wordsToFind,
-                                 List<List<String>> stringsToSearch) {
+    public SearchWithRxJavaPhrases(List<String> phrasesToFind,
+                                   List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
                 stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses an RxJava Stream to
-     * concurrently search for words in the input data.
+     * concurrently search for phrases in the input data.
      */
    @Override
    protected List<List<SearchResults>> processStream() {
        return Observable
-           // Converts mWordsToFind array into an Observable that
+           // Converts mPhrasesToFind array into an Observable that
            // emits the items in the array.
-           .from(mWordsToFind)
+           .from(mPhrasesToFind)
 
            // Returns an Observable that emits items based on applying
-           // processWord() to each item emitted by the source
-           // Observable, where processWord() returns an Observable,
+           // processPhrase() to each item emitted by the source
+           // Observable, where processPhrase() returns an Observable,
            // and then merging the resulting Observables and emitting
            // the results of this merger as a single Observable.
-           .flatMap(word ->
+           .flatMap(phrase ->
                     Observable
-                    // Returns an Observable that emits a single word
+                    // Returns an Observable that emits a single phrase
                     // and then completes.
-                    .just(word)
+                    .just(phrase)
 
                     // Returns an Observable that applies the
-                    // processWord() method to each item emitted by
+                    // processPhrase() method to each item emitted by
                     // the source Observable and emits a list of
                     // SearchResults.
-                    .map(this::processWord)
+                    .map(this::processPhrase)
 
                     // Asynchronously subscribes Observers to this
                     // Observable on the computation scheduler.
@@ -76,31 +77,33 @@ public class SearchWithRxJavaWords
    }
 
     /**
-     * Search all the input strings for all occurrences of the word to
+     * Search all the input strings for all occurrences of the phrase to
      * find.
      */
-    private List<SearchResults> processWord(String word) {
+    private List<SearchResults> processPhrase(String phrase) {
      	// Get the input.
         return getInput()
             // Sequentially process each String in the input list.
             .stream()
 
             // Map each input string to a stream of SearchResults for
-            // each time the word appears in the input.
+            // each time the phrase appears in the input.
             .map(inputString -> {
                     String title = getTitle(inputString);
 
                     // Return a SearchResults containing a match for
-                    // each time word appears in the input string.
-                    return searchForWord(word, 
-                                         // Skip over the title.
-                                         inputString.substring(title.length()),
-                                         title,
-                                         false);
+                    // each time phrase appears in the input string.
+                    return searchForPhrase(phrase, 
+                                           // Skip over the title.
+                                           inputString.substring(title.length()),
+                                           title,
+                                           false);
                 })
 
-            // Only keep SearchResults with at least one match.
-            .filter(result -> result.size() > 0)
+            // Only keep a result that has at least one match.
+            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            // Filtering can also be done as
+            // .filter(result -> result.size() > 0)
 
             // Create a list of SearchResults.
             .collect(toList());

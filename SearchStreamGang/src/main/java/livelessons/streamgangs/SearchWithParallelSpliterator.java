@@ -10,7 +10,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Customizes the SearchStreamGang framework to use a Java stream to
  * concurrently search each input data string and use a parallel
- * spliterator to search for each word (from an array of words) in
+ * spliterator to search for each phrase (from an array of phrases) in
  * each input data string.
  */
 public class SearchWithParallelSpliterator
@@ -18,26 +18,26 @@ public class SearchWithParallelSpliterator
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithParallelSpliterator(List<String> wordsToFind,
+    public SearchWithParallelSpliterator(List<String> phrasesToFind,
                                          List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * concurrently search each input string for words to find.
+     * concurrently search each input string for phrases to find.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
     	// Get the input.
         return getInput()
             // Concurrently process each string in the input list.
-            .parallelStream()
+            .stream()
 
             // Concurrently map each string to a stream containing the
-            // words found in the input string.
+            // phrases found in the input string.
             .map(this::processInput)
 
             // Terminate the stream and return a list of lists of
@@ -46,7 +46,7 @@ public class SearchWithParallelSpliterator
     }
 
     /**
-     * Search the @a inputString for all occurrences of the words to
+     * Search the @a inputString for all occurrences of the phrases to
      * find.
      */
     private List<SearchResults> processInput(String inputString) {
@@ -56,16 +56,16 @@ public class SearchWithParallelSpliterator
         // Skip over the title.
         String input = inputString.substring(title.length());
 
-        // Find all occurrences of word in the input string.
-        return mWordsToFind
-            // Convert the list of words to find into a stream.
+        // Find all occurrences of phrase in the input string.
+        return mPhrasesToFind
+            // Convert the list of phrases to find into a stream.
             .stream()
 
-            // Find all indices where word matches the input data.
-            .map(word -> searchForWord(word,
-                                       input,
-                                       title,
-                                       true))
+            // Find all indices where phrase matches the input data.
+            .map(phrase -> searchForPhrase(phrase,
+                                           input,
+                                           title,
+                                           true))
 
             // Only keep a result that has at least one match.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())

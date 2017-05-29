@@ -11,37 +11,37 @@ import static java.util.stream.Collectors.toList;
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
  * in conjunction with Java Streams to asynchronously search how many
- * times each word in a list of words appears in a list of input
+ * times each phrase in a list of phrases appears in a list of input
  * strings.
  */
-public class SearchWithCompletableFuturesWords
+public class SearchWithCompletableFuturesPhrases
     extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithCompletableFuturesWords(List<String> wordsToFind,
-                                             List<List<String>> stringsToSearch) {
+    public SearchWithCompletableFuturesPhrases(List<String> phrasesToFind,
+                                               List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses a Java 8 Stream and
-     * CompletableFutures to asynchronously search for words in the
+     * CompletableFutures to asynchronously search for phrases in the
      * input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Convert the words to find into a list of CompletableFutures
+        // Convert the phrases to find into a list of CompletableFutures
         // to lists of SearchResults.
-        List<CompletableFuture<List<SearchResults>>> listOfFutures = mWordsToFind
-            // Create a sequential stream of words to find.
+        List<CompletableFuture<List<SearchResults>>> listOfFutures = mPhrasesToFind
+            // Create a sequential stream of phrases to find.
             .stream()
 
-            // Map each word to a CompletableFuture to a list of
+            // Map each phrase to a CompletableFuture to a list of
             // SearchResults.
-            .map(this::processWordAsync)
+            .map(this::processPhraseAsync)
 
             // Terminate stream and return a list of
             // CompletableFutures.
@@ -49,21 +49,33 @@ public class SearchWithCompletableFuturesWords
                     
         // Convert all the completed CompletableFutures in the
         // listOfFutures into a list of lists of SearchResults.
-        return StreamsUtils.joinAll(listOfFutures)
-                            // join() blocks the calling thread until
-                            // all the futures have been completed.
-                            .join();
+        List<List<SearchResults>> results = StreamsUtils
+            .joinAll(listOfFutures)
+            // join() blocks the calling thread until all the futures
+            // have been completed.
+            .join();
+            
+        // Return results that filter out all zero-sized results.
+        return results
+            // Convert into a stream.
+            .stream()
+
+            // Only keep a result that has at least one match.
+            .filter(list -> list.stream().mapToInt(SearchResults::size).sum() > 0)
+            
+            // Terminate stream and return a list of SearchResults.
+            .collect(toList());
     }
 
     /**
      * Asynchronously search all the input strings for occurrences of
-     * the word to find.
+     * the phrase to find.
      */
-    private CompletableFuture<List<SearchResults>> processWordAsync(String word) {
+    private CompletableFuture<List<SearchResults>> processPhraseAsync(String phrase) {
         // Convert the input strings into a list of
         // CompletableFutures to SearchResults.
         List<CompletableFuture<SearchResults>> listOfFutures = getInput()
-            // Create a sequential stream of words to find.
+            // Create a sequential stream of phrases to find.
             .stream()
 
             // Map each input string to a CompletableFuture to
@@ -75,12 +87,12 @@ public class SearchWithCompletableFuturesWords
                     // Get the input string (skipping over the title).
                     String inputData = inputString.substring(title.length());
 
-                    // Asynchronously search for the word in the input string.
+                    // Asynchronously search for the phrase in the input string.
                     return CompletableFuture.supplyAsync(() 
-                                                         -> searchForWord(word,
-                                                                          inputData,
-                                                                          title,
-                                                                          false));
+                                                         -> searchForPhrase(phrase,
+                                                                            inputData,
+                                                                            title,
+                                                                            false));
                 })
 
             // Terminate stream and return a list of

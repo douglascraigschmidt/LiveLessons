@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 import javax.naming.directory.SearchResult;
 
@@ -22,23 +23,23 @@ import static java.util.stream.Collectors.toList;
 /**
  * Customizes the SearchStreamGang framework to use RxJava in
  * conjunction with Java Streams to search the input data for each
- * word in an array of words.
+ * phrase in an array of phrases.
  */
 public class SearchWithRxJavaInputs
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithRxJavaInputs(List<String> wordsToFind,
+    public SearchWithRxJavaInputs(List<String> phrasesToFind,
                                   List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses an RxJava Stream to
-     * concurrently search for words in the input data.
+     * concurrently search for phrases in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -84,7 +85,7 @@ public class SearchWithRxJavaInputs
     }
 
     /**
-     * Search input string for all occurrences of the words to find.
+     * Search input string for all occurrences of the phrases to find.
      */
     private List<SearchResults> processInput(String inputString) {
         // Get the title.
@@ -93,22 +94,24 @@ public class SearchWithRxJavaInputs
         // Skip over the title.
         String input = inputString.substring(title.length());
 
-        return mWordsToFind
-            // Sequentially process each word.
+        return mPhrasesToFind
+            // Sequentially process each phrase.
             .stream()
 
-            // Map each word to a stream of SearchResults for each
-            // time the word is found in the input.
-            .map(word -> 
+            // Map each phrase to a stream of SearchResults for each
+            // time the phrase is found in the input.
+            .map(phrase -> 
                  // Return a SearchResults containing a match for
-                 // each time word appears in the input string.
-                 searchForWord(word, 
-                               input,
-                               title,
-                               false))
+                 // each time phrase appears in the input string.
+                 searchForPhrase(phrase, 
+                                 input,
+                                 title,
+                                 false))
 
-            // Only keep SearchResults with at least one match.
-            .filter(result -> result.size() > 0)
+            // Only keep a result that has at least one match.
+            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            // Filtering can also be done as
+            // .filter(result -> result.size() > 0)
 
             // Create a list of SearchResults.
             .collect(toList());

@@ -1,4 +1,4 @@
-package livelessons.utils;
+package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Defines a framework for initiating Streams that process input from
  * a generic List of elements E for one or more cycles.
  */
-public abstract class StreamGang<E> 
+public abstract class StreamGang<E>
        implements Runnable {
     /**
      * Debugging tag
@@ -104,6 +104,6 @@ public abstract class StreamGang<E>
 
             // Invoke hook method to wait for all the tasks to exit.
             awaitTasksDone();
-        }            
+        }
     }
 }

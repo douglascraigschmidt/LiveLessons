@@ -46,6 +46,7 @@ public class PhraseMatchSpliterator
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
         
+        // Create a regex that will match the phrase across lines.
         String regexPhrase = phrase
             // Replace multiple spaces with one whitespace
             // boundary expression.
@@ -56,6 +57,7 @@ public class PhraseMatchSpliterator
         // Ignore case and search for phrases that split across lines.
         mPattern = Pattern.compile(regexPhrase,
                                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
         // Create a regex matcher.
         mPhraseMatcher = mPattern.matcher(input);
 
@@ -65,8 +67,9 @@ public class PhraseMatchSpliterator
     }
 
     /**
-     * This constructor is used internally by the trySplit() method
-     * below.
+     * This constructor is used internally by the trySplit() method.
+     * It initializes all the fields for the "left hand size" of a
+     * split.
      */
     private PhraseMatchSpliterator(String input,
                                    String phrase,
@@ -104,9 +107,8 @@ public class PhraseMatchSpliterator
      */
     @Override
     public Spliterator<SearchResults.Result> trySplit() {
+        // Current size of the entire input string.
         int currentSize = mInput.length();
-        int phraseLength = mPhrase.length();
-        int patternPhraseLength = mPattern.toString().length();
 
         // Bail out if the input is too small to split further.
         if (currentSize < mMinSplitSize)
@@ -114,6 +116,12 @@ public class PhraseMatchSpliterator
 
         // Compute the candidate split point.
         int splitPos = currentSize / 2;
+
+        // Length of the phrase in non-regex characters.
+        int phraseLength = mPhrase.length();
+        
+        // Length of the phrase in regex characters.
+        int patternPhraseLength = mPattern.toString().length();
 
         // Subtract the phrase length so we can check to make sure the
         // phrase doesn't span across splitPos.
@@ -125,28 +133,34 @@ public class PhraseMatchSpliterator
             return null;
         }
 
-        // Handle the case where a phrase spans across the initial
-        // splitPos.
+        // Create a substring to handle the case where a phrase spans
+        // across the initial splitPos.
         String substr = mInput.substring(startPos,
                                          startPos + patternPhraseLength);
 
-        // Try to match the pattern in the substr.
+        // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
 
-        // Check to see if the phrase matches.
+        // Check to see if the phrase matches within the subtring.
         if (phraseMatcher.find()) 
-            // Update the splitPos to account for the phrase that
-            // spans newlines.
+            // If there's a match update the splitPos to account for
+            // the phrase that spans newlines.
             splitPos = startPos + phraseMatcher.start() + phraseMatcher.group().length();
 
         // Split the input at the appropriate location.
-        String rightHandSide = mInput.substring(0, splitPos);
+        String leftHandSide = mInput.substring(0, splitPos);
+
+        // Update this field to account for the shorter input on the
+        // "right hand" portion.
         mInput = mInput.substring(splitPos);
 
+        // Update this field to handle the shorter input.
+        mPhraseMatcher = mPattern.matcher(mInput);
+
         // Create a new PhraseMatchSpliterator object that handles the
-        // "right hand" portion of the input, while the "this" object
-        // handles the "left hand" portion of the input.
-        return new PhraseMatchSpliterator(rightHandSide,
+        // "left hand" portion of the input, while the "this" object
+        // handles the "right hand" portion of the input.
+        return new PhraseMatchSpliterator(leftHandSide,
                                           mPhrase,
                                           mPattern,
                                           mMinSplitSize);

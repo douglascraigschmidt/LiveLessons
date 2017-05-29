@@ -2,12 +2,8 @@ package livelessons.streamgangs;
 
 import livelessons.utils.PhraseMatchSpliterator;
 import livelessons.utils.SearchResults;
-import livelessons.utils.StreamGang;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,14 +19,14 @@ import static java.util.stream.Collectors.toList;
  * This class factors out the common code used by all instantiations
  * of the StreamGang framework in the SearchStreamGang program.  It
  * customizes the StreamGang framework to search a list of input
- * Strings for words provided in a list of words to find.
+ * Strings for phrases provided in a list of phrases to find.
  */
 public class SearchStreamGang
        extends StreamGang<String> {
     /**
-     * The list of words to find.
+     * The list of phrases to find.
      */
-    protected final List<String> mWordsToFind;
+    protected final List<String> mPhrasesToFind;
 
     /**
      * An Iterator to the list of Strings to search.
@@ -46,10 +42,10 @@ public class SearchStreamGang
     /**
      * Constructor initializes the fields.
      */
-    public SearchStreamGang(List<String> wordsToFind,
+    public SearchStreamGang(List<String> phrasesToFind,
                             List<List<String>> stringsToSearch) {
-        // Store the words to search for.
-        mWordsToFind = wordsToFind;
+        // Store the phrases to search for.
+        mPhrasesToFind = phrasesToFind;
 
         // Create an Iterator for the array of Strings to search.
         mInputIterator = stringsToSearch.iterator();
@@ -77,7 +73,7 @@ public class SearchStreamGang
 
     /**
      * This template method starts the Java 8 stream processing to
-     * search the list of input strings for the given words to find.
+     * search the list of input strings for the given phrases to find.
      */
     @Override
     protected void initiateStream() {
@@ -159,11 +155,19 @@ public class SearchStreamGang
                            .mapToInt(list 
                                      -> list.stream().mapToInt(SearchResults::size).sum())
                            .sum()
-                           + " word matches for "
+                           + " phrase matches for "
                            + getInput().size() 
                            + " input strings");
 
-        // Create a map that associates words found in the input with
+        // Print out the titles.
+        // printTitles(listOfListOfSearchResults);
+    }
+
+    /**
+     * Print out the quotes associated with each play title.
+     */
+    private void printTitles(List<List<SearchResults>> listOfListOfSearchResults) {
+        // Create a map that associates phrases found in the input with
         // the indices where they were found.
         Map<String, List<SearchResults>> resultsMap = listOfListOfSearchResults
             // Convert the list of lists into a stream of lists.
@@ -178,29 +182,40 @@ public class SearchStreamGang
         // Print out the results in the map, where each phrase is
         // first printed followed by a list of the indices where the
         // phrase appeared in the input.
-        resultsMap.forEach((key, value)
-                           -> { System.out.println("Title \""
-                                                 + key
-                                                 + "\" contained");
-                                value.stream().forEach((SearchResults sr) -> sr.print());
-        });
+        resultsMap
+            // Get the EntrySet for the map.
+            .entrySet()
+
+            // Convert the EntrySet into a stream.
+            .stream()
+
+            // Filter out any titles that have no phrases.
+            .filter(entrySet -> entrySet.getValue().size() > 0)
+
+            // Print out the titles and their associated phrases.
+            .forEach(entrySet
+                     -> { System.out.println("Title \""
+                                             + entrySet.getKey()
+                                             + "\" contained");
+                         entrySet.getValue().forEach((SearchResults sr) -> sr.print());
+                     });
     }
 
     /**
-     * Looks for all instances of @code word in @code inputData and
+     * Looks for all instances of @code phrase in @code inputData and
      * return a list of all the @code SearchResults (if any).
      */
-    public SearchResults searchForWord(String word,
-                                       String inputData,
-                                       String title,
-                                       boolean parallel) {
+    public SearchResults searchForPhrase(String phrase,
+                                         String inputData,
+                                         String title,
+                                         boolean parallel) {
         List<SearchResults.Result> resultList =
-            // Use a PhraseMatchSpliterator to add the indices of all places
-            // in the inputData where word matches.
+            // Use a PhraseMatchSpliterator to add the indices of all
+            // places in the inputData where phrase matches.
             StreamSupport
                 // Create a stream of Results to record the indices
-                // (if any) where the word matched the input data.
-                .stream(new PhraseMatchSpliterator(inputData, word),
+                // (if any) where the phrase matched the input data.
+                .stream(new PhraseMatchSpliterator(inputData, phrase),
                         parallel)
                     
                 // This terminal operation triggers aggregate
@@ -210,7 +225,7 @@ public class SearchStreamGang
     	// Create/return SearchResults to keep track of relevant info.
         return new SearchResults(Thread.currentThread().getId(),
                                  currentCycle(),
-                                 word,
+                                 phrase,
                                  title,
                                  resultList);
     }

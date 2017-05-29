@@ -2,6 +2,7 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamsUtils;
@@ -11,24 +12,24 @@ import static java.util.stream.Collectors.toList;
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
  * in conjunction with Java streams to asynchronously search the input
- * data for each word in an list of words.
+ * data for each phrase in an list of phrases.
  */
 public class SearchWithCompletableFuturesInputs
     extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithCompletableFuturesInputs(List<String> wordsToFind,
+    public SearchWithCompletableFuturesInputs(List<String> phrasesToFind,
                                               List<List<String>> stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
+        super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
      * Perform the processing, which uses a Java 8 Stream in
      * conjunction with CompletableFutures to asynchronously search for
-     * words in the input data.
+     * phrases in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -48,15 +49,27 @@ public class SearchWithCompletableFuturesInputs
 
         // Convert all the completed CompletableFutures in the
         // listOfFutures into a list of lists of SearchResults.
-        return StreamsUtils.joinAll(listOfFutures)
-                           // join() blocks the calling thread until
-                           // all the futures have been completed.
-                           .join();
+        List<List<SearchResults>> results = StreamsUtils
+            .joinAll(listOfFutures)
+            // join() blocks the calling thread until all the futures
+            // have been completed.
+            .join();
+            
+        // Return results that filter out all zero-sized results.
+        return results
+            // Convert into a stream.
+            .stream()
+
+            // Only keep a result that has at least one match.
+            .filter(list -> list.stream().mapToInt(SearchResults::size).sum() > 0)
+            
+            // Terminate stream and return a list of SearchResults.
+            .collect(toList());
     }
 
     /**
      * Asynchronously search @a inputString for all occurrences of the
-     * words to find.
+     * phrases to find.
      */
     private CompletableFuture<List<SearchResults>> processInputAsync(String inputString) {
         // Store the title.
@@ -65,20 +78,20 @@ public class SearchWithCompletableFuturesInputs
         // Skip over the title.
         String inputData = inputString.substring(title.length());
 
-        // Convert the list of words into a list of CompletableFutures
+        // Convert the list of phrases into a list of CompletableFutures
         // to SearchResults.
-        List<CompletableFuture<SearchResults>> listOfFutures = mWordsToFind
-            // Create a sequential stream of words.
+        List<CompletableFuture<SearchResults>> listOfFutures = mPhrasesToFind
+            // Create a sequential stream of phrases.
             .stream()
 
-            // Asynchronously find each word in the input data and
+            // Asynchronously find each phrase in the input data and
             // return a CompletableFuture<SearchResults>.
-            .map(word ->
+            .map(phrase ->
                  CompletableFuture.supplyAsync(()
-                                               -> searchForWord(word,
-                                                                inputData,
-                                                                title,
-                                                                false)))
+                                               -> searchForPhrase(phrase,
+                                                                  inputData,
+                                                                  title,
+                                                                  false)))
 
             // Terminate stream and return a list of
             // CompletableFutures.

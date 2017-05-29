@@ -50,10 +50,10 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the word list in the @a filename as a list of
+     * Return the phrase list in the @a filename as a list of
      * non-empty strings.
      */
-    public static List<String> getWordsList(String filename) {
+    public static List<String> getPhrasesList(String filename) {
         try {
             return Files
                 // Read all lines from filename.
