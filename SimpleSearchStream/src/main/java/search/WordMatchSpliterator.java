@@ -1,16 +1,15 @@
 package search;
 
-import search.SearchResult;
-
 import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * This Spliterator is used to create a Stream of matches to
- * a word in the input data.
+ * This class is used in conjunction with StreamSupport.stream() to
+ * create a stream of SearchResults.Result objects that match the
+ * number of times a phrase appears in an input string.
  */
 public class WordMatchSpliterator
-       extends Spliterators.AbstractSpliterator<SearchResult> {
+       extends Spliterators.AbstractSpliterator<SearchResults.Result> {
     /**
      * The word to match.
      */
@@ -40,14 +39,14 @@ public class WordMatchSpliterator
     /**
      * Attempt to advance the spliterator by one position.
      */
-    public boolean tryAdvance(Consumer<? super SearchResult> action) {
+    public boolean tryAdvance(Consumer<? super SearchResults.Result> action) {
         mCurrentPos = mInput.indexOf(mWord, mCurrentPos);
 
         // If there's no match then we're done with the iteration.
         if (mCurrentPos == -1) 
             return false;
         else {
-            action.accept(new SearchResult(mInput, mWord, mCurrentPos));
+            action.accept(new SearchResults.Result(mCurrentPos));
 
             // Compute the next potential position.
             int nextPos = mCurrentPos + mWord.length();

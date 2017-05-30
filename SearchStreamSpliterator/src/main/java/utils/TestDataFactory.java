@@ -34,20 +34,19 @@ public class TestDataFactory {
             CharSequence bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
-            return
-                // Compile a regular expression that's used to split
-                // the file into a list of strings.
-                Pattern.compile(splitter)
+            return Pattern
+                // Compile splitter into a regular expression (regex).
+                .compile(splitter)
 
-                       // Creates a stream from the given input
-                       // sequence around matches of this pattern.
-                       .splitAsStream(bytes)
+                // Use the regex to split the file into a stream of
+                // strings.
+                .splitAsStream(bytes)
 
-                       // Filter out any empty strings.
-                       .filter(((Predicate<String>) String::isEmpty).negate())
-
-                       // Collect the results into a string.
-                       .collect(toList());
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
+                
+                // Collect the results into a string.
+                .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;

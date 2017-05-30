@@ -32,16 +32,19 @@ public class TestDataFactory {
             // Open the file and get all the bytes.
             String bytes = new String(Files.readAllBytes(Paths.get(uri)));
 
-            return
-                // Compile a regular expression that's used to split the
-                // file into a list of strings.
-                Pattern.compile(splitter).splitAsStream(bytes)
+            return Pattern
+                // Compile splitter into a regular expression (regex).
+                .compile(splitter)
 
-                        // Filter out any empty strings.
-                        .filter(((Predicate<String>) String::isEmpty).negate())
+                // Use the regex to split the file into a stream of
+                // strings.
+                .splitAsStream(bytes)
 
-                        // Collect the results into a string.
-                        .collect(toList());
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
+
+                // Collect the results into a string.
+                .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -57,7 +60,7 @@ public class TestDataFactory {
             return Files
                 // Read all lines from filename.
                 .lines(Paths.get(ClassLoader.getSystemResource
-                                        (filename).toURI()))
+                                 (filename).toURI()))
 
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())

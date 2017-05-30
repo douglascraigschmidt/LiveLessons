@@ -81,9 +81,9 @@ public class SearchWithSpliterator {
 
             // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
-                                       input,
-                                       title,
-                                       mParallel))
+                                           input,
+                                           title,
+                                           mParallel))
 
             // Only keep a result that has at least one match.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())

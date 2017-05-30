@@ -32,9 +32,9 @@ public class WordSearcher {
      * print the results (if any).
      */
     public void findAndPrintWords(List <String> wordsToFind) {
-        // Create a list of lists of SearchResults corresponding to
-        // the index where each word occurs in the input string.
-        List<List<SearchResult>> results = wordsToFind
+        // Create a list SearchResults corresponding to the index
+        // where each word occurs in the input string.
+        List<SearchResults> results = wordsToFind
             // Convert the list of words to find into a stream.
             .stream()
 
@@ -44,7 +44,7 @@ public class WordSearcher {
             .map(this::searchForWord)
             
             // Filter out any lists that have empty SearchResults.
-            .filter(((Predicate<List>) List::isEmpty).negate())
+            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
             
             // This terminal operation triggers intermediate operation
             // processing and collects results into a list.
@@ -55,47 +55,53 @@ public class WordSearcher {
     }
 
     /**
-     * Search for all instances of @code word in the input and return
-     * a list of all the @code SearchResults (if any).
+     * Looks for all instances of @code phrase in @code inputData and
+     * return a list of all the @code SearchResults (if any).
      */
-    private List<SearchResult> searchForWord(String word) {
-        // Return list of SearchResults indicating where the word
-        // matches the input.
-        return StreamSupport
-            // Create a stream of SearchResult objects that record the
-            // indices (if any) where the word matched the input.
-            .stream(new WordMatchSpliterator(mInput, word),
-                    // This is a sequential stream.
-                    false)
+    private SearchResults searchForWord(String word) {
+        List<SearchResults.Result> resultList =
+            // Use a WordMatchSpliterator to add the indices of all
+            // places in the inputData where phrase matches.
+            StreamSupport
+                // Create a stream of Results to record the indices
+                // (if any) where the phrase matched the input data.
+                .stream(new WordMatchSpliterator(mInput, word),
+                        false)
+                    
+                // This terminal operation triggers aggregate
+                // operation processing and returns a list of Results.
+                .collect(toList());
 
-            // Collect the stream into a list of SearchResult objects.
-            .collect(toList());
+    	// Create/return SearchResults to keep track of relevant info.
+        return new SearchResults(Thread.currentThread().getId(),
+                                 1,
+                                 word,
+                                 "",
+                                 resultList);
     }
 
     /**
      * Print the results of the word search.
      */
-    private void printResults(List<List<SearchResult>> listOfListOfSearchResults) {
+    private void printResults(List<SearchResults> listOfSearchResults) {
         // Create a map that associates words found in the input with
         // the indices where they were found.
-        Map<String, List<Integer>> resultsMap = listOfListOfSearchResults
-            // Convert the list of lists into a stream of lists.
+        Map<String, List<SearchResults>> resultsMap = listOfSearchResults
+            // Convert the list into a stream.
             .stream()
 
-            // Flatten the lists into a stream of SearchResults.
-            .flatMap(List::stream)
-
             // Collect the SearchResults into a Map.
-            .collect(groupingBy(SearchResult::getWord, 
-                                mapping(SearchResult::getIndex, toList())));
+            .collect(groupingBy(SearchResults::getWord));
 
         // Print out the results in the map, where each word is first
         // printed followed by a list of the indices where the word
         // appeared in the input.
         resultsMap.forEach((key, value)
-                           -> System.out.println("Word \""
-                                                 + key
-                                                 + "\" matched at index "
-                                                 + value));
+                           -> {
+                               System.out.print("Word \""
+                                                  + key
+                                                  + "\" appeared at indices ");
+                               value.stream().forEach((SearchResults sr) -> sr.print());
+                           });
     }
 }

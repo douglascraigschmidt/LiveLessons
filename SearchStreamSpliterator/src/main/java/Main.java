@@ -183,9 +183,10 @@ public class Main {
         // first printed followed by a list of the indices where the
         // phrase appeared in the input.
         resultsMap.forEach((key, value)
-                           -> { System.out.println("Title \""
-                                                   + key
-                                                   + "\" contained");
+                           -> { 
+                               System.out.println("Title \""
+                                                  + key
+                                                  + "\" contained");
                                value.stream().forEach((SearchResults sr) -> sr.print());
                            });
     }
