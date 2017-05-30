@@ -92,7 +92,8 @@ public class SearchWithRxJavaInputs
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
 
         return mPhrasesToFind
             // Sequentially process each phrase.

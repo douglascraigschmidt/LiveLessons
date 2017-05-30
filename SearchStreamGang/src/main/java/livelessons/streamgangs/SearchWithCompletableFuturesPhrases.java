@@ -61,7 +61,8 @@ public class SearchWithCompletableFuturesPhrases
             .stream()
 
             // Only keep a result that has at least one match.
-            .filter(list -> list.stream().mapToInt(SearchResults::size).sum() > 0)
+            .filter(list 
+                    -> list.stream().mapToInt(SearchResults::size).sum() > 0)
             
             // Terminate stream and return a list of SearchResults.
             .collect(toList());
@@ -80,18 +81,20 @@ public class SearchWithCompletableFuturesPhrases
 
             // Map each input string to a CompletableFuture to
             // SearchResults.
-            .map(input -> {
+            .map(inputSeq -> {
                     // Get the title.
-                    String title = getTitle(input);
+                    String title = getTitle(inputSeq);
 
-                    // Asynchronously search for the phrase in the input string.
+                    // Get input string (skip over title).
+                    CharSequence input = inputSeq.subSequence(title.length(),
+                                                              inputSeq.length());
+
+                    // Asynchronously search for phrase in the input.
                     return CompletableFuture.supplyAsync
-                            (()
-                             -> searchForPhrase(phrase,
-                                                // Get the input string (skipping over the title).
-                                                input.subSequence(title.length(), input.length()),
-                                                title,
-                                                false));
+                            (() -> searchForPhrase(phrase,
+                                                   input,
+                                                   title,
+                                                   false));
                 })
 
             // Terminate stream and return a list of

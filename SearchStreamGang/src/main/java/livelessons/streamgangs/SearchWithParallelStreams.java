@@ -58,14 +58,17 @@ public class SearchWithParallelStreams
 
             // Concurrently map each string to a stream containing the
             // phrases found in the input.
-            .map(input -> {
+            .map(inputSeq -> {
                     // Get the section title.
-                    String title = getTitle(input);
+                    String title = getTitle(inputSeq);
+
+                    // Skip over the title.
+                    CharSequence input = inputSeq.subSequence(title.length(),
+                                                              inputSeq.length());
 
                     // Find all occurrences of phrase in the input string.
                     return searchForPhrase(phrase, 
-                                           // Skip over the title.
-                                           input.subSequence(title.length(), input.length()),
+                                           input,
                                            title,
                                            false);
                 })

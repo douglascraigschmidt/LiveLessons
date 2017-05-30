@@ -56,7 +56,8 @@ public class SearchWithSequentialStream
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
 
         // Iterate through each phrase we're searching for and try to
         // find it in the inputData.

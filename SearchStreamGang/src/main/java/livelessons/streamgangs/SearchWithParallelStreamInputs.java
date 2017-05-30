@@ -56,7 +56,8 @@ public class SearchWithParallelStreamInputs
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
 
         // Sequentially iterate through each phrase we're searching for
         // and try to find it in the inputData.

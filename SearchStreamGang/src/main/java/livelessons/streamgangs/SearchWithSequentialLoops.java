@@ -44,7 +44,8 @@ public class SearchWithSequentialLoops
             String title = getTitle(inputSeq);
 
             // Skip over the title.
-            CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+            CharSequence input = inputSeq.subSequence(title.length(),
+                                                      inputSeq.length());
 
             // Store the search results into a list.
             List<SearchResults> listOfSearchResults =
@@ -54,9 +55,9 @@ public class SearchWithSequentialLoops
             for (String phrase : mPhrasesToFind) {
                 // Create the search results (if any).
                 SearchResults results = searchForPhrase(phrase,
-                                                       input,
-                                                       title,
-                                                       false);
+                                                        input,
+                                                        title,
+                                                        false);
 
                 // Only add results if there's at least one match.
                 if (results.size() > 0)

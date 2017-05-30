@@ -88,14 +88,17 @@ public class SearchWithRxJavaPhrases
 
             // Map each input string to a stream of SearchResults for
             // each time the phrase appears in the input.
-            .map(input -> {
-                    String title = getTitle(input);
+            .map(inputSeq -> {
+                    String title = getTitle(inputSeq);
+
+                    // Skip over the title.
+                    CharSequence input = inputSeq.subSequence(title.length(),
+                                                              inputSeq.length());
 
                     // Return a SearchResults containing a match for
                     // each time phrase appears in the input string.
                     return searchForPhrase(phrase, 
-                                           // Skip over the title.
-                                           input.subSequence(title.length(), input.length()),
+                                           input,
                                            title,
                                            false);
                 })

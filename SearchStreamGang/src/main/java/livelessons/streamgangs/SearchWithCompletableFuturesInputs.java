@@ -76,7 +76,9 @@ public class SearchWithCompletableFuturesInputs
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+        CharSequence input = 
+            inputSeq.subSequence(title.length(),
+                                 inputSeq.length());
 
         // Convert the list of phrases into a list of CompletableFutures
         // to SearchResults.

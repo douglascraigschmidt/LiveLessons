@@ -54,7 +54,8 @@ public class SearchWithParallelSpliterator
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
+        CharSequence input = inputSeq.subSequence(title.length(), 
+                                                  inputSeq.length());
 
         // Find all occurrences of phrase in the input string.
         return mPhrasesToFind
