@@ -157,11 +157,12 @@ public class Main {
                            + "|"
                            + (parallel ? "parallel)" : "sequential)"));
 
-        // printTitles(listOfListOfSearchResults);
+        // Print the matching titles.
+        printTitles(listOfListOfSearchResults);
     }
 
     /**
-     *
+     * Print the matching titles.
      */
     private static void printTitles(List<List<SearchResults>> listOfListOfSearchResults) {
         // Create a map that associates words found in the input with
