@@ -10,10 +10,10 @@ import static java.util.stream.Collectors.groupingBy;
 
 /**
  * This program searches seqentially for the occurrence of words in a
- * string.  It demonstrates the use of basic Java 8 functional
- * programming features (such as lambda expressions and method
- * references) in conjunction with Java 8 sequential streams and a
- * spliterator.
+ * string containing the contents of a file.  It demonstrates the use
+ * of basic Java 8 functional programming features (such as lambda
+ * expressions and method references) in conjunction with Java 8
+ * sequential streams and a spliterator.
  */
 public class Main {
     /*

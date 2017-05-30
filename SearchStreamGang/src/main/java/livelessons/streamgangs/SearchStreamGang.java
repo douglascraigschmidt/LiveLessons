@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -160,7 +161,7 @@ public class SearchStreamGang
                            + " input strings");
 
         // Print out the titles.
-        // printTitles(listOfListOfSearchResults);
+        printTitles(listOfListOfSearchResults);
     }
 
     /**
@@ -182,22 +183,12 @@ public class SearchStreamGang
         // Print out the results in the map, where each phrase is
         // first printed followed by a list of the indices where the
         // phrase appeared in the input.
-        resultsMap
-            // Get the EntrySet for the map.
-            .entrySet()
-
-            // Convert the EntrySet into a stream.
-            .stream()
-
-            // Filter out any titles that have no phrases.
-            .filter(entrySet -> entrySet.getValue().size() > 0)
-
-            // Print out the titles and their associated phrases.
-            .forEach(entrySet
-                     -> { System.out.println("Title \""
-                                             + entrySet.getKey()
-                                             + "\" contained");
-                         entrySet.getValue().forEach((SearchResults sr) -> sr.print());
+        resultsMap.forEach((key, value)
+                     -> {
+                         System.out.println("Title \""
+                                            + key
+                                            + "\" contained");
+                         value.forEach(SearchResults::print);
                      });
     }
 

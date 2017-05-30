@@ -187,7 +187,7 @@ public class Main {
                                System.out.println("Title \""
                                                   + key
                                                   + "\" contained");
-                               value.stream().forEach((SearchResults sr) -> sr.print());
+                               value.forEach(SearchResults::print);
                            });
     }
 }

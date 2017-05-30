@@ -1,4 +1,6 @@
-package utils;
+package livelessons.utils;
+
+import livelessons.utils.SharedString;
 
 import java.net.URI;
 import java.nio.file.Files;

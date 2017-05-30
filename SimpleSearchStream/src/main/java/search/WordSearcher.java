@@ -43,11 +43,11 @@ public class WordSearcher {
             // the input.
             .map(this::searchForWord)
             
-            // Filter out any lists that have empty SearchResults.
+            // Filter out any SearchResults that are empty.
             .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
             
             // This terminal operation triggers intermediate operation
-            // processing and collects results into a list.
+            // processing and collects the SearchResults into a list.
             .collect(toList());
 
         // Print the results;
@@ -61,16 +61,16 @@ public class WordSearcher {
     private SearchResults searchForWord(String word) {
         List<SearchResults.Result> resultList =
             // Use a WordMatchSpliterator to add the indices of all
-            // places in the inputData where phrase matches.
+            // places in the input where phrase matches.
             StreamSupport
-                // Create a stream of Results to record the indices
-                // (if any) where the phrase matched the input data.
-                .stream(new WordMatchSpliterator(mInput, word),
-                        false)
+            // Create a sequential stream of SearchResults.Result that
+            // record where the word matched the input (if it did).
+            .stream(new WordMatchSpliterator(mInput, word),
+                    false)
                     
-                // This terminal operation triggers aggregate
-                // operation processing and returns a list of Results.
-                .collect(toList());
+            // This terminal operation triggers aggregate operation
+            // processing and returns a list of Results.
+            .collect(toList());
 
     	// Create/return SearchResults to keep track of relevant info.
         return new SearchResults(Thread.currentThread().getId(),
@@ -99,9 +99,9 @@ public class WordSearcher {
         resultsMap.forEach((key, value)
                            -> {
                                System.out.print("Word \""
-                                                  + key
-                                                  + "\" appeared at indices ");
-                               value.stream().forEach((SearchResults sr) -> sr.print());
+                                                + key
+                                                + "\" appeared at indices ");
+                               value.forEach(SearchResults::print);
                            });
     }
 }
