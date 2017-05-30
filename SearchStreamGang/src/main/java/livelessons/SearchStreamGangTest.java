@@ -97,24 +97,15 @@ public class SearchStreamGangTest {
         // Parse the command-line arguments.
         Options.getInstance().parseArgs(args);
 
-        // All the input data goes here.
+        // All the input is initialized here.
         List<List<CharSequence>> inputData = 
             new ArrayList<List<CharSequence>>() {
-                { // Create a list of input strings from the complete
-                  // works of William Shakespeare.
+                { // Create a list of input from the complete works of
+                  // William Shakespeare.
                   add(TestDataFactory
                       // Split input by input separator from Options singleton.
-                      .getInput(sSHAKESPEARE_DATA_FILE,
-                                Options.getInstance().getInputSeparator())
-            
-                      // Convert the input into a stream.
-                      .stream()
-
-                      // Map each char sequence to a SharedString.
-                      .map(charSeq -> new SharedString(new String(charSeq.toString()).toCharArray()))
-
-                      // Terminate stream and trigger intermediate operation.
-                      .collect(toList()));
+                      .getSharedInput(sSHAKESPEARE_DATA_FILE,
+                                      Options.getInstance().getInputSeparator()));
                 }
             };
 

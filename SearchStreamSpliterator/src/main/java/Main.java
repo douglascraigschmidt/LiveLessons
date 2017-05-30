@@ -21,8 +21,10 @@ import static java.util.stream.Collectors.toList;
  * uses Java 8 functional programming features (such as lambda
  * expressions, method references, functional interfaces,
  * sequential/parallel streams, a fork/join pool, and a spliterator)
- * to concurrently search for phrases in a string containing all the
- * works of Shakespeare.
+ * to concurrently search for phrases in a list of input containing
+ * all the works of Shakespeare.  The program also shows the
+ * performance benefits of SharedString over String stemming from
+ * reducing data copying for subsequences vs substrings.
  */
 public class Main {
     /*
@@ -43,12 +45,13 @@ public class Main {
         "phraseList.txt";
 
     /**
-     * A List of strings containing the complete works of Shakespeare.
+     * A List of Strings containing the complete works of Shakespeare.
      */
     private static List<CharSequence> mInput;
 
     /**
-     * A List of strings containing the complete works of Shakespeare.
+     * A List of SharedStrings containing the complete works of
+     * Shakespeare.
      */
     private static List<CharSequence> mSharedInput;
 
@@ -66,23 +69,22 @@ public class Main {
         // Parse the command-line arguments.
         Options.getInstance().parseArgs(args);
 
-        // Create a list of input strings from the complete works of
-        // William Shakespeare, which is split by the input separator
-        // from the Options singleton.
+        // Create a list of Strings to search from the complete works
+        // of William Shakespeare.
         mInput =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                     // Split input by input separator
+                                     // from Options singleton.
                                      Options.getInstance().getInputSeparator());
 
-        // Create a list of shared input strings.
-        mSharedInput = mInput
-            // Convert the input into a stream.
-            .stream()
-
-            // Map each char sequence to a SharedString.
-            .map(charSeq -> new SharedString(new String(charSeq.toString()).toCharArray()))
-
-            // Terminate stream and trigger intermediate operation.
-            .collect(toList());
+        // Create a list of SharedStrings to search from the complete
+        // works of William Shakespeare.
+        mSharedInput = 
+            TestDataFactory.getSharedInput(sSHAKESPEARE_DATA_FILE,
+                                           // Split input by input
+                                           // separator from Options
+                                           // singleton.
+                                           Options.getInstance().getInputSeparator());
 
         // Get the list of phrases to find in the works of
         // Shakespeare.
@@ -158,7 +160,7 @@ public class Main {
                            + (parallel ? "parallel)" : "sequential)"));
 
         // Print the matching titles.
-        printTitles(listOfListOfSearchResults);
+        // printTitles(listOfListOfSearchResults);
     }
 
     /**

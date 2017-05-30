@@ -21,11 +21,11 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the input data in the given @a filename as an array of
+     * Return the input data in the given @a filename as a list of
      * Strings.
      */
     public static List<CharSequence> getInput(String filename,
-                                        String splitter) {
+                                              String splitter) {
         try {
             // Convert the filename into a pathname.
             URI uri = ClassLoader.getSystemResource(filename).toURI();
@@ -45,6 +45,45 @@ public class TestDataFactory {
 
                        // Filter out any empty strings.
                        .filter(((Predicate<String>) String::isEmpty).negate())
+
+                       // Collect the results into a string.
+                       .collect(toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the input data in the given @a filename as a list of
+     * SharedStrings.
+     */
+    public static List<CharSequence> getSharedInput(String filename,
+                                                    String splitter) {
+        try {
+            // Convert the filename into a pathname.
+            URI uri = ClassLoader.getSystemResource(filename).toURI();
+
+            // Open the file and get all the bytes.
+            CharSequence bytes =
+                new String(Files.readAllBytes(Paths.get(uri)));
+
+            return
+                // Compile a regular expression that's used to split
+                // the file into a list of Strings.
+                Pattern.compile(splitter)
+
+                       // Creates a stream from the given input
+                       // sequence around matches of this pattern.
+                .splitAsStream(bytes)
+
+                       // Filter out any empty strings.
+                       .filter(((Predicate<String>) String::isEmpty).negate())
+
+                       // Map each String to a SharedString to
+                       // eliminate copying overhead.
+                       .map(string -> 
+                            new SharedString(string.toCharArray()))
 
                        // Collect the results into a string.
                        .collect(toList());
