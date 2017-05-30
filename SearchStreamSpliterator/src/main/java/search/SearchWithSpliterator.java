@@ -126,17 +126,15 @@ public class SearchWithSpliterator {
     /**
      * Return the title portion of the @a inputData.
      */
-    private String getTitle(CharSequence inputData) {
-        // This regex matches only the first line in the inputData.
-        Pattern p = Pattern.compile("(?m)^.*$");
+    private String getTitle(CharSequence input) {
+        // Create a Matcher.
+        Matcher m = Pattern
+                // Compile a regex that matches only the first line in the input.
+                .compile("(?m)^.*$")
 
-        // Create a matcher for this pattern.
-        Matcher m = p.matcher(inputData);
+                // Create a matcher for this pattern.
+                .matcher(input);
 
-        // Find/return the first line in the string.
-        return m.find()
-            ? m.group()
-            : "";
         /* Could also use
           
         int index = inputData.indexOf('\n');

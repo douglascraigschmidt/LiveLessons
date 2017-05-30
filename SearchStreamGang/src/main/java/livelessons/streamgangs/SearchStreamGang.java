@@ -177,10 +177,10 @@ public class SearchStreamGang
             // Flatten the lists into a stream of SearchResults.
             .flatMap(List::stream)
 
-            // Collect the SearchResults into a Map.
+            // Collect the SearchResults into a Map by their titles.
             .collect(groupingBy(SearchResults::getTitle));
 
-        // Print out the results in the map, where each phrase is
+        // Print out the results in the map, where each title is
         // first printed followed by a list of the indices where the
         // phrase appeared in the input.
         resultsMap.forEach((key, value)
@@ -222,14 +222,16 @@ public class SearchStreamGang
     }
     
     /**
-     * Return the title portion of the @a inputData.
+     * Return the title portion of the @a input.
      */
-    public String getTitle(CharSequence inputData) {
-        // This regex matches only the first line in the inputData.
-        Pattern p = Pattern.compile("(?m)^.*$");
+    public String getTitle(CharSequence input) {
+        // Create a Matcher.
+        Matcher m = Pattern
+                // Compile a regex that matches only the first line in the input.
+                .compile("(?m)^.*$")
 
-        // Create a matcher for this pattern.
-        Matcher m = p.matcher(inputData);
+                // Create a matcher for this pattern.
+                .matcher(input);
 
         // Find/return the first line in the string.
         return m.find()
