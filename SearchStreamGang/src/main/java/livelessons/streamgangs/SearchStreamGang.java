@@ -22,16 +22,16 @@ import static java.util.stream.Collectors.toList;
  * Strings for phrases provided in a list of phrases to find.
  */
 public class SearchStreamGang
-       extends StreamGang<String> {
+       extends StreamGang<CharSequence> {
     /**
      * The list of phrases to find.
      */
     protected final List<String> mPhrasesToFind;
 
     /**
-     * An Iterator to the list of Strings to search.
+     * Iterator to the list of Strings to search.
      */
-    private final Iterator<List<String>> mInputIterator;
+    private final Iterator<List<CharSequence>> mInputIterator;
 
     /**
      * Exit barrier that controls when the framework has completed its
@@ -43,12 +43,12 @@ public class SearchStreamGang
      * Constructor initializes the fields.
      */
     public SearchStreamGang(List<String> phrasesToFind,
-                            List<List<String>> stringsToSearch) {
+                            List<List<CharSequence>> listOfListOfInputToSearch) {
         // Store the phrases to search for.
         mPhrasesToFind = phrasesToFind;
 
         // Create an Iterator for the array of Strings to search.
-        mInputIterator = stringsToSearch.iterator();
+        mInputIterator = listOfListOfInputToSearch.iterator();
 
         // Initialize the Executor with a ForkJoinPool.
         setExecutor(Executors.newWorkStealingPool());
@@ -59,7 +59,7 @@ public class SearchStreamGang
      * searched by StreamGang implementation strategies.
      */
     @Override
-    protected List<String> getNextInput() {
+    protected List<CharSequence> getNextInput() {
         if (!mInputIterator.hasNext())
         	return null;
         else {
@@ -206,7 +206,7 @@ public class SearchStreamGang
      * return a list of all the @code SearchResults (if any).
      */
     public SearchResults searchForPhrase(String phrase,
-                                         String inputData,
+                                         CharSequence input,
                                          String title,
                                          boolean parallel) {
         List<SearchResults.Result> resultList =
@@ -215,7 +215,7 @@ public class SearchStreamGang
             StreamSupport
                 // Create a stream of Results to record the indices
                 // (if any) where the phrase matched the input data.
-                .stream(new PhraseMatchSpliterator(inputData, phrase),
+                .stream(new PhraseMatchSpliterator(input, phrase),
                         parallel)
                     
                 // This terminal operation triggers aggregate
@@ -233,7 +233,7 @@ public class SearchStreamGang
     /**
      * Return the title portion of the @a inputData.
      */
-    public String getTitle(String inputData) {
+    public String getTitle(CharSequence inputData) {
         // This regex matches only the first line in the inputData.
         Pattern p = Pattern.compile("(?m)^.*$");
 

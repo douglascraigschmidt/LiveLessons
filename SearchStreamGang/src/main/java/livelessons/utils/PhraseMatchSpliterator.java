@@ -16,7 +16,7 @@ public class PhraseMatchSpliterator
     /**
      * The input string.
      */
-    private String mInput;
+    private CharSequence mInput;
 
     /**
      * The phrase to search for in the input string.
@@ -41,7 +41,7 @@ public class PhraseMatchSpliterator
     /**
      * Constructor initializes the fields.
      */
-    public PhraseMatchSpliterator(String input,
+    public PhraseMatchSpliterator(CharSequence input,
                                   String phrase) {
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
@@ -71,7 +71,7 @@ public class PhraseMatchSpliterator
      * It initializes all the fields for the "left hand size" of a
      * split.
      */
-    private PhraseMatchSpliterator(String input,
+    private PhraseMatchSpliterator(CharSequence input,
                                    String phrase,
                                    Pattern pattern,
                                    int minSplitSize) {
@@ -135,8 +135,8 @@ public class PhraseMatchSpliterator
 
         // Create a substring to handle the case where a phrase spans
         // across the initial splitPos.
-        String substr = mInput.substring(startPos,
-                                         startPos + patternPhraseLength);
+        CharSequence substr = mInput.subSequence(startPos,
+                                                 startPos + patternPhraseLength);
 
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
@@ -148,11 +148,11 @@ public class PhraseMatchSpliterator
             splitPos = startPos + phraseMatcher.start() + phraseMatcher.group().length();
 
         // Split the input at the appropriate location.
-        String leftHandSide = mInput.substring(0, splitPos);
+        CharSequence leftHandSide = mInput.subSequence(0, splitPos);
 
         // Update this field to account for the shorter input on the
         // "right hand" portion.
-        mInput = mInput.substring(splitPos);
+        mInput = mInput.subSequence(splitPos, mInput.length());
 
         // Update this field to handle the shorter input.
         mPhraseMatcher = mPattern.matcher(mInput);

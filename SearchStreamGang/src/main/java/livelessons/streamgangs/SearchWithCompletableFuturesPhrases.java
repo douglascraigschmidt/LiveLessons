@@ -20,7 +20,7 @@ public class SearchWithCompletableFuturesPhrases
      * Constructor initializes the super class.
      */
     public SearchWithCompletableFuturesPhrases(List<String> phrasesToFind,
-                                               List<List<String>> stringsToSearch) {
+                                               List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
@@ -80,19 +80,18 @@ public class SearchWithCompletableFuturesPhrases
 
             // Map each input string to a CompletableFuture to
             // SearchResults.
-            .map(inputString -> {
+            .map(input -> {
                     // Get the title.
-                    String title = getTitle(inputString);
-
-                    // Get the input string (skipping over the title).
-                    String inputData = inputString.substring(title.length());
+                    String title = getTitle(input);
 
                     // Asynchronously search for the phrase in the input string.
-                    return CompletableFuture.supplyAsync(() 
-                                                         -> searchForPhrase(phrase,
-                                                                            inputData,
-                                                                            title,
-                                                                            false));
+                    return CompletableFuture.supplyAsync
+                            (()
+                             -> searchForPhrase(phrase,
+                                                // Get the input string (skipping over the title).
+                                                input.subSequence(title.length(), input.length()),
+                                                title,
+                                                false));
                 })
 
             // Terminate stream and return a list of

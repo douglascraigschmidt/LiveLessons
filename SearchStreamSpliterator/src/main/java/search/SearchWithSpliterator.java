@@ -20,7 +20,7 @@ public class SearchWithSpliterator {
     /**
      * The list of strings to search.
      */
-    private List<String> mInputList;
+    private List<? extends CharSequence> mInputList;
 
     /**
      * The list of phrases to find.
@@ -35,7 +35,7 @@ public class SearchWithSpliterator {
     /**
      * Construtor initializes the fields.
      */
-    public SearchWithSpliterator(List<String> inputList,
+    public SearchWithSpliterator(List<? extends CharSequence> inputList,
                                  List<String> phrasesToFind,
                                  boolean parallel) {
         mInputList = inputList;
@@ -66,12 +66,13 @@ public class SearchWithSpliterator {
      * This method searches the @a inputString for all occurrences of
      * the phrases to find.
      */
-    private List<SearchResults> processInput(String inputString) {
+    private List<SearchResults> processInput(CharSequence inputString) {
         // Get the section title.
         String title = getTitle(inputString);
 
         // Skip over the title.
-        String input = inputString.substring(title.length());
+        CharSequence input = inputString.subSequence(title.length(),
+                                                     inputString.length());
 
         // Find all occurrences of phrase in the input string.
         return mPhrasesToFind
@@ -98,7 +99,7 @@ public class SearchWithSpliterator {
      * return a list of all the @code SearchResults (if any).
      */
     private SearchResults searchForPhrase(String phrase,
-                                          String inputData,
+                                          CharSequence inputData,
                                           String title,
                                           boolean parallel) {
         List<SearchResults.Result> resultList =
@@ -125,7 +126,7 @@ public class SearchWithSpliterator {
     /**
      * Return the title portion of the @a inputData.
      */
-    private String getTitle(String inputData) {
+    private String getTitle(CharSequence inputData) {
         // This regex matches only the first line in the inputData.
         Pattern p = Pattern.compile("(?m)^.*$");
 

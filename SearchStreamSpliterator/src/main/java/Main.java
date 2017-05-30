@@ -1,6 +1,8 @@
 import search.PhraseMatchSpliterator;
 import search.SearchResults;
 import search.SearchWithSpliterator;
+import utils.Options;
+import utils.SharedString;
 import utils.TestDataFactory;
 
 import java.net.URI;
@@ -43,7 +45,12 @@ public class Main {
     /**
      * A List of strings containing the complete works of Shakespeare.
      */
-    private static List<String> mInput;
+    private static List<CharSequence> mInput;
+
+    /**
+     * A List of strings containing the complete works of Shakespeare.
+     */
+    private static List<CharSequence> mSharedInput;
 
     /**
      * The list of phrases to find.
@@ -56,11 +63,26 @@ public class Main {
     static public void main(String[] args) {
         System.out.println("Starting SearchStream");
 
-        // Create a list of input strings from the works of
-        // Shakespeare.
+        // Parse the command-line arguments.
+        Options.getInstance().parseArgs(args);
+
+        // Create a list of input strings from the complete works of
+        // William Shakespeare, which is split by the input separator
+        // from the Options singleton.
         mInput =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                     "@");
+                                     Options.getInstance().getInputSeparator());
+
+        // Create a list of shared input strings.
+        mSharedInput = mInput
+            // Convert the input into a stream.
+            .stream()
+
+            // Map each char sequence to a SharedString.
+            .map(charSeq -> new SharedString(new String(charSeq.toString()).toCharArray()))
+
+            // Terminate stream and trigger intermediate operation.
+            .collect(toList());
 
         // Get the list of phrases to find in the works of
         // Shakespeare.
@@ -70,12 +92,14 @@ public class Main {
         // Run the tests multiple times to account for any
         // instruction/data caching effects, as well as the time
         // needed to initialize the common fork/join pool.
-        runTest(false);
-        runTest(true);
-        runTest(false);
-        runTest(true);
-        runTest(false);
-        runTest(true);
+        runTest("String", mInput, false);
+        runTest("String", mInput, true);
+        runTest("SharedString", mSharedInput, false);
+        runTest("SharedString", mSharedInput, true);
+        runTest("String", mInput, false);
+        runTest("String", mInput, true);
+        runTest("SharedString", mSharedInput, false);
+        runTest("SharedString", mSharedInput, true);
 
         System.out.println("Ending SearchStream");
     }
@@ -85,13 +109,15 @@ public class Main {
      * parameter indicates whether to run the spliterator concurrently
      * or not.
      */
-    private static void runTest(boolean parallel) {
+    private static void runTest(String testName,
+                                List<CharSequence> input,
+                                boolean parallel) {
         // Record the start time.
         long startTime = System.nanoTime();
 
         // Search the input looking for phrases that match.
         List<List<SearchResults>> listOfListOfSearchResults =
-            new SearchWithSpliterator(mInput,
+            new SearchWithSpliterator(input,
                                       mPhrasesToFind,
                                       parallel).processStream();
 
@@ -99,7 +125,8 @@ public class Main {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         // Print the results.
-        printResults(parallel,
+        printResults(testName,
+                     parallel,
                      stopTime,
                      listOfListOfSearchResults);
 
@@ -110,22 +137,33 @@ public class Main {
     /**
      * Print out the search results.
      */
-    private static void printResults(boolean parallel,
+    private static void printResults(String testName,
+                                     boolean parallel,
                                      long stopTime,
                                      List<List<SearchResults>> listOfListOfSearchResults) {
         // Print the number of times each phrase matched the input.
-        System.out.println("SearchStreamSpliterator"
-                           + (parallel ? "(parallel)" : "(sequential)")
-                           + ": The search returned = "
+        System.out.println("The search returned = "
                            // Count the number of matches.
                            + listOfListOfSearchResults.stream()
                            .mapToInt(list
                                      -> list.stream().mapToInt(SearchResults::size).sum())
                            .sum()
-                           + " phrase matches for input strings in "
+                           + " phrase matches for "
+                           + mInput.size()
+                           + " input strings in "
                            + stopTime
-                           + " milliseconds");
+                           + " milliseconds for SearchWithSpliterator("
+                           + testName
+                           + "|"
+                           + (parallel ? "parallel)" : "sequential)"));
 
+        // printTitles(listOfListOfSearchResults);
+    }
+
+    /**
+     *
+     */
+    private static void printTitles(List<List<SearchResults>> listOfListOfSearchResults) {
         // Create a map that associates words found in the input with
         // the indices where they were found.
         Map<String, List<SearchResults>> resultsMap = listOfListOfSearchResults

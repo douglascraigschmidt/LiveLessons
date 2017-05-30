@@ -19,7 +19,7 @@ public class SearchWithParallelStreams
      * Constructor initializes the super class.
      */
     public SearchWithParallelStreams(List<String> phrasesToFind,
-                                     List<List<String>> stringsToSearch) {
+                                     List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
@@ -58,14 +58,14 @@ public class SearchWithParallelStreams
 
             // Concurrently map each string to a stream containing the
             // phrases found in the input.
-            .map(inputString -> {
+            .map(input -> {
                     // Get the section title.
-                    String title = getTitle(inputString);
+                    String title = getTitle(input);
 
                     // Find all occurrences of phrase in the input string.
                     return searchForPhrase(phrase, 
                                            // Skip over the title.
-                                           inputString.substring(title.length()),
+                                           input.subSequence(title.length(), input.length()),
                                            title,
                                            false);
                 })

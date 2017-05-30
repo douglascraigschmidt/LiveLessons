@@ -21,7 +21,7 @@ public class SearchWithSequentialLoops
      * Constructor initializes the super class.
      */
     public SearchWithSequentialLoops(List<String> phrasesToFind,
-                                     List<List<String>> stringsToSearch) {
+                                     List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
@@ -38,13 +38,13 @@ public class SearchWithSequentialLoops
             new ArrayList<>();
 
         // Process all the strings in the list.
-        for (String inputString : getInput()) {
+        for (CharSequence inputSeq : getInput()) {
 
             // Get the section title.
-            String title = getTitle(inputString);
+            String title = getTitle(inputSeq);
 
             // Skip over the title.
-            String input = inputString.substring(title.length());
+            CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
 
             // Store the search results into a list.
             List<SearchResults> listOfSearchResults =
@@ -78,7 +78,7 @@ public class SearchWithSequentialLoops
     public SearchResults searchForPhrase(String phrase,
                                         String input,
                                         String title,
-                                        boolean parallel) {
+                                        boolean notUsed) {
         // Create a list to hold the results.
         List<SearchResults.Result> resultList =
             new ArrayList<>();

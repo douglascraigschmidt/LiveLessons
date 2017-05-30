@@ -24,7 +24,7 @@ public class SearchWithRxJavaPhrases
      * Constructor initializes the super class.
      */
     public SearchWithRxJavaPhrases(List<String> phrasesToFind,
-                                   List<List<String>> stringsToSearch) {
+                                   List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
                 stringsToSearch);
@@ -88,14 +88,14 @@ public class SearchWithRxJavaPhrases
 
             // Map each input string to a stream of SearchResults for
             // each time the phrase appears in the input.
-            .map(inputString -> {
-                    String title = getTitle(inputString);
+            .map(input -> {
+                    String title = getTitle(input);
 
                     // Return a SearchResults containing a match for
                     // each time phrase appears in the input string.
                     return searchForPhrase(phrase, 
                                            // Skip over the title.
-                                           inputString.substring(title.length()),
+                                           input.subSequence(title.length(), input.length()),
                                            title,
                                            false);
                 })

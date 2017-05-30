@@ -1,6 +1,8 @@
 package livelessons;
 
 import livelessons.streamgangs.*;
+import livelessons.utils.Options;
+import livelessons.utils.SharedString;
 import livelessons.utils.TestDataFactory;
 
 import java.util.*;
@@ -37,7 +39,7 @@ public class SearchStreamGangTest {
      * SearchStreamGang subclass implementation strategy.
      */
     private static SearchStreamGang makeSearchStreamGang(List<String> phaseList,
-                                                         List<List<String>> inputData,
+                                                         List<List<CharSequence>> inputData,
                                                          TestsToRun choice) {
         switch (choice) {
         case SEQUENTIAL_LOOPS:
@@ -73,9 +75,17 @@ public class SearchStreamGangTest {
     }
 
     /*
-     * Various input files.
+     * Input files.
+     */
+    /**
+     * The complete works of William Shakespeare.
      */
     private static String sSHAKESPEARE_DATA_FILE = "completeWorksOfShakespeare.txt";
+
+    /**
+     * A list of phrases to search for in the complete works of
+     * Shakespeare.
+     */
     private static String sPHASE_LIST_FILE = "phraseList.txt";
 
     /**
@@ -84,18 +94,33 @@ public class SearchStreamGangTest {
     public static void main(String[] args) throws Throwable {
         System.out.println("Starting SearchStreamGangTest");
 
-        // Create the input strings from famous Shakespeare plays,
-        // using the '@' symbol as the "splitter" between scenes.
-        List<List<String>> inputData =
-            new ArrayList<List<String>>() {
-                {
-                    add(TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "#"));
+        // Parse the command-line arguments.
+        Options.getInstance().parseArgs(args);
+
+        // All the input data goes here.
+        List<List<CharSequence>> inputData = 
+            new ArrayList<List<CharSequence>>() {
+                { // Create a list of input strings from the complete
+                  // works of William Shakespeare.
+                  add(TestDataFactory
+                      // Split input by input separator from Options singleton.
+                      .getInput(sSHAKESPEARE_DATA_FILE,
+                                Options.getInstance().getInputSeparator())
+            
+                      // Convert the input into a stream.
+                      .stream()
+
+                      // Map each char sequence to a SharedString.
+                      .map(charSeq -> new SharedString(new String(charSeq.toString()).toCharArray()))
+
+                      // Terminate stream and trigger intermediate operation.
+                      .collect(toList()));
                 }
             };
 
         // Get the list of input phases to find.
         List<String> phaseList = 
-            TestDataFactory.getPhrasesList(sPHASE_LIST_FILE);
+            TestDataFactory.getPhraseList(sPHASE_LIST_FILE);
 
         // Create/run StreamGangs to search for the phases to find.
         runTests(phaseList,
@@ -108,7 +133,7 @@ public class SearchStreamGangTest {
      * Create/run appropriate type of StreamGang to search for phases.
      */
     private static void runTests(List<String> phaseList,
-                                 List<List<String>> inputData) {
+                                 List<List<CharSequence>> inputData) {
         // Run all the SearchStreamGang tests.
         for (TestsToRun test : TestsToRun.values()) {
             System.out.println("Starting " + test);

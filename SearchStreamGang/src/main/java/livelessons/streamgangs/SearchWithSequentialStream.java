@@ -20,7 +20,7 @@ public class SearchWithSequentialStream
      * Constructor initializes the super class.
      */
     public SearchWithSequentialStream(List<String> phrasesToFind,
-                                      List<List<String>> stringsToSearch) {
+                                      List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
@@ -51,12 +51,12 @@ public class SearchWithSequentialStream
      * Sequentially search @a inputString for all occurrences of the
      * phrases to find.
      */
-    private List<SearchResults> processInput(String inputString) {
+    private List<SearchResults> processInput(CharSequence inputSeq) {
         // Get the section title.
-        String title = getTitle(inputString);
+        String title = getTitle(inputSeq);
 
         // Skip over the title.
-        String input = inputString.substring(title.length());
+        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
 
         // Iterate through each phrase we're searching for and try to
         // find it in the inputData.

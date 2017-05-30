@@ -24,39 +24,34 @@ public class TestDataFactory {
      * Return the input data in the given @a filename as an array of
      * Strings.
      */
-    public static List<String> getInput(String filename,
+    public static List<CharSequence> getInput(String filename,
                                         String splitter) {
         try {
             // Convert the filename into a pathname.
             URI uri = ClassLoader.getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
-            String bytes = new String(Files.readAllBytes(Paths.get(uri)));
+            CharSequence bytes =
+                new String(Files.readAllBytes(Paths.get(uri)));
 
             return
-                // Compile a regular expression that's used to split the
-                // file into a list of strings.
-                Pattern.compile(splitter).splitAsStream(bytes)
+                // Compile a regular expression that's used to split
+                // the file into a list of strings.
+                Pattern.compile(splitter)
 
-                        // Filter out any empty strings.
-                        .filter(((Predicate<String>) String::isEmpty).negate())
+                       // Creates a stream from the given input
+                       // sequence around matches of this pattern.
+                       .splitAsStream(bytes)
 
-                        // Collect the results into a string.
-                        .collect(toList());
+                       // Filter out any empty strings.
+                       .filter(((Predicate<String>) String::isEmpty).negate())
+
+                       // Collect the results into a string.
+                       .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-    }
-
-    /**
-     * A generic negation predicate that can be used to negate a
-     * predicate.
-     *
-     * @return The negation of the input predicate.
-     */
-    public static<T> Predicate<T> not(Predicate<T> p) {
-        return p.negate();
     }
 
     /**

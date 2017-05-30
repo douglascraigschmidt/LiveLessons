@@ -20,7 +20,7 @@ public class SearchWithCompletableFuturesInputs
      * Constructor initializes the super class.
      */
     public SearchWithCompletableFuturesInputs(List<String> phrasesToFind,
-                                              List<List<String>> stringsToSearch) {
+                                              List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
@@ -71,12 +71,12 @@ public class SearchWithCompletableFuturesInputs
      * Asynchronously search @a inputString for all occurrences of the
      * phrases to find.
      */
-    private CompletableFuture<List<SearchResults>> processInputAsync(String inputString) {
+    private CompletableFuture<List<SearchResults>> processInputAsync(CharSequence inputSeq) {
         // Store the title.
-        String title = getTitle(inputString);
+        String title = getTitle(inputSeq);
 
         // Skip over the title.
-        String inputData = inputString.substring(title.length());
+        CharSequence input = inputSeq.subSequence(title.length(), inputSeq.length());
 
         // Convert the list of phrases into a list of CompletableFutures
         // to SearchResults.
@@ -89,7 +89,7 @@ public class SearchWithCompletableFuturesInputs
             .map(phrase ->
                  CompletableFuture.supplyAsync(()
                                                -> searchForPhrase(phrase,
-                                                                  inputData,
+                                                                  input,
                                                                   title,
                                                                   false)))
 
