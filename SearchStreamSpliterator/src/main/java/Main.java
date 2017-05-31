@@ -160,7 +160,8 @@ public class Main {
                            + (parallel ? "parallel)" : "sequential)"));
 
         // Print the matching titles.
-        // printTitles(listOfListOfSearchResults);
+        if (Options.getInstance().isVerbose())
+            printTitles(listOfListOfSearchResults);
     }
 
     /**
@@ -187,6 +188,7 @@ public class Main {
                                System.out.println("Title \""
                                                   + key
                                                   + "\" contained");
+                               // Print out the indicates for this key.
                                value.forEach(SearchResults::print);
                            });
     }

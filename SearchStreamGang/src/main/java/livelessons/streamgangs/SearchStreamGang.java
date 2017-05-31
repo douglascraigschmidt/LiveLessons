@@ -1,5 +1,6 @@
 package livelessons.streamgangs;
 
+import livelessons.utils.Options;
 import livelessons.utils.PhraseMatchSpliterator;
 import livelessons.utils.SearchResults;
 
@@ -161,7 +162,8 @@ public class SearchStreamGang
                            + " input strings");
 
         // Print out the titles.
-        printTitles(listOfListOfSearchResults);
+        if (Options.getInstance().isVerbose())
+            printTitles(listOfListOfSearchResults);
     }
 
     /**
@@ -188,6 +190,7 @@ public class SearchStreamGang
                          System.out.println("Title \""
                                             + key
                                             + "\" contained");
+                         // Print out the indicates for this key.
                          value.forEach(SearchResults::print);
                      });
     }

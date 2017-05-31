@@ -25,6 +25,12 @@ public class Options {
     private String mInputSeparator = "@";
 
     /**
+     * Stores whether the user wants verbose output or not.  Default
+     * is no verbose output.
+     */
+    private boolean mVerbose = false;
+
+    /**
      * Must have a private constructor.
      */
     private Options() {
@@ -34,15 +40,18 @@ public class Options {
      * Parse command-line arguments and set the appropriate values.
      */
     public boolean parseArgs(String[] args) {
-        if (args.length > 0) {
-            if (args[0].equals("-s")) {
-                mInputSeparator = args[1];
-                return true;
-            } else {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-s")) 
+                // Set the file separator character.
+                mInputSeparator = args[++i];
+            else if (args[i].equals("-v")) 
+                mVerbose = true;
+            else {
                 printUsage();
                 return false;
             }
         }
+
         return true;
     }
 
@@ -52,11 +61,18 @@ public class Options {
     public String getInputSeparator() {
         return mInputSeparator;
     }
+
+    /**
+     * Returns true if the user wants "verbose" output, else false.
+     */
+    public boolean isVerbose() {
+        return mVerbose;
+    }
     
     /** 
      * Print out usage and default values. 
      */
     private void printUsage() {
-        System.out.println("Options usage: \n-s [input-separator]");
+        System.out.println("Options usage: \n-s [input-separator] -v");
     }
 }
