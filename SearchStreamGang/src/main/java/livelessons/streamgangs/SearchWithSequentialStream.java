@@ -8,6 +8,7 @@ import livelessons.utils.SearchResults;
 import javax.naming.directory.SearchResult;
 
 import static java.util.stream.Collectors.toList;
+import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use Java Streams to
@@ -72,7 +73,7 @@ public class SearchWithSequentialStream
                                            false))
             
             // Only keep a result that has at least one match.
-            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            .filter(not(SearchResults::isEmpty))
             // Filtering can also be done as
             // .filter(result -> result.size() > 0)
             

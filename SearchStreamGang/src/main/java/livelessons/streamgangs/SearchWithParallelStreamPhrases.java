@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import livelessons.utils.SearchResults;
 
 import static java.util.stream.Collectors.toList;
+import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang superclass to use CompletableFutures
@@ -74,7 +75,7 @@ public class SearchWithParallelStreamPhrases
             })
             
             // Only keep a result that has at least one match.
-            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            .filter(not(SearchResults::isEmpty))
             // Filtering can also be done as
             // .filter(result -> result.size() > 0)
 

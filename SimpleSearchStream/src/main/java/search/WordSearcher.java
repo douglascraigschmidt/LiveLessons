@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.*;
+import static utils.StreamsUtils.not;
 
 /**
  * This class demonstrates the use of basic Java 8 functional
@@ -44,7 +45,7 @@ public class WordSearcher {
             .map(this::searchForWord)
             
             // Filter out any SearchResults that are empty.
-            .filter(((Predicate<SearchResults>) SearchResults::isEmpty).negate())
+            .filter(not(SearchResults::isEmpty))
             
             // This terminal operation triggers intermediate operation
             // processing and collects the SearchResults into a list.
