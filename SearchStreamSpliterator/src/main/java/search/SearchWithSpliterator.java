@@ -135,6 +135,10 @@ public class SearchWithSpliterator {
                 // Create a matcher for this pattern.
                 .matcher(input);
 
+        return m.find()
+                ? m.group()
+                : "";
+
         /* Could also use
           
         int index = inputData.indexOf('\n');
