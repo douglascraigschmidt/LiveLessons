@@ -31,8 +31,9 @@ public class WordMatchSpliterator
             + "\\b";
 
         mWordMatcher = Pattern
-            // Compile the regex.
-            .compile(regexWord)
+            // Compile the regex, which will ignore case.
+            .compile(regexWord,
+                     Pattern.CASE_INSENSITIVE)
 
             // Create a Matcher for the regex on the input.
             .matcher(input);
