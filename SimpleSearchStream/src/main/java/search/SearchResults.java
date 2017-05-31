@@ -108,22 +108,6 @@ public class SearchResults {
     }
 
     /**
-     * Convert to header to String form.
-     */
-    public String headerToString() {
-        return "";
-            // "["
-            // + mThreadId
-            // + "|"
-            // + mCycle
-            // + "] "
-            // + mTitle
-            // "  \""
-            // + mWord
-            // + "\" at ";
-    }
-
-    /**
      * Add a Result.
      */
     public void add(int index) {
@@ -159,8 +143,6 @@ public class SearchResults {
         String output = new String("");
 
         if (!isEmpty()) {
-            output += headerToString();
-
             // Iterate through the list of indices that matched the
             // search word and print them out.
             for (Result result : mList)
@@ -177,11 +159,9 @@ public class SearchResults {
      * Print the results.
      */
     public SearchResults print() {
-        if (!isEmpty()) {
-            synchronized(System.out) {
-                System.out.println(toString());
-            }
-        }
+        if (!isEmpty()) 
+            System.out.println(toString());
+
         return this;
     }
 }

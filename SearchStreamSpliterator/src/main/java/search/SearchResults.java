@@ -111,16 +111,7 @@ public class SearchResults {
      * Convert to header to String form.
      */
     public String headerToString() {
-        return 
-            // "["
-            // + mThreadId
-            // + "|"
-            // + mCycle
-            // + "] "
-            // + mTitle
-            "  \""
-            + mPhrase
-            + "\" at ";
+        return "  \"" + mPhrase + "\" at ";
     }
 
     /**
@@ -177,11 +168,9 @@ public class SearchResults {
      * Print the results.
      */
     public SearchResults print() {
-        if (!isEmpty()) {
-            synchronized(System.out) {
-                System.out.println(toString());
-            }
-        }
+        if (!isEmpty()) 
+            System.out.println(toString());
+
         return this;
     }
 }

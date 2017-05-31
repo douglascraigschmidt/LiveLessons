@@ -39,7 +39,7 @@ public class WordSearcher {
             // Convert the list of words to find into a stream.
             .stream()
 
-            // For each word to find create a list of SearchResults
+            // For each word to find create a stream of SearchResults
             // indicating the index (if any) where the word matched
             // the input.
             .map(this::searchForWord)
