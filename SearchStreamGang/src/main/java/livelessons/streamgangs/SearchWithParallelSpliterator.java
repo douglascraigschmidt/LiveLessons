@@ -34,7 +34,7 @@ public class SearchWithParallelSpliterator
     	// Get the input.
         return getInput()
             // Concurrently process each string in the input list.
-            .stream()
+            .parallelStream()
 
             // Concurrently map each string to a stream containing the
             // phrases found in the input string.
@@ -60,7 +60,7 @@ public class SearchWithParallelSpliterator
         // Find all occurrences of phrase in the input string.
         return mPhrasesToFind
             // Convert the list of phrases to find into a stream.
-            .stream()
+            .parallelStream()
 
             // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
