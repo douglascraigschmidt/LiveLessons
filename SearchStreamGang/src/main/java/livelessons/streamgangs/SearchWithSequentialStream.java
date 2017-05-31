@@ -33,9 +33,11 @@ public class SearchWithSequentialStream
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-    	// Get, process, and return the input data strings in a
-    	// stream.
-        return getInput()
+        // Get the list of input strings.
+        List<CharSequence> inputList = getInput();
+
+    	// Process the input strings via a sequential stream.
+        return inputList
             // Sequentially process each String in the input list.
             .stream()
 

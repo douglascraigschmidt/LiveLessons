@@ -60,7 +60,8 @@ public class SearchWithParallelSpliterator
 
         // Find all occurrences of phrase in the input string.
         return mPhrasesToFind
-            // Convert the list of phrases to find into a stream.
+            // Convert the list of phrases to find into a parallel
+            // stream.
             .parallelStream()
 
             // Find all indices where phrase matches the input data.
