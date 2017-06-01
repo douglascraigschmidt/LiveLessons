@@ -38,4 +38,6 @@ Here's an overview of what's included:
 . ex9 - This example uses a Java 8 ConcurrentHashMap and Java 8
   function-based method reference to cache prime numbers.
 
+. ex10 - This example shows the use of a lambda expression in the
+  context of a Java ConcurrentHashMap removeIf() method.
 
