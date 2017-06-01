@@ -16,9 +16,9 @@ Here's an overview of what's included:
   of the Comparator.comparing() factory method.
   
 . ex4 - This example shows how a Java 7 BiFunction lambda can be used
-  to replace all the values of all keys in a HashMap.  It also
-  contrasts the Java 8 BiFunction with a conventional Java 7 solution
-  using a foreach loop.
+  to replace all the values of all keys in a ConcurrentHashMap.  It
+  also contrasts the Java 8 BiFunction with a conventional Java 7
+  solution using a foreach loop.
 
 . ex5 - This example shows how a Java 8 Consumer interface can be used
   with forEach() to print out the values in a list by binding the

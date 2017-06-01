@@ -1,18 +1,25 @@
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static javax.swing.UIManager.put;
 
 /**
  * This example shows how a Java 7 BiFunction lambda can be used to
- * replace all the values of all keys in a HashMap.  It also contrasts
- * the Java 8 BiFunction with a conventional Java 7 solution using a
- * foreach loop.
+ * replace all the values of all keys in a ConcurrentHashMap.  It also
+ * contrasts the Java 8 BiFunction with a conventional Java 7 solution
+ * using a foreach loop.
  */
 public class ex4 {
     static public void main(String[] argv) {
-        // Create a new map that associates Stooges with their IQ
-        // levels.
-    	Map<String, Integer> iqMap = new HashMap<String, Integer>() {
-            { put("Larry", 100); put("Curly", 100); put("Moe", 100); }
-        };
+        // Create a map that associates Stooges with IQ points.
+    	Map<String, Integer> iqMap = 
+            new ConcurrentHashMap<String, Integer>() {
+                { 
+                    put("Larry", 100);
+                    put("Curly", 90);
+                    put("Moe", 110);
+                }
+            };
 
     	System.out.println(iqMap);
     		 
