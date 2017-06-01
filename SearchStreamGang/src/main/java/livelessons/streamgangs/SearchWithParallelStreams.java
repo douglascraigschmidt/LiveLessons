@@ -28,51 +28,50 @@ public class SearchWithParallelStreams
 
     /**
      * Perform the processing, which uses a Java 8 Stream to
-     * sequentially search for phrases in the input data.
+     * concurrently search for phrases in the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-         // Concurrently iterate through each phrase we're searching for
-        // and try to find it in the input data.
-        return mPhrasesToFind
-            // Convert the array of phrases into a parallel stream.
+        // Get the list of input strings.
+        List<CharSequence> inputList = getInput();
+
+    	// Process the input strings via a parallel stream.
+        return inputList
+            // Concurrently process each string in the input list.
             .parallelStream()
-            
-            // Concurrently search for all places where the phrase
-            // matches the input data.
-            .map(this::processPhrase)
+
+            // Map each input string to list of SearchResults
+            // containing the phrases found in the input.
+            .map(this::processInput)
 
             // Terminate stream and return a list of lists of
             // SearchResults.
             .collect(toList());
-   }
+    }
     
     /**
-     * Concurrently Search the inputData for all occurrences of the
+     * Concurrently search @a inputSeq for all occurrences of the
      * phrases to find.
      */
-    private List<SearchResults> processPhrase(String phrase) {
-  	// Get the input.
-        return getInput()
-            // Concurrently process each String in the input list.
+    private List<SearchResults> processInput(CharSequence inputSeq) {
+        // Get the section title.
+        String title = getTitle(inputSeq);
+
+        // Skip over the title.
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
+
+        // Iterate through each phrase we're searching for and try to
+        // find it in the inputData.
+        List<SearchResults> results = mPhrasesToFind
+            // Convert the list of phrases into a parallel stream.
             .parallelStream()
-
-            // Concurrently map each string to a stream containing the
-            // phrases found in the input.
-            .map(inputSeq -> {
-                    // Get the section title.
-                    String title = getTitle(inputSeq);
-
-                    // Skip over the title.
-                    CharSequence input = inputSeq.subSequence(title.length(),
-                                                              inputSeq.length());
-
-                    // Find all occurrences of phrase in the input string.
-                    return searchForPhrase(phrase, 
+            
+            // Find all indices where phrase matches the input data.
+            .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
-                                           false);
-                })
+                                           false))
             
             // Only keep a result that has at least one match.
             .filter(not(SearchResults::isEmpty))
@@ -81,6 +80,9 @@ public class SearchWithParallelStreams
             
             // Terminate stream and return a list of SearchResults.
             .collect(toList());
+            
+        // Return the results.
+        return results;
     }
 }
 

@@ -52,7 +52,7 @@ public class ex9 {
 
         // Cache that maps candidate primes to their smallest factor
         // (if they aren't prime) or 0 if they are prime.
-        final ConcurrentMap<Integer, Integer> primeCache =
+        final Map<Integer, Integer> primeCache =
             new ConcurrentHashMap<>();
 
         // This runnable checks to see if sMAX random numbers are

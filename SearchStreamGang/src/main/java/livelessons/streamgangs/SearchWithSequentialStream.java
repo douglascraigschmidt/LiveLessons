@@ -38,7 +38,7 @@ public class SearchWithSequentialStream
 
     	// Process the input strings via a sequential stream.
         return inputList
-            // Sequentially process each String in the input list.
+            // Sequentially process each string in the input list.
             .stream()
 
             // Map each input string to list of SearchResults
@@ -51,7 +51,7 @@ public class SearchWithSequentialStream
     }
     
     /**
-     * Sequentially search @a inputString for all occurrences of the
+     * Sequentially search @a inputSeq for all occurrences of the
      * phrases to find.
      */
     private List<SearchResults> processInput(CharSequence inputSeq) {
@@ -65,7 +65,7 @@ public class SearchWithSequentialStream
         // Iterate through each phrase we're searching for and try to
         // find it in the inputData.
         List<SearchResults> results = mPhrasesToFind
-            // Convert the array of phrases into a Stream.
+            // Convert the list of phrases into a sequential stream.
             .stream()
             
             // Find all indices where phrase matches the input data.
