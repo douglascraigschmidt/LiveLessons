@@ -41,3 +41,6 @@ Here's an overview of what's included:
 . ex10 - This example shows the use of a lambda expression in the
   context of a Java ConcurrentHashMap removeIf() method.
 
+. ex11 - This example shows the improper use of the Stream.peek()
+  aggregate operation to interfere with a running stream.
+

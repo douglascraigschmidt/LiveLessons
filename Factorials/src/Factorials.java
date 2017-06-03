@@ -115,7 +115,7 @@ public class Factorials {
      * This class demonstrates how the Java 8 reduce() operation avoid
      * sharing state between Java threads altogether.
      */
-    static class NonSynchronizedParallelFactorial {
+    static class ParallelStreamFactorial {
          /**
          * Return the factorial for the given @a n using a parallel
          * stream and the reduce() terminal operation.
@@ -165,8 +165,8 @@ public class Factorials {
                          SynchronizedParallelFactorial::factorial,
                          n);
 
-        runFactorialTest("NonSynchronizedParallelFactorial",
-                         NonSynchronizedParallelFactorial::factorial,
+        runFactorialTest("ParallelStreamFactorial",
+                         ParallelStreamFactorial::factorial,
                          n);
 
         runFactorialTest("BuggyFactorial",

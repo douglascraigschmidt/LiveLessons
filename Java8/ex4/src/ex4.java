@@ -1,6 +1,9 @@
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.*;
 import static javax.swing.UIManager.put;
 
 /**
@@ -12,9 +15,9 @@ import static javax.swing.UIManager.put;
 public class ex4 {
     static public void main(String[] argv) {
         // Create a map that associates Stooges with IQ points.
-    	Map<String, Integer> iqMap = 
+    	Map<String, Integer> iqMap =
             new ConcurrentHashMap<String, Integer>() {
-                { 
+                {
                     put("Larry", 100);
                     put("Curly", 90);
                     put("Moe", 110);
@@ -22,7 +25,7 @@ public class ex4 {
             };
 
     	System.out.println(iqMap);
-    		 
+
     	// Replace all values of all keys using a Java 8 BiFunction
     	// lambda.
     	iqMap.replaceAll((k, v) -> v - 50);
@@ -32,7 +35,7 @@ public class ex4 {
     	// Replace all values of all keys using a Java 7 foreach loop.
     	for (Map.Entry<String, Integer> entry : iqMap.entrySet())
             entry.setValue(entry.getValue() - 50);
-    	
+
     	System.out.println(iqMap);
     }
 }
