@@ -26,7 +26,7 @@ public class PhraseMatchSpliterator
     /**
      * The compiled regular expression pattern.
      */
-    private Pattern mPattern;
+    private final Pattern mPattern;
 
     /**
      * The phrase matcher.
@@ -36,7 +36,7 @@ public class PhraseMatchSpliterator
     /**
      * The minimum size of an input string to split.
      */
-    private int mMinSplitSize = 0;
+    private final int mMinSplitSize;
 
     /**
      * Constructor initializes the fields.
