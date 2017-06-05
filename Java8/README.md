@@ -44,3 +44,7 @@ Here's an overview of what's included:
 . ex11 - This example shows the improper use of the Stream.peek()
   aggregate operation to interfere with a running stream.
 
+. ex12 - This example shows a simple example of a Java 8 stream that
+  illustrates how it can be used with "pure" functions, i.e.,
+  functions whose return values are only determined by their input
+  values, without observable side effects.
