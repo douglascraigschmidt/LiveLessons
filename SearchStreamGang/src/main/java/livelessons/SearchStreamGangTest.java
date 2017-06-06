@@ -2,7 +2,6 @@ package livelessons;
 
 import livelessons.streamgangs.*;
 import livelessons.utils.Options;
-import livelessons.utils.SharedString;
 import livelessons.utils.TestDataFactory;
 
 import java.util.*;
@@ -46,7 +45,7 @@ public class SearchStreamGangTest {
             return new SearchWithSequentialLoops(phaseList,
                         inputData);
         case SEQUENTIAL_STREAM:
-            return new SearchWithSequentialStream(phaseList,
+            return new SearchWithSequentialStreams(phaseList,
                                                   inputData);
         case PARALLEL_SPLITERATOR:
             return new SearchWithParallelSpliterator(phaseList,

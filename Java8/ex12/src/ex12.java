@@ -1,7 +1,7 @@
 import com.sun.istack.internal.NotNull;
 
-import java.util.*;
 import java.util.stream.Stream;
+import static java.lang.Character.toLowerCase;
 
 /**
  * This example shows a simple example of a Java 8 stream that
@@ -29,7 +29,7 @@ public class ex12 {
                 "Ophelia")
 
             // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s ->s.startsWith("h")||s.startsWith("H"))
+            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
 
             // Capitalize the first letter in the string.
             .map(this::capitalize)

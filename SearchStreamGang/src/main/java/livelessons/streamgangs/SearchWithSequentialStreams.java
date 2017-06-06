@@ -15,13 +15,13 @@ import static livelessons.utils.StreamsUtils.not;
  * sequentially search an input data string for each phrase in an array
  * of phrases.
  */
-public class SearchWithSequentialStream
+public class SearchWithSequentialStreams
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithSequentialStream(List<String> phrasesToFind,
-                                      List<List<CharSequence>> stringsToSearch) {
+    public SearchWithSequentialStreams(List<String> phrasesToFind,
+                                       List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
