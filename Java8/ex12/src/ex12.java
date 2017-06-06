@@ -1,4 +1,7 @@
+import com.sun.istack.internal.NotNull;
+
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * This example shows a simple example of a Java 8 stream that
@@ -8,42 +11,47 @@ import java.util.*;
  */
 public class ex12 {
     static public void main(String[] argv) {
-        // Create a list of characters from William Shakespeare's Hamlet.
-        List<String> list = 
-            Arrays.asList("horatio",
-                          "claudius",
-                          "Gertrude",
-                          "Hamlet",
-                          "laertes",
-                          "Ophelia");
+        new ex12().run();
+    }
 
-        list
-            // Convert the list into a stream.
-            .stream()
+    /**
+     * Run the example.
+     */
+    public void run() {
+        Stream
+            // Create a stream of characters from William
+            // Shakespeare's Hamlet.
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "laertes",
+                "Ophelia")
 
             // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> s.startsWith("h") || s.startsWith("H"))
+            .filter(s ->s.startsWith("h")||s.startsWith("H"))
 
             // Capitalize the first letter in the string.
-            .map(ex12::capitalize)
+            .map(this::capitalize)
 
             // Sort the results in ascending order.
             .sorted()
 
             // Print out the results.
             .forEach(System.out::println);
-    }
 
+    }
     /**
-     * Capitalize @a s by making the first letter uppercase and the rest lowercase.
+     * Capitalize @a s by making the first letter uppercase and the
+     * rest lowercase.
      */
-    private static String capitalize(String s) {
-        if (s == null || s.length() == 0)
+    private String capitalize(@NotNull String s) {
+        if (s.length() == 0)
             return s;
         return s.substring(0, 1)
                 .toUpperCase()
-                + s.substring(1)
-                   .toLowerCase();
+               + s.substring(1)
+                  .toLowerCase();
     }
 }
 
