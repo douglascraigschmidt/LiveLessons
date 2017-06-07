@@ -4,14 +4,8 @@ import livelessons.streamgangs.*;
 import livelessons.utils.Options;
 import livelessons.utils.TestDataFactory;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.*;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This test driver showcases how implementation strategies customize
@@ -166,53 +160,44 @@ public class SearchStreamGangTest {
         int numberOfRuns =
             resultsMap.entrySet().iterator().next().getValue().size();
 
-        // Create a list of TreeMaps to hold the timing results in
-        // sorted order.
-        List<TreeMap<Long, String>> listOfMaps = IntStream
-            // Generate an IntStream from [0 .. numberOfRuns)
-            .range(0, numberOfRuns)
+        // Iterate through the results of each of the test runs.
+        for (int i = 0;
+             i < numberOfRuns;
+             i++) {
+            final int runNumber = i;
+            System.out.println("\nPrinting "
+                               + resultsMap.entrySet().size()
+                               + " results for input file "
+                               + (runNumber + 1)
+                               + " from fastest to slowest");
 
-            // Create a TreeMap from the resultsMap.
-            .mapToObj(runNumber -> resultsMap
+            // Print out the contents of the resultsMap in sorted
+            // order.
+            resultsMap
                 // Get the entrySet for the resultsMap.
                 .entrySet()
 
                 // Convert the entrySet into a stream.
                 .stream()
 
-                // Create a TreeMap that contains the timing results
-                // (value) followed by the name of the test (key).
-                .collect(toMap(e -> e.getValue().get(runNumber),
-                               e -> e.getKey(),
-                              (a,b) -> a,
-                               TreeMap::new)))
+                // Create a SimpleImmutableEntry containing the timing
+                // results (value) followed by the test name (key).
+                .map(entry
+                     -> new SimpleImmutableEntry<>
+                        (entry.getValue().get(runNumber),
+                         entry.getKey()))
 
-            // Collect the TreeMaps into a list.
-            .collect(toList());
+                // Sort the stream by the timing results (key).
+                .sorted(Comparator.comparing(SimpleImmutableEntry::getKey))
 
-        // Print the results of the test runs from fastest to slowest.
-        IntStream.range(0, numberOfRuns)
-            // Iterate through each of the test runs.
-            .forEach(treeIndex -> {
-                    System.out.println("\nPrinting "
-                                       + resultsMap.entrySet().size()
-                                       + " results for input file "
-                                       + (treeIndex + 1)
-                                       + " from fastest to slowest");
-                    // Print results of test run with name of the test
-                    // first followed by time in msecs.
-                    listOfMaps
-                        // Get the appropriate TreeMap.
-                        .get(treeIndex)
-
-                        // Get the entry set from the map.
-                        .forEach((key, value) 
-                                 -> System.out.println(""
-                                                       + value
-                                                       + " executed in "
-                                                       + key
-                                                       + " msecs"));
-                });
+                // Print all the entries in the sorted stream.
+                .forEach(entry
+                         -> System.out.println(""
+                                               + entry.getValue()
+                                               + " executed in "
+                                               + entry.getKey()
+                                               + " msecs"));
+        }
     }
 
     /**
