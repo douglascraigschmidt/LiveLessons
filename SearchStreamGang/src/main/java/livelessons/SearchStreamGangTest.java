@@ -76,13 +76,15 @@ public class SearchStreamGangTest {
     /**
      * The complete works of William Shakespeare.
      */
-    private static String sSHAKESPEARE_DATA_FILE = "completeWorksOfShakespeare.txt";
+    private static String sSHAKESPEARE_DATA_FILE =
+        "completeWorksOfShakespeare.txt";
 
     /**
      * A list of phrases to search for in the complete works of
      * Shakespeare.
      */
-    private static String sPHASE_LIST_FILE = "phraseList.txt";
+    private static String sPHASE_LIST_FILE =
+        "phraseList.txt";
 
     /**
      * This is the entry point into the test driver program.
