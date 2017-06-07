@@ -5,9 +5,12 @@ import livelessons.utils.Options;
 import livelessons.utils.TestDataFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -163,54 +166,52 @@ public class SearchStreamGangTest {
         int numberOfRuns =
             resultsMap.entrySet().iterator().next().getValue().size();
 
-        // This local class is needed to make the Java 8 compiler happy.
-        final class ResultMap extends TreeMap<Long, String> {
-        }
-
         // Create a list of TreeMaps to hold the timing results in
         // sorted order.
-        List<ResultMap> listOfMaps =
-            Stream.generate(ResultMap::new)
-            .limit(numberOfRuns)
+        List<TreeMap<Long, String>> listOfMaps = IntStream
+            // Generate an IntStream from [0 .. numberOfRuns)
+            .range(0, numberOfRuns)
+
+            // Create a TreeMap from the resultsMap.
+            .mapToObj(runNumber -> resultsMap
+                // Get the entrySet for the resultsMap.
+                .entrySet()
+
+                // Convert the entrySet into a stream.
+                .stream()
+
+                // Create a TreeMap that contains the timing results
+                // (value) followed by the name of the test (key).
+                .collect(toMap(e -> e.getValue().get(runNumber),
+                               e -> e.getKey(),
+                              (a,b) -> a,
+                               TreeMap::new)))
+
+            // Collect the TreeMaps into a list.
             .collect(toList());
-
-        // Initialize the TreeMaps to contain the results from each
-        // timing test.
-        IntStream.range(0, numberOfRuns)
-            // Iterate through each of the test runs.
-            .forEach(treeIndex ->
-                     // Get the entry set from the map.
-                     // Iterate through each entry in the map.
-                     resultsMap.forEach((key, value) -> {
-                             // Get the appropriate tree map.
-                             ResultMap map = listOfMaps.get(treeIndex);
-
-                             // Store results into the tree map, whose
-                             // key is time in msecs and whose value
-                             // is test that ran.
-                             map.put(value.get(treeIndex),
-                                     key);
-                         }));
 
         // Print the results of the test runs from fastest to slowest.
         IntStream.range(0, numberOfRuns)
             // Iterate through each of the test runs.
             .forEach(treeIndex -> {
-                    System.out.println("\nPrinting results for input file "
+                    System.out.println("\nPrinting "
+                                       + resultsMap.entrySet().size()
+                                       + " results for input file "
                                        + (treeIndex + 1)
                                        + " from fastest to slowest");
-                    // Print results of test run with name of the
-                    // test first followed by time in msecs.
+                    // Print results of test run with name of the test
+                    // first followed by time in msecs.
                     listOfMaps
                         // Get the appropriate TreeMap.
                         .get(treeIndex)
 
                         // Get the entry set from the map.
-                        .forEach((key, value) -> System.out.println(""
-                                                                    + value
-                                                                    + " executed in "
-                                                                    + key
-                                                                    + " msecs"));
+                        .forEach((key, value) 
+                                 -> System.out.println(""
+                                                       + value
+                                                       + " executed in "
+                                                       + key
+                                                       + " msecs"));
                 });
     }
 
@@ -219,3 +220,4 @@ public class SearchStreamGangTest {
      */
     private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 }
+
