@@ -6,9 +6,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is used in conjunction with StreamSupport.stream() to
- * create a stream of SearchResults.Result objects that match the
- * number of times a word appears in an input string.
+ * This class is used in conjunction with StreamSupport.stream() and
+ * the Java Regex class to create a stream of SearchResults.Result
+ * objects that match the number of times a word appears in an input
+ * string.
  */
 public class WordMatchSpliterator
        extends Spliterators.AbstractSpliterator<SearchResults.Result> {
@@ -40,7 +41,7 @@ public class WordMatchSpliterator
     }
 
     /**
-     * Attempt to advance the spliterator by one position.
+     * Attempt to advance the spliterator by one word match.
      */
     public boolean tryAdvance(Consumer<? super SearchResults.Result> action) {
         // If there's no match then we're done with the iteration.
