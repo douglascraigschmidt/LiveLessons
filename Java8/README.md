@@ -48,3 +48,7 @@ Here's an overview of what's included:
   illustrates how it can be used with "pure" functions, i.e.,
   functions whose return values are only determined by their input
   values, without observable side effects.
+
+. ex13 - This example shows a simple example of a Java 8 Spliterator
+  to traverse each word in a list containing a quote from a famous
+  Shakespeare play.

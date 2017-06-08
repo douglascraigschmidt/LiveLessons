@@ -56,29 +56,28 @@ public class WordSearcher {
     }
 
     /**
-     * Looks for all instances of @code phrase in @code inputData and
+     * Looks for all instances of @code word in @code inputData and
      * return a list of all the @code SearchResults (if any).
      */
     private SearchResults searchForWord(String word) {
-        List<SearchResults.Result> resultList =
-            // Use a WordMatchSpliterator to add the indices of all
-            // places in the input where phrase matches.
-            StreamSupport
-            // Create a sequential stream of SearchResults.Result that
-            // record where the word matched the input (if it did).
-            .stream(new WordMatchSpliterator(mInput, word),
-                    false)
-                    
-            // This terminal operation triggers aggregate operation
-            // processing and returns a list of Results.
-            .collect(toList());
-
     	// Create/return SearchResults to keep track of relevant info.
-        return new SearchResults(Thread.currentThread().getId(),
-                                 1,
-                                 word,
-                                 "",
-                                 resultList);
+        return new SearchResults
+            (Thread.currentThread().getId(),
+             1,
+             word,
+             "",
+
+             // Use a WordMatchSpliterator to add the indices of all
+             // places in the input where word matches.
+             StreamSupport
+                 // Create a sequential stream of Result objects that
+                 // record where the word matched the input (if it did).
+                 .stream(new WordMatchSpliterator(mInput, word),
+                         false)
+
+             // This terminal operation triggers aggregate operation
+             // processing and returns a list of Results.
+             .collect(toList()));
     }
 
     /**
