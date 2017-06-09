@@ -107,36 +107,60 @@ public class PhraseMatchSpliterator
      */
     @Override
     public Spliterator<SearchResults.Result> trySplit() {
-        // Current size of the entire input string.
-        int currentSize = mInput.length();
-
         // Bail out if the input is too small to split further.
-        if (currentSize < mMinSplitSize)
+        if (mInput.length() < mMinSplitSize)
             return null;
 
-        // Compute the candidate split point.
-        int splitPos = currentSize / 2;
+        // Compute a candidate position for splitting the input.
+        int startPos, splitPos = mInput.length() / 2;
 
+        // Determine the position to start determining if a phrase
+        // spans the split position.
+        if ((startPos = computeStartPos(splitPos)) < 0)
+            return null;
+
+        // Update splitPos if a phrase spans across the initial
+        // splitPos.
+        splitPos = tryToUpdateSplitPos(startPos, splitPos);
+
+        // Create a new PhraseMatchSpliterator that handles the "left
+        // hand" portion of the input, while the "this" object handles
+        // the "right hand" portion of the input.
+        return splitInput(splitPos);
+    }
+
+    /**
+     * Determine the position to start determining if a phrase spans
+     * the split position.  Returns -1 if the phrase is too long for
+     * the input.
+     */
+    private int computeStartPos(int splitPos) {
         // Length of the phrase in non-regex characters.
         int phraseLength = mPhrase.length();
         
-        // Length of the phrase in regex characters.
-        int patternPhraseLength = mPattern.toString().length();
-
         // Subtract the phrase length so we can check to make sure the
         // phrase doesn't span across splitPos.
         int startPos = splitPos - phraseLength;
 
-        // Check if phrase is too long for this segment.
-        if (startPos < 0
-            || phraseLength > splitPos) {
-            return null;
-        }
+        // Check if phrase is too long for this input segment.
+        if (startPos < 0 || phraseLength > splitPos) 
+            return -1;
+        else
+            return startPos;
+    }
 
-        // Create a substring to handle the case where a phrase spans
-        // across the initial splitPos.
-        CharSequence substr = mInput.subSequence(startPos,
-                                                 startPos + patternPhraseLength);
+    /**
+     * Update splitPos if a phrase spans across the initial splitPos.
+     */
+    private int tryToUpdateSplitPos(int startPos,
+                                    int splitPos) {
+        // Create a substring to check for the case where a phrase
+        // spans across the initial splitPos.
+        CharSequence substr =
+            mInput.subSequence(startPos,
+                               // Add length of the phrase in regex
+                               // characters.
+                               startPos + mPattern.toString().length());
 
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
@@ -145,8 +169,19 @@ public class PhraseMatchSpliterator
         if (phraseMatcher.find()) 
             // If there's a match update the splitPos to account for
             // the phrase that spans newlines.
-            splitPos = startPos + phraseMatcher.start() + phraseMatcher.group().length();
+            splitPos = startPos 
+                + phraseMatcher.start() 
+                + phraseMatcher.group().length();
 
+        return splitPos;
+    }
+
+    /**
+     * Return a new PhraseMatchSpliterator that handles the "left
+     * hand" portion of the input, while the "this" object handles the
+     * "right hand" portion of the input.
+     */
+    private PhraseMatchSpliterator splitInput(int splitPos) {
         // Split the input at the appropriate location.
         CharSequence leftHandSide = mInput.subSequence(0, splitPos);
 
@@ -157,9 +192,9 @@ public class PhraseMatchSpliterator
         // Update this field to handle the shorter input.
         mPhraseMatcher = mPattern.matcher(mInput);
 
-        // Create a new PhraseMatchSpliterator object that handles the
-        // "left hand" portion of the input, while the "this" object
-        // handles the "right hand" portion of the input.
+        // Create a new PhraseMatchSpliterator that handles the "left
+        // hand" portion of the input, while the "this" object handles
+        // the "right hand" portion of the input.
         return new PhraseMatchSpliterator(leftHandSide,
                                           mPhrase,
                                           mPattern,
