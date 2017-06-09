@@ -2,7 +2,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This example shows the difference in overhead for using a
+ * This example shows the difference in overhead for using a parallel
  * spliterator to split a Java LinkedList and an ArrayList into
  * chunks.
  */
@@ -55,21 +55,21 @@ public class ex14 {
      * Warm up the threads in the fork/join pool so the timing results
      * will be more accurate.
      */
-    private static void warmUpForkJoinPool(List<CharSequence> quote) {
+    private static void warmUpForkJoinPool(List<CharSequence> words) {
         System.out.println("\n++Warming up the fork/join pool");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) 
-            quote.parallelStream().count();
+            words.parallelStream().count();
 
         // Run the garbage collector after each test.
         System.gc();
     }
 
     /**
-     * Determine how long it takes to split the quote list via a
+     * Determine how long it takes to split the word list via a
      * parallel spliterator for various types of lists.
      */
-    private static void timeParallelStream(String testName, List<CharSequence> quote) {
+    private static void timeParallelStream(String testName, List<CharSequence> words) {
         System.out.println("\n++Timing the " 
                            + testName 
                            + " parallel implementation");
@@ -80,8 +80,12 @@ public class ex14 {
         long total = 0;
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            total += quote
-                    .parallelStream().count();
+            total += words
+                // Convert the list into a parallel stream (which uses
+                // a spliterator internally).
+                .parallelStream()
+                // Count the number of words in the stream.
+                .count();
         }
 
         // Record the stop time.

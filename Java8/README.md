@@ -52,3 +52,7 @@ Here's an overview of what's included:
 . ex13 - This example shows a simple example of a Java 8 Spliterator
   to traverse each word in a list containing a quote from a famous
   Shakespeare play.
+
+. ex14 - This example shows the difference in overhead for using a
+  parallel spliterator to split a Java LinkedList and an ArrayList
+  into chunks.
