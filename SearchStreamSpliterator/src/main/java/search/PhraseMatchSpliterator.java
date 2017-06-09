@@ -114,8 +114,8 @@ public class PhraseMatchSpliterator
         // Compute a candidate position for splitting the input.
         int startPos, splitPos = mInput.length() / 2;
 
-        // Determine the position to start determining if a phrase
-        // spans the split position.
+        // Get the position to start determining if a phrase spans the
+        // split position.
         if ((startPos = computeStartPos(splitPos)) < 0)
             return null;
 
