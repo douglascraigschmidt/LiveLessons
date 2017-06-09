@@ -1,0 +1,114 @@
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * This example shows a simple example of a Java 8 Spliterator to
+ * traverse each word in a list containing a quote from a famous
+ * Shakespeare play.
+ */
+public class ex14 {
+    private static final int sMAX_ITERATIONS = 1000;
+
+    /**
+     * The complete works of William Shakespeare.
+     */
+    private static final String sSHAKESPEARE_DATA_FILE =
+        "completeWorksOfShakespeare.txt";
+
+    /**
+     * Main entry point into the program.
+     */
+    static public void main(String[] argv) {
+        // Create a list of strings containing words the works of Shakespeare.
+        List<CharSequence> bardWords =             
+            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                     // Split input into "words".
+                                     "\\s+");
+
+        //
+        warmUpForkJoinPool(new LinkedList<>(bardWords));
+
+        // Time the various examples.
+        timeParallelStream("ArrayList", bardWords);
+        timeParallelStream("LinkedList", new LinkedList<>(bardWords));
+
+        // Time the various examples.
+        timeSequentialStream("ArrayList", bardWords);
+        timeSequentialStream("LinkedList", new LinkedList<>(bardWords));
+    }
+
+    /**
+     * ...
+     */
+    private static void warmUpForkJoinPool(List<CharSequence> quote) {
+        System.out.println("\n++Warming up the fork/join pool");
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            quote.parallelStream().count();
+        }
+
+        // Run the garbage collector after each test.
+        System.gc();
+    }
+
+    /**
+     * ...
+     */
+    private static void timeSequentialStream(String testName, List<CharSequence> quote) {
+        System.out.println("\n++Timing the " + testName + " sequential implementation");
+
+        // Record the start time.
+        long startTime = System.nanoTime();
+
+        long total = 0;
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            total += quote
+                    .stream().count();
+        }
+
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+
+        System.out.println("The time to count "
+                + total
+                + " stream elements took "
+                + stopTime
+                + " milliseconds for "
+                + testName);
+
+        // Run the garbage collector after each test.
+        System.gc();
+    }
+
+    /**
+     * ...
+     */
+    private static void timeParallelStream(String testName, List<CharSequence> quote) {
+        System.out.println("\n++Timing the " + testName + " parallel implementation");
+
+        // Record the start time.
+        long startTime = System.nanoTime();
+
+        long total = 0;
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            total += quote
+                    .parallelStream().count();
+        }
+
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+
+        System.out.println("The time to count "
+                + total
+                + " stream elements took "
+                + stopTime
+                + " milliseconds for "
+                + testName);
+
+        // Run the garbage collector after each test.
+        System.gc();
+    }
+}
+
