@@ -1,5 +1,6 @@
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
@@ -60,14 +61,14 @@ public class ex14 {
         // collect() and Collectors.joining() in a parallel stream.
         // The performance of this test will be poor due to the
         // overhead of combining/joining the various partial results.
-        timeParallelStreamJoining(linkedBardWords);
+        timeStreamJoining(true, linkedBardWords);
 
         // Compute/print the time required to join the LinkedList via
         // collect() and Collectors.joining() in a parallel stream.
         // The performance of this test will be better than the
         // parallel stream version above since there's less overhead
         // for combining/joining the various partial results.
-        timeSequentialStreamJoining(linkedBardWords);
+        timeStreamJoining(false, linkedBardWords);
     }
 
     /**
@@ -131,69 +132,44 @@ public class ex14 {
 
     /**
      * Determines how long it takes to join the word list via
-     * collect() and Collectors.joining() in a parallel stream.
+     * collect() and Collectors.joining() in a stream.  If @a parallel
+     * is true then a parallel stream is used, else a sequential
+     * stream is used.
      */
-    private static void timeParallelStreamJoining(List<CharSequence> words) {
-        System.out.println("\n++Timing the parallelStreamJoining implementation");
+    private static void timeStreamJoining(boolean parallel, 
+                                          List<CharSequence> words) {
+        System.out.println("\n++Timing the "
+                           + (parallel ? "parallel" : "sequential")
+                           + "StreamJoining implementation");
 
         // Record the start time.
         long startTime = System.nanoTime();
 
-        String results = "";
+        StringBuilder results = new StringBuilder();
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            results += words
-                // Convert the list into a parallel stream (which uses
-                // a spliterator internally).
-                .parallelStream()
+            Stream<CharSequence> wordStream = words
+                // Convert the list into a stream (which uses a
+                // spliterator internally).
+                .stream();
 
-                // Join all the words in the stream.
-                .collect(joining(" "));
+            if (parallel)
+                //noinspection ResultOfMethodCallIgnored
+                wordStream.parallel();
+
+            results.append(wordStream
+                           // Join all the words in the stream.
+                           .collect(joining(" ")));
         }
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to join "
-                           + results.replaceAll("[^ ]", "").length()
+                           + results.toString().replaceAll("[^ ]", "").length()
                            + " stream elements took "
                            + stopTime
-                           + " milliseconds for parallelStreamJoining");
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Determines how long it takes to join the word list via
-     * collect() and Collectors.joining() in a sequential stream.
-     */
-    private static void timeSequentialStreamJoining(List<CharSequence> words) {
-        System.out.println("\n++Timing the sequentialStreamJoining implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        String results = "";
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            results += words
-                // Convert the list into a sequential stream (which
-                // uses a spliterator internally).
-                .stream()
-
-                // Join all the words in the stream.
-                .collect(joining(" "));
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to join "
-                           + results.replaceAll("[^ ]", "").length()
-                           + " stream elements took "
-                           + stopTime
-                           + " milliseconds for sequentialStreamJoining");
+                           + " milliseconds");
 
         // Run the garbage collector after each test.
         System.gc();

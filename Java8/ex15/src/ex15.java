@@ -23,42 +23,51 @@ public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static final long sNUMBER = 1000000;
+    private static final long sNUMBER = 10000000;
 
     /**
      * Main entry point into the program.
      */
     public static void main(String[] args) {
-        mVerbose = args.length > 0 ? true : false;
+        mVerbose = args.length > 0;
 
         ex15 test = new ex15();
 
         test.warmUpForkJoinPool(sNUMBER);
 
         // Run the tests.
-        test.testParallelStreamIterate(sNUMBER);
-        test.testParallelStreamRange(sNUMBER);
-        test.testSequentialStream(sNUMBER);
+
+        // This implementation will perform very poorly since
+        // iterate() and limit() are inherently sequentially and
+        // cannot be split effectively.
+        test.testStreamIterate(true, sNUMBER);
+
+        // This implementation will perform well since range() can be
+        // split effectively.
+        test.testStreamRange(true, sNUMBER);
+        test.testStreamIterate(false, sNUMBER);
+        test.testStreamRange(false, sNUMBER);
     }
 
     /**
-     * Use a parallel stream and the Stream.iterate() operation to
-     * compute the sqrt of the first @a number even numbers.  This
-     * implementation will perform very poorly since iterate() and
-     * limit() are inherently sequentially and cannot be split
-     * effectively.
+     * Use a stream and the Stream.iterate() operation to compute the
+     * sqrt of the first @a number even numbers.  If @a parallel is
+     * true use a parallel stream, else use a sequential stream.
      */
-    private void testParallelStreamIterate(long number) {
+    private void testStreamIterate(boolean parallel,
+                                   long number) {
         // Record the start time.
         long startTime = System.nanoTime();
 
-        List<Double> result= Stream
-            // Generate a stream of numbers starting at 2.
-            .iterate(2, i -> i + 1)
+        final Stream<Long> stream = Stream
+                // Generate a stream of numbers starting at 2.
+                .iterate(2L, l -> l + 1L);
 
+        if (parallel)
             // Run the remainder of the stream concurrently.
-            .parallel()
-                
+            stream.parallel();
+
+        List<Double> result = stream
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
@@ -77,7 +86,9 @@ public class ex15 {
         assert number == result.size();
 
         // System.out.println(result);
-        System.out.println("The parallel stream using Stream.iterate() took "
+        System.out.println("The "
+                           + (parallel ? "parallel" : "sequential") 
+                           + " stream using Stream.iterate() took "
                            + stopTime
                            + " milliseconds to find the sqrt of the first "
                            + number
@@ -88,23 +99,25 @@ public class ex15 {
     }
 
     /**
-     * Use a parallel stream and the LongStream.range() operation to
-     * compute the sqrt of the first @a number even numbers.  This
-     * implementation will perform well since range() can be split
-     * effectively.
+     * Use a stream and the LongStream.range() operation to compute
+     * the sqrt of the first @a number even numbers.  If @a parallel
+     * is true use a parallel stream, else use a sequential stream.
      */
-    private void testParallelStreamRange(long number) {
+    private void testStreamRange(boolean parallel,
+                                 long number) {
         // Record the start time.
         long startTime = System.nanoTime();
 
-        List<Double> result= LongStream
+        LongStream stream = LongStream
             // Generate a stream of numbers starting at 2 and
             // continuing up to @a number * 2.
-            .range(2, (number * 2) + 1)
+            .range(2, (number * 2) + 1);
 
+        if (parallel)
             // Run the remainder of the stream concurrently.
-            .parallel()
+            stream.parallel();
 
+        List<Double> result = stream
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
@@ -120,49 +133,9 @@ public class ex15 {
         assert number == result.size();
 
         // System.out.println(result);
-        System.out.println("The parallel stream using IntStream.range() took "
-                           + stopTime
-                           + " milliseconds to find the sqrt of the first "
-                           + number
-                           + " even numbers");
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Use a sequential stream and the Stream.iterate() operation to
-     * compute the sqrt of the first @a number even numbers.  This
-     * implementation provides a baseline for a sequential
-     * implementation.
-     */
-    private void testSequentialStream(long number) {
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        List<Double> result= Stream
-            // Generate a stream of numbers starting at 2.
-            .iterate(2, i -> i + 1)
-
-            // Remove all the odd numbers from the stream.
-            .filter(this::isEven)
-
-            // Limit the # of elements in the stream to @a number.
-            .limit(number)
-
-            // Compute the sqrt of each even number in the stream.
-            .map(this::findSQRT)
-
-            // Terminate the stream and collect results into a list.
-            .collect(toList());
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        assert number == result.size();
-
-        // System.out.println(result);
-        System.out.println("The sequential stream using Stream.iterate() took "
+        System.out.println("The "
+                           + (parallel ? "parallel" : "sequential") 
+                           + " stream using IntStream.range() took "
                            + stopTime
                            + " milliseconds to find the sqrt of the first "
                            + number
