@@ -14,7 +14,7 @@ public class ex11 {
     static public void main(String[] argv) {
         boolean useSequentialStream = argv.length > 0;
 
-        // Create a list of 10 integers in the range 0..9.
+        // Create a list of 10 integers in the open range [0..10).
         List<Integer> list = IntStream
             .range(0, 10)
             .boxed()
