@@ -16,20 +16,16 @@ import static java.util.stream.Collectors.toList;
  */
 public class ex15 {
     /**
-     * Keeps track of whether to print the output verbosely.
-     */
-    private static boolean mVerbose;
-
-    /**
      * Number of times to iterate the tests.
      */
-    private static final long sNUMBER = 10000000;
+    private static long sNUMBER = 10000000;
 
     /**
      * Main entry point into the program.
      */
     public static void main(String[] args) {
-        mVerbose = args.length > 0;
+        // Override the number of iterations if user requests it.
+        sNUMBER = args.length > 0 ? Long.valueOf(args[0]) : sNUMBER;
 
         ex15 test = new ex15();
 
@@ -184,7 +180,6 @@ public class ex15 {
     private Double findSQRT(long number){
         Double v = Math.sqrt(number);
         /*
-          if (mVerbose)
           System.out.println("findSQRT:: "
           + number
           + " in "
@@ -199,11 +194,12 @@ public class ex15 {
      * Returns true of @a number is even, else false.
      */
     private boolean isEven(long number){
-        if (mVerbose)
-            System.out.println("isEven:: "
+        /*
+          System.out.println("isEven:: "
                                + number
                                + " in "
                                + Thread.currentThread());
+        */
         // Use the bit-wise operator to determine if a number is even
         // or odd.
         return (number & 1) == 0;

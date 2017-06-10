@@ -2,6 +2,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -11,24 +12,30 @@ import static java.util.stream.Collectors.toList;
  */
 public class ex11 {
     static public void main(String[] argv) {
+        boolean useSequentialStream = argv.length > 0;
+
         // Create a list of 10 integers in the range 0..9.
         List<Integer> list = IntStream
             .range(0, 10)
             .boxed()
             .collect(toList());
 
-        list
-            // Convert the list into parallel stream.  This example
-            // will also fail if a sequential stream is used.
-            .parallelStream()
+        Stream<Integer> stream = list
+            // Convert the list of integers into a stream of integers.
+            .stream();
 
+        if (!useSequentialStream)
+            stream
+                // Convert the list into parallel stream.
+                .parallel();
+
+        stream
             // Improperly modify the stream during its processing.
             // This should generate a ConcurrentModificationException
             .peek(list::remove)
 
             // Print out the results of the stream.
             .forEach(System.out::println);
-
     }
 }
 
