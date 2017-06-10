@@ -56,3 +56,7 @@ Here's an overview of what's included:
 . ex14 - This example shows the difference in overhead for using a
   parallel spliterator to split a Java LinkedList and an ArrayList
   into chunks.
+
+. ex15 - This example shows the limitations of using inherently
+  sequential Java 8 streams operations (such as iterate() and limit())
+  in the context of parallel streams.
