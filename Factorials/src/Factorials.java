@@ -7,7 +7,8 @@ import static java.lang.Math.min;
 
 /**
  * This program implements various ways of computing factorials to
- * demonstrate alternative techniques and the dangers of shared state.
+ * demonstrate the performance of alternative techniques and the
+ * dangers of sharing unsynchronized state between threads.
  */
 public class Factorials {
     /**
@@ -138,7 +139,7 @@ public class Factorials {
                 // Performs a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
-                .reduce(1, (a, b) -> a * b);
+                .reduce(1, Factorials::product);
         }
     }
 
@@ -157,10 +158,16 @@ public class Factorials {
                 .rangeClosed(1, n)
 
                 // Performs a reduction on the elements of this stream
-                // to compute the factorial.  Note that there's no
-                // shared state at all!
-                .reduce(1, (a, b) -> a * b);
+                // to compute the factorial.
+                .reduce(1, Factorials::product);
         }
+    }
+
+    /**
+     * Compute the product of two longs.
+     */
+    static long product(long a, long b) {
+        return a * b;
     }
 
     /**
