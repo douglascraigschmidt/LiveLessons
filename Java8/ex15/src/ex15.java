@@ -23,7 +23,7 @@ public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static final long sNUMBER = 100000;
+    private static final long sNUMBER = 1000000;
 
     /**
      * Main entry point into the program.
@@ -32,6 +32,8 @@ public class ex15 {
         mVerbose = args.length > 0 ? true : false;
 
         ex15 test = new ex15();
+
+        test.warmUpForkJoinPool(sNUMBER);
 
         // Run the tests.
         test.testParallelStreamIterate(sNUMBER);
@@ -54,14 +56,14 @@ public class ex15 {
             // Generate a stream of numbers starting at 2.
             .iterate(2, i -> i + 1)
 
+            // Run the remainder of the stream concurrently.
+            .parallel()
+                
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
             // Limit the # of elements in the stream to @a number.
             .limit(number)
-
-            // Run the remainder of the stream concurrently.
-            .parallel()
 
             // Compute the sqrt of each even number in the stream.
             .map(this::findSQRT)
@@ -100,11 +102,11 @@ public class ex15 {
             // continuing up to @a number * 2.
             .range(2, (number * 2) + 1)
 
-            // Remove all the odd numbers from the stream.
-            .filter(this::isEven)
-
             // Run the remainder of the stream concurrently.
             .parallel()
+
+            // Remove all the odd numbers from the stream.
+            .filter(this::isEven)
 
             // Compute the sqrt of each even number in the stream.
             .mapToObj(this::findSQRT)
@@ -171,18 +173,45 @@ public class ex15 {
     }
 
     /**
+     * Warm up the threads in the fork/join pool so the timing results
+     * will be more accurate.
+     */
+    private void warmUpForkJoinPool(long number) {
+        System.out.println("Warming up the fork/join pool");
+
+        List<Double> result= Stream
+            // Generate a stream of numbers starting at 2.
+            .iterate(2, i -> i + 1)
+
+            // Remove all the odd numbers from the stream.
+            .filter(this::isEven)
+
+            // Limit the # of elements in the stream to @a number.
+            .limit(number)
+
+            // Run the remainder of the stream concurrently.
+            .parallel()
+
+            // Compute the sqrt of each even number in the stream.
+            .map(this::findSQRT)
+
+            // Terminate the stream and collect results into a list.
+            .collect(toList());
+    }
+
+    /**
      * Return the sqrt of @a number.
      */
     private Double findSQRT(long number){
         Double v = Math.sqrt(number);
         /*
-        if (mVerbose)
-            System.out.println("findSQRT:: "
-                               + number
-                               + " in "
-                               + Thread.currentThread()
-                               + " = "
-                               + v);
+          if (mVerbose)
+          System.out.println("findSQRT:: "
+          + number
+          + " in "
+          + Thread.currentThread()
+          + " = "
+          + v);
         */
         return v;
     }
