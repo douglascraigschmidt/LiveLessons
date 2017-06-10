@@ -37,16 +37,22 @@ public class ex15 {
 
         // Run the tests.
 
-        // This implementation will perform very poorly since
+        // This parallel variant will perform very poorly since
         // iterate() and limit() are inherently sequentially and
         // cannot be split effectively.
         test.testStreamIterate(true, sNUMBER);
 
-        // This implementation will perform well since range() can be
-        // split effectively.
-        test.testStreamRange(true, sNUMBER);
+        // This sequental variant will perform poorly since iterate()
+        // is relatively inefficient.
         test.testStreamIterate(false, sNUMBER);
+
+        // This sequential variant will perform better than the
+        // previous one since range() is efficient.
         test.testStreamRange(false, sNUMBER);
+
+        // This parallel variant will perform very well since range()
+        // can be split effectively.
+        test.testStreamRange(true, sNUMBER);
     }
 
     /**
