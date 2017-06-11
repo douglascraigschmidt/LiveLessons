@@ -1,20 +1,25 @@
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * This example shows the difference in overhead for using a parallel
  * spliterator to split a Java LinkedList and an ArrayList into
  * chunks.  It also shows the difference in overhead between combining
- * LinkedList results in a parallel stream vs. sequential stream.
+ * and collecting LinkedList results in a parallel stream
+ * vs. sequential stream.
  */
 public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 50;
+    private static final int sMAX_ITERATIONS = 25;
 
     /**
      * The complete works of William Shakespeare.
@@ -64,11 +69,24 @@ public class ex14 {
         timeStreamJoining(true, linkedBardWords);
 
         // Compute/print the time required to join the LinkedList via
-        // collect() and Collectors.joining() in a parallel stream.
+        // collect() and Collectors.joining() in a sequential stream.
         // The performance of this test will be better than the
         // parallel stream version above since there's less overhead
         // for combining/joining the various partial results.
         timeStreamJoining(false, linkedBardWords);
+
+        // Compute/print the time required to collect partial results
+        // into a TreeSet in a parallel stream.  The performance of
+        // this test will be poor due to the overhead of collecting
+        // the various partial results into a TreeSet.
+        timeStreamCollectToSet(true, linkedBardWords);
+
+        // Compute/print the time required to collect partial results
+        // into a TreeSet in a sequential stream.  The performance of
+        // this test will be better than the parallel stream version
+        // above since there's less overhead collecting the various
+        // partial results into a TreeSet.
+        timeStreamCollectToSet(false, linkedBardWords);
     }
 
     /**
@@ -131,10 +149,10 @@ public class ex14 {
     }
 
     /**
-     * Determines how long it takes to join the word list via
-     * collect() and Collectors.joining() in a stream.  If @a parallel
-     * is true then a parallel stream is used, else a sequential
-     * stream is used.
+     * Determines how long it takes to combine partial results in the
+     * word list via collect() and Collectors.joining() in a stream.
+     * If @a parallel is true then a parallel stream is used, else a
+     * sequential stream is used.
      */
     private static void timeStreamJoining(boolean parallel, 
                                           List<CharSequence> words) {
@@ -154,7 +172,7 @@ public class ex14 {
                 .stream();
 
             if (parallel)
-                //noinspection ResultOfMethodCallIgnored
+                // Convert to a parallel stream.
                 wordStream.parallel();
 
             results.append(wordStream
@@ -167,6 +185,50 @@ public class ex14 {
 
         System.out.println("The time to join "
                            + results.toString().replaceAll("[^ ]", "").length()
+                           + " stream elements took "
+                           + stopTime
+                           + " milliseconds");
+
+        // Run the garbage collector after each test.
+        System.gc();
+    }
+
+    /**
+     * Determines how long it takes to collect partial results into a
+     * TreeSet.  If @a parallel is true then a parallel stream is
+     * used, else a sequential stream is used.
+     */
+    private static void timeStreamCollectToSet(boolean parallel, 
+                                               List<CharSequence> words) {
+        System.out.println("\n++Timing the "
+                           + (parallel ? "parallel" : "sequential")
+                           + "StreamCollectToSet implementation");
+
+        // Record the start time.
+        long startTime = System.nanoTime();
+
+        Set<CharSequence> results = null;
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            Stream<CharSequence> wordStream = words
+                // Convert the list into a stream (which uses a
+                // spliterator internally).
+                .stream();
+
+            if (parallel)
+                // Convert to a parallel stream.
+                wordStream.parallel();
+
+            results = wordStream
+                // Collect all the words in the stream into a TreeSet.
+                .collect(toCollection(TreeSet::new));
+        }
+
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+
+        System.out.println("The time to collect "
+                           + results.size()
                            + " stream elements took "
                            + stopTime
                            + " milliseconds");

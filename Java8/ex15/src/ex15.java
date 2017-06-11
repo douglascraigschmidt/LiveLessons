@@ -61,9 +61,9 @@ public class ex15 {
         // Record the start time.
         long startTime = System.nanoTime();
 
-        final Stream<Long> stream = Stream
+        Stream<Long> stream = Stream
                 // Generate a stream of numbers starting at 2.
-                .iterate(2L, l -> l + 1L);
+                .iterate(2L, l -> l + 1);
 
         if (parallel)
             // Run the remainder of the stream concurrently.
