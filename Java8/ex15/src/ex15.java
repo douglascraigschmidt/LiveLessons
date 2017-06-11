@@ -66,7 +66,7 @@ public class ex15 {
                 .iterate(2L, l -> l + 1);
 
         if (parallel)
-            // Run the remainder of the stream concurrently.
+            // Run the stream concurrently.
             stream.parallel();
 
         List<Double> result = stream
@@ -116,7 +116,7 @@ public class ex15 {
             .range(2, (number * 2) + 1);
 
         if (parallel)
-            // Run the remainder of the stream concurrently.
+            // Run the stream concurrently.
             stream.parallel();
 
         List<Double> result = stream
@@ -158,14 +158,14 @@ public class ex15 {
             // Generate a stream of numbers starting at 2.
             .iterate(2, i -> i + 1)
 
+            // Run the stream concurrently.
+            .parallel()
+
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
             // Limit the # of elements in the stream to @a number.
             .limit(number)
-
-            // Run the remainder of the stream concurrently.
-            .parallel()
 
             // Compute the sqrt of each even number in the stream.
             .map(this::findSQRT)
