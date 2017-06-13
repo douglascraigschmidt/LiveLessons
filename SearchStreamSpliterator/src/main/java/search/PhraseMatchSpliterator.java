@@ -93,7 +93,7 @@ public class PhraseMatchSpliterator
             return false;
         else {
             // Create/accept a new Result object that stores the index
-            // of the word.
+            // of the phrase.
             action.accept(new SearchResults.Result(mPhraseMatcher.start()));
 
             // Indicate that the spliterator should continue.

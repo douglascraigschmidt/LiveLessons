@@ -31,6 +31,11 @@ public class Options {
     private boolean mVerbose = false;
 
     /**
+     * Stores the parallel mode ("all");
+     */
+    private String mParallelMode = "";
+
+    /**
      * Must have a private constructor.
      */
     private Options() {
@@ -46,6 +51,8 @@ public class Options {
                 mInputSeparator = args[++i];
             else if (args[i].equals("-v")) 
                 mVerbose = true;
+            else if (args[i].equals("-p"))
+                mParallelMode = args[++i];
             else {
                 printUsage();
                 return false;
@@ -68,11 +75,18 @@ public class Options {
     public boolean isVerbose() {
         return mVerbose;
     }
+
+    /**
+     * Returns the parallel mode.
+     */
+    public String getParallelMode() {
+        return mParallelMode;
+    }
     
     /** 
      * Print out usage and default values. 
      */
     private void printUsage() {
-        System.out.println("Options usage: \n-s [input-separator] -v");
+        System.out.println("Options usage: \n-s [input-separator] -v -p [parallel-mode]");
     }
 }

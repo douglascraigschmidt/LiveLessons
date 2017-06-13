@@ -8,7 +8,7 @@ import org.junit.Test;
 
 /**
  * Test program for the BuggyQueue that induces race conditions due to
- * lack of synchronization.
+ * lack of synchronization between producer and consumer threads.
  */
 public class BuggyQueueTest {
     /**

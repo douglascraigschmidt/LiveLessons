@@ -1,5 +1,7 @@
 package search;
 
+import utils.Options;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -48,12 +50,17 @@ public class SearchWithSpliterator {
      * Performs stream processing on the input.
      */
     public List<List<SearchResults>> processStream() {
+        Stream<? extends CharSequence> inputStream = mInputList
+            // Convert the list of input strings into a stream.
+            .stream();
+
+        if (Options.getInstance().getParallelMode().equals("all"))
+            // Convert the stream to a parallel stream.
+            inputStream.parallel();
+
         // Create a list of SearchResults that indicate which phrases
         // are found in the list of input strings.
-        return mInputList
-            // Convert the input list into a stream.
-            .stream()
-
+        return inputStream
             // Process each input string to find all occurrences of
             // the search phrases.
             .map(this::processInput)
@@ -75,11 +82,16 @@ public class SearchWithSpliterator {
         CharSequence input = inputString.subSequence(title.length(),
                                                      inputString.length());
 
-        // Find all occurrences of phrase in the input string.
-        return mPhrasesToFind
+        Stream<String> phraseStream = mPhrasesToFind
             // Convert the list of phrases to find into a stream.
-            .stream()
+            .stream();
 
+        if (Options.getInstance().getParallelMode().equals("all"))
+            // Convert the stream to a parallel stream.
+            phraseStream.parallel();
+
+        // Find all occurrences of phrase in the input string.
+        return phraseStream
             // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
                                            input,

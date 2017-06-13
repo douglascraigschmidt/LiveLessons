@@ -1,20 +1,11 @@
-import search.PhraseMatchSpliterator;
 import search.SearchResults;
 import search.SearchWithSpliterator;
 import utils.Options;
-import utils.SharedString;
 import utils.TestDataFactory;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This example implements an "embarrassingly parallel" program that
@@ -47,7 +38,7 @@ public class Main {
     /**
      * A List of Strings containing the complete works of Shakespeare.
      */
-    private static List<CharSequence> mInput;
+    private static List<CharSequence> mInputList;
 
     /**
      * A List of SharedStrings containing the complete works of
@@ -71,7 +62,7 @@ public class Main {
 
         // Create a list of Strings to search from the complete works
         // of William Shakespeare.
-        mInput =
+        mInputList =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                      // Split input by input separator
                                      // from Options singleton.
@@ -91,19 +82,32 @@ public class Main {
         mPhrasesToFind = TestDataFactory
             .getPhraseList(sPHRASE_LIST_FILE);
 
-        // Run the tests multiple times to account for any
-        // instruction/data caching effects, as well as the time
-        // needed to initialize the common fork/join pool.
-        runTest("String", mInput, false);
-        runTest("String", mInput, true);
-        runTest("SharedString", mSharedInput, false);
-        runTest("SharedString", mSharedInput, true);
-        runTest("String", mInput, false);
-        runTest("String", mInput, true);
+        // Warm up the fork-join pool to account for any
+        // instruction/data caching effects.
+        warmUpForkJoinPool();
+
+        // Run the tests.
+        runTest("String", mInputList, false);
+        runTest("String", mInputList, true);
         runTest("SharedString", mSharedInput, false);
         runTest("SharedString", mSharedInput, true);
 
         System.out.println("Ending SearchStream");
+    }
+
+    /**
+     * Warm up the fork-join pool to account for any
+     * instruction/data caching effects.
+     */
+    private static void warmUpForkJoinPool() {
+        // Search the input looking for phrases that match.
+        List<List<SearchResults>> listOfListOfSearchResults =
+            new SearchWithSpliterator(mInputList,
+                                      mPhrasesToFind,
+                                      true).processStream();
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**
@@ -151,7 +155,7 @@ public class Main {
                                      -> list.stream().mapToInt(SearchResults::size).sum())
                            .sum()
                            + " phrase matches for "
-                           + mInput.size()
+                           + mInputList.size()
                            + " input strings in "
                            + stopTime
                            + " milliseconds for SearchWithSpliterator("
