@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
 /**
- * This class searches for phrases in the works of Shakespeare.  It
- * demonstrates the use of Java 7 fork-join pool.
+ * This class demonstrates the use of the Java 7 fork-join framework
+ * to search for phrases in the works of Shakespeare.  There's
+ * commented-out code that shows how to use Java 8 streams to
+ * implement this solution even more concisely.
  */
 public class SearchWithForkJoinTask
        extends RecursiveTask<List<List<SearchResults>>> {
@@ -41,14 +43,14 @@ public class SearchWithForkJoinTask
      */
     @Override
     protected List<List<SearchResults>> compute() {
-        // Create a list of tasks.
+        // Create a list of RecursiveTasks.
         List<RecursiveTask<List<SearchResults>>> forks =
             new LinkedList<>();
 
         // Loop through each input string in the list.
         for (CharSequence input : mInputList) {
-            // Create a task that searches an input string for a list
-            // of phrases.
+            // Create a RecursiveTask that searches an input string
+            // for a list of phrases.
             SearchForPhrasesTask task =
                 new SearchForPhrasesTask(input,
                                          mPhrasesToFind,
@@ -67,8 +69,9 @@ public class SearchWithForkJoinTask
         List<List<SearchResults>> results =
                 new LinkedList<>();
 
-        // Join each task and add to the list of results.
+        // Iterate through the list of ReactiveTasks.
         for (RecursiveTask<List<SearchResults>> task : forks)
+            // Join each task and add to the list of results.
             results.add(task.join());
 
         // Return the results.
@@ -76,15 +79,29 @@ public class SearchWithForkJoinTask
 
         /*
         // A more concise solution via Java 8 streams.
-
         return mInputList
-                .stream()
-                .map(inputString
-                        -> new SearchForPhrasesTask(inputString).fork())
-                .collect(toList())
-                .stream()
-                .map(ForkJoinTask::join)
-                .collect(toList());
-                */
+            // Convert the input list into a stream.
+            .stream()
+
+            // Create and fork a new SearchForPhrasesTask for 
+            // each input string.
+            .map(inputString
+                 -> new SearchForPhrasesTask(inputString).fork())
+
+            // Collect the results into a list of lists of
+            // SearchResults.
+            .collect(toList())
+
+            // Convert that list into another stream.
+            .stream()
+
+            // Join all the results into a stream of lists of
+            // SearchResults.
+            .map(ForkJoinTask::join)
+
+            // Collect the results into the final list of lists of
+            searchResults.
+            .collect(toList());
+        */
     }
 }

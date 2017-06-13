@@ -1,20 +1,23 @@
 package search;
 
+import utils.MatcherSpliterator;
+
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Spliterator;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with the Java 7 fork-join pool to
  * create a list of SearchResults.Result objects that match the number
  * of times a phrase appears in an input string.  The comparison is
- * case-insensitive.
+ * case-insensitive.  There's commented-out code that shows how to use
+ * Java 8 streams to implement this solution even more concisely.
  */
 public class PhraseMatchTask
        extends RecursiveTask<List<SearchResults.Result>> {
@@ -51,9 +54,9 @@ public class PhraseMatchTask
     /**
      * Constructor initializes the fields.
      */
-    public PhraseMatchTask(CharSequence input,
-                           String phrase,
-                           boolean parallel) {
+    PhraseMatchTask(CharSequence input,
+                    String phrase,
+                    boolean parallel) {
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
         
@@ -113,6 +116,21 @@ public class PhraseMatchTask
 
         // Return the list.
         return list;
+
+        /*
+        // Here's a more concise Java 8 version.
+        return StreamSupport
+            // Use the MatcherSpliterator to create a new stream of
+            // MatchResults.
+            .stream(new MatcherSpliterator(mPhraseMatcher),
+                    false)
+
+            // Map each MatchResult into a SearchResults.Result.
+            .map(mr -> new SearchResults.Result(mr.start()))
+
+            // Collect all the results into a list.
+            .collect(toList());
+        */
     }
 
     /**

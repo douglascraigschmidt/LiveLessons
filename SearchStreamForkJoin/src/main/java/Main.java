@@ -88,10 +88,6 @@ public class Main {
         runTest("String", mInputList, true);
         runTest("SharedString", mSharedInput, false);
         runTest("SharedString", mSharedInput, true);
-        runSequentialTest("String", mInputList, false);
-        runSequentialTest("String", mInputList, true);
-        runSequentialTest("SharedString", mSharedInput, false);
-        runSequentialTest("SharedString", mSharedInput, true);
 
         System.out.println("Ending SearchStream");
     }
@@ -137,45 +133,6 @@ public class Main {
 
         // Print the results.
         printResults("SearchWithForkJoin" + "(" + testName + "|" + (parallel ? "parallel)" : "sequential)"),
-                     stopTime,
-                     listOfListOfSearchResults);
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Run the test and print out the timing results.  The @a parallel
-     * parameter indicates whether to run the spliterator concurrently
-     * or not.
-     */
-    private static void runSequentialTest(String testName,
-                                          List<CharSequence> inputList,
-                                          boolean parallel) {
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        // Search the input looking for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults =
-            new LinkedList<>();
-
-        // Loop through each input string in the list.
-        for (CharSequence input : inputList) {
-            // Create a task that searches an input string for a list
-            // of phrases.
-            SearchForPhrasesTask task =
-                new SearchForPhrasesTask(input,
-                                         mPhrasesToFind,
-                                         parallel);
-
-            listOfListOfSearchResults.add(task.compute());
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        // Print the results.
-        printResults("SearchWithSequentialForkJoin" + "(" + testName + "|" + (parallel ? "parallel)" : "sequential)"),
                      stopTime,
                      listOfListOfSearchResults);
 
