@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 /**
  * Defines a Matcher-based spliterator implementation, as per
  * https://stackoverflow.com/questions/24660888/collect-hashset-java-8-regex-pattern-stream-api/24663422#24663422.
- * This will be supported natively as of JDK 9, as per
+ * This feature will be supported natively as of JDK 9, as per
  * https://bugs.openjdk.java.net/browse/JDK-8071479.
  */
 public class MatcherSpliterator 
@@ -22,7 +22,8 @@ public class MatcherSpliterator
      * Constructor initializes the fields.
      */
     public MatcherSpliterator(Matcher matcher) {
-        super(Long.MAX_VALUE, ORDERED | NONNULL | IMMUTABLE);
+        super(Long.MAX_VALUE,
+              ORDERED | NONNULL | IMMUTABLE);
         mMatcher = matcher;
     }
 

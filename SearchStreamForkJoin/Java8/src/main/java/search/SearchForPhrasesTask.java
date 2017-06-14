@@ -157,29 +157,6 @@ public class SearchForPhrasesTask
 
         // Return the result.
         return leftResult;
-
-        /*
-        // The following is a more concise Java 8 streams solution.
-
-        // Find all occurrences of phrase in the input string.
-        return mPhrasesToFind
-            // Convert the list of phrases to find into a stream.
-            .parallelStream()
-
-            // Find all indices where phrase matches the input data.
-            .map(phrase -> searchForPhrase(phrase,
-                                           input,
-                                           title,
-                                           mParallelSearching))
-
-            // Only keep a result that has at least one match.
-            .filter(not(SearchResults::isEmpty))
-            // Filtering can also be done as
-            // .filter(result -> result.size() > 0)
-
-            // Terminate the stream and trigger the processing.
-            .collect(toList());
-        */
     }
 
     /**

@@ -13,8 +13,9 @@ import static java.util.stream.Collectors.groupingBy;
  * This example implements an "embarrassingly parallel" program that
  * uses a Java 7 fork-join pool to concurrently search for phrases in
  * a list of input containing all the works of Shakespeare.  The key
- * portions of the program in the search package just use "classic"
- * Java 8 features.
+ * portions of the program in the search package use Java 8 features,
+ * such as lambda expressions, method references, and (sequential)
+ * streams.
  */
 public class Main {
     /*
