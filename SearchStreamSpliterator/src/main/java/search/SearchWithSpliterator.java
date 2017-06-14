@@ -79,6 +79,9 @@ public class SearchWithSpliterator {
             // the search phrases.
             .map(this::processInput)
 
+            // If a phrase was found add it to the list of results.
+            .filter(not(List<SearchResults>::isEmpty))
+
             // This terminal operation triggers aggregate operation
             // processing and returns a list of list of SearchResults.
             .collect(toList());
