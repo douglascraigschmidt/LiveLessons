@@ -123,8 +123,8 @@ public class Main {
                         .invoke(new SearchWithForkJoinTask(mInputList,
                                                            mPhrasesToFind,
                                                            true,
-                                true,
-                                true));
+                                                           true,
+                                                           true));
 
         // Run the garbage collector after each test.
         System.gc();

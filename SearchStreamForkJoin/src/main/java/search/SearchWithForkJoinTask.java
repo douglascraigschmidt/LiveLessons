@@ -1,7 +1,9 @@
 package search;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
 /**
@@ -39,6 +41,11 @@ public class SearchWithForkJoinTask
     private boolean mParallelInput;
 
     /**
+     * The minimum size of an input list to split.
+     */
+    private final int mMinSplitSize;
+
+    /**
      * Construtor initializes the fields.
      */
     public SearchWithForkJoinTask(List<? extends CharSequence> inputList,
@@ -51,6 +58,55 @@ public class SearchWithForkJoinTask
         mParallelSearching = parallelSearching;
         mParallelPhrases = parallelPhrases;
         mParallelInput = parallelInput;
+        mMinSplitSize = inputList.size() / 2;
+    }
+
+    /**
+     * This constructor is used internally by the compute() method.
+     * It initializes all the fields for the "left hand size" of a
+     * split.
+     */
+    private SearchWithForkJoinTask(List<? extends CharSequence> inputList,
+                                   List<String> phrasesToFind,
+                                   boolean parallelSearching,
+                                   boolean parallelPhrases,
+                                   boolean parallelInput,
+                                   int minSplitSize) {
+        mInputList = inputList;
+        mPhrasesToFind = phrasesToFind;
+        mParallelSearching = parallelSearching;
+        mParallelPhrases = parallelPhrases;
+        mParallelInput = parallelInput;
+        mMinSplitSize = minSplitSize;
+    }
+
+    /**
+     * Perform the computations sequentially at this point.
+     */
+    private List<List<SearchResults>> computeSequentially() {
+        // Create a list to hold the results.
+        List<List<SearchResults>> results =
+            new ArrayList<>(mInputList.size());
+
+        // Loop through each input string in the list.
+        for (CharSequence input : mInputList) {
+            // Create a SearchForPhrasesTask that searches an input
+            // string for a list of phrases and store the results from
+            // computing the task.
+            List<SearchResults> lsr =
+                new SearchForPhrasesTask(input,
+                                         mPhrasesToFind,
+                                         mParallelSearching,
+                                         mParallelPhrases)
+                .compute();
+
+            // If a phrase was found add it to the list of results.
+            if (lsr.size() > 0)
+                results.add(lsr);
+        }
+
+        // Return the results.
+        return results;
     }
 
     /**
@@ -58,45 +114,47 @@ public class SearchWithForkJoinTask
      */
     @Override
     protected List<List<SearchResults>> compute() {
-        // Create a list of RecursiveTasks.
-        List<SearchForPhrasesTask> forks =
-            new LinkedList<>();
+        if (mInputList.size() <= mMinSplitSize
+            || !mParallelInput)
+            return computeSequentially();
+        else 
+            // Compute position to split the input list and forward to
+            // the splitInputList() method to perform the split.
+            return splitInputList(mInputList.size() / 2);
+    }
 
-        // Loop through each input string in the list.
-        for (CharSequence input : mInputList) {
-            // Create a RecursiveTask that searches an input string
-            // for a list of phrases.
-            SearchForPhrasesTask task =
-                new SearchForPhrasesTask(input,
-                                         mPhrasesToFind,
-                                         mParallelSearching,
-                                         mParallelPhrases);
+    /**
+     * Use the fork-join framework to recursively split the input list
+     * and return a list of lists of SearchResults that contain all
+     * matching phrases in the input list.
+     */
+    private List<List<SearchResults>> splitInputList(int splitPos) {
+        // Create and fork a new SearchWithForkJoinTask that
+        // concurrently handles the "left hand" part of the input,
+        // while "this" handles the "right hand" part of the input.
+        ForkJoinTask<List<List<SearchResults>>> leftTask =
+            new SearchWithForkJoinTask(mInputList.subList(0, splitPos),
+                                       mPhrasesToFind,
+                                       mParallelSearching,
+                                       mParallelPhrases,
+                                       mParallelInput,
+                                       mMinSplitSize).fork();
 
-            // Add the new task to the list of tasks.
-            forks.add(task);
+        // Update "this" SearchWithForkJoinTask to handle the "right
+        // hand" portion of the input.
+        mInputList = mInputList.subList(splitPos, mInputList.size());
 
-            if (mParallelInput)
-                // Use the fork-join framework to create a list of
-                // SearchResults that indicate which phrases are found in
-                // the list of input strings.
-                task.fork();
-        }
+        // Recursively call compute() to continue the splitting.
+        List<List<SearchResults>> rightResult = compute();
 
-        // Create a list to hold the results.
-        List<List<SearchResults>> results =
-                new LinkedList<>();
+        // Wait and join the results from the left task.
+        List<List<SearchResults>> leftResult = leftTask.join();
 
-        // Iterate through the list of ReactiveTasks.
-        for (SearchForPhrasesTask task : forks)
-            if (mParallelInput)
-                // Join each task and add to the list of results.
-                results.add(task.join());
-            else
-                // Compute each task sequentially.
-                results.add(task.compute());
+        // sConcatenate the left result with the right result.
+        leftResult.addAll(rightResult);
 
-        // Return the results.
-        return results;
+        // Return the result.
+        return leftResult;
 
         /*
         // A more concise solution via Java 8 streams.

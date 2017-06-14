@@ -49,7 +49,7 @@ public class PhraseMatchTask
     /**
      * True if we compute the match in parallel, else false.
      */
-    private final boolean mParallel;
+    private final boolean mParallelSearch;
 
     /**
      * Constructor initializes the fields.
@@ -78,11 +78,11 @@ public class PhraseMatchTask
         // Initialize the fields.
         mInput = input;
         mMinSplitSize = input.length() / 2;
-        mParallel = parallel;
+        mParallelSearch = parallel;
     }
 
     /**
-     * This constructor is used internally by the trySplit() method.
+     * This constructor is used internally by the compute() method.
      * It initializes all the fields for the "left hand size" of a
      * split.
      */
@@ -96,7 +96,7 @@ public class PhraseMatchTask
         mInput = input;
         mPhrase = phrase;
         mMinSplitSize = minSplitSize;
-        mParallel = parallel;
+        mParallelSearch = parallel;
     }
     
     /**
@@ -141,25 +141,26 @@ public class PhraseMatchTask
         // Compute sequentially if the input is too small to split
         // further.
         if (mInput.length() < mMinSplitSize
-            || !mParallel)
+            || !mParallelSearch)
             return computeSequentially();
+        else {
+            // Compute a candidate position for splitting the input.
+            int startPos, splitPos = mInput.length() / 2;
 
-        // Compute a candidate position for splitting the input.
-        int startPos, splitPos = mInput.length() / 2;
+            // Get the position to start determining if a phrase spans
+            // the split position.
+            if ((startPos = computeStartPos(splitPos)) < 0)
+                return null;
 
-        // Get the position to start determining if a phrase spans the
-        // split position.
-        if ((startPos = computeStartPos(splitPos)) < 0)
-            return null;
+            // Update splitPos if a phrase spans across the initial
+            // splitPos.
+            splitPos = tryToUpdateSplitPos(startPos, splitPos);
 
-        // Update splitPos if a phrase spans across the initial
-        // splitPos.
-        splitPos = tryToUpdateSplitPos(startPos, splitPos);
-
-        // Create a new PhraseMatchTask that handles the "left
-        // hand" portion of the input, while the "this" object handles
-        // the "right hand" portion of the input.
-        return splitInput(splitPos);
+            // Create a new PhraseMatchTask that handles the "left
+            // hand" portion of the input, while the "this" object
+            // handles the "right hand" portion of the input.
+            return splitInput(splitPos);
+        }
     }
 
     /**
@@ -216,14 +217,14 @@ public class PhraseMatchTask
      */
     private List<SearchResults.Result> splitInput(int splitPos) {
         // Create and fork a new PhraseMatchTask that concurrently
-        // handles the "left hand" portion of the input, while the
-        // rightTask handles the "right hand" portion of the input.
+        // handles the "left hand" portion of the input, while "this"
+        // handles the "right hand" portion of the input.
         ForkJoinTask<List<SearchResults.Result>> leftTask =
             new PhraseMatchTask(mInput.subSequence(0, splitPos),
                                 mPhrase,
                                 mPattern,
                                 mMinSplitSize,
-                                mParallel).fork();
+                                mParallelSearch).fork();
             
         // Update "this" PhraseMatchTask to handle the "right hand"
         // portion of the input.

@@ -108,7 +108,7 @@ public class PhraseMatchSpliterator
     @Override
     public Spliterator<SearchResults.Result> trySplit() {
         // Bail out if the input is too small to split further.
-        if (mInput.length() < mMinSplitSize)
+        if (mInput.length() <= mMinSplitSize)
             return null;
 
         // Compute a candidate position for splitting the input.
