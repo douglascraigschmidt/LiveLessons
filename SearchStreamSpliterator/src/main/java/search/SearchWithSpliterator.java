@@ -33,17 +33,31 @@ public class SearchWithSpliterator {
     /**
      * Indicates whether to run the spliterator concurrently.
      */
-    private boolean mParallel;
+    private boolean mParallelSpliterator;
+
+    /**
+     * Indicates whether to run the phrases concurrently.
+     */
+    private boolean mParallelPhrases;
+
+    /**
+     * Indicates whether to run the input concurrently.
+     */
+    private boolean mParallelInput;
 
     /**
      * Construtor initializes the fields.
      */
     public SearchWithSpliterator(List<? extends CharSequence> inputList,
                                  List<String> phrasesToFind,
-                                 boolean parallel) {
+                                 boolean parallelSpliterator,
+                                 boolean parallelPhrases,
+                                 boolean parallelInput) {
         mInputList = inputList;
         mPhrasesToFind = phrasesToFind;
-        mParallel = parallel;
+        mParallelSpliterator = parallelSpliterator;
+        mParallelPhrases = parallelPhrases;
+        mParallelInput = parallelInput;
     }
 
     /**
@@ -54,7 +68,7 @@ public class SearchWithSpliterator {
             // Convert the list of input strings into a stream.
             .stream();
 
-        if (Options.getInstance().getParallelMode().equals("all"))
+        if (mParallelInput)
             // Convert the stream to a parallel stream.
             inputStream.parallel();
 
@@ -86,7 +100,7 @@ public class SearchWithSpliterator {
             // Convert the list of phrases to find into a stream.
             .stream();
 
-        if (Options.getInstance().getParallelMode().equals("all"))
+        if (mParallelPhrases)
             // Convert the stream to a parallel stream.
             phraseStream.parallel();
 
@@ -96,7 +110,7 @@ public class SearchWithSpliterator {
             .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
-                                           mParallel))
+                                           mParallelSpliterator))
 
             // Only keep a result that has at least one match.
             .filter(not(SearchResults::isEmpty))

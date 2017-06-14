@@ -23,19 +23,34 @@ public class SearchWithForkJoinTask
     private List<String> mPhrasesToFind;
 
     /**
-     * Indicates whether to run PhraseMatchTask concurrently.
+     * Indicates whether to search for a phrase in each string
+     * concurrently.
      */
-    private boolean mParallel;
+    private boolean mParallelSearching;
+
+    /**
+     * Indicates whether to run the phrases concurrently.
+     */
+    private boolean mParallelPhrases;
+
+    /**
+     * Indicates whether to run the input concurrently.
+     */
+    private boolean mParallelInput;
 
     /**
      * Construtor initializes the fields.
      */
     public SearchWithForkJoinTask(List<? extends CharSequence> inputList,
                                   List<String> phrasesToFind,
-                                  boolean parallel) {
+                                  boolean parallelSearching,
+                                  boolean parallelPhrases,
+                                  boolean parallelInput) {
         mInputList = inputList;
         mPhrasesToFind = phrasesToFind;
-        mParallel = parallel;
+        mParallelSearching = parallelSearching;
+        mParallelPhrases = parallelPhrases;
+        mParallelInput = parallelInput;
     }
 
     /**
@@ -44,7 +59,7 @@ public class SearchWithForkJoinTask
     @Override
     protected List<List<SearchResults>> compute() {
         // Create a list of RecursiveTasks.
-        List<RecursiveTask<List<SearchResults>>> forks =
+        List<SearchForPhrasesTask> forks =
             new LinkedList<>();
 
         // Loop through each input string in the list.
@@ -54,15 +69,17 @@ public class SearchWithForkJoinTask
             SearchForPhrasesTask task =
                 new SearchForPhrasesTask(input,
                                          mPhrasesToFind,
-                                         mParallel);
+                                         mParallelSearching,
+                                         mParallelPhrases);
 
             // Add the new task to the list of tasks.
             forks.add(task);
 
-            // Use the fork-join framework to create a list of
-            // SearchResults that indicate which phrases are found in
-            // the list of input strings.
-            task.fork();
+            if (mParallelInput)
+                // Use the fork-join framework to create a list of
+                // SearchResults that indicate which phrases are found in
+                // the list of input strings.
+                task.fork();
         }
 
         // Create a list to hold the results.
@@ -70,9 +87,13 @@ public class SearchWithForkJoinTask
                 new LinkedList<>();
 
         // Iterate through the list of ReactiveTasks.
-        for (RecursiveTask<List<SearchResults>> task : forks)
-            // Join each task and add to the list of results.
-            results.add(task.join());
+        for (SearchForPhrasesTask task : forks)
+            if (mParallelInput)
+                // Join each task and add to the list of results.
+                results.add(task.join());
+            else
+                // Compute each task sequentially.
+                results.add(task.compute());
 
         // Return the results.
         return results;

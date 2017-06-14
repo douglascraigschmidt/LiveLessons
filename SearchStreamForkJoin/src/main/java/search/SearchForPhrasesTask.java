@@ -30,19 +30,51 @@ public class SearchForPhrasesTask
     /**
      * Indicates whether to run the spliterator concurrently.
      */
-    private boolean mParallel;
+    private boolean mParallelSearching;
+
+    /**
+     * Indicates whether to run the phrases concurrently.
+     */
+    private boolean mParallelPhrases;
 
     /**
      * Constructor initializes the field.
      */
     public SearchForPhrasesTask(CharSequence inputString,
                                 List<String> phrasesToFind,
-                                boolean parallel) {
+                                boolean parallelSearching,
+                                boolean parallelPhrases) {
         mInputString = inputString;
         mPhrasesToFind = phrasesToFind;
-        mParallel = parallel;
+        mParallelSearching = parallelSearching;
+        mParallelPhrases = parallelPhrases;
     }
 
+    class PhraseTask extends RecursiveTask<SearchResults> {
+        private final String mPhrase;
+        private final CharSequence mInput;
+        private final String mTitle;
+
+        PhraseTask(String phrase,
+                   CharSequence input,
+                   String title,
+                   boolean parallelSearching) {
+            mPhrase = phrase;
+            mInput = input;
+            mTitle = title;
+            mParallelSearching = parallelSearching;
+        }
+            @Override
+            // Forward to the searchForPhrase() method.
+            public SearchResults compute() {
+            // Find all indices where phrase matches the
+            // input data.
+            return searchForPhrase(mPhrase,
+                    mInput,
+                    mTitle,
+                    mParallelSearching);
+        }
+    }
     /**
      * This method searches the @a inputString for all occurrences
      * of the phrases to find.
@@ -57,34 +89,24 @@ public class SearchForPhrasesTask
                 mInputString.length());
 
         // Create a list of RecursiveTasks.
-        List<RecursiveTask<SearchResults>> forks =
+        List<PhraseTask> forks =
                 new LinkedList<>();
 
         // Loop through each phrase to find.
         for (String phrase : mPhrasesToFind) {
             // Create an anonymous RecursiveTask that searches an
             // input string for a list of phrases.
-            RecursiveTask<SearchResults> task =
-                    new RecursiveTask<SearchResults>() {
-                        @Override
-                        // Forward to the searchForPhrase() method.
-                        protected SearchResults compute() {
-                            // Find all indices where phrase matches the
-                            // input data.
-                            return searchForPhrase(phrase,
-                                    input,
-                                    title,
-                                    mParallel);
-                        }
-                    };
+            PhraseTask task =
+                    new PhraseTask(phrase, input, title, mParallelSearching);
 
             // Add the new task to the list of tasks.
             forks.add(task);
 
-            // Use the fork-join framework to create a list of
-            // SearchResults that indicate which phrases are found in
-            // the list of input strings.
-            task.fork();
+            if (mParallelPhrases)
+                // Use the fork-join framework to create a list of
+                // SearchResults that indicate which phrases are found in
+                // the list of input strings.
+                task.fork();
         }
 
         // Create a list to hold the results.
@@ -92,9 +114,15 @@ public class SearchForPhrasesTask
                 new LinkedList<>();
 
         // Iterate through the list of ReactiveTasks.
-        for (RecursiveTask<SearchResults> task : forks) {
-            // Join each task.
-            SearchResults sr = task.join();
+        for (PhraseTask task : forks) {
+            SearchResults sr;
+
+            if (mParallelPhrases)
+                // Join each task.
+                sr = task.join();
+            else
+                // Compute each task.
+                sr = task.compute();
 
             // If a phrase was found add it to the list of results.
             if (sr.size() > 0)
@@ -116,7 +144,7 @@ public class SearchForPhrasesTask
             .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
-                                           mParallel))
+                                           mParallelSearching))
 
             // Only keep a result that has at least one match.
             .filter(not(SearchResults::isEmpty))

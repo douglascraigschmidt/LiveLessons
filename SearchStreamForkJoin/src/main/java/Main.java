@@ -49,6 +49,12 @@ public class Main {
     private static List<String> mPhrasesToFind;
         
     /**
+     * Keep track of which SearchStreamSpliterator performed the best.
+     */
+    private static Map<Long, String> mResultsMap =
+        new HashMap<>();
+
+    /**
      * This is the main entry point into the program.
      */
     static public void main(String[] args) {
@@ -83,11 +89,22 @@ public class Main {
         // instruction/data caching effects.
         warmUpForkJoinPool();
 
-        // Run the tests.
-        runTest("String", mInputList, false);
-        runTest("String", mInputList, true);
-        runTest("SharedString", mSharedInput, false);
-        runTest("SharedString", mSharedInput, true);
+        // Run the non-shared string tests.
+        runTest(mInputList, false, false, false, false);
+        runTest(mInputList, false, true, true, true);
+
+        // Run the non-shared string tests.
+        runTest(mSharedInput, true, false, false, false);
+        runTest(mSharedInput, true, false, true, false);
+        runTest(mSharedInput, true, false, false, true);
+        runTest(mSharedInput, true, false, true, true);
+        runTest(mSharedInput, true, true, false, false);
+        runTest(mSharedInput, true, true, true, false);
+        runTest(mSharedInput, true, true, false, true);
+        runTest(mSharedInput, true, true, true, true);
+
+        // Print out the search results.
+        printResults();
 
         System.out.println("Ending SearchStream");
     }
@@ -97,26 +114,32 @@ public class Main {
      * instruction/data caching effects.
      */
     private static void warmUpForkJoinPool() {
-        // Use the common fork-join pool to search the input looking
-        // for phrases that match.
+        System.out.println("Warming up the fork-join pool");
+
+        @SuppressWarnings("unused")
+        // Search the input looking for phrases that match.
         List<List<SearchResults>> listOfListOfSearchResults =
             ForkJoinPool.commonPool()
                         .invoke(new SearchWithForkJoinTask(mInputList,
                                                            mPhrasesToFind,
-                                                           true));
+                                                           true,
+                                true,
+                                true));
 
         // Run the garbage collector after each test.
         System.gc();
     }
 
     /**
-     * Run the test and print out the timing results.  The @a parallel
-     * parameter indicates whether to run the spliterator concurrently
-     * or not.
+     * Run the test and print out the timing results.  The various @a
+     * parallel* parameters indicates whether to run different parts
+     * of the solution in parallel or not.
      */
-    private static void runTest(String testName,
-                                List<CharSequence> inputList,
-                                boolean parallel) {
+    private static void runTest(List<CharSequence> inputList,
+                                boolean sharedString,
+                                boolean parallelSearching,
+                                boolean parallelPhrases,
+                                boolean parallelInput) {
         // Record the start time.
         long startTime = System.nanoTime();
 
@@ -126,13 +149,23 @@ public class Main {
             ForkJoinPool.commonPool()
                         .invoke(new SearchWithForkJoinTask(inputList,
                                                            mPhrasesToFind,
-                                                           parallel));
+                                                           parallelSearching,
+                                                           parallelPhrases,
+                                                           parallelInput));
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
-        // Print the results.
-        printResults("SearchWithForkJoin" + "(" + testName + "|" + (parallel ? "parallel)" : "sequential)"),
+        // Store the results.
+        storeResults("SearchWithForkJoin("
+                     + (sharedString ? "shared-string" : "string")
+                     + "|"
+                     + (parallelSearching ? "parallel" : "sequential")
+                     + "Spliterator|"
+                     + (parallelPhrases ? "parallel" : "sequential")
+                     + "Phrases|"
+                     + (parallelInput ? "parallel" : "sequential")
+                     + "Input)",
                      stopTime,
                      listOfListOfSearchResults);
 
@@ -143,22 +176,44 @@ public class Main {
     /**
      * Print out the search results.
      */
-    private static void printResults(String testName,
+    private static void printResults() {
+        // Print out the contents of the mResultsMap in sorted order.
+        mResultsMap
+            // Get the entrySet for the mResultsMap.
+            .entrySet()
+
+            // Convert the entrySet into a stream.
+            .stream()
+
+            // Sort the stream by the timing results (key).
+            .sorted(Map.Entry.comparingByKey())
+
+            // Print all the entries in the sorted stream.
+            .forEach(entry
+                     -> System.out.println(entry.getValue()));
+
+    }
+
+    /**
+     * Store the search results.
+     */
+    private static void storeResults(String testName,
                                      long stopTime,
                                      List<List<SearchResults>> listOfListOfSearchResults) {
         // Print the number of times each phrase matched the input.
-        System.out.println("The search returned = "
-                           // Count the number of matches.
-                           + listOfListOfSearchResults.stream()
-                           .mapToInt(list
-                                     -> list.stream().mapToInt(SearchResults::size).sum())
-                           .sum()
-                           + " phrase matches for "
-                           + mInputList.size()
-                           + " input strings in "
-                           + stopTime
-                           + " milliseconds for "
-                           + testName);
+        mResultsMap.put(stopTime,
+                        "The search returned = "
+                        // Count the number of matches.
+                        + listOfListOfSearchResults.stream()
+                        .mapToInt(list
+                                  -> list.stream().mapToInt(SearchResults::size).sum())
+                        .sum()
+                        + " phrase matches for "
+                        + mInputList.size()
+                        + " input strings in "
+                        + stopTime
+                        + " milliseconds for "
+                        + testName);
 
         // Print the matching titles.
         if (Options.getInstance().isVerbose())
