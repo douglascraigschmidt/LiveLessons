@@ -4,15 +4,21 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * This example uses a Java 8 ConcurrentHashMap and Java 8
- * Function-based method reference to cache prime numbers.
+ * Function-based method reference to compute/cache/retrieve prime
+ * numbers.
  */
 public class ex9 {
+    /**
+     * Number of times each thread iterates computing prime numbers.
+     */
+    private static int sMAX = 1000;
+
     /**
      * This method provides a brute-force determination of whether
      * number @a primeCandidate is prime.  Returns 0 if it is prime,
      * or the smallest factor if it is not prime.
      */
-    private static Integer primeChecker(Integer primeCandidate) {
+    private Integer primeChecker(Integer primeCandidate) {
         int n = primeCandidate;
 
         if (n > 3)
@@ -33,19 +39,9 @@ public class ex9 {
     }
 
     /**
-     * Number of times each thread iterates computing prime numbers.
+     * Run the prime number test.
      */
-    private static int sMAX = 1000;
-
-    /**
-     * Main entry point into the test program.
-     */
-    static public void main(String[] argv) {
-        // Determine the max number of iterations.
-        int maxIterations = argv.length == 0 
-            ? sMAX 
-            : Integer.valueOf(argv[0]);
-
+    private void runTest(int maxIterations) {
         // Random number generator.
         final Random random = 
             new Random();
@@ -55,12 +51,11 @@ public class ex9 {
         final Map<Integer, Integer> primeCache =
             new ConcurrentHashMap<>();
 
-        // This runnable checks to see if sMAX random numbers are
-        // prime.
+        // Runnable checks if maxIterations random numbers are prime.
         Runnable primeChecker = () -> {
             for (long l = 0; l < maxIterations; l++) {
                 // Get the next random number.
-                Integer primeCandidate =
+                Integer primeCandidate = 
                     Math.abs(random.nextInt(maxIterations) + 1);
 
                 // computeIfAbsent() first checks to see if the factor
@@ -68,8 +63,8 @@ public class ex9 {
                 // it atomically determines if this number is prime
                 // and stores it in the cache.
                 Integer smallestFactor =
-                    smallestFactor = primeCache.computeIfAbsent
-                        (primeCandidate, ex9::primeChecker);
+                    primeCache.computeIfAbsent(primeCandidate,
+                                               this::primeChecker);
 
                 if (smallestFactor != 0)
                     System.out.println(""
@@ -104,6 +99,18 @@ public class ex9 {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+    }
+
+    /**
+     * Main entry point into the test program.
+     */
+    static public void main(String[] argv) {
+        // Determine the max number of iterations.
+        int maxIterations = argv.length == 0 
+            ? sMAX 
+            : Integer.valueOf(argv[0]);
+
+        new ex9().runTest(maxIterations);
     }
 }
 
