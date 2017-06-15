@@ -51,7 +51,7 @@ public class Main {
     private static List<String> mPhrasesToFind;
         
     /**
-     * Keep track of which SearchStreamSpliterator performed the best.
+     * Keep track of which implementation performed the best.
      */
     private static Map<Long, String> mResultsMap =
         new HashMap<>();
@@ -163,7 +163,7 @@ public class Main {
                      + (sharedString ? "shared-string" : "string")
                      + "|"
                      + (parallelSearching ? "parallel" : "sequential")
-                     + "Spliterator|"
+                     + "Spliter|"
                      + (parallelPhrases ? "parallel" : "sequential")
                      + "Phrases|"
                      + (parallelInput ? "parallel" : "sequential")
