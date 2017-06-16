@@ -1,6 +1,5 @@
 package search;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 

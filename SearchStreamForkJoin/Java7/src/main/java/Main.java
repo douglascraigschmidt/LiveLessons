@@ -1,5 +1,4 @@
 import search.IndexAwareSearchWithForkJoinTask;
-import search.SearchForPhrasesTask;
 import search.SearchResults;
 import search.SearchWithForkJoinTask;
 import utils.Options;
@@ -239,7 +238,7 @@ public class Main {
                      + (sharedString ? "shared-string" : "string")
                      + "|"
                      + (parallelSearching ? "parallel" : "sequential")
-                     + "Spliter|"
+                     + "Splitter|"
                      + (parallelPhrases ? "parallel" : "sequential")
                      + "Phrases|"
                      + (parallelInput ? "parallel" : "sequential")
