@@ -41,14 +41,17 @@ public class Options {
      */
     public boolean parseArgs(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-s")) 
-                // Set the file separator character.
-                mInputSeparator = args[++i];
-            else if (args[i].equals("-v")) 
-                mVerbose = true;
-            else {
-                printUsage();
-                return false;
+            switch (args[i]) {
+                case "-s":
+                    // Set the file separator character.
+                    mInputSeparator = args[++i];
+                    break;
+                case "-v":
+                    mVerbose = true;
+                    break;
+                default:
+                    printUsage();
+                    return false;
             }
         }
 

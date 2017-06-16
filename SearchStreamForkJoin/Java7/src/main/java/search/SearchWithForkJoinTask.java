@@ -1,7 +1,6 @@
 package search;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
@@ -44,7 +43,7 @@ public class SearchWithForkJoinTask
     private final int mMinSplitSize;
 
     /**
-     * Construtor initializes the fields.
+     * Constructor initializes the fields.
      */
     public SearchWithForkJoinTask(List<? extends CharSequence> inputList,
                                   List<String> phrasesToFind,

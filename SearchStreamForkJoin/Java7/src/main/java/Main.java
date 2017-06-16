@@ -1,4 +1,3 @@
-import search.SearchForPhrasesTask;
 import search.SearchResults;
 import search.SearchWithForkJoinTask;
 import utils.Options;
@@ -75,7 +74,7 @@ public class Main {
 
         // Create a list of SharedStrings to search from the complete
         // works of William Shakespeare.
-        mSharedInput = 
+        mSharedInput =
             TestDataFactory.getSharedInput(sSHAKESPEARE_DATA_FILE,
                                            // Split input by input
                                            // separator from Options

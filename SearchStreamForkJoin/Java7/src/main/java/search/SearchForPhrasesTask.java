@@ -163,7 +163,7 @@ public class SearchForPhrasesTask
     private String getTitle(CharSequence input) {
         // Create a Matcher.
         Matcher m = Pattern
-            // This regex matchs the first line in the input.
+            // This regex matches the first line in the input.
             .compile("(?m)^.*$")
 
             // Create a matcher for this pattern.
