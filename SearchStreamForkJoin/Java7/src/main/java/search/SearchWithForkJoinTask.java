@@ -158,7 +158,7 @@ public class SearchWithForkJoinTask
         // concurrently handles the "left hand" part of the input,
         // while "this" handles the "right hand" part of the input.
         ForkJoinTask<List<List<SearchResults>>> leftTask =
-            forkRightTask(splitPos, mMinSplitSize);
+            forkLeftTask(splitPos, mMinSplitSize);
 
         List<List<SearchResults>> rightResult =
             computeRightTask(splitPos,
@@ -192,8 +192,8 @@ public class SearchWithForkJoinTask
      * Create and fork a new SearchWithForkJoinTask that concurrently
      * handles the "left hand" part of the input
      */
-    protected ForkJoinTask<List<List<SearchResults>>> forkRightTask(int splitPos,
-                                                                    int mMinSplitSize) {
+    protected ForkJoinTask<List<List<SearchResults>>> forkLeftTask(int splitPos,
+                                                                   int mMinSplitSize) {
         return new SearchWithForkJoinTask(mInputList.subList(0, splitPos),
                                           mPhrasesToFind,
                                           mParallelSearching,

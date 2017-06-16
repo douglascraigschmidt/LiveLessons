@@ -109,8 +109,8 @@ public class IndexAwareSearchWithForkJoinTask
      * handles the "left hand" part of the input
      */
     @Override
-    protected ForkJoinTask<List<List<SearchResults>>> forkRightTask(int splitPos,
-                                                                    int mMinSplitSize) {
+    protected ForkJoinTask<List<List<SearchResults>>> forkLeftTask(int splitPos,
+                                                                   int mMinSplitSize) {
         return new IndexAwareSearchWithForkJoinTask(mInputList,
                                                     mPhrasesToFind,
                                                     mParallelSearching,

@@ -61,21 +61,30 @@ public class Main {
      * This interface makes it possible to use constructor references
      * for SearchWithForkJoinTask and IndexAwareForkJoinTask below.
      */
-    public interface FiveParamConstructor<ListList,
-                                          ListString,
-                                          B1,
-                                          B2,
-                                          B3,
+    @FunctionalInterface
+    public interface FiveParamConstructor<P1,
+                                          P2,
+                                          P3,
+                                          P4,
+                                          P5,
                                           R> {
         /**
          * Create an instance of the appropriate constructor.
          */
-        R make(ListList inputList,
-               ListString phrasesToFind,
-               B1 parallelSearching,
-               B2 parallelPhrases,
-               B3 parallelInput);
+        R make(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
     }
+
+    /**
+     * Customize the FiveParamConstructor for the
+     * SearchWithForkJoinTask hierarchy of classes.
+     */
+    private interface SearchWithForkJoinTaskFactory
+            extends FiveParamConstructor<List<CharSequence>,
+                                            List<String>,
+                                            Boolean,
+                                            Boolean,
+                                            Boolean,
+                                            SearchWithForkJoinTask> {}
 
     /**
      * This is the main entry point into the program.
@@ -110,22 +119,12 @@ public class Main {
 
         // This constructor reference creates an
         // IndexAwareSearchWithForkJoinTask object.
-        FiveParamConstructor<List<CharSequence>,
-            List<String>,
-            Boolean,
-            Boolean,
-            Boolean,
-            SearchWithForkJoinTask> indexAwareConsRef =
+        SearchWithForkJoinTaskFactory indexAwareConsRef =
             IndexAwareSearchWithForkJoinTask::new;
 
         // This constructor reference creates an
         // SearchWithForkJoinTask object.
-        FiveParamConstructor<List<CharSequence>,
-            List<String>,
-            Boolean,
-            Boolean,
-            Boolean,
-            SearchWithForkJoinTask> consRef =
+        SearchWithForkJoinTaskFactory consRef =
             SearchWithForkJoinTask::new;
 
         // Warm up the fork-join pool to account for any
