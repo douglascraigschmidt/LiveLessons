@@ -1,3 +1,4 @@
+import search.IndexAwareSearchWithForkJoinTask;
 import search.SearchForPhrasesTask;
 import search.SearchResults;
 import search.SearchWithForkJoinTask;
@@ -57,6 +58,26 @@ public class Main {
         new HashMap<>();
 
     /**
+     * This interface makes it possible to use constructor references
+     * for SearchWithForkJoinTask and IndexAwareForkJoinTask below.
+     */
+    public interface FiveParamConstructor<ListList,
+                                          ListString,
+                                          B1,
+                                          B2,
+                                          B3,
+                                          R> {
+        /**
+         * Create an instance of the appropriate constructor.
+         */
+        R make(ListList inputList,
+               ListString phrasesToFind,
+               B1 parallelSearching,
+               B2 parallelPhrases,
+               B3 parallelInput);
+    }
+
+    /**
      * This is the main entry point into the program.
      */
     static public void main(String[] args) {
@@ -87,23 +108,57 @@ public class Main {
         mPhrasesToFind = TestDataFactory
             .getPhraseList(sPHRASE_LIST_FILE);
 
+        // This constructor reference creates an
+        // IndexAwareSearchWithForkJoinTask object.
+        FiveParamConstructor<List<CharSequence>,
+            List<String>,
+            Boolean,
+            Boolean,
+            Boolean,
+            SearchWithForkJoinTask> indexAwareConsRef =
+            IndexAwareSearchWithForkJoinTask::new;
+
+        // This constructor reference creates an
+        // SearchWithForkJoinTask object.
+        FiveParamConstructor<List<CharSequence>,
+            List<String>,
+            Boolean,
+            Boolean,
+            Boolean,
+            SearchWithForkJoinTask> consRef =
+            SearchWithForkJoinTask::new;
+
         // Warm up the fork-join pool to account for any
         // instruction/data caching effects.
-        warmUpForkJoinPool();
+        warmUpForkJoinPool(indexAwareConsRef);
 
         // Run the non-shared string tests.
-        runTest(mInputList, false, false, false, false);
-        runTest(mInputList, false, true, true, true);
+        runTest(mInputList, false, false, false, false, consRef);
+        runTest(mInputList, false, true, true, true, consRef);
 
         // Run the non-shared string tests.
-        runTest(mSharedInput, true, false, false, false);
-        runTest(mSharedInput, true, false, true, false);
-        runTest(mSharedInput, true, false, false, true);
-        runTest(mSharedInput, true, false, true, true);
-        runTest(mSharedInput, true, true, false, false);
-        runTest(mSharedInput, true, true, true, false);
-        runTest(mSharedInput, true, true, false, true);
-        runTest(mSharedInput, true, true, true, true);
+        runTest(mSharedInput, true, false, false, false, consRef);
+        runTest(mSharedInput, true, false, true, false, consRef);
+        runTest(mSharedInput, true, false, false, true, consRef);
+        runTest(mSharedInput, true, false, true, true, consRef);
+        runTest(mSharedInput, true, true, false, false, consRef);
+        runTest(mSharedInput, true, true, true, false, consRef);
+        runTest(mSharedInput, true, true, false, true, consRef);
+        runTest(mSharedInput, true, true, true, true, consRef);
+
+        // Use Indexaware fork join tasks.
+        runTest(mInputList, false, false, false, false, indexAwareConsRef);
+        runTest(mInputList, false, true, true, true, indexAwareConsRef);
+
+        // Run the non-shared string tests.
+        runTest(mSharedInput, true, false, false, false, indexAwareConsRef);
+        runTest(mSharedInput, true, false, true, false, indexAwareConsRef);
+        runTest(mSharedInput, true, false, false, true, indexAwareConsRef);
+        runTest(mSharedInput, true, false, true, true, indexAwareConsRef);
+        runTest(mSharedInput, true, true, false, false, indexAwareConsRef);
+        runTest(mSharedInput, true, true, true, false, indexAwareConsRef);
+        runTest(mSharedInput, true, true, false, true, indexAwareConsRef);
+        runTest(mSharedInput, true, true, true, true, indexAwareConsRef);
 
         // Print out the search results.
         printResults();
@@ -112,21 +167,29 @@ public class Main {
     }
 
     /**
-     * Warm up the fork-join pool to account for any
-     * instruction/data caching effects.
+     * Warm up the fork-join pool to account for any instruction/data
+     * caching effects.
      */
-    private static void warmUpForkJoinPool() {
+    private static void warmUpForkJoinPool(FiveParamConstructor<List<CharSequence>,
+                                                                List<String>,
+                                                                Boolean,
+                                                                Boolean,
+                                                                Boolean,
+                                                                SearchWithForkJoinTask> consRef) {
         System.out.println("Warming up the fork-join pool");
+        // Create the appropriate type of object.
+        SearchWithForkJoinTask forkJoinTask =
+            consRef.make(mInputList,
+                         mPhrasesToFind,
+                         true,
+                         true,
+                         true);
 
         @SuppressWarnings("unused")
-        // Search the input looking for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults =
+            // Search the input looking for phrases that match.
+            List<List<SearchResults>> listOfListOfSearchResults =
             ForkJoinPool.commonPool()
-                        .invoke(new SearchWithForkJoinTask(mInputList,
-                                                           mPhrasesToFind,
-                                                           true,
-                                                           true,
-                                                           true));
+            .invoke(forkJoinTask);
 
         // Run the garbage collector after each test.
         System.gc();
@@ -141,7 +204,21 @@ public class Main {
                                 boolean sharedString,
                                 boolean parallelSearching,
                                 boolean parallelPhrases,
-                                boolean parallelInput) {
+                                boolean parallelInput,
+                                FiveParamConstructor<List<CharSequence>,
+                                                    List<String>,
+                                                    Boolean,
+                                                    Boolean,
+                                                    Boolean,
+                                                    SearchWithForkJoinTask> consRef) {
+        // Create the appropriate type of object.
+        SearchWithForkJoinTask forkJoinTask = 
+            consRef.make(inputList,
+                         mPhrasesToFind,
+                         parallelSearching,
+                         parallelPhrases,
+                         parallelInput);
+
         // Record the start time.
         long startTime = System.nanoTime();
 
@@ -149,17 +226,17 @@ public class Main {
         // for phrases that match.
         List<List<SearchResults>> listOfListOfSearchResults =
             ForkJoinPool.commonPool()
-                        .invoke(new SearchWithForkJoinTask(inputList,
-                                                           mPhrasesToFind,
-                                                           parallelSearching,
-                                                           parallelPhrases,
-                                                           parallelInput));
+                        .invoke(forkJoinTask);
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
+
+
         // Store the results.
-        storeResults("SearchWithForkJoin("
+        storeResults(((forkJoinTask instanceof IndexAwareSearchWithForkJoinTask) 
+                      ? "IndexAwareSearchWithForkJoin("
+                      : "SearchWithForkJoin(")
                      + (sharedString ? "shared-string" : "string")
                      + "|"
                      + (parallelSearching ? "parallel" : "sequential")
