@@ -14,12 +14,12 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program shows several examples of a Java 8 stream that
- * illustrate how it can be used with "pure" functions, i.e.,
- * functions whose return values are only determined by their input
- * values, without observable side effects.  This program also shows
- * various stream terminal operations, including forEach(), collect(),
- * and several variants of reduce().
+ * This program provides several examples of a Java 8 stream that show
+ * how it can be used with "pure" functions, i.e., functions whose
+ * return values are only determined by their input values, without
+ * observable side effects.  This program also shows various stream
+ * terminal operations, including forEach(), collect(), and several
+ * variants of reduce().
  */
 public class ex12 {
     static public void main(String[] argv) {

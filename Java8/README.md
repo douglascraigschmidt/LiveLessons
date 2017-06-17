@@ -45,10 +45,12 @@ Here's an overview of what's included:
 . ex11 - This example shows the improper use of the Stream.peek()
   aggregate operation to interfere with a running stream.
 
-. ex12 - This example shows a simple example of a Java 8 stream that
-  illustrates how it can be used with "pure" functions, i.e.,
-  functions whose return values are only determined by their input
-  values, without observable side effects.
+. ex12 - This program provides several examples of a Java 8 stream
+  that show how it can be used with "pure" functions, i.e., functions
+  whose return values are only determined by their input values,
+  without observable side effects.  This program also shows various
+  stream terminal operations, including forEach(), collect(), and
+  several variants of reduce().
 
 . ex13 - This example shows a simple example of a Java 8 Spliterator
   to traverse each word in a list containing a quote from a famous
@@ -61,3 +63,7 @@ Here's an overview of what's included:
 . ex15 - This example shows the limitations of using inherently
   sequential Java 8 streams operations (such as iterate() and limit())
   in the context of parallel streams.
+
+. ex16 - This program implements various ways of computing factorials
+  to demonstrate the performance of alternative techniques and the
+  dangers of sharing unsynchronized state between threads.

@@ -10,7 +10,7 @@ import static java.lang.Math.min;
  * demonstrate the performance of alternative techniques and the
  * dangers of sharing unsynchronized state between threads.
  */
-public class Factorials {
+public class ex16 {
     /**
      * Max number of times to run the tests.
      */
