@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
  * functions whose return values are only determined by their input
  * values, without observable side effects.  This program also shows
  * various stream terminal operations, including forEach(), collect(),
- * and reduce().
+ * and several variants of reduce().
  */
 public class ex12 {
     static public void main(String[] argv) {
