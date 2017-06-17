@@ -1,16 +1,11 @@
 package search;
 
-import utils.MatcherSpliterator;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with the Java 7 fork-join pool to
@@ -183,7 +178,7 @@ public class PhraseMatchTask
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
 
-        // Check to see if the phrase matches within the subtring.
+        // Check to see if the phrase matches within the substring.
         if (phraseMatcher.find()) 
             // If there's a match update the splitPos to account for
             // the phrase that spans newlines.

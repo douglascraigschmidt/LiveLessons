@@ -147,7 +147,7 @@ public class SearchResults {
      */
     @Override
     public String toString() {
-        String output = new String("");
+        String output = "";
 
         if (!isEmpty()) {
             output += headerToString();

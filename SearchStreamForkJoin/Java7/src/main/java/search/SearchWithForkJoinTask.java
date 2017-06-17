@@ -43,7 +43,7 @@ public class SearchWithForkJoinTask
     protected  int mMinSplitSize;
 
     /**
-     * Construtor initializes the fields.
+     * Constructor initializes the fields.
      */
     public SearchWithForkJoinTask(List<? extends CharSequence> inputList,
                                   List<String> phrasesToFind,

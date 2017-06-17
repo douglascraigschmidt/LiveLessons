@@ -1,5 +1,4 @@
 import search.IndexAwareSearchWithForkJoinTask;
-import search.SearchForPhrasesTask;
 import search.SearchResults;
 import search.SearchWithForkJoinTask;
 import utils.Options;
@@ -211,7 +210,7 @@ public class Main {
                                                     Boolean,
                                                     SearchWithForkJoinTask> consRef) {
         // Create the appropriate type of object.
-        SearchWithForkJoinTask forkJoinTask = 
+        SearchWithForkJoinTask forkJoinTask =
             consRef.make(inputList,
                          mPhrasesToFind,
                          parallelSearching,
@@ -233,13 +232,13 @@ public class Main {
 
 
         // Store the results.
-        storeResults(((forkJoinTask instanceof IndexAwareSearchWithForkJoinTask) 
+        storeResults(((forkJoinTask instanceof IndexAwareSearchWithForkJoinTask)
                       ? "IndexAwareSearchWithForkJoin("
                       : "SearchWithForkJoin(")
                      + (sharedString ? "shared-string" : "string")
                      + "|"
                      + (parallelSearching ? "parallel" : "sequential")
-                     + "Spliter|"
+                     + "Splitter|"
                      + (parallelPhrases ? "parallel" : "sequential")
                      + "Phrases|"
                      + (parallelInput ? "parallel" : "sequential")
