@@ -1,14 +1,12 @@
+import java.math.BigInteger;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
-import static java.lang.Math.min;
 
 /**
- * This program implements various ways of computing factorials to
- * demonstrate the performance of alternative techniques and the
- * dangers of sharing unsynchronized state between threads.
+ * This program implements various ways of computing factorials for
+ * BigIntegers to demonstrate the performance of alternative parallel
+ * and sequential algorithms, as well as the dangers of sharing
+ * unsynchronized state between threads.
  */
 public class ex16 {
     /**
@@ -20,7 +18,7 @@ public class ex16 {
      * Default factorial number.  Going above this number will create
      * incorrect results.
      */
-    private static final int sDEFAULT_N = 20;
+    private static final int sDEFAULT_N = 400;
 
     /**
      * This class demonstrates how race conditions can occur when
@@ -36,14 +34,14 @@ public class ex16 {
             /**
              * The running total of the factorial.
              */
-            public long mTotal = 1;
+            BigInteger mTotal = BigInteger.ONE;
 
             /**
              * Multiply the running total by @a n.  This method is not
              * synchronized, so it may incur race conditions.
              */
-            public void multiply(long n) {
-                mTotal *= n;
+            void multiply(BigInteger n) {
+                mTotal = mTotal.multiply(n);
             }
         }  
 
@@ -52,15 +50,18 @@ public class ex16 {
          * are race conditions wrt accessing shared state, however, so
          * the result may not always be correct.
          */
-        static long factorial(long n) {
+        static BigInteger factorial(BigInteger n) {
             Total t = new Total();
 
             LongStream
                 // Create a stream of longs from 1 to n.
-                .rangeClosed(1, n)
+                .rangeClosed(1, n.longValue())
 
                 // Run the forEach() terminal operation concurrently.
                 .parallel()
+
+                // Create a BigInteger from the long value.
+                .mapToObj(BigInteger::valueOf)
 
                 // Multiple the latest value in the range by the
                 // running total (not properly synchronized).
@@ -85,14 +86,16 @@ public class ex16 {
             /**
              * The running total of the factorial.
              */
-            public long mTotal = 1;
+            BigInteger mTotal = BigInteger.ONE;
 
             /**
              * Multiply the running total by @a n.  This method is
              * synchronized to avoid race conditions.
              */
-            public synchronized void multiply(long n) {
-                mTotal *= n;
+            void multiply(BigInteger n) {
+                synchronized (this) {
+                    mTotal = mTotal.multiply(n);
+                }
             }
         }
 
@@ -100,15 +103,18 @@ public class ex16 {
          * Return the factorial for the given @a n using a parallel
          * stream and the forEach() terminal operation.
          */
-        static long factorial(long n) {
+        static BigInteger factorial(BigInteger n) {
             Total t = new Total();
 
             LongStream
                 // Create a stream of longs from 1 to n.
-                .rangeClosed(1, n)
+                .rangeClosed(1, n.longValue())
 
                 // Run the forEach() terminal operation concurrently.
                 .parallel()
+
+                // Create a BigInteger from the long value.
+                .mapToObj(BigInteger::valueOf)
 
                 // Multiple the latest value in the range by the
                 // running total (properly synchronized).
@@ -124,22 +130,24 @@ public class ex16 {
      * avoids sharing state between Java threads altogether.
      */
     private static class ParallelStreamFactorial {
-         /**
+        /**
          * Return the factorial for the given @a n using a parallel
          * stream and the reduce() terminal operation.
          */
-        static long factorial(long n) {
+        static BigInteger factorial(BigInteger n) {
             return LongStream
                 // Create a stream of longs from 1 to n.
-                .rangeClosed(1, n)
+                .rangeClosed(1, n.longValue())
 
                 // Run the reduce() terminal operation concurrently.
-                .parallel() 
+                .parallel()
+
+                .mapToObj(BigInteger::valueOf)
 
                 // Performs a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
-                .reduce(1, Factorials::product);
+                .reduce(BigInteger.ONE, BigInteger::multiply);
         }
     }
 
@@ -148,34 +156,30 @@ public class ex16 {
      * implementation.
      */
     private static class SequentialStreamFactorial {
-         /**
+        /**
          * Return the factorial for the given @a n using a sequential
          * stream and the reduce() terminal operation.
          */
-        static long factorial(long n) {
+        static BigInteger factorial(BigInteger n) {
             return LongStream
                 // Create a stream of longs from 1 to n.
-                .rangeClosed(1, n)
+                .rangeClosed(1, n.longValue())
+
+                // Create a BigInteger from the long value.
+                .mapToObj(BigInteger::valueOf)
 
                 // Performs a reduction on the elements of this stream
                 // to compute the factorial.
-                .reduce(1, Factorials::product);
+                .reduce(BigInteger.ONE, BigInteger::multiply);
         }
-    }
-
-    /**
-     * Compute the product of two longs.
-     */
-    static long product(long a, long b) {
-        return a * b;
     }
 
     /**
      * Run the given @a factorial test and print the result.
      */
-    private static void runFactorialTest(String factorialTest,
-                                         Function<Long, Long> factorial,
-                                         long n) {
+    private <T> void runFactorialTest(String factorialTest,
+                                      Function<T, T> factorial,
+                                      T n) {
         // Record the start time.
         long startTime = System.nanoTime();
 
@@ -195,17 +199,20 @@ public class ex16 {
                            + factorial.apply(n)
                            + " for " 
                            + factorialTest);
+
+        // Help out the garbage collector.
+        System.gc();
     }
 
     /**
      * Warm up the threads in the fork/join pool so that the timing
      * results will be more accurate.
      */
-    private static void warmUpForkJoinThreads() {
+    private void warmUpForkJoinThreads() {
         System.out.println("Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++)
-            ParallelStreamFactorial.factorial(sDEFAULT_N);
+            ParallelStreamFactorial.factorial(BigInteger.valueOf(sDEFAULT_N));
     }
 
     /**
@@ -214,29 +221,35 @@ public class ex16 {
     public static void main(String[] args) {
         System.out.println("Starting Factorial Tests");
 
-        long n = sDEFAULT_N;
+        // Initialize to the default value.
+        BigInteger n = BigInteger.valueOf(sDEFAULT_N);
 
+        // Change the size as requested.
         if (args.length > 0) 
-            // Ensure the value of n isn't out of range.
-            n = min(Long.valueOf(args[1]), sDEFAULT_N);
+            n = BigInteger.valueOf(Long.valueOf(args[0]));
 
-        warmUpForkJoinThreads();
+        // Create a new test object.
+        ex16 test = new ex16();
 
-        runFactorialTest("SynchronizedParallelFactorial",
-                         SynchronizedParallelFactorial::factorial,
-                         n);
+        // Warm up the fork-join pool to ensure accurate timings.
+        test.warmUpForkJoinThreads();
 
-        runFactorialTest("ParallelStreamFactorial",
-                         ParallelStreamFactorial::factorial,
-                         n);
+        // Run the various tests.
+        test.runFactorialTest("SynchronizedParallelFactorial",
+                              SynchronizedParallelFactorial::factorial,
+                              n);
 
-        runFactorialTest("BuggyFactorial",
-                         BuggyFactorial::factorial,
-                         n);
+        test.runFactorialTest("SequentialStreamFactorial",
+                              SequentialStreamFactorial::factorial,
+                              n);
 
-        runFactorialTest("SequentialStreamFactorial",
-                         SequentialStreamFactorial::factorial,
-                         n);
+        test.runFactorialTest("BuggyFactorial",
+                              BuggyFactorial::factorial,
+                              n);
+
+        test.runFactorialTest("ParallelStreamFactorial",
+                              ParallelStreamFactorial::factorial,
+                              n);
 
         System.out.println("Ending Factorial Tests");
     }
