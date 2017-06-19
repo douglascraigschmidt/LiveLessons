@@ -16,27 +16,27 @@ public class SearchForPhrasesTask
     /**
      * The input string to search.
      */
-    private final CharSequence mInputString;
+    protected final CharSequence mInputString;
 
     /**
      * The list of phrases to find.
      */
-    private List<String> mPhraseList;
+    protected List<String> mPhraseList;
 
     /**
      * Indicates whether to run the spliterator concurrently.
      */
-    private boolean mParallelSearching;
+    protected boolean mParallelSearching;
 
     /**
      * Indicates whether to run the phrases concurrently.
      */
-    private boolean mParallelPhrases;
+    protected boolean mParallelPhrases;
 
     /**
      * The minimum size of the phrases list to split.
      */
-    private final int mMinSplitSize;
+    protected int mMinSplitSize;
 
     /**
      * Constructor initializes the field.
@@ -49,7 +49,7 @@ public class SearchForPhrasesTask
         mPhraseList = phraseList;
         mParallelSearching = parallelSearching;
         mParallelPhrases = parallelPhrases;
-        mMinSplitSize = phraseList.size()/ 2;
+        mMinSplitSize = getPartitionSize()/ 2;
     }
 
     /**
@@ -57,7 +57,7 @@ public class SearchForPhrasesTask
      * It initializes all the fields for the "left hand size" of a
      * split.
      */
-    private SearchForPhrasesTask(CharSequence inputString,
+    public SearchForPhrasesTask(CharSequence inputString,
                                  List<String> phraseList,
                                  boolean parallelSearching,
                                  boolean parallelPhrases,
@@ -71,11 +71,14 @@ public class SearchForPhrasesTask
 
     /**
      * Perform the computations sequentially at this point.
+     * @param startIndex
+     * @param endIndex
      */
-    private List<SearchResults> computeSequentially() {
+    private List<SearchResults> computeSequentially(int startIndex,
+                                                    int endIndex) {
         // Create a list to hold the results.
         List<SearchResults> results =
-            new ArrayList<>(mPhraseList.size());
+            new ArrayList<>(getPartitionSize());
 
         // Get the section title.
         String title = getTitle(mInputString);
@@ -85,7 +88,8 @@ public class SearchForPhrasesTask
                                                       mInputString.length());
 
         // Loop through each phrase to find.
-        for (String phrase : mPhraseList) {
+        for (int i = startIndex; i < endIndex; i++) {
+            String phrase = mPhraseList.get(i);
             // Find all indices where the phrase matches in the input
             // data.
             SearchResults sr =
@@ -115,13 +119,18 @@ public class SearchForPhrasesTask
      */
     @Override
     public List<SearchResults> compute() {
-        if (mPhraseList.size() < mMinSplitSize
+        int partitionSize = getPartitionSize();
+        if (partitionSize < mMinSplitSize
             || !mParallelPhrases)
-            return computeSequentially();
+            return computeSequentially(getStartIndex(),getEndIndex());
         else 
             // Compute position to split the phrase list and forward
             // to the splitPhraseList() method to perform the split.
-            return splitPhraseList(mPhraseList.size() / 2);
+            return splitPhraseList(partitionSize / 2);
+    }
+
+    protected int getPartitionSize() {
+        return mPhraseList.size();
     }
 
     /**
@@ -134,18 +143,11 @@ public class SearchForPhrasesTask
         // concurrently handles the "left hand" part of the input,
         // while "this" handles the "right hand" part of the input.
         ForkJoinTask<List<SearchResults>> leftTask =
-            new SearchForPhrasesTask(mInputString,
-                                     mPhraseList.subList(0, splitPos),
-                                     mParallelSearching,
-                                     mParallelPhrases,
-                                     mMinSplitSize).fork();
+                forkLeftTask(splitPos,mMinSplitSize);
 
         // Update "this" SearchForPhrasesTask to handle the "right
         // hand" portion of the input.
-        mPhraseList = mPhraseList.subList(splitPos, mPhraseList.size());
-
-        // Recursively call compute() to continue the splitting.
-        List<SearchResults> rightResult = compute();
+        List<SearchResults> rightResult = computeRightTask(splitPos,mMinSplitSize);
 
         // Wait and join the results from the left task.
         List<SearchResults> leftResult = leftTask.join();
@@ -155,6 +157,28 @@ public class SearchForPhrasesTask
 
         // Return the result.
         return leftResult;
+    }
+
+    /**
+     *
+     */
+    protected List<SearchResults> computeRightTask(int splitPos,int mMinSplitSize) {
+        mPhraseList = mPhraseList.subList(splitPos, getPartitionSize());
+
+        // Recursively call compute() to continue the splitting.
+        return compute();
+    }
+
+    /**
+     *
+     */
+    protected ForkJoinTask<List<SearchResults>> forkLeftTask(int splitPos,
+                                                             int mMinSplitSize) {
+        return new SearchForPhrasesTask(mInputString,
+                                        mPhraseList.subList(0, splitPos),
+                                        mParallelSearching,
+                                        mParallelPhrases,
+                                        mMinSplitSize).fork();
     }
 
     /**
@@ -172,6 +196,20 @@ public class SearchForPhrasesTask
         return m.find()
             ? m.group()
             : "";
+    }
+
+    /**
+     * Return the start index.
+     */
+    int getStartIndex() {
+        return 0;
+    }
+
+    /**
+     * Return the end index.
+     */
+    int getEndIndex() {
+        return mPhraseList.size();
     }
 }
 

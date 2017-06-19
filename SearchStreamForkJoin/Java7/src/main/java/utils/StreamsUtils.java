@@ -60,4 +60,41 @@ public class StreamsUtils {
     public static<T> Predicate<T> not(Predicate<T> p) {
         return p.negate();
     }
+
+    /**
+     * Represents a function that accepts five arguments and produces
+     * a result.  This is a functional interface whose functional
+     * method is
+     * {@link #apply(Object, Object, Object, Object, Object)}.
+     */
+    @FunctionalInterface
+    public interface PentaFunction<P1,
+                                   P2,
+                                   P3,
+                                   P4,
+                                   P5,
+                                   R> {
+        /**
+         * Apply the parameters and return a value.
+         */
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
+    }
+
+    /**
+     * Represents a function that accepts four arguments and produces
+     * a result.  This is a functional interface whose functional
+     * method is
+     * {@link #apply(Object, Object, Object, Object)}.
+     */
+    @FunctionalInterface
+    public interface QuadFunction<P1,
+                                  P2,
+                                  P3,
+                                  P4,
+                                  R> {
+        /**
+         * Apply the parameters and return a value.
+         */
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
+    }
 }

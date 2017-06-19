@@ -142,6 +142,7 @@ public class ex16 {
                 // Run the reduce() terminal operation concurrently.
                 .parallel()
 
+                // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
                 // Performs a reduction on the elements of this stream

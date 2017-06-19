@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
+import static utils.StreamsUtils.QuadFunction;
+
 /**
  * This class demonstrates the use of the Java 7 fork-join framework
- * to search for phrases in the works of Shakespeare.  
+ * to search for phrases in the works of Shakespeare.
  */
 public class SearchWithForkJoinTask
        extends RecursiveTask<List<List<SearchResults>>> {
@@ -40,7 +42,24 @@ public class SearchWithForkJoinTask
     /**
      * The minimum size of an input list to split.
      */
-    protected  int mMinSplitSize;
+    protected int mMinSplitSize;
+
+    /**
+     * Customize the QuadFunction for the SearchForPhrasesTask
+     * hierarchy of classes so we can use constructor references.
+     */
+    protected interface SearchForPhrasesTaskFactory
+              extends QuadFunction<CharSequence,
+                                   List<String>,
+                                   Boolean,
+                                   Boolean,
+                                   SearchForPhrasesTask> {}
+
+    /**
+     * This constructor reference creates the appropriate
+     * [IndexAware]SearchForPhrasesTask object.
+     */
+    SearchForPhrasesTaskFactory mConsRef;
 
     /**
      * Constructor initializes the fields.
@@ -56,6 +75,8 @@ public class SearchWithForkJoinTask
         mParallelPhrases = parallelPhrases;
         mParallelInput = parallelInput;
         mMinSplitSize = getPartitionSize() / 2;
+        // By default use the SearchForPhrasesTask.
+        mConsRef = SearchForPhrasesTask::new;
     }
 
     /**
@@ -75,6 +96,7 @@ public class SearchWithForkJoinTask
         mParallelPhrases = parallelPhrases;
         mParallelInput = parallelInput;
         mMinSplitSize = minSplitSize;
+        mConsRef = SearchForPhrasesTask::new;
     }
 
     /**
@@ -85,22 +107,21 @@ public class SearchWithForkJoinTask
                                                   int endIndex) {
         // Create a list to hold the results.
         List<List<SearchResults>> results =
-            new ArrayList<>(getPartitionSize());
+                new ArrayList<>(getPartitionSize());
 
         // Loop through each input string in the "sublist" range.
         for (int i = startIndex; i < endIndex; i++) {
             // Get the ith CharSequence in the list.
             CharSequence input = mInputList.get(i);
-            
+
             // Create a SearchForPhrasesTask that searches an input
             // string for a list of phrases and store the results from
             // computing the task.
             List<SearchResults> lsr =
-                new SearchForPhrasesTask(input,
-                                         mPhrasesToFind,
-                                         mParallelSearching,
-                                         mParallelPhrases)
-                .compute();
+                mConsRef.apply(input,
+                               mPhrasesToFind,
+                               mParallelSearching,
+                               mParallelPhrases).compute();
 
             // If a phrase was found add it to the list of results.
             if (lsr.size() > 0)
@@ -109,19 +130,18 @@ public class SearchWithForkJoinTask
 
         // Return the results.
         return results;
-
     }
 
     /**
      * Searches for phrases to find in the input list.
      */
     @Override
-        protected List<List<SearchResults>> compute() {
+    protected List<List<SearchResults>> compute() {
         int partitionSize = getPartitionSize();
         if (partitionSize <= mMinSplitSize
-            || !mParallelInput)
+                || !mParallelInput)
             return computeSequentially(getStartIndex(), getEndIndex());
-        else 
+        else
             // Compute position to split the input list and forward to
             // the splitInputList() method to perform the split.
             return splitInputList(partitionSize / 2);
@@ -158,11 +178,11 @@ public class SearchWithForkJoinTask
         // concurrently handles the "left hand" part of the input,
         // while "this" handles the "right hand" part of the input.
         ForkJoinTask<List<List<SearchResults>>> leftTask =
-            forkLeftTask(splitPos, mMinSplitSize);
+                forkLeftTask(splitPos, mMinSplitSize);
 
         List<List<SearchResults>> rightResult =
-            computeRightTask(splitPos,
-                             mMinSplitSize);
+                computeRightTask(splitPos,
+                                 mMinSplitSize);
 
         // Wait and join the results from the left task.,
         List<List<SearchResults>> leftResult = leftTask.join();

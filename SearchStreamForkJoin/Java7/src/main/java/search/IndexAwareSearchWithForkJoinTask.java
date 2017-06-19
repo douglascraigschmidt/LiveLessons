@@ -31,15 +31,17 @@ public class IndexAwareSearchWithForkJoinTask
                                             boolean parallelInput) {
         // Initialize the super class.
         super(inputList,
-              phrasesToFind,
-              parallelSearching,
-              parallelPhrases,
-              parallelInput);
+                phrasesToFind,
+                parallelSearching,
+                parallelPhrases,
+                parallelInput);
 
         // Initialize the fields.
         mStartIndex = 0;
         mEndIndex = inputList.size();
         mMinSplitSize = getPartitionSize() / 2;
+        // This implementation use the IndexAwareSearchForPhrasesTask.
+        mConsRef = IndexAwareSearchForPhrasesTask::new;
     }
 
     /**
@@ -93,14 +95,16 @@ public class IndexAwareSearchWithForkJoinTask
     @Override
     protected List<List<SearchResults>> computeRightTask(int splitPos,
                                                          int mMinSplitSize) {
-        return new IndexAwareSearchWithForkJoinTask(mInputList,
-                                                    mPhrasesToFind,
-                                                    mParallelSearching,
-                                                    mParallelPhrases,
-                                                    mParallelInput,
-                                                    mMinSplitSize,
-                                                    mStartIndex + splitPos,
-                                                    mEndIndex).compute();
+        IndexAwareSearchWithForkJoinTask indexAwareSearchWithForkJoinTask =
+            new IndexAwareSearchWithForkJoinTask(mInputList,
+                                                 mPhrasesToFind,
+                                                 mParallelSearching,
+                                                 mParallelPhrases,
+                                                 mParallelInput,
+                                                 mMinSplitSize,
+                                                 mStartIndex + splitPos,
+                                                 mEndIndex);
+        return indexAwareSearchWithForkJoinTask.compute();
     }
 
     /**

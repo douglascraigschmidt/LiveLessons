@@ -8,13 +8,14 @@ import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 import static java.util.stream.Collectors.groupingBy;
+import static utils.StreamsUtils.PentaFunction;
 
 /**
  * This example implements an "embarrassingly parallel" program that
  * uses a Java 7 fork-join pool to concurrently search for phrases in
  * a list of input containing all the works of Shakespeare.  The key
  * portions of the program in the search package just use "classic"
- * Java 7 features.
+ * Java 7 features (i.e., no Java 8 streams).
  */
 public class Main {
     /*
@@ -57,33 +58,16 @@ public class Main {
         new HashMap<>();
 
     /**
-     * This interface makes it possible to use constructor references
-     * for SearchWithForkJoinTask and IndexAwareForkJoinTask below.
-     */
-    @FunctionalInterface
-    public interface FiveParamConstructor<P1,
-                                          P2,
-                                          P3,
-                                          P4,
-                                          P5,
-                                          R> {
-        /**
-         * Create an instance of the appropriate constructor.
-         */
-        R make(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
-    }
-
-    /**
-     * Customize the FiveParamConstructor for the
-     * SearchWithForkJoinTask hierarchy of classes.
+     * Customize the PentaFunction for the SearchWithForkJoinTask
+     * hierarchy of classes so we can use constructor references.
      */
     private interface SearchWithForkJoinTaskFactory
-            extends FiveParamConstructor<List<CharSequence>,
-                                            List<String>,
-                                            Boolean,
-                                            Boolean,
-                                            Boolean,
-                                            SearchWithForkJoinTask> {}
+            extends PentaFunction<List<CharSequence>,
+                                  List<String>,
+                                  Boolean,
+                                  Boolean,
+                                  Boolean,
+                                  SearchWithForkJoinTask> {}
 
     /**
      * This is the main entry point into the program.
@@ -168,20 +152,15 @@ public class Main {
      * Warm up the fork-join pool to account for any instruction/data
      * caching effects.
      */
-    private static void warmUpForkJoinPool(FiveParamConstructor<List<CharSequence>,
-                                                                List<String>,
-                                                                Boolean,
-                                                                Boolean,
-                                                                Boolean,
-                                                                SearchWithForkJoinTask> consRef) {
+    private static void warmUpForkJoinPool(SearchWithForkJoinTaskFactory consRef) {
         System.out.println("Warming up the fork-join pool");
         // Create the appropriate type of object.
         SearchWithForkJoinTask forkJoinTask =
-            consRef.make(mInputList,
-                         mPhrasesToFind,
-                         true,
-                         true,
-                         true);
+            consRef.apply(mInputList,
+                          mPhrasesToFind,
+                          true,
+                          true,
+                          true);
 
         @SuppressWarnings("unused")
             // Search the input looking for phrases that match.
@@ -203,19 +182,14 @@ public class Main {
                                 boolean parallelSearching,
                                 boolean parallelPhrases,
                                 boolean parallelInput,
-                                FiveParamConstructor<List<CharSequence>,
-                                                    List<String>,
-                                                    Boolean,
-                                                    Boolean,
-                                                    Boolean,
-                                                    SearchWithForkJoinTask> consRef) {
+                                SearchWithForkJoinTaskFactory consRef) {
         // Create the appropriate type of object.
         SearchWithForkJoinTask forkJoinTask =
-            consRef.make(inputList,
-                         mPhrasesToFind,
-                         parallelSearching,
-                         parallelPhrases,
-                         parallelInput);
+            consRef.apply(inputList,
+                          mPhrasesToFind,
+                          parallelSearching,
+                          parallelPhrases,
+                          parallelInput);
 
         // Record the start time.
         long startTime = System.nanoTime();
@@ -228,8 +202,6 @@ public class Main {
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-
 
         // Store the results.
         storeResults(((forkJoinTask instanceof IndexAwareSearchWithForkJoinTask)
