@@ -6,13 +6,30 @@ import java.util.stream.LongStream;
  * This program implements various ways of computing factorials for
  * BigIntegers to demonstrate the performance of alternative parallel
  * and sequential algorithms, as well as the dangers of sharing
- * unsynchronized state between threads.
+ * unsynchronized state between threads.  A conventional Java 8
+ * parallel streams solution would look like this for 'n' of type
+ * long:
+ *
+ * LongStream
+ *   // Generate long values from 1 to n
+ *   .rangeClosed(1, n)
+ *
+ *   // Run the stream in parallel.
+ *   .parallel()
+ *
+ *   // Reduce the results of the parallel chunks.
+ *   .reduce(1, (a, b) -> a * b);
+ *
+ * However, due to the expotential++ growth rate of factorials we use
+ * a BigInteger result instead of a long result.  A more interesting
+ * (albeit more complicated) solution that also uses BigIntegers for
+ * the type of 'n' appears at https://github.com/jevad/egfactorial.
  */
 public class ex16 {
     /**
      * Max number of times to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 100000;
+    private static final int sMAX_ITERATIONS = 10000;
 
     /**
      * Default factorial number.  Going above this number will create
@@ -192,14 +209,14 @@ public class ex16 {
 
         System.out.println("It took "
                            + stopTime
-                           + " milliseconds to compute "
+                           + " milliseconds for "
+                           + factorialTest
+                           + " to compute "
                            + sMAX_ITERATIONS
                            + " iterations of the factorial for "
                            + n 
                            + " = "
-                           + factorial.apply(n)
-                           + " for " 
-                           + factorialTest);
+                           + factorial.apply(n));
 
         // Help out the garbage collector.
         System.gc();
