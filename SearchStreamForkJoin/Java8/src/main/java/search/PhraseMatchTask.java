@@ -1,16 +1,11 @@
 package search;
 
-import utils.MatcherSpliterator;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with the Java 7 fork-join pool to
@@ -45,6 +40,12 @@ public class PhraseMatchTask
      * The minimum size of an input string to split.
      */
     private final int mMinSplitSize;
+
+    /**
+     * Keeps track of the offset needed to return the appropriate
+     * index into the original string.
+     */
+    private int mOffset = 0;
 
     /**
      * True if we compute the match in parallel, else false.
@@ -90,12 +91,14 @@ public class PhraseMatchTask
                             String phrase,
                             Pattern pattern,
                             int minSplitSize,
+                            int offset,
                             boolean parallel) {
         mPattern = pattern;
         mPhraseMatcher = mPattern.matcher(input);
         mInput = input;
         mPhrase = phrase;
         mMinSplitSize = minSplitSize;
+        mOffset = offset;
         mParallelSearch = parallel;
     }
     
@@ -111,7 +114,7 @@ public class PhraseMatchTask
                     false)
 
             // Map each MatchResult into a SearchResults.Result.
-            .map(mr -> new SearchResults.Result(mr.start()))
+            .map(mr -> new SearchResults.Result(mOffset + mr.start()))
 
             // Collect all the results into a list.
             .collect(toList());
@@ -138,7 +141,8 @@ public class PhraseMatchTask
 
             // Update splitPos if a phrase spans across the initial
             // splitPos.
-            splitPos = tryToUpdateSplitPos(startPos, splitPos);
+            if ((splitPos = tryToUpdateSplitPos(startPos, splitPos)) < 0)
+                return null;
 
             // Create a new PhraseMatchTask that handles the "left
             // hand" portion of the input, while the "this" object
@@ -172,18 +176,23 @@ public class PhraseMatchTask
      */
     private int tryToUpdateSplitPos(int startPos,
                                     int splitPos) {
+        // Add length of the phrase in regex characters.
+        int endPos = splitPos + mPattern.toString().length();
+
+        // Make sure endPos isn't larger than the input string!
+        if (endPos >= mInput.length())
+            return -1;
+
         // Create a substring to check for the case where a phrase
         // spans across the initial splitPos.
         CharSequence substr =
             mInput.subSequence(startPos,
-                               // Add length of the phrase in regex
-                               // characters.
-                               startPos + mPattern.toString().length());
+                               endPos);
 
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
 
-        // Check to see if the phrase matches within the subtring.
+        // Check to see if the phrase matches within the substring.
         if (phraseMatcher.find()) 
             // If there's a match update the splitPos to account for
             // the phrase that spans newlines.
@@ -208,7 +217,11 @@ public class PhraseMatchTask
                                 mPhrase,
                                 mPattern,
                                 mMinSplitSize,
+                                mOffset,
                                 mParallelSearch).fork();
+
+        // Update the offset.
+        mOffset += splitPos;
             
         // Update "this" PhraseMatchTask to handle the "right hand"
         // portion of the input.

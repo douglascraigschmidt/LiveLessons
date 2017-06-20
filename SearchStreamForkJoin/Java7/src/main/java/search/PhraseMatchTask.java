@@ -41,6 +41,12 @@ public class PhraseMatchTask
     private final int mMinSplitSize;
 
     /**
+     * Keeps track of the offset needed to return the appropriate
+     * index into the original string.
+     */
+    private int mOffset = 0;
+
+    /**
      * True if we compute the match in parallel, else false.
      */
     private final boolean mParallelSearch;
@@ -48,9 +54,9 @@ public class PhraseMatchTask
     /**
      * Constructor initializes the fields.
      */
-    PhraseMatchTask(CharSequence input,
-                    String phrase,
-                    boolean parallel) {
+    public PhraseMatchTask(CharSequence input,
+                           String phrase,
+                           boolean parallel) {
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
         
@@ -84,12 +90,14 @@ public class PhraseMatchTask
                             String phrase,
                             Pattern pattern,
                             int minSplitSize,
+                            int offset,
                             boolean parallel) {
         mPattern = pattern;
         mPhraseMatcher = mPattern.matcher(input);
         mInput = input;
         mPhrase = phrase;
         mMinSplitSize = minSplitSize;
+        mOffset = offset;
         mParallelSearch = parallel;
     }
     
@@ -104,9 +112,10 @@ public class PhraseMatchTask
         // Try to find a phrase match in the input, ignoring case.  If
         // there's no match then we're done with the iteration.
         while (mPhraseMatcher.find())
-            // Create and add a new Result object that stores the
-            // index of the phrase.
-            list.add(new SearchResults.Result(mPhraseMatcher.start()));
+            // Create/accept a new Result object that stores the index
+            // of where the phrase occurs in the original string
+            // (which is why we add mOffset).
+            list.add(new SearchResults.Result(mOffset + mPhraseMatcher.start()));
 
         // Return the list.
         return list;
@@ -133,7 +142,8 @@ public class PhraseMatchTask
 
             // Update splitPos if a phrase spans across the initial
             // splitPos.
-            splitPos = tryToUpdateSplitPos(startPos, splitPos);
+            if ((splitPos = tryToUpdateSplitPos(startPos, splitPos)) < 0)
+                return null;
 
             // Create a new PhraseMatchTask that handles the "left
             // hand" portion of the input, while the "this" object
@@ -167,13 +177,18 @@ public class PhraseMatchTask
      */
     private int tryToUpdateSplitPos(int startPos,
                                     int splitPos) {
+        // Add length of the phrase in regex characters.
+        int endPos = splitPos + mPattern.toString().length();
+
+        // Make sure endPos isn't larger than the input string!
+        if (endPos >= mInput.length())
+            return -1;
+
         // Create a substring to check for the case where a phrase
         // spans across the initial splitPos.
         CharSequence substr =
             mInput.subSequence(startPos,
-                               // Add length of the phrase in regex
-                               // characters.
-                               startPos + mPattern.toString().length());
+                               endPos);
 
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
@@ -203,7 +218,11 @@ public class PhraseMatchTask
                                 mPhrase,
                                 mPattern,
                                 mMinSplitSize,
+                                mOffset,
                                 mParallelSearch).fork();
+
+        // Update the offset.
+        mOffset += splitPos;
             
         // Update "this" PhraseMatchTask to handle the "right hand"
         // portion of the input.
