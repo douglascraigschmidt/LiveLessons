@@ -1,11 +1,15 @@
 package search;
 
-import java.util.ArrayList;
+import utils.MatcherSpliterator;
+
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with the Java 7 fork-join pool to
@@ -55,9 +59,9 @@ public class PhraseMatchTask
     /**
      * Constructor initializes the fields.
      */
-    PhraseMatchTask(CharSequence input,
-                    String phrase,
-                    boolean parallel) {
+    public PhraseMatchTask(CharSequence input,
+                           String phrase,
+                           boolean parallel) {
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
         
