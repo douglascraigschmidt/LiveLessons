@@ -11,7 +11,8 @@ import static org.junit.Assert.assertNotEquals;
  * Tests the features of the PhraseMatchTask.  Thanks to Sanjeev Kumar
  * for contributing this test.
  */
-public class BasicPhraseMatchTaskTest {
+public class
+BasicPhraseMatchTaskTest {
     /**
      * The input to test.
      */
