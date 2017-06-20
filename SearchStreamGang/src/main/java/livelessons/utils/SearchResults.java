@@ -1,4 +1,4 @@
-package search;
+package livelessons.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class SearchResults {
          * Create a Result object contains meta-data about a search
          * result.
          */
-        Result(int index) {
+        public Result(int index) {
             mIndex = index;
         }
 

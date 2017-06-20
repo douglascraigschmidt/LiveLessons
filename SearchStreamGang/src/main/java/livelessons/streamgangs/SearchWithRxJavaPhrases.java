@@ -1,15 +1,10 @@
 package livelessons.streamgangs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
-
 import livelessons.utils.SearchResults;
-import livelessons.utils.StreamsUtils;
 import rx.Observable;
-import rx.observables.BlockingObservable;
 import rx.schedulers.Schedulers;
+
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamsUtils.not;

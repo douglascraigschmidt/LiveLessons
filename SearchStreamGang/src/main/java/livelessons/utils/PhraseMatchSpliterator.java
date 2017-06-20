@@ -1,4 +1,4 @@
-package utils;
+package livelessons.utils;
 
 import java.util.Spliterator;
 import java.util.function.Consumer;
