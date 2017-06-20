@@ -32,8 +32,7 @@ public class ex16 {
     private static final int sMAX_ITERATIONS = 10000;
 
     /**
-     * Default factorial number.  Going above this number will create
-     * incorrect results.
+     * Default factorial number.  
      */
     private static final int sDEFAULT_N = 400;
 
@@ -143,10 +142,10 @@ public class ex16 {
     }
 
     /**
-     * This class demonstrates how the Java 8 reduce() operation
-     * avoids sharing state between Java threads altogether.
+     * This class demonstrates how the two parameter Java 8 reduce()
+     * operation avoids sharing state between Java threads altogether.
      */
-    private static class ParallelStreamFactorial {
+    private static class ParallelStreamFactorial2 {
         /**
          * Return the factorial for the given @a n using a parallel
          * stream and the reduce() terminal operation.
@@ -166,6 +165,35 @@ public class ex16 {
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
                 .reduce(BigInteger.ONE, BigInteger::multiply);
+        }
+    }
+
+    /**
+     * This class demonstrates how the three parameter Java 8 reduce()
+     * operation avoids sharing state between Java threads altogether.
+     */
+    private static class ParallelStreamFactorial3 {
+        /**
+         * Return the factorial for the given @a n using a parallel
+         * stream and the reduce() terminal operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return LongStream
+                // Create a stream of longs from 1 to n.
+                .rangeClosed(1, n.longValue())
+
+                // Run the reduce() terminal operation concurrently.
+                .parallel()
+
+                // Create a BigInteger from the long value.
+                .mapToObj(BigInteger::valueOf)
+
+                // Performs a reduction on the elements of this stream
+                // to compute the factorial.  Note that there's no
+                // shared state at all!
+                .reduce(BigInteger.ONE,
+                        BigInteger::multiply,
+                        BigInteger::multiply);
         }
     }
 
@@ -230,7 +258,7 @@ public class ex16 {
         System.out.println("Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++)
-            ParallelStreamFactorial.factorial(BigInteger.valueOf(sDEFAULT_N));
+            ParallelStreamFactorial2.factorial(BigInteger.valueOf(sDEFAULT_N));
     }
 
     /**
@@ -265,8 +293,12 @@ public class ex16 {
                               BuggyFactorial::factorial,
                               n);
 
-        test.runFactorialTest("ParallelStreamFactorial",
-                              ParallelStreamFactorial::factorial,
+        test.runFactorialTest("ParallelStreamFactorial2",
+                              ParallelStreamFactorial2::factorial,
+                              n);
+
+        test.runFactorialTest("ParallelStreamFactorial3",
+                              ParallelStreamFactorial3::factorial,
                               n);
 
         System.out.println("Ending Factorial Tests");

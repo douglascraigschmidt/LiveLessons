@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * This example shows the difference in overhead for using a parallel
@@ -33,18 +32,18 @@ public class ex14 {
     static public void main(String[] argv) {
         // Create a list of strings containing all the words in the
         // complete works of Shakespeare.
-        List<CharSequence> bardWords =             
+        List<CharSequence> allBardWords =             
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                      // Split input into "words" by
                                      // ignoring whitespace.
                                      "\\s+");
 
         List<CharSequence> linkedBardWords = 
-            new LinkedList<>(bardWords);
+            new LinkedList<>(allBardWords);
 
         // Warm up the threads in the fork/join pool so the timing
         // results will be more accurate.
-        warmUpForkJoinPool(new LinkedList<>(bardWords));
+        warmUpForkJoinPool(new LinkedList<>(allBardWords));
 
         // Compute/print the time required to split/count an ArrayList
         // via a parallel stream (and thus a parallel spliterator).
@@ -52,7 +51,7 @@ public class ex14 {
         // have low split costs (just a few arithmetic operations and
         // an object creation) and also split evenly (leading to
         // balanced computation trees).
-        timeParallelStreamCounting("ArrayList", bardWords);
+        timeParallelStreamCounting("ArrayList", allBardWords);
 
         // Compute/print the time required to split/count a LinkedList
         // via a parallel stream (and thus a parallel spliterator).
@@ -65,7 +64,8 @@ public class ex14 {
         // Compute/print the time required to join the LinkedList via
         // collect() and Collectors.joining() in a parallel stream.
         // The performance of this test will be poor due to the
-        // overhead of combining/joining the various partial results.
+        // overhead of combining/joining the various partial results
+        // in parallel.
         timeStreamJoining(true, linkedBardWords);
 
         // Compute/print the time required to join the LinkedList via
@@ -78,7 +78,7 @@ public class ex14 {
         // Compute/print the time required to collect partial results
         // into a TreeSet in a parallel stream.  The performance of
         // this test will be poor due to the overhead of collecting
-        // the various partial results into a TreeSet.
+        // the various partial results into a TreeSet in parallel.
         timeStreamCollectToSet(true, linkedBardWords);
 
         // Compute/print the time required to collect partial results
@@ -139,7 +139,7 @@ public class ex14 {
 
         System.out.println("The time to count "
                            + total
-                           + " stream elements took "
+                           + " all the words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds for "
                            + testName);
@@ -175,9 +175,15 @@ public class ex14 {
                 // Convert to a parallel stream.
                 wordStream.parallel();
 
-            results.append(wordStream
-                           // Join all the words in the stream.
-                           .collect(joining(" ")));
+            // A "real" application would likely do something
+            // interesting with the words at this point.
+
+            // Join all the words in the stream.
+            CharSequence charSequence = wordStream
+                .collect(joining(" "));
+
+            // Add the joined results to the string builder.
+            results.append(charSequence);
         }
 
         // Record the stop time.
@@ -185,7 +191,7 @@ public class ex14 {
 
         System.out.println("The time to join "
                            + results.toString().replaceAll("[^ ]", "").length()
-                           + " stream elements took "
+                           + " all the words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds");
 
@@ -199,7 +205,7 @@ public class ex14 {
      * used, else a sequential stream is used.
      */
     private static void timeStreamCollectToSet(boolean parallel, 
-                                               List<CharSequence> words) {
+                                               List<CharSequence> allWords) {
         System.out.println("\n++Timing the "
                            + (parallel ? "parallel" : "sequential")
                            + "StreamCollectToSet implementation");
@@ -207,10 +213,10 @@ public class ex14 {
         // Record the start time.
         long startTime = System.nanoTime();
 
-        Set<CharSequence> results = null;
+        Set<CharSequence> uniqueWords = null;
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<CharSequence> wordStream = words
+            Stream<CharSequence> wordStream = allWords
                 // Convert the list into a stream (which uses a
                 // spliterator internally).
                 .stream();
@@ -219,8 +225,12 @@ public class ex14 {
                 // Convert to a parallel stream.
                 wordStream.parallel();
 
-            results = wordStream
-                // Collect all the words in the stream into a TreeSet.
+            // A "real" application would likely do something
+            // interesting with the words at this point.
+
+            // Collect all the unique words in Shakespeare's works
+            // into an ordered TreeSet.
+            uniqueWords = wordStream
                 .collect(toCollection(TreeSet::new));
         }
 
@@ -228,8 +238,8 @@ public class ex14 {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to collect "
-                           + results.size()
-                           + " stream elements took "
+                           + uniqueWords.size()
+                           + " unique words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds");
 
@@ -237,4 +247,3 @@ public class ex14 {
         System.gc();
     }
 }
-
