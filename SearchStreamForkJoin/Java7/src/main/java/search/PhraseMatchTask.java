@@ -61,10 +61,28 @@ public class PhraseMatchTask
         mPhrase = phrase;
         
         // Create a regex that will match the phrase across lines.
-        String regexPhrase = phrase
-            // Replace multiple spaces with one whitespace
-            // boundary expression.
-            .trim().replaceAll("\\s+", "\\\\s+")
+        String regexPhrase = 
+            // Start with a word boundary.
+            "\\b"
+            + phrase
+            // Remove leading/trailing whitespace.
+            .trim()
+            // Replace multiple spaces with one whitespace boundary
+            // expression and delimit words.
+            .replaceAll("\\s+", "\\\\b\\\\s+\\\\b")
+            // End with a word boundary.
+            + "\\b";
+
+        regexPhrase = regexPhrase
+            // Move various punctations so they aren't considered part
+            // of a word.
+            .replace("?\\b", "\\b?")
+            .replace(".\\b", "\\b.")
+            .replace(",\\b", "\\b,")
+            .replace("!\\b", "\\b!")
+            .replace(";\\b", "\\b;")
+            .replace("-\\b", "\\b-")
+            .replace("\\b'", "'\\b")
             // Quote any question marks to avoid problems.
             .replace("?", "\\?");
 
