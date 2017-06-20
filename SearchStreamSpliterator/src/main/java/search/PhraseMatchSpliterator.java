@@ -39,6 +39,12 @@ public class PhraseMatchSpliterator
     private final int mMinSplitSize;
 
     /**
+     * Keeps track of the offset needed to return the appropriate
+     * index into the original string.
+     */
+    private int mOffset = 0;
+
+    /**
      * Constructor initializes the fields.
      */
     public PhraseMatchSpliterator(CharSequence input,
@@ -74,12 +80,14 @@ public class PhraseMatchSpliterator
     private PhraseMatchSpliterator(CharSequence input,
                                    String phrase,
                                    Pattern pattern,
-                                   int minSplitSize) {
+                                   int minSplitSize,
+                                   int offset) {
         mPattern = pattern;
         mPhraseMatcher = mPattern.matcher(input);
         mInput = input;
         mPhrase = phrase;
         mMinSplitSize = minSplitSize;
+        mOffset = offset;
     }
 
     /**
@@ -93,8 +101,9 @@ public class PhraseMatchSpliterator
             return false;
         else {
             // Create/accept a new Result object that stores the index
-            // of the phrase.
-            action.accept(new SearchResults.Result(mPhraseMatcher.start()));
+            // of where the phrase occurs in the original string
+            // (which is why we add mOffset).
+            action.accept(new SearchResults.Result(mOffset + mPhraseMatcher.start()));
 
             // Indicate that the spliterator should continue.
             return true;
@@ -121,7 +130,8 @@ public class PhraseMatchSpliterator
 
         // Update splitPos if a phrase spans across the initial
         // splitPos.
-        splitPos = tryToUpdateSplitPos(startPos, splitPos);
+        if ((splitPos = tryToUpdateSplitPos(startPos, splitPos)) < 0)
+            return null;
 
         // Create a new PhraseMatchSpliterator that handles the "left
         // hand" portion of the input, while the "this" object handles
@@ -154,18 +164,23 @@ public class PhraseMatchSpliterator
      */
     private int tryToUpdateSplitPos(int startPos,
                                     int splitPos) {
+        // Add length of the phrase in regex characters.
+        int endPos = splitPos + mPattern.toString().length();
+
+        // Make sure endPos isn't larger than the input string!
+        if (endPos >= mInput.length())
+            return -1;
+
         // Create a substring to check for the case where a phrase
         // spans across the initial splitPos.
         CharSequence substr =
             mInput.subSequence(startPos,
-                               // Add length of the phrase in regex
-                               // characters.
-                               startPos + mPattern.toString().length());
+                               endPos);
 
         // Create a pattern matcher for the substring.
         Matcher phraseMatcher = mPattern.matcher(substr);
 
-        // Check to see if the phrase matches within the subtring.
+        // Check to see if the phrase matches within the substring.
         if (phraseMatcher.find()) 
             // If there's a match update the splitPos to account for
             // the phrase that spans newlines.
@@ -193,12 +208,20 @@ public class PhraseMatchSpliterator
         mPhraseMatcher = mPattern.matcher(mInput);
 
         // Create a new PhraseMatchSpliterator that handles the "left
-        // hand" portion of the input, while the "this" object handles
-        // the "right hand" portion of the input.
-        return new PhraseMatchSpliterator(leftHandSide,
-                                          mPhrase,
-                                          mPattern,
-                                          mMinSplitSize);
+        // hand" portion of the input.
+        PhraseMatchSpliterator leftHalfSpliterator =
+            new PhraseMatchSpliterator(leftHandSide,
+                                       mPhrase,
+                                       mPattern,
+                                       mMinSplitSize,
+                                       mOffset);
+
+        // Update the offset.
+        mOffset += splitPos;
+
+        // Return a spliterator for the left half of the input, while
+        // the "this" object handles the "right hand" of the input.
+        return leftHalfSpliterator;
     }
 
     /**

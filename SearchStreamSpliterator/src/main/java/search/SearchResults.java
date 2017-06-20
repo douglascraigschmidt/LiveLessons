@@ -3,6 +3,8 @@ package search;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * Keeps track of how many times a phrase appears in an input string.
  */
@@ -21,7 +23,7 @@ public class SearchResults {
          * Create a Result object contains meta-data about a search
          * result.
          */
-        public Result(int index) {
+        Result(int index) {
             mIndex = index;
         }
 
@@ -30,6 +32,14 @@ public class SearchResults {
          */
         public int getIndex() {
             return mIndex;
+        }
+
+        /**
+         * Return a string version of the object.
+         */
+        @Override
+        public String toString() {
+            return String.format("[%d]", mIndex);
         }
     }
 
@@ -103,6 +113,20 @@ public class SearchResults {
         mList = resultList;
     }
 
+    /**
+     * Create a SearchResults with values for the various fields.
+     * This constructor is also passed a filled in resultList.
+     */
+    public SearchResults(String phrase,
+                         String title,
+                         List<Result> resultList) {
+        mThreadId = Thread.currentThread().getId();
+        mCycle = 1;
+        mPhrase = phrase;
+        mTitle = title;
+        mList = resultList;
+    }
+
     public String getTitle() {
         return mTitle;
     }
@@ -111,7 +135,7 @@ public class SearchResults {
      * Convert to header to String form.
      */
     public String headerToString() {
-        return "  \"" + mPhrase + "\" at ";
+        return "\"" + mPhrase + "\" at ";
     }
 
     /**
@@ -147,18 +171,18 @@ public class SearchResults {
      */
     @Override
     public String toString() {
-        String output = new String("");
+        String output = "";
 
         if (!isEmpty()) {
-            output += headerToString();
-
-            // Iterate through the list of indices that matched the
-            // search phrase and print them out.
-            for (Result result : mList)
-                output += 
-                    "["
-                    + result.mIndex
-                    + "]";
+            output += headerToString()
+                // Create a string containing indices of all the matches.
+                + mList
+                // Convert list to a stream.
+                .stream()
+                // Map each result to a string.
+                .map(Result::toString)
+                // Join all the results together.
+                .collect(joining());
         }
         
         return output;
@@ -174,4 +198,3 @@ public class SearchResults {
         return this;
     }
 }
-
