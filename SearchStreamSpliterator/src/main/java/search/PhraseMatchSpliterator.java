@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static search.SearchResults.Result;
+
 /**
  * This class is used in conjunction with StreamSupport.stream() to
  * create a stream of SearchResults.Result objects that match the
@@ -12,7 +14,7 @@ import java.util.regex.Pattern;
  * comparison is case-insensitive.
  */
 public class PhraseMatchSpliterator
-       implements Spliterator<SearchResults.Result> {
+       implements Spliterator<Result> {
     /**
      * The input string.
      */
@@ -115,7 +117,7 @@ public class PhraseMatchSpliterator
      * Attempt to advance the spliterator by one matching phrase.
      */
     @Override
-    public boolean tryAdvance(Consumer<? super SearchResults.Result> action) {
+    public boolean tryAdvance(Consumer<? super Result> action) {
         // Try to find a phrase match in the input, ignoring case.  If
         // there's no match then we're done with the iteration.
         if (!mPhraseMatcher.find())
@@ -124,7 +126,7 @@ public class PhraseMatchSpliterator
             // Create/accept a new Result object that stores the index
             // of where the phrase occurs in the original string
             // (which is why we add mOffset).
-            action.accept(new SearchResults.Result(mOffset + mPhraseMatcher.start()));
+            action.accept(new Result(mOffset + mPhraseMatcher.start()));
 
             // Indicate that the spliterator should continue.
             return true;
@@ -136,7 +138,7 @@ public class PhraseMatchSpliterator
      * concurrently.
      */
     @Override
-    public Spliterator<SearchResults.Result> trySplit() {
+    public Spliterator<Result> trySplit() {
         // Bail out if the input is too small to split further.
         if (mInput.length() <= mMinSplitSize)
             return null;
@@ -154,9 +156,9 @@ public class PhraseMatchSpliterator
         if ((splitPos = tryToUpdateSplitPos(startPos, splitPos)) < 0)
             return null;
 
-        // Create a new PhraseMatchSpliterator that handles the "left
-        // hand" portion of the input, while the "this" object handles
-        // the "right hand" portion of the input.
+        // Create a new Spliterator that handles the "left hand"
+        // portion of the input, while the "this" object handles the
+        // "right hand" portion of the input.
         return splitInput(splitPos);
     }
 
@@ -185,8 +187,8 @@ public class PhraseMatchSpliterator
      */
     private int tryToUpdateSplitPos(int startPos,
                                     int splitPos) {
-        // Add length of the phrase in regex characters.
-        int endPos = splitPos + mPattern.toString().length();
+        // Add length of the phrase.
+        int endPos = splitPos + mPhrase.length(); // mPattern.toString().length();
 
         // Make sure endPos isn't larger than the input string!
         if (endPos >= mInput.length())
@@ -213,11 +215,20 @@ public class PhraseMatchSpliterator
     }
 
     /**
-     * Return a new PhraseMatchSpliterator that handles the "left
-     * hand" portion of the input, while the "this" object handles the
-     * "right hand" portion of the input.
+     * Return a new Spliterator that handles the "left hand" portion
+     * of the input, while "this" object handles the "right hand"
+     * portion of the input.
      */
-    private PhraseMatchSpliterator splitInput(int splitPos) {
+    private Spliterator<Result> splitInput(int splitPos) {
+        /*
+        System.out.println("Splitting input \""
+                           + mInput
+                           + "\" at " + splitPos
+                           + " for phrase \""
+                           + mPhrase
+                           + "\"");
+        */
+
         // Split the input at the appropriate location.
         CharSequence leftHandSide = mInput.subSequence(0, splitPos);
 
@@ -225,12 +236,20 @@ public class PhraseMatchSpliterator
         // "right hand" portion.
         mInput = mInput.subSequence(splitPos, mInput.length());
 
+        /*
+        System.out.println(", which yields lhs = \"" 
+                           + leftHandSide 
+                           + "\" and rhs = \""
+                           + mInput
+                           + "\"");
+        */
+                 
         // Update this field to handle the shorter input.
         mPhraseMatcher = mPattern.matcher(mInput);
 
-        // Create a new PhraseMatchSpliterator that handles the "left
-        // hand" portion of the input.
-        PhraseMatchSpliterator leftHalfSpliterator =
+        // Create a new Spliterator that handles the "left hand"
+        // portion of the input.
+        Spliterator<Result> leftHalfSpliterator =
             new PhraseMatchSpliterator(leftHandSide,
                                        mPhrase,
                                        mPattern,
