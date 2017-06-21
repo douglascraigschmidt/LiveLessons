@@ -17,7 +17,7 @@ BasicPhraseMatchTaskTest {
      * The input to test.
      */
     private static final String sINPUT_DATA =
-        "A quick brown fox jumps over the lazy dog";
+        "The quick brown fox jumps over the lazy dog";
 
     /**
      * Search for a phrase in the input data.

@@ -70,3 +70,9 @@ Here's an overview of what's included:
 . ex16 - This program implements various ways of computing factorials
   to demonstrate the performance of alternative techniques and the
   dangers of sharing unsynchronized state between threads.
+
+. ex17 -- This example shows various issues associated with using the
+  Java 8 stream reduce() terminal operation, including the need to use
+  the correct identity value and to ensure operations are associative.
+  It also demonstrates what goes wrong when reduce() performs a
+  mutable reduction on a parallel stream.

@@ -22,7 +22,7 @@ public class BasicSpliteratorTest {
      * The input to test.
      */
     private static final String sINPUT_DATA =
-        "A quick\nbrown fox\njumps over\nthe lazy dog";
+        "The quick\nbrown fox\njumps over\nthe lazy dog";
 
     /**
      * Search for a phrase in the input data.

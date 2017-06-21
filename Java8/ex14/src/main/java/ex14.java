@@ -14,8 +14,7 @@ import static java.util.stream.Collectors.toCollection;
  * spliterator to split a Java LinkedList and an ArrayList into
  * chunks.  It also shows the difference in overhead between combining
  * and collecting LinkedList results in a parallel stream
- * vs. sequential stream.  Finally, it illustrates why reduce()
- * shouldn't be used with mutable objects..
+ * vs. sequential stream.
  */
 public class ex14 {
     /**
@@ -90,20 +89,6 @@ public class ex14 {
         // this test will be poor due to the overhead of collecting
         // the various partial results into a TreeSet in parallel.
         timeStreamCollectToSet(true, linkedBardWords);
-
-        // Compute/print the time required to reduce partial results
-        // into a string using a sequential stream.  Since a
-        // sequential stream is used the results of this test will be
-        // correct even though a mutable object (StringBuilder) is
-        // used with reduce().
-        timeBuggyStreamReduce(false, linkedBardWords);
-
-        // Compute/print the time required to reduce partial results
-        // into a string using a parallel stream.  The results of this
-        // test will be incorrect due to the use of a mutable object
-        // (StringBuilder) with reduce(), which performs immutable
-        // reduction.
-        timeBuggyStreamReduce(true, linkedBardWords);
     }
 
     /**
@@ -207,7 +192,7 @@ public class ex14 {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to join "
-                           + (results.toString().replaceAll("[^ ]", "").length() + 1)
+                           + results.toString().split("\\s+").length
                            + " words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds");
@@ -257,70 +242,6 @@ public class ex14 {
         System.out.println("The time to collect "
                            + uniqueWords.size()
                            + " unique words in Shakespeare's works took "
-                           + stopTime
-                           + " milliseconds");
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * TreeSet.  If @a parallel is true then a parallel stream is
-     * used, else a sequential stream is used.
-     */
-    private static void timeBuggyStreamReduce(boolean parallel, 
-                                              List<CharSequence> allWords) {
-        System.out.println("\n++Timing the "
-                           + (parallel ? "parallel" : "sequential")
-                           + "BuggyStreamReduce implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        StringBuilder wordBuilder = new StringBuilder();
-
-        try {
-            for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                Stream<CharSequence> wordStream = allWords
-                    // Convert the list into a stream (which uses a
-                    // spliterator internally).
-                    .stream();
-
-                if (parallel)
-                    // Convert to a parallel stream.
-                    wordStream.parallel();
-
-                // A "real" application would likely do something
-                // interesting with the words at this point.
-
-                StringBuilder stringBuilder = wordStream
-                    // Use reduce() to append all the words in
-                    // the stream.  This implementation will
-                    // fail horribly when used with a parallel
-                    // stream since reduce() expects to do
-                    // "immutable" reduction.
-                    .reduce(new StringBuilder(),
-                            (sb, s) -> sb.append(s).append(" "),
-                            StringBuilder::append);
-
-                // Append all the words in Shakespeare's works into a
-                // single string builder.
-                wordBuilder
-                    .append(stringBuilder);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        String words = wordBuilder.toString();
-
-        System.out.println("The time to collect "
-                           + words.replaceAll("[^ ]", "").length()
-                           + " words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds");
 
