@@ -2,6 +2,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -46,7 +48,6 @@ public class ex14 {
         // results will be more accurate.
         warmUpForkJoinPool(new LinkedList<>(allBardWords));
 
-        /*
         // Compute/print the time required to split/count an ArrayList
         // via a parallel stream (and thus a parallel spliterator).
         // The performance of this test will be good since ArrayLists
@@ -62,7 +63,6 @@ public class ex14 {
         // finding the midpoint requires traversing half the list, one
         // node at a time.
         timeParallelStreamCounting("LinkedList", linkedBardWords);
-        */
 
         // Compute/print the time required to join the LinkedList via
         // collect() and Collectors.joining() in a sequential stream.
