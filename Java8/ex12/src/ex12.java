@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import static java.lang.Character.toLowerCase;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -145,7 +146,7 @@ public class ex12 {
             .collect(groupingBy(identity(),
                                 // Use a TreeMap to sort the results.
                                 TreeMap::new,
-                                Collectors.summingLong(String::length)));
+                                summingLong(String::length)));
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.

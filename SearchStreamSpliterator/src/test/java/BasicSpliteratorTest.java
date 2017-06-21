@@ -86,6 +86,9 @@ public class BasicSpliteratorTest {
             // strings.
             .splitAsStream(sINPUT_DATA)
 
+            // Run the stream in parallel.
+            .parallel()
+
             // Perform the sequential and parallel searches.
             .map(this::performSearches)
 
@@ -110,7 +113,10 @@ public class BasicSpliteratorTest {
             // strings.
             .splitAsStream(sINPUT_DATA)
 
-            // Perform the sequential and parallel searches.
+            // Run the stream in parallel.
+            .parallel()
+
+                // Perform the sequential and parallel searches.
             .map(this::performSearches)
 
             // Collect the results into a list.

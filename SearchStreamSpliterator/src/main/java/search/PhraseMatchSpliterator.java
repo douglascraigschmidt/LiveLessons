@@ -62,6 +62,7 @@ public class PhraseMatchSpliterator
             // Replace multiple spaces with one whitespace boundary
             // expression and delimit words.
             .replaceAll("\\s+", "\\\\b\\\\s+\\\\b")
+
             // End with a word boundary.
             + "\\b";
 

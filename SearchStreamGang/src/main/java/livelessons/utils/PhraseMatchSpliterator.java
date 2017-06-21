@@ -78,7 +78,7 @@ public class PhraseMatchSpliterator
             // Quote any question marks to avoid problems.
             .replace("?", "\\?");
 
-        // System.out.println("regex phrase = " + regexPhrase);
+        System.out.println("regex phrase = " + regexPhrase);
 
         // Ignore case and search for phrases that split across lines.
         mPattern = Pattern.compile(regexPhrase,
