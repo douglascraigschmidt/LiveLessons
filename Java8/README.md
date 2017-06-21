@@ -58,7 +58,10 @@ Here's an overview of what's included:
 
 . ex14 - This example shows the difference in overhead for using a
   parallel spliterator to split a Java LinkedList and an ArrayList
-  into chunks.
+  into chunks.  It also shows the difference in overhead between
+  combining and collecting LinkedList results in a parallel stream
+  vs. sequential stream.  Finally, it illustrates why reduce()
+  shouldn't be used with mutable objects..
 
 . ex15 - This example shows the limitations of using inherently
   sequential Java 8 streams operations (such as iterate() and limit())
