@@ -294,18 +294,20 @@ public class ex14 {
                 // A "real" application would likely do something
                 // interesting with the words at this point.
 
+                StringBuilder stringBuilder = wordStream
+                    // Use reduce() to append all the words in
+                    // the stream.  This implementation will
+                    // fail horribly when used with a parallel
+                    // stream since reduce() expects to do
+                    // "immutable" reduction.
+                    .reduce(new StringBuilder(),
+                            (sb, s) -> sb.append(s).append(" "),
+                            StringBuilder::append);
+
                 // Append all the words in Shakespeare's works into a
-                // single string builder.  
+                // single string builder.
                 wordBuilder
-                    .append(wordStream
-                            // Use reduce() to append all the words in
-                            // the stream.  This implementation will
-                            // fail horribly when used with a parallel
-                            // stream since reduce() expects to do
-                            // "immutable" reduction.
-                            .reduce(new StringBuilder(),
-                                    (sb, s) -> sb.append(s).append(" "),
-                                    StringBuilder::append));
+                    .append(stringBuilder);
             }
         } catch (Exception e) {
             e.printStackTrace();
