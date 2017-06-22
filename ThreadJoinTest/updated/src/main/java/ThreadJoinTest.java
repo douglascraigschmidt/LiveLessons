@@ -13,7 +13,7 @@ import java.util.function.Function;
  * interfaces) in conjunction with Thread.start() to run threads and
  * Thread.join() to wait for all running threads.
  */
-public class Main {
+public class ThreadJoinTest {
     /*
      * Input files.
      */
@@ -35,12 +35,14 @@ public class Main {
      * The list of strings containing the complete works of
      * Shakespeare.
      */
-    private static List<String> mInputList;
+    private static final List<String> mInputList =
+            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "@");
 
     /**
      * The list of phrases to find.
      */
-    private static List<String> mPhrasesToFind;
+    private static final List<String> mPhrasesToFind =
+            TestDataFactory.getPhraseList(sPHRASE_LIST_FILE);
         
     /**
      * This is the main entry point into the program.
@@ -48,16 +50,8 @@ public class Main {
     static public void main(String[] args) {
         System.out.println("Starting SearchStream");
 
-        // Create a list of input strings containing the works of
-        // Shakespeare.
-        mInputList = TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE, "@");
-
-        // Get the list of phrases to find.
-        mPhrasesToFind = TestDataFactory.getPhraseList(sPHRASE_LIST_FILE);
-
         // Create/run an object to search for phrases concurrently.
-        new SearchOneShotThreadJoin(mInputList,
-                                    mPhrasesToFind).run();
+        new SearchOneShotThreadJoin().run();
 
         System.out.println("Ending SearchStream");
     }
@@ -68,51 +62,23 @@ public class Main {
      * finish.  This implementation requires no Java synchronization
      * mechanisms other than what's provided by the Thread class.
      */
-    private static class SearchOneShotThreadJoin 
-            implements Runnable {
-        /**
-         * The list of phrases to find.
-         */
-        private final List<String> mPhrasesToFind;
-
-        /**
-         * The list of worker threads that were created.
-         */
-        private final List<Thread> mWorkerThreads;
-        
-        /**
-         * The constructor initializes the fields.
-         */
-        SearchOneShotThreadJoin(List<String> inputList,
-                                List<String> phrasesToFind) {
-            // Initialize field.
-            mPhrasesToFind = phrasesToFind;
-
-            // Call the makeWorkerThreads() factory method to create a
-            // list of threads that each runs the processInput()
-            // method reference.  These threads will be joined after
-            // they process the input strings.
-            mWorkerThreads =
-                makeWorkerThreads(this::processInput,
-                                  inputList);
-        }
-
+    static class SearchOneShotThreadJoin
+           implements Runnable {
         /**
          * This factory method creates a list of threads that will be
          * joined when their processing is done.
          *
          * @param task Function to run in each thread.
-         * @param inputList List of strings to search.
          * @return List of threads that will run the @a task.
          */
-        List<Thread> makeWorkerThreads(Function<String, Void> task,
-                                       List<String> inputList) {
+        List<Thread> makeWorkerThreads(Function<String, Void> task) {
             // Create a new list.
             List<Thread> workerThreads = new ArrayList<>();
 
             // Create a thread for each input string to perform
             // processing designated by the task parameter.
-            for (String input : inputList)
+            assert mInputList != null;
+            for (String input : mInputList)
                 workerThreads.add
                     (new Thread(()
                                 // Create lambda runnable to run in thread.
@@ -129,18 +95,25 @@ public class Main {
          */
         @Override
         public void run() {
+            // Call the makeWorkerThreads() factory method to create a
+            // list of threads that each runs the processInput()
+            // method reference.  These threads will be joined after
+            // they process the input strings.
+            List<Thread> workerThreads =
+                makeWorkerThreads(this::processInput);
+
             // Iterate through the list of threads and pass a method
             // reference that starts a thread for each input string.
-            mWorkerThreads.forEach(Thread::start);
+            workerThreads.forEach(Thread::start);
 
             // Iterate through the list of threads and join with them
             // all, which is a form of barrier synchronization.
-            mWorkerThreads.forEach(thread -> {
-                                     try {
-                                         thread.join();
-                                     } catch (InterruptedException e) {
-                                       throw new RuntimeException(e);
-                                     }});
+            workerThreads.forEach(thread -> {
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }});
 
             /*
             // This alternative, (more concise) solution iterate
@@ -148,7 +121,7 @@ public class Main {
             // reference as a barrier synchronizer to wait for all
             // threads to finish.  Note how rethrowConsumer() converts
             // a checked exception to an unchecked exception.
-            mWorkerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+            workerThreads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
             */
         }
 
