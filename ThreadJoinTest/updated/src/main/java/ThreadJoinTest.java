@@ -127,19 +127,19 @@ public class ThreadJoinTest {
 
         /**
          * This method runs in a background thread and searches the @a
-         * inputData for all occurrences of the phrases to find.
+         * input for all occurrences of the phrases to find.
          */
-        private Void processInput(String inputData) {
-            String title = getTitle(inputData);
+        private Void processInput(String input) {
+            String title = getTitle(input);
 
             // Iterate through each phrase to find.
             for (String phrase : mPhrasesToFind) 
 
                 // Check to see how many times (if any) the phrase
                 // appears in the input data.
-                for (int i = inputData.indexOf(phrase, 0);
+                for (int i = input.indexOf(phrase, 0);
                      i != -1;
-                     i = inputData.indexOf(phrase, i + phrase.length()))
+                     i = input.indexOf(phrase, i + phrase.length()))
 
                     // Whenever a match is found we print out the
                     // results.
@@ -156,11 +156,11 @@ public class ThreadJoinTest {
         }
 
         /**
-         * Return the title portion of the @a inputData.
+         * Return the title portion of the @a input.
          */
-        String getTitle(String inputData) {
-            int endOfTitlePos = inputData.indexOf('\n');
-            return inputData.substring(0, endOfTitlePos);
+        String getTitle(String input) {
+            int endOfTitlePos = input.indexOf('\n');
+            return input.substring(0, endOfTitlePos);
         }
     }
 }
