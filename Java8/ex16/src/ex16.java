@@ -161,7 +161,8 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Performs a reduction on the elements of this stream
+                // Use the two parameter variant of reduce() to
+                // perform a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
                 .reduce(BigInteger.ONE, BigInteger::multiply);
@@ -188,7 +189,8 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Performs a reduction on the elements of this stream
+                // Use the three parameter variant of reduce() to
+                // perform a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
                 .reduce(BigInteger.ONE,
@@ -223,9 +225,9 @@ public class ex16 {
     /**
      * Run the given @a factorial test and print the result.
      */
-    private <T> void runFactorialTest(String factorialTest,
-                                      Function<T, T> factorial,
-                                      T n) {
+    private <T> void runTest(String factorialTest,
+                             Function<T, T> factorial,
+                             T n) {
         // Record the start time.
         long startTime = System.nanoTime();
 
@@ -281,25 +283,25 @@ public class ex16 {
         test.warmUpForkJoinThreads();
 
         // Run the various tests.
-        test.runFactorialTest("SynchronizedParallelFactorial",
-                              SynchronizedParallelFactorial::factorial,
-                              n);
+        test.runTest("SynchronizedParallelFactorial",
+                     SynchronizedParallelFactorial::factorial,
+                     n);
 
-        test.runFactorialTest("SequentialStreamFactorial",
-                              SequentialStreamFactorial::factorial,
-                              n);
+        test.runTest("SequentialStreamFactorial",
+                     SequentialStreamFactorial::factorial,
+                     n);
 
-        test.runFactorialTest("BuggyFactorial",
-                              BuggyFactorial::factorial,
-                              n);
+        test.runTest("BuggyFactorial",
+                     BuggyFactorial::factorial,
+                     n);
 
-        test.runFactorialTest("ParallelStreamFactorial2",
-                              ParallelStreamFactorial2::factorial,
-                              n);
+        test.runTest("ParallelStreamFactorial2",
+                     ParallelStreamFactorial2::factorial,
+                     n);
 
-        test.runFactorialTest("ParallelStreamFactorial3",
-                              ParallelStreamFactorial3::factorial,
-                              n);
+        test.runTest("ParallelStreamFactorial3",
+                     ParallelStreamFactorial3::factorial,
+                     n);
 
         System.out.println("Ending Factorial Tests");
     }

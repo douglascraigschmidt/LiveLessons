@@ -1,4 +1,3 @@
-import utils.ExceptionUtils;
 import utils.TestDataFactory;
 
 import java.util.ArrayList;
@@ -169,8 +168,8 @@ public class Main {
                      i != -1;
                      i = inputData.indexOf(phrase, i + phrase.length()))
 
-                    // Whenever a match is found the processResults()
-                    // method is called to handle the results.
+                    // Whenever a match is found we print out the
+                    // results.
                     System.out.println("in thread " 
                                        + Thread.currentThread().getId()
                                        + " the phrase \""
@@ -191,7 +190,5 @@ public class Main {
             return inputData.substring(0, endOfTitlePos);
         }
     }
-
-
 }
 
