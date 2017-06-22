@@ -41,12 +41,12 @@ public class ex17 {
         testSum(1L, true);
 
         // Reduce partial results into a string using a sequential
-        // stream.
-        buggyStreamReduce(false);
+        // stream and the three parameter version of reduce().
+        buggyStreamReduce3(false);
 
         // Reduce partial results into a string using a parallel
-        // stream.
-        buggyStreamReduce(true);
+        // stream and the three parameter version of reduce().
+        buggyStreamReduce3(true);
     }
 
     /**
@@ -105,19 +105,20 @@ public class ex17 {
     }
 
     /**
-     * Reduce partial results into a StringBuilder.  If @a parallel is
-     * true then a parallel stream is used, else a sequential stream
-     * is used.  When a sequential stream is used the results of this
-     * test will be correct even though a mutable object
-     * (StringBuilder) is used with reduce().  When a parallel stream
-     * is used, however, the results of this test will be incorrect
-     * due to the use of a mutable object (StringBuilder) with
-     * reduce(), which performs immutable reduction.
+     * Reduce partial results into a StringBuilder using the three
+     * parameter version of reduce().  If @a parallel is true then a
+     * parallel stream is used, else a sequential stream is used.
+     * When a sequential stream is used the results of this test will
+     * be correct even though a mutable object (StringBuilder) is used
+     * with reduce().  When a parallel stream is used, however, the
+     * results of this test will be incorrect due to the use of a
+     * mutable object (StringBuilder) with reduce(), which performs
+     * immutable reduction.
      */
-    private static void buggyStreamReduce(boolean parallel) {
+    private static void buggyStreamReduce3(boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "BuggyStreamReduce implementation");
+                           + "BuggyStreamReduce3 implementation");
 
         List<String> allWords =
             Arrays.asList("The quick brown fox jumps over the lazy dog\n",
