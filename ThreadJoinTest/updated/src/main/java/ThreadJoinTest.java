@@ -75,17 +75,20 @@ public class ThreadJoinTest {
             // Create a new list.
             List<Thread> workerThreads = new ArrayList<>();
 
+            assert mInputList != null;
             // Create a thread for each input string to perform
             // processing designated by the task parameter.
-            assert mInputList != null;
-            for (String input : mInputList)
-                workerThreads.add
-                    (new Thread(()
-                                // Create lambda runnable to run in thread.
-                                ->
-                                // Apply the task to process the input
-                                // string.
-                                task.apply(input)));
+            mInputList.forEach
+                (input ->
+                 // Add a new thread to the list.
+                 workerThreads.add
+                 (new Thread(()
+                             // Create lambda runnable to run in
+                             // thread.
+                             ->
+                             // Apply the task to process the input
+                             // string.
+                             task.apply(input))));
 
             return workerThreads;
         }
