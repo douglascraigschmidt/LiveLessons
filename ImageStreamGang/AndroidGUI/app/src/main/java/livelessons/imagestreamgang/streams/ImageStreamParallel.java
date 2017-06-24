@@ -90,6 +90,6 @@ public class ImageStreamParallel
            // image and run it to filter each image and store it in an
            // output file.
            .map(filter
-                -> makeFilterDecoratorWithImage(filter, image).run())
+                -> makeFilterDecoratorWithImage(filter, image).run());
     }
 }
