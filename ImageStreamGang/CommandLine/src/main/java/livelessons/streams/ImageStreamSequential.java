@@ -43,7 +43,7 @@ public class ImageStreamSequential
 
             // Use map() to transform each URL to an image (i.e.,
             // synchronously download each image via its URL).
-            .map(ImageStreamGang::downloadImage)
+            .map(this::downloadImage)
 
             // Use flatMap() to create a stream containing multiple filtered
             // versions of each image.

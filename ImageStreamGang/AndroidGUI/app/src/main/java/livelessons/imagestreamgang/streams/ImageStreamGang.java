@@ -197,7 +197,7 @@ public abstract class ImageStreamGang
      * Factory method that retrieves the image associated with the @a
      * urlToDownload and creates an Image to encapsulate it.
      */
-    protected static Image downloadImage(URL urlToDownload) {
+    protected Image downloadImage(URL urlToDownload) {
         return new Image(urlToDownload,
                          NetUtils.downloadContent(urlToDownload));
     }

@@ -48,13 +48,11 @@ public class ImageStreamParallel
             // i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Use map() to transform each URL to an image (i.e.,
-            // synchronously download each image via its URL).
-            .map(url ->
-                 // This call ensures the common fork/join thread pool
-                 // is expanded to handle the blocking image download.
-                 BlockingTask.callInManagedBlock(() 
-                                                 -> ImageStreamGang.downloadImage(url)))
+            // Transform URL to an Image by downloading each image
+            // via its URL.  This call ensures the common
+            // fork/join thread pool is expanded to handle the
+            // blocking image download.
+            .map(this::managedBlockDownloadImage)
 
             // Use flatMap() to create a stream containing multiple filtered
             // versions of each image.
@@ -68,6 +66,16 @@ public class ImageStreamParallel
                            + ": processing of "
                            + filteredImages.size()
                            + " image(s) is complete");
+    }
+
+    /**
+     * Transform URL to an Image by downloading each image via its
+     * URL.  This call ensures the common fork/join thread pool is
+     * expanded to handle the blocking image download.
+     */
+    private Image managedBlockDownloadImage(URL url) {
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
     }
 
     /**

@@ -44,30 +44,38 @@ public class ImageStreamParallel
         List<URL> urls = getInput();
 
         List<Image> filteredImages = urls
-                // Concurrently process each URL in the input List.
-                .parallelStream()
+            // Concurrently process each URL in the input List.
+            .parallelStream()
 
-                // Only include URLs that have not been already cached.
-                .filter(StreamsUtils.not(this::urlCached))
+            // Only include URLs that have not been already cached.
+            .filter(StreamsUtils.not(this::urlCached))
 
-                // Transform URL -> Image (download each image via
-                // its URL).
-                .map(url ->
-                     // This call ensures the common fork/join thread pool
-                     // is expanded to handle the blocking image download.
-                     BlockingTask.callInManagedBlock(()
-                                                     -> ImageStreamGang.downloadImage(url)))
+            // Transform URL to an Image by downloading each image
+            // via its URL.  This call ensures the common
+            // fork/join thread pool is expanded to handle the
+            // blocking image download.
+            .map(this::managedBlockDownloadImage)
 
-                // Map each image to a stream containing the filtered
-                // versions of the image.
-                .flatMap(this::applyFilters)
+            // Map each image to a stream containing the filtered
+            // versions of the image.
+            .flatMap(this::applyFilters)
 
-                // Terminate the stream.
-                .collect(Collectors.toList());
+             // Terminate the stream.
+             .collect(Collectors.toList());
 
         Log.d(TAG, "processing of "
-                + filteredImages.size()
-                + " image(s) is complete");
+              + filteredImages.size()
+              + " image(s) is complete");
+    }
+
+    /**
+     * Transform URL to an Image by downloading each image via its
+     * URL.  This call ensures the common fork/join thread pool is
+     * expanded to handle the blocking image download.
+     */
+    private Image managedBlockDownloadImage(URL url) {
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
     }
 
     /**
