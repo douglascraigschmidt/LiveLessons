@@ -54,7 +54,7 @@ public class ImageStreamParallel
             // via its URL.  This call ensures the common
             // fork/join thread pool is expanded to handle the
             // blocking image download.
-            .map(this::managedBlockDownloadImage)
+            .map(this::blockingDownload)
 
             // Map each image to a stream containing the filtered
             // versions of the image.
@@ -73,7 +73,7 @@ public class ImageStreamParallel
      * URL.  This call ensures the common fork/join thread pool is
      * expanded to handle the blocking image download.
      */
-    private Image managedBlockDownloadImage(URL url) {
+    private Image blockingDownload(URL url) {
         return BlockingTask.callInManagedBlock(()
                                                -> downloadImage(url));
     }
