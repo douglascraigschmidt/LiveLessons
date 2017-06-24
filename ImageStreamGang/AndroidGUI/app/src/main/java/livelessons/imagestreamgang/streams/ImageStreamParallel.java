@@ -75,10 +75,10 @@ public class ImageStreamParallel
             // Apply each filter concurrently.
             .parallelStream()
 
-            // Create an OutputDecoratedFilter for each image.
-            .map(filter -> makeFilterDecoratorWithImage(filter, image))
-
-            // Filter the image and store it in an output file.
-            .map(FilterDecoratorWithImage::run);
+           // Use map() to create an OutputFilterDecorator for each
+           // image and run it to filter each image and store it in an
+           // output file.
+           .map(filter
+                -> makeFilterDecoratorWithImage(filter, image).run())
     }
 }
