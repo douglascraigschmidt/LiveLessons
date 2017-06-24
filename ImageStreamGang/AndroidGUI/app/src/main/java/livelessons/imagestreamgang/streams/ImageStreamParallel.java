@@ -40,7 +40,10 @@ public class ImageStreamParallel
      */
     @Override
     protected void processStream() {
-        List<Image> filteredImages = getInput()
+        // Get the list of URLs.
+        List<URL> urls = getInput();
+
+        List<Image> filteredImages = urls
                 // Concurrently process each URL in the input List.
                 .parallelStream()
 
