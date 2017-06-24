@@ -2,6 +2,8 @@ package search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.joining;
 
@@ -23,7 +25,7 @@ public class SearchResults {
          * Create a Result object contains meta-data about a search
          * result.
          */
-        Result(int index) {
+        public Result(int index) {
             mIndex = index;
         }
 
@@ -39,7 +41,7 @@ public class SearchResults {
          */
         @Override
         public String toString() {
-            return String.format("[%d]", mIndex);
+            return String.format("%d", mIndex);
         }
     }
 
@@ -176,13 +178,18 @@ public class SearchResults {
         if (!isEmpty()) {
             output += headerToString()
                 // Create a string containing indices of all the matches.
+                + "["
                 + mList
                 // Convert list to a stream.
                 .stream()
-                // Map each result to a string.
-                .map(Result::toString)
-                // Join all the results together.
-                .collect(joining());
+
+                // Create a custom collector to join all the results
+                // together.
+                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
+                                      (j, r) -> j.add(r.toString()),       // accumulator
+                                      StringJoiner::merge,                 // combiner
+                                      StringJoiner::toString))             // finisher
+                + "]";
         }
         
         return output;

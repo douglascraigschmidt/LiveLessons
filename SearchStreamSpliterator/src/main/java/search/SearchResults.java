@@ -2,11 +2,13 @@ package search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.joining;
 
 /**
- * Keeps track of how many times a phrase appears in an input string.
+ * Keeps track of how many times a word appears in an input string.
  */
 public class SearchResults {
     /**
@@ -14,7 +16,7 @@ public class SearchResults {
      */
     public static class Result {
         /**
-         * The index in the search String where the phrase that was
+         * The index in the search String where the word that was
          * found.
          */
         private int mIndex;
@@ -23,7 +25,7 @@ public class SearchResults {
          * Create a Result object contains meta-data about a search
          * result.
          */
-        Result(int index) {
+        public Result(int index) {
             mIndex = index;
         }
 
@@ -39,7 +41,7 @@ public class SearchResults {
          */
         @Override
         public String toString() {
-            return String.format("[%d]", mIndex);
+            return String.format("%d", mIndex);
         }
     }
 
@@ -49,9 +51,9 @@ public class SearchResults {
     private long mThreadId;
 
     /**
-     * The phrase that was found.
+     * The word that was found.
      */
-    private String mPhrase;
+    private String mWord;
 
     /**
      * The section title this search is associated with.
@@ -64,7 +66,7 @@ public class SearchResults {
     private long mCycle;
 
     /**
-     * The List of Result objects that matched the @code mPhrase.
+     * The List of Result objects that matched the @code mWord.
      */
     private List<Result> mList;
 
@@ -88,11 +90,11 @@ public class SearchResults {
      */
     public SearchResults(long threadId,
                          long cycle,
-                         String phrase,
+                         String word,
                          String title) {
         mThreadId = threadId;
         mCycle = cycle;
-        mPhrase = phrase;
+        mWord = word;
         mTitle = title;
         mList = new ArrayList<>();
     }
@@ -103,12 +105,12 @@ public class SearchResults {
      */
     public SearchResults(long threadId,
                          long cycle,
-                         String phrase,
+                         String word,
                          String title,
                          List<Result> resultList) {
         mThreadId = threadId;
         mCycle = cycle;
-        mPhrase = phrase;
+        mWord = word;
         mTitle = title;
         mList = resultList;
     }
@@ -117,12 +119,12 @@ public class SearchResults {
      * Create a SearchResults with values for the various fields.
      * This constructor is also passed a filled in resultList.
      */
-    public SearchResults(String phrase,
+    public SearchResults(String word,
                          String title,
                          List<Result> resultList) {
         mThreadId = Thread.currentThread().getId();
         mCycle = 1;
-        mPhrase = phrase;
+        mWord = word;
         mTitle = title;
         mList = resultList;
     }
@@ -135,7 +137,7 @@ public class SearchResults {
      * Convert to header to String form.
      */
     public String headerToString() {
-        return "\"" + mPhrase + "\" at ";
+        return "\"" + mWord + "\" at ";
     }
 
     /**
@@ -160,10 +162,10 @@ public class SearchResults {
     }
 
     /**
-     * Return the phrase.
+     * Return the word.
      */
-    public String getPhrase() {
-        return mPhrase;
+    public String getWord() {
+        return mWord;
     }
 
     /**
@@ -176,13 +178,18 @@ public class SearchResults {
         if (!isEmpty()) {
             output += headerToString()
                 // Create a string containing indices of all the matches.
+                + "["
                 + mList
                 // Convert list to a stream.
                 .stream()
-                // Map each result to a string.
-                .map(Result::toString)
-                // Join all the results together.
-                .collect(joining());
+
+                // Create a custom collector to join all the results
+                // together.
+                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
+                                      (j, r) -> j.add(r.toString()),       // accumulator
+                                      StringJoiner::merge,                 // combiner
+                                      StringJoiner::toString))             // finisher
+                + "]";
         }
         
         return output;
