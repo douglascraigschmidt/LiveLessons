@@ -76,9 +76,8 @@ public class ImageStreamParallel
      * expanded to handle the blocking image download.
      */
     private Image blockingDownload(URL url) {
-        return downloadImage(url);
-        // return BlockingTask.callInManagedBlock(()
-         //                                      -> downloadImage(url));
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
     }
 
     /**
