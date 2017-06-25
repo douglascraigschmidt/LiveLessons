@@ -32,7 +32,10 @@ public class ImageStreamSequential
      */
     @Override
     protected void processStream() {
-        List<Image> collect = getInput()
+        // Get the input URLs.
+        List<URL> urls = getInput();
+
+        List<Image> filteredImages = urls
             // Convert the URLs in the input list into a stream and
             // process them sequentially.
             .stream()
@@ -55,8 +58,10 @@ public class ImageStreamSequential
 
         System.out.println(TAG
                            + ": processing of "
-                           + collect.size()
-                           + " image(s) is complete");
+                           + filteredImages.size()
+                           + " image(s) from "
+                           + urls.size() 
+                           + " urls is complete");
     }
 
     /**

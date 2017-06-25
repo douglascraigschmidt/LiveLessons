@@ -46,7 +46,7 @@ public class Options {
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/uci.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/kitten.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/slow.jpg",
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug.jpg",
           "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg,"
@@ -171,7 +171,7 @@ public class Options {
             	ClassLoader.getSystemResource("uci.png"),
             	ClassLoader.getSystemResource("dougs-small.jpg"),
             	ClassLoader.getSystemResource("kitten.png"),
-            	ClassLoader.getSystemResource("slow.jpg")
+            	ClassLoader.getSystemResource("doug.jpg")
             },
             {    
             	ClassLoader.getSystemResource("lil_doug.jpg"),

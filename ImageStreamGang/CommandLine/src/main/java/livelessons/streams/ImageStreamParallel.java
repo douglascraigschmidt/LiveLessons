@@ -65,7 +65,9 @@ public class ImageStreamParallel
         System.out.println(TAG
                            + ": processing of "
                            + filteredImages.size()
-                           + " image(s) is complete");
+                           + " image(s) from "
+                           + urls.size() 
+                           + " urls is complete");
     }
 
     /**
@@ -74,8 +76,9 @@ public class ImageStreamParallel
      * expanded to handle the blocking image download.
      */
     private Image blockingDownload(URL url) {
-        return BlockingTask.callInManagedBlock(()
-                                               -> downloadImage(url));
+        return downloadImage(url);
+        // return BlockingTask.callInManagedBlock(()
+         //                                      -> downloadImage(url));
     }
 
     /**

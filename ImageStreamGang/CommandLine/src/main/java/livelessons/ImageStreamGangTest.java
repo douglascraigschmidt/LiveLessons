@@ -70,8 +70,7 @@ public class ImageStreamGangTest {
      */
     private static void runTests() {
         // Warm up the fork-join pool.
-        // warmUpForkJoinPool(mFilters,
-        // Options.instance().getUrlIterator());
+        warmUpForkJoinPool();
 
         // Iterate thru the implementation strategies and test them.
         for (TestsToRun test : TestsToRun.values()) {
@@ -111,17 +110,23 @@ public class ImageStreamGangTest {
      * Warm up the threads in the common fork-join pool so the timing
      * results will be more accurate.
      */
-    private static void warmUpForkJoinPool(Filter[] filters,
-                                           Iterator<List<URL>> urlIterator) {
+    private static void warmUpForkJoinPool() {
         System.out.println("Warming up the fork-join pool");
 
-        // Run the ImageStreamParallel test to warm up threads in the
-        // common fork-join pool.
-        new ImageStreamParallel(filters,
-                                urlIterator).run();
+        // Delete any the filtered images from the previous run.
+        deleteFilteredImages();
+
+        // Create and run the ImageStreamParallel test to warm up
+        // threads in the common fork-join pool.
+        ImageStreamGang streamGang=
+            new ImageStreamParallel(mFilters,
+                                    Options.instance().getUrlIterator());
+        streamGang.run();
 
         // Run the garbage collector to avoid perturbing the test.
         System.gc();
+
+        System.out.println("End warming up the fork-join pool");
     }
 
     /**

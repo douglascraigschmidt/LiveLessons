@@ -36,8 +36,11 @@ public class ImageStreamCompletableFuture1
      */
     @Override
     protected void processStream() {
-        // Create a list of completable futures to images.
-        List<CompletableFuture<Image>> listOfFutures = getInput()
+        // Get the input URLs.
+        List<URL> urls = getInput();
+
+        // Create a list of completable futures to filtered images.
+        List<CompletableFuture<Image>> listOfFilteredImageFutures = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -63,15 +66,17 @@ public class ImageStreamCompletableFuture1
         // Create a CompletableFuture that can be used to wait for all
         // operations associated with the futures to complete.
         CompletableFuture<List<Image>> allImagesDone =
-                StreamsUtils.joinAll(listOfFutures);
+                StreamsUtils.joinAll(listOfFilteredImageFutures);
 
         // Print the results.
-        System.out.println(TAG 
+        System.out.println(TAG
                            + ": processing of "
                            // This call blocks until all the images
                            // are downloaded, processed, and stored.
                            + allImagesDone.join().size()
-                           + " image(s) is complete");
+                           + " image(s) from "
+                           + urls.size() 
+                           + " urls is complete");
     }
 
     /**
