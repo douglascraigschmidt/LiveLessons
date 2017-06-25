@@ -4,11 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -73,8 +69,11 @@ public class ImageStreamGangTest {
      * they perform.
      */
     private static void runTests() {
-        // Iterate through all the implementation strategies and test
-        // them.
+        // Warm up the fork-join pool.
+        // warmUpForkJoinPool(mFilters,
+        // Options.instance().getUrlIterator());
+
+        // Iterate thru the implementation strategies and test them.
         for (TestsToRun test : TestsToRun.values()) {
             System.out.println("Starting " + test); 
 
@@ -106,6 +105,23 @@ public class ImageStreamGangTest {
 
         // Print out all the timing results.
         printTimingResults(mResultsMap);
+    }
+
+    /**
+     * Warm up the threads in the common fork-join pool so the timing
+     * results will be more accurate.
+     */
+    private static void warmUpForkJoinPool(Filter[] filters,
+                                           Iterator<List<URL>> urlIterator) {
+        System.out.println("Warming up the fork-join pool");
+
+        // Run the ImageStreamParallel test to warm up threads in the
+        // common fork-join pool.
+        new ImageStreamParallel(filters,
+                                urlIterator).run();
+
+        // Run the garbage collector to avoid perturbing the test.
+        System.gc();
     }
 
     /**
@@ -180,60 +196,44 @@ public class ImageStreamGangTest {
         // Determine how many runs of the tests took place.
         int numberOfRuns =
             resultsMap.entrySet().iterator().next().getValue().size();
-        
-        // This local class is needed to make the Java compiler happy.
-        final class ResultMap extends TreeMap<Long, String> {}
-        
-        // Create a list of TreeMaps to hold the timing results in
-        // sorted order.
-        List<ResultMap> listOfMaps = 
-            Stream.generate(ResultMap::new)
-            .limit(numberOfRuns)
-            .collect(toList());
-        
-        // Initialize the TreeMaps to contain the results from each
-        // timing test.
-        IntStream.range(0, numberOfRuns)
-            // Iterate through each of the test runs.
-            .forEach(treeIndex ->
-                     // Get the entry set from the map.
-                     resultsMap.entrySet()
-                                                         
-                     // Iterate through each entry in the map.
-                     .forEach(entry -> {
-                                   // Get the appropriate tree map.
-                                   ResultMap map = listOfMaps.get(treeIndex);
 
-                                   // Store results into the tree map,
-                                   // whose key is time in msecs and
-                                   // whose value is test that ran.
-                                   map.put(entry.getValue()
-                                           .get(treeIndex),
-                                           entry.getKey());
-                          }));
+        // Iterate through the results of each of the test runs.
+        for (int i = 0;
+             i < numberOfRuns;
+             i++) {
+            final int runNumber = i;
+            System.out.println("\nPrinting "
+                               + resultsMap.entrySet().size()
+                               + " results for input file "
+                               + (runNumber + 1)
+                               + " from fastest to slowest");
 
-        // Print the results of the test runs from fastest to slowest.
-        IntStream.range(0, numberOfRuns)
-            // Iterate through each of the test runs.
-            .forEach(treeIndex -> {
-                    System.out.println("\nPrinting results for input " 
-                                       + (treeIndex + 1)
-                                       + " from fastest to slowest");
-                    listOfMaps
-                        // Get the appropriate TreeMap.
-                        .get(treeIndex)
-                        
-                        // Get the entry set from the map.
-                        .entrySet()
+            // Print out the contents of the resultsMap in sorted
+            // order.
+            resultsMap
+                // Get the entrySet for the resultsMap.
+                .entrySet()
 
-                        // Print results of test run with name of the
-                        // test first followed by time in msecs.
-                        .forEach (entry ->
-                                  System.out.println("" 
-                                                     + entry.getValue() 
-                                                     + " executed in " 
-                                                     + entry.getKey() 
-                                                     + " msecs"));
-                });
+                // Convert the entrySet into a stream.
+                .stream()
+
+                // Create a SimpleImmutableEntry containing the timing
+                // results (value) followed by the test name (key).
+                .map(entry
+                     -> new AbstractMap.SimpleImmutableEntry<>
+                        (entry.getValue().get(runNumber),
+                         entry.getKey()))
+
+                // Sort the stream by the timing results (key).
+                .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
+
+                // Print all the entries in the sorted stream.
+                .forEach(entry
+                         -> System.out.println(""
+                                               + entry.getValue()
+                                               + " executed in "
+                                               + entry.getKey()
+                                               + " msecs"));
+        }
     }
 }

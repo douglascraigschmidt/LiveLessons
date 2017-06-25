@@ -42,12 +42,16 @@ public class Options {
      * Default URLs used for testing.
      */
     private final String[] mDefaultUrls = new String[] {        
-        "http://www.dre.vanderbilt.edu/~schmidt/ka.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/uci.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg",
-        "http://www.cs.wustl.edu/~schmidt/gifs/lil-doug.jpg,"
-        + "http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg,"
-        + "http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg"
+          "http://www.dre.vanderbilt.edu/~schmidt/gifs/ka.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/uci.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/kitten.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/slow.jpg",
+          "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/robot.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug-circle.png"
     };
 
     /**
@@ -165,12 +169,16 @@ public class Options {
             {
             	ClassLoader.getSystemResource("ka.png"),
             	ClassLoader.getSystemResource("uci.png"),
-            	ClassLoader.getSystemResource("dougs_small.jpg")
+            	ClassLoader.getSystemResource("dougs-small.jpg"),
+            	ClassLoader.getSystemResource("kitten.png"),
+            	ClassLoader.getSystemResource("slow.jpg")
             },
             {    
+            	ClassLoader.getSystemResource("lil_doug.jpg"),
             	ClassLoader.getSystemResource("ironbound.jpg"),
             	ClassLoader.getSystemResource("wm.jpg"),
-            	ClassLoader.getSystemResource("lil_doug.jpg")
+            	ClassLoader.getSystemResource("robot.png"),
+            	ClassLoader.getSystemResource("doug-circle.png")
             }
         };
 
