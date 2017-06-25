@@ -28,8 +28,8 @@ public class BlockingTask {
      */
     public static<T> T callInManagedBlock(final Supplier<T> supplier) {
         // Create a helper object to encapsulate the supplier.
-        final SupplierManagedBlock<T> managedBlock =
-            new SupplierManagedBlock<>(supplier);
+        final SupplierManagedBlocker<T> managedBlock =
+            new SupplierManagedBlocker<>(supplier);
 
         try {
             /*
@@ -68,7 +68,7 @@ public class BlockingTask {
      * This class is an adapter that enables a blocking Supplier to be
      * used efficient with the common fork/join thread pool.
      */
-    private static class SupplierManagedBlock<T>
+    private static class SupplierManagedBlocker<T>
             implements ForkJoinPool.ManagedBlocker {
         /**
          * The blocking supplier.
@@ -88,7 +88,7 @@ public class BlockingTask {
         /**
          * Constructor initializes the field.
          */
-        private SupplierManagedBlock(final Supplier<T> supplier) {
+        private SupplierManagedBlocker(final Supplier<T> supplier) {
             mSupplier = supplier;
         }
 

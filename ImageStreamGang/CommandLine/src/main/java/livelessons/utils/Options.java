@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -44,14 +43,14 @@ public class Options {
     private final String[] mDefaultUrls = new String[] {        
           "http://www.dre.vanderbilt.edu/~schmidt/gifs/ka.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/uci.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs-small.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs_small.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/kitten.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug.jpg",
           "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/robot.png,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug-circle.png"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug_circle.png"
     };
 
     /**
@@ -169,7 +168,7 @@ public class Options {
             {
             	ClassLoader.getSystemResource("ka.png"),
             	ClassLoader.getSystemResource("uci.png"),
-            	ClassLoader.getSystemResource("dougs-small.jpg"),
+            	ClassLoader.getSystemResource("dougs_small.jpg"),
             	ClassLoader.getSystemResource("kitten.png"),
             	ClassLoader.getSystemResource("doug.jpg")
             },
@@ -178,7 +177,7 @@ public class Options {
             	ClassLoader.getSystemResource("ironbound.jpg"),
             	ClassLoader.getSystemResource("wm.jpg"),
             	ClassLoader.getSystemResource("robot.png"),
-            	ClassLoader.getSystemResource("doug-circle.png")
+            	ClassLoader.getSystemResource("doug_circle.png")
             }
         };
 
