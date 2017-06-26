@@ -110,6 +110,9 @@ public class Main {
         SearchWithForkJoinTaskFactory consRef =
             SearchWithForkJoinTask::new;
 
+        System.out.println("The parallelism in the common fork-join pool is "
+                           + ForkJoinPool.getCommonPoolParallelism());
+
         // Warm up the fork-join pool to account for any
         // instruction/data caching effects.
         warmUpForkJoinPool(indexAwareConsRef);
