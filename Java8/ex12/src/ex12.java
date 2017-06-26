@@ -1,9 +1,6 @@
 import com.sun.istack.internal.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,14 +17,16 @@ import static java.util.stream.Collectors.toList;
  * return values are only determined by their input values, without
  * observable side effects.  This program also shows various stream
  * terminal operations, including forEach(), collect(), and several
- * variants of reduce().
+ * variants of reduce().  It also includes a non-Java 8 example as a
+ * baseline.
  */
 public class ex12 {
     static public void main(String[] argv) {
         // Create an instance of this class.
         ex12 ex = new ex12();
 
-        // Demonstrate each terminal operation.
+        // Demonstrate each approach.
+        ex.runNonJava8();
         ex.runForEach();
         ex.runCollect();
         ex.runCollectReduce();
@@ -52,10 +51,46 @@ public class ex12 {
     }
 
     /**
+     * Run an example using only Java 7 features.  This serve as a
+     * baseline for comparing the Java 8 solutions.
+     */
+    private void runNonJava8() {
+        System.out.println("Results from runNonJava8():");
+
+        List<String> listOfCharacters = new LinkedList
+            (Arrays.asList("horatio",
+                           "claudius",
+                           "Gertrude",
+                           "Hamlet",
+                           "laertes",
+                           "Ophelia"));
+
+        // Loop through all the characters.
+        for (int i = 0; i < listOfCharacters.size();) {
+            // Remove any strings that don't start with 'h' or 'H'.
+            if (toLowerCase(listOfCharacters.get(i).charAt(0)) != 'h') {
+                listOfCharacters.remove(i);
+            } else {
+                // Capitalize the first letter of a character whose
+                // names starts with 'H' or 'h'.
+                listOfCharacters.set(i, capitalize(listOfCharacters.get(i)));
+                i++;
+            }
+        }
+
+        // Sort the results in ascending order.
+        Collections.sort(listOfCharacters);
+
+        // Print the results.
+        for (String s : listOfCharacters)
+            System.out.println(s);
+    }
+
+    /**
      * Run an example using the forEach() terminal operation.
      */
     private void runForEach() {
-        System.out.println("Results from runForEach():");
+        System.out.println("\nResults from runForEach():");
 
         Stream
             // Create a stream of characters from William

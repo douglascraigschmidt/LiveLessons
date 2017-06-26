@@ -10,9 +10,9 @@ import java.util.stream.StreamSupport;
 import static java.lang.Character.toLowerCase;
 
 /**
- * This example shows a simple example of a Java 8 Spliterator to
- * traverse each word in a list containing a quote from a famous
- * Shakespeare play.
+ * This example shows several examples of using Java 8 Spliterators
+ * and streams to traverse each word in a list containing a quote from
+ * a famous Shakespeare play.
  */
 public class ex13 {
     /**
