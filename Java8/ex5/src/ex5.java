@@ -7,10 +7,12 @@ import java.util.*;
  */
 public class ex5 {
     static public void main(String[] argv) {
+        // Create a list of threads.
         List<Thread> threads =
-            new ArrayList<>(Arrays.asList(new Thread("Larry"),
-                                          new Thread("Curly"),
-                                          new Thread("Moe")));
+            Arrays.asList(new Thread("Larry"),
+                          new Thread("Curly"),
+                          new Thread("Moe"));
+
         // forEach() takes a Consumer, which is bound to the
         // System.out println() method.
         threads.forEach(System.out::println);
