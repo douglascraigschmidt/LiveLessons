@@ -186,10 +186,10 @@ public abstract class ImageStreamGang
      * @return true if the @a url is in the cache, else false.
      */
     protected boolean urlCached(URL url) {
-        // Iterate through the list of filters and concurrently check
-        // to see which images are already cached.
+        // Iterate through the list of filters and check to see which
+        // images are already cached.
         long count = mFilters
-            .parallelStream()
+            .stream()
             .filter(filter -> 
                     urlCached(url, filter.getName()))
             .count();
