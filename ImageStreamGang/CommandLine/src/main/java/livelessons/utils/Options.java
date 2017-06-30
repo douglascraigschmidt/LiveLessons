@@ -45,11 +45,15 @@ public class Options {
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/uci.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dougs_small.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/kitten.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/schmidt_coursera.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dark_rider.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug.jpg",
           "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/robot.png,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ace_copy.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/tao_copy.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug_circle.png"
     };
 
@@ -111,10 +115,52 @@ public class Options {
      */
     public Iterator<List<URL>> getUrlIterator() {
         List<List<URL>> urlLists =
-            getUrlLists(mInputSource);
+            getUrlLists();
     	return urlLists != null && urlLists.size() > 0
             ? urlLists.iterator()
             : null;
+    }
+
+    /**
+     * Gets the list of lists of URLs from which we want to download
+     * images.
+     */
+    public List<List<URL>> getUrlLists() {
+    	try {
+            switch (mInputSource) {
+            // If the user selects the defaults source, return the
+            // default list of remote URL lists.
+            case DEFAULT:
+                return getDefaultUrlList(false);
+
+            // If the user selects the default_local source, return the
+            // default list of local URL lists.
+            case DEFAULT_LOCAL:
+                return getDefaultUrlList(true);
+
+            // Take input from the Android UI.
+            case USER:
+            	/*
+                for (int i = 0; i < numChildViews; ++i) {
+
+                    // Convert the input string into a list of URLs
+                    // and add it to the main list.
+                    variableNumberOfInputURLs.add
+                        (convertStringToUrls(child.getText().toString()));
+                }
+                */
+
+                break;
+
+            default:
+                System.out.println("Invalid Source");
+                return null;
+            }
+    	} catch (MalformedURLException e) {
+            System.out.println("Invalid URL");
+            return null;
+    	}
+    	return null;
     }
 
     /**
@@ -166,6 +212,8 @@ public class Options {
         // Create a two-dimensional array of URLs to images on the local device.
         URL[][] urlsArray = new URL[][] {
             {
+            	ClassLoader.getSystemResource("schmidt_coursera.jpg"),
+            	ClassLoader.getSystemResource("dark_rider.jpg"),
             	ClassLoader.getSystemResource("ka.png"),
             	ClassLoader.getSystemResource("uci.png"),
             	ClassLoader.getSystemResource("dougs_small.jpg"),
@@ -173,6 +221,8 @@ public class Options {
             	ClassLoader.getSystemResource("doug.jpg")
             },
             {    
+            	ClassLoader.getSystemResource("ace_copy.jpg"),
+            	ClassLoader.getSystemResource("tao_copy.jpg"),
             	ClassLoader.getSystemResource("lil_doug.jpg"),
             	ClassLoader.getSystemResource("ironbound.jpg"),
             	ClassLoader.getSystemResource("wm.jpg"),
@@ -196,54 +246,6 @@ public class Options {
 
         return variableNumberOfInputURLs;
         */
-    }
-
-    /**
-     * Gets the list of lists of URLs from which we want to download
-     * images.
-     */
-    public List<List<URL>> getUrlLists(InputSource source) {
-    	List<List<URL>> variableNumberOfInputURLs =
-            new ArrayList<>();
-
-    	try {
-            switch (source) {
-            // If the user selects the defaults source, return the
-            // default list of remote URL lists.
-            case DEFAULT:
-                variableNumberOfInputURLs = getDefaultUrlList(false);
-                break;
-
-            // If the user selects the default_local source, return the
-            // default list of local URL lists.
-            case DEFAULT_LOCAL:
-                variableNumberOfInputURLs = getDefaultUrlList(true);
-                break;
-
-            // Take input from the Android UI.
-            case USER:
-            	/*
-                for (int i = 0; i < numChildViews; ++i) {
-
-                    // Convert the input string into a list of URLs
-                    // and add it to the main list.
-                    variableNumberOfInputURLs.add
-                        (convertStringToUrls(child.getText().toString()));
-                }
-                */
-
-                break;
-
-            default:
-                System.out.println("Invalid Source");
-                return null;
-            }
-    	} catch (MalformedURLException e) {
-            System.out.println("Invalid URL");
-            return null;
-    	}
-
-    	return variableNumberOfInputURLs;
     }
 
     /**

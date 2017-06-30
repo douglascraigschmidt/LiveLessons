@@ -118,7 +118,7 @@ public class ImageStreamGangTest {
 
         // Create and run the ImageStreamParallel test to warm up
         // threads in the common fork-join pool.
-        ImageStreamGang streamGang=
+        ImageStreamGang streamGang =
             new ImageStreamParallel(mFilters,
                                     Options.instance().getUrlIterator());
         streamGang.run();
