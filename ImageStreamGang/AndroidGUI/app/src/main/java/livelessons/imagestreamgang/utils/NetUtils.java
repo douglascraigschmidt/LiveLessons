@@ -113,13 +113,13 @@ public final class NetUtils {
         String uriName = url.getHost() + url.getFile();
 
         // Replace useless characters with UNDERSCORE
-        String fileName = uriName.replace(".", "_").replace("/", "_");
+        String fileName = uriName.replaceAll("[./:]", "_");
 
         // Replace last underscore with a dot
         fileName = fileName.substring(0, fileName.lastIndexOf('_'))
             + "."
             + fileName.substring(fileName.lastIndexOf('_') + 1,
-                                   fileName.length());
+                                 fileName.length());
         return fileName;
     }
 }
