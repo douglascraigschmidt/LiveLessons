@@ -56,7 +56,7 @@ public final class PlatSpec {
      * @return An input stream.
      * @throws IOException
      */
-    private static InputStream getInputStream(URL url)
+    public static InputStream getInputStream(URL url)
             throws IOException {
        // Normal URL.
        return url.openStream();
