@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import sun.rmi.runtime.Log;
-
-import com.sun.jndi.toolkit.url.Uri;
-
-import static sun.security.util.PolicyUtil.getInputStream;
+import static livelessons.platspec.PlatSpec.getInputStream;
 
 /**
  * Provides some general utility helper methods for network operations.
@@ -69,7 +65,7 @@ public final class NetUtils {
     /**
      * @return True iff the url is a resource file.
      */
-    private static boolean isResourceUrl(String url) {
+    public static boolean isResourceUrl(String url) {
         return (null != url) 
             && url.startsWith(RESOURCE_BASE);
     }
