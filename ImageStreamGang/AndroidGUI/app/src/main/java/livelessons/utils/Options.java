@@ -65,7 +65,8 @@ public class Options {
      * Prefix for all the URLs.
      */
     private static String sURL_PREFIX =
-        "http://www.dre.vanderbilt.edu/~schmidt/gifs/";
+        //        "http://www.dre.vanderbilt.edu/~schmidt/gifs/";
+        "http://www.cse.wustl.edu/~schmidt/gifs/";
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -180,17 +181,17 @@ public class Options {
                                         Object listUrlGroups) {
     	try {
             switch (mInputSource) {
-            // If the user selects the defaults source, return the
-            // default list of remote URL lists.
+                // If the user selects the defaults source, return the
+                // default list of remote URL lists.
             case DEFAULT:
                 return getDefaultUrlList(false);
 
-            // If the user selects the default_local source, return the
-            // default list of local URL lists.
+                // If the user selects the default_local source, return the
+                // default list of local URL lists.
             case DEFAULT_LOCAL:
                 return getDefaultUrlList(true);
 
-            // Take input from the Android UI.
+                // Take input from the Android UI.
             case USER:
                 return PlatSpec.getUrlLists(context,
                                             listUrlGroups);
@@ -212,8 +213,8 @@ public class Options {
     private List<List<URL>> getDefaultUrlList(boolean local)
         throws MalformedURLException {
         return local
-               ? getDefaultResourceUrlList()
-               : getDefaultUrlList();
+            ? getDefaultResourceUrlList()
+            : getDefaultUrlList();
     }
 
     /**
@@ -221,7 +222,7 @@ public class Options {
      * platform.
      */
     private List<List<URL>> getDefaultUrlList()
-            throws MalformedURLException {
+        throws MalformedURLException {
         return Stream
             // Convert the array of strings into a stream of strings.
             .of(mDefaultImageNames)
@@ -238,7 +239,7 @@ public class Options {
      * platform.
      */
     private List<List<URL>> getDefaultResourceUrlList()
-            throws MalformedURLException {
+        throws MalformedURLException {
         return PlatSpec.getDefaultResourceUrlList(null,
                                                   mDefaultImageNames);
     }
@@ -287,15 +288,15 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                    case "-d":
-                        mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                        break;
-                    case "-s":
-                        mInputSource = getInputSource(argv[argc + 1]);
-                        break;
-                    default:
-                        printUsage();
-                        return false;
+                case "-d":
+                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    break;
+                case "-s":
+                    mInputSource = getInputSource(argv[argc + 1]);
+                    break;
+                default:
+                    printUsage();
+                    return false;
                 }
             return true;
         } else
