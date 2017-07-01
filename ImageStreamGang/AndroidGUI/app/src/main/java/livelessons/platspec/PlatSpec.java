@@ -96,7 +96,8 @@ public final class PlatSpec {
     }
 
     /**
-     * Returns a list of 
+     * Gets the list of lists of URLs from which the user wants to
+     * download images.
      */
     public static List<List<URL>> getUrlLists(Object c, Object l) {
         Context context = (Context) c;

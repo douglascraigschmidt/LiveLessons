@@ -1,6 +1,7 @@
 package livelessons.platspec;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -42,8 +43,8 @@ public final class PlatSpec {
     /**
      * Return the path to the external storage directory.
      */
-    public String getDirectoryPath() {
-        new File(IMAGE_DIRECTORY_PATH).getAbsolutePath();
+    public static String getDirectoryPath() {
+        return new File(IMAGE_DIRECTORY_PATH).getAbsolutePath();
     }
 
     /**
@@ -59,6 +60,14 @@ public final class PlatSpec {
             throws IOException {
        // Normal URL.
        return url.openStream();
+    }
+
+    /**
+     * Gets the list of lists of URLs from which the user wants to
+     * download images.
+     */
+    public static List<List<URL>> getUrlLists(Object c, Object l) {
+        return null; // This is a no-op.
     }
 
     /**

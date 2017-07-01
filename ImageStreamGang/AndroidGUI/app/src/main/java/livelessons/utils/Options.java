@@ -173,8 +173,8 @@ public class Options {
     }
 
     /**
-     * Gets the list of lists of URLs from which we want to download
-     * images.
+     * Gets the list of lists of URLs from which the user wants to
+     * download images.
      */
     private List<List<URL>> getUrlLists(Object context,
                                         Object listUrlGroups) {

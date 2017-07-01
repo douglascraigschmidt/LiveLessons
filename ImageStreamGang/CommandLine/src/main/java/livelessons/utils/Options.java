@@ -2,6 +2,7 @@ package livelessons.utils;
 
 import livelessons.platspec.PlatSpec;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
@@ -38,7 +39,7 @@ public class Options {
     /**
      * Keep track of the source of the inputs.
      */
-    InputSource mInputSource = InputSource.DEFAULT_LOCAL;
+    private InputSource mInputSource = InputSource.DEFAULT_LOCAL;
 
     /**
      * Default image names to use for testing.
@@ -63,12 +64,8 @@ public class Options {
     /**
      * Prefix for all the URLs.
      */
-    private String mUrlPrefix = "http://www.dre.vanderbilt.edu/~schmidt/gifs/";
-
-    /**
-     * Pathname for the file containing URLs to download.
-     */
-    private String mPathname = "defaultUrls.txt";
+    private static String sURL_PREFIX =
+        "http://www.dre.vanderbilt.edu/~schmidt/gifs/";
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -87,17 +84,51 @@ public class Options {
     }
 
     /**
-     * Return pathname for the file containing the URLs to download.
-     */
-    public String getURLFilePathname() {
-        return mPathname;
-    }
-
-    /**
      * Return the path for the directory where images are stored.
      */
     public String getDirectoryPath() {
-        return new File("DownloadImages").getAbsolutePath();
+        return PlatSpec.getDirectoryPath();
+    }
+
+    /**
+     * Return the suggestions.
+     */
+    public String[] getSuggestions() {
+        return Stream
+            // Convert the array of strings (of comma-separated image
+            // names) to a stream of strings.
+            .of(mDefaultImageNames)
+
+            // Map each string of image names into string of
+            // comma-separated URL strings.
+            .map(stringOfImageNames
+                 -> {
+                     return Pattern
+                         // Create a regular expression for the ","
+                         // separator.
+                         .compile(",")
+                         
+                         // Use regular expression to split
+                         // stringOfNames into a Stream<String>.
+                         .splitAsStream(stringOfImageNames)
+
+                         // Concatenate the url prefix with each name.
+                         .map(name -> sURL_PREFIX + name)
+
+                         // Combine all the URL strings together with
+                         // a ',' between them.
+                         .collect(joining(","));
+                 })
+
+            // Convert the stream back into an array of strings.
+            .toArray(String[]::new);
+    }
+
+    /**
+     * Set the input source.
+     */
+    public void setInputSource(Options.InputSource inputSource) {
+        mInputSource = inputSource;
     }
 
     /**
@@ -121,19 +152,32 @@ public class Options {
     /**
      * Return an Iterator over one or more input URL Lists.
      */
-    public Iterator<List<URL>> getUrlIterator() {
-        List<List<URL>> urlLists =
-            getUrlLists();
+    public Iterator<List<URL>> getUrlIterator(Object context,
+                                              Object listUrlGroups) {
+    	List<List<URL>> urlLists = getUrlLists(context,
+                                               listUrlGroups);
     	return urlLists != null && urlLists.size() > 0
             ? urlLists.iterator()
             : null;
     }
 
     /**
-     * Gets the list of lists of URLs from which we want to download
-     * images.
+     * Return an Iterator over one or more input URL Lists.
      */
-    private List<List<URL>> getUrlLists() {
+    public Iterator<List<URL>> getUrlIterator() {
+        List<List<URL>> urlLists =
+            getUrlLists(null, null);
+    	return urlLists != null && urlLists.size() > 0
+            ? urlLists.iterator()
+            : null;
+    }
+
+    /**
+     * Gets the list of lists of URLs from which the user wants to
+     * download images.
+     */
+    private List<List<URL>> getUrlLists(Object context,
+                                        Object listUrlGroups) {
     	try {
             switch (mInputSource) {
             // If the user selects the defaults source, return the
@@ -148,17 +192,8 @@ public class Options {
 
             // Take input from the Android UI.
             case USER:
-            	/*
-                for (int i = 0; i < numChildViews; ++i) {
-
-                    // Convert the input string into a list of URLs
-                    // and add it to the main list.
-                    variableNumberOfInputURLs.add
-                        (convertStringToUrls(child.getText().toString()));
-                }
-                */
-
-                break;
+                return PlatSpec.getUrlLists(context,
+                                            listUrlGroups);
 
             default:
                 System.out.println("Invalid Source");
@@ -168,7 +203,6 @@ public class Options {
             System.out.println("Invalid URL");
             return null;
     	}
-    	return null;
     }
 
     /**
@@ -205,15 +239,16 @@ public class Options {
      */
     private List<List<URL>> getDefaultResourceUrlList()
             throws MalformedURLException {
-        return PlatSpec.getDefaultResourceUrlList(null, mDefaultImageNames);
+        return PlatSpec.getDefaultResourceUrlList(null,
+                                                  mDefaultImageNames);
     }
 
     /**
-     * Create a new URL list from a @a stringOfUrls that contains a
-     * list of URLs separated by commas and add them to the URL list
-     * that's returned.
+     * Create a new URL list from a @a stringOfUrls that contains the
+     * sURL_PREFIX list of names separated by commas and add them to
+     * the URL list that's returned.
      */
-    private List<URL> convertStringToUrls(String stringOfNames) {
+    public List<URL> convertStringToUrls(String stringOfNames) {
         // Create a Function that returns a new URL object when
         // applied and which converts checked URL exceptions into
         // runtime exceptions.
@@ -229,7 +264,7 @@ public class Options {
             .splitAsStream(stringOfNames)
 
             // Concatenate the url prefix with each name.
-            .map(name -> mUrlPrefix + name)
+            .map(name -> sURL_PREFIX + name)
 
             // Convert each string in the stream to a URL.
             .map(urlFactory::apply)
