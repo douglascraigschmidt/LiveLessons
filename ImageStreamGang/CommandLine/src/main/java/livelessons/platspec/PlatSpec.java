@@ -1,18 +1,19 @@
 package livelessons.platspec;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import livelessons.utils.Image;
 import sun.rmi.runtime.Log;
 
 import com.sun.jndi.toolkit.url.Uri;
+
+import javax.imageio.ImageIO;
 
 import static java.util.stream.Collectors.toList;
 
@@ -60,6 +61,20 @@ public final class PlatSpec {
             throws IOException {
        // Normal URL.
        return url.openStream();
+    }
+
+    /**
+     * Write the @a image to the @a outputStream.
+     */
+    public static void writeImageFile(FileOutputStream outputStream,
+                                      Image image) throws IOException {
+        BufferedImage bufferedImage = image.getImage();
+        if (bufferedImage == null)
+            System.out.println("null image");
+        else 
+            ImageIO.write(bufferedImage,
+                          "png",
+                          outputStream);
     }
 
     /**

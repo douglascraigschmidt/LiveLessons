@@ -1,11 +1,9 @@
 package livelessons.filters;
 
-import android.graphics.Bitmap;
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileOutputStream;
 
+import livelessons.platspec.PlatSpec;
 import livelessons.utils.Image;
 import livelessons.utils.Options;
 
@@ -47,18 +45,14 @@ public class OutputFilterDecorator
         externalFile.mkdirs();
         
         // Get a reference to the file in which the image will be stored
-        File imageFile = new File(externalFile, image.getFileName());
+        File imageFile = new File(externalFile,
+                                  image.getFileName());
         
         // Store the image using try-with-resources
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
-                Bitmap bitmap = image.getImage();
-                if (bitmap == null)
-                    Log.e(TAG, "null Bitmap");
-                else
-                    bitmap.compress(Bitmap.CompressFormat.PNG,
-                                    100,
-                                    outputFile);
+            // Write the image to the output file.
+            PlatSpec.writeImageFile(outputFile, image);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

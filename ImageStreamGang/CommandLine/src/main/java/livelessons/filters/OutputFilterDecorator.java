@@ -1,11 +1,9 @@
 package livelessons.filters;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import javax.imageio.ImageIO;
-
+import livelessons.platspec.PlatSpec;
 import livelessons.utils.Image;
 import livelessons.utils.Options;
 
@@ -47,15 +45,14 @@ public class OutputFilterDecorator
         externalFile.mkdirs();
         
         // Get a reference to the file in which the image will be stored
-        File imageFile = new File(externalFile, image.getFileName());
+        File imageFile = new File(externalFile,
+                                  image.getFileName());
         
         // Store the image using try-with-resources
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
-                BufferedImage bi = image.getImage();
-                ImageIO.write(bi,
-                              "png",
-                              outputFile);
+            // Write the image to the output file.
+            PlatSpec.writeImageFile(outputFile, image);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

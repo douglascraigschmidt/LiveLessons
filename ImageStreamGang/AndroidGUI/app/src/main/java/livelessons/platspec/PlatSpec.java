@@ -3,12 +3,14 @@ package livelessons.platspec;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -22,6 +24,7 @@ import java.util.stream.Stream;
 
 import livelessons.R;
 import livelessons.utils.ExceptionUtils;
+import livelessons.utils.Image;
 import livelessons.utils.Options;
 
 import static java.util.stream.Collectors.toList;
@@ -93,6 +96,21 @@ public final class PlatSpec {
             // Normal URL.
             return url.openStream();
         }
+    }
+
+    /**
+     * Write the @a image to the @a outputStream.
+     */
+    public static void writeImageFile(FileOutputStream outputStream,
+                                      Image image) {
+        Bitmap bitmap = image.getImage();
+
+        if (bitmap == null)
+            System.out.println("null bitmap");
+        else 
+            bitmap.compress(Bitmap.CompressFormat.PNG,
+                            100,
+                            outputStream);
     }
 
     /**
