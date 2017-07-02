@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import livelessons.R;
 import livelessons.filters.Filter;
@@ -161,6 +163,12 @@ public class MainActivity
                         makeImageStreamGang(mFilters,
                                 iterator);
 
+                /*
+                CompletableFuture
+                    .runAsync(imageStreamGang::run)
+                    .thenRun(this::startResultActivity);
+                    */
+
                 // Spawn a thread to avoid blocking the UI thread.
                 new Thread(() -> {
                     // Run the given image stream gang.
@@ -173,6 +181,7 @@ public class MainActivity
                     // context.
                     MainActivity.this.runOnUiThread(this::startResultActivity);
                 }).start();
+
             }
 
             // Make the delete menu item visible.
