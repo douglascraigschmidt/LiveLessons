@@ -1,5 +1,7 @@
 package livelessons.streams;
 
+import android.util.Log;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -154,8 +156,11 @@ public abstract class ImageStreamGang
      * url and creates an Image to encapsulate it.
      */
     protected Image downloadImage(URL url) {
+        byte[] imageData = NetUtils.downloadContent(url);
+
+        System.out.println(TAG, "downloading of " + url + (imageData == null ? " failed " : " succeeded "));
         return new Image(url,
-                         NetUtils.downloadContent(url));
+                         imageData);
     }
 
     /**

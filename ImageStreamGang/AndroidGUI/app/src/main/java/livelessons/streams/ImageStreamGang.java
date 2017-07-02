@@ -158,7 +158,7 @@ public abstract class ImageStreamGang
     protected Image downloadImage(URL url) {
         byte[] imageData = NetUtils.downloadContent(url);
 
-        Log.d(TAG, "downloading of " + url + (imageData == null ? " failed " : " succeeded "));
+        System.out.println(TAG, "downloading of " + url + (imageData == null ? " failed " : " succeeded "));
         return new Image(url,
                          imageData);
     }
