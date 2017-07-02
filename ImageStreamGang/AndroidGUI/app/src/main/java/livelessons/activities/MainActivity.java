@@ -1,6 +1,7 @@
 package livelessons.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -134,16 +135,14 @@ public class MainActivity
      * Run the streamgang by reading the input lists of URLs.
      */
     public void runWithUserURLs(View view) {
-    	runURLs(view, 
-                Options.InputSource.USER);
+    	runURLs(Options.InputSource.USER);
     }
     
     /**
      * Helper method to run the appropriate configuration of inputs
      * and contexts
      */
-    private void runURLs(View view, 
-                         Options.InputSource inputSource) {
+    private void runURLs(Options.InputSource inputSource) {
         // Set the input source.
         Options.instance().setInputSource(inputSource);
 
@@ -500,7 +499,7 @@ public class MainActivity
      */
     public void runWithDefaultURLs(MenuItem item) {
         // Record the user's menu choice.
-        runURLs(item.getActionView(), Options.InputSource.DEFAULT);
+        runURLs(Options.InputSource.DEFAULT);
     }
 
     /**
@@ -510,7 +509,7 @@ public class MainActivity
      */
     public void runWithDefaultLocal(MenuItem item) {
         // Record the user's menu choice.
-        runURLs(item.getActionView(), Options.InputSource.DEFAULT_LOCAL);
+        runURLs(Options.InputSource.DEFAULT_LOCAL);
     }
 
     /**
@@ -545,6 +544,7 @@ public class MainActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Cache menu
         mMenu = menu;
+
 
         // Inflate the menu.
         getMenuInflater().inflate(R.menu.stream_menu,
