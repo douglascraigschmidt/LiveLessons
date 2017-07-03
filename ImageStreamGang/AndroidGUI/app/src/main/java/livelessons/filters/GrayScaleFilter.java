@@ -31,7 +31,7 @@ public class GrayScaleFilter
      * conversion using a pixel-by-pixel coloring algorithm.
      */
     @Override
-    public Image applyFilter(Image image) {
+    protected Image applyFilter(Image image) {
         // Forward to the platform-specific implementation of this
         // filter.
         return PlatSpec.applyFilter(image);
