@@ -65,23 +65,6 @@ public class ImageStreamSequential
     }
 
     /**
-     * @return true if the @a url is already in the cache, else false.
-     */
-    @Override
-    protected boolean urlCached(URL url) {
-        // Iterate through the list of image filters sequentially and use
-        // the filter aggregate operation to exclude those already cached.
-        long count = mFilters
-            .stream()
-            .filter(filter ->
-                    urlCached(url, filter.getName()))
-            .count();
-
-        // A count > 0 means the url has already been cached.
-        return count > 0;
-    }
-
-    /**
      * Apply the image filters to each @a image sequentially.
      */
     private Stream<Image> applyFilters(Image image) {
