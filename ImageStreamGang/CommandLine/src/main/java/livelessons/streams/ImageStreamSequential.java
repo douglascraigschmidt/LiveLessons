@@ -48,8 +48,8 @@ public class ImageStreamSequential
             // synchronously download each image via its URL).
             .map(this::downloadImage)
 
-            // Use flatMap() to create a stream containing multiple filtered
-            // versions of each image.
+            // Use flatMap() to create a stream containing multiple
+            // filtered versions of each image.
             .flatMap(this::applyFilters)
 
             // Terminate the stream and collect the results into

@@ -1,6 +1,7 @@
 package livelessons.streams;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,20 +171,36 @@ public abstract class ImageStreamGang
     }
 
     /**
-     * @return true if the @a url is in the cache, else false.
+     * Checks to see if the @a url is already exists in the file
+     * system.  If not, it atomically creates a new file based on
+     * combining the @a url with the @a filterName and returns false,
+     * else true.
+
+     * @return true if the @a url already exists in file system, else
+     * false.
      */
     protected boolean urlCached(URL url,
                                 String filterName) {
-        // Construct the subdirectory for the filter.
-        File externalFile = new File(Options.instance().getDirectoryPath(),
-                                     filterName);
+        File imageFile = null;
+        try {
+            // Construct the subdirectory for the filter.
+            File externalFile =
+                new File(Options.instance().getDirectoryPath(),
+                         filterName);
 
-        // Construct the filename for the URL.
-        File imageFile = new File(externalFile,
-                                  NetUtils.getFileNameForUrl(url));
-
-        // If the image file exists then the URL is cached.
-        return imageFile.exists();
+            // Construct a new file based on the filename for the URL.
+            imageFile =
+                new File(externalFile,
+                         NetUtils.getFileNameForUrl(url));
+            
+            // The URL is already cached if imageFile exists so we
+            // negate the return value from createNewFile().
+            return !imageFile.createNewFile();
+        } catch (IOException e) {
+            // e.printStackTrace();
+            System.out.println("file " + imageFile.toString() + e);
+            return true;
+        }
     }
 
     /**

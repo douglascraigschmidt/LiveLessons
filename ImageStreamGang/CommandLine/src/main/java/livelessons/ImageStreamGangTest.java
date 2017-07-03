@@ -189,7 +189,8 @@ public class ImageStreamGangTest {
             deletedFiles++;
         }
 
-        currentFolder.delete();
+        // Don't delete the current folder.
+        // currentFolder.delete();
         return deletedFiles;
     }
 

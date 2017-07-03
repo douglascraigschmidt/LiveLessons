@@ -3,15 +3,24 @@ package livelessons.filters;
 import livelessons.platspec.PlatSpec;
 import livelessons.utils.Image;
 
+import java.io.File;
+
 /**
  * A Filter sublcass that converts a downloaded image to grayscale.
  */
 public class GrayScaleFilter 
        extends Filter {
     /**
-     * Constructs a default GrayScaleFilter.
+     * Constructs a default GrayScaleFilter and creates the output
+     * directory for this filter.
      */
-    public GrayScaleFilter() {}
+    public GrayScaleFilter() {
+        // Create the path to the filter directory.
+        File externalFile = getFilePath();
+
+        // Create the filter directory.
+        externalFile.mkdirs();
+    }
 
     /**
      * Constructs a Grayscale filter with the given name. This
