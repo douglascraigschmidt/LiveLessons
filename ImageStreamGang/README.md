@@ -1,4 +1,4 @@
-This folder contains source code thats implement pattern-oriented
+This folder contains source code that implements pattern-oriented
 variants of the
 [ImageTaskGangApplication](https://github.com/douglascraigschmidt/LiveLessons/tree/master/ImageTaskGangApplication)
 from my [Java
