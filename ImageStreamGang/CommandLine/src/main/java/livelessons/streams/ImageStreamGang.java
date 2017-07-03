@@ -177,9 +177,11 @@ public abstract class ImageStreamGang
         // Construct the subdirectory for the filter.
         File externalFile = new File(Options.instance().getDirectoryPath(),
                                      filterName);
+
         // Construct the filename for the URL.
         File imageFile = new File(externalFile,
                                   NetUtils.getFileNameForUrl(url));
+
         // If the image file exists then the URL is cached.
         return imageFile.exists();
     }
@@ -189,11 +191,17 @@ public abstract class ImageStreamGang
      */
     protected boolean urlCached(URL url) {
         // Iterate through the list of filters and check to see which
-        // images are already cached.
+        // images already exist in the cache.
         long count = mFilters
+            // Convert list of filters into a stream.
             .stream()
+
+            // Find files that already exist.
             .filter(filter -> 
                     urlCached(url, filter.getName()))
+
+            // Return a count of the number of files that already
+            // exist.
             .count();
 
         // A count > 0 means the url has already been cached.
