@@ -1,12 +1,10 @@
 package livelessons.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -148,44 +146,34 @@ public class MainActivity
         // Set the input source.
         Options.instance().setInputSource(inputSource);
 
-        // Create an iterator containing the URL to download.
+        // Create an iterator containing the URLs to download.
         Iterator<List<URL>> iterator =
             Options.instance().getUrlIterator(this,
                                               mListUrlGroups);
     	
-        // Check to see if the user entered any lists.
+        // Check to see if there's any input to process.
         if (iterator != null) {
             if (iterator.hasNext() 
                 && (inputSource != Options.InputSource.USER || !isEmpty())) {
                 // Create a new ImageStreamGang to process the images.
                 ImageStreamGang imageStreamGang =
-                        makeImageStreamGang(mFilters,
-                                iterator);
+                    makeImageStreamGang(mFilters,
+                                        iterator);
 
-                /*
+                // Use the completable future framework to run and
+                // handle the results.
+                assert imageStreamGang != null;
                 CompletableFuture
+                    // Run the processing in the background.
                     .runAsync(imageStreamGang::run)
+                    // Start ResultsActivity to display the images.
                     .thenRun(this::startResultActivity);
-                    */
-
-                // Spawn a thread to avoid blocking the UI thread.
-                new Thread(() -> {
-                    // Run the given image stream gang.
-                    imageStreamGang.run();
-
-                    // Uses the Android HaMeR concurrency
-                    // framework to invoke the displayImages()
-                    // method in the UI Thread so that the
-                    // ResultsActivity is launched in that
-                    // context.
-                    MainActivity.this.runOnUiThread(this::startResultActivity);
-                }).start();
-
             }
 
             // Make the delete menu item visible.
             menuVisible();
 
+            // Disable the buttons.
             setButtonsEnabled(false);
         } else 
             UiUtils.showToast(this,

@@ -1,5 +1,6 @@
 package livelessons.platspec;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -9,9 +10,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import livelessons.utils.Image;
-import sun.rmi.runtime.Log;
-
-import com.sun.jndi.toolkit.url.Uri;
 
 import javax.imageio.ImageIO;
 
@@ -78,6 +76,55 @@ public final class PlatSpec {
     }
 
     /**
+     * Uses the Java platform color transformation values for
+     * grayscale conversion using a pixel-by-pixel coloring algorithm.
+     */
+    public static Image applyFilter(Image image) {
+        // Forward to the platform-specific implementation of this
+        // filter.
+        BufferedImage originalImage = image.getImage();
+        BufferedImage grayScaleImage =
+            new BufferedImage
+            (originalImage.getColorModel(),
+             originalImage.copyData(null),
+             originalImage.getColorModel().isAlphaPremultiplied(),
+             null);
+    
+        boolean hasTransparent =
+            grayScaleImage.getColorModel().hasAlpha();
+        int width = grayScaleImage.getWidth();
+        int height = grayScaleImage.getHeight();
+    
+        // A common pixel-by-pixel grayscale conversion algorithm
+        // using values obtained from en.wikipedia.org/wiki/Grayscale.
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+            	
+            	// Check if the pixel is transparent in the original.
+                if (hasTransparent 
+                    && (grayScaleImage.getRGB(j,
+                                              i) >> 24) == 0x00) 
+                    continue;
+                
+                // Convert the pixel to grayscale.
+                Color c = new Color(grayScaleImage.getRGB(j,
+                                                          i));
+                int grayConversion =
+                    (int) (c.getRed() * 0.299)
+                    + (int) (c.getGreen() * 0.587)
+                    + (int) (c.getBlue() * 0.114);
+                Color grayScale = new Color(grayConversion,
+                                            grayConversion,
+                                            grayConversion);
+                grayScaleImage.setRGB(j, i, grayScale.getRGB());
+            }
+        }
+   	
+        return new Image(image.getSourceURL(),
+                         grayScaleImage);
+    }
+
+    /**
      * Gets the list of lists of URLs from which the user wants to
      * download images.
      */
@@ -97,21 +144,19 @@ public final class PlatSpec {
 
             // Map each string in the list into a list of URLs.
             .map(stringOfNames
-                 -> {
-                    return Pattern
-                        // Create a regular expression for the "," separator.
-                        .compile(",")
+                 -> Pattern
+                     // Create a regular expression for the "," separator.
+                     .compile(",")
 
-                        // Use regular expression to split stringOfNames into a
-                        // Stream<String>.
-                        .splitAsStream(stringOfNames)
+                     // Use regular expression to split stringOfNames into a
+                     // Stream<String>.
+                     .splitAsStream(stringOfNames)
 
-                        // Concatenate the url prefix with each name.
-                        .map(ClassLoader::getSystemResource)
+                     // Concatenate the url prefix with each name.
+                     .map(ClassLoader::getSystemResource)
 
-                        // Create a list of URLs.
-                        .collect(toList());
-                 })
+                     // Create a list of URLs.
+                     .collect(toList()))
 
             // Create and return a list of a list of URLs.
             .collect(toList());

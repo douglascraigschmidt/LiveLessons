@@ -1,8 +1,6 @@
 package livelessons.filters;
 
-import android.graphics.Bitmap;
-import android.graphics.Color;
-
+import livelessons.platspec.PlatSpec;
 import livelessons.utils.Image;
 
 /**
@@ -33,45 +31,9 @@ public class GrayScaleFilter
      * conversion using a pixel-by-pixel coloring algorithm.
      */
     @Override
-    protected Image applyFilter(Image image) {
+    public Image applyFilter(Image image) {
         // Forward to the platform-specific implementation of this
         // filter.
-        Bitmap bitmap = image.getImage();
-        Bitmap originalImage = bitmap;
-
-        Bitmap grayScaleImage =
-            originalImage.copy(originalImage.getConfig(), true);
-
-        boolean hasTransparent = grayScaleImage.hasAlpha();
-        int width = grayScaleImage.getWidth();
-        int height = grayScaleImage.getHeight();
-
-        // A common pixel-by-pixel grayscale conversion algorithm
-        // using values obtained from en.wikipedia.org/wiki/Grayscale.
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-            	
-            	// Check if the pixel is transparent in the original
-            	// by checking if the alpha is 0
-                if (hasTransparent 
-                    && ((grayScaleImage.getPixel(j, i) & 0xff000000) >> 24) == 0) {
-                    continue;
-                }
-                
-                // Convert the pixel to grayscale.
-                int pixel = grayScaleImage.getPixel(j, i);
-                int grayScale = 
-                    (int) (Color.red(pixel) * .299
-                           + Color.green(pixel) * .587
-                           + Color.blue(pixel) * .114);
-                grayScaleImage.setPixel(j, i, 
-                                        Color.rgb(grayScale, grayScale, grayScale)
-                                        );
-            }
-        }
-
-        // Return an Image containing the filtered image.
-        return new Image(image.getSourceURL(),
-                         grayScaleImage);
+        return PlatSpec.applyFilter(image);
     }
 }
