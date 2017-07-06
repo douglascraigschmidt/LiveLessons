@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
  * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
  * for more info.
  */
-class FuturesCollector<T>
+public class FuturesCollector<T>
       implements Collector<CompletableFuture<T>,
                  Collection<CompletableFuture<T>>,
                  CompletableFuture<List<T>>> {
@@ -101,11 +101,21 @@ class FuturesCollector<T>
      * indicating the characteristics of this Collector.  This set
      * should be immutable.
      *
-     * @return an immutable set of collector characteristics, which in
+     * @return An immutable set of collector characteristics, which in
      * this case is simply UNORDERED
      */
     @Override
     public Set characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
+    }
+
+    /**
+     * This static factory method creates a new FuturesCollector.
+     *
+     * @return A new FuturesCollector()
+     */
+    public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
+                          toFutures() {
+        return new FuturesCollector<T>();
     }
 }

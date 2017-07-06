@@ -185,7 +185,7 @@ public class ex18 {
                                                   -> func.apply(n)))
 
             // Collect the results into a single completable future.
-            .collect(new FuturesCollector<>());
+            .collect(FuturesCollector.toFutures());
 
         // Wait for the single future to complete and then printout
         // all the results.
