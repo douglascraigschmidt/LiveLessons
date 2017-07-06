@@ -148,11 +148,11 @@ public final class PlatSpec {
                      // Create a regular expression for the "," separator.
                      .compile(",")
 
-                     // Use regular expression to split stringOfNames into a
-                     // Stream<String>.
+                     // Use regular expression to split stringOfNames
+                     // into a Stream<String>.
                      .splitAsStream(stringOfNames)
 
-                     // Concatenate the url prefix with each name.
+                     // Get the URL from the class loader.
                      .map(ClassLoader::getSystemResource)
 
                      // Create a list of URLs.

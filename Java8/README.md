@@ -76,3 +76,7 @@ Here's an overview of what's included:
   the correct identity value and to ensure operations are associative.
   It also demonstrates what goes wrong when reduce() performs a
   mutable reduction on a parallel stream.
+
+. ex18 -- This program shows how to use a custom collector in
+  conjunction with a stream of completable futures.
+
