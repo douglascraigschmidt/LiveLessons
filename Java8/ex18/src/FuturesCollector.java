@@ -73,9 +73,9 @@ public class FuturesCollector<T>
     public Function<Collection<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
         return futures
             -> CompletableFuture
-            // Use CompletableFuture.allOf() to obtain a CompletableFuture
-            // that will itself be complete when all CompletableFutures in
-            // futureList parameter have completed.
+            // Use CompletableFuture.allOf() to obtain a
+            // CompletableFuture that will itself be complete when all
+            // CompletableFutures in futures have completed.
             .allOf(futures
                    .stream()
                    .toArray(CompletableFuture[]::new))
@@ -83,8 +83,8 @@ public class FuturesCollector<T>
             // When all futures have completed get a CompletableFuture
             // to a list of joined elements of type T.
             .thenApply(v -> futures
-                       // Convert futureList into a stream of
-                       // completable futures.
+                       // Convert futures into a stream of completable
+                       // futures.
                        .stream()
 
                        // Use map() to join() all completablefutures
