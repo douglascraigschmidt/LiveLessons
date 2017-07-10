@@ -30,6 +30,7 @@ public class SearchStreamGangTest {
         PARALLEL_STREAM_PHASES,
         PARALLEL_STREAMS,
         PARALLEL_SPLITERATOR,
+        FORK_JOIN,
         COMPLETABLE_FUTURES_PHASES,
         COMPLETABLE_FUTURES_INPUTS
     }
@@ -38,38 +39,41 @@ public class SearchStreamGangTest {
      * Factory method that creates the desired type of
      * SearchStreamGang subclass implementation strategy.
      */
-    private static SearchStreamGang makeSearchStreamGang(List<String> phaseList,
+    private static SearchStreamGang makeSearchStreamGang(List<String> phraseList,
                                                          List<List<CharSequence>> inputData,
                                                          TestsToRun choice) {
         switch (choice) {
         case SEQUENTIAL_LOOPS:
-            return new SearchWithSequentialLoops(phaseList,
+            return new SearchWithSequentialLoops(phraseList,
                         inputData);
         case SEQUENTIAL_STREAM:
-            return new SearchWithSequentialStreams(phaseList,
+            return new SearchWithSequentialStreams(phraseList,
                                                   inputData);
+        case FORK_JOIN:
+            return new SearchWithForkJoin(phraseList,
+                                          inputData);
         case PARALLEL_SPLITERATOR:
-            return new SearchWithParallelSpliterator(phaseList,
+            return new SearchWithParallelSpliterator(phraseList,
                                                      inputData);
         case PARALLEL_STREAM_INPUTS:
-            return new SearchWithParallelStreamInputs(phaseList,
+            return new SearchWithParallelStreamInputs(phraseList,
                                                       inputData);
         case PARALLEL_STREAM_PHASES:
-            return new SearchWithParallelStreamPhrases(phaseList,
+            return new SearchWithParallelStreamPhrases(phraseList,
                                                      inputData);
         case PARALLEL_STREAMS:
-            return new SearchWithParallelStreams(phaseList,
+            return new SearchWithParallelStreams(phraseList,
                                                  inputData);
         case COMPLETABLE_FUTURES_PHASES:
-            return new SearchWithCompletableFuturesPhrases(phaseList,
+            return new SearchWithCompletableFuturesPhrases(phraseList,
                                                          inputData);
         case COMPLETABLE_FUTURES_INPUTS:
-            return new SearchWithCompletableFuturesInputs(phaseList,
+            return new SearchWithCompletableFuturesInputs(phraseList,
                                                           inputData);
         case RXJAVA_INPUTS:
-            return new SearchWithRxJavaInputs(phaseList, inputData);
+            return new SearchWithRxJavaInputs(phraseList, inputData);
         case RXJAVA_PHASES:
-            return new SearchWithRxJavaPhrases(phaseList, inputData);
+            return new SearchWithRxJavaPhrases(phraseList, inputData);
         }
         return null;
     }
