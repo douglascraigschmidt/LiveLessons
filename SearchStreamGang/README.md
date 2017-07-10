@@ -4,10 +4,10 @@ command-line app that reimplements the
 example from my [Java
 Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava/)
 LiveLessons tutorial to show how Java 8 features, such as lambdas,
-method references, sequential & parallel streams, and completable
-futures, can be applied to search for words in a list of input data
-strings. This app also compares and contrasts the performance of
-different concurrency models based on Parallel Streams and
-CompletableFutures.
+method references, sequential and parallel streams, completable
+futures, as well as the Java 7 fork-join framework, can be applied to
+search for words in a list of input data strings. This app also
+compares and contrasts the performance of different concurrency and
+parallelism models.
 
 

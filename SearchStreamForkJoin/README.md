@@ -8,6 +8,7 @@ works of Shakespeare.  Here's an overview of what's included:
   approach, i.e., splitting the various (inputs|phrases|strings) in
   half.
 
-. Java8 -- This example provides a Java 8 implementation of the
-  fork-join-based program.
+. RecursiveTraverse -- This example provides a Java 8 implementation
+  of the fork-join-based example from
+  http://www.oracle.com/technetwork/articles/java/fork-join-422606.html.
 

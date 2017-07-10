@@ -1,6 +1,6 @@
 import org.junit.Test;
-import search.PhraseMatchTask;
-import search.SearchResults;
+import livelessons.utils.PhraseMatchTask;
+import livelessons.utils.SearchResults;
 
 import java.util.StringTokenizer;
 
@@ -23,16 +23,14 @@ BasicPhraseMatchTaskTest {
      * Search for a phrase in the input data.
      */
     private static SearchResults searchForPhrase(String phrase,
-                                                 CharSequence inputData,
-                                                 boolean parallel) {
+                                                 CharSequence inputData) {
         return new SearchResults
             (phrase,
              "",
              // Perform the processing (either sequentially or in
              // parallel) and return a list of Results.
              new PhraseMatchTask(inputData,
-                                 phrase,
-                                 parallel).compute());
+                                 phrase).compute());
     }
 
     /**
@@ -49,29 +47,18 @@ BasicPhraseMatchTaskTest {
         while (tokenizer.hasMoreElements()) {
             String nextWord = tokenizer.nextToken();
 
-            // Conduct a sequential search.
+            // Conduct a parallel search.
             SearchResults r1 =
                 searchForPhrase(nextWord,
-                                sINPUT_DATA,
-                                false);
-
-            // Conduct a parallel search.
-            SearchResults r2 =
-                searchForPhrase(nextWord,
-                                sINPUT_DATA,
-                                true);
+                                sINPUT_DATA);
             
             // Get the results as strings.
-            String sequentialResult = r1.toString();
-            String parallelResult = r2.toString();
+            String parallelResult = r1.toString();
 
             // Make sure the results are correct.
             assertNotEquals(0, r1.getResultList().size());
-            assertNotEquals(0, r2.getResultList().size());
-            assertEquals(true, sequentialResult.equals(parallelResult));
 
             // Print the results.
-            System.out.println (sequentialResult + ": sequential");
             System.out.println (parallelResult + ": parallel");
         }
     }
