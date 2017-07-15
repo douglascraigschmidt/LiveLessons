@@ -26,12 +26,14 @@ public class TestDataFactory {
      * Return a folder object that's used to search a recursive
      * directory containing the complete works of William Shakespeare.
      */
-    public static Folder getFolder(String rootFolderName)
+    public static Folder getRootFolder(String rootFolderName,
+                                       boolean parallel)
         throws URISyntaxException, IOException {
         return Folder
             .fromDirectory(new File(ClassLoader
                                     .getSystemResource(rootFolderName)
-                                    .toURI()));
+                                    .toURI()),
+                           parallel);
     }
 
     /**

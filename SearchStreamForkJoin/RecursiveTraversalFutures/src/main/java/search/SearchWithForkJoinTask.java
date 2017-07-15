@@ -123,36 +123,6 @@ public class SearchWithForkJoinTask
 
                 // Trigger intermediate operations and return a list.
                 .collect(toList());
-
-            /*
-            // Create a list of all the tasks that search for phrases
-            // in the docs comprising a work.
-            List<SearchForPhrasesTask> docsList = docsStream
-                // Convert each Document object to a
-                // SearchForPhrasesTask object.
-                .map(doc
-                     -> new SearchForPhrasesTask(mWork.getName(),
-                                                 doc.getContents(),
-                                                 mPhrasesToFind,
-                                                 mParallelSearching,
-                                                 mParallelPhrases))
-
-                // Trigger intermediate operation processing and
-                // return a list.
-                .collect(toList());
-
-            
-            // Return a list of SearchResults corresponding to this
-            // work.  The invokeAll() method forks all the tasks in
-            // the docsList and returns a collection until they are
-            // done.
-            return invokeAll(docsList)
-                // Convert
-                .stream()
-                .map(RecursiveTask::join)
-                .flatMap(List::stream)
-                .collect(toList());
-            */
         }
     }
 
@@ -212,17 +182,6 @@ public class SearchWithForkJoinTask
                 // Trigger intermediate operation processing and
                 // return a list.
                 .collect(toList());
-
-            /*
-            List<WorkSearchTask> worksList = worksStream
-                .map(WorkSearchTask::new)
-                .collect(toList());
-
-            return invokeAll(worksList)
-                    .stream()
-                    .map(RecursiveTask::join)
-                    .collect(toList());
-            */
         }
     }
         

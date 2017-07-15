@@ -142,14 +142,18 @@ public class SearchWithForkJoinTask
                 // return a list.
                 .collect(toList());
 
+            Stream<SearchForPhrasesTask> resultsStream = invokeAll(docsList)
+                // Convert the list into a stream.
+                .stream();
+
+            if (mParallelInput)
+                resultsStream.parallel();
+
             // Return a list of SearchResults corresponding to this
             // work.  The invokeAll() method forks all the tasks in
             // the docsList and returns a collection once all the
             // tasks are done.
-            return invokeAll(docsList)
-                // Convert the list into a stream.
-                .stream()
-
+            return resultsStream
                 // Join all the SearchForPhrasesTask results.
                 .map(RecursiveTask::join)
 

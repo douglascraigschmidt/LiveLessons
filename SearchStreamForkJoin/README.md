@@ -20,4 +20,9 @@ works of Shakespeare.  Here's an overview of what's included:
   http://www.oracle.com/technetwork/articles/java/fork-join-422606.html,
   but is much more powerful and interesting.
 
+. RecursiveTraversalFutures -- This example implements an
+  "embarrassingly parallel" program that uses the Java 7 fork-join
+  framework and the Java 8 completable futures framework to search for
+  phrases in a recursive directory folder containing the works of
+  Shakespeare.
 

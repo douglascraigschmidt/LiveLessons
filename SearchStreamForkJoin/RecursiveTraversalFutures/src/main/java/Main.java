@@ -14,12 +14,9 @@ import static utils.StreamsUtils.PentaFunction;
 
 /**
  * This example implements an "embarrassingly parallel" program that
- * uses the Java 7 fork-join framework in conjunction with Java 8
- * sequential and/or parallel streams to search for phrases in a
- * recursive directory folder containing the works of Shakespeare.
- * This example is (very) loosely based on the fork-join tutorial at
- * http://www.oracle.com/technetwork/articles/java/fork-join-422606.html,
- * but is much more powerful and interesting.
+ * uses the Java 7 fork-join framework and the Java 8 completable
+ * futures framework to search for phrases in a recursive directory
+ * folder containing the works of Shakespeare.
  */
 public class Main {
     /*
@@ -96,7 +93,7 @@ public class Main {
         // This object is used to search a recursive directory
         // containing the complete works of William Shakespeare.
         Folder folder = TestDataFactory
-            .getFolder(sSHAKESPEARE_FOLDER);
+            .getRootFolder(sSHAKESPEARE_FOLDER);
 
         // Create the appropriate type of object.
         SearchWithForkJoinTask forkJoinTask =
