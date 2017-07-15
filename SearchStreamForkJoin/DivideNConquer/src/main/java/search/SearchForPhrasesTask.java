@@ -16,35 +16,35 @@ public class SearchForPhrasesTask
     /**
      * The input string to search.
      */
-    protected final CharSequence mInputString;
+    final CharSequence mInputString;
 
     /**
      * The list of phrases to find.
      */
-    protected List<String> mPhraseList;
+    List<String> mPhraseList;
 
     /**
      * Indicates whether to run the spliterator concurrently.
      */
-    protected boolean mParallelSearching;
+    boolean mParallelSearching;
 
     /**
      * Indicates whether to run the phrases concurrently.
      */
-    protected boolean mParallelPhrases;
+    boolean mParallelPhrases;
 
     /**
      * The minimum size of the phrases list to split.
      */
-    protected int mMinSplitSize;
+    int mMinSplitSize;
 
     /**
      * Constructor initializes the field.
      */
-    public SearchForPhrasesTask(CharSequence inputString,
-                                List<String> phraseList,
-                                boolean parallelSearching,
-                                boolean parallelPhrases) {
+    SearchForPhrasesTask(CharSequence inputString,
+                         List<String> phraseList,
+                         boolean parallelSearching,
+                         boolean parallelPhrases) {
         mInputString = inputString;
         mPhraseList = phraseList;
         mParallelSearching = parallelSearching;
@@ -57,11 +57,11 @@ public class SearchForPhrasesTask
      * It initializes all the fields for the "left hand size" of a
      * split.
      */
-    public SearchForPhrasesTask(CharSequence inputString,
-                                 List<String> phraseList,
-                                 boolean parallelSearching,
-                                 boolean parallelPhrases,
-                                 int minSplitSize) {
+    SearchForPhrasesTask(CharSequence inputString,
+                         List<String> phraseList,
+                         boolean parallelSearching,
+                         boolean parallelPhrases,
+                         int minSplitSize) {
         mInputString = inputString;
         mPhraseList = phraseList;
         mParallelSearching = parallelSearching;
@@ -71,8 +71,8 @@ public class SearchForPhrasesTask
 
     /**
      * Perform the computations sequentially at this point.
-     * @param startIndex
-     * @param endIndex
+     * @param startIndex Starting index for the computations
+     * @param endIndex   Ending index for the computations
      */
     private List<SearchResults> computeSequentially(int startIndex,
                                                     int endIndex) {
@@ -94,9 +94,7 @@ public class SearchForPhrasesTask
             // data.
             SearchResults sr =
                 new SearchResults
-                (Thread.currentThread().getId(),
-                 1,
-                 phrase,
+                (phrase,
                  title,
                  // Use a PhraseMatchTask to add the indices of all
                  // places in the inputData where phrase matches.
@@ -122,7 +120,8 @@ public class SearchForPhrasesTask
         int partitionSize = getPartitionSize();
         if (partitionSize < mMinSplitSize
             || !mParallelPhrases)
-            return computeSequentially(getStartIndex(),getEndIndex());
+            return computeSequentially(getStartIndex(),
+                                       getEndIndex());
         else 
             // Compute position to split the phrase list and forward
             // to the splitPhraseList() method to perform the split.
@@ -143,16 +142,18 @@ public class SearchForPhrasesTask
         // concurrently handles the "left hand" part of the input,
         // while "this" handles the "right hand" part of the input.
         ForkJoinTask<List<SearchResults>> leftTask =
-                forkLeftTask(splitPos,mMinSplitSize);
+                forkLeftTask(splitPos,
+                             mMinSplitSize);
 
         // Update "this" SearchForPhrasesTask to handle the "right
         // hand" portion of the input.
-        List<SearchResults> rightResult = computeRightTask(splitPos,mMinSplitSize);
+        List<SearchResults> rightResult = computeRightTask(splitPos,
+                                                           mMinSplitSize);
 
         // Wait and join the results from the left task.
         List<SearchResults> leftResult = leftTask.join();
 
-        // sConcatenate the left result with the right result.
+        // Concatenate the left result with the right result.
         leftResult.addAll(rightResult);
 
         // Return the result.
@@ -160,22 +161,29 @@ public class SearchForPhrasesTask
     }
 
     /**
-     *
+     * Compute the right task.
      */
-    protected List<SearchResults> computeRightTask(int splitPos,int mMinSplitSize) {
-        mPhraseList = mPhraseList.subList(splitPos, getPartitionSize());
+    protected List<SearchResults> computeRightTask(int splitPos,
+                                                   int unused) {
+        // Update mPhraseList to contain a sublist at the split
+        // position.
+        mPhraseList = mPhraseList.subList(splitPos,
+                                          getPartitionSize());
 
         // Recursively call compute() to continue the splitting.
         return compute();
     }
 
     /**
-     *
+     * Compute the left task.
      */
     protected ForkJoinTask<List<SearchResults>> forkLeftTask(int splitPos,
                                                              int mMinSplitSize) {
+            // Create and fork a new task to handle the "right hand"
+            // portion of the split.
         return new SearchForPhrasesTask(mInputString,
-                                        mPhraseList.subList(0, splitPos),
+                                        mPhraseList.subList(0, 
+                                                            splitPos),
                                         mParallelSearching,
                                         mParallelPhrases,
                                         mMinSplitSize).fork();

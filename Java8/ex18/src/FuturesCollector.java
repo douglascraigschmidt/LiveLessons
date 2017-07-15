@@ -20,8 +20,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class FuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                 Collection<CompletableFuture<T>>,
-                 CompletableFuture<List<T>>> {
+                           Collection<CompletableFuture<T>>,
+                           CompletableFuture<List<T>>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -112,7 +112,7 @@ public class FuturesCollector<T>
     /**
      * This static factory method creates a new FuturesCollector.
      *
-     * @return A new FuturesCollector()
+     * @return A new FuturesCollector
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
                           toFutures() {

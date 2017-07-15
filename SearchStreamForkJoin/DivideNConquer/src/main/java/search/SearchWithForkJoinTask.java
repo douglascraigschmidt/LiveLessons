@@ -16,39 +16,39 @@ public class SearchWithForkJoinTask
     /**
      * The list of strings to search.
      */
-    protected List<? extends CharSequence> mInputList;
+    List<? extends CharSequence> mInputList;
 
     /**
      * The list of phrases to find.
      */
-    protected List<String> mPhrasesToFind;
+    List<String> mPhrasesToFind;
 
     /**
      * Indicates whether to search for a phrase in each string
      * concurrently.
      */
-    protected boolean mParallelSearching;
+    boolean mParallelSearching;
 
     /**
      * Indicates whether to run the phrases concurrently.
      */
-    protected boolean mParallelPhrases;
+    boolean mParallelPhrases;
 
     /**
      * Indicates whether to run the input concurrently.
      */
-    protected boolean mParallelInput;
+    boolean mParallelInput;
 
     /**
      * The minimum size of an input list to split.
      */
-    protected int mMinSplitSize;
+    int mMinSplitSize;
 
     /**
      * Customize the QuadFunction for the SearchForPhrasesTask
      * hierarchy of classes so we can use constructor references.
      */
-    protected interface SearchForPhrasesTaskFactory
+    interface SearchForPhrasesTaskFactory
               extends QuadFunction<CharSequence,
                                    List<String>,
                                    Boolean,
@@ -84,12 +84,12 @@ public class SearchWithForkJoinTask
      * It initializes all the fields for the "left hand size" of a
      * split.
      */
-    public SearchWithForkJoinTask(List<? extends CharSequence> inputList,
-                                  List<String> phrasesToFind,
-                                  boolean parallelSearching,
-                                  boolean parallelPhrases,
-                                  boolean parallelInput,
-                                  int minSplitSize) {
+    SearchWithForkJoinTask(List<? extends CharSequence> inputList,
+                           List<String> phrasesToFind,
+                           boolean parallelSearching,
+                           boolean parallelPhrases,
+                           boolean parallelInput,
+                           int minSplitSize) {
         mInputList = inputList;
         mPhrasesToFind = phrasesToFind;
         mParallelSearching = parallelSearching;
@@ -103,8 +103,8 @@ public class SearchWithForkJoinTask
      * Perform the computations sequentially at this point from @a
      * startIndex to @a endIndex.
      */
-    List<List<SearchResults>> computeSequentially(int startIndex,
-                                                  int endIndex) {
+    private List<List<SearchResults>> computeSequentially(int startIndex,
+                                                          int endIndex) {
         // Create a list to hold the results.
         List<List<SearchResults>> results =
                 new ArrayList<>(getPartitionSize());
@@ -198,7 +198,7 @@ public class SearchWithForkJoinTask
      * Recursively compute the right task.
      */
     protected List<List<SearchResults>> computeRightTask(int splitPos,
-                                                         int mMinSplitSize) {
+                                                         int mUnused) {
         // Update "this" SearchWithForkJoinTask to handle the "right
         // hand" portion of the input.
         mInputList =

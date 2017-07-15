@@ -20,10 +20,10 @@ public class IndexAwareSearchForPhrasesTask
      */
     private final int mEndIndex;
 
-    public IndexAwareSearchForPhrasesTask(CharSequence inputString,
-                                          List<String> phraseList,
-                                          boolean parallelSearching,
-                                          boolean parallelPhrases) {
+    IndexAwareSearchForPhrasesTask(CharSequence inputString,
+                                   List<String> phraseList,
+                                   boolean parallelSearching,
+                                   boolean parallelPhrases) {
         super(inputString,
               phraseList,
               parallelSearching,
@@ -84,12 +84,12 @@ public class IndexAwareSearchForPhrasesTask
      */
     @Override
     protected List<SearchResults> computeRightTask(int splitPos,
-                                                   int mMinSplitSize) {
+                                                   int minSplitSize) {
         return new IndexAwareSearchForPhrasesTask(mInputString,
                                                   mPhraseList,
                                                   mParallelSearching,
                                                   mParallelPhrases,
-                                                  mMinSplitSize,
+                                                  minSplitSize,
                                                   mStartIndex + splitPos,
                                                   mEndIndex).compute();
     }

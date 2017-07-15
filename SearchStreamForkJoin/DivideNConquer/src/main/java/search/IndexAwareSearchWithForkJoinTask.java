@@ -91,29 +91,34 @@ public class IndexAwareSearchWithForkJoinTask
 
     /**
      * Recursively compute the right task.
+     *
+     * @return A list of lists of search results
      */
     @Override
     protected List<List<SearchResults>> computeRightTask(int splitPos,
                                                          int mMinSplitSize) {
-        IndexAwareSearchWithForkJoinTask indexAwareSearchWithForkJoinTask =
-            new IndexAwareSearchWithForkJoinTask(mInputList,
-                                                 mPhrasesToFind,
-                                                 mParallelSearching,
-                                                 mParallelPhrases,
-                                                 mParallelInput,
-                                                 mMinSplitSize,
-                                                 mStartIndex + splitPos,
-                                                 mEndIndex);
-        return indexAwareSearchWithForkJoinTask.compute();
+        // Return a list of lists of search results.
+        return new IndexAwareSearchWithForkJoinTask(mInputList,
+                                                    mPhrasesToFind,
+                                                    mParallelSearching,
+                                                    mParallelPhrases,
+                                                    mParallelInput,
+                                                    mMinSplitSize,
+                                                    mStartIndex + splitPos,
+                                                    mEndIndex).compute();
     }
 
     /**
      * Create and fork a new SearchWithForkJoinTask that concurrently
-     * handles the "left hand" part of the input
+     * handles the "left hand" part of the input.
+     *
+     * @return A ForkJoinTask
      */
     @Override
     protected ForkJoinTask<List<List<SearchResults>>> forkLeftTask(int splitPos,
                                                                    int mMinSplitSize) {
+        // Create and fork a new SearchWithForkJoinTask that
+        // concurrently handles the "left hand" part of the input.
         return new IndexAwareSearchWithForkJoinTask(mInputList,
                                                     mPhrasesToFind,
                                                     mParallelSearching,

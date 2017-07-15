@@ -8,7 +8,7 @@ import java.util.stream.Collector;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Keeps track of how many times a word appears in an input string.
+ * Keeps track of how many times a phrase appears in an input string.
  */
 public class SearchResults {
     /**
@@ -16,7 +16,7 @@ public class SearchResults {
      */
     public static class Result {
         /**
-         * The index in the search String where the word that was
+         * The index in the search String where the phrase that was
          * found.
          */
         private int mIndex;
@@ -51,9 +51,9 @@ public class SearchResults {
     private long mThreadId;
 
     /**
-     * The word that was found.
+     * The phrase that was found.
      */
-    private String mWord;
+    private String mPhrase;
 
     /**
      * The section title this search is associated with.
@@ -66,7 +66,7 @@ public class SearchResults {
     private long mCycle;
 
     /**
-     * The List of Result objects that matched the @code mWord.
+     * The List of Result objects that matched the @code mPhrase.
      */
     private List<Result> mList;
 
@@ -90,11 +90,11 @@ public class SearchResults {
      */
     public SearchResults(long threadId,
                          long cycle,
-                         String word,
+                         String phrase,
                          String title) {
         mThreadId = threadId;
         mCycle = cycle;
-        mWord = word;
+        mPhrase = phrase;
         mTitle = title;
         mList = new ArrayList<>();
     }
@@ -105,12 +105,12 @@ public class SearchResults {
      */
     public SearchResults(long threadId,
                          long cycle,
-                         String word,
+                         String phrase,
                          String title,
                          List<Result> resultList) {
         mThreadId = threadId;
         mCycle = cycle;
-        mWord = word;
+        mPhrase = phrase;
         mTitle = title;
         mList = resultList;
     }
@@ -119,12 +119,12 @@ public class SearchResults {
      * Create a SearchResults with values for the various fields.
      * This constructor is also passed a filled in resultList.
      */
-    public SearchResults(String word,
+    public SearchResults(String phrase,
                          String title,
                          List<Result> resultList) {
         mThreadId = Thread.currentThread().getId();
         mCycle = 1;
-        mWord = word;
+        mPhrase = phrase;
         mTitle = title;
         mList = resultList;
     }
@@ -137,7 +137,7 @@ public class SearchResults {
      * Convert to header to String form.
      */
     public String headerToString() {
-        return "\"" + mWord + "\" at ";
+        return "\"" + mPhrase + "\" at ";
     }
 
     /**
@@ -162,10 +162,10 @@ public class SearchResults {
     }
 
     /**
-     * Return the word.
+     * Return the phrase.
      */
-    public String getWord() {
-        return mWord;
+    public String getPhrase() {
+        return mPhrase;
     }
 
     /**
