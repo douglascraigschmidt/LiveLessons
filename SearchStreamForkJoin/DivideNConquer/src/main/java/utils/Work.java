@@ -11,11 +11,6 @@ import static java.lang.Integer.max;
  */
 public class Work {
     /**
-     * The title of the work.
-     */
-    private String mTitle;
-
-    /**
      * The complete contents of the work.
      */
     private CharSequence mContents;
@@ -32,11 +27,6 @@ public class Work {
          * Shakespeare.
          */
         private List<Document> mDocsList;
-
-        /**
-         * This object is used to concatenate the CharSequences together.
-         */
-        private final StringBuilder mStringBuilder;
 
         /**
          * Indicates whether to process the documents in parallel.
@@ -64,7 +54,6 @@ public class Work {
             if (docsFolder.size() > 0)
                 mDocsList.addAll(docsFolder.get(0).getDocuments());
 
-            mStringBuilder = new StringBuilder("");
             mParallel = parallel;
 
             // Don't let mMinSplitSize fall below 1!
@@ -80,7 +69,6 @@ public class Work {
                                     boolean parallel,
                                     int minSplitSize) {
             mDocsList = docsList;
-            mStringBuilder = new StringBuilder("");
             mParallel = parallel;
             mMinSplitSize = minSplitSize;
         }
@@ -89,14 +77,17 @@ public class Work {
          * Perform the computations sequentially at this point.
          */
         private CharSequence computeSequentially() {
+            // Used to concatenate the CharSequences together.
+            StringBuilder stringBuilder = new StringBuilder();
+
             // Iterate through the list of documents.
             for (Document doc : mDocsList)
                 // Append the contents of each document.
-                mStringBuilder.append(doc.getContents());
+                stringBuilder.append(doc.getContents());
 
             // Return a CharSequence containing the contents of this
             // Shakespeare work.
-            return mStringBuilder.toString();
+            return stringBuilder.toString();
         }
 
         /**
@@ -106,7 +97,7 @@ public class Work {
          */
         @Override
         public CharSequence compute() {
-            // Check to see if we're done spliting and should now
+            // Check to see if we're done splitting and should now
             // compute sequentially.
             if (mDocsList.size() <= mMinSplitSize
                 || !mParallel) {
@@ -137,13 +128,18 @@ public class Work {
             CharSequence rightResult = computeRightTask(splitPos);
 
             // Wait and join the results from the left task.
-            mStringBuilder.append(leftTask.join());
+            CharSequence leftResult = leftTask.join();
 
-            // Concatenate the left result with the right result.
-            mStringBuilder.append(rightResult);
+            // Used to concatenate the CharSequences together.
+            StringBuilder stringBuilder = new StringBuilder();
 
             // Return the result.
-            return mStringBuilder.toString();
+            return stringBuilder
+                // Append the left result.
+                .append(leftResult)
+                // Concatenate the left result with the right result.
+                .append(rightResult)
+                .toString();
         }
 
         /**
@@ -178,22 +174,13 @@ public class Work {
      */
     public Work(Folder folder,
                 boolean parallel) {
-        // Store the title.
-        mTitle = folder.getName();
-
         // Concatenate the contents of the intro document and all the
         // acts together.
         mContents =
             new GetWorkContentsTask(folder,
                                     parallel).compute();
+        // System.out.println("first 20 characters of contents are: " + mContents.subSequence(0, 20));
     } 
-
-    /**
-     * @return The title of the work.
-     */
-    public String getTitle() {
-        return mTitle;
-    }
 
     /**
      * The complete contents of the work.

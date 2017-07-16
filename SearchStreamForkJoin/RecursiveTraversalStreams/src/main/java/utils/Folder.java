@@ -1,7 +1,8 @@
 package utils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -56,29 +57,34 @@ public class Folder {
     }
     
     /**
-     * Factory method that creates a folder from the given @a dir.
+     * Factory method that creates a folder from the given @a rootPath.
      */
-    public static Folder fromDirectory(File dir,
-                                       boolean parallel) throws IOException {
-        //noinspection ConstantConditions
-        Stream<File> folderStream = Stream
+    static Folder fromDirectory(Path rootPath,
+                                boolean parallel) throws IOException {
+        // Create a stream containing all the contents at the given
+        // rootPath.
+        Stream<Path> pathStream = Files
             // Obtain a listing of all the subfolders and documents in
-            // this folder.
-            .of(dir.listFiles());
+            // just this folder.
+            .walk(rootPath, 1);
 
         if (parallel)
-            folderStream.parallel();
+            pathStream.parallel();
 
-        Folder folder = folderStream
+        // Create a folder containing all the contents at the given
+        // rootPath.
+        Folder folder = pathStream
+            // Eliminate ourselves!
+            .filter(path -> !path.equals(rootPath))
+
             // Terminate the stream and create a Folder containing all
             // the subfolders and documents in this folder.
             .collect(FolderCollector.toFolder(parallel));
 
         // Set the name of the folder.
-        folder.mName = dir.getName();
+        folder.mName = rootPath.getFileName().toString();
 
         // Return a Folder containing the contents of this directory.
         return folder;
     }
 }
-

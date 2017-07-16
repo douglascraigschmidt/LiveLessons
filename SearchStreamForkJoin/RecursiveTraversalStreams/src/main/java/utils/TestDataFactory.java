@@ -32,7 +32,7 @@ public class TestDataFactory {
         return Folder
             .fromDirectory(new File(ClassLoader
                                     .getSystemResource(rootFolderName)
-                                    .toURI()),
+                                    .toURI()).toPath(),
                            parallel);
     }
 

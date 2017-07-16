@@ -4,12 +4,10 @@ import utils.Document;
 import utils.Folder;
 
 import java.util.List;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static utils.StreamsUtils.PentaFunction;
 
 /**
  * Implements RecursiveTask and shows how the Java fork-join framework

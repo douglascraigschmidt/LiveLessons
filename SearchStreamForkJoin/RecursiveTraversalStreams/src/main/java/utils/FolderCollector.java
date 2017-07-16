@@ -1,8 +1,7 @@
 package utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -12,11 +11,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Implements a custom collector that converts a stream of File
+ * Implements a custom collector that converts a stream of Path
  * objects into a single Folder object.
  */
 public class FolderCollector
-      implements Collector<File,
+      implements Collector<Path,
                            Folder,
                            Folder> {
     /**
@@ -27,7 +26,7 @@ public class FolderCollector
     /**
      * Constructor initializes the field.
      */
-    public FolderCollector(boolean parallel) {
+    private FolderCollector(boolean parallel) {
         mParallel = parallel;
     }
 
@@ -44,19 +43,20 @@ public class FolderCollector
     }
     
     /**
-     * A function that folds a File into the mutable result container.
+     * A function that folds a Path into the mutable result container.
      *
-     * @return a function which folds a File into a mutable result container
+     * @return a function which folds a Path into a mutable result container
      */
     @Override
-    public BiConsumer<Folder, File> accumulator() {
-        Function<File, Folder> getFolders =
-                ExceptionUtils.rethrowFunction(file -> Folder.fromDirectory(file, mParallel));
-        Function<File, Document> getDocuments =
-                ExceptionUtils.rethrowFunction(Document::fromFile);
+    public BiConsumer<Folder, Path> accumulator() {
+        Function<Path, Folder> getFolders =
+                ExceptionUtils.rethrowFunction(file 
+                                               -> Folder.fromDirectory(file, mParallel));
+        Function<Path, Document> getDocuments =
+                ExceptionUtils.rethrowFunction(Document::fromPath);
 
-        return (Folder folder, File entry) -> {
-                if (entry.isDirectory())
+        return (Folder folder, Path entry) -> {
+                if (Files.isDirectory(entry))
                     folder.getSubFolders().add(getFolders.apply(entry));
                 else
                     folder.getDocuments().add(getDocuments.apply(entry));
@@ -112,7 +112,7 @@ public class FolderCollector
      *
      * @return A new FolderCollector
      */
-    public static Collector<File, Folder, Folder> toFolder(boolean parallel) {
+    public static Collector<Path, Folder, Folder> toFolder(boolean parallel) {
         return new FolderCollector(parallel);
     }
 }
