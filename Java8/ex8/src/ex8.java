@@ -7,9 +7,29 @@ import java.math.BigInteger;
  * compute the greatest common divisor (GCD) of two BigIntegers.
  */
 public class ex8 {
-    static public void main (String[] argv) {
-        CompletableFuture<BigInteger>
-            future = new CompletableFuture<>();
+    public static void main (String[] argv) {
+        // testGCD();
+        testCF();
+    }
+
+    private static void testCF() {
+        CompletableFuture<BigInteger> f1 =
+            new CompletableFuture<>();
+
+        CompletableFuture<BigInteger> f2 = f1
+            .thenApply(bi -> {
+                System.out.println("bi = " + bi);
+                return bi.multiply(bi);
+            });
+        f1.complete(BigInteger.valueOf(3));
+        System.out.println("bi = " + f2.join());
+    }
+    /**
+     * Test a GCD computation using a CompletableFuture.
+     */
+    private static void testGCD() {
+        CompletableFuture<BigInteger> future =
+            new CompletableFuture<>();
 
         // Create and start a thread whose runnable lambda computes
         // the GCD of two big integers.

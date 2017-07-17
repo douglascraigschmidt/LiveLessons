@@ -1,11 +1,13 @@
+package folder;
+
+import utils.ExceptionUtils;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
@@ -15,7 +17,13 @@ import java.util.stream.Collector;
 public class FolderCollector
       implements Collector<Path,
                            Folder,
-                           Folder> {
+                           CompletableFuture<Folder>> {
+    /**
+     * The hook that's invoked whenever processing of a folder or a
+     * document has completed.
+     */
+    private EntryVisitor mEntryVisitor;
+
     /**
      * Indicates whether processing should occur in parallel.
      */
@@ -24,7 +32,9 @@ public class FolderCollector
     /**
      * Constructor initializes the field.
      */
-    private FolderCollector(boolean parallel) {
+    private FolderCollector(EntryVisitor entryVisitor,
+                            boolean parallel) {
+        mEntryVisitor = entryVisitor;
         mParallel = parallel;
     }
 
@@ -47,18 +57,10 @@ public class FolderCollector
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
-        Function<Path, Folder> getFolders =
-                ExceptionUtils.rethrowFunction(file 
-                                               -> Folder.fromDirectory(file, mParallel));
-        Function<Path, Document> getDocuments =
-                ExceptionUtils.rethrowFunction(Document::fromPath);
-
-        return (Folder folder, Path entry) -> {
-                if (Files.isDirectory(entry))
-                    folder.getSubFolders().add(getFolders.apply(entry));
-                else
-                    folder.getDocuments().add(getDocuments.apply(entry));
-        };
+        return (Folder folder, Path entry) 
+            -> folder.addEntry(entry,
+                               mEntryVisitor,
+                               mParallel);
     }
 
     /**
@@ -71,11 +73,7 @@ public class FolderCollector
      */
     @Override
     public BinaryOperator<Folder> combiner() {
-        return (Folder one, Folder another) -> {
-            one.getSubFolders().addAll(another.getSubFolders());
-            one.getDocuments().addAll(another.getDocuments());
-            return one; 
-        };
+        return Folder::addAll;
     }
 
     /**
@@ -87,8 +85,8 @@ public class FolderCollector
      * the final result, which is a Folder object
      */
     @Override
-    public Function<Folder, Folder> finisher() {
-        return Function.identity();
+    public Function<Folder, CompletableFuture<Folder>> finisher() {
+        return Folder::joinAll;
     }
     
     /**
@@ -110,7 +108,10 @@ public class FolderCollector
      *
      * @return A new FolderCollector
      */
-    public static Collector<Path, Folder, Folder> toFolder(boolean parallel) {
-        return new FolderCollector(parallel);
+    public static Collector<Path, Folder, CompletableFuture<Folder>>
+                      toFolder(EntryVisitor entryVisitor,
+                               boolean parallel) {
+        return new FolderCollector(entryVisitor,
+                                   parallel);
     }
 }

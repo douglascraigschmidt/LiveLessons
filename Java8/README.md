@@ -80,4 +80,4 @@ Here's an overview of what's included:
 . ex18 -- This program shows how to use a custom collector in
   conjunction with a stream of completable futures.
 
-. ex19 -- 
+
