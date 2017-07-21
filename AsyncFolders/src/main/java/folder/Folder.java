@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -25,22 +26,28 @@ public class Folder
     /**
      * The list of futures to subfolders contained in this folder.
      */
-    private final List<CompletableFuture<Dirent>> mSubFolderFutures;
+    private List<CompletableFuture<Dirent>> mSubFolderFutures;
 
     /**
      * The list of futures to documents contained in this folder.
      */
-    private final List<CompletableFuture<Dirent>> mDocumentFutures;
+    private List<CompletableFuture<Dirent>> mDocumentFutures;
 
     /**
      * The list of subfolders contained in this folder.
      */
-    private List<Folder> mSubFolders;
+    List<Folder> mSubFolders;
 
     /**
      * The list of documents contained in this folder.
      */
-    private List<Document> mDocuments;
+    List<Document> mDocuments;
+
+    /**
+     * The total number of entries in this recursively structured
+     * folder.
+     */
+    long mSize;
 
     /**
      * Constructor initializes the fields.
@@ -49,7 +56,30 @@ public class Folder
         mSubFolderFutures = new ArrayList<>();
         mDocumentFutures = new ArrayList<>();
     }
-    
+
+    /**
+     * Constructor initializes the fields from the parameters.
+     */
+    Folder(Path path,
+           List<Folder> subFolders,
+           List<Document> documents) {
+        super(path);
+        mSubFolders = new ArrayList<>(subFolders);
+        mDocuments = new ArrayList<>(documents);
+        mSize = mSubFolders.size() 
+            + mDocuments.size();
+    }
+
+    /**
+     * Copy constructor initializes the fields from the parameters.
+     */
+    Folder(Folder originalFolder) {
+        super(originalFolder.getPath());
+        mSubFolders = new ArrayList<>(originalFolder.getSubFolders());
+        mDocuments = new ArrayList<>(originalFolder.getDocuments());
+        mSize = originalFolder.mSize;
+    }
+
     /**
      * @return The list of subfolders in this folder
      */
@@ -67,6 +97,14 @@ public class Folder
     }
 
     /**
+     * @return The total number of entries in this recursively
+     * structured folder.
+     */
+    public long size() {
+        return mSize;
+    }
+
+    /**
      *
      */
     @Override
@@ -79,10 +117,9 @@ public class Folder
      */
     @Override
     public Stream<Dirent> stream() {
-        return Stream
-            .concat(Stream.concat(mSubFolders.stream().map(folder -> (Dirent) folder),
-                                  mDocuments.stream().map(document -> (Dirent) document)),
-                    mSubFolders.stream().flatMap(Folder::stream));
+        return StreamSupport
+            .stream(new BatchFolderSpliterator(this),
+                    false);
     }
 
     /**
@@ -90,10 +127,9 @@ public class Folder
      */
     @Override
     public Stream<Dirent> parallelStream() {
-        return Stream
-                .concat(Stream.concat(mSubFolders.parallelStream().map(folder -> (Dirent) folder),
-                        mDocuments.parallelStream().map(document -> (Dirent) document)),
-                        mSubFolders.parallelStream().flatMap(Folder::parallelStream));
+        return StreamSupport
+            .stream(new BatchFolderSpliterator(this),
+                    true);
     }
 
     /*
@@ -154,12 +190,26 @@ public class Folder
                        -> {
                            // Set the path of the folder.
                            folder.setPath(rootPath);
+                            ((Folder) folder).computeSize();
 
                            if (entryVisitor != null)
                                folder.accept(entryVisitor);
 
                            return folder;
                        });
+    }
+
+    private void computeSize() {
+        long folderCount = getSubFolders()
+            .stream()
+            .mapToLong(subFolder -> subFolder.mSize)
+            // .peek(System.out::println)
+            .sum();
+        long docCount = getDocuments()
+            .stream()
+            // .peek(System.out::println)
+            .count();
+        mSize = folderCount + docCount + 1;
     }
 
     /*
@@ -227,6 +277,7 @@ public class Folder
                                  .map(entryCompletableFuture
                                       -> (Document) entryCompletableFuture.join())
                                  .collect(toList());
+                             mSize = mSubFolders.size() + mDocuments.size();
                              return this;
                 });
     }

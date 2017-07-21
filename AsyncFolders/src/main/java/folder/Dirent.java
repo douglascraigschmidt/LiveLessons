@@ -45,8 +45,8 @@ public abstract class Dirent {
     /**
      * @return Path of the dirent
      */
-    public String getPath() {
-        return mPath.toString();
+    public Path getPath() {
+        return mPath;
     }
 
     /**

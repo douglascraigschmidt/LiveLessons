@@ -22,7 +22,7 @@ public class Main {
         "works";
 
     static void display(String string) {
-        if (Options.getInstance().isVerbose())
+        if (Options.getInstance().getVerbose())
             System.out.println(string);
     }
 
@@ -52,7 +52,7 @@ public class Main {
                            // contents of the folder as it's being
                            // created asynchronously.
                            printVisitor,
-                           Options.getInstance().isParallel());
+                           Options.getInstance().getParallel());
                            
         Dirent rootFolder = folderFuture
             // After the Folder is created count the number of entries
@@ -62,30 +62,40 @@ public class Main {
                            Stream<Dirent> folderStream = folder
                            .stream();
 
-                           if (Options.getInstance().isParallel())
+                           if (Options.getInstance().getParallel())
                                folderStream.parallel();
 
+                           long count = folderStream
+                           // .peek(dirent -> dirent.accept(printVisitor))
+                           .count();
+                           
                            System.out.println("number of entries in the folder = "
-                                   + folderStream.count());
+                                              + count);
                            return folder;
                        })
             // Wait for all the processing to complete.
             .join();
 
         // Search for a word in the folder.
-        searchFolder(rootFolder, "anon");
+        searchFolder(rootFolder, "CompletableFuture");
 
-        System.out.println((Options.getInstance().isParallel() ? "Parallel" : "Sequential")
+        System.out.println((Options.getInstance().getParallel() ? "Parallel" : "Sequential")
                            + " test ran in "
                            + (System.nanoTime() - startTime) / 1_000_000
                            + " milliseconds");
     }
 
+    /**
+     *
+     */
     private static void searchFolder(Dirent rootFolder,
                                      String searchedWord) {
+        Options.getInstance().setVerbose(true);
         EntryVisitor searchVisitor = EntryVisitor
             .of((folder)
                 -> {
+                    display("in folder "
+                            + folder.getName());
                 },
                 (document) 
                 -> {
@@ -93,16 +103,16 @@ public class Main {
                                                        searchedWord);
 
                     if (occurrences > 0)
-                        System.out.println("\"anon\" occurs "
-                                           + occurrences
-                                           + " time(s) in document "
-                                           + document.getPath());
+                        display("\"" + searchedWord + "\" occurs "
+                                + occurrences
+                                + " time(s) in document "
+                                + document.getName());
                 });
 
         Stream<Dirent> folderStream = rootFolder
                 .stream();
 
-        if (Options.getInstance().isParallel())
+        if (Options.getInstance().getParallel())
             folderStream.parallel();
 
         folderStream
@@ -119,7 +129,7 @@ public class Main {
         Stream<String> wordStream = Stream
             .of(wordsIn(document.toString()));
 
-        if (Options.getInstance().isParallel())
+        if (Options.getInstance().getParallel())
             wordStream.parallel();
 
         return wordStream

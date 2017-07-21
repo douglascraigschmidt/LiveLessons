@@ -56,17 +56,24 @@ public class Options {
     }
 
     /**
-     * Returns true if the user wants "verbose" output, else false.
+     * Sets the mVerbose field to the value of @a verbose.
      */
-    public boolean isVerbose() {
+    public void setVerbose(boolean verbose) {
+        mVerbose = verbose;
+    }
+
+    /**
+     * @return True if the user wants "verbose" output, else false
+     */
+    public boolean getVerbose() {
         return mVerbose;
     }
 
     /**
-     * Returns true if the user wants to run the tests in parallel,
-     * else false.
+     * @return True if the user wants to run the tests in parallel,
+     * else false
      */
-    public boolean isParallel() {
+    public boolean getParallel() {
         return mParallel;
     }
     
