@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">ExpressionTree</string>
-    <string name="action_settings">Settings</string>
-    <color  name="blue" >#00bcff</color>
-</resources>

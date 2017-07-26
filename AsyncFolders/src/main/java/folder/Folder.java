@@ -9,17 +9,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Represents the contents of a folder, which can be subfolders or
- * documents.
+ * Represents the contents of a folder, which can include recursive
+ * (sub)folders and/or documents.
  */
 public class Folder 
        extends Dirent {
@@ -34,20 +34,24 @@ public class Folder
     private List<CompletableFuture<Dirent>> mDocumentFutures;
 
     /**
-     * The list of subfolders contained in this folder.
+     * The list of subfolders contained in this folder, which are
+     * initialized only after all the futures in mSubFolderFutures
+     * have completed.
      */
-    List<Folder> mSubFolders;
+    private List<Dirent> mSubFolders;
 
     /**
-     * The list of documents contained in this folder.
+     * The list of documents contained in this folder, which are
+     * initialized only after all the futures in mDocumentFutures have
+     * completed.
      */
-    List<Document> mDocuments;
+    private List<Dirent> mDocuments;
 
     /**
      * The total number of entries in this recursively structured
      * folder.
      */
-    long mSize;
+    private long mSize;
 
     /**
      * Constructor initializes the fields.
@@ -56,35 +60,12 @@ public class Folder
         mSubFolderFutures = new ArrayList<>();
         mDocumentFutures = new ArrayList<>();
     }
-
-    /**
-     * Constructor initializes the fields from the parameters.
-     */
-    Folder(Path path,
-           List<Folder> subFolders,
-           List<Document> documents) {
-        super(path);
-        mSubFolders = new ArrayList<>(subFolders);
-        mDocuments = new ArrayList<>(documents);
-        mSize = mSubFolders.size() 
-            + mDocuments.size();
-    }
-
-    /**
-     * Copy constructor initializes the fields from the parameters.
-     */
-    Folder(Folder originalFolder) {
-        super(originalFolder.getPath());
-        mSubFolders = new ArrayList<>(originalFolder.getSubFolders());
-        mDocuments = new ArrayList<>(originalFolder.getDocuments());
-        mSize = originalFolder.mSize;
-    }
-
+    
     /**
      * @return The list of subfolders in this folder
      */
     @Override
-    public List<Folder> getSubFolders() {
+    public List<Dirent> getSubFolders() {
         return mSubFolders;
     }
     
@@ -92,7 +73,7 @@ public class Folder
      * @return The list of documents in this folder
      */
     @Override
-    public List<Document> getDocuments() {
+    public List<Dirent> getDocuments() {
         return mDocuments;
     }
 
@@ -105,7 +86,7 @@ public class Folder
     }
 
     /**
-     *
+     * Accept the @a entryVisitor in accordance with the Visitor pattern.
      */
     @Override
     public void accept(EntryVisitor entryVisitor) {
@@ -113,31 +94,49 @@ public class Folder
     }
 
     /**
-     *
+     * @return A spliterator for this class
+     */
+    public Spliterator<Dirent> spliterator() {
+        return new RecursiveFolderSpliterator(this);
+    }
+
+    /**
+     * @return A sequential stream containing all elements rooted at
+     * this directory entry
      */
     @Override
     public Stream<Dirent> stream() {
-        return StreamSupport
-            .stream(new BatchFolderSpliterator(this),
-                    false);
+        return StreamSupport.stream(spliterator(),
+                                    false);
     }
 
     /**
-     *
+     * @return A parallel stream containing all elements rooted at
+     * this directory entry
      */
     @Override
     public Stream<Dirent> parallelStream() {
-        return StreamSupport
-            .stream(new BatchFolderSpliterator(this),
-                    true);
+        return StreamSupport.stream(spliterator(),
+                                    true);
     }
 
     /*
-     * These factor methods are used by clients of this class.
+     * The following factory methods are used by clients of this
+     * class.
      */
 
     /**
-     * Factory method that creates a folder from the given @a file.
+     * Factory method that asynchronously creates a folder from the
+     * given @a file.
+     *
+     * @param file The file associated with the folder in the file system
+     * @param entryVisitor A callback that's invoked once the 
+     *                     document's contents are available
+     * @param parallel A flag that indicates whether to create the
+     *                 folder sequentially or in parallel
+     *
+     * @return A future to the document that will be complete when the
+     *         contents of the folder are available
      */
     public static CompletableFuture<Dirent>
         fromDirectory(File file,
@@ -149,21 +148,34 @@ public class Folder
     }
 
     /**
-     * Factory method that creates a folder from the given @a rootPath.
+     * Factory method that asynchronously creates a folder from the
+     * given @a file.
+     *
+     * @param rootPath The path of the folder in the file system
+     * @param entryVisitor A callback that's invoked once the 
+     *                     document's contents are available
+     * @param parallel A flag that indicates whether to create the
+     *                 folder sequentially or in parallel
+     *
+     * @return A future to the document that will be complete when the
+     *         contents of the folder are available
      */
     public static CompletableFuture<Dirent>
         fromDirectory(Path rootPath,
                       EntryVisitor entryVisitor,
                       boolean parallel) throws IOException {
-        return CompletableFuture.supplyAsync(() -> {
+        // Return a future that completes once the folder's contents
+        // are available and the entryVisitor callback is made.
+        CompletableFuture<CompletableFuture<Folder>> folderFuture =
+            CompletableFuture.supplyAsync(() -> {
                 Function<Path, Stream<Path>> getStream = ExceptionUtils
                     .rethrowFunction(path
                                      // List all subfolders and
                                      // documents in just this folder.
                                      -> Files.walk(path, 1));
 
-                // Create a stream containing all the contents at the given
-                // rootPath.
+                // Create a stream containing all the contents at the
+                // given rootPath.
                 Stream<Path> pathStream = getStream.apply(rootPath);
 
                 // Convert the stream to parallel if directed.
@@ -173,43 +185,49 @@ public class Folder
 
                 // Create a future to the folder containing all the
                 // contents at the given rootPath.
-                CompletableFuture<Folder> folderFuture = pathStream
-                    // Eliminate ourselves to avoid infinite recursion.
+                return pathStream
+                    // Eliminate rootPath to avoid infinite recursion.
                     .filter(path -> !path.equals(rootPath))
 
                     // Terminate the stream and create a Folder
                     // containing all entries in this folder.
                     .collect(FolderCollector.toFolder(entryVisitor,
                                                       parallel));
+                });
+        return folderFuture.thenCompose(ff -> {
+            // Run the following code after the folder's contents are
+            // available.
+            return ff.thenApply((Dirent folder)
+                    -> {
+                // Set the path of the folder.
+                folder.setPath(rootPath);
+                ((Folder) folder).computeSize();
 
-                // Return a Folder containing the contents of this
-                // directory.
-                return folderFuture.join();
-            })
-            .thenApply((Dirent folder)
-                       -> {
-                           // Set the path of the folder.
-                           folder.setPath(rootPath);
-                            ((Folder) folder).computeSize();
+                if (entryVisitor != null)
+                    // Invoke the visitor callback.
+                    folder.accept(entryVisitor);
 
-                           if (entryVisitor != null)
-                               folder.accept(entryVisitor);
-
-                           return folder;
-                       });
+                // Return the folder, which is wrapped in
+                // a future.
+                return folder;
+            });
+        });
     }
 
+    /**
+     * Determine how many subfolders and documents are rooted at this
+     * folder.
+     */
     private void computeSize() {
         long folderCount = getSubFolders()
             .stream()
-            .mapToLong(subFolder -> subFolder.mSize)
-            // .peek(System.out::println)
+            .mapToLong(subFolder -> ((Folder) subFolder).mSize)
             .sum();
-        long docCount = getDocuments()
-            .stream()
-            // .peek(System.out::println)
-            .count();
-        mSize = folderCount + docCount + 1;
+        long docCount = (long) getDocuments().size();
+        mSize = folderCount 
+            + docCount
+            // Add 1 to count this folder.
+            + 1;
     }
 
     /*
@@ -217,21 +235,29 @@ public class Folder
      */
 
     /**
-     *
+     * Add a new @a entry to the appropriate list of futures.
      */
     void addEntry(Path entry,
                   EntryVisitor entryVisitor,
                   boolean parallel) {
+        // This adapter simplifies exception handling.
         Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
             .rethrowFunction(file 
+                             // Asynchronously create a folder from a
+                             // directory file.
                              -> Folder.fromDirectory(file,
                                                      entryVisitor,
                                                      parallel));
+
+        // This adapter simplifies exception handling.
         Function<Path, CompletableFuture<Dirent>> getDocument = ExceptionUtils
             .rethrowFunction(path
+                             // Asynchronously create a document from
+                             // a path.
                              -> Document.fromPath(path,
                                                   entryVisitor));
 
+        // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry))
             mSubFolderFutures.add(getFolder.apply(entry));
         else
@@ -239,7 +265,11 @@ public class Folder
     }
 
     /**
+     * Merge the contents of @a folder with the contents of this
+     * folder.
      *
+     * @param folder The folder to merge from
+     * @return The merged result
      */
     Folder addAll(Folder folder) {
         mSubFolderFutures.addAll(folder.mSubFolderFutures);
@@ -248,37 +278,42 @@ public class Folder
     }
 
     /**
-     *
-     * @return A future to the Folder that will complete when all
-     * entries in the Folder complete
+     * @return A future to a folder that will complete when all
+     * entries in the folder complete
      */
     CompletableFuture<Folder> joinAll() {
-        // Create an array containing all the futures for subfoldres
+        // Create an array containing all the futures for subfolders
         // and documents.
         CompletableFuture[] futures =
                 ArrayUtils.concat(mSubFolderFutures,
                                   mDocumentFutures);
 
-        // Create a future that will complete when all the
+        // Create a future that will complete when all the other
         // futures have completed.
         CompletableFuture<Void> allDoneFuture =
             CompletableFuture.allOf(futures);
             
+        // Return a future to this folder after first initializing its
+        // subfolder/document fields after allDoneFuture completes.
         return allDoneFuture
             .thenApply(v -> {
-                             mSubFolders = mSubFolderFutures
-                                 .stream()
-                                 .map(entryCompletableFuture
-                                      -> (Folder) entryCompletableFuture.join())
-                                 .collect(toList());
+                    // Initialize all the subfolders.
+                    mSubFolders = mSubFolderFutures
+                        .stream()
+                        .map(entryCompletableFuture
+                             -> entryCompletableFuture.join())
+                        .collect(toList());
 
-                             mDocuments = mDocumentFutures
-                                 .stream()
-                                 .map(entryCompletableFuture
-                                      -> (Document) entryCompletableFuture.join())
-                                 .collect(toList());
-                             mSize = mSubFolders.size() + mDocuments.size();
-                             return this;
+                    // Initialize all the documents.
+                    mDocuments = mDocumentFutures
+                        .stream()
+                        .map(entryCompletableFuture
+                             -> entryCompletableFuture.join())
+                        .collect(toList());
+
+                    // Initialize the size.
+                    mSize = mSubFolders.size() + mDocuments.size();
+                    return this;
                 });
     }
 }
