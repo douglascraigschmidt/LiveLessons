@@ -1,0 +1,70 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+  <LinearLayout
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal">
+
+    <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textSize="@dimen/font_size"
+       android:text="@string/location" />
+
+    <EditText
+       android:id="@+id/mUrlEditText"
+       android:layout_height="wrap_content"
+       android:layout_width="fill_parent"
+       android:layout_weight="1"
+       android:inputType="text|textMultiLine"
+       android:hint="@string/defaultURL" />
+  </LinearLayout>
+
+  <LinearLayout
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal"
+     android:gravity="center_horizontal">
+
+    <Button
+       style="@style/Widget.AppCompat.Button.Borderless"
+       android:id="@+id/buggy1_button"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:textSize="14dp"
+       android:onClick="buggy1"
+       android:text="@string/buggy1" />
+
+    <Button
+       style="@style/Widget.AppCompat.Button.Borderless"
+       android:id="@+id/buggy2_button"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:textSize="14dp"
+       android:onClick="buggy2"
+       android:text="@string/buggy2" />
+
+    <Button
+       style="@style/Widget.AppCompat.Button.Borderless"
+       android:id="@+id/reset_image_button"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:textSize="14dp"
+       android:onClick="resetImage"
+       android:text="@string/resetImage" />
+
+  </LinearLayout>
+
+  <ImageView
+     android:id="@+id/mImageView"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"  
+     android:src="@mipmap/ic_icon" >
+  </ImageView>
+
+</LinearLayout>

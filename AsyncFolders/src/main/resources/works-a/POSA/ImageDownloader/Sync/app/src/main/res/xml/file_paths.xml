@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Path names used for file provider support for API 24
+    new storage security permissions
+-->
+
+<paths>
+    <!-- Exposed directories in Context.getCacheDir() -->
+    <cache-path
+        name="CacheDownloadPath"
+        path="ImageDir/"/>
+    <!-- Exposed directories in Context.getFilesDir() -->
+    <files-path
+        name="FilesDownloadPath"
+        path="ImageDir/"/>
+    <!-- Exposed directories in Environment.getExternalStorageDirectory() -->
+    <external-path
+        name="ExternalDownloadPath"
+        path="DCIM/ImageDir"/>
+</paths>
