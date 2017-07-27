@@ -76,11 +76,6 @@ public abstract class Dirent {
     }
 
     /**
-     * Accept the @a entryVisitor in accordance with the Visitor pattern.
-     */
-    public abstract void accept(EntryVisitor entryVisitor);
-
-    /**
      * @return A sequential stream containing all elements rooted at
      * this directory entry
      */

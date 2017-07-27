@@ -1,17 +1,20 @@
 import folder.Dirent;
 import folder.Document;
-import folder.EntryVisitor;
 import folder.Folder;
 import utils.Options;
+import utils.StreamsUtils;
 import utils.TestDataFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the use of the Java 8 streams and completable
@@ -41,120 +44,97 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Start the timer.
-        long startTime = System.nanoTime();
+        // The word to search for while the folder's been constructed.
+        final String searchedWord = "CompletableFuture";
 
-        // Create a visitor that's used during the creation of the
-        // root folder.
-        EntryVisitor printVisitor = EntryVisitor
-            .of((folder)
-                -> display("folder name = "
-                           + folder.getName()),
-                (document)
-                -> display("document name = "
-                           + document.getName()));
+        // Create a new folder.
+        Dirent rootFolder = createFolder();
 
-        CompletableFuture<Dirent> folderFuture = Folder
-            // Asynchronously create a folder containing all the
-            // works.
-            .fromDirectory(TestDataFactory
-                           .getRootFolderFile(sWORKs),
-                           // Create a visitor that prints out the
-                           // contents of the folder as it's being
-                           // created asynchronously.
-                           printVisitor,
-                           Options.getInstance().getParallel());
-
-        Dirent rootFolder = folderFuture
-            // After the folder is created count the number of entries
-            // in it.
-            .thenApply(folder
-                       -> {
-                           Stream<Dirent> folderStream = folder
-                           .stream();
-
-                           if (Options.getInstance().getParallel())
-                               folderStream.parallel();
-
-                           long count = folderStream
-                           .count();
-
-                           System.out.println("number of entries in the folder = "
-                                              + count);
-                           return folder;
-                       })
-            // Wait for all the processing to complete.
-            .join();
-
-        // Search for a word in the folder.
-        searchFolderVisitor(rootFolder, "CompletableFuture");
-        searchFolderStream(rootFolder, "CompletableFuture");
+        // Count the number of entries in the folder.
+        countEntries(rootFolder);
 
         // Count the number of lines in the folder.
         countLines(rootFolder);
 
-        // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() ? "Parallel" : "Sequential")
-                           + " test ran in "
-                           + (System.nanoTime() - startTime) / 1_000_000
-                           + " milliseconds");
+        // Synchronously search for a word in all folders starting at
+        // the rootFolder.
+        searchFoldersSync(rootFolder, "CompletableFuture");
+
+        // Asynchronously search for a word in all folders starting at
+        // the rootFolder.
+        searchFoldersAsync(rootFolder, "CompletableFuture");
     }
 
     /**
-     * Find all occurrences of @a searchedWord in @a rootFolder using
-     * a visitor.
+     * Create a new folder.
      */
-    private static void searchFolderVisitor(Dirent rootFolder,
-                                            String searchedWord) {
-        // Options.getInstance().setVerbose(true);
+    private static Dirent createFolder()
+        throws IOException, URISyntaxException {
+        // Start the timer.
+        long startTime = System.nanoTime();
 
-        // Create a visitor that displays results.
-        EntryVisitor searchVisitor = EntryVisitor
-            .of((folder)
-                -> {
-                    display("in folder "
-                            + folder.getName());
-                },
-                (document)
-                -> {
-                    // Find how many times searchedWord occurs in the
-                    // document.
-                    long occurrences = occurrencesCount(document.getContents(),
-                                                        searchedWord);
+        // Asynchronously create a folder containing all the
+        // works.
+        CompletableFuture<Dirent> folderFuture = Folder
+            .fromDirectory(TestDataFactory
+                           .getRootFolderFile(sWORKs),
+                           Options.getInstance().getParallel());
 
-                    // Display the results.
-                    if (occurrences > 0)
-                        display("\"" 
-                                + searchedWord 
-                                + "\" occurs "
-                                + occurrences
-                                + " time(s) in document "
-                                + document.getName());
-                });
+        // Wait for all the processing to complete.
+        Dirent rootFolder = folderFuture.join();
 
-        // Create a stream for the folder.
-        Stream<Dirent> folderStream = rootFolder
+        // Print the timing results.
+        System.out.println((Options.getInstance().getParallel() ?
+                            "Parallel" : "Sequential")
+                           + " folder creation ran in "
+                           + (System.nanoTime() - startTime) / 1_000_000
+                           + " milliseconds");
+
+        // Return the folder.
+        return rootFolder;
+    }
+
+    /**
+     * Count the number of entries in the folder.
+     */
+    private static void countEntries(Dirent folder) {
+        // Start the timer.
+        long startTime = System.nanoTime();
+
+        // Create a stream from the folder.
+        Stream<Dirent> folderStream = folder
             .stream();
 
         // Convert to the parallel stream if desired.
         if (Options.getInstance().getParallel())
             folderStream.parallel();
 
-        // Apply searchVisitor on each dirent in the stream.
-        folderStream
-            .forEach(dirent
-                     -> dirent.accept(searchVisitor));
+        // Get a count of the number of elements in the stream.
+        long count = folderStream.count();
+
+        System.out.println("number of entries in the folder = "
+                           + count);
+
+        // Print the timing results.
+        System.out.println((Options.getInstance().getParallel() 
+                            ? "Parallel" : "Sequential")
+                           + " entry counting ran in "
+                           + (System.nanoTime() - startTime) / 1_000_000
+                           + " milliseconds");
     }
 
     /**
-     * Find all occurrences of @a searchedWord in @a rootFolder using
-     * a stream.
+     * Synchronously find all occurrences of @a searchedWord in @a
+     * rootFolder using a stream.
      */
-    private static void searchFolderStream(Dirent rootFolder,
-                                           String searchedWord) {
+    private static void searchFoldersSync(Dirent rootFolder,
+                                          String searchedWord) {
+        // Start the timer.
+        long startTime = System.nanoTime();
+
         // Create a stream for the folder.
         Stream<Dirent> folderStream = rootFolder
-                .stream();
+            .stream();
 
         // Convert to the parallel stream if desired.
         if (Options.getInstance().getParallel())
@@ -166,7 +146,7 @@ public class Main {
             .filter(dirent
                     -> dirent instanceof Document)
 
-            // Search the document.
+            // Search the document synchronously.
             .mapToLong(document
                        -> occurrencesCount(document.getContents(),
                                            searchedWord))
@@ -175,10 +155,75 @@ public class Main {
 
         // Print the results.
         System.out.println("total matches of \""
-                + searchedWord
-                + "\" = "
-                + matches);
+                           + searchedWord
+                           + "\" = "
+                           + matches);
 
+        // Print the timing results.
+        System.out.println((Options.getInstance().getParallel() 
+                            ? "Parallel" : "Sequential")
+                           + " searchFoldersSync ran in "
+                           + (System.nanoTime() - startTime) / 1_000_000
+                           + " milliseconds");
+    }
+
+    /**
+     * Asynchronously find all occurrences of @a searchedWord in @a
+     * rootFolder using a stream.
+     */
+    private static void searchFoldersAsync(Dirent rootFolder,
+                                          String searchedWord) {
+        // Start the timer.
+        long startTime = System.nanoTime();
+
+        // Create a stream for the folder.
+        Stream<Dirent> folderStream = rootFolder
+            .stream();
+
+        // Convert to the parallel stream if desired.
+        if (Options.getInstance().getParallel())
+            folderStream.parallel();
+
+        // Compute the total number of matches of searchedWord.
+        List<CompletableFuture<Long>> listOfFutures = folderStream
+            // Only search documents.
+            .filter(dirent
+                    -> dirent instanceof Document)
+
+            // Search the document asynchronously.
+            .map(document -> CompletableFuture
+                 .supplyAsync(() -> 
+                              occurrencesCount(document.getContents(),
+                                               searchedWord)))
+
+            // Trigger intermediate operation processing and return a
+            // list.
+            .collect(toList());
+
+        // Create a single future that can be used to wait for
+        // all the futures in the list to complete.
+        CompletableFuture<List<Long>> allDoneFuture =
+            StreamsUtils.joinAll(listOfFutures);
+
+        // Compute the total number of matches of searchedWord.
+        long matches = allDoneFuture
+            .join()
+            .stream()
+            .mapToLong(Long::longValue)
+            .sum());
+
+        // Print the results.
+        System.out.println("total matches of \""
+                           + searchedWord
+                           + "\" = "
+                           + matches);
+
+        // Print the timing results.
+        System.out.println((Options.getInstance().getParallel() 
+                            ? "Parallel" : "Sequential")
+                           + " searchFoldersAsync ran in "
+                           + (System.nanoTime() - startTime) / 1_000_000
+                           + " milliseconds");
     }
 
     /**
@@ -214,6 +259,9 @@ public class Main {
      * rootFolder.
      */
     private static void countLines(Dirent rootFolder) {
+        // Start the timer.
+        long startTime = System.nanoTime();
+
         // Options.getInstance().setVerbose(true);
 
         // Create a stream for the folder.
@@ -242,9 +290,16 @@ public class Main {
                       .length)
 
             // Sum the results;
-            .sum());
+            .sum();
 
         System.out.println("total number of lines = "
                            + lineCount);
+
+        // Print the timing results.
+        System.out.println((Options.getInstance().getParallel() 
+                            ? "Parallel" : "Sequential")
+                           + " line count ran in "
+                           + (System.nanoTime() - startTime) / 1_000_000
+                           + " milliseconds");
     }
 }

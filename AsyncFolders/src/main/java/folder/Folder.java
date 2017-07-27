@@ -86,14 +86,6 @@ public class Folder
     }
 
     /**
-     * Accept the @a entryVisitor in accordance with the Visitor pattern.
-     */
-    @Override
-    public void accept(EntryVisitor entryVisitor) {
-        entryVisitor.visit(this);
-    }
-
-    /**
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
@@ -130,8 +122,6 @@ public class Folder
      * given @a file.
      *
      * @param file The file associated with the folder in the file system
-     * @param entryVisitor A callback that's invoked once the 
-     *                     document's contents are available
      * @param parallel A flag that indicates whether to create the
      *                 folder sequentially or in parallel
      *
@@ -140,10 +130,8 @@ public class Folder
      */
     public static CompletableFuture<Dirent>
         fromDirectory(File file,
-                      EntryVisitor entryVisitor,
                       boolean parallel) throws IOException {
         return fromDirectory(file.toPath(),
-                             entryVisitor,
                              parallel);
     }
 
@@ -152,8 +140,6 @@ public class Folder
      * given @a file.
      *
      * @param rootPath The path of the folder in the file system
-     * @param entryVisitor A callback that's invoked once the 
-     *                     document's contents are available
      * @param parallel A flag that indicates whether to create the
      *                 folder sequentially or in parallel
      *
@@ -162,12 +148,10 @@ public class Folder
      */
     public static CompletableFuture<Dirent>
         fromDirectory(Path rootPath,
-                      EntryVisitor entryVisitor,
                       boolean parallel) throws IOException {
         // Return a future that completes once the folder's contents
-        // are available and the entryVisitor callback is made.
-        CompletableFuture<CompletableFuture<Folder>> folderFuture =
-            CompletableFuture.supplyAsync(() -> {
+        // are available.
+        return CompletableFuture.supplyAsync(() -> {
                 Function<Path, Stream<Path>> getStream = ExceptionUtils
                     .rethrowFunction(path
                                      // List all subfolders and
@@ -191,27 +175,23 @@ public class Folder
 
                     // Terminate the stream and create a Folder
                     // containing all entries in this folder.
-                    .collect(FolderCollector.toFolder(entryVisitor,
-                                                      parallel));
+                    .collect(FolderCollector.toFolder(parallel));
+            })
+            .thenCompose(folderFuture -> {
+                    // Run the following code after the folder's
+                    // contents are available.
+                    return folderFuture
+                        .thenApply(folder
+                                   -> {
+                                       // Set the path of the folder.
+                                       folder.setPath(rootPath);
+                                       ((Folder) folder).computeSize();
+
+                                       // Return the folder, which is wrapped in
+                                       // a future.
+                                       return folder;
+                                   });
                 });
-        return folderFuture.thenCompose(ff -> {
-            // Run the following code after the folder's contents are
-            // available.
-            return ff.thenApply((Dirent folder)
-                    -> {
-                // Set the path of the folder.
-                folder.setPath(rootPath);
-                ((Folder) folder).computeSize();
-
-                if (entryVisitor != null)
-                    // Invoke the visitor callback.
-                    folder.accept(entryVisitor);
-
-                // Return the folder, which is wrapped in
-                // a future.
-                return folder;
-            });
-        });
     }
 
     /**
@@ -238,7 +218,6 @@ public class Folder
      * Add a new @a entry to the appropriate list of futures.
      */
     void addEntry(Path entry,
-                  EntryVisitor entryVisitor,
                   boolean parallel) {
         // This adapter simplifies exception handling.
         Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
@@ -246,7 +225,6 @@ public class Folder
                              // Asynchronously create a folder from a
                              // directory file.
                              -> Folder.fromDirectory(file,
-                                                     entryVisitor,
                                                      parallel));
 
         // This adapter simplifies exception handling.
@@ -254,8 +232,7 @@ public class Folder
             .rethrowFunction(path
                              // Asynchronously create a document from
                              // a path.
-                             -> Document.fromPath(path,
-                                                  entryVisitor));
+                             -> Document.fromPath(path));
 
         // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry))

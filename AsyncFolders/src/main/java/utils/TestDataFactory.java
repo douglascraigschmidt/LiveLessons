@@ -41,7 +41,6 @@ public class TestDataFactory {
         return Folder
             .fromDirectory(getRootFolderFile(rootFolderName)
                            .toPath(),
-                           entryVisitor,
                            parallel);
     }
 }

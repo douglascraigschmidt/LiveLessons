@@ -20,12 +20,6 @@ public class FolderCollector
                            Folder,
                            CompletableFuture<Folder>> {
     /**
-     * The hook that's invoked whenever processing of a folder or a
-     * document has completed.
-     */
-    private EntryVisitor mEntryVisitor;
-
-    /**
      * Indicates whether processing should occur in parallel.
      */
     private boolean mParallel;
@@ -33,9 +27,7 @@ public class FolderCollector
     /**
      * Constructor initializes the field.
      */
-    private FolderCollector(EntryVisitor entryVisitor,
-                            boolean parallel) {
-        mEntryVisitor = entryVisitor;
+    private FolderCollector(boolean parallel) {
         mParallel = parallel;
     }
 
@@ -60,7 +52,6 @@ public class FolderCollector
     public BiConsumer<Folder, Path> accumulator() {
         return (Folder folder, Path entry) 
             -> folder.addEntry(entry,
-                               mEntryVisitor,
                                mParallel);
     }
 
@@ -110,9 +101,7 @@ public class FolderCollector
      * @return A new FolderCollector
      */
     public static Collector<Path, Folder, CompletableFuture<Folder>>
-                      toFolder(EntryVisitor entryVisitor,
-                               boolean parallel) {
-        return new FolderCollector(entryVisitor,
-                                   parallel);
+                      toFolder(boolean parallel) {
+        return new FolderCollector(parallel);
     }
 }
