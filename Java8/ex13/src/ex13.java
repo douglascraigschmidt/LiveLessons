@@ -85,6 +85,7 @@ public class ex13 {
             // stream.
             .stream(quote.spliterator(), 
                     false)
+
             // Print out each element of the stream.
             .forEach(System.out::print);
     }

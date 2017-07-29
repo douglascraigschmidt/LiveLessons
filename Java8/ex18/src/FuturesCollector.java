@@ -73,9 +73,8 @@ public class FuturesCollector<T>
     public Function<Collection<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
         return futures
             -> CompletableFuture
-            // Use CompletableFuture.allOf() to obtain a
-            // CompletableFuture that will itself be complete when all
-            // CompletableFutures in futures have completed.
+            // Use CompletableFuture.allOf() to obtain a future that
+            // will itself be complete when all futures complete.
             .allOf(futures
                    .stream()
                    .toArray(CompletableFuture[]::new))

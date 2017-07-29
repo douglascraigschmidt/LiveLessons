@@ -77,7 +77,8 @@ Here's an overview of what's included:
   It also demonstrates what goes wrong when reduce() performs a
   mutable reduction on a parallel stream.
 
-. ex18 -- This program shows how to use a custom collector in
-  conjunction with a stream of completable futures.
-
+. ex18 -- This program shows how wait for the results of a stream of
+  completable futures using (1) a custom collector and (2) the
+  StreamsUtils.joinAll() method (which is a wrapper for
+  CompletableFuture.allOf()).
 

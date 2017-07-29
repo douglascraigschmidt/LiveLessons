@@ -41,7 +41,7 @@ public class ex9 {
     /**
      * Run the prime number test.
      */
-    private void runTest(int maxIterations) {
+    private void runTest(int maxIterations) throws InterruptedException {
         // Random number generator.
         final Random random = 
             new Random();
@@ -82,8 +82,8 @@ public class ex9 {
             }
         };
 
-        // Create a list of threads each of which running the prime
-        // checker algorithm.
+        // Create a list of threads, each running the prime checker
+        // algorithm.
         List<Thread> threads =
             new ArrayList<>(Arrays.asList(new Thread(primeChecker),
                                           new Thread(primeChecker),
@@ -94,11 +94,7 @@ public class ex9 {
 
         // Wait for all the threads to finish.
         for (Thread thread : threads)
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            thread.join();
     }
 
     /**
