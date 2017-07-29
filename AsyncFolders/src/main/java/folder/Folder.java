@@ -200,10 +200,19 @@ public class Folder
      */
     private void computeSize() {
         long folderCount = getSubFolders()
+            // Convert list to a stream.
             .stream()
+
+            // Get the size of each subfolder.
             .mapToLong(subFolder -> ((Folder) subFolder).mSize)
+
+            // Sub up the sizes of the subfolders.
             .sum();
+
+        // Count the number of documents in this folder.
         long docCount = (long) getDocuments().size();
+
+        // Update the field with the correct count.
         mSize = folderCount 
             + docCount
             // Add 1 to count this folder.
@@ -276,20 +285,40 @@ public class Folder
             .thenApply(v -> {
                     // Initialize all the subfolders.
                     mSubFolders = mSubFolderFutures
+                        // Convert the list into a stream.
                         .stream()
-                        .map(entryCompletableFuture
-                             -> entryCompletableFuture.join())
+
+                        // Convert the future to a directory entry.
+                        // Note that join() won't block since all the
+                        // futures have completed by this point.
+                        .map(subFolderFuture
+                             -> subFolderFuture.join())
+
+                        // Trigger intermediate processing and return
+                        // a list.
                         .collect(toList());
 
                     // Initialize all the documents.
                     mDocuments = mDocumentFutures
+                        // Convert the list into a stream.
                         .stream()
-                        .map(entryCompletableFuture
-                             -> entryCompletableFuture.join())
+
+
+                        // Convert the future to a directory entry.
+                        // Note that join() won't block since all the
+                        // futures have completed by this point.
+                        .map(documentFuture
+                             -> documentFuture.join())
+
+                        // Trigger intermediate processing and return
+                        // a list.
                         .collect(toList());
 
                     // Initialize the size.
                     mSize = mSubFolders.size() + mDocuments.size();
+
+                    // Return this folder, which is converted to a
+                    // future to a folder.
                     return this;
                 });
     }

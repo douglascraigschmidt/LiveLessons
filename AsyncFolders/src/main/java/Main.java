@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * This example shows the use of the Java 8 streams and completable
  * futures frameworks to process entries in a recursively structured
- * directory folder in parallel and/or asynchronously.
+ * directory folder sequentially, in parallel, and/or asynchronously.
  */
 public class Main {
     /**
@@ -44,60 +44,89 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // The word to search for while the folder's been constructed.
-        final String searchedWord = "CompletableFuture";
-
-        // Create a new folder.
-        Dirent rootFolder = createFolder();
-
-        // Count the number of entries in the folder.
-        countEntries(rootFolder);
-
-        // Count the number of lines in the folder.
-        countLines(rootFolder);
-
-        // Synchronously search for a word in all folders starting at
-        // the rootFolder.
-        searchFoldersSync(rootFolder, "CompletableFuture");
-
-        // Asynchronously search for a word in all folders starting at
-        // the rootFolder.
-        searchFoldersAsync(rootFolder, "CompletableFuture");
+        warmupThreadPool();
+        runTests(false);
+        runTests(true);
     }
 
     /**
-     * Create a new folder.
+     *
      */
-    private static Dirent createFolder()
-        throws IOException, URISyntaxException {
-        // Start the timer.
-        long startTime = System.nanoTime();
+    private static void warmupThreadPool() throws IOException, URISyntaxException {
+        // Create a new folder.
+        createFolder(true).join();
+    }
 
-        // Asynchronously create a folder containing all the
-        // works.
-        CompletableFuture<Dirent> folderFuture = Folder
+    /**
+     * Run all the tests, either sequentially or in parallel,
+     * depending on the value of @a parallel.
+     */
+    private static void runTests(boolean parallel) throws IOException, URISyntaxException {
+        // The word to search for while the folder's been constructed.
+        final String searchedWord = "CompletableFuture";
+
+        // Start the timer.
+        final long startTime = System.nanoTime();
+
+        // Create a new folder.
+        CompletableFuture<Dirent> rootFolderFuture =
+            createFolder(parallel);
+
+        rootFolderFuture
+            // This method is invoked when asynchronous folder
+            // creation has completed.
+            .thenAccept(rootFolder -> {
+                    // Print the timing results.
+                    System.out.println((parallel ? "Parallel" : "Sequential")
+                                       + " folder creation ran in "
+                                       + (System.nanoTime() - startTime) / 1_000_000
+                                       + " milliseconds");
+
+                    // Count the number of entries in the folder.
+                    countEntries(rootFolder, 
+                                 parallel);
+
+                    // Count the number of lines in the folder.
+                    countLines(rootFolder,
+                               parallel);
+
+                    // Synchronously search for a word in all folders starting at
+                    // the rootFolder.
+                    searchFoldersSync(rootFolder,
+                                      "CompletableFuture",
+                                      parallel);
+
+                    // Asynchronously search for a word in all folders starting at
+                    // the rootFolder.
+                    searchFoldersAsync(rootFolder,
+                                       "CompletableFuture",
+                                       parallel);
+                })
+            // Wait for everything to finish and then return from main().
+            .join();
+    }
+
+    /**
+     * Create a new folder asynchronously.
+     *
+     * @return A future to the folder that completes when the folder
+     *         is created
+     */
+    private static CompletableFuture<Dirent> createFolder(boolean parallel)
+        throws IOException, URISyntaxException {
+        // Asynchronously create and return a folder containing all
+        // the works in the sWORKs directory.
+        return Folder
             .fromDirectory(TestDataFactory
                            .getRootFolderFile(sWORKs),
-                           Options.getInstance().getParallel());
-
-        // Wait for all the processing to complete.
-        Dirent rootFolder = folderFuture.join();
-
-        // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() ?
-                            "Parallel" : "Sequential")
-                           + " folder creation ran in "
-                           + (System.nanoTime() - startTime) / 1_000_000
-                           + " milliseconds");
-
-        // Return the folder.
-        return rootFolder;
+                           parallel);
     }
 
     /**
      * Count the number of entries in the folder.
      */
-    private static void countEntries(Dirent folder) {
+    private static void countEntries(Dirent folder,
+                                     boolean parallel) {
         // Start the timer.
         long startTime = System.nanoTime();
 
@@ -106,7 +135,7 @@ public class Main {
             .stream();
 
         // Convert to the parallel stream if desired.
-        if (Options.getInstance().getParallel())
+        if (parallel)
             folderStream.parallel();
 
         // Get a count of the number of elements in the stream.
@@ -116,7 +145,7 @@ public class Main {
                            + count);
 
         // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() 
+        System.out.println((parallel
                             ? "Parallel" : "Sequential")
                            + " entry counting ran in "
                            + (System.nanoTime() - startTime) / 1_000_000
@@ -128,7 +157,8 @@ public class Main {
      * rootFolder using a stream.
      */
     private static void searchFoldersSync(Dirent rootFolder,
-                                          String searchedWord) {
+                                          String searchedWord,
+                                          boolean parallel) {
         // Start the timer.
         long startTime = System.nanoTime();
 
@@ -137,7 +167,7 @@ public class Main {
             .stream();
 
         // Convert to the parallel stream if desired.
-        if (Options.getInstance().getParallel())
+        if (parallel)
             folderStream.parallel();
 
         // Compute the total number of matches of searchedWord.
@@ -149,7 +179,8 @@ public class Main {
             // Search the document synchronously.
             .mapToLong(document
                        -> occurrencesCount(document.getContents(),
-                                           searchedWord))
+                                           searchedWord,
+                                           parallel))
             // Sum the results.
             .sum();
 
@@ -160,8 +191,7 @@ public class Main {
                            + matches);
 
         // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() 
-                            ? "Parallel" : "Sequential")
+        System.out.println((parallel ? "Parallel" : "Sequential")
                            + " searchFoldersSync ran in "
                            + (System.nanoTime() - startTime) / 1_000_000
                            + " milliseconds");
@@ -172,7 +202,8 @@ public class Main {
      * rootFolder using a stream.
      */
     private static void searchFoldersAsync(Dirent rootFolder,
-                                          String searchedWord) {
+                                           String searchedWord,
+                                           boolean parallel) {
         // Start the timer.
         long startTime = System.nanoTime();
 
@@ -181,7 +212,7 @@ public class Main {
             .stream();
 
         // Convert to the parallel stream if desired.
-        if (Options.getInstance().getParallel())
+        if (parallel)
             folderStream.parallel();
 
         // Compute the total number of matches of searchedWord.
@@ -194,7 +225,8 @@ public class Main {
             .map(document -> CompletableFuture
                  .supplyAsync(() -> 
                               occurrencesCount(document.getContents(),
-                                               searchedWord)))
+                                               searchedWord,
+                                               parallel)))
 
             // Trigger intermediate operation processing and return a
             // list.
@@ -210,7 +242,7 @@ public class Main {
             .join()
             .stream()
             .mapToLong(Long::longValue)
-            .sum());
+            .sum();
 
         // Print the results.
         System.out.println("total matches of \""
@@ -219,8 +251,7 @@ public class Main {
                            + matches);
 
         // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() 
-                            ? "Parallel" : "Sequential")
+        System.out.println((parallel ? "Parallel" : "Sequential")
                            + " searchFoldersAsync ran in "
                            + (System.nanoTime() - startTime) / 1_000_000
                            + " milliseconds");
@@ -230,7 +261,8 @@ public class Main {
      * Determine # of times @a searchedWord appears in @a document.
      */
     private static Long occurrencesCount(CharSequence document,
-                                         String searchedWord) {
+                                         String searchedWord,
+                                         boolean parallel) {
         Stream<String> wordStream = Pattern
                 // Compile word splitter into a regular expression
                 // (regex).
@@ -241,7 +273,7 @@ public class Main {
                 .splitAsStream(document);
 
         // Convert to the parallel stream if desired.
-        if (Options.getInstance().getParallel())
+        if (parallel)
             wordStream.parallel();
 
         // Return # of times searchedWord appears in the stream.
@@ -258,7 +290,8 @@ public class Main {
      * Count # of lines in the recursively structured directory at @a
      * rootFolder.
      */
-    private static void countLines(Dirent rootFolder) {
+    private static void countLines(Dirent rootFolder, 
+                                   boolean parallel) {
         // Start the timer.
         long startTime = System.nanoTime();
 
@@ -269,7 +302,7 @@ public class Main {
                 .stream();
 
         // Convert to the parallel stream if desired.
-        if (Options.getInstance().getParallel())
+        if (parallel)
             folderStream.parallel();
 
         // Count # of lines in documents residing in the folder.
@@ -296,8 +329,7 @@ public class Main {
                            + lineCount);
 
         // Print the timing results.
-        System.out.println((Options.getInstance().getParallel() 
-                            ? "Parallel" : "Sequential")
+        System.out.println((parallel ? "Parallel" : "Sequential")
                            + " line count ran in "
                            + (System.nanoTime() - startTime) / 1_000_000
                            + " milliseconds");
