@@ -8,9 +8,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * This example shows the use of the Java 8 completable future
- * framework to concurrently compute the greatest common divisor (GCD)
- * of two BigIntegers using several techniques.
+ * This example shows how to multiple big fractions using a range of
+ * CompletableFuture features.
  */
 public class ex8 {
     /**
@@ -266,7 +265,7 @@ public class ex8 {
         // Create a supplier that generates big fractions.
         Supplier<BigFraction> generator = () -> {
             // Create a very large random big integer.
-            BigInteger numerator =
+            BigInteger numerator = 
                 new BigInteger(150000, random);
 
             // Create a denominator that's between 1 to 10 times
@@ -283,13 +282,39 @@ public class ex8 {
         // Create a function to asynchronously reduce a big fraction.
         Function<BigFraction, CompletableFuture<BigFraction>> reduceFractions =
             unreducedFraction -> CompletableFuture
-            .supplyAsync(() -> BigFraction.reduce(unreducedFraction));
+                .supplyAsync(() -> BigFraction.reduce(unreducedFraction));
 
-        // Create a consumer that prints a list of reduced fractions.
-        Consumer<List<BigFraction>> printList = list -> 
-            list.forEach(reducedFraction ->
-                         // Print fraction using "mixed" format.
-                         System.out.println(reducedFraction.toMixedString()));
+        // Create a consumer that sorts and prints a list of reduced
+        // fractions.
+        Consumer<List<BigFraction>> printSortedList = list -> {
+            // This implementation uses quick sort to order the list. 
+            CompletableFuture<List<BigFraction>> quickSort = CompletableFuture
+                .supplyAsync(() -> {
+                    BigFraction[] bigFractionArray =
+                    list.toArray(new BigFraction[0]);
+                    Arrays.sort(bigFractionArray);
+                    return Arrays.asList(bigFractionArray);
+                });
+
+            // This implementation uses merge sort to order the list. 
+            CompletableFuture<List<BigFraction>> mergeSort = CompletableFuture
+                .supplyAsync(() -> {
+                    Collections.sort(list);
+                    return list;
+                });
+
+            // Select the result of whichever sort implementation
+            // finishes first.
+            quickSort
+                .applyToEither(mergeSort, result -> {
+                    // Print the results as mixed fractions.
+                    result.forEach(fraction -> 
+                                   System.out.println(fraction.toMixedString()));
+
+                    // The result is unused.
+                    return result;
+                });
+        };
 
         // Create a future to a list of reduced big fractions.
         CompletableFuture<List<BigFraction>> futureToList = Stream
@@ -304,9 +329,11 @@ public class ex8 {
             // future to a list of reduced big fractions.
             .collect(FuturesCollector.toFutures());
 
+        System.out.println("Printing sorted results:\n");
+
         futureToList
             // After all the asynchronous fraction reductions have
-            // completed print out the results.
-            .thenAccept(printList);
+            // completed sort and print the results.
+            .thenAccept(printSortedList);
     }
 }

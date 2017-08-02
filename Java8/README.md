@@ -31,9 +31,8 @@ Here's an overview of what's included:
 . ex7 - This example of shows how the Java 8 Supplier interface can be
   used in conjunction with a constructor reference.
   
-. ex8 - This example shows the use of the Java 8 completable future
-  framework to concurrently compute the greatest common divisor (GCD)
-  of two BigIntegers using several techniques.
+. ex8 - This example shows how to multiple big fractions using a range
+  of CompletableFuture features.
 
 . ex9 - This example uses a Java 8 ConcurrentHashMap and Java 8
   function-based method reference to compute/cache/retrieve prime
