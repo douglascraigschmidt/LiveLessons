@@ -25,11 +25,12 @@ public class StreamsUtils {
      * @param futures A list of completable futures.
      * @return A CompletableFuture containing a List with all the joined results.
      */
-    public static <T> CompletableFuture<List<T>> joinAll(List<CompletableFuture<T>> futures) {
+    public static <T> CompletableFuture<List<T>> joinAll
+        (List<CompletableFuture<T>> futures) {
         // Obtain a CompletableFuture that will be complete when all
         // of the futures have completed.
-        CompletableFuture<Void> allDoneFuture =
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+        CompletableFuture<Void> allDoneFuture = CompletableFuture
+            .allOf(futures.toArray(new CompletableFuture[futures.size()]));
 
         // When all the futures have completed return a list of the
         // joined elements.

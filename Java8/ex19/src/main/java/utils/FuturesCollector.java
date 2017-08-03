@@ -1,5 +1,9 @@
-import java.math.BigInteger;
-import java.util.*;
+package utils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -20,8 +24,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class FuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                           Collection<CompletableFuture<T>>,
-                           CompletableFuture<List<T>>> {
+                 List<CompletableFuture<T>>,
+                 CompletableFuture<List<T>>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -30,7 +34,7 @@ public class FuturesCollector<T>
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<Collection<CompletableFuture<T>>> supplier() {
+    public Supplier<List<CompletableFuture<T>>> supplier() {
         return ArrayList::new;
     }
 
@@ -41,8 +45,8 @@ public class FuturesCollector<T>
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<Collection<CompletableFuture<T>>, CompletableFuture<T>> accumulator() {
-        return Collection::add;
+    public BiConsumer<List<CompletableFuture<T>>, CompletableFuture<T>> accumulator() {
+        return List::add;
     }
 
     /**
@@ -54,9 +58,9 @@ public class FuturesCollector<T>
      * result
      */
     @Override
-    public BinaryOperator<Collection<CompletableFuture<T>>> combiner() {
-        return (Collection<CompletableFuture<T>> one,
-                Collection<CompletableFuture<T>> another) -> {
+    public BinaryOperator<List<CompletableFuture<T>>> combiner() {
+        return (List<CompletableFuture<T>> one,
+                List<CompletableFuture<T>> another) -> {
             one.addAll(another);
             return one;
         };
@@ -70,17 +74,16 @@ public class FuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<Collection<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
+    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
         return futures
             -> CompletableFuture
-            // Use CompletableFuture.allOf() to obtain a future that
-            // will itself be complete when all futures complete.
-            .allOf(futures
-                   .stream()
-                   .toArray(CompletableFuture[]::new))
+            // Use CompletableFuture.allOf() to obtain a
+            // CompletableFuture that will itself complete when all
+            // CompletableFutures in futures have completed.
+            .allOf(futures.toArray(new CompletableFuture[0]))
 
             // When all futures have completed get a CompletableFuture
-            // to a list of joined elements of type T.
+            // to an array of joined elements of type T.
             .thenApply(v -> futures
                        // Convert futures into a stream of completable
                        // futures.
@@ -91,7 +94,7 @@ public class FuturesCollector<T>
                        // join() should never block.
                        .map(CompletableFuture::join)
 
-                       // Collect the results of type T into a list.
+                       // Collect the results of type T into an array.
                        .collect(toList()));
     }
 
@@ -103,6 +106,7 @@ public class FuturesCollector<T>
      * @return An immutable set of collector characteristics, which in
      * this case is simply UNORDERED
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Set characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
@@ -111,10 +115,10 @@ public class FuturesCollector<T>
     /**
      * This static factory method creates a new FuturesCollector.
      *
-     * @return A new FuturesCollector
+     * @return A new FuturesCollector()
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
-                          toFutures() {
-        return new FuturesCollector<T>();
+        toFutures() {
+        return new FuturesCollector<>();
     }
 }

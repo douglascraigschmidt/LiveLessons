@@ -1,3 +1,6 @@
+import utils.BigFraction;
+import utils.FuturesCollector;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -290,9 +293,13 @@ public class ex8 {
             // This implementation uses quick sort to order the list. 
             CompletableFuture<List<BigFraction>> quickSort = CompletableFuture
                 .supplyAsync(() -> {
+                    // Convert the list to an array and sort it
+                    // with quick sort.
                     BigFraction[] bigFractionArray =
-                    list.toArray(new BigFraction[0]);
+                        list.toArray(new BigFraction[0]);
                     Arrays.sort(bigFractionArray);
+
+                    // Convert the array back to a list.
                     return Arrays.asList(bigFractionArray);
                 });
 
