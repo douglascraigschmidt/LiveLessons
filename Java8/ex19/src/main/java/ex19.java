@@ -46,7 +46,7 @@ public class ex19 {
         long totalImages =
             // Perform the image counting starting at the root URL,
             // which is given an initial depth count of 1.
-            performCrawl(Options.instance().getRootUri(),
+            countImages(Options.instance().getRootUri(),
                          1)
             // join() blocks until all futures complete!
             .join();
@@ -65,8 +65,8 @@ public class ex19 {
      * @param depth The current depth of the recursive processing
      * @return A future to the number of images counted
      */
-    private CompletableFuture<Long> performCrawl(String pageUri,
-                                                 int depth) {
+    private CompletableFuture<Long> countImages(String pageUri,
+                                                int depth) {
         printDiagnostics(TAG
                            + ":>> Depth: " 
                            + depth 
@@ -232,7 +232,7 @@ public class ex19 {
             // count of the number of images found at that hyperlink.
             .map(hyperLink ->
                  // Recursively visit all the hyperlinks on this page.
-                 performCrawl(Options
+                 countImages(Options
                               .instance()
                               .getJSuper()
                               .getHyperLink(hyperLink),
