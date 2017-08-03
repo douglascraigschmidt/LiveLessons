@@ -81,4 +81,7 @@ Here's an overview of what's included:
   StreamsUtils.joinAll() method (which is a wrapper for
   CompletableFuture.allOf()).
 
-. ex19 -- ...
+. ex19 -- This example shows how to count the number of images in a
+  recursively-defined folder structure using a range of
+  CompletableFuture features.  The folder can either reside locally
+  (filesystem-based) or remotely (web-based).

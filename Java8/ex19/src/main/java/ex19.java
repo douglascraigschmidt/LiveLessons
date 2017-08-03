@@ -9,7 +9,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * This example ...
+ * This example shows how to count the number of images in a
+ * recursively-defined folder structure using a range of
+ * CompletableFuture features.  The folder can either reside locally
+ * (filesystem-based) or remotely (web-based).
  */
 public class ex19 {
     /**
@@ -31,25 +34,23 @@ public class ex19 {
         // Initializes the Options singleton.
         Options.instance().parseArgs(args);
 
-        // Run the tests.
-        new ex19().runTest();
+        // Count the images.
+        new ex19().countImages();
     }
 
     /**
-     * Iterate through all the implementation strategies to test how
-     * they perform.
+     * Count all the images reachable from the root URI.
      */
-    private void runTest() {
-        // Perform the image counting starting at the root URL, which
-        // is given an initial depth count of 1.
-        CompletableFuture<Long> imagesProcessing =
-            performCrawl(Options.instance().getRootUri(), 1);
-
+    private void countImages() {
         // Get the total number of images.
         long totalImages =
+            // Perform the image counting starting at the root URL,
+            // which is given an initial depth count of 1.
+            performCrawl(Options.instance().getRootUri(),
+                         1)
             // join() blocks until all futures complete!
-            imagesProcessing.join();
-
+            .join();
+                         
         printDiagnostics(TAG
                            + ": there are "
                            + totalImages
