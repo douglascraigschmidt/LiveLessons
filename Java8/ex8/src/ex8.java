@@ -149,6 +149,7 @@ public class ex8 {
             e.printStackTrace();
         }
 
+        assert result != null;
         System.out.println("Callable.call() = "
                            + result.toMixedString());
     }
@@ -292,35 +293,19 @@ public class ex8 {
         Consumer<List<BigFraction>> printSortedList = list -> {
             // This implementation uses quick sort to order the list. 
             CompletableFuture<List<BigFraction>> quickSort = CompletableFuture
-                .supplyAsync(() -> {
-                    // Convert the list to an array and sort it
-                    // with quick sort.
-                    BigFraction[] bigFractionArray =
-                        list.toArray(new BigFraction[0]);
-                    Arrays.sort(bigFractionArray);
-
-                    // Convert the array back to a list.
-                    return Arrays.asList(bigFractionArray);
-                });
+                .supplyAsync(() -> quickSort(list));
 
             // This implementation uses merge sort to order the list. 
             CompletableFuture<List<BigFraction>> mergeSort = CompletableFuture
-                .supplyAsync(() -> {
-                    Collections.sort(list);
-                    return list;
-                });
+                .supplyAsync(() -> mergeSort(list));
 
             // Select the result of whichever sort implementation
             // finishes first.
             quickSort
-                .applyToEither(mergeSort, result -> {
+            .acceptEither(mergeSort, results ->
                     // Print the results as mixed fractions.
-                    result.forEach(fraction -> 
-                                   System.out.println(fraction.toMixedString()));
-
-                    // The result is unused.
-                    return result;
-                });
+                    results.forEach(fraction ->
+                                    System.out.println(fraction.toMixedString())));
         };
 
         // Create a future to a list of reduced big fractions.
@@ -334,7 +319,7 @@ public class ex8 {
 
             // Trigger intermediate operation processing and return a
             // future to a list of reduced big fractions.
-            .collect(FuturesCollector.toFutures());
+            .collect(FuturesCollector.toFuture());
 
         System.out.println("Printing sorted results:\n");
 
@@ -342,5 +327,28 @@ public class ex8 {
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
             .thenAccept(printSortedList);
+    }
+
+    /**
+     * Perform a quick sort on the @a list.
+     */
+    private static List<BigFraction> quickSort(List<BigFraction> list) {
+        // Convert the list to an array.
+        BigFraction[] bigFractionArray =
+            list.toArray(new BigFraction[0]);
+
+        // Order the array with quick sort.
+        Arrays.sort(bigFractionArray);
+
+        // Convert the array back to a list.
+        return Arrays.asList(bigFractionArray);
+    }
+
+    /*
+     * Perform a merge sort on the @a list.
+     */
+    private static List<BigFraction> mergeSort(List<BigFraction> list) {
+        Collections.sort(list);
+        return list;
     }
 }

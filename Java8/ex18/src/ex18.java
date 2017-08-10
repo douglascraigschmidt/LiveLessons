@@ -212,7 +212,7 @@ public class ex18 {
 
             // Trigger intermediate processing and return a single
             // completable future.
-            .collect(FuturesCollector.toFutures());
+            .collect(FuturesCollector.toFuture());
 
         resultsFuture
             // Wait for the single future to complete.

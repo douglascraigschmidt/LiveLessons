@@ -40,7 +40,7 @@ public class ImageStreamCompletableFuture1
         List<URL> urls = getInput();
 
         // Create a list of completable futures to filtered images.
-        List<CompletableFuture<Image>> listOfFilteredImageFutures = urls
+        List<CompletableFuture<Image>> futureList = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -66,7 +66,7 @@ public class ImageStreamCompletableFuture1
         // Create a CompletableFuture that can be used to wait for all
         // operations associated with the futures to complete.
         CompletableFuture<List<Image>> allImagesDone =
-                StreamsUtils.joinAll(listOfFilteredImageFutures);
+                StreamsUtils.joinAll(futureList);
 
         // Print the results.
         System.out.println(TAG
