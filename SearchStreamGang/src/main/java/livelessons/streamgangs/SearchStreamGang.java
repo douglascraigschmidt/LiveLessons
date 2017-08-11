@@ -163,15 +163,15 @@ public class SearchStreamGang
 
         // Print out the titles.
         if (Options.getInstance().isVerbose())
-            printTitles(listOfListOfSearchResults);
+            printPhrases(listOfListOfSearchResults);
     }
 
     /**
-     * Print out the quotes associated with each play title.
+     * Displays the phrases associated with each play.
      */
-    private void printTitles(List<List<SearchResults>> listOfListOfSearchResults) {
-        // Create a map that associates phrases found in the input with
-        // the indices where they were found.
+    private void printPhrases(List<List<SearchResults>> listOfListOfSearchResults) {
+        // Create a map that associates phrases found in the input
+        // with the titles where they were found.
         Map<String, List<SearchResults>> resultsMap = listOfListOfSearchResults
             // Convert the list of lists into a stream of lists.
             .stream()

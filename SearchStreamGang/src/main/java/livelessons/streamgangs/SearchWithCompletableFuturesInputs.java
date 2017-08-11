@@ -2,12 +2,12 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
 
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamsUtils;
 
 import static java.util.stream.Collectors.toList;
+import static livelessons.utils.FuturesCollector.toFuture;
 
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
@@ -33,9 +33,9 @@ public class SearchWithCompletableFuturesInputs
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Convert the input strings into a list of
-        // CompletableFutures.
-        List<CompletableFuture<List<SearchResults>>> listOfFutures = getInput()
+        // Convert the input strings into a single completable future
+        // to a list of CompletableFutures.
+        CompletableFuture<List<List<SearchResults>>> allDoneFuture = getInput()
             // Create a sequential stream of input strings.
             .stream()
 
@@ -43,20 +43,16 @@ public class SearchWithCompletableFuturesInputs
             // of SearchResults.
             .map(this::processInputAsync)
             
-            // Terminate stream and return a list of
-            // CompletableFutures.
-            .collect(toList());
+            // Trigger intermediate operations and return a single
+            // completable future to a list completable futures.
+            .collect(toFuture());
 
-        // Convert all the completed CompletableFutures in the
-        // listOfFutures into a list of lists of SearchResults.
-        List<List<SearchResults>> results = StreamsUtils
-            .joinAll(listOfFutures)
+        // Return results that filter out all zero-sized results.
+        return allDoneFuture
             // join() blocks the calling thread until all the futures
             // have been completed.
-            .join();
-            
-        // Return results that filter out all zero-sized results.
-        return results
+            .join()
+        
             // Convert into a stream.
             .stream()
 
