@@ -81,8 +81,8 @@ public class FuturesCollector<T>
                    .stream()
                    .toArray(CompletableFuture[]::new))
 
-            // When all futures have completed get a CompletableFuture
-            // to a list of joined elements of type T.
+            // When all futures have completed get a single future to
+            // a list of joined elements of type T.
             .thenApply(v -> futures
                        // Convert futures into a stream of completable
                        // futures.
