@@ -4,6 +4,10 @@ Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava/),
 as well as some other examples from my Safari Live Training courses.
 Here's an overview of what's included:
 
+. ex0 - This example two implementations of a zap() method that
+  removes strings from a list of strings.  One method uses basic Java
+  7 features and the other uses basic Java 8 features.
+
 . ex1 - This example shows how to use Java 8 lambda expressions and
   method references to sort elements of a collection.  It also shows
   how to use the Java 8 forEach() method.
