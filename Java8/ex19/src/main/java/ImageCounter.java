@@ -38,16 +38,22 @@ class ImageCounter {
         // is given an initial depth count of 1.
         countImages(rootUri, 1)
 
+        // Handle any exception that occurred.
+        .exceptionally(ex -> {
+            System.out.println("Error: " + ex.getMessage());
+            return 0; // Indicate no images were counted due to the exception.
+        })
+
         // When the future completes print the total number of images.
         .thenAccept(totalImages ->
                     print(TAG
-                          + ": there are "
+                          + ": " 
                           + totalImages
-                          + " total image(s) reachable from "
+                          + " total image(s) are reachable from "
                           + rootUri))
 
         // join() blocks until all futures complete!
-        .join();                         
+        .join();
     }
 
     /**
