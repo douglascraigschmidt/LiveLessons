@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+  <TextView
+      android:id="@+id/progressProducerCount"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:text=""
+      />
+
+  <ProgressBar
+      android:id="@+id/progressProducerBar"
+      android:layout_width="400dp"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/progressProducerCount"
+      android:layout_gravity="center"
+      android:visibility="invisible"
+      android:indeterminate="false"
+      style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+      android:max="100" />
+
+  <TextView
+      android:id="@+id/progressConsumerCount"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/progressProducerBar"
+      android:layout_gravity="center"
+      android:text=""
+      />
+
+  <ProgressBar
+      android:id="@+id/progressConsumerBar"
+      android:layout_width="400dp"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/progressConsumerCount"
+      android:layout_gravity="center"
+      android:visibility="invisible"
+      android:indeterminate="false"
+      style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+      android:max="100" />
+
+  <edu.vandy.busysynchronizedqueue.utils.Chronometer
+     android:id="@+id/chronometer"
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:layout_below="@id/progressConsumerBar"
+     android:visibility="invisible"
+     android:textSize="16sp"
+     android:gravity="center"/>
+
+  <LinearLayout
+      android:id="@+id/layout2"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="bottom"
+      android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/count"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_count"
+        android:maxLines="1" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <android.support.design.widget.FloatingActionButton
+          android:id="@+id/play_fab"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentLeft="true"
+          android:layout_margin="@dimen/fab_margin"
+          android:onClick="startOrStopComputations"
+          android:src="@android:drawable/ic_media_play"
+          android:tint="@android:color/white"/>
+
+      <android.support.design.widget.FloatingActionButton
+          android:id="@+id/set_fab"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentEnd="true"
+          android:layout_alignTop="@+id/play_fab"
+          android:layout_marginBottom="20dp"
+          android:layout_marginLeft="@dimen/fab_margin"
+          android:layout_marginRight="@dimen/fab_margin"
+          android:onClick="setCount"
+          android:src="@android:drawable/ic_input_add"
+          android:tint="@android:color/white"/>
+    </RelativeLayout>
+
+  </LinearLayout>
+
+</LinearLayout>

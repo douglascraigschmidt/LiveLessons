@@ -28,6 +28,12 @@ class ImageCounter {
         new ConcurrentHashSet<>();
 
     /**
+     * Stores a completed future with value of 0.
+     */
+    private CompletableFuture<Integer> mZero = 
+        CompletableFuture.completedFuture(0);
+
+    /**
      * Constructor counts all the images reachable from the root URI.
      */
     public ImageCounter() {
@@ -37,12 +43,18 @@ class ImageCounter {
         // Perform the image counting starting at the root Uri, which
         // is given an initial depth count of 1.
         countImages(rootUri, 1)
-
-        // Handle any exception that occurred.
-        .exceptionally(ex -> {
-            System.out.println("Error: " + ex.getMessage());
-            return 0; // Indicate no images were counted due to the exception.
+        .handle((totalImages, ex) -> {
+            if (totalImages == null)
+              totalImages = 0;
+            print(TAG + ": " + totalImages
+                    + " total image(s) are reachable from "
+                    + rootUri);
+            return 0;
         })
+
+            /*
+        // Handle any exception that occurred.
+        .exceptionally(ex -> 0) // Indicate no images were counted due to the exception.
 
         // When the future completes print the total number of images.
         .thenAccept(totalImages ->
@@ -51,6 +63,7 @@ class ImageCounter {
                           + totalImages
                           + " total image(s) are reachable from "
                           + rootUri))
+            */
 
         // join() blocks until all futures complete!
         .join();
@@ -66,35 +79,29 @@ class ImageCounter {
      */
     private CompletableFuture<Integer> countImages(String pageUri,
                                                    int depth) {
-        print(TAG
-              + ":>> Depth: " 
-              + depth 
-              + " [" 
-              + pageUri
-              + "]" 
-              + " (" 
-              + Thread.currentThread().getId() 
-              + ")");
-
         // Return 0 if we've reached the depth limit of the crawling.
         if (depth > Options.instance().maxDepth()) {
             print(TAG 
-                  + ": Exceeded max depth of "
+                  + "[Depth"
+                  + depth
+                  + "]: Exceeded max depth of "
                   + Options.instance().maxDepth());
 
-            return CompletableFuture.completedFuture(0);
+            return mZero;
         }
 
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
         else if (!mUniqueUris.putIfAbsent(pageUri)) {
-            print(TAG + 
-                  ": Already processed " 
+            print(TAG 
+                  + "[Depth"
+                  + depth
+                  + "]: Already processed "
                   + pageUri);
 
             // Return 0 if we've already examined this url.
-            return CompletableFuture.completedFuture(0);
+            return mZero;
         }
 
         // Use completable futures to asynchronously (1) count the
@@ -102,7 +109,22 @@ class ImageCounter {
         // hyperlinks accessible via this page and count their images.
         else 
             return countImagesAsync(pageUri,
-                                    depth);
+                                    depth)
+                .whenComplete((totalImages, ex) -> {
+                        if (totalImages != null)
+                            print(TAG
+                                  + "[Depth"
+                                  + depth
+                                  + "]: found "
+                                  + totalImages
+                                  + " images for "
+                                  + pageUri
+                                  + " in thread " 
+                                  + Thread.currentThread().getId());
+                        else 
+                            print(TAG + ": exception " + ex.getMessage());
+                    });
+
     }
 
     /**
@@ -113,7 +135,7 @@ class ImageCounter {
      * @return A future to the number of images counted
      */
     private CompletableFuture<Integer> countImagesAsync(String pageUri,
-                                                     int depth) {
+                                                        int depth) {
         try {
             // The following three lambdas are passed to the
             // countImagesMapReduce() method below.

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_above="@+id/testerTaskButtomControlsLayout"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentTop="true"
+      android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/testerTaskListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/testerTaskButtomControlsLayout"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentStart="true"
+      android:orientation="vertical">
+
+    <edu.vandy.visfwk.utils.Chronometer
+        android:id="@+id/testerTaskChronometer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:visibility="invisible"/>
+
+    <LinearLayout
+        android:id="@+id/testerTaskLinearWrapper2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+      <EditText
+          android:id="@+id/testerTaskCount"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/enter_count"
+          android:maxLines="1"
+          android:inputType="number"
+          android:visibility="invisible"/>
+
+      <RelativeLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/testerTaskPlay_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:alpha="1.0"
+            android:src="@android:drawable/ic_media_play"
+            android:tint="@android:color/white"
+            android:visibility="invisible"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/testerTaskSet_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/testerTaskPlay_fab"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:src="@android:drawable/ic_input_add"
+            android:tint="@android:color/white"/>
+      </RelativeLayout>
+    </LinearLayout>
+  </LinearLayout>
+</RelativeLayout>

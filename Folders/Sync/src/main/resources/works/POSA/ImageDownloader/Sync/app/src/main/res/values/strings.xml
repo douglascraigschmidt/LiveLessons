@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ImageDownloader</string>
+    <string name="download_image">Download Image</string>
+    <string name="defaultURL">http://www.dre.vanderbilt.edu/~schmidt/robot.png</string>
+    <string name="hintprompt">Please touch the floating action button to add a URL</string>
+    <string name="enter_url">Enter URL (or press enter for default)</string>
+    <string name="downloading">Downloading...</string>
+    <string name="ok_button">OK</string>
+
+</resources>

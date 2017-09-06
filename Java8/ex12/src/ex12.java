@@ -160,8 +160,8 @@ public class ex12 {
     private void runCollectReduce() {
         System.out.println("\nResults from runCollectReduce():");
 
-        // Create map of Hamlet characters starting with 'h' or 'H'
-        // and the length of each characters name.
+        // Create map of Hamlet characters starting with 'h' or 'H' (key)
+        // and the length of each characters name (value).
         Map<String, Long> matchingCharactersMap = Pattern
             // Create a stream of characters from William
             // Shakespeare's Hamlet.
@@ -182,6 +182,11 @@ public class ex12 {
                                 // Use a TreeMap to sort the results.
                                 TreeMap::new,
                                 summingLong(String::length)));
+
+        // Print the results.
+        System.out.println("Hamlet characters' names + name lengths "
+                // Get the list of character names and name lengths.
+                + matchingCharactersMap);
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.

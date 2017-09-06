@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/pingpong_color_output"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="50sp" />
+    
+  <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    <TextView
+       android:id="@+id/pingpong_text_output"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:textSize="15sp" />
+  </ScrollView>
+    
+ <Button
+     android:id="@+id/play_button"
+     android:text="@string/play_button"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:onClick="playButtonClicked" />    
+</LinearLayout>
