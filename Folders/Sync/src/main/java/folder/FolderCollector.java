@@ -70,13 +70,16 @@ public class FolderCollector
     }
 
     /**
-     * No-op.
+     * Perform the final transformation from the intermediate
+     * accumulation type {@code A} to the final result type {@code
+     * R}.
      *
-     * @return null
+     * @return a function which transforms the intermediate result to
+     * the final result
      */
     @Override
     public Function<Folder, Folder> finisher() {
-        return null;
+        return Function.identity();
     }
 
     /**
