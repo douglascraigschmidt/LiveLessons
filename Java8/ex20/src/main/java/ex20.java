@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class shows how to use the ManagedBlocker interface in the
+ * This example shows how to use the ManagedBlocker interface in the
  * Java fork-join pool to download multiple images from a remote
  * server.
  */
