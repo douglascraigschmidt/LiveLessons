@@ -3,20 +3,12 @@ import folder.Document;
 import folder.Folder;
 import utils.Options;
 import utils.RunTimer;
-import utils.StreamsUtils;
 import utils.TestDataFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the use of the Java 8 streams to process entries
@@ -75,22 +67,33 @@ public class Main {
         // The word to search for while the folder's been constructed.
         final String searchedWord = "CompletableFuture";
 
-        // Create a new folder.
-        Dirent rootFolder = createFolder(parallel);
+        // Compute the time needed to create a new folder.
+        Dirent rootFolder = 
+            RunTimer.timeRun(() -> createFolder(parallel),
+                             "createFolder() in "
+                             + (parallel ? "Parallel" : "Sequential"));
+;
+        // Compute the time taken to count the entries in the folder.
+        RunTimer.timeRun(() -> countEntries(rootFolder, 
+                                            parallel),
+                         "countEntries() in "
+                         + (parallel ? "Parallel" : "Sequential"));
+;
 
-        // Count the number of entries in the folder.
-        countEntries(rootFolder, 
-                     parallel);
+        // Compute the time taken to count the # of lines in the
+        // folder.
+        RunTimer.timeRun(() -> countLines(rootFolder,
+                                          parallel),
+                         "countLines() in "
+                         + (parallel ? "Parallel" : "Sequential"));
 
-        // Count the number of lines in the folder.
-        countLines(rootFolder,
-                   parallel);
-
-        // Synchronously search for a word in all folders starting at
-        // the rootFolder.
-        searchFolders(rootFolder,
-                      searchedWord,
-                      parallel);
+        // Compute the time taken to synchronously search for a word
+        // in all folders starting at the rootFolder.
+        RunTimer.timeRun(() -> searchFolders(rootFolder,
+                                             searchedWord,
+                                             parallel),
+                         "searchFolders() in "
+                         + (parallel ? "Parallel" : "Sequential"));
     }
 
     /**
@@ -101,13 +104,10 @@ public class Main {
     private static Dirent createFolder(boolean parallel) {
         // Count the time needed to create and return a folder
         // containing all the works in the sWORKs directory.
-        return RunTimer.timeRun(() ->
-                                Folder
-                                .fromDirectory(TestDataFactory
-                                               .getRootFolderFile(sWORKs),
-                                               parallel),
-                                "createFolder() in "
-                                + (parallel ? "Parallel" : "Sequential"));
+        return Folder
+            .fromDirectory(TestDataFactory
+                           .getRootFolderFile(sWORKs),
+                           parallel);
     }
 
     /**
@@ -115,24 +115,19 @@ public class Main {
      */
     private static void countEntries(Dirent folder,
                                      boolean parallel) {
-        // Compute the time taken to count the entries.
-        RunTimer.timeRun(() -> {
-                // Create a stream from the folder.
-                Stream<Dirent> folderStream = folder
-                    .stream();
+        // Create a stream from the folder.
+        Stream<Dirent> folderStream = folder
+            .stream();
 
-                // Convert to the parallel stream if desired.
-                if (parallel)
-                    folderStream.parallel();
+        // Convert to the parallel stream if desired.
+        if (parallel)
+            folderStream.parallel();
 
-                // Get a count of the number of elements in the stream.
-                long count = folderStream.count();
+        // Get a count of the number of elements in the stream.
+        long count = folderStream.count();
 
-                display("number of entries in the folder = "
-                        + count);
-            },
-            "countEntries() in "
-            + (parallel ? "Parallel" : "Sequential"));
+        display("number of entries in the folder = "
+                + count);
     }
 
     /**
@@ -142,38 +137,33 @@ public class Main {
     private static void searchFolders(Dirent rootFolder,
                                       String searchedWord,
                                       boolean parallel) {
-        // Compute the time taken to search the folders.
-        RunTimer.timeRun(() -> {
-                // Create a stream for the folder.
-                Stream<Dirent> folderStream = rootFolder
-                    .stream();
+        // Create a stream for the folder.
+        Stream<Dirent> folderStream = rootFolder
+            .stream();
 
-                // Convert to the parallel stream if desired.
-                if (parallel)
-                    folderStream.parallel();
+        // Convert to the parallel stream if desired.
+        if (parallel)
+            folderStream.parallel();
 
-                // Compute the total number of matches of searchedWord.
-                long matches = folderStream
-                    // Only search documents.
-                    .filter(dirent
-                            -> dirent instanceof Document)
+        // Compute the total number of matches of searchedWord.
+        long matches = folderStream
+            // Only search documents.
+            .filter(dirent
+                    -> dirent instanceof Document)
 
-                    // Search the document synchronously.
-                    .mapToLong(document
-                               -> occurrencesCount(document.getContents(),
-                                                   searchedWord,
-                                                   parallel))
-                    // Sum the results.
-                    .sum();
+            // Search the document synchronously.
+            .mapToLong(document
+                       -> occurrencesCount(document.getContents(),
+                                           searchedWord,
+                                           parallel))
+            // Sum the results.
+            .sum();
 
-                // Print the results.
-                display("total matches of \""
-                        + searchedWord
-                        + "\" = "
-                        + matches);
-            },
-            "searchFolders() in "
-            + (parallel ? "Parallel" : "Sequential"));
+        // Print the results.
+        display("total matches of \""
+                + searchedWord
+                + "\" = "
+                + matches);
     }
 
     /**
@@ -212,43 +202,37 @@ public class Main {
      */
     private static void countLines(Dirent rootFolder, 
                                    boolean parallel) {
-        // Compute the time taken to count the # of lines in the
-        // directory.
-        RunTimer.timeRun(() -> {
-                // Options.getInstance().setVerbose(true);
+        // Options.getInstance().setVerbose(true);
 
-                // Create a stream for the folder.
-                Stream<Dirent> folderStream = rootFolder
-                    .stream();
+        // Create a stream for the folder.
+        Stream<Dirent> folderStream = rootFolder
+            .stream();
 
-                // Convert to the parallel stream if desired.
-                if (parallel)
-                    folderStream.parallel();
+        // Convert to the parallel stream if desired.
+        if (parallel)
+            folderStream.parallel();
 
-                // Count # of lines in documents residing in the folder.
-                long lineCount = folderStream
-                    // Only consider documents. 
-                    .filter(dirent
-                            -> dirent instanceof Document)
+        // Count # of lines in documents residing in the folder.
+        long lineCount = folderStream
+            // Only consider documents. 
+            .filter(dirent
+                    -> dirent instanceof Document)
 
-                    // Count # of lines in the document.
-                    .mapToInt(document
-                              -> document
-                              // Get contents of document
-                              .getContents().toString()
-                              // Split document by newline.
-                              .split("[\n\r]")
+            // Count # of lines in the document.
+            .mapToInt(document
+                      -> document
+                      // Get contents of document
+                      .getContents().toString()
+                      // Split document by newline.
+                      .split("[\n\r]")
                       
-                              // Return length of the result.
-                              .length)
+                      // Return length of the result.
+                      .length)
 
-                    // Sum the results;
-                    .sum();
+            // Sum the results;
+            .sum();
 
-                display("total number of lines = "
-                       + lineCount);
-            },
-            "countLines() in "
-            + (parallel ? "Parallel" : "Sequential"));
+        display("total number of lines = "
+                + lineCount);
     }
 }
