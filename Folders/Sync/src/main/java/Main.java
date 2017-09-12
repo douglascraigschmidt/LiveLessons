@@ -18,8 +18,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the use of the Java 8 streams to process entries
- * in a recursively structured directory folder sequentially or in
- * parallel.
+ * in a recursively structured directory folder concurrently using the
+ * Java 8 completable futures framework.
  */
 public class Main {
     /**

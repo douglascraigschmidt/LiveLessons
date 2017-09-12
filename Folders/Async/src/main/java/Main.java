@@ -17,9 +17,9 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example shows the use of the Java 8 streams and completable
- * futures frameworks to process entries in a recursively structured
- * directory folder sequentially, in parallel, and/or asynchronously.
+ * This example shows the use of the Java 8 sequential and parallel
+ * streams framework to process entries in a recursively structured
+ * directory folder sequentially and in parallel.
  */
 public class Main {
     /**
