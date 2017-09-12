@@ -54,6 +54,7 @@ public class Main {
         // Run the tests in parallel.
         runTests(true);
 
+        // Print the results.
         System.out.println(RunTimer.getTimingResults());
     }
 
