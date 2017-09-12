@@ -2,6 +2,7 @@ package livelessons.streamgangs;
 
 import livelessons.utils.Options;
 import livelessons.utils.PhraseMatchSpliterator;
+import livelessons.utils.RunTimer;
 import livelessons.utils.SearchResults;
 
 import java.util.*;
@@ -82,14 +83,10 @@ public class SearchStreamGang
         // Create a new barrier for this iteration cycle.
         mExitBarrier = new CountDownLatch(1);
 
-        // Start timing the test run.
-        startTiming();
-
-        // Start the stream processing.
-        List<List<SearchResults>> results = processStream();
-        
-        // Stop timing the test run.
-        stopTiming();
+        // Execute the test and time how long it runs.
+        List<List<SearchResults>> results =
+            RunTimer.timeRun(() -> processStream(),
+                             TAG);
 
         // Print the results.
         printResults(TAG, results);
@@ -257,36 +254,5 @@ public class SearchStreamGang
         return null; 
     }
 
-    /**
-     * Keeps track of how long the test has run.
-     */
-    private long mStartTime;
-
-    /**
-     * Keeps track of all the execution times.
-     */
-    private List<Long> mExecutionTimes = new ArrayList<>();
-
-    /**
-     * Start timing the test run.
-     */
-    private void startTiming() {
-        // Note the start time.
-        mStartTime = System.nanoTime();
-    }
-
-    /**
-     * Stop timing the test run.
-     */
-    private void stopTiming() {
-        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
-    }
-
-    /**
-     * Return the time needed to execute the test.
-     */
-    public List<Long> executionTimes() {
-        return mExecutionTimes;
-    }
 }
 

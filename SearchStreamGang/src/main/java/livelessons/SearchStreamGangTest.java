@@ -2,6 +2,7 @@ package livelessons;
 
 import livelessons.streamgangs.*;
 import livelessons.utils.Options;
+import livelessons.utils.RunTimer;
 import livelessons.utils.SearchResults;
 import livelessons.utils.TestDataFactory;
 
@@ -145,13 +146,11 @@ public class SearchStreamGangTest {
                                      inputData,
                                      test);
 
-            // Execute the test.
+            // Ensure nothing weird happened..
             assert streamGang != null;
-            streamGang.run();
 
-            // Store the execution times into the results map.
-            mResultsMap.put(test.toString(),
-                            streamGang.executionTimes());
+            // Execute the test.
+            streamGang.run();
 
             // Run the garbage collector to free up memory and
             // minimize timing perturbations on each test.
@@ -161,7 +160,7 @@ public class SearchStreamGangTest {
         }
 
         // Sort and display all the timing results.
-        printTimingResults(mResultsMap);
+        System.out.println(RunTimer.getTimingResults());
     }
 
     /**
@@ -255,59 +254,5 @@ public class SearchStreamGangTest {
             // minimize timing perturbations on each test.
             System.gc();
     }
-
-    /**
-     * Print out all the timing results for all the test runs in order
-     * from fastest to slowest.
-     */
-    private static void printTimingResults(Map<String, List<Long>> resultsMap) {
-        // Determine how many runs of the tests took place.
-        int numberOfRuns =
-            resultsMap.entrySet().iterator().next().getValue().size();
-
-        // Iterate through the results of each of the test runs.
-        for (int i = 0;
-             i < numberOfRuns;
-             i++) {
-            final int runNumber = i;
-            System.out.println("\nPrinting "
-                               + resultsMap.entrySet().size()
-                               + " results for input file "
-                               + (runNumber + 1)
-                               + " from fastest to slowest");
-
-            // Print out the contents of the resultsMap in sorted
-            // order.
-            resultsMap
-                // Get the entrySet for the resultsMap.
-                .entrySet()
-
-                // Convert the entrySet into a stream.
-                .stream()
-
-                // Create a SimpleImmutableEntry containing the timing
-                // results (value) followed by the test name (key).
-                .map(entry
-                     -> new SimpleImmutableEntry<>
-                        (entry.getValue().get(runNumber),
-                         entry.getKey()))
-
-                // Sort the stream by the timing results (key).
-                .sorted(Comparator.comparing(SimpleImmutableEntry::getKey))
-
-                // Print all the entries in the sorted stream.
-                .forEach(entry
-                         -> System.out.println(""
-                                               + entry.getValue()
-                                               + " executed in "
-                                               + entry.getKey()
-                                               + " msecs"));
-        }
-    }
-
-    /**
-     * Keep track of which SearchStreamGang performed the best.
-     */
-    private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 }
 

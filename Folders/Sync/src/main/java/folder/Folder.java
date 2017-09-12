@@ -109,8 +109,7 @@ public class Folder
      * @return An open document
      */
     public static Dirent fromDirectory(File file,
-                                       boolean parallel)
-        throws IOException {
+                                       boolean parallel) {
         return fromDirectory(file.toPath(),
                              parallel);
     }
@@ -125,8 +124,7 @@ public class Folder
      * @return An open document
      */
     public static Dirent fromDirectory(Path rootPath,
-                                       boolean parallel)
-        throws IOException {
+                                       boolean parallel) {
         // An exception adapter.
         Function<Path, Stream<Path>> getStream = ExceptionUtils
             .rethrowFunction(path
