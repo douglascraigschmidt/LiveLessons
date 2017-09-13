@@ -39,7 +39,6 @@ public class Document
      *         contents of the document are available
      */
     static CompletableFuture<Dirent> fromPath(Path path) {
-
         // Return a future that completes once the document's contents
         // are available.
         return CompletableFuture

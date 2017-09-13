@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * This utility class contains methods for obtaining test data.
@@ -23,11 +24,13 @@ public class TestDataFactory {
      * Return a File object that's used to search a recursive
      * directory containing the complete works of William Shakespeare.
      */
-    public static File getRootFolderFile(String rootFolderName)
-        throws URISyntaxException, IOException {
-        return new File(ClassLoader
-                        .getSystemResource(rootFolderName)
-                        .toURI());
+    public static File getRootFolderFile(String rootFolderName) {
+        Function<String, File> getFile = ExceptionUtils
+                .rethrowFunction(name -> new File(ClassLoader
+                                             .getSystemResource(name)
+                                             .toURI()));
+
+        return getFile.apply(rootFolderName);
     }
 
     /**
@@ -36,8 +39,7 @@ public class TestDataFactory {
      */
     public static CompletableFuture<Dirent> getRootFolder(String rootFolderName,
                                                           EntryVisitor entryVisitor,
-                                                          boolean parallel)
-        throws URISyntaxException, IOException {
+                                                          boolean parallel) {
         return Folder
             .fromDirectory(getRootFolderFile(rootFolderName)
                            .toPath(),

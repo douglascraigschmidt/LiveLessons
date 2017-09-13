@@ -54,8 +54,9 @@ public class Main {
      * Warmup the thread pool.
      */
     private static void warmupThreadPool() {
+        display("Warming up the thread pool");
+
         // Create a new folder.
-        System.out.println("Warming up the thread pool");
         createFolder(true);
     }
 

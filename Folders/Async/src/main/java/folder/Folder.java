@@ -128,9 +128,8 @@ public class Folder
      * @return A future to the document that will be complete when the
      *         contents of the folder are available
      */
-    public static CompletableFuture<Dirent>
-        fromDirectory(File file,
-                      boolean parallel) throws IOException {
+    public static CompletableFuture<Dirent> fromDirectory(File file,
+                                                          boolean parallel) {
         return fromDirectory(file.toPath(),
                              parallel);
     }
@@ -147,8 +146,7 @@ public class Folder
      *         contents of the folder are available
      */
     public static CompletableFuture<Dirent>
-        fromDirectory(Path rootPath,
-                      boolean parallel) throws IOException {
+        fromDirectory(Path rootPath, boolean parallel)  {
         // Return a future that completes once the folder's contents
         // are available.
         return CompletableFuture.supplyAsync(() -> {
