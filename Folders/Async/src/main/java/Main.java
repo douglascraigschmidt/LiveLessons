@@ -79,29 +79,41 @@ public class Main {
             .of(rootFolderFuture
                 // This method is invoked when asynchronous folder
                 // creation has completed.
-                .thenAccept(rootFolder -> 
-                            // Compute the time needed to count the number of
-                            // entries in the folder.
-                            RunTimer.timeRun(() -> countEntries(rootFolder),
-                                             "countEntries()")),
+                .thenCompose((Dirent rootFolder) -> CompletableFuture
+                             // Run asynchronously.
+                             .runAsync(() ->
+                                       // Compute the time needed to count the
+                                       // number of entries in the folder.
+                                       RunTimer
+                                       .timeRun(() -> countEntries(rootFolder),
+                                                "countEntries()"))),
                 rootFolderFuture
                 // This method is invoked when asynchronous folder
                 // creation has completed.
-                .thenAccept(rootFolder ->
-                            // Compute the time needed to count the number of
-                            // lines in the folder.
-                            RunTimer.timeRun(() -> countLines(rootFolder),
-                                             "countLines()")),
+                .thenCompose((Dirent rootFolder) -> CompletableFuture
+                             // Run asynchronously.
+                             .runAsync(() ->
+                                       // Compute the time needed to
+                                       // count the number of lines in
+                                       // the folder.
+                                       RunTimer
+                                       .timeRun(() -> countLines(rootFolder),
+                                                "countLines()"))),
 
                 rootFolderFuture
                 // This method is invoked when asynchronous folder
                 // creation has completed.
-                .thenAccept(rootFolder ->
-                            // Compute the need needed to search for a word in
-                            // all folders starting at the rootFolder.
-                            RunTimer.timeRun(() -> searchFolders(rootFolder,
-                                                                 searchedWord),
-                                             "searchFolders()")))
+                .thenCompose((Dirent rootFolder) -> CompletableFuture
+                             // Run asynchronously.
+                             .runAsync(() ->
+                                       // Compute time needed to
+                                       // search for a word in all
+                                       // folders starting at the
+                                       // rootFolder.
+                                       RunTimer
+                                       .timeRun(() -> searchFolders(rootFolder,
+                                                                    searchedWord),
+                                                "searchFolders()"))))
 
             // Trigger intermediate operation processing and return a
             // a single future that can be used to wait for all the
