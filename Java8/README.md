@@ -53,8 +53,8 @@ Here's an overview of what's included:
   whose return values are only determined by their input values,
   without observable side effects.  This program also shows various
   stream terminal operations, including forEach(), collect(), and
-  several variants of reduce().  It also includes a non-Java 8 example
-  as a baseline.
+  several variants of reduce().  In addition, it includes a non-Java 8
+  example as a baseline.
 
 . ex13 - This example shows several examples of using Java 8
   Spliterators and streams to traverse each word in a list containing
