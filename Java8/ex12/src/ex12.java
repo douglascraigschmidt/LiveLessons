@@ -232,8 +232,8 @@ public class ex12 {
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
-                // Get the list of character names.
-                + results);
+                           // Get the list of character names.
+                           + results);
     }
 
     /**
@@ -268,8 +268,8 @@ public class ex12 {
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
-                // Get the list of character names and name lengths.
-                + matchingCharactersMap);
+                           // Get the list of character names and name lengths.
+                           + matchingCharactersMap);
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
