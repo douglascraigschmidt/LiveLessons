@@ -2,27 +2,19 @@ package folder;
 
 import utils.Options;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterators;
 import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with StreamSupport.stream() and
- * Spliterators.spliterator() to create a sequential or parallel
- * stream of Dirents from a recursively structured directory folder.
+ * Spliterators.spliterator() to create a sequential stream of Dirents
+ * from a recursively structured directory folder.
  */
-public class BatchFolderSpliterator
+public class FolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
-    /**
-     * Size of the batch to process, which is doubled every time it's
-     * used.
-     */
-    private int mBatchSize;
-
     /**
      * Iterator traverses the folder contents one directory entry at a
      * time.
@@ -40,14 +32,9 @@ public class BatchFolderSpliterator
     /**
      * Constructor initializes the fields and super class.
      */
-    public BatchFolderSpliterator(Folder folder) {
+    FolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
         //         Options.getInstance().setVerbose(true);
-
-        // Make the intialize batch size match the number of
-        // processors.
-        mBatchSize =
-            (int) folder.size() / Runtime.getRuntime().availableProcessors();
 
         // Initialize the iterator.
         mIterator = new BFSIterator(folder);
@@ -66,45 +53,6 @@ public class BatchFolderSpliterator
         } else
             // Bail out.
             return false;
-    }
-
-    /**
-     * If this spliterator can be partitioned, returns a spliterator
-     * covering elements in the current folder, that will, upon return
-     * from this method, not be covered by this spliterator.
-     */
-    public Spliterator<Dirent> trySplit() {
-        // If there's a dirent available.
-        if (mIterator.hasNext()) 
-            // Split off and process the next batch of dirents in
-            // parallel.
-            return splitBatch();
-        else
-            // Bail out.
-            return null;
-    }
-
-    /**
-     * Split off and process the next batch of dirents in parallel.
-     */
-    private Spliterator<Dirent> splitBatch() {
-        // This array holds the next batch of dirents to process.
-        Object[] direntArray = new Object[mBatchSize];
-        int index;
-
-        // Iterate through mBatchSize dirents and
-        // add them to the array.
-        for (index = 0; index < mBatchSize; index++)
-            if (mIterator.hasNext())
-                direntArray[index] = mIterator.next();
-            else
-                break;
-
-        // Double the batch size each time it's used.
-        mBatchSize += mBatchSize;
-
-        // Return a spliterator that will process this batch.
-        return Spliterators.spliterator(direntArray, 0, index, 0);
     }
 
     /**
@@ -154,7 +102,8 @@ public class BatchFolderSpliterator
                 if (mFoldersList.size() > 0) {
                     // If there are subfolders left then pop the one
                     // at the end and make it the current entry.
-                    mCurrentEntry = mFoldersList.remove(mFoldersList.size() - 1);
+                    mCurrentEntry =
+                        mFoldersList.remove(mFoldersList.size() - 1);
 
                     // Add any/all subfolders from the new current
                     // entry to the end of the subfolders list.

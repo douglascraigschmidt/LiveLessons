@@ -18,18 +18,18 @@ public abstract class Dirent {
     /**
      * Contents of the document.
      */
-    protected CharSequence mContents;
+    CharSequence mContents;
 
     /**
      * Default constructor.
      */
-    public Dirent() {
+    Dirent() {
     }
 
     /**
      * Constructor initializes the field.
      */
-    public Dirent(Path path) {
+    Dirent(Path path) {
         mPath = path;
     }
 

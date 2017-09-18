@@ -42,20 +42,15 @@ public class Document
         // Return a future that completes once the document's contents
         // are available.
         return CompletableFuture
-            .supplyAsync(() 
-                         -> {
-                             Function<Path, byte[]> getBytes = ExceptionUtils
-                                 .rethrowFunction(Files::readAllBytes);
+            .supplyAsync(() -> {
+                    Function<Path, byte[]> getBytes = ExceptionUtils
+                        .rethrowFunction(Files::readAllBytes);
 
-                             // Create a new document containing all
-                             // bytes of the file at the given path.
-                             Dirent document = new Document
-                                 (new String(getBytes.apply(path)),
-                                  path);
-
-                             // Return the document, which is wrapped
-                             // in a future.
-                             return document;
-                         });
+                    // Create/return a new document (wrapped in a
+                    // future) containing file contents at the path.
+                    return new Document
+                        (new String(getBytes.apply(path)),
+                         path);
+                });
     }
 }

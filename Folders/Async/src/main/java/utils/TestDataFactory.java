@@ -5,8 +5,6 @@ import folder.EntryVisitor;
 import folder.Folder;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -26,9 +24,10 @@ public class TestDataFactory {
      */
     public static File getRootFolderFile(String rootFolderName) {
         Function<String, File> getFile = ExceptionUtils
-                .rethrowFunction(name -> new File(ClassLoader
-                                             .getSystemResource(name)
-                                             .toURI()));
+            .rethrowFunction(name ->
+                             new File(ClassLoader
+                                      .getSystemResource(name)
+                                      .toURI()));
 
         return getFile.apply(rootFolderName);
     }
@@ -37,12 +36,8 @@ public class TestDataFactory {
      * Return a folder object that's used to search a recursive
      * directory containing the complete works of William Shakespeare.
      */
-    public static CompletableFuture<Dirent> getRootFolder(String rootFolderName,
-                                                          EntryVisitor entryVisitor,
-                                                          boolean parallel) {
-        return Folder
-            .fromDirectory(getRootFolderFile(rootFolderName)
-                           .toPath(),
-                           parallel);
+    public static CompletableFuture<Dirent> getRootFolder(String rootFolderName) {
+        return Folder.fromDirectory(getRootFolderFile(rootFolderName)
+                                    .toPath());
     }
 }

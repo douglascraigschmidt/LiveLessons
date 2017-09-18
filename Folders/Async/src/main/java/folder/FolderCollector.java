@@ -1,14 +1,18 @@
 package folder;
 
-import utils.ExceptionUtils;
+import utils.ArrayUtils;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Implements a custom collector that converts a stream of Path
@@ -19,18 +23,6 @@ public class FolderCollector
       implements Collector<Path,
                            Folder,
                            CompletableFuture<Folder>> {
-    /**
-     * Indicates whether processing should occur in parallel.
-     */
-    private boolean mParallel;
-
-    /**
-     * Constructor initializes the field.
-     */
-    private FolderCollector(boolean parallel) {
-        mParallel = parallel;
-    }
-
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the documents and subfolders in
@@ -51,8 +43,7 @@ public class FolderCollector
     @Override
     public BiConsumer<Folder, Path> accumulator() {
         return (Folder folder, Path entry) 
-            -> folder.addEntry(entry,
-                               mParallel);
+            -> folder.addEntry(entry);
     }
 
     /**
@@ -65,7 +56,11 @@ public class FolderCollector
      */
     @Override
     public BinaryOperator<Folder> combiner() {
-        return Folder::addAll;
+        return (folder1, folder2) -> {
+                folder1.mSubFolderFutures.addAll(folder2.mSubFolderFutures);
+                folder1.mDocumentFutures.addAll(folder2.mDocumentFutures);
+                return folder1;
+            };
     }
 
     /**
@@ -78,7 +73,59 @@ public class FolderCollector
      */
     @Override
     public Function<Folder, CompletableFuture<Folder>> finisher() {
-        return Folder::joinAll;
+        return folder -> {
+            // Create an array containing all the futures for subfolders
+            // and documents.
+            CompletableFuture[] futures =
+                    ArrayUtils.concat(folder.mSubFolderFutures,
+                            folder.mDocumentFutures);
+
+            // Create a future that will complete when all the other
+            // futures have completed.
+            CompletableFuture<Void> allDoneFuture =
+                    CompletableFuture.allOf(futures);
+
+            // Return a future to this folder after first initializing its
+            // subfolder/document fields after allDoneFuture completes.
+            return allDoneFuture
+                    .thenApply(v -> {
+                        // Initialize all the subfolders.
+                        folder.mSubFolders = folder.mSubFolderFutures
+                                // Convert the list into a stream.
+                                .stream()
+
+                                // Convert the future to a directory entry.
+                                // Note that join() won't block since all the
+                                // futures have completed by this point.
+                                .map(CompletableFuture::join)
+
+                                // Trigger intermediate processing and return
+                                // a list.
+                                .collect(toList());
+
+                        // Initialize all the documents.
+                        folder.mDocuments = folder.mDocumentFutures
+                                // Convert the list into a stream.
+                                .stream()
+
+
+                                // Convert the future to a directory entry.
+                                // Note that join() won't block since all the
+                                // futures have completed by this point.
+                                .map(CompletableFuture::join)
+
+                                // Trigger intermediate processing and return
+                                // a list.
+                                .collect(toList());
+
+                        // Initialize the size.
+                        folder.mSize = folder.mSubFolders.size() + folder.mDocuments.size();
+
+                        // Return this folder, which is converted to a
+                        // future to a folder.
+                        return folder;
+                    });
+        };
     }
     
     /**
@@ -100,8 +147,7 @@ public class FolderCollector
      *
      * @return A new FolderCollector
      */
-    public static Collector<Path, Folder, CompletableFuture<Folder>>
-                      toFolder(boolean parallel) {
-        return new FolderCollector(parallel);
+    public static Collector<Path, Folder, CompletableFuture<Folder>>toFolder() {
+        return new FolderCollector();
     }
 }

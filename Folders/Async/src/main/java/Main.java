@@ -7,6 +7,8 @@ import utils.TestDataFactory;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -61,6 +63,57 @@ public class Main {
     }
 
     /**
+     * A factory method that runs {@code func} asynchronously in the
+     * fork-join pool.
+     *
+     * @param rootFolderFuture A future to the asynchronously created folder
+     * @param func The function to run in the fork-join pool
+     * @param funcName The name of the function to run in the fork-join pool
+     * @return A CompletableFuture<Void> that will complete after {@code func} completes.
+     */
+    private static CompletableFuture<Void> runFunction(CompletableFuture<Dirent> rootFolderFuture,
+                                                       Function<Dirent, Void> func,
+                                                       String funcName) {
+        return rootFolderFuture
+            // This method is invoked when rootFolderFuture completes.
+            .thenCompose((Dirent rootFolder) -> CompletableFuture
+                         // Run asynchronously in the fork-join pool.
+                         .runAsync(() ->
+                                   // Compute time needed to apply
+                                   // func on the rootFolder.
+                                   RunTimer
+                                   .timeRun(() -> func.apply(rootFolder),
+                                            funcName)));
+    }
+
+    /**
+     * A factory method that runs {@code func} asynchronously in the
+     * fork-join pool.
+     *
+     * @param rootFolderFuture A future to the asynchronously created folder
+     * @param biFunc The bifunction to run in the fork-join pool
+     * @param param The parameter to pass to {@code biFunc}
+     * @param funcName The name of the function to run in the fork-join pool
+     * @return A CompletableFuture<Void> that will complete after {@code func} completes.
+     */
+    private static CompletableFuture<Void> runBiFunction(CompletableFuture<Dirent> rootFolderFuture,
+                                                         BiFunction<Dirent, String, Void> biFunc,
+                                                         String param,
+                                                         String funcName) {
+        return rootFolderFuture
+            // This method is invoked when rootFolderFuture completes.
+            .thenCompose((Dirent rootFolder) -> CompletableFuture
+                         // Run asynchronously in the fork-join pool.
+                         .runAsync(() ->
+                                   // Compute time needed to apply
+                                   // biFunc on the rootFolder.
+                                   RunTimer
+                                   .timeRun(() -> biFunc.apply(rootFolder,
+                                                               param),
+                                            funcName)));
+    }
+
+    /**
      * Run all the tests.
      */
     private static void runTests() {
@@ -69,54 +122,27 @@ public class Main {
 
         // Compute the time needed to create a new folder.
         CompletableFuture<Dirent> rootFolderFuture = 
-            RunTimer.timeRun(() -> createFolder(),
+            RunTimer.timeRun(Main::createFolder,
                              "createFolder()");
         
+
         Stream
             // Call the of() factory method to create a stream of
-            // CompletableFuture<Void>.  All the thenAccept() calls
-            // below can run concurrently.
-            .of(rootFolderFuture
-                // This method is invoked when asynchronous folder
-                // creation has completed.
-                .thenCompose((Dirent rootFolder) -> CompletableFuture
-                             // Run asynchronously.
-                             .runAsync(() ->
-                                       // Compute the time needed to count the
-                                       // number of entries in the folder.
-                                       RunTimer
-                                       .timeRun(() -> countEntries(rootFolder),
-                                                "countEntries()"))),
-                rootFolderFuture
-                // This method is invoked when asynchronous folder
-                // creation has completed.
-                .thenCompose((Dirent rootFolder) -> CompletableFuture
-                             // Run asynchronously.
-                             .runAsync(() ->
-                                       // Compute the time needed to
-                                       // count the number of lines in
-                                       // the folder.
-                                       RunTimer
-                                       .timeRun(() -> countLines(rootFolder),
-                                                "countLines()"))),
-
-                rootFolderFuture
-                // This method is invoked when asynchronous folder
-                // creation has completed.
-                .thenCompose((Dirent rootFolder) -> CompletableFuture
-                             // Run asynchronously.
-                             .runAsync(() ->
-                                       // Compute time needed to
-                                       // search for a word in all
-                                       // folders starting at the
-                                       // rootFolder.
-                                       RunTimer
-                                       .timeRun(() -> searchFolders(rootFolder,
-                                                                    searchedWord),
-                                                "searchFolders()"))))
+            // CompletableFuture<Void> based on asynchronous calls to
+            // the function lambdas below, which run concurrently.
+            .of(runFunction(rootFolderFuture,
+                            Main::countEntries,
+                            "countEntries()"),
+                runFunction(rootFolderFuture,
+                            Main::countLines,
+                            "countLines()"),
+                runBiFunction(rootFolderFuture,
+                              Main::searchFolders,
+                              searchedWord,
+                              "searchFolders()"))
 
             // Trigger intermediate operation processing and return a
-            // a single future that can be used to wait for all the
+            // a single future that can be used to wait for all
             // futures in the list to complete.
             .collect(toFuture())
         
@@ -135,30 +161,28 @@ public class Main {
         // the works in the sWORKs directory.
         return Folder
             .fromDirectory(TestDataFactory
-                           .getRootFolderFile(sWORKs),
-                           false);
+                           .getRootFolderFile(sWORKs));
     }
 
     /**
      * Count the number of entries in the folder.
      */
-    private static void countEntries(Dirent folder) {
-        long count = folder
-            // Create a stream from the folder.
-            .stream()
-
-            // Count the number of elements in the stream.
-            .count();
-
+    private static Void countEntries(Dirent folder) {
         display("number of entries in the folder = "
-                + count);
+                + folder
+                // Create a stream from the folder.
+                .stream()
+
+                // Count the number of elements in the stream.
+                .count());
+        return null;
     }
 
     /**
      * Asynchronously find all occurrences of @a searchedWord in @a
      * rootFolder using a stream.
      */
-    private static void searchFolders(Dirent rootFolder,
+    private static Void searchFolders(Dirent rootFolder,
                                       String searchedWord) {
         // Create a single future that can be used to wait for all the
         // futures in the list to complete.
@@ -181,18 +205,24 @@ public class Main {
             // futures in the list to complete.
             .collect(toFuture());
 
-        // Compute the total number of matches of searchedWord.
-        long matches = allDoneFuture
-            .join()
-            .stream()
-            .mapToLong(Long::longValue)
-            .sum();
-
         // Print the results.
-        System.out.println("total matches of \""
-                           + searchedWord
-                           + "\" = "
-                           + matches);
+        display("total matches of \""
+                + searchedWord
+                + "\" = "
+                + allDoneFuture
+                // Wait for all computations to
+                // complete.
+                .join()
+
+                // Create a stream of long results.
+                .stream()
+
+                // Map long results to Long.
+                .mapToLong(Long::longValue)
+
+                // Sum # of searchedWord matches.
+                .sum());
+        return null;
     }
 
     /**
@@ -213,41 +243,41 @@ public class Main {
             // Only consider words that match.
             .filter(searchedWord::equals)
 
-             // Count the results.
-             .count();
+            // Count the results.
+            .count();
     }
 
     /**
      * Count # of lines in the recursively structured directory at @a
      * rootFolder.
      */
-    private static void countLines(Dirent rootFolder) {
+    private static Void countLines(Dirent rootFolder) {
         // Options.getInstance().setVerbose(true);
 
         // Count # of lines in documents residing in the folder.
-        long lineCount = rootFolder
-            // Create a stream from the folder.
-            .stream()
+        display("total number of lines = "
+                + rootFolder
+                // Create a stream from the folder.
+                .stream()
 
-            // Only consider documents. 
-            .filter(dirent
-                    -> dirent instanceof Document)
+                // Only consider documents. 
+                .filter(dirent
+                        -> dirent instanceof Document)
 
-            // Count # of lines in the document.
-            .mapToInt(document
-                      -> document
-                      // Get contents of document
-                      .getContents().toString()
-                      // Split document by newline.
-                      .split("[\n\r]")
+                // Count # of lines in the document.
+                .mapToInt(document
+                          -> document
+                          // Get contents of document
+                          .getContents().toString()
+
+                          // Split document by newline.
+                          .split("[\n\r]")
                       
-                      // Return length of the result.
-                      .length)
+                          // Return length of the result.
+                          .length)
 
-            // Sum the results;
-            .sum();
-
-        System.out.println("total number of lines = "
-                           + lineCount);
+                // Sum the results;
+                .sum());
+        return null;
     }
 }
