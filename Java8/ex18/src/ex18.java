@@ -11,7 +11,7 @@ import java.util.stream.LongStream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program shows how wait for the results of a stream of
+ * This program shows how to wait for the results of a stream of
  * completable futures using (1) a custom collector and (2) the
  * StreamsUtils.joinAll() method (which is a wrapper for
  * CompletableFuture.allOf()).
@@ -21,6 +21,36 @@ public class ex18 {
      * Default factorial number.  
      */
     private static final int sDEFAULT_N = 1000;
+
+    /**
+     * This is the entry point into the test program.
+     */
+    public static void main(String[] args) {
+        System.out.println("Starting Factorial Tests");
+
+        // Create a new test object.
+        ex18 test = new ex18();
+
+        // Create a list containing all the factorial methods.
+        List<Function<BigInteger, BigInteger>> factList =
+            Arrays.asList(SynchronizedParallelFactorial::factorial,
+                          SequentialStreamFactorial::factorial,
+                          ParallelStreamFactorial2::factorial,
+                          ParallelStreamFactorial3::factorial);
+
+        // Initialize to the default value.
+        final BigInteger n = (args.length > 0)
+                ? BigInteger.valueOf(Long.valueOf(args[0]))
+                : BigInteger.valueOf(sDEFAULT_N);
+
+        // Test the StreamsUtils.joinAll() method.
+        test.testJoinAll(factList, n);
+
+        // Test the FuturesCollector.
+        test.testFuturesCollector(factList, n);
+
+        System.out.println("Ending Factorial Tests");
+    }
 
     /**
      * This class demonstrates how a synchronized statement can avoid
@@ -220,35 +250,5 @@ public class ex18 {
 
             // Printout all the results.
             .forEach(System.out::println);
-    }
-
-    /**
-     * This is the entry point into the test program.
-     */
-    public static void main(String[] args) {
-        System.out.println("Starting Factorial Tests");
-
-        // Create a new test object.
-        ex18 test = new ex18();
-
-        // Create a list containing all the factorial methods.
-        List<Function<BigInteger, BigInteger>> factList =
-            Arrays.asList(SynchronizedParallelFactorial::factorial,
-                          SequentialStreamFactorial::factorial,
-                          ParallelStreamFactorial2::factorial,
-                          ParallelStreamFactorial3::factorial);
-
-        // Initialize to the default value.
-        final BigInteger n = (args.length > 0)
-                ? BigInteger.valueOf(Long.valueOf(args[0]))
-                : BigInteger.valueOf(sDEFAULT_N);
-
-        // Test the StreamsUtils.joinAll() method.
-        test.testJoinAll(factList, n);
-
-        // Test the FuturesCollector.
-        test.testFuturesCollector(factList, n);
-
-        System.out.println("Ending Factorial Tests");
     }
 }

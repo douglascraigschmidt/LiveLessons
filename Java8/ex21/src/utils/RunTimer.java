@@ -1,4 +1,4 @@
-package livelessons.utils;
+package utils;
 
 import java.util.*;
 import java.util.function.Supplier;

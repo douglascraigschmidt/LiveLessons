@@ -80,8 +80,8 @@ Here's an overview of what's included:
   It also demonstrates what goes wrong when reduce() performs a
   mutable reduction on a parallel stream.
 
-. ex18 -- This program shows how wait for the results of a stream of
-  completable futures using (1) a custom collector and (2) the
+. ex18 -- This program shows how to wait for the results of a stream
+  of completable futures using (1) a custom collector and (2) the
   StreamsUtils.joinAll() method (which is a wrapper for
   CompletableFuture.allOf()).
 
@@ -92,3 +92,5 @@ Here's an overview of what's included:
 . ex20 -- This example shows how to use the ManagedBlocker interface in
   the Java fork-join pool to download multiple images from a remote
   server.
+
+. ex21 -- This example...

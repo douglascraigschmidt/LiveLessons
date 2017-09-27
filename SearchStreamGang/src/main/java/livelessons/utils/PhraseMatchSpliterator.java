@@ -162,9 +162,12 @@ public class PhraseMatchSpliterator
     }
 
     /**
-     * Determine the position to start determining if a phrase spans
-     * the split position.  Returns -1 if the phrase is too long for
-     * the input.
+     * Identify the position to start determining if a phrase spans
+     * the split position {@code splitPos).
+     *
+     * @return The position in the input string to start determining
+     *         of a phrase spans the split position or -1 if the phrase is too
+     *         long for the input string
      */
     private int computeStartPos(int splitPos) {
         // Length of the phrase in non-regex characters.

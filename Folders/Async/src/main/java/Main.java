@@ -179,8 +179,8 @@ public class Main {
     }
 
     /**
-     * Asynchronously find all occurrences of @a searchedWord in @a
-     * rootFolder using a stream.
+     * Find all occurrences of @a searchedWord in @a rootFolder using
+     * completable futures in cojunction with a stream.
      */
     private static Void searchFolders(Dirent rootFolder,
                                       String searchedWord) {
@@ -217,7 +217,7 @@ public class Main {
                 // Create a stream of long results.
                 .stream()
 
-                // Map long results to Long.
+                // Map contents to Long.
                 .mapToLong(Long::longValue)
 
                 // Sum # of searchedWord matches.
