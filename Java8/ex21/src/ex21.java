@@ -1,6 +1,7 @@
 import utils.RunTimer;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -10,11 +11,12 @@ import static java.util.stream.Collectors.joining;
 /**
  * This program shows the difference between stream sources (such as
  * List) that enforce encounter order and stream sources (such as
- * HashSet) that do not.  
+ * HashSet) that do not in the context of various order-sensitive
+ * aggregate operations, such as limit() and distinct().
  */
 public class ex21 {
     /**
-     * The maximum value in the range for the encounter order tests.
+     * The maximum number of elements encounter order tests.
      */
     private final static int sEncounterMax = 100000000;
 
@@ -27,9 +29,11 @@ public class ex21 {
      * This is the entry point into the test program.
      */
     public static void main(String[] args) {
+        // Create a new random number generator.
         Random random = new Random();
 
-        // Create a List of integers (List enforces encounter order).
+        // Create a List of random integers between the values 100 and
+        // 200 (List enforces encounter order).
         List<Integer> list =
             Arrays.asList(random.ints(sEncounterMax, 100, 200)
                           .boxed()
@@ -42,20 +46,26 @@ public class ex21 {
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(list);
 
-        printFirstNEvenNumbers(list,
-                               sOutputLimit,
-                               "encounter order");
+        // Print first n items in the list in their "encounter order".
+        printFirstNDistinctEvenNumbersDoubled(list,
+                                              sOutputLimit,
+                                              "list encounter order");
 
         // Run/time the tests that enforce encounter order, which will
-        // take longer to run than those that don't.
+        // take longer to run than those that ignore it.
         runTestAndPrintResult(() -> enforceEncounterOrder(false, list),
                               "enforceEncounterOrder(sequential)");
 
         runTestAndPrintResult(() -> enforceEncounterOrder(true, list),
                               "enforceEncounterOrder(parallel)");
 
-        // Run/time the tests that do not enforce encounter order,
-        // which will run faster than those that do.
+        // Print first n items in the set in their "encounter order".
+        printFirstNDistinctEvenNumbersDoubled(set,
+                                              sOutputLimit,
+                                              "set encounter order");
+
+        // Run/time the tests that ignore encounter order, which will
+        // run faster than those that enforce it.
         runTestAndPrintResult(() -> ignoreEncounterOrder(false, set),
                               "ignoreEncounterOrder(sequential)");
                     
@@ -64,10 +74,22 @@ public class ex21 {
 
         // Run/time tests that show the difference in performance
         // between ordered and unordered uses of limit().
-        runTestAndPrintResult(() -> limitTest(true, list),
-                              "limitTest(unordered)");
-        runTestAndPrintResult(() -> limitTest(false, list),
-                              "limitTest(ordered)");
+        runTestAndPrintResult(() -> limitTest(true, true, list),
+                              "limitTest(unordered|parallel)");
+        runTestAndPrintResult(() -> limitTest(false, true, list),
+                              "limitTest(ordered|parallel)");
+        runTestAndPrintResult(() -> limitTest(true, false, list),
+                              "limitTest(unordered|sequential)");
+        runTestAndPrintResult(() -> limitTest(false, false, list),
+                              "limitTest(ordered|sequential)");
+
+        // Run/time tests that show the difference in performance
+        // between forEachOrdered() (which preserves order) and
+        // forEach() (which does not preserve order).
+        runTestAndPrintResult(() -> forEachTest(false, set),
+                              "forEachTest(ordered)");
+        runTestAndPrintResult(() -> forEachTest(true, set),
+                              "forEachTest(unordered)");
 
         // Print out the timing results for all the tests.
         System.out.println(RunTimer.getTimingResults());
@@ -78,19 +100,22 @@ public class ex21 {
      */
     private static void warmUpThreadPool(Collection<Integer> list) {
         System.out.println("Warming up the thread pool");
-        limitTest(false, list);
+        limitTest(false, true, list);
     }
 
     /**
      * Print the first 
      */
-    private static void printFirstNEvenNumbers(Collection<Integer> collection,
-                                               int n,
-                                               String testName) {
+    private static void printFirstNDistinctEvenNumbersDoubled(Collection<Integer> collection,
+                                                              int n,
+                                                              String testName) {
         // Store the results in a string.
         String results = collection
             // Convert the collection into a stream.
             .stream()
+
+            // Ensure the results are distinct.
+            .distinct()
 
             // Only keep even numbers.
             .filter(x -> x % 2 == 0)
@@ -100,9 +125,6 @@ public class ex21 {
 
             // Map each integer to a string.
             .map(Object::toString)
-
-            // Ensure the results are distinct.
-            .distinct()
 
             // Limit the number of items in the output.
             .limit(n)
@@ -130,7 +152,7 @@ public class ex21 {
         // Run/time the supplier and store the results into an array
         // of integers.
         Integer[] array =
-                RunTimer.timeRun(supplier, testName);
+            RunTimer.timeRun(supplier, testName);
 
         // Store the results in a string.
         String results = Arrays
@@ -160,7 +182,7 @@ public class ex21 {
 
     /**
      * Shows how encounter order is enforced if the source is ordered.
-     * 
+     *
      * @param parallel Indicates whether or not the stream should run in parallel
      */
     private static Integer[] enforceEncounterOrder(boolean parallel,
@@ -176,14 +198,14 @@ public class ex21 {
 
         // Return an array of results that preserve the encounter order.
         return intStream
+            // Ensure the results are distinct.
+            .distinct()
+
             // Only keep even numbers.
             .filter(x -> x % 2 == 0)
 
             // Double the integers in the list.
             .map(x -> x * 2)
-
-            // Ensure the results are distinct.
-            .distinct()
 
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
@@ -211,14 +233,14 @@ public class ex21 {
             
         // Return an array of results that ignore encounter order.
         return intStream
+            // Ensure the results are distinct.
+            .distinct()
+
             // Only keep even numbers.
             .filter(x -> x % 2 == 0)
 
             // Double the integers in the list.
             .map(x -> x * 2)
-
-            // Ensure the results are distinct.
-            .distinct()
 
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
@@ -229,8 +251,10 @@ public class ex21 {
      * unordered vs ordered.
      * 
      * @param unordered Indicates whether the stream should be unordered or ordered
+     * @param parallel Indicates whether or not the stream should run in parallel
      */
     private static Integer[] limitTest(boolean unordered,
+                                       boolean parallel,
                                        Collection<Integer> collection) {
         // A stream of integers.
         Stream<Integer> intStream;
@@ -239,32 +263,91 @@ public class ex21 {
         if (unordered)
             // Create a stream.
             intStream = collection
-                // Convert the collection into a parallel stream.
-                .parallelStream()
+                // Convert the collection into a stream.
+                .stream()
 
                 // Make the stream unordered.
                 .unordered();
         else
             intStream = collection
-                // Convert the collection into a parallel stream.
-                .parallelStream();
+                // Convert the collection into a stream.
+                .stream();
+
+        // Make the stream parallel if directed.
+        if (parallel)
+            intStream.parallel();
 
         // Return an array of results that may or may not preserve
         // encounter order.
         return intStream
+            // Ensure the results are distinct.
+            .distinct()
+
             // Only keep even numbers.
             .filter(x -> x % 2 == 0)
                            
             // Double the integers in the list.
             .map(x -> x * 2)
 
-            // Ensure the results are distinct.
-            .distinct()
-
             // Limit the number of items in the output.
             .limit(sOutputLimit)
 
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
+    }
+
+    /**
+     * Shows how the use of forEach() is faster than forEachOrdered() for
+     * a parallel stream.
+     * 
+     * @param unordered Indicates whether the stream should be unordered or ordered
+     */
+    private static Integer[] forEachTest(boolean unordered,
+                                         Collection<Integer> collection) {
+        // Store the results in a concurrent queue.
+        ConcurrentLinkedQueue<Integer> queue =
+            new ConcurrentLinkedQueue<>();
+
+        if (unordered)
+            collection
+                // Convert collection into a parallel stream.
+                .parallelStream()
+
+                // Ensure the results are distinct.
+                .distinct()
+
+                // Only keep even numbers.
+                .filter(x -> x % 2 == 0)
+                           
+                // Double the integers in the list.
+                .map(x -> x * 2)
+
+                // Limit the number of items in the output.
+                .limit(sOutputLimit)
+
+                // Add each item to the list in an unordered manner.
+                .forEach(queue::add);
+        
+        else 
+            collection
+                // Convert collection into a parallel stream.
+                .parallelStream()
+
+                // Ensure the results are distinct.
+                .distinct()
+
+                // Only keep even numbers.
+                .filter(x -> x % 2 == 0)
+                           
+                // Double the integers in the list.
+                .map(x -> x * 2)
+
+                // Limit the number of items in the output.
+                .limit(sOutputLimit)
+
+                // Add each item to the list in an ordered manner.
+                .forEachOrdered(queue::add);
+
+        return queue.toArray(new Integer[0]);
     }
 }
