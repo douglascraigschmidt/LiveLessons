@@ -14,14 +14,9 @@ import static java.util.stream.Collectors.joining;
  */
 public class ex21 {
     /**
-     * The maximum value in the range for the limitTest().
-     */
-    private final static int sLimitMax = 1000000000;
-
-    /**
      * The maximum value in the range for the encounter order tests.
      */
-    private final static int sEncounterMax = 10000000;
+    private final static int sEncounterMax = 100000000;
 
     /**
      * The number of output elements to print.
@@ -32,29 +27,24 @@ public class ex21 {
      * This is the entry point into the test program.
      */
     public static void main(String[] args) {
-        // Create a List of integers (where List enforces encounter
-        // order).
+        Random random = new Random();
+
+        // Create a List of integers (List enforces encounter order).
         List<Integer> list =
-            Arrays.asList(IntStream.range(0, sEncounterMax)
+            Arrays.asList(random.ints(sEncounterMax, 100, 200)
                           .boxed()
                           .toArray(Integer[]::new));
 
-        // Create a HashSet of integers (where HashSet doesn't enforce
+        // Create a HashSet of integers (HashSet doesn't enforce
         // encounter order).
-        Set<Integer> set =
-            new HashSet<>(Arrays.asList(IntStream.range(0, sEncounterMax)
-                                        .boxed()
-                                        .toArray(Integer[]::new)));
+        Set<Integer> set = new HashSet<>(list);
 
         // Warm up the thread pool so the results are more accurate.
-        warmUpThreadPool();
+        warmUpThreadPool(list);
 
-        // Run/time tests that show the difference in performance
-        // between ordered and unordered uses of limit().
-        runTestAndPrintResult(() -> limitTest(true),
-                              "limitTest(unordered)");
-        runTestAndPrintResult(() -> limitTest(false),
-                              "limitTest(ordered)");
+        printFirstNEvenNumbers(list,
+                               sOutputLimit,
+                               "encounter order");
 
         // Run/time the tests that enforce encounter order, which will
         // take longer to run than those that don't.
@@ -72,6 +62,13 @@ public class ex21 {
         runTestAndPrintResult(() -> ignoreEncounterOrder(true, set),
                               "ignoreEncounterOrder(parallel)");
 
+        // Run/time tests that show the difference in performance
+        // between ordered and unordered uses of limit().
+        runTestAndPrintResult(() -> limitTest(true, list),
+                              "limitTest(unordered)");
+        runTestAndPrintResult(() -> limitTest(false, list),
+                              "limitTest(ordered)");
+
         // Print out the timing results for all the tests.
         System.out.println(RunTimer.getTimingResults());
     }
@@ -79,9 +76,50 @@ public class ex21 {
     /**
      * Warm up the thread pool so the results are more accurate.
      */
-    private static void warmUpThreadPool() {
+    private static void warmUpThreadPool(Collection<Integer> list) {
         System.out.println("Warming up the thread pool");
-        limitTest(false);
+        limitTest(false, list);
+    }
+
+    /**
+     * Print the first 
+     */
+    private static void printFirstNEvenNumbers(Collection<Integer> collection,
+                                               int n,
+                                               String testName) {
+        // Store the results in a string.
+        String results = collection
+            // Convert the collection into a stream.
+            .stream()
+
+            // Only keep even numbers.
+            .filter(x -> x % 2 == 0)
+                           
+            // Double the integers in the list.
+            .map(x -> x * 2)
+
+            // Map each integer to a string.
+            .map(Object::toString)
+
+            // Ensure the results are distinct.
+            .distinct()
+
+            // Limit the number of items in the output.
+            .limit(n)
+
+            // Collect into a single string separated by ' '.
+            .collect(joining(" "));
+
+        // Print the results.
+        System.out.println("The first "
+                           + n
+                           + " even numbers = ["
+                           + results
+                           + "] "
+                           + testName);
+
+        // Let the system garbage collect.
+        System.gc();
     }
 
     /**
@@ -99,17 +137,17 @@ public class ex21 {
             // Convert the array into a stream.
             .stream(array)
 
-            // Only consider the last sOutputLimit elements.
-            .skip(array.length - sOutputLimit)
-
             // Map each integer to a string.
             .map(Object::toString)
+
+            // Limit the number of items in the output.
+            .limit(sOutputLimit)
 
             // Collect into a single string separated by ' '.
             .collect(joining(" "));
 
         // Print the results.
-        System.out.println("The last "
+        System.out.println("The first "
                            + sOutputLimit
                            + " even numbers = ["
                            + results
@@ -144,6 +182,9 @@ public class ex21 {
             // Double the integers in the list.
             .map(x -> x * 2)
 
+            // Ensure the results are distinct.
+            .distinct()
+
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
     }
@@ -176,6 +217,9 @@ public class ex21 {
             // Double the integers in the list.
             .map(x -> x * 2)
 
+            // Ensure the results are distinct.
+            .distinct()
+
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
     }
@@ -186,22 +230,24 @@ public class ex21 {
      * 
      * @param unordered Indicates whether the stream should be unordered or ordered
      */
-    private static Integer[] limitTest(boolean unordered) {
-        // Create a stream.
-        IntStream intStream;
+    private static Integer[] limitTest(boolean unordered,
+                                       Collection<Integer> collection) {
+        // A stream of integers.
+        Stream<Integer> intStream;
 
         // Make the stream unordered if directed.
         if (unordered)
-            intStream = IntStream.range(0, sLimitMax)
-                // Make the stream unordered.
-                .unordered()
+            // Create a stream.
+            intStream = collection
+                // Convert the collection into a parallel stream.
+                .parallelStream()
 
-                // Create a parallel stream.
-                .parallel();
+                // Make the stream unordered.
+                .unordered();
         else
-            // Convert the list into a parallel stream.
-            intStream = IntStream.range(0, sLimitMax)
-                .parallel();
+            intStream = collection
+                // Convert the collection into a parallel stream.
+                .parallelStream();
 
         // Return an array of results that may or may not preserve
         // encounter order.
@@ -212,11 +258,11 @@ public class ex21 {
             // Double the integers in the list.
             .map(x -> x * 2)
 
+            // Ensure the results are distinct.
+            .distinct()
+
             // Limit the number of items in the output.
             .limit(sOutputLimit)
-
-            // Box the results.
-            .boxed()
 
             // Convert the stream into an integer array.
             .toArray(Integer[]::new);
