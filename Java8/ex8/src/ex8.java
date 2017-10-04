@@ -46,8 +46,13 @@ public class ex8 {
         testFractionAsyncChaining();
 
         // Test fraction multiplication using a CompletableFuture and
-        // a chain of completion stage methods.
+        // a chain of completion stage "normal" (i.e., non-*Async())
+        // methods.
         testAsyncFractionReduction();
+
+        // Test fraction multiplication using a CompletableFuture and
+        // a chain of completion stage *Async() methods.
+        testAsyncAsyncFractionReduction();
 
         // Test fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods.
@@ -103,13 +108,13 @@ public class ex8 {
             // Initiate an async task whose supplier multiplies two
             // large fractions.
             .runAsync(() -> {
-                BigFraction bf1 = new BigFraction(f1);
-                BigFraction bf2 = new BigFraction(f2);
+                    BigFraction bf1 = new BigFraction(f1);
+                    BigFraction bf2 = new BigFraction(f2);
                     
-                // Complete the future once the computation is
-                // finished.
-                future.complete(bf1.multiply(bf2));
-            });
+                    // Complete the future once the computation is
+                    // finished.
+                    future.complete(bf1.multiply(bf2));
+                });
 
         // Print the result, blocking until it's ready.
         System.out.println("runAsync() result = "
@@ -138,7 +143,7 @@ public class ex8 {
         // Submit the call to the common fork-join pool and store the
         // future it returns.
         Future<BigFraction> future =
-                ForkJoinPool.commonPool().submit(call);
+            ForkJoinPool.commonPool().submit(call);
 
         BigFraction result = null;
 
@@ -170,12 +175,12 @@ public class ex8 {
             // Initiate an async task whose supplier multiplies two
             // large fractions.
             .supplyAsync(() -> {
-                BigFraction bf1 = new BigFraction(f1);
-                BigFraction bf2 = new BigFraction(f2);
+                    BigFraction bf1 = new BigFraction(f1);
+                    BigFraction bf2 = new BigFraction(f2);
                     
-                // Return the result of multiplying the fractions.
-                return bf1.multiply(bf2);
-            });
+                    // Return the result of multiplying the fractions.
+                    return bf1.multiply(bf2);
+                });
 
         // Print the result, blocking until it's ready.
         System.out.println("supplyAsync() result = " 
@@ -217,9 +222,14 @@ public class ex8 {
 
     /**
      * Test fraction multiplication using a CompletableFuture and a
-     * chain of completion stage methods.
+     * chain of completion stage "normal" (i.e., non-*Async())
+     * methods.
      */
     private static void testAsyncFractionReduction() {
+        System.out.println("["
+                           + Thread.currentThread().getId()
+                           + "] testAsyncFractionReduction()");
+
         // Create a new unreduced big fraction.
         BigFraction unreducedFraction = 
             BigFraction.valueOf(new BigInteger ("846122553600669882"),
@@ -229,9 +239,11 @@ public class ex8 {
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction =
-                    BigFraction.reduce(unreducedFraction);
+            BigFraction.reduce(unreducedFraction);
 
-            System.out.println("unreducedFraction "
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] unreducedFraction "
                                + unreducedFraction.toString()
                                + "\nreduced improper fraction = "
                                + reducedFraction.toString());
@@ -240,10 +252,20 @@ public class ex8 {
             return reducedFraction;
         };
 
+        Function<BigFraction, String> convertToMixedString = result -> {
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] calling BigFraction::toMixedString");
+
+            return result.toMixedString();
+        };
+
         // Create a consumer to print the mixed reduced result.
         Consumer<String> printResult = result ->
-                System.out.println("mixed reduced fraction = "
-                        + result);
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] mixed reduced fraction = "
+                               + result);
 
         CompletableFuture
             // Asynchronously reduce the unreduced big fraction.
@@ -252,10 +274,69 @@ public class ex8 {
             // After the big fraction is reduced then return a future
             // to a computation that converts it into a string in
             // mixed fraction format.
-            .thenApply(BigFraction::toMixedString)
+            .thenApply(convertToMixedString)
 
             // Print result after converting it to a mixed fraction.
             .thenAccept(printResult);
+    }
+
+    /**
+     * Test fraction multiplication using a CompletableFuture and a
+     * chain of completion stage *Async() methods.
+     */
+    private static void testAsyncAsyncFractionReduction() {
+        System.out.println("["
+                           + Thread.currentThread().getId()
+                           + "] testAsyncAsyncFractionReduction()");
+
+        // Create a new unreduced big fraction.
+        BigFraction unreducedFraction = 
+            BigFraction.valueOf(new BigInteger ("846122553600669882"),
+                                new BigInteger("188027234133482196"),
+                                false);
+
+        Supplier<BigFraction> reduceFraction = () -> {
+            // Reduce the big fraction.
+            BigFraction reducedFraction =
+            BigFraction.reduce(unreducedFraction);
+
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] unreducedFraction "
+                               + unreducedFraction.toString()
+                               + "\nreduced improper fraction = "
+                               + reducedFraction.toString());
+
+            // Return the reduction.
+            return reducedFraction;
+        };
+
+        Function<BigFraction, String> convertToMixedString = result -> {
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] calling BigFraction::toMixedString");
+
+            return result.toMixedString();
+        };
+
+        // Create a consumer to print the mixed reduced result.
+        Consumer<String> printResult = result ->
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] mixed reduced fraction = "
+                               + result);
+
+        CompletableFuture
+            // Asynchronously reduce the unreduced big fraction.
+            .supplyAsync(reduceFraction)
+
+            // After the big fraction is reduced then return a future
+            // to a computation that converts it into a string in
+            // mixed fraction format.
+            .thenApplyAsync(convertToMixedString)
+
+            // Print result after converting it to a mixed fraction.
+            .thenAcceptAsync(printResult);
     }
 
     /**
@@ -270,12 +351,12 @@ public class ex8 {
         Supplier<BigFraction> generator = () -> {
             // Create a very large random big integer.
             BigInteger numerator = 
-                new BigInteger(150000, random);
+            new BigInteger(150000, random);
 
             // Create a denominator that's between 1 to 10 times
             // smaller than the numerator.
             BigInteger denominator = 
-                numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
+            numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
 
             // Return an unreduced big fraction.
             return BigFraction.valueOf(numerator,
@@ -286,26 +367,26 @@ public class ex8 {
         // Create a function to asynchronously reduce a big fraction.
         Function<BigFraction, CompletableFuture<BigFraction>> reduceFractions =
             unreducedFraction -> CompletableFuture
-                .supplyAsync(() -> BigFraction.reduce(unreducedFraction));
+            .supplyAsync(() -> BigFraction.reduce(unreducedFraction));
 
         // Create a consumer that sorts and prints a list of reduced
         // fractions.
         Consumer<List<BigFraction>> printSortedList = list -> {
             // This implementation uses quick sort to order the list. 
             CompletableFuture<List<BigFraction>> quickSort = CompletableFuture
-                .supplyAsync(() -> quickSort(list));
+            .supplyAsync(() -> quickSort(list));
 
             // This implementation uses merge sort to order the list. 
             CompletableFuture<List<BigFraction>> mergeSort = CompletableFuture
-                .supplyAsync(() -> mergeSort(list));
+            .supplyAsync(() -> mergeSort(list));
 
             // Select the result of whichever sort implementation
             // finishes first.
             quickSort
             .acceptEither(mergeSort, results ->
-                    // Print the results as mixed fractions.
-                    results.forEach(fraction ->
-                                    System.out.println(fraction.toMixedString())));
+                          // Print the results as mixed fractions.
+                          results.forEach(fraction ->
+                                          System.out.println(fraction.toMixedString())));
         };
 
         // Create a future to a list of reduced big fractions.
