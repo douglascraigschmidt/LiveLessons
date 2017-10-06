@@ -37,7 +37,8 @@ Here's an overview of what's included:
   
 . ex8 - This example shows how to reduce and/or multiply big fractions
   using a wide range of CompletableFuture features, including many
-  completion stage methods and exception handling methods.
+  factory methods, completion stage methods, arbitrary-arity methods,
+  and exception handling methods.
 
 . ex9 - This example uses a Java 8 ConcurrentHashMap and Java 8
   function-based method reference to compute/cache/retrieve prime
