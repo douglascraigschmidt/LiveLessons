@@ -36,7 +36,8 @@ Here's an overview of what's included:
   used in conjunction with a constructor reference.
   
 . ex8 - This example shows how to reduce and/or multiply big fractions
-  using a wide range of CompletableFuture features.
+  using a wide range of CompletableFuture features, including many
+  completion stage methods and exception handling methods.
 
 . ex9 - This example uses a Java 8 ConcurrentHashMap and Java 8
   function-based method reference to compute/cache/retrieve prime
