@@ -66,6 +66,14 @@ public class ex8 {
         // supplyAsync() and thenCombine().
         testFractionCombine();
 
+        // Test BigFraction exception handling using
+        // CompletableFutures and the handle() method.
+        testFractionExceptions1();
+
+        // Test BigFraction exception handling using
+        // CompletableFutures and the exceptionally() method.
+        testFractionExceptions2();
+
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods.
         testFractionMultiplications();
@@ -407,6 +415,104 @@ public class ex8 {
     }
 
     /**
+     * Test BigFraction exception handling using CompletableFutures
+     * and the handle() method.
+     */
+    private static void testFractionExceptions1() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions1\n");
+
+        Arrays
+            // Generate results both with and without exceptions.
+            .asList(true, false)
+
+            // Convert list to a stream.
+            .stream()
+
+            // Iterate through the stream elements.
+            .forEach(throwException -> {
+                    // If boolean is true then make the demoninator 0
+                    // to trigger an exception.
+                    int denominator = throwException ? 0 : 1;
+
+                    // Create and process a BigFraction.
+                    CompletableFuture
+                        .supplyAsync(() ->
+                                     // Run asynchronously and maybe
+                                     // throw ArithmeticException.
+                                     BigFraction.valueOf(100, denominator))
+
+                        // Handle outcome of previous stage.
+                        .handle((fraction, ex) -> {
+                                // If exception occurred convert it to 0.
+                                if (fraction == null) {
+                                    sb.append("     exception = " + ex.getMessage());
+                                    return BigFraction.ZERO;
+                                } else
+                                    // Multiply fraction by a constant.
+                                    return fraction.multiply(sBigReducedFraction);
+                            })
+
+                        // When future completes prepare results for output.
+                        .thenAccept(fraction ->
+                                    sb.append("\n     result = "
+                                              + fraction.toMixedString()));
+                });
+
+        // Print results.
+        display(sb.toString());
+    }
+
+    /**
+     * Test BigFraction exception handling using CompletableFutures
+     * and the exceptionally() method.
+     */
+    private static void testFractionExceptions2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions2\n");
+
+        Arrays
+            // Generate results both with and without exceptions.
+            .asList(true, false)
+
+            // Convert list to a stream.
+            .stream()
+
+            // Iterate through the stream elements.
+            .forEach(throwException -> {
+                    // If boolean is true then make the demoninator 0
+                    // to trigger an exception.
+                    int denominator = throwException ? 0 : 1;
+
+                    // Create and process a BigFraction.
+                    CompletableFuture
+                        .supplyAsync(() ->
+                                     // Run asynchronously and maybe
+                                     // throw ArithmeticException.
+                                     BigFraction.valueOf(100, denominator))
+
+                        // Multiply fraction by a constant when
+                        // previous stage completes.
+                        .thenApply(fraction ->
+                                   fraction.multiply(sBigReducedFraction))
+
+                        // If exception occurred convert it to 0.
+                        .exceptionally(ex -> {
+                                sb.append("     exception = " + ex.getMessage());
+                                return BigFraction.ZERO;
+                            })
+
+                        // When future completes prepare results for output.
+                        .thenAccept(fraction ->
+                                    sb.append("\n     result = "
+                                    + fraction.toMixedString()));
+                });
+
+        // Print results.
+        display(sb.toString());
+    }
+
+    /**
      * Test BigFraction multiplications using a stream of
      * CompletableFutures and a chain of completion stage methods.
      */
@@ -414,8 +520,8 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications\n");
 
-        // A function to asynchronously reduce/multiply big fractions.
-        Function<BigFraction, CompletableFuture<BigFraction>> reduceAndMultiplyFractions =
+        // Lambda asynchronously reduces/multiplies a big fraction. 
+        Function<BigFraction, CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
             .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
@@ -427,8 +533,7 @@ public class ex8 {
                          .supplyAsync(() 
                                       -> reducedFraction.multiply(sBigReducedFraction)));
 
-        // Create a consumer that sorts and prints a list of reduced
-        // fractions.
+        // Consumer sorts and prints a list of reduced fractions.
         Consumer<List<BigFraction>> printSortedList = list -> {
             // This implementation uses quick sort to order the list. 
             CompletableFuture<List<BigFraction>> quickSortFuture = CompletableFuture
@@ -453,30 +558,30 @@ public class ex8 {
                 });
         };
 
-        // Create a future to a list of reduced big fractions.
-        CompletableFuture<List<BigFraction>> futureToList = Stream
+        sb.append("     Printing sorted results:\n");
+
+        // Process the two lambdas in a sequential stream.
+        Stream
             // Generate sMAX_FRACTIONS random unreduced BigFractions.
             .generate(() -> makeBigFraction(new Random(), false))
             .limit(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
-            .map(reduceAndMultiplyFractions)
+            .map(reduceAndMultiplyFraction)
 
             // Trigger intermediate operation processing and return a
             // future to a list of big fractions that are being
             // reduced and multiplied asynchronously.
-            .collect(FuturesCollector.toFuture());
+            .collect(FuturesCollector.toFuture())
 
-        sb.append("     Printing sorted results:\n");
-
-        futureToList
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
             .thenAccept(printSortedList);
     }
 
     /**
-     * A factory method that returns a large random BigFraction.
+     * A factory method that returns a large random BigFraction whose
+     * creation is performed synchronously.
      *
      * @param random A random number generator
      * @param reduced A flag indicating whether to reduce the fraction or not
@@ -493,12 +598,43 @@ public class ex8 {
         BigInteger denominator =
             numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
 
-        // Return an unreduced big fraction.
-        return BigFraction
-            .valueOf(numerator,
-                     denominator,
-                     reduced);
+        // Return a big fraction.
+        return BigFraction.valueOf(numerator,
+                                   denominator,
+                                   reduced);
     }
+
+    /**
+     * A factory method that returns a large random BigFraction whose
+     * creation is performed synchronously.
+     *
+     * @param random A random number generator
+     * @param reduced A flag indicating whether to reduce the fraction or not
+     * @return A completable future to a large random BigFraction
+     */
+    private static CompletableFuture<BigFraction> 
+        makeBigFractionAsync(Random random,
+                             boolean reduced) {
+        return CompletableFuture
+            .supplyAsync(() -> {
+                    // Create a large random big integer.
+                    BigInteger numerator =
+                        new BigInteger(150000, random);
+
+                    // Create a denominator that's between 1 to 10
+                    // times smaller than the numerator.
+                    BigInteger denominator =
+                        numerator.divide(BigInteger
+                                         .valueOf(random
+                                                  .nextInt(10) + 1));
+
+                    // Return a big fraction.
+                    return BigFraction.valueOf(numerator,
+                                               denominator,
+                                               reduced);
+                });
+    }
+
     /**
      * Perform a quick sort on the @a list.
      */

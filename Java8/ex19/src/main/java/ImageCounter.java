@@ -43,6 +43,9 @@ class ImageCounter {
         // Perform the image counting starting at the root Uri, which
         // is given an initial depth count of 1.
         countImages(rootUri, 1)
+
+        // Handle outcome of previous stage by converting any
+        // exceptions into 0 and printing the total # of images.
         .handle((totalImages, ex) -> {
             if (totalImages == null)
               totalImages = 0;
