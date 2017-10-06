@@ -343,10 +343,8 @@ public class ex8 {
 
         // Create a supplier that multiplies two large fractions.
         Supplier<BigFraction> fractionMultiplier = () -> {
-            BigFraction bf1 =
-            new BigFraction("62675744/15668936");
-            BigFraction bf2 =
-            new BigFraction("609136/913704");
+            BigFraction bf1 = new BigFraction("62675744/15668936");
+            BigFraction bf2 = new BigFraction("609136/913704");
                     
             // Return the result of multiplying the fractions.
             return bf1.multiply(bf2);
