@@ -51,8 +51,8 @@ public class ex8 {
         // its runAsync() and join() methods.
         testFractionMultiplicationRunAsync();
 
-        // Test BigFraction multiplication using a Callable and the
-        // common fork-join pool.
+        // Test BigFraction multiplication using a Callable, Future,
+        // and the common fork-join pool.
         testFractionMultiplicationCallable();
 
         // Test BigFraction multiplication using a CompletableFuture and
@@ -260,45 +260,42 @@ public class ex8 {
     }
 
     /**
-     * Test BigFraction multiplication using a Callable and the common
-     * fork-join pool.
+     * Test BigFraction multiplication using a Callable, Future, and
+     * the common fork-join pool.
      */
     private static void testFractionMultiplicationCallable() {
         StringBuffer sb = 
             new StringBuffer(">> Calling testFractionMultiplicationCallabl\n");
 
-        // These "effectively final" objects are used to pass params
-        // to the callable lambda below.
-        String f1 = "62675744/15668936";
-        String f2 = "609136/913704";
-
-        // Create a callable that multiplies two large fractions.
-        Callable<BigFraction> call = () -> {
-            BigFraction bf1 = new BigFraction(f1);
-            BigFraction bf2 = new BigFraction(f2);
-                    
-            // Return the result of multiplying the fractions.
-            return bf1.multiply(bf2);
-        };
-
-        // Submit the call to the common fork-join pool and store the
-        // future it returns.
-        Future<BigFraction> future =
-            ForkJoinPool.commonPool().submit(call);
-
-        BigFraction result = null;
-
         try {
+            // These "effectively final" objects are used to pass
+            // params to the callable lambda below.
+            String f1 = "62675744/15668936";
+            String f2 = "609136/913704";
+
+            // Create a callable that multiplies two large fractions.
+            Callable<BigFraction> call = () -> {
+                BigFraction bf1 = new BigFraction(f1);
+                BigFraction bf2 = new BigFraction(f2);
+                    
+                // Return the result of multiplying the fractions.
+                return bf1.multiply(bf2);
+            };
+
+            // Submit the call to the common fork-join pool and store
+            // the future it returns.
+            Future<BigFraction> future =
+                ForkJoinPool.commonPool().submit(call);
+
             // Block until the result is available.
-            result = future.get();
+            BigFraction result = future.get();
+
+            sb.append("     Callable.call() = "
+                      + result.toMixedString());
+            display(sb.toString());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-
-        assert result != null;
-        sb.append("     Callable.call() = "
-                  + result.toMixedString());
-        display(sb.toString());
     }
 
     /**
