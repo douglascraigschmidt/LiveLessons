@@ -31,6 +31,13 @@ public class ex8 {
                             true);
 
     /**
+     * Stores a completed future with a BigFraction value of
+     * sBigReducedFraction.
+     */
+    private static CompletableFuture<BigFraction> mBigReducedFractionFuture =
+        CompletableFuture.completedFuture(sBigReducedFraction);
+
+    /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws IOException {
@@ -42,6 +49,10 @@ public class ex8 {
         // Test BigFraction reduction using a CompletableFuture and a
         // chain of completion stage *Async() methods.
         testAsyncFractionReduction();
+
+        // Test the use of a BigFraction constant using basic features
+        // of a CompletableFuture and an explicit Java Thread.
+        testFractionConstantThread();
 
         // Test BigFraction multiplication using basic features of
         // CompletableFuture and an explicit Java Thread.
@@ -191,6 +202,31 @@ public class ex8 {
 
             // Print result after converting it to a mixed fraction.
             .thenAcceptAsync(printResult);
+    }
+
+    /**
+     * Test the use of a BigFraction constant using basic features of
+     * a CompletableFuture and an explicit Java Thread.
+     */
+    private static void testFractionConstantThread() {
+        StringBuffer sb = 
+            new StringBuffer(">> Calling testFractionConstantThread\n");
+
+        // Create an empty completable future.
+        CompletableFuture<BigFraction> future =
+            new CompletableFuture<>();
+
+        // Create and start a thread whose runnable lambda 
+        // sets the future to a constant.
+        new Thread (() -> {
+                // Set future to a constant.
+                future.complete(mBigReducedFractionFuture.join());
+        }).start();
+
+        // Print the result, blocking until it's ready.
+        sb.append("     Thread result = "
+                  + future.join().toMixedString());
+        display(sb.toString());
     }
 
     /**
