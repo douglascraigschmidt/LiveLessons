@@ -562,7 +562,8 @@ public class ex8 {
             // thenCompose() is like flatMap(), i.e., it returns a
             // completable future to a multiplied big fraction.
             .thenCompose(reducedFraction -> CompletableFuture
-                         // Perform the multiplication asynchronously.
+                         // Multiply BigFractions asynchronously since
+                         // it may run for a long time.
                          .supplyAsync(() 
                                       -> reducedFraction.multiply(sBigReducedFraction)));
 

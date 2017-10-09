@@ -162,8 +162,8 @@ class ImageCounter {
                      CompletableFuture<Integer>> imagesInLinks =
                 page -> CompletableFuture
                 .supplyAsync(() ->
-                             // This method runs synchronously, so
-                             // call it via supplyAsync().
+                             // This call runs synchronously, so call
+                             // supplyAsync() to avoid blocking.
                              crawlLinksInPage(page,
                                                    depth))
                 // When the future completes return its value to
