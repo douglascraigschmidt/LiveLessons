@@ -45,32 +45,32 @@ class ImageCounter {
         // is given an initial depth count of 1.
         countImages(rootUri, 1)
 
-        // Handle outcome of previous stage by converting any
-        // exceptions into 0 and printing the total # of images.
-        .handle((totalImages, ex) -> {
-            if (totalImages == null)
-              totalImages = 0;
-            print(TAG + ": " + totalImages
-                    + " total image(s) are reachable from "
-                    + rootUri);
-            return 0;
-        })
+            // Handle outcome of previous stage by converting any
+            // exceptions into 0 and printing the total # of images.
+            .handle((totalImages, ex) -> {
+                    if (totalImages == null)
+                        totalImages = 0;
+                    print(TAG + ": " + totalImages
+                          + " total image(s) are reachable from "
+                          + rootUri);
+                    return 0;
+                })
 
             /*
-        // Handle any exception that occurred.
-        .exceptionally(ex -> 0) // Indicate no images were counted due to the exception.
+            // Handle any exception that occurred.
+            .exceptionally(ex -> 0) // Indicate no images were counted due to the exception.
 
-        // When the future completes print the total number of images.
-        .thenAccept(totalImages ->
-                    print(TAG
-                          + ": " 
-                          + totalImages
-                          + " total image(s) are reachable from "
-                          + rootUri))
+            // When the future completes print the total number of images.
+            .thenAccept(totalImages ->
+            print(TAG
+            + ": " 
+            + totalImages
+            + " total image(s) are reachable from "
+            + rootUri))
             */
 
-        // join() blocks until all futures complete!
-        .join();
+            // join() blocks until all futures complete!
+            .join();
     }
 
     /**
@@ -147,19 +147,19 @@ class ImageCounter {
 
             // Asynchronously count the # of images on this page and
             // return a future to the count.
-            CompletableFuture<Integer> imagesInPage = pageFuture
+            CompletableFuture<Integer> imagesInPageFuture = pageFuture
                 // The getImagesOnPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .thenApplyAsync(this::getImagesOnPage)
 
                 // Count the number of images on this page.
-                .thenApply(ArrayList::size);
+                .thenApply(List::size);
 
-            // Asynchronously count the # of images in link on
-            // this page and returns a future to this count.
-            CompletableFuture<Integer> imagesInLinks = pageFuture
-                // The crawlLinksInPage() methods runs synchronously, so
-                // call thenApplyAsync() to avoid blocking.
+            // Asynchronously count the # of images in link on this
+            // page and returns a future to this count.
+            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
+                // The crawlLinksInPage() methods runs synchronously,
+                // so call thenApplyAsync() to avoid blocking.
                 .thenApplyAsync(page ->
                                 crawlLinksInPage(page,
                                                  depth))
@@ -168,10 +168,10 @@ class ImageCounter {
                 // avoid an extra join.
                 .thenCompose(Function.identity());
 
-            // Return a count of the # of images on this page plus the #
-            // of images on hyperlinks accessible via this page.
-            return countImagesMapReduce(imagesInPage,
-                                        imagesInLinks);
+            // Return a count of the # of images on this page plus the
+            // # of images on hyperlinks accessible via this page.
+            return combineImageCounts(imagesInPageFuture,
+                                      imagesInLinksFuture);
         } catch (Exception e) {
             print("For '" 
                   + pageUri 
@@ -183,26 +183,25 @@ class ImageCounter {
     }
 
     /**
-     * Asynchronously count of the # of images on this page plus the
-     * # of images on hyperlinks accessible via this page.
+     * Asynchronously count of the # of images on this page plus the #
+     * of images on hyperlinks accessible via this page.
      *
      * @param imagesInPageFuture A future to a count of the # of
-     *                     images on this page
-     * @param imagesInLinksFuture A future to a count of the # of images in
-     *                      links on this page
+     *                           images on this page
+     * @param imagesInLinksFuture A future to a count of the # of 
+     *                            images in links on this page
      * @return A future to the number of images counted
      */
-    private CompletableFuture<Integer> countImagesMapReduce
+    private CompletableFuture<Integer> combineImageCounts
         (CompletableFuture<Integer> imagesInPageFuture,
          CompletableFuture<Integer> imagesInLinksFuture) {
 
         // Return a completable future to the results of adding the
         // two futures params after they both complete.
         return imagesInPageFuture
-            // When both futures complete add the results.
+            // When both futures complete sum the results.
             .thenCombine(imagesInLinksFuture,
-                         (imagesInPage, imagesInLinks)
-                          -> imagesInPage + imagesInLinks);
+                         Integer::sum);
     }
 
     /**
@@ -249,10 +248,10 @@ class ImageCounter {
             .map(hyperLink ->
                  // Recursively visit all the hyperlinks on this page.
                  countImages(Options
-                              .instance()
-                              .getJSuper()
-                              .getHyperLink(hyperLink),
-                              depth + 1))
+                             .instance()
+                             .getJSuper()
+                             .getHyperLink(hyperLink),
+                             depth + 1))
 
             // Trigger intermediate operation processing and return a
             // future to a list of completable futures.

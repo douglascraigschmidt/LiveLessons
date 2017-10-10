@@ -95,4 +95,8 @@ Here's an overview of what's included:
   the Java fork-join pool to download multiple images from a remote
   server.
 
-. ex21 -- This example...
+. ex21 -- This program shows the difference between stream sources
+  (such as List) that enforce encounter order and stream sources (such
+  as HashSet) that do not in the context of various order-sensitive
+  aggregate operations, such as limit() and distinct().
+
