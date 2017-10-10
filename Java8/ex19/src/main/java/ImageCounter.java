@@ -4,6 +4,7 @@ import utils.ConcurrentHashSet;
 import utils.FuturesCollector;
 import utils.Options;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -36,7 +37,7 @@ class ImageCounter {
     /**
      * Constructor counts all the images reachable from the root URI.
      */
-    public ImageCounter() {
+    ImageCounter() {
         // Get the URI to the root of the page/folder being traversed.
         String rootUri = Options.instance().getRootUri();
 
@@ -140,41 +141,36 @@ class ImageCounter {
     private CompletableFuture<Integer> countImagesAsync(String pageUri,
                                                         int depth) {
         try {
-            // The following three lambdas are passed to the
-            // countImagesMapReduce() method below.
+            // Get a future to the page at the root URI.
+            CompletableFuture<Document> pageFuture = 
+                getStartPage(pageUri);
 
-            // This function asynchronously counts the number of
-            // images on this page and return a future to the count.
-            Function<Document, CompletableFuture<Integer>> imagesInPage =
-                page -> CompletableFuture
-                // Asynchronously get a collection of IMG SRC URLs in this page.
-                .supplyAsync(() ->
-                             // This method runs synchronously, so
-                             // call it via supplyAsync().
-                             getImagesOnPage(page))
-                // Asynchronously count the number of images on
-                // this page.
-                .thenApply(Elements::size);
+            // Asynchronously count the # of images on this page and
+            // return a future to the count.
+            CompletableFuture<Integer> imagesInPage = pageFuture
+                // The getImagesOnPage() method runs synchronously, so
+                // call it via thenApplyAsync().
+                .thenApplyAsync(this::getImagesOnPage)
 
-            // A function that asynchronously counts # of images in
-            // links on this page and returns a future to this count.
-            Function<Document,
-                     CompletableFuture<Integer>> imagesInLinks =
-                page -> CompletableFuture
-                .supplyAsync(() ->
-                             // This call runs synchronously, so call
-                             // supplyAsync() to avoid blocking.
-                             crawlLinksInPage(page,
-                                                   depth))
+                // Count the number of images on this page.
+                .thenApply(ArrayList::size);
+
+            // Asynchronously count the # of images in link on
+            // this page and returns a future to this count.
+            CompletableFuture<Integer> imagesInLinks = pageFuture
+                // The crawlLinksInPage() methods runs synchronously, so
+                // call thenApplyAsync() to avoid blocking.
+                .thenApplyAsync(page ->
+                                crawlLinksInPage(page,
+                                                 depth))
+
                 // When the future completes return its value to
                 // avoid an extra join.
                 .thenCompose(Function.identity());
 
-            // Asynchronously count the number of images on this page
-            // and (2) crawls other hyperlinks accessible via this
-            // page and counts their images.
-            return countImagesMapReduce(pageUri,
-                                        imagesInPage,
+            // Return a count of the # of images on this page plus the #
+            // of images on hyperlinks accessible via this page.
+            return countImagesMapReduce(imagesInPage,
                                         imagesInLinks);
         } catch (Exception e) {
             print("For '" 
@@ -187,48 +183,26 @@ class ImageCounter {
     }
 
     /**
-     * Asynchronously count the number of images on this page and
-     * crawl links accessible on this page to count their images.
+     * Asynchronously count of the # of images on this page plus the
+     * # of images on hyperlinks accessible via this page.
      *
-     * @param pageUri The URL that we're counting at this point
-     * @param imagesInPage A function that asynchronously counts the number of
-     *                     images on this page and return a future to the count
-     * @param imagesInLinks A function that asynchronously counts # of images in
-     *                      links on this page and returns a future to the count
+     * @param imagesInPageFuture A future to a count of the # of
+     *                     images on this page
+     * @param imagesInLinksFuture A future to a count of the # of images in
+     *                      links on this page
      * @return A future to the number of images counted
      */
     private CompletableFuture<Integer> countImagesMapReduce
-        (String pageUri,
-         Function<Document, CompletableFuture<Integer>> imagesInPage,
-         Function<Document, CompletableFuture<Integer>> imagesInLinks) {
-        // Get a future to the page at the root URI.
-        CompletableFuture<Document> pageFuture = 
-            getStartPage(pageUri);
-
-        // The following two asynchronous method calls run
-        // concurrently in the common fork-join pool.
-
-        // After contents of the document are obtained get a future to
-        // the number of images processed on this page.
-        CompletableFuture<Integer> imagesInPageFuture = pageFuture
-            // thenCompose() returns a completable future to
-            // the count of URLs in this page.
-            .thenCompose(imagesInPage);
-
-        // Obtain a future to the number of images processed
-        // on pages linked from this page.
-        CompletableFuture<Integer> imagesInLinksFuture = pageFuture
-            // thenCompose() returns a completable future to the count
-            // of URLs reachable via hyperlinks in this page.
-            .thenCompose(imagesInLinks);
+        (CompletableFuture<Integer> imagesInPageFuture,
+         CompletableFuture<Integer> imagesInLinksFuture) {
 
         // Return a completable future to the results of adding the
         // two futures params after they both complete.
         return imagesInPageFuture
             // When both futures complete add the results.
             .thenCombine(imagesInLinksFuture,
-                         (imgsInPage, imgsInLinks)
-                          -> imgsInPage + imgsInLinks);
+                         (imagesInPage, imagesInLinks)
+                          -> imagesInPage + imagesInLinks);
     }
 
     /**
