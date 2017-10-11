@@ -229,6 +229,8 @@ class ImageCounter {
     /**
      * Recursively crawl through hyperlinks that are in a @a page.
      *
+     * @param page The page containing HTML
+     * @param depth The depth of the level of web page traversal
      * @return A completable future to an integer that counts how many
      * images were in each hyperlink on the page
      */

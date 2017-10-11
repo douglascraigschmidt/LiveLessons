@@ -77,6 +77,16 @@ public class ex18 {
                     mTotal = mTotal.multiply(n);
                 }
             }
+
+            /**
+             * Synchronize get to ensure visibility of the data.
+             */
+            BigInteger get() {
+                synchronized (this) {
+                    return mTotal;
+                }
+            }
+
         }
 
         /**
@@ -101,7 +111,7 @@ public class ex18 {
                 .forEach(t::multiply);
 
             // Return the total.
-            return t.mTotal;
+            return t.get();
         }
     }
 
