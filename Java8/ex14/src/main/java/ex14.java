@@ -1,7 +1,10 @@
+import utils.ConcurrentHashSetCollector;
+import utils.TestDataFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashSet;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -14,7 +17,8 @@ import static java.util.stream.Collectors.toCollection;
  * spliterator to split a Java LinkedList and an ArrayList into
  * chunks.  It also shows the difference in overhead between combining
  * and collecting LinkedList results in a parallel stream
- * vs. sequential stream.
+ * vs. sequential stream using concurrent and non-concurrent
+ * collectors.
  */
 public class ex14 {
     /**
@@ -78,17 +82,31 @@ public class ex14 {
         timeStreamJoining(true, linkedBardWords);
 
         // Compute/print the time required to collect partial results
-        // into a TreeSet in a sequential stream.  The performance of
+        // into a HashSet in a sequential stream.  The performance of
         // this test will be better than the parallel stream version
         // above since there's less overhead collecting the various
-        // partial results into a TreeSet.
+        // partial results into a HashSet.
         timeStreamCollectToSet(false, linkedBardWords);
 
         // Compute/print the time required to collect partial results
-        // into a TreeSet in a parallel stream.  The performance of
+        // into a HashSet in a parallel stream.  The performance of
         // this test will be poor due to the overhead of collecting
-        // the various partial results into a TreeSet in parallel.
+        // the various partial results into a HashSet in parallel.
         timeStreamCollectToSet(true, linkedBardWords);
+
+        // Compute/print the time required to collect partial results
+        // into a ConcurrentHashSet in a sequential stream.  The
+        // performance of this test will be better than the parallel
+        // stream version above since there's less overhead collecting
+        // the various partial results into a HashSet.
+        timeStreamCollectToConcurrentSet(false, linkedBardWords);
+
+        // Compute/print the time required to collect partial results
+        // into a ConcurrentHashSet in a parallel stream.  The
+        // performance of this test will be poor due to the overhead
+        // of collecting the various partial results into a HashSet in
+        // parallel.
+        timeStreamCollectToConcurrentSet(true, linkedBardWords);
     }
 
     /**
@@ -203,7 +221,7 @@ public class ex14 {
 
     /**
      * Determines how long it takes to collect partial results into a
-     * TreeSet.  If @a parallel is true then a parallel stream is
+     * HashSet.  If @a parallel is true then a parallel stream is
      * used, else a sequential stream is used.
      */
     private static void timeStreamCollectToSet(boolean parallel, 
@@ -230,10 +248,67 @@ public class ex14 {
             // A "real" application would likely do something
             // interesting with the words at this point.
 
-            // Collect all the unique words in Shakespeare's works
-            // into an ordered TreeSet.
+            // A set of unique words in Shakespeare's works.
             uniqueWords = wordStream
-                .collect(toCollection(TreeSet::new));
+                // Map each string to lower case.  A "real" application
+                // would likely do something interesting with the words at
+                // this point.
+                .map(charSeq -> charSeq.toString().toLowerCase())
+
+                // Trigger intermediate processing and collect unique
+                // words into a HashSet.
+                .collect(toCollection(HashSet::new));
+        }
+
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+
+        System.out.println("The time to collect "
+                           + uniqueWords.size()
+                           + " unique words in Shakespeare's works took "
+                           + stopTime
+                           + " milliseconds");
+
+        // Run the garbage collector after each test.
+        System.gc();
+    }
+
+    /**
+     * Determines how long it takes to collect partial results into a
+     * ConcurrentHashSet.  If @a parallel is true then a parallel
+     * stream is used, else a sequential stream is used.
+     */
+    private static void timeStreamCollectToConcurrentSet(boolean parallel,
+                                                         List<CharSequence> allWords) {
+        System.out.println("\n++Timing the "
+                           + (parallel ? "parallel" : "sequential")
+                           + "StreamCollectToConcurrentSet implementation");
+
+        // Record the start time.
+        long startTime = System.nanoTime();
+
+        Set<CharSequence> uniqueWords = null;
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            Stream<CharSequence> wordStream = allWords
+                // Convert the list into a stream (which uses a
+                // spliterator internally).
+                .stream();
+
+            if (parallel)
+                // Convert to a parallel stream.
+                wordStream.parallel();
+
+            // A set of unique words in Shakespeare's works.
+            uniqueWords = wordStream
+                // Map each string to lower case.  A "real" application
+                // would likely do something interesting with the words at
+                // this point.
+                .map(charSeq -> charSeq.toString().toLowerCase())
+
+                // Trigger intermediate processing and collect unique
+                // words into a ConcurrentHashSet.
+                .collect(ConcurrentHashSetCollector.toSet());
         }
 
         // Record the stop time.
