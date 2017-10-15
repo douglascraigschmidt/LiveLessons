@@ -86,7 +86,6 @@ public class ex18 {
                     return mTotal;
                 }
             }
-
         }
 
         /**

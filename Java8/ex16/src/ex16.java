@@ -83,7 +83,8 @@ public class ex16 {
                 // running total (not properly synchronized).
                 .forEach(t::multiply);
 
-            // Return the total.
+            // Return the total, which is also not properly
+            // synchronized.
             return t.mTotal;
         }
     }
@@ -113,6 +114,15 @@ public class ex16 {
                     mTotal = mTotal.multiply(n);
                 }
             }
+
+            /**
+             * Synchronize get to ensure visibility of the data.
+             */
+            BigInteger get() {
+                synchronized (this) {
+                    return mTotal;
+                }
+            }
         }
 
         /**
@@ -137,7 +147,7 @@ public class ex16 {
                 .forEach(t::multiply);
 
             // Return the total.
-            return t.mTotal;
+            return t.get();
         }
     }
 
