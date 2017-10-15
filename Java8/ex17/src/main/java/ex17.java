@@ -52,11 +52,8 @@ public class ex17 {
     /**
      * Print out the results of subtracting the first 100 numbers.
      * If @a parallel is true then a parallel stream is used, else a
-     * sequential stream is used.  When a sequential stream is used
-     * the results of this test will be correct since the subtraction
-     * is done in encounter order.  When a parallel stream is used,
-     * however, the results of this test will be incorrect since
-     * subtraction is not associative.
+     * sequential stream is used.  The results for each of these tests
+     * will differ since subtraction is not associative.
      */
     private static void testDifferenceReduce(boolean parallel) {
         LongStream rangeStream = LongStream
@@ -66,11 +63,11 @@ public class ex17 {
             rangeStream.parallel();
 
         long difference = rangeStream
-            .reduce(0L,
+            .reduce(1L,
                     (x, y) -> x - y);
 
         System.out.println((parallel ? "Parallel" : "Sequential")
-                           + " difference of first 100 numbers = " 
+                           + " difference of first 100 numbers = "
                            + difference);
     }
 
