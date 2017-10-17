@@ -22,7 +22,7 @@ public class ex10 {
         
         // This lambda expression removes entries with IQ less than or
         // equal to 100.
-        iqMap.entrySet().removeIf(entry -> entry.getValue() <= 100w);
+        iqMap.entrySet().removeIf(entry -> entry.getValue() <= 100);
         
         System.out.println(iqMap);
     }
