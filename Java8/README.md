@@ -32,8 +32,9 @@ Here's an overview of what's included:
   to print a default value if a key is not found in a map.  It also
   shows how to use the Java 8 Optional class.
   
-. ex7 - This example of shows how the Java 8 Supplier interface can be
-  used in conjunction with a constructor reference.
+. ex7 - This example of shows how the Java 8 functional interfaces
+  (including Supplier and a custom functional interface) can be used
+  in conjunction with Java 8 constructor references.
   
 . ex8 - This example shows how to reduce and/or multiply big fractions
   using a wide range of CompletableFuture features, including many

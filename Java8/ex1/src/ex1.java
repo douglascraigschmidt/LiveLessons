@@ -22,21 +22,25 @@ public class ex1 {
             "mary"
         };
 
+        System.out.println("Original array:\n"
+                           + Arrays.asList(nameArray));
+
         // Demonstrate the various techniques.
         showInnerClass(nameArray);
         showLambdaExpression(nameArray);
-        showMethodReference(nameArray);
+        showMethodReference1(nameArray);
+        showMethodReference2(nameArray);
     }
 
     /**
      * Show how to sort using an anonymous inner class.
      */
     private static void showInnerClass(String[] nameArray) {
+        System.out.println("showInnerClass()");
+
         // Make a copy of the array.
         String[] nameArrayCopy = 
             Arrays.copyOf(nameArray, nameArray.length);
-
-        System.out.println(Arrays.asList(nameArrayCopy));
 
         // Sort using an anonymous inner class.
         Arrays.sort(nameArrayCopy, new Comparator<String>() {
@@ -53,6 +57,8 @@ public class ex1 {
      * Show how to sort using a lambda expression.
      */
     private static void showLambdaExpression(String[] nameArray) {
+        System.out.println("showLambdaExpression()");
+
         // Make a copy of the array.
         String[] nameArrayCopy = 
             Arrays.copyOf(nameArray, nameArray.length);
@@ -69,7 +75,9 @@ public class ex1 {
     /**
      * Show how to sort using a method reference.
      */
-    private static void showMethodReference(String[] nameArray) {
+    private static void showMethodReference1(String[] nameArray) {
+        System.out.println("showMethodReference1()");
+
         // Make a copy of the array.
         String[] nameArrayCopy = 
             Arrays.copyOf(nameArray, nameArray.length);
@@ -81,6 +89,25 @@ public class ex1 {
         // Print out the sorted contents using the Java 8 forEach()
         // method.
         Stream.of(nameArrayCopy).forEach(System.out::print);
+    }
+
+    /**
+     * Show how to sort using a method reference.
+     */
+    private static void showMethodReference2(String[] nameArray) {
+        System.out.println("\nshowMethodReference2()");
+
+        // Make a copy of the array.
+        String[] nameArrayCopy = 
+            Arrays.copyOf(nameArray, nameArray.length);
+
+        // Sort using a method reference.
+        Arrays.sort(nameArrayCopy,
+                    String::compareToIgnoreCase);
+
+        // Print out the sorted contents using the Java 8 forEach()
+        // method.
+        Arrays.asList(nameArrayCopy).forEach(System.out::print);
     }
 }
 
