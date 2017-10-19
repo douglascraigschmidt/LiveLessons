@@ -34,6 +34,7 @@ public class ex12 {
         ex.runCollectToList();
         ex.runCollectToSet();
         ex.runCollectToMap();
+        ex.runCollectGroupingBy();
         ex.runCollectReduce();
         ex.runMapReduce();
     }
@@ -123,7 +124,7 @@ public class ex12 {
 
     /**
      * Run an example using the collect() terminal operation to put
-     * the results into a list.
+     * the results into a ArrayList using the toList() collector.
      */
     private void runCollectToList() {
         System.out.println("\nResults from runCollectToList():");
@@ -163,7 +164,7 @@ public class ex12 {
 
     /**
      * Run an example using the collect() terminal operation to put
-     * the results into a set.
+     * the results into a HashSet using the toSet() collector.
      */
     private void runCollectToSet() {
         System.out.println("\nResults from runCollectToSet():");
@@ -200,7 +201,7 @@ public class ex12 {
 
     /**
      * Run an example using the collect() terminal operation to put
-     * the results into a map.
+     * the results into a HashMap using the toMap() collector.
      */
     private void runCollectToMap() {
         System.out.println("\nResults from runCollectToMap():");
@@ -229,6 +230,51 @@ public class ex12 {
             // Terminal operation that triggers aggregate operation
             // processing and collects the results into a map.
             .collect(toMap(identity(), String::length, Integer::sum));
+
+        // Print the results.
+        System.out.println("Hamlet characters' names + name lengths "
+                           // Get the list of character names.
+                           + results);
+    }
+
+    /**
+     * Run an example using the collect() terminal operation to put
+     * the results into a TreeMap using the groupingBy() collector.
+     */
+    private void runCollectGroupingBy() {
+        System.out.println("\nResults from runCollectGroupingBy():");
+
+        // Create a list of key characters in Hamlet.
+        List<String> characters = Arrays.asList("horatio",
+                                                "claudius",
+                                                "Gertrude",
+                                                "Hamlet",
+                                                "Hamlet", // Hamlet appears twice.
+                                                "laertes",
+                                                "Ophelia");
+
+        // Create sorted set of characters starting with 'h' or 'H'.
+        Map<String, Long> results = characters
+            // Create a stream of characters from William
+            // Shakespeare's Hamlet.
+            .stream()
+
+            // Remove any strings that don't start with 'h' or 'H'.
+            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+
+            // Capitalize the first letter in the string.
+            .map(this::capitalize)
+
+            // Terminal operation that triggers aggregate operation
+            // processing and collects the results into a map.
+            // Terminal operation that triggers aggregate operation
+            // processing and groups the results into a map whose keys
+            // are strings of matching Hamlet characters and whose
+            // values are the length of each string.
+            .collect(groupingBy(identity(),
+                                // Use a TreeMap to sort the results.
+                                TreeMap::new,
+                                summingLong(String::length)));
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "

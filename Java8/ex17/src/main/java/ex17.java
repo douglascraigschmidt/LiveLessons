@@ -150,6 +150,7 @@ public class ex17 {
             // Create a string.
             .toString();
 
+
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 

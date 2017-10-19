@@ -74,20 +74,20 @@ public class TestDataFactory {
                 // the file into a list of Strings.
                 Pattern.compile(splitter)
 
-                       // Creates a stream from the given input
-                       // sequence around matches of this pattern.
+                // Creates a stream from the given input
+                // sequence around matches of this pattern.
                 .splitAsStream(bytes)
 
-                       // Filter out any empty strings.
-                       .filter(((Predicate<String>) String::isEmpty).negate())
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
 
-                       // Map each String to a SharedString to
-                       // eliminate copying overhead.
-                       .map(string -> 
-                            new SharedString(string.toCharArray()))
+                // Map each String to a SharedString to
+                // eliminate copying overhead.
+                .map(string -> 
+                     new SharedString(string.toCharArray()))
 
-                       // Collect the results into a string.
-                       .collect(toList());
+                // Collect the results into a string.
+                .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
