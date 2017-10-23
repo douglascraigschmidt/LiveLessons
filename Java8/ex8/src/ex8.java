@@ -643,20 +643,11 @@ public class ex8 {
 
     /**
      * Sort the {@code list} in parallel using quicksort and mergesort
-     * and then store the results in the {@code stringBuffer}.
+     * and then store the results in the {@code StringBuffer}
+     * parameter.
      */
     private static void sortAndPrintList(List<BigFraction> list,
-                                         StringBuffer stringBuffer) {
-        // Consumer that display a list of sorted reduced fractions.
-        Consumer<List<BigFraction>> displayResults = lizt -> {
-            // Print the results as mixed fractions.
-            lizt.forEach(fraction ->
-                         stringBuffer.append("     " 
-                                             + fraction.toMixedString() 
-                                             + "\n"));
-            display(stringBuffer.toString());
-        };
-
+                                         StringBuffer sb) {
         // This implementation uses quick sort to order the list.
         CompletableFuture<List<BigFraction>> quickSortFuture = CompletableFuture
             // Perform quick sort asynchronously.
@@ -670,7 +661,14 @@ public class ex8 {
         // Select the result of whichever sort implementation
         // finishes first.
         quickSortFuture
-            .acceptEither(mergeSortFuture, displayResults);
+            .acceptEither(mergeSortFuture, sortedList -> {
+                    // Print the results as mixed fractions.
+                    sortedList.forEach(fraction ->
+                                       sb.append("     "
+                                                 + fraction.toMixedString()
+                                                 + "\n"));
+                    display(sb.toString());
+                });
     }
 
     /**
