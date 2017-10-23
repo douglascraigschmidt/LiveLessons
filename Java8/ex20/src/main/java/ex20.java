@@ -65,8 +65,7 @@ public class ex20 {
         return BlockingTask
             // This call ensures the common fork/join thread pool
             // is expanded to handle the blocking image download.
-            .callInManagedBlock(()
-                                -> downloadImage(url))
+            .callInManagedBlock(() -> downloadImage(url))
 
             // Store the image on the local device.
             .store();

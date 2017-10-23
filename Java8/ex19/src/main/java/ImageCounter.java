@@ -159,14 +159,11 @@ class ImageCounter {
             // page and returns a future to this count.
             CompletableFuture<Integer> imagesInLinksFuture = pageFuture
                 // The crawlLinksInPage() methods runs synchronously,
-                // so call thenApplyAsync() to avoid blocking.
-                .thenApplyAsync(page ->
-                                crawlLinksInPage(page,
-                                                 depth))
-
-                // When the future completes return its value to
-                // avoid an extra join.
-                .thenCompose(Function.identity());
+                // so thenComposeAsync() is used to avoid blocking via
+                // "flatMap()" semantics wrt nesting of futures.
+                .thenComposeAsync(page ->
+                                  crawlLinksInPage(page,
+                                                   depth));
 
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.

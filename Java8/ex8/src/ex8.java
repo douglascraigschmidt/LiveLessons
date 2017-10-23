@@ -88,8 +88,14 @@ public class ex8 {
         testFractionExceptions2();
 
         // Test big fraction multiplication using a stream of
-        // CompletableFutures and a chain of completion stage methods.
-        testFractionMultiplications();
+        // CompletableFutures and a chain of completion stage methods
+        // involving supplyAsync(), thenCompose(), and acceptEither().
+        testFractionMultiplications1();
+
+        // Test big fraction multiplication using a stream of
+        // CompletableFutures and a chain of completion stage methods
+        // involving supplyAsync(), thenComposeAsync(), and acceptEither().
+        testFractionMultiplications2();
 
         // Block until user provides input and then exit to allow
         // future computations to complete running asynchronously.
@@ -210,7 +216,7 @@ public class ex8 {
      */
     private static void testFractionConstantThread() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionConstantThread\n");
+            new StringBuffer(">> Calling testFractionConstantThread()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -235,7 +241,7 @@ public class ex8 {
      */
     private static void testFractionMultiplicationThread() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationThread\n");
+            new StringBuffer(">> Calling testFractionMultiplicationThread()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -266,7 +272,7 @@ public class ex8 {
      */
     private static void testFractionMultiplicationRunAsync() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationRunAsync\n");
+            new StringBuffer(">> Calling testFractionMultiplicationRunAsync()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -301,7 +307,7 @@ public class ex8 {
      */
     private static void testFractionMultiplicationCallable() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationCallabl\n");
+            new StringBuffer(">> Calling testFractionMultiplicationCallable()\n");
 
         try {
             // These "effectively final" objects are used to pass
@@ -340,7 +346,7 @@ public class ex8 {
      */
     private static void testFractionMultiplicationSupplyAsync() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationSupplyAsync\n");
+            new StringBuffer(">> Calling testFractionMultiplicationSupplyAsync()\n");
 
         // These "effectively final" objects are used to pass params
         // to the supplier lambda below.
@@ -373,7 +379,7 @@ public class ex8 {
      */
     private static void testFractionMultiplicationAsyncChaining() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationAsyncChaining\n");
+            new StringBuffer(">> Calling testFractionMultiplicationAsyncChaining()\n");
 
         // Create a supplier that multiplies two large fractions.
         Supplier<BigFraction> fractionMultiplier = () -> {
@@ -409,7 +415,7 @@ public class ex8 {
      */
     private static void testFractionCombine() {
         StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionCombine\n");
+            new StringBuffer(">> Calling testFractionCombine()\n");
 
         // A random number generator.
         Random random = new Random();
@@ -453,7 +459,7 @@ public class ex8 {
      */
     private static void testFractionExceptions1() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionExceptions1\n");
+            new StringBuffer(">> Calling testFractionExceptions1()\n");
 
         Arrays
             // Generate results both with and without exceptions.
@@ -502,7 +508,7 @@ public class ex8 {
      */
     private static void testFractionExceptions2() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionExceptions2\n");
+            new StringBuffer(">> Calling testFractionExceptions2()\n");
 
         Arrays
             // Generate results both with and without exceptions.
@@ -547,11 +553,12 @@ public class ex8 {
 
     /**
      * Test BigFraction multiplications using a stream of
-     * CompletableFutures and a chain of completion stage methods.
+     * CompletableFutures and a chain of completion stage methods
+     * involving supplyAsync(), thenCompose(), and acceptEither().
      */
-    private static void testFractionMultiplications() {
+    private static void testFractionMultiplications1() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications\n");
+            new StringBuffer(">> Calling testFractionMultiplications1()\n");
 
         // Lambda asynchronously reduces/multiplies a big fraction. 
         Function<BigFraction, CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
@@ -566,31 +573,6 @@ public class ex8 {
                          // it may run for a long time.
                          .supplyAsync(() 
                                       -> reducedFraction.multiply(sBigReducedFraction)));
-
-        // Consumer sorts and prints a list of reduced fractions.
-        Consumer<List<BigFraction>> printSortedList = list -> {
-            // This implementation uses quick sort to order the list. 
-            CompletableFuture<List<BigFraction>> quickSortFuture = CompletableFuture
-            // Perform quick sort asynchronously.
-            .supplyAsync(() -> quickSort(list));
-
-            // This implementation uses merge sort to order the list. 
-            CompletableFuture<List<BigFraction>> mergeSortFuture = CompletableFuture
-            // Perform merge sort asynchronously.
-            .supplyAsync(() -> mergeSort(list));
-
-            // Select the result of whichever sort implementation
-            // finishes first.
-            quickSortFuture
-            .acceptEither(mergeSortFuture, results -> {
-                    // Print the results as mixed fractions.
-                    results.forEach(fraction ->
-                                    sb.append("     " 
-                                              + fraction.toMixedString() 
-                                              + "\n"));
-                    display(sb.toString());
-                });
-        };
 
         sb.append("     Printing sorted results:\n");
 
@@ -610,7 +592,85 @@ public class ex8 {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            .thenAccept(printSortedList);
+            .thenAccept(list -> sortAndPrintList(list,
+                                                 sb));
+    }
+
+    /**
+     * Test BigFraction multiplications using a stream of
+     * CompletableFutures and a chain of completion stage methods
+     * involving supplyAsync(), thenComposeAsync(), and
+     * acceptEither().
+     */
+    private static void testFractionMultiplications2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications2()\n");
+
+        // Lambda asynchronously reduces/multiplies a big fraction. 
+        Function<BigFraction, CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+            unreducedFraction -> CompletableFuture
+            // Perform the reduction asynchronously.
+            .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
+
+            // thenCompose() is like flatMap(), i.e., it returns a
+            // completable future to a multiplied big fraction.
+            // Multiply BigFractions asynchronously since
+            // it may run for a long time.
+            .thenApplyAsync(reducedFraction
+                            -> reducedFraction.multiply(sBigReducedFraction));
+
+        sb.append("     Printing sorted results:\n");
+
+        // Process the two lambdas in a sequential stream.
+        Stream
+            // Generate sMAX_FRACTIONS random unreduced BigFractions.
+            .generate(() -> makeBigFraction(new Random(), false))
+            .limit(sMAX_FRACTIONS)
+
+            // Reduce and multiply these fractions asynchronously.
+            .map(reduceAndMultiplyFraction)
+
+            // Trigger intermediate operation processing and return a
+            // future to a list of big fractions that are being
+            // reduced and multiplied asynchronously.
+            .collect(FuturesCollector.toFuture())
+
+            // After all the asynchronous fraction reductions have
+            // completed sort and print the results.
+            .thenAccept(list -> sortAndPrintList(list,
+                                                 sb));
+    }
+
+    /**
+     * Sort the {@code list} in parallel using quicksort and mergesort
+     * and then store the results in the {@code stringBuffer}.
+     */
+    private static void sortAndPrintList(List<BigFraction> list,
+                                         StringBuffer stringBuffer) {
+        // Consumer that display a list of sorted reduced fractions.
+        Consumer<List<BigFraction>> displayResults = lizt -> {
+            // Print the results as mixed fractions.
+            lizt.forEach(fraction ->
+                         stringBuffer.append("     " 
+                                             + fraction.toMixedString() 
+                                             + "\n"));
+            display(stringBuffer.toString());
+        };
+
+        // This implementation uses quick sort to order the list.
+        CompletableFuture<List<BigFraction>> quickSortFuture = CompletableFuture
+            // Perform quick sort asynchronously.
+            .supplyAsync(() -> quickSort(list));
+
+        // This implementation uses merge sort to order the list. 
+        CompletableFuture<List<BigFraction>> mergeSortFuture = CompletableFuture
+            // Perform merge sort asynchronously.
+            .supplyAsync(() -> mergeSort(list));
+
+        // Select the result of whichever sort implementation
+        // finishes first.
+        quickSortFuture
+            .acceptEither(mergeSortFuture, displayResults);
     }
 
     /**
