@@ -87,6 +87,10 @@ public class ex8 {
         // CompletableFutures and the exceptionally() method.
         testFractionExceptions2();
 
+        // Test BigFraction exception handling using
+        // CompletableFutures and the whenComplete() method.
+        testFractionExceptions3();
+
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
         // involving supplyAsync(), thenCompose(), and acceptEither().
@@ -545,6 +549,54 @@ public class ex8 {
                         .thenAccept(fraction ->
                                     sb.append("\n     result = "
                                     + fraction.toMixedString()));
+                });
+
+        // Print results.
+        display(sb.toString());
+    }
+
+    /**
+     * Test BigFraction exception handling using CompletableFutures
+     * and the whenComplete() method.
+     */
+    private static void testFractionExceptions3() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions3()\n");
+
+        Arrays
+            // Generate results both with and without exceptions.
+            .asList(true, false)
+
+            // Convert list to a stream.
+            .stream()
+
+            // Iterate through the stream elements.
+            .forEach(throwException -> {
+                    // If boolean is true then make the demoninator 0
+                    // to trigger an exception.
+                    int denominator = throwException ? 0 : 1;
+
+                    // Create and process a BigFraction.
+                    CompletableFuture
+                        .supplyAsync(() ->
+                                     // Run asynchronously and maybe
+                                     // throw ArithmeticException.
+                                     BigFraction.valueOf(100, denominator))
+
+                        // Multiply fraction by a constant when
+                        // previous stage completes.
+                        .thenApply(fraction ->
+                                   fraction.multiply(sBigReducedFraction))
+
+                        // When future completes prepare results for output,
+                        // either normal or exceptional.
+                        .whenComplete((fraction, ex) -> {
+                                if (fraction != null)
+                                    sb.append("\n     result = "
+                                              + fraction.toMixedString());
+                                else
+                                    sb.append("     exception = " + ex.getMessage());
+                            });
                 });
 
         // Print results.
