@@ -705,10 +705,14 @@ public class ex8 {
             // Perform quick sort asynchronously.
             .supplyAsync(() -> quickSort(list));
 
-        // This implementation uses merge sort to order the list. 
+        // This implementation uses merge sort to order the list.
         CompletableFuture<List<BigFraction>> mergeSortFuture = CompletableFuture
             // Perform merge sort asynchronously.
             .supplyAsync(() -> mergeSort(list));
+
+        // Could also use the following in conjunction with acceptEitherAsync() below:
+        // CompletableFuture<List<BigFraction>> mergeSortFuture =
+        //        CompletableFuture.completedFuture(mergeSort(list));
 
         // Select the result of whichever sort implementation
         // finishes first.
