@@ -45,8 +45,8 @@ public class ImageStreamCompletableFuture1
             // stream.
             .stream()
 
-            // Use filter() to ignore URLs that are already cached locally,
-            // i.e., only download non-cached images.
+            // Use filter() to ignore URLs that are already cached
+            // locally, i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
             // Use map() to transform each URL to a completable future
@@ -107,8 +107,7 @@ public class ImageStreamCompletableFuture1
                  // stage completes normally, is executed with this
                  // stage's result as the argument to the supplied
                  // lambda expression.
-                 filterFuture.thenCompose(filter ->
-                                          CompletableFuture.supplyAsync(filter::run,
-                                                                        getExecutor())));
+                 filterFuture.thenApplyAsync(FilterDecoratorWithImage::run,
+                                             getExecutor()));
     }
 }

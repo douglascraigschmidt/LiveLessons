@@ -39,12 +39,14 @@ public abstract class ImageStreamCompletableFutureBase
      * Asynchronously filter the image and store it in an output file.
      * Returns a CompletableFuture that completes when the image has
      * been filtered and stored.
+     * @param filterDecoratorWithImage
      */
     protected CompletableFuture<Image> filterImageAsync
         (FilterDecoratorWithImage filterDecoratorWithImage) {
         // Asynchronously filter the image and store it in an output
         // file.
-        return CompletableFuture.supplyAsync(filterDecoratorWithImage::run,
-                                             getExecutor());
+        return CompletableFuture
+            .supplyAsync(filterDecoratorWithImage::run,
+                         getExecutor());
     }
 }

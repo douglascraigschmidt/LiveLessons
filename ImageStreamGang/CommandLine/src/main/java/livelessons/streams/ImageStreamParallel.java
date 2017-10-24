@@ -71,16 +71,6 @@ public class ImageStreamParallel
     }
 
     /**
-     * Transform URL to an Image by downloading each image via its
-     * URL.  This call ensures the common fork/join thread pool is
-     * expanded to handle the blocking image download.
-     */
-    private Image blockingDownload(URL url) {
-        return BlockingTask.callInManagedBlock(()
-                                               -> downloadImage(url));
-    }
-
-    /**
      * Apply all the image filters concurrently to each @a image.
      */
     private Stream<Image> applyFilters(Image image) {
@@ -92,7 +82,7 @@ public class ImageStreamParallel
            // Use map() to create an OutputFilterDecorator for each
            // image and run it to filter each image and store it in an
            // output file.
-           .map(filter
-                -> makeFilterDecoratorWithImage(filter, image).run());
+           .map(filter ->
+                makeFilterDecoratorWithImage(filter, image).run());
     }
 }

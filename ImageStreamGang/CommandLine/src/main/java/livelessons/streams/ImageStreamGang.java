@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import livelessons.utils.BlockingTask;
 import livelessons.utils.Image;
 import livelessons.utils.NetUtils;
 import livelessons.utils.Options;
@@ -148,6 +149,16 @@ public abstract class ImageStreamGang
         else
             // Indicate that we're done.
             return null;
+    }
+
+    /**
+     * Transform URL to an Image by downloading each image via its
+     * URL.  This call ensures the common fork/join thread pool is
+     * expanded to handle the blocking image download.
+     */
+    protected Image blockingDownload(URL url) {
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
     }
 
     /**

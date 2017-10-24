@@ -73,11 +73,10 @@ public class ImageStreamSequential
             // apply each one to the image.
             .stream()
 
-            // Use map() to create an OutputFilterDecorator for each image.
-            .map(filter -> makeFilterDecoratorWithImage(filter, image))
-
-            // Use map() to apply the OutputFilterDecorator to each
-            // image and store it in an output file.
-            .map(FilterDecoratorWithImage::run);
+            // Use map() to create an OutputFilterDecorator for each
+            // image and run it to filter each image and store it in an
+            // output file.
+            .map(filter -> 
+                 makeFilterDecoratorWithImage(filter, image).run());
     }
 }
