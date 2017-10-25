@@ -1,9 +1,9 @@
 package livelessons.filters;
 
-import java.io.File;
-
 import livelessons.utils.Image;
 import livelessons.utils.Options;
+
+import java.io.File;
 
 /**
  * An abstract class that defines an interface for applying filtering
@@ -16,7 +16,7 @@ public abstract class Filter {
     /**
      * Debug logging tag.
      */
-    protected static final String TAG = "Filter";
+    protected final String TAG = Filter.class.getName();
 
     /**
      * The name of the filter, which defaults to the "canonical name"
@@ -29,7 +29,8 @@ public abstract class Filter {
      */
     public Filter() {
         // Default uses the class name without the package prefix.
-    	mName = this.getClass().getSimpleName();
+    	mName = this.getClass().getName();
+
     }
 
     /**

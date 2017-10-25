@@ -1,9 +1,9 @@
 package livelessons.filters;
 
-import java.io.File;
-
 import livelessons.platspec.PlatSpec;
 import livelessons.utils.Image;
+
+import java.io.File;
 
 /**
  * A Filter sublcass that converts a downloaded image to grayscale.

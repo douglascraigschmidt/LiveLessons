@@ -26,7 +26,7 @@ public class BlockingTask {
      * This method enables blocking Suppliers to be used efficiently
      * with the common Java fork/join thread pool.
      */
-    public static<T> T callInManagedBlock(final Supplier<T> supplier) {
+    public static <T> T callInManagedBlock(final Supplier<T> supplier) {
         // Create a helper object to encapsulate the supplier.
         final SupplierManagedBlocker<T> managedBlock =
             new SupplierManagedBlocker<>(supplier);

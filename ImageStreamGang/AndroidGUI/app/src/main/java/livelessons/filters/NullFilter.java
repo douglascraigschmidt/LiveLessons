@@ -1,8 +1,8 @@
 package livelessons.filters;
 
-import java.io.File;
-
 import livelessons.utils.Image;
+
+import java.io.File;
 
 /**
  * The NullFilter will return the image as it was downloaded.  It's

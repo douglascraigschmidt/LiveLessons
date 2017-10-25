@@ -39,13 +39,8 @@ public class OutputFilterDecorator
         // organize the filtered results and write the image to the
         // file in the appropriate directory.
 
-    	// Ensure that the path exists.
-        File externalFile = new File(Options.instance().getDirectoryPath(),
-                                     this.getName());
-        externalFile.mkdirs();
-        
         // Get a reference to the file in which the image will be stored
-        File imageFile = new File(externalFile,
+        File imageFile = new File(getFilePath(),
                                   image.getFileName());
         
         // Store the image using try-with-resources
