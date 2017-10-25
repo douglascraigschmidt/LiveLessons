@@ -1,6 +1,9 @@
 package livelessons.filters;
 
+import java.io.File;
+
 import livelessons.utils.Image;
+import livelessons.utils.Options;
 
 /**
  * An abstract class that defines an interface for applying filtering
@@ -67,5 +70,13 @@ public abstract class Filter {
      */
     public String getName() {
         return mName;
+    }
+
+    /**
+     * Gets the file path where a filtered image will be stored.
+     */
+    public File getFilePath() {
+        return new File(Options.instance().getDirectoryPath(),
+                        getName());
     }
 }

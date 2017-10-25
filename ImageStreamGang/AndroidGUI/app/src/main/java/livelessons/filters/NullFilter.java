@@ -1,5 +1,7 @@
 package livelessons.filters;
 
+import java.io.File;
+
 import livelessons.utils.Image;
 
 /**
@@ -12,9 +14,16 @@ import livelessons.utils.Image;
 public class NullFilter 
        extends Filter {
     /**
-     * Default constructor is a no-op.
+     * Constructs a default NullFilter and creates the output
+     * directory for this filter.
      */
-    public NullFilter() {}
+    public NullFilter() {
+        // Create the path to the filter directory.
+        File externalFile = getFilePath();
+
+        // Create the filter directory.
+        externalFile.mkdirs();
+    }
     
     /**
      * Constructors for the NullFilter. See GrayScaleFilter for
