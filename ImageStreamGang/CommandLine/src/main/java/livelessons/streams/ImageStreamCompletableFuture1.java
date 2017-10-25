@@ -84,7 +84,8 @@ public class ImageStreamCompletableFuture1
      * imageFuture after it finishes downloading and store the results
      * in output files on the local computer.
      */
-    private Stream<CompletableFuture<Image>> applyFiltersAsync(CompletableFuture<Image> imageFuture) {
+    private Stream<CompletableFuture<Image>> applyFiltersAsync
+        (CompletableFuture<Image> imageFuture) {
         return mFilters
             // Convert the list of filters to a sequential stream.
             .stream()
@@ -109,5 +110,16 @@ public class ImageStreamCompletableFuture1
                  // lambda expression.
                  filterFuture.thenApplyAsync(FilterDecoratorWithImage::run,
                                              getExecutor()));
+    }
+
+    /**
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
+     */
+    private CompletableFuture<Image> downloadImageAsync(URL url) {
+        // Asynchronously download an Image from the url parameter.
+        return CompletableFuture.supplyAsync(() -> downloadImage(url),
+                                             getExecutor());
     }
 }

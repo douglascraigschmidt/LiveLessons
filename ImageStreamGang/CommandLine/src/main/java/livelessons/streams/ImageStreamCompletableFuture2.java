@@ -106,4 +106,14 @@ public class ImageStreamCompletableFuture2
                          // Collect the list of futures.
                          .collect(toFuture()));
     }
+
+    /**
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
+     */
+    private CompletableFuture<Image> downloadImageAsync(URL url) {
+        // Asynchronously download an Image from the url parameter.
+        return CompletableFuture.supplyAsync(() -> blockingDownload(url));
+    }
 }
