@@ -40,13 +40,13 @@ public class ImageStreamCompletableFuture1
         List<URL> urls = getInput();
 
         // Create a list of completable futures to filtered images.
-        List<CompletableFuture<Image>> listOfFilteredImageFutures = urls
+        List<CompletableFuture<Image>> futureList = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
 
-            // Use filter() to ignore URLs that are already cached locally,
-            // i.e., only download non-cached images.
+            // Use filter() to ignore URLs that are already cached
+            // locally, i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
             // Use map() to transform each URL to a completable future
@@ -66,7 +66,7 @@ public class ImageStreamCompletableFuture1
         // Create a CompletableFuture that can be used to wait for all
         // operations associated with the futures to complete.
         CompletableFuture<List<Image>> allImagesDone =
-                StreamsUtils.joinAll(listOfFilteredImageFutures);
+                StreamsUtils.joinAll(futureList);
 
         // Print the results.
         System.out.println(TAG
@@ -84,7 +84,8 @@ public class ImageStreamCompletableFuture1
      * imageFuture after it finishes downloading and store the results
      * in output files on the local computer.
      */
-    private Stream<CompletableFuture<Image>> applyFiltersAsync(CompletableFuture<Image> imageFuture) {
+    private Stream<CompletableFuture<Image>> applyFiltersAsync
+        (CompletableFuture<Image> imageFuture) {
         return mFilters
             // Convert the list of filters to a sequential stream.
             .stream()
@@ -107,8 +108,18 @@ public class ImageStreamCompletableFuture1
                  // stage completes normally, is executed with this
                  // stage's result as the argument to the supplied
                  // lambda expression.
-                 filterFuture.thenCompose(filter ->
-                                          CompletableFuture.supplyAsync(filter::run,
-                                                                        getExecutor())));
+                 filterFuture.thenApplyAsync(FilterDecoratorWithImage::run,
+                                             getExecutor()));
+    }
+
+    /**
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
+     */
+    private CompletableFuture<Image> downloadImageAsync(URL url) {
+        // Asynchronously download an Image from the url parameter.
+        return CompletableFuture.supplyAsync(() -> downloadImage(url),
+                                             getExecutor());
     }
 }

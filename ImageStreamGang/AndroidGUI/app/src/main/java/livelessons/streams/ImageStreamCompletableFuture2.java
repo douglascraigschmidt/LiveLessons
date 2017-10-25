@@ -12,6 +12,7 @@ import livelessons.utils.Image;
 import livelessons.utils.StreamsUtils;
 import livelessons.filters.FilterDecoratorWithImage;
 import static java.util.stream.Collectors.summingInt;
+import static livelessons.utils.FuturesCollector.toFuture;
 
 /**
  * This is another asynchronous implementation strategy that
@@ -25,7 +26,7 @@ public class ImageStreamCompletableFuture2
      * Constructor initializes the superclass and data members.
      */
     public ImageStreamCompletableFuture2(Filter[] filters,
-                                        Iterator<List<URL>> urlListIterator) {
+                                         Iterator<List<URL>> urlListIterator) {
         super(filters, urlListIterator);
     }
 
@@ -38,8 +39,9 @@ public class ImageStreamCompletableFuture2
         // Get the input URLs.
         List<URL> urls = getInput();
 
-        // Create a list of completable futures to a list of images.
-        final List<CompletableFuture<List<Image>>> listOfFilteredImageFutures = urls
+        // A completable futures to the number of images downloaded and
+        // filtered.
+        CompletableFuture<Integer> imagesProcessed = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -53,63 +55,31 @@ public class ImageStreamCompletableFuture2
             // via its URL).
             .map(this::downloadImageAsync)
 
-            // Use map() to call makeFilterDecorators(), which returns
-            // a List of FilterDecoratorWithImage objects associated
-            // with a completable future.
-            .map(this::makeFilterDecorators)
-
             // Use map() to call the applyFiltersAsync() method
             // reference, which returns a list of filtered Image
             // futures.
             .map(this::applyFiltersAsync)
-            
-            // Terminate the stream, which returns a list of
-            // completable futures to a list of images.
-            .collect(toList());
 
-        // Create a CompletableFuture that can be used to wait for all
-        // operations associated with the futures to complete.
-        CompletableFuture<List<List<Image>>> allImagesDone =
-                StreamsUtils.joinAll(listOfFilteredImageFutures);
+            // Trigger intermediate processing and create a
+            // CompletableFuture that can be used to wait for all
+            // operations associated with the futures to complete.
+            .collect(toFuture())
 
-        // The call to join() is needed here to blocks the calling
-        // thread until all the futures have completed.
-        Integer imagesProcessed = allImagesDone
-            // join() returns a list of list of images, so we convert
-            // this to a stream and then sum up the size of each of
-            // these lists to get the final count of images processed.
-            .join()
-            .stream()
-            .collect(summingInt(List::size));
+            // When all image processing is done return a count
+            // of the number of images downloaded/filtered.
+            .thenApply(list -> list
+                       // Convert list to stream.
+                       .stream()
+
+                       // Sum up the counts of all the processed images.
+                       .collect(summingInt(List::size)));
 
         System.out.println(TAG
                            + ": processing of "
-                           + imagesProcessed
+                           + imagesProcessed.join()
                            + " image(s) from "
-                           + urls.size() 
+                           + urls.size()
                            + " urls is complete");
-    }
-
-    /**
-     * A factory method that makes all the image processing filters
-     * for the @a imageFuture after its downloaded.
-     */
-    private CompletableFuture<List<FilterDecoratorWithImage>> makeFilterDecorators
-                (CompletableFuture<Image> imageFuture) {
-        // Returns a new CompletionStage that, when this stage
-        // completes normally, is executed with this stage's result as
-        // the argument to the supplied lambda expression.
-        return imageFuture.thenApply(image -> mFilters
-            // Convert all the image filters into a sequential stream.
-            .stream()
-
-            // Create a FilterDecoratorWithImage object for each
-            // filter/image combo.
-            .map(filter -> makeFilterDecoratorWithImage(filter, image))
-
-            // Return a completable future to a list of
-            // FilterDecoratorWithImage objects.
-            .collect(toList()));
     }
 
     /**
@@ -117,26 +87,33 @@ public class ImageStreamCompletableFuture2
      * in an output file on the local computer.
      */
     private CompletableFuture<List<Image>> applyFiltersAsync
-      (CompletableFuture<List<FilterDecoratorWithImage>> decoratedFiltersWithImageFuture) {
-        // Returns a new CompletionStage that, when this stage
-        // completes normally, is executed with this stage's result as
-        // the argument to the supplied lambda expression.
-        return decoratedFiltersWithImageFuture.thenCompose(list -> {
-                List<CompletableFuture<Image>> listOfFutures = list
-                    // Converts the list of FilterDecoratorWithImage
-                    // objects into a sequential stream.
-                    .stream()
+        (CompletableFuture<Image> imageFuture) {
+        // Return a completable future to an array of images that are
+        // being processed.
+        return imageFuture
+            .thenCompose(image -> mFilters
+                         // Convert image filters to a sequential
+                         // stream.
+                         .stream()
 
-                    // Asynchronously apply a filter to an Image.
-                    .map(this::filterImageAsync)
+                         // Create a FilterDecoratorWithImage object
+                         // for each filter/image combo and apply this
+                         // filter to an image.
+                         .map(filter ->
+                              filterImageAsync(makeFilterDecoratorWithImage(filter,
+                                                                            image)))
 
-                    // Collect the list of futures.
-                    .collect(toList());
+                         // Collect the list of futures.
+                         .collect(toFuture()));
+    }
 
-                // Return a CompletableFuture to a list of images that
-                // will be available when all the CompletableFutures
-                // in listOfFutures complete.
-                return StreamsUtils.joinAll(listOfFutures);
-            });
+    /**
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
+     */
+    private CompletableFuture<Image> downloadImageAsync(URL url) {
+        // Asynchronously download an Image from the url parameter.
+        return CompletableFuture.supplyAsync(() -> blockingDownload(url));
     }
 }

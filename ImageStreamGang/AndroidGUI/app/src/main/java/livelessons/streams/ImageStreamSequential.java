@@ -48,8 +48,8 @@ public class ImageStreamSequential
             // synchronously download each image via its URL).
             .map(this::downloadImage)
 
-            // Use flatMap() to create a stream containing multiple filtered
-            // versions of each image.
+            // Use flatMap() to create a stream containing multiple
+            // filtered versions of each image.
             .flatMap(this::applyFilters)
 
             // Terminate the stream and collect the results into
@@ -65,23 +65,6 @@ public class ImageStreamSequential
     }
 
     /**
-     * @return true if the @a url is already in the cache, else false.
-     */
-    @Override
-    protected boolean urlCached(URL url) {
-        // Iterate through the list of image filters sequentially and use
-        // the filter aggregate operation to exclude those already cached.
-        long count = mFilters
-            .stream()
-            .filter(filter ->
-                    urlCached(url, filter.getName()))
-            .count();
-
-        // A count > 0 means the url has already been cached.
-        return count > 0;
-    }
-
-    /**
      * Apply the image filters to each @a image sequentially.
      */
     private Stream<Image> applyFilters(Image image) {
@@ -90,11 +73,10 @@ public class ImageStreamSequential
             // apply each one to the image.
             .stream()
 
-            // Use map() to create an OutputFilterDecorator for each image.
-            .map(filter -> makeFilterDecoratorWithImage(filter, image))
-
-            // Use map() to apply the OutputFilterDecorator to each
-            // image and store it in an output file.
-            .map(FilterDecoratorWithImage::run);
+            // Use map() to create an OutputFilterDecorator for each
+            // image and run it to filter each image and store it in an
+            // output file.
+            .map(filter -> 
+                 makeFilterDecoratorWithImage(filter, image).run());
     }
 }
