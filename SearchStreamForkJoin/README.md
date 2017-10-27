@@ -12,17 +12,11 @@ works of Shakespeare.  Here's an overview of what's included:
   (i.e., no Java 8 parallel streams) to demonstrate "raw" fork-join
   pool programming.
 
-. RecursiveTraversalStreams -- This example implements an
-  "embarrassingly parallel" program that uses the Java 7 fork-join
-  framework and Java 8 sequential and/or parallel streams to search
-  for phrases in a recursive directory folder containing the works of
-  Shakespeare.  This example is loosely based on the tutorial at
+. RecursiveTraversal -- This example implements an "embarrassingly
+  parallel" program that uses the Java 7 fork-join framework and a
+  "recursive traversal" strategy to search for phrases in a recursive
+  directory folder containing the works of Shakespeare.  This example
+  is loosely based on the tutorial at
   http://www.oracle.com/technetwork/articles/java/fork-join-422606.html,
   but is much more powerful and interesting.
-
-. RecursiveTraversalFutures -- This example implements an
-  "embarrassingly parallel" program that uses the Java 7 fork-join
-  framework and the Java 8 completable futures framework to search for
-  phrases in a recursive directory folder containing the works of
-  Shakespeare.
 
