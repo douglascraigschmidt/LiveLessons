@@ -12,9 +12,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowFunction;
-import static utils.ForkJoinUtils.applyAllIter;
-import static utils.ForkJoinUtils.applyAllSplit;
-import static utils.ForkJoinUtils.invokeAll;
+import static utils.ForkJoinUtils.*;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
@@ -54,13 +52,11 @@ public class ex22 {
         Function<BigFraction, BigFraction> op =
             (bigFraction) -> BigFraction
                 .reduce(bigFraction)
-                .multiply(sBigReducedFraction)
-                .divide(200000)
-                .multiply(sBigReducedFraction)
                 .multiply(sBigReducedFraction);
 
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(fractionList, op);
+
         System.gc();
         RunTimer.timeRun(() -> testFractionOperations1(fractionList, op),
                          "testFractionOperations1()");
@@ -70,6 +66,10 @@ public class ex22 {
         System.gc();
         RunTimer.timeRun(() -> testFractionOperations3(fractionList, op),
                          "testFractionOperations3()");
+        System.gc();
+        RunTimer.timeRun(() -> testFractionOperations4(fractionList, op),
+                         "testFractionOperations4()");
+
 
         display(RunTimer.getTimingResults());
     }
@@ -103,12 +103,22 @@ public class ex22 {
     }
 
     /**
-     * Test the applyAppSplit() utility method.
+     * Test the applyAllSplit() utility method.
      */
     private static void testFractionOperations3(List<BigFraction> fractionList,
                                                     Function<BigFraction, BigFraction> op) {    
         // Test big fraction operations using applyAllSplit().
         List<BigFraction> results = applyAllSplit(fractionList, op);
+
+    }
+
+    /**
+     * Test the applyAllSplitIndex() utility method.
+     */
+    private static void testFractionOperations4(List<BigFraction> fractionList,
+                                                    Function<BigFraction, BigFraction> op) {    
+        // Test big fraction operations using applyAllSplitIndex().
+        List<BigFraction> results = applyAllSplitIndex(fractionList, op);
     }
 
     /**

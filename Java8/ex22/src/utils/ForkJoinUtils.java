@@ -1,8 +1,7 @@
 package utils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -45,27 +44,24 @@ public class ForkJoinUtils {
     public static <T> List<T> applyAllSplit(List<T> list,
                                             Function<T, T> op) {
         class SplitterTask extends RecursiveTask<List<T>> {
-            List<T> mList;
-            final Function<T, T> mOp;
+            private List<T> mList;
 
-            SplitterTask(List<T> list, Function<T, T> op) {
+            private SplitterTask(List<T> list) {
                 mList = list;
-                mOp = op;
             }
 
             protected List<T> compute() {
                 if (mList.size() <= 4) {
                     List<T> l = new ArrayList<>();
                     for (T t : mList)
-                        l.add(mOp.apply(t));
+                        l.add(op.apply(t));
 
                     return l;
                 } else {
                     int splitPos = mList.size() / 2;
                     ForkJoinTask<List<T>> leftTask = 
                         new SplitterTask(mList.subList(0,
-                                                       splitPos),
-                                         mOp)
+                                                       splitPos))
                         .fork();
                                          
                     mList = mList.subList(splitPos, mList.size());
@@ -81,7 +77,50 @@ public class ForkJoinUtils {
             }
         }
 
-        return ForkJoinPool.commonPool().invoke(new SplitterTask(list, op));
+        return ForkJoinPool.commonPool().invoke(new SplitterTask(list));
+    }
+
+    /**
+     * Apply {@code op} to all items in the {@code list} by
+     * recursively splitting up calls to fork-join pool methods.
+     */
+    public static <T> List<T> applyAllSplitIndex(List<T> list,
+                                                 Function<T, T> op) {
+        List<T> results =
+            Arrays.asList((T[]) Array.newInstance(list.get(0).getClass(),
+                                                  list.size()));
+        class SplitterTask extends RecursiveTask<Void> {
+            private int mLo;
+            private int mHi;
+
+            private SplitterTask(int lo, int hi) {
+                mLo = lo;
+                mHi = hi;
+            }
+
+            protected Void compute() {
+                int mid = (mLo + mHi) >>> 1;
+                if (mLo == mid) {
+                    results.set(mLo, op.apply(list.get(mLo)));
+                    return null;
+                } else {
+                    ForkJoinTask<Void> leftTask =
+                        new SplitterTask(mLo, 
+                                         mid) 
+                        .fork();
+
+                    mLo = mid;
+                    compute();
+                    
+                    leftTask.join();
+                    
+                    return null;
+                }
+            }
+        }
+
+        ForkJoinPool.commonPool().invoke(new SplitterTask(0, list.size()));
+        return results;
     }
 
     /**
