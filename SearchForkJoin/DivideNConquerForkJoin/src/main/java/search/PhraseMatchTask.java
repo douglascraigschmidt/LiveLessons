@@ -237,7 +237,8 @@ public class PhraseMatchTask
                                 mPattern,
                                 mMinSplitSize,
                                 mOffset,
-                                mParallelSearch).fork();
+                                mParallelSearch)
+            .fork();
 
         // Update the offset.
         mOffset += splitPos;
