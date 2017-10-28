@@ -86,9 +86,8 @@ public class ForkJoinUtils {
      */
     public static <T> List<T> applyAllSplitIndex(List<T> list,
                                                  Function<T, T> op) {
-        List<T> results =
-            Arrays.asList((T[]) Array.newInstance(list.get(0).getClass(),
-                                                  list.size()));
+        T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
+                                                  list.size());
         class SplitterTask extends RecursiveTask<Void> {
             private int mLo;
             private int mHi;
@@ -101,7 +100,7 @@ public class ForkJoinUtils {
             protected Void compute() {
                 int mid = (mLo + mHi) >>> 1;
                 if (mLo == mid) {
-                    results.set(mLo, op.apply(list.get(mLo)));
+                    results[mLo] = op.apply(list.get(mLo));
                     return null;
                 } else {
                     ForkJoinTask<Void> leftTask =
@@ -120,7 +119,7 @@ public class ForkJoinUtils {
         }
 
         ForkJoinPool.commonPool().invoke(new SplitterTask(0, list.size()));
-        return results;
+        return Arrays.asList(results);
     }
 
     /**

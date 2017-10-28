@@ -22,7 +22,7 @@ public class ex22 {
     /**
      * Number of big fractions to process via a fork-join pool.
      */
-    private static int sMAX_FRACTIONS = 50;
+    private static int sMAX_FRACTIONS = 10;
 
     /**
      * A big reduced fraction constant.
@@ -81,7 +81,7 @@ public class ex22 {
                                          Function<BigFraction, BigFraction> op) {
         System.out.println("Warming up the thread pool");
         // Test big fraction multiplication using ...
-        List<BigFraction> results = applyAllSplit(fractionList, op);
+        List<BigFraction> results = applyAllSplitIndex(fractionList, op);
     }
 
     /**
