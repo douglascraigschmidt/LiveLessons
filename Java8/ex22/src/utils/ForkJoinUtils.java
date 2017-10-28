@@ -20,8 +20,8 @@ public class ForkJoinUtils {
                                            Function<T, T> op) {
         return ForkJoinPool.commonPool().invoke(new RecursiveTask<List<T>>() {
                 protected List<T> compute() {
-                    List<ForkJoinTask<T>> forks = new ArrayList<>();
-                    List<T> results = new ArrayList<>();
+                    List<ForkJoinTask<T>> forks = new LinkedList<>();
+                    List<T> results = new LinkedList<>();
 
                     for (T t : list)
                         forks.add(new RecursiveTask<T>() {
@@ -105,10 +105,9 @@ public class ForkJoinUtils {
                 } else {
                     ForkJoinTask<Void> leftTask =
                         new SplitterTask(mLo, 
-                                         mid) 
+                                         mLo = mid)
                         .fork();
 
-                    mLo = mid;
                     compute();
                     
                     leftTask.join();
