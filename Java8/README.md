@@ -102,3 +102,4 @@ Here's an overview of what's included:
   as HashSet) that do not in the context of various order-sensitive
   aggregate operations, such as limit() and distinct().
 
+. ex22 -- 
