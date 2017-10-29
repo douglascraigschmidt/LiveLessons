@@ -77,7 +77,7 @@ public class RunTimer {
         StringBuffer stringBuffer =
             new StringBuffer();
 
-        stringBuffer.append("\nPrinting ")
+        stringBuffer.append("Printing ")
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest\n");
 
