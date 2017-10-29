@@ -2,16 +2,15 @@ import utils.BigFraction;
 import utils.RunTimer;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
 import java.math.BigInteger;
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static utils.ExceptionUtils.rethrowFunction;
 import static utils.ForkJoinUtils.*;
 
 /**
@@ -22,7 +21,7 @@ public class ex22 {
     /**
      * Number of big fractions to process via a fork-join pool.
      */
-    private static int sMAX_FRACTIONS = 10;
+    private static int sMAX_FRACTIONS = 12;
 
     /**
      * A big reduced fraction constant.
@@ -51,8 +50,8 @@ public class ex22 {
 
         Function<BigFraction, BigFraction> op =
             (bigFraction) -> BigFraction
-                .reduce(bigFraction)
-                .multiply(sBigReducedFraction);
+            .reduce(bigFraction)
+            .multiply(sBigReducedFraction);
 
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(fractionList, op);
@@ -81,44 +80,53 @@ public class ex22 {
                                          Function<BigFraction, BigFraction> op) {
         System.out.println("Warming up the thread pool");
         // Test big fraction multiplication using ...
-        List<BigFraction> results = applyAllSplitIndex(fractionList, op);
+        applyAllSplitIndex(fractionList,
+                           op,
+                           ForkJoinPool.commonPool());
     }
 
     /**
      * Test the applyAllIter() utility method.
      */
     private static void testFractionOperations1(List<BigFraction> fractionList,
-                                                    Function<BigFraction, BigFraction> op) {
+                                                Function<BigFraction, BigFraction> op) {
         // Test big fraction operations using applyAppIter().
-        List<BigFraction> results = applyAllIter(fractionList, op);
+        applyAllIter(fractionList, 
+                     op,
+                     ForkJoinPool.commonPool());
     }
 
     /**
      * Test the invokeAll() utility method.
      */
     private static void testFractionOperations2(List<BigFraction> fractionList,
-                                                    Function<BigFraction, BigFraction> op) {    
+                                                Function<BigFraction, BigFraction> op) {    
         // Test big fraction operations using invokeAll()
-        List<Future<BigFraction>> results = invokeAll(fractionList, op);
+        invokeAll(fractionList,
+                  op,
+                  ForkJoinPool.commonPool());
     }
 
     /**
      * Test the applyAllSplit() utility method.
      */
     private static void testFractionOperations3(List<BigFraction> fractionList,
-                                                    Function<BigFraction, BigFraction> op) {    
+                                                Function<BigFraction, BigFraction> op) {    
         // Test big fraction operations using applyAllSplit().
-        List<BigFraction> results = applyAllSplit(fractionList, op);
-
+        applyAllSplit(fractionList,
+                      op,
+                      ForkJoinPool.commonPool());
     }
 
     /**
      * Test the applyAllSplitIndex() utility method.
      */
     private static void testFractionOperations4(List<BigFraction> fractionList,
-                                                    Function<BigFraction, BigFraction> op) {    
+                                                Function<BigFraction, BigFraction> op) {    
         // Test big fraction operations using applyAllSplitIndex().
-        List<BigFraction> results = applyAllSplitIndex(fractionList, op);
+        applyAllSplitIndex(fractionList,
+                           op,
+                           ForkJoinPool.commonPool());
     }
 
     /**
