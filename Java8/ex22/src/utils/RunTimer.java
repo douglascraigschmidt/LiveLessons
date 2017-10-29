@@ -79,7 +79,7 @@ public class RunTimer {
 
         stringBuffer.append("Printing ")
             .append(mResultsMap.entrySet().size())
-            .append(" results from fastest to slowest\n");
+            .append(" results from fastest to slowest");
 
         // Print out the contents of the mResultsMap in sorted
         // order.
@@ -102,11 +102,11 @@ public class RunTimer {
 
             // Append the entries in the sorted stream.
             .forEach(entry -> stringBuffer
-                     .append("")
+                     .append("\n")
                      .append(entry.getValue())
                      .append(" executed in ")
                      .append(entry.getKey())
-                     .append(" msecs\n"));
+                     .append(" msecs"));
 
         return stringBuffer.toString();
     }
