@@ -42,21 +42,20 @@ public class ex22 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws IOException {
+        display("Starting ForkJoinTest");
+
+        // Generate a list of sMAX_FRACTIONS random unreduced BigFractions.
         List<BigFraction> fractionList = Stream
-            // Generate sMAX_FRACTIONS random unreduced BigFractions.
             .generate(() -> makeBigFraction(new Random(), false))
             .limit(sMAX_FRACTIONS)
             .collect(toList());
 
+        // Define a BigFraction operation to run.
         Function<BigFraction, BigFraction> op =
             (bigFraction) -> BigFraction
             .reduce(bigFraction)
             .multiply(sBigReducedFraction);
 
-        // Warm up the thread pool so the results are more accurate.
-        warmUpThreadPool(fractionList, op);
-
-        System.gc();
         RunTimer.timeRun(() -> testFractionOperations1(fractionList, op),
                          "testFractionOperations1()");
         System.gc();
@@ -69,20 +68,10 @@ public class ex22 {
         RunTimer.timeRun(() -> testFractionOperations4(fractionList, op),
                          "testFractionOperations4()");
 
-
+        // Print the results of the tests.
         display(RunTimer.getTimingResults());
-    }
 
-    /**
-     * Warm up the thread pool so the results are more accurate.
-     */
-    private static void warmUpThreadPool(List<BigFraction> fractionList,
-                                         Function<BigFraction, BigFraction> op) {
-        System.out.println("Warming up the thread pool");
-        // Test big fraction multiplication using ...
-        applyAllSplitIndex(fractionList,
-                           op,
-                           ForkJoinPool.commonPool());
+        display("Finishing ForkJoinTest");
     }
 
     /**
