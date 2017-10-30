@@ -66,6 +66,9 @@ public class Main {
         mPhrasesToFind = TestDataFactory
             .getPhraseList(sPHRASE_LIST_FILE);
 
+        System.out.println("The parallelism in the common fork-join pool is "
+                           + ForkJoinPool.getCommonPoolParallelism());
+
         // Warm up the fork-join pool to account for any
         // instruction/data caching effects.
         warmUpForkJoinPool();
