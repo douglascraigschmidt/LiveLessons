@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.toList;
+import static utils.ExceptionUtils.rethrowFunction;
+
 /**
  * A Java utility class that defines useful helper methods for
  * fork-join operations.
@@ -56,6 +59,38 @@ public class ForkJoinUtils {
                     // Return the results.
                     return results;
                 }});
+    }
+
+    /**
+     * Apply {@code op} to all items in the {@code list} using the
+     * fork-join pool invokeAll() method.
+     */
+    public static <T> List<T> invokeAll(List<T> list,
+                                        Function<T, T> op,
+                                        ForkJoinPool forkJoinPool) {
+        // Create a new list of callables.
+        List<Callable<T>> tasks =
+            new ArrayList<>();
+
+        // Add all the ops to the list.
+        for (T t : list)
+            tasks.add(() -> { return op.apply(t);});
+
+
+        // Create a list of elements from the list of futures and
+        // return it.
+        return forkJoinPool
+            // Call invokeAll() to process all elements in the list.
+            .invokeAll(tasks)
+
+            // Convert the list of futures to a stream.
+            .stream()
+
+            // Map the futures to elements.
+            .map(rethrowFunction(Future::get))
+
+            // Collect the results into a list.
+            .collect(toList());
     }
 
     /**
@@ -211,24 +246,5 @@ public class ForkJoinUtils {
 
         // Create a list from the array of results and return it.
         return Arrays.asList(results);
-    }
-
-    /**
-     * Apply {@code op} to all items in the {@code list} using the
-     * fork-join pool invokeAll() method.
-     */
-    public static <T> List<Future<T>> invokeAll(List<T> list,
-                                                Function<T, T> op,
-                                                ForkJoinPool forkJoinPool) {
-        // Create a new list of callables.
-        List<Callable<T>> tasks =
-            new ArrayList<>();
-
-        // Add all the ops to the list.
-        for (T t : list)
-            tasks.add(() -> { return op.apply(t);});
-
-        // Call invokeAll() to process all elements in the list.
-        return forkJoinPool.invokeAll(tasks);
     }
 }

@@ -21,7 +21,7 @@ public class ex22 {
     /**
      * Number of big fractions to process via a fork-join pool.
      */
-    private static int sMAX_FRACTIONS = 10;
+    private static int sMAX_FRACTIONS = 12;
 
     /**
      * A big reduced fraction constant.
