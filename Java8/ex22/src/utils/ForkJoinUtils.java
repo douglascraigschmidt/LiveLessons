@@ -62,35 +62,78 @@ public class ForkJoinUtils {
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} using the
-     * fork-join pool invokeAll() method.
+     * Apply {@code op} to all items in the {@code list} by
+     * recursively splitting up calls to fork-join pool methods.
      */
-    public static <T> List<T> invokeAll(List<T> list,
-                                        Function<T, T> op,
-                                        ForkJoinPool forkJoinPool) {
-        // Create a new list of callables.
-        List<Callable<T>> tasks =
-            new ArrayList<>();
+    public static <T> List<T> applyAllSplitIndex(List<T> list,
+                                                 Function<T, T> op,
+                                                 ForkJoinPool forkJoinPool) {
+        // Create a new array to hold the results.
+        T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
+                                              list.size());
 
-        // Add all the ops to the list.
-        for (T t : list)
-            tasks.add(() -> op.apply(t));
+        /**
+         * This task partitions list recursively and runs each half in
+         * a ForkJoinTask.  It uses indices to avoid the overhead of
+         * copying.
+         */
+        class SplitterTask 
+              extends RecursiveAction {
+            /**
+             * The lo index in this partition.
+             */
+            private int mLo;
 
+            /**
+             * The hi index in this partition.
+             */
+            private int mHi;
 
-        // Create a list of elements from the list of futures and
-        // return it.
-        return forkJoinPool
-            // Call invokeAll() to process all elements in the list.
-            .invokeAll(tasks)
+            /**
+             * Constructor initializes the fields.
+             */
+            private SplitterTask(int lo, int hi) {
+                mLo = lo;
+                mHi = hi;
+            }
 
-            // Convert the list of futures to a stream.
-            .stream()
+            /**
+             * Recursively perform the computations in parallel using
+             * the fork-join pool.
+             */
+            protected void compute() {
+                // Find the midpoint.
+                int mid = (mLo + mHi) >>> 1;
 
-            // Map the futures to elements.
-            .map(rethrowFunction(Future::get))
+                // If there's just a single element then apply
+                // the operation.
+                if (mLo == mid) {
+                    // Update the mLo location with the results of
+                    // applying the operation.
+                    results[mLo] = op.apply(list.get(mLo));
+                } else {
+                    // Create a new SplitterTask to handle the
+                    // left-hand side of the list and fork it.
+                    ForkJoinTask<Void> leftTask =
+                        new SplitterTask(mLo, mLo = mid)
+                            .fork();
 
-            // Collect the results into a list.
-            .collect(toList());
+                    // Compute the right-hand side in parallel with
+                    // the left-hand side.
+                    compute();
+                    
+                    // Join with the left-hand side.  This is a
+                    // synchronization point.
+                    leftTask.join();
+                }
+            }
+        }
+
+        // Invoke a new SplitterTask in the fork-join pool.
+        forkJoinPool.invoke(new SplitterTask(0, list.size()));
+
+        // Create a list from the array of results and return it.
+        return Arrays.asList(results);
     }
 
     /**
@@ -172,76 +215,34 @@ public class ForkJoinUtils {
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join pool methods.
+     * Apply {@code op} to all items in the {@code list} using the
+     * fork-join pool invokeAll() method.
      */
-    public static <T> List<T> applyAllSplitIndex(List<T> list,
-                                                 Function<T, T> op,
-                                                 ForkJoinPool forkJoinPool) {
-        // Create a new array to hold the results.
-        T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
-                                              list.size());
+    public static <T> List<T> invokeAll(List<T> list,
+                                        Function<T, T> op,
+                                        ForkJoinPool forkJoinPool) {
+        // Create a new list of callables.
+        List<Callable<T>> tasks =
+            new ArrayList<>();
 
-        /**
-         * This task partitions list recursively and runs each half in
-         * a ForkJoinTask.  It uses indices to avoid the overhead of
-         * copying.
-         */
-        class SplitterTask 
-              extends RecursiveAction {
-            /**
-             * The lo index in this partition.
-             */
-            private int mLo;
+        // Add all the ops to the list.
+        for (T t : list)
+            tasks.add(() -> op.apply(t));
 
-            /**
-             * The hi index in this partition.
-             */
-            private int mHi;
 
-            /**
-             * Constructor initializes the fields.
-             */
-            private SplitterTask(int lo, int hi) {
-                mLo = lo;
-                mHi = hi;
-            }
+        // Create a list of elements from the list of futures and
+        // return it.
+        return forkJoinPool
+            // Call invokeAll() to process all elements in the list.
+            .invokeAll(tasks)
 
-            /**
-             * Recursively perform the computations in parallel using
-             * the fork-join pool.
-             */
-            protected void compute() {
-                // Find the midpoint.
-                int mid = (mLo + mHi) >>> 1;
+            // Convert the list of futures to a stream.
+            .stream()
 
-                // If there's just a single element then apply
-                // the operation.
-                if (mLo == mid) {
-                    // Update the mLo location with the results of
-                    // applying the operation.
-                    results[mLo] = op.apply(list.get(mLo));
-                } else {
-                    // Create a new SplitterTask to handle the
-                    // left-hand side of the list and fork it.
-                    RecursiveAction leftTask =
-                        new SplitterTask(mLo, 
-                                         mLo = mid);
-                    leftTask.fork();
+            // Map the futures to elements.
+            .map(rethrowFunction(Future::get))
 
-                    // Compute the right-hand side.
-                    compute();
-                    
-                    // Join with the left-hand side.
-                    leftTask.join();
-                }
-            }
-        }
-
-        // Invoke a new SpliterTask in the fork-join pool.
-        forkJoinPool.invoke(new SplitterTask(0, list.size()));
-
-        // Create a list from the array of results and return it.
-        return Arrays.asList(results);
+            // Collect the results into a list.
+            .collect(toList());
     }
 }

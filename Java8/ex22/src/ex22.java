@@ -14,14 +14,14 @@ import static java.util.stream.Collectors.toList;
 import static utils.ForkJoinUtils.*;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * using the Java fork-join pool framework.
+ * This example shows how to reduce and multiply big fractions using
+ * the Java fork-join pool framework.
  */
 public class ex22 {
     /**
      * Number of big fractions to process via a fork-join pool.
      */
-    private static int sMAX_FRACTIONS = 12;
+    private static int sMAX_FRACTIONS = 20;
 
     /**
      * A big reduced fraction constant.
@@ -56,27 +56,42 @@ public class ex22 {
             .collect(toList());
 
         // Define a BigFraction operation to run.
-        Function<BigFraction, BigFraction> op =
-            (bigFraction) -> BigFraction
+        Function<BigFraction, BigFraction> op = bigFraction -> BigFraction
             // Reduce the big fraction.
             .reduce(bigFraction)
 
             // Multiply it by the constant.
             .multiply(sBigReducedFraction);
 
+        ForkJoinPool fjp1 = new ForkJoinPool();
+
         // Run all the tests.
-        RunTimer.timeRun(() -> testFractionOperations1(fractionList, op),
-                         "testFractionOperations1()");
+        RunTimer.timeRun(() -> testApplyAllIter(fractionList, op, fjp1),
+                         "testApplyAllIter()");
+        System.out.println("applyAllIter() steal count = " 
+                           + fjp1.getStealCount());
 
         System.gc();
-        RunTimer.timeRun(() -> testFractionOperations2(fractionList, op),
-                         "testFractionOperations2()");
+        ForkJoinPool fjp2 = new ForkJoinPool();
+        RunTimer.timeRun(() -> testApplyAllSplitIndex(fractionList, op, fjp2),
+                         "testApplyAllSplitIndex()");
+        System.out.println("applyAllSplitIndex() steal count = " 
+                           + fjp2.getStealCount());
+
         System.gc();
-        RunTimer.timeRun(() -> testFractionOperations3(fractionList, op),
-                         "testFractionOperations3()");
+
+        ForkJoinPool fjp3 = new ForkJoinPool();
+        RunTimer.timeRun(() -> testApplyAllSplit(fractionList, op, fjp3),
+                         "testApplyallSplit()");
+        System.out.println("applyAllSplit() steal count = "
+                           + fjp3.getStealCount());
+
         System.gc();
-        RunTimer.timeRun(() -> testFractionOperations4(fractionList, op),
-                         "testFractionOperations4()");
+        ForkJoinPool fjp4 = new ForkJoinPool();
+        RunTimer.timeRun(() -> testInvokeAll(fractionList, op, fjp4),
+                         "testInvokeAll()");
+        System.out.println("invokeAll() steal count = "
+                           + fjp4.getStealCount());
 
         // Print the results of the tests.
         display(RunTimer.getTimingResults());
@@ -112,45 +127,49 @@ public class ex22 {
     /**
      * Test the applyAllIter() utility method.
      */
-    private static void testFractionOperations1(List<BigFraction> fractionList,
-                                                Function<BigFraction, BigFraction> op) {
+    private static void testApplyAllIter(List<BigFraction> fractionList,
+                                         Function<BigFraction, BigFraction> op,
+                                         ForkJoinPool fjp) {
         // Test big fraction operations using applyAllIter().
         applyAllIter(fractionList, 
                      op,
-                     ForkJoinPool.commonPool());
+                     fjp);
     }
 
     /**
      * Test the applyAllSplitIndex() utility method.
      */
-    private static void testFractionOperations2(List<BigFraction> fractionList,
-                                                Function<BigFraction, BigFraction> op) {    
+    private static void testApplyAllSplitIndex(List<BigFraction> fractionList,
+                                               Function<BigFraction, BigFraction> op,
+                                               ForkJoinPool fjp) {
         // Test big fraction operations using applyAllSplitIndex().
         applyAllSplitIndex(fractionList,
                            op,
-                           ForkJoinPool.commonPool());
+                           fjp);
     }
 
     /**
      * Test the applyAllSplit() utility method.
      */
-    private static void testFractionOperations3(List<BigFraction> fractionList,
-                                                Function<BigFraction, BigFraction> op) {    
+    private static void testApplyAllSplit(List<BigFraction> fractionList,
+                                          Function<BigFraction, BigFraction> op,
+                                          ForkJoinPool fjp) {
         // Test big fraction operations using applyAllSplit().
         applyAllSplit(fractionList,
                       op,
-                      ForkJoinPool.commonPool());
+                      fjp);
     }
 
     /**
      * Test the invokeAll() utility method.
      */
-    private static void testFractionOperations4(List<BigFraction> fractionList,
-                                                Function<BigFraction, BigFraction> op) {    
+    private static void testInvokeAll(List<BigFraction> fractionList,
+                                      Function<BigFraction, BigFraction> op,
+                                      ForkJoinPool fjp) {
         // Test big fraction operations using invokeAll()
         invokeAll(fractionList,
                   op,
-                  ForkJoinPool.commonPool());
+                  fjp);
     }
 
     /**
