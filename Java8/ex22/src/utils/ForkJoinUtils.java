@@ -17,7 +17,7 @@ public class ForkJoinUtils {
 
     /**
      * Apply {@code op} to all items in the {@code list} using
-     * iterative calls to fork-join pool methods.
+     * iterative calls to fork-join methods.
      */
     public static <T> List<T> applyAllIter(List<T> list,
                                            Function<T, T> op,
@@ -63,7 +63,7 @@ public class ForkJoinUtils {
 
     /**
      * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join pool methods.
+     * recursively splitting up calls to fork-join methods.
      */
     public static <T> List<T> applyAllSplitIndex(List<T> list,
                                                  Function<T, T> op,
@@ -138,7 +138,7 @@ public class ForkJoinUtils {
 
     /**
      * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join pool methods.
+     * recursively splitting up calls to fork-join methods.
      */
     public static <T> List<T> applyAllSplit(List<T> list,
                                             Function<T, T> op,
