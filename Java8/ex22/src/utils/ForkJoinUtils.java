@@ -74,7 +74,7 @@ public class ForkJoinUtils {
 
         // Add all the ops to the list.
         for (T t : list)
-            tasks.add(() -> { return op.apply(t);});
+            tasks.add(() -> op.apply(t));
 
 
         // Create a list of elements from the list of futures and
@@ -109,13 +109,13 @@ public class ForkJoinUtils {
             /**
              * A copy of a portion of the list.
              */
-            private List<T> mList;
+            private List<T> mSubList;
 
             /**
              * Constructor initializes the field.
              */
             private SplitterTask(List<T> list) {
-                mList = list;
+                mSubList = list;
             }
 
             /**
@@ -124,32 +124,32 @@ public class ForkJoinUtils {
              */
             protected List<T> compute() {
                 // The base case for the recursion.
-                if (mList.size() <= 1) {
+                if (mSubList.size() <= 1) {
                     // Create a new list to hold the result (if any).
                     List<T> result = new ArrayList<>();
 
-                    // Iterate through the list.
-                    for (T t : mList)
+                    // Iterate through the sublist.
+                    for (T t : mSubList)
                         // Apply the operation and add the result to
-                        // the list.
+                        // the result list.
                         result.add(op.apply(t));
 
-                    // Return the result.
+                    // Return the result list.
                     return result;
                 } else {
-                    // Determine the midpoint of the list.
-                    int mid = mList.size() / 2;
+                    // Determine the midpoint of the sublist.
+                    int mid = mSubList.size() / 2;
 
                     // Create a new SplitterTask to handle the
-                    // left-hand side of the list and fork it.
+                    // left-hand side of the sublist and fork it.
                     ForkJoinTask<List<T>> leftTask = 
-                        new SplitterTask(mList.subList(0,
+                        new SplitterTask(mSubList.subList(0,
                                                        mid))
                         .fork();
                                          
-                    // Update mList to handle the right-hand side of
-                    // the list.
-                    mList = mList.subList(mid, mList.size());
+                    // Update mSubList to handle the right-hand side of
+                    // the sublist.
+                    mSubList = mSubList.subList(mid, mSubList.size());
 
                     // Compute the right-hand side.
                     List<T> rightResult = compute();
@@ -188,7 +188,7 @@ public class ForkJoinUtils {
          * copying.
          */
         class SplitterTask 
-              extends RecursiveTask<Void> {
+              extends RecursiveAction {
             /**
              * The lo index in this partition.
              */
@@ -211,7 +211,7 @@ public class ForkJoinUtils {
              * Recursively perform the computations in parallel using
              * the fork-join pool.
              */
-            protected Void compute() {
+            protected void compute() {
                 // Find the midpoint.
                 int mid = (mLo + mHi) >>> 1;
 
@@ -221,22 +221,19 @@ public class ForkJoinUtils {
                     // Update the mLo location with the results of
                     // applying the operation.
                     results[mLo] = op.apply(list.get(mLo));
-                    return null;
                 } else {
                     // Create a new SplitterTask to handle the
                     // left-hand side of the list and fork it.
-                    ForkJoinTask<Void> leftTask =
+                    RecursiveAction leftTask =
                         new SplitterTask(mLo, 
-                                         mLo = mid)
-                        .fork();
+                                         mLo = mid);
+                    leftTask.fork();
 
                     // Compute the right-hand side.
                     compute();
                     
                     // Join with the left-hand side.
                     leftTask.join();
-                    
-                    return null;
                 }
             }
         }

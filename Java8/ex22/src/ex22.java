@@ -44,20 +44,30 @@ public class ex22 {
     public static void main (String[] argv) throws IOException {
         display("Starting ForkJoinTest");
 
-        // Generate a list of sMAX_FRACTIONS random unreduced BigFractions.
+        // A list of random unreduced BigFractions.
         List<BigFraction> fractionList = Stream
+            // Generate a list of random unreduced BigFractions
             .generate(() -> makeBigFraction(new Random(), false))
+
+            // Limit the size of the list.
             .limit(sMAX_FRACTIONS)
+
+            // Collect all the BigFractions into an ArrayList.
             .collect(toList());
 
         // Define a BigFraction operation to run.
         Function<BigFraction, BigFraction> op =
             (bigFraction) -> BigFraction
+            // Reduce the big fraction.
             .reduce(bigFraction)
+
+            // Multiply it by the constant.
             .multiply(sBigReducedFraction);
 
+        // Run all the tests.
         RunTimer.timeRun(() -> testFractionOperations1(fractionList, op),
                          "testFractionOperations1()");
+
         System.gc();
         RunTimer.timeRun(() -> testFractionOperations2(fractionList, op),
                          "testFractionOperations2()");
@@ -75,25 +85,50 @@ public class ex22 {
     }
 
     /**
+     * A factory method that returns a large random BigFraction whose
+     * creation is performed synchronously.
+     *
+     * @param random A random number generator
+     * @param reduced A flag indicating whether to reduce the fraction or not
+     * @return A large random BigFraction
+     */
+    private static BigFraction makeBigFraction(Random random,
+                                               boolean reduced) {
+        // Create a large random big integer.
+        BigInteger numerator =
+                new BigInteger(150000, random);
+
+        // Create a denominator that's between 1 to 10 times smaller
+        // than the numerator.
+        BigInteger denominator =
+                numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
+
+        // Return a big fraction.
+        return BigFraction.valueOf(numerator,
+                                   denominator,
+                                   reduced);
+    }
+
+    /**
      * Test the applyAllIter() utility method.
      */
     private static void testFractionOperations1(List<BigFraction> fractionList,
                                                 Function<BigFraction, BigFraction> op) {
-        // Test big fraction operations using applyAppIter().
+        // Test big fraction operations using applyAllIter().
         applyAllIter(fractionList, 
                      op,
                      ForkJoinPool.commonPool());
     }
 
     /**
-     * Test the invokeAll() utility method.
+     * Test the applyAllSplitIndex() utility method.
      */
     private static void testFractionOperations2(List<BigFraction> fractionList,
                                                 Function<BigFraction, BigFraction> op) {    
-        // Test big fraction operations using invokeAll()
-        invokeAll(fractionList,
-                  op,
-                  ForkJoinPool.commonPool());
+        // Test big fraction operations using applyAllSplitIndex().
+        applyAllSplitIndex(fractionList,
+                           op,
+                           ForkJoinPool.commonPool());
     }
 
     /**
@@ -108,39 +143,14 @@ public class ex22 {
     }
 
     /**
-     * Test the applyAllSplitIndex() utility method.
+     * Test the invokeAll() utility method.
      */
     private static void testFractionOperations4(List<BigFraction> fractionList,
                                                 Function<BigFraction, BigFraction> op) {    
-        // Test big fraction operations using applyAllSplitIndex().
-        applyAllSplitIndex(fractionList,
-                           op,
-                           ForkJoinPool.commonPool());
-    }
-
-    /**
-     * A factory method that returns a large random BigFraction whose
-     * creation is performed synchronously.
-     *
-     * @param random A random number generator
-     * @param reduced A flag indicating whether to reduce the fraction or not
-     * @return A large random BigFraction
-     */
-    private static BigFraction makeBigFraction(Random random,
-                                               boolean reduced) {
-        // Create a large random big integer.
-        BigInteger numerator =
-            new BigInteger(150000, random);
-
-        // Create a denominator that's between 1 to 10 times smaller
-        // than the numerator.
-        BigInteger denominator =
-            numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
-
-        // Return a big fraction.
-        return BigFraction.valueOf(numerator,
-                                   denominator,
-                                   reduced);
+        // Test big fraction operations using invokeAll()
+        invokeAll(fractionList,
+                  op,
+                  ForkJoinPool.commonPool());
     }
 
     /**
