@@ -150,15 +150,15 @@ public class ForkJoinUtils {
         class SplitterTask
               extends RecursiveTask<List<T>> {
             /**
-             * A copy of a portion of the list.
+             * A reference to a portion of the original list.
              */
-            private List<T> mSubList;
+            private List<T> mList;
 
             /**
              * Constructor initializes the field.
              */
             private SplitterTask(List<T> list) {
-                mSubList = list;
+                mList = list;
             }
 
             /**
@@ -167,12 +167,12 @@ public class ForkJoinUtils {
              */
             protected List<T> compute() {
                 // The base case for the recursion.
-                if (mSubList.size() <= 1) {
+                if (mList.size() <= 1) {
                     // Create a new list to hold the result (if any).
                     List<T> result = new ArrayList<>();
 
-                    // Iterate through the sublist.
-                    for (T t : mSubList)
+                    // Iterate through the list.
+                    for (T t : mList)
                         // Apply the operation and add the result to
                         // the result list.
                         result.add(op.apply(t));
@@ -180,19 +180,19 @@ public class ForkJoinUtils {
                     // Return the result list.
                     return result;
                 } else {
-                    // Determine the midpoint of the sublist.
-                    int mid = mSubList.size() / 2;
+                    // Determine the midpoint of the list.
+                    int mid = mList.size() / 2;
 
                     // Create a new SplitterTask to handle the
-                    // left-hand side of the sublist and fork it.
+                    // left-hand side of the list and fork it.
                     ForkJoinTask<List<T>> leftTask = 
-                        new SplitterTask(mSubList.subList(0,
+                        new SplitterTask(mList.subList(0,
                                                        mid))
                         .fork();
                                          
-                    // Update mSubList to handle the right-hand side of
-                    // the sublist.
-                    mSubList = mSubList.subList(mid, mSubList.size());
+                    // Update mList to handle the right-hand side of
+                    // the list.
+                    mList = mList.subList(mid, mList.size());
 
                     // Compute the right-hand side.
                     List<T> rightResult = compute();
