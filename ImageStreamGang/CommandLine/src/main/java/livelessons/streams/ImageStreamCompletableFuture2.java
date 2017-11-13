@@ -46,9 +46,12 @@ public class ImageStreamCompletableFuture2
             // stream.
             .stream()
 
-            // Use filter() to ignore URLs that are already cached locally,
-            // i.e., only download non-cached images.
-            .filter(StreamsUtils.not(this::urlCached))
+            // Use filter() to ignore URLs that are already cached
+            // locally, i.e., only download non-cached images.
+            .map(this::checkUrlCachedAsync)
+
+            // Eliminate any future that's null (i.e., url already cached).
+            .filter(future -> future != mNullFuture)
 
             // Use map() to transform each URL to a completable future
             // to an image (i.e., asynchronously download each image
@@ -112,8 +115,10 @@ public class ImageStreamCompletableFuture2
      * return a CompletableFuture that completes when the image
      * finishes downloading.
      */
-    private CompletableFuture<Image> downloadImageAsync(URL url) {
+    private CompletableFuture<Image> downloadImageAsync
+            (CompletableFuture<URL> urlFuture) {
         // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> blockingDownload(url));
+        return urlFuture
+            .thenApplyAsync(this::blockingDownload);
     }
 }

@@ -25,12 +25,6 @@ import livelessons.filters.FilterDecoratorWithImage;
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
     /**
-     * Used to represent a null future.
-     */
-    static CompletableFuture<URL> mNullFuture =
-        CompletableFuture.completedFuture(null);
-
-    /**
      * Constructor initializes the superclass and data members.
      */
     public ImageStreamCompletableFuture1(Filter[] filters,
@@ -91,21 +85,6 @@ public class ImageStreamCompletableFuture1
     }
 
     /**
-     * Asynchronously check if {@code url} is already cached.
-     *
-     * @param url The URL to check
-     * @return A completable future to null if already cached, else a non-null
-     * completable future to the {@code url} if it's not already cached
-     */
-    private CompletableFuture<URL> checkUrlCachedAsync(URL url) {
-        return CompletableFuture
-                .supplyAsync(() -> urlCached(url) ? null : url)
-                .thenCompose(u -> (u == null)
-                        ? mNullFuture
-                        : CompletableFuture.completedFuture(u));
-    }
-
-    /**
      * Asynchronously download an image from the @a url parameter and
      * return a CompletableFuture that completes when the image
      * finishes downloading.
@@ -113,9 +92,9 @@ public class ImageStreamCompletableFuture1
     private CompletableFuture<Image> downloadImageAsync
             (CompletableFuture<URL> urlFuture) {
         // Asynchronously download an Image from the url parameter.
-            return urlFuture
-                .thenApplyAsync(this::downloadImage,
-                                getExecutor());
+        return urlFuture
+            .thenApplyAsync(this::downloadImage,
+                            getExecutor());
     }
 
     /**
