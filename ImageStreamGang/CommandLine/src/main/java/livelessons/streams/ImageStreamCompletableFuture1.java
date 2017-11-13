@@ -7,7 +7,9 @@ import static java.util.stream.Collectors.toList;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import livelessons.utils.Image;
@@ -22,6 +24,12 @@ import livelessons.filters.FilterDecoratorWithImage;
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
+    /**
+     * Used to represent a null future.
+     */
+    static CompletableFuture<URL> mNullFuture =
+        CompletableFuture.completedFuture(null);
+
     /**
      * Constructor initializes the superclass and data members.
      */
@@ -47,7 +55,10 @@ public class ImageStreamCompletableFuture1
 
             // Use filter() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
-            .filter(StreamsUtils.not(this::urlCached))
+            .map(this::checkUrlCachedAsync)
+
+            // Eliminate any future that's null (i.e., url already cached).
+            .filter(future -> future != mNullFuture)
 
             // Use map() to transform each URL to a completable future
             // to an image (i.e., asynchronously download each image
@@ -77,6 +88,34 @@ public class ImageStreamCompletableFuture1
                            + " image(s) from "
                            + urls.size() 
                            + " urls is complete");
+    }
+
+    /**
+     * Asynchronously check if {@code url} is already cached.
+     *
+     * @param url The URL to check
+     * @return A completable future to null if already cached, else a non-null
+     * completable future to the {@code url} if it's not already cached
+     */
+    private CompletableFuture<URL> checkUrlCachedAsync(URL url) {
+        return CompletableFuture
+                .supplyAsync(() -> urlCached(url) ? null : url)
+                .thenCompose(u -> (u == null)
+                        ? mNullFuture
+                        : CompletableFuture.completedFuture(u));
+    }
+
+    /**
+     * Asynchronously download an image from the @a url parameter and
+     * return a CompletableFuture that completes when the image
+     * finishes downloading.
+     */
+    private CompletableFuture<Image> downloadImageAsync
+            (CompletableFuture<URL> urlFuture) {
+        // Asynchronously download an Image from the url parameter.
+            return urlFuture
+                .thenApplyAsync(this::downloadImage,
+                                getExecutor());
     }
 
     /**
@@ -110,16 +149,5 @@ public class ImageStreamCompletableFuture1
                  // lambda expression.
                  filterFuture.thenApplyAsync(FilterDecoratorWithImage::run,
                                              getExecutor()));
-    }
-
-    /**
-     * Asynchronously download an image from the @a url parameter and
-     * return a CompletableFuture that completes when the image
-     * finishes downloading.
-     */
-    private CompletableFuture<Image> downloadImageAsync(URL url) {
-        // Asynchronously download an Image from the url parameter.
-        return CompletableFuture.supplyAsync(() -> downloadImage(url),
-                                             getExecutor());
     }
 }

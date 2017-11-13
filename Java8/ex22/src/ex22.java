@@ -82,7 +82,7 @@ public class ex22 {
 
         ForkJoinPool fjp3 = new ForkJoinPool();
         RunTimer.timeRun(() -> testApplyAllSplit(fractionList, op, fjp3),
-                         "testApplyallSplit()");
+                         "testApplyAllSplit()");
         System.out.println("applyAllSplit() steal count = "
                            + fjp3.getStealCount());
 
@@ -92,6 +92,13 @@ public class ex22 {
                          "testInvokeAll()");
         System.out.println("invokeAll() steal count = "
                            + fjp4.getStealCount());
+
+        System.gc();
+        ForkJoinPool fjp5 = new ForkJoinPool();
+        RunTimer.timeRun(() -> testApplyAllSplitIndexEx(fractionList, op, fjp5),
+                "testApplyAllSplitIndexEx()");
+        System.out.println("applyAllSplitIndexEx() steal count = "
+                + fjp5.getStealCount());
 
         // Print the results of the tests.
         display(RunTimer.getTimingResults());
@@ -146,6 +153,20 @@ public class ex22 {
         applyAllSplitIndex(fractionList,
                            op,
                            fjp);
+    }
+
+    /**
+     * Test the applyAllSplitIndex() utility method.
+     */
+    private static void testApplyAllSplitIndexEx(List<BigFraction> fractionList,
+                                                 Function<BigFraction, BigFraction> op,
+                                                 ForkJoinPool fjp) {
+        BigFraction[] results = new BigFraction[fractionList.size()];
+        // Test big fraction operations using applyAllSplitIndex().
+        applyAllSplitIndexEx(fractionList,
+                op,
+                fjp,
+                results);
     }
 
     /**

@@ -140,6 +140,75 @@ public class ForkJoinUtils {
      * Apply {@code op} to all items in the {@code list} by
      * recursively splitting up calls to fork-join methods.
      */
+    public static <T> void applyAllSplitIndexEx(List<T> list,
+                                                Function<T, T> op,
+                                                ForkJoinPool forkJoinPool,
+                                                T[] results) {
+        /**
+         * This task partitions list recursively and runs each half in
+         * a ForkJoinTask.  It uses indices to avoid the overhead of
+         * copying.
+         */
+        class SplitterTask
+                extends RecursiveAction {
+            /**
+             * The lo index in this partition.
+             */
+            private int mLo;
+
+            /**
+             * The hi index in this partition.
+             */
+            private int mHi;
+
+            /**
+             * Constructor initializes the fields.
+             */
+            private SplitterTask(int lo, int hi) {
+                mLo = lo;
+                mHi = hi;
+            }
+
+            /**
+             * Recursively perform the computations in parallel using
+             * the fork-join pool.
+             */
+            protected void compute() {
+                // Find the midpoint.
+                int mid = (mLo + mHi) >>> 1;
+
+                // If there's just a single element then apply
+                // the operation.
+                if (mLo == mid) {
+                    // Update the mLo location with the results of
+                    // applying the operation.
+                    results[mLo] = op.apply(list.get(mLo));
+                } else {
+                    // Create a new SplitterTask to handle the
+                    // left-hand side of the list and fork it.
+                    ForkJoinTask<Void> leftTask =
+                            new SplitterTask(mLo, mLo = mid)
+                                    .fork();
+
+                    // Compute the right-hand side in parallel with
+                    // the left-hand side.
+                    compute();
+
+                    // Join with the left-hand side.  This is a
+                    // synchronization point.
+                    leftTask.join();
+                }
+            }
+        }
+
+        // Invoke a new SplitterTask in the fork-join pool.
+        forkJoinPool.invoke(new SplitterTask(0, list.size()));
+    }
+
+    /**
+     * Apply {@code op} to all items in the {@code list} by
+     * recursively splitting up calls to fork-join methods.
+     */
     public static <T> List<T> applyAllSplit(List<T> list,
                                             Function<T, T> op,
                                             ForkJoinPool forkJoinPool) {
