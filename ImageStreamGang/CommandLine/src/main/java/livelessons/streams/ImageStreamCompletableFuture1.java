@@ -42,7 +42,7 @@ public class ImageStreamCompletableFuture1
         List<URL> urls = getInput();
 
         // Create a list of completable futures to filtered images.
-        List<CompletableFuture<Image>> futureList = urls
+        Stream<CompletableFuture<Image>> futureStream = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -63,26 +63,27 @@ public class ImageStreamCompletableFuture1
             // Use flatMap() to create a stream containing completable
             // futures to multiple filtered/stored versions of each
             // image.
-            .flatMap(this::applyFiltersAsync)
+            .flatMap(this::applyFiltersAsync);
 
-            // Terminate the stream and collect the results into
-            // list of completable futures to images.
-            .collect(toList());
+        StreamsUtils
+            // Create a CompletableFuture that can be used to wait for
+            // all futures associated with futureStream to complete.
+            .joinAllStream(futureStream)
 
-        // Create a CompletableFuture that can be used to wait for all
-        // operations associated with the futures to complete.
-        CompletableFuture<List<Image>> allImagesDone =
-                StreamsUtils.joinAll(futureList);
+            // This completion stage method is called after the future
+            // from the previous stage completes.
+            .thenAccept(resultsStream ->
+                        // Print the results.
+                        System.out.println(TAG
+                                           + ": processing of "
+                                           + resultsStream.count()
+                                           + " image(s) from "
+                                           + urls.size() 
+                                           + " urls is complete"))
 
-        // Print the results.
-        System.out.println(TAG
-                           + ": processing of "
-                           // This call blocks until all the images
-                           // are downloaded, processed, and stored.
-                           + allImagesDone.join().size()
-                           + " image(s) from "
-                           + urls.size() 
-                           + " urls is complete");
+            // Wait until all the images have been downloaded,
+            // processed, and stored.
+            .join();
     }
 
     /**

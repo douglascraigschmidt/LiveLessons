@@ -1,18 +1,15 @@
 package livelessons.streams;
 
 import livelessons.filters.Filter;
-import java.net.URL;
-import static java.util.stream.Collectors.toList;
+import livelessons.utils.FuturesCollectorStream;
+import livelessons.utils.Image;
 
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import livelessons.utils.Image;
-import livelessons.utils.StreamsUtils;
-import livelessons.filters.FilterDecoratorWithImage;
-import static java.util.stream.Collectors.summingInt;
-import static livelessons.utils.FuturesCollector.toFuture;
+import static livelessons.utils.FuturesCollectorStream.toFuture;
 
 /**
  * This is another asynchronous implementation strategy that
@@ -39,9 +36,7 @@ public class ImageStreamCompletableFuture2
         // Get the input URLs.
         List<URL> urls = getInput();
 
-        // A completable futures to the number of images downloaded and
-        // filtered.
-        CompletableFuture<Integer> imagesProcessed = urls
+        urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -71,19 +66,17 @@ public class ImageStreamCompletableFuture2
 
             // When all image processing is done return a count
             // of the number of images downloaded/filtered.
-            .thenApply(list -> list
-                       // Convert list to stream.
-                       .stream()
+            .thenApply(stream -> 
+                       stream.mapToInt(List::size).sum())
 
-                       // Sum up the counts of all the processed images.
-                       .collect(summingInt(List::size)));
-
-        System.out.println(TAG
+            .thenAccept(imagesProcessed ->
+                        System.out.println(TAG
                            + ": processing of "
-                           + imagesProcessed.join()
+                           + imagesProcessed
                            + " image(s) from "
                            + urls.size()
-                           + " urls is complete");
+                           + " urls is complete"))
+            .join();
     }
 
     /**
