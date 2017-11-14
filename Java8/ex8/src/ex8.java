@@ -5,10 +5,15 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static utils.FuturesCollector.toFuture;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
@@ -640,7 +645,7 @@ public class ex8 {
             // Trigger intermediate operation processing and return a
             // future to a list of big fractions that are being
             // reduced and multiplied asynchronously.
-            .collect(FuturesCollector.toFuture())
+            .collect(toFuture())
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
@@ -685,7 +690,7 @@ public class ex8 {
             // Trigger intermediate operation processing and return a
             // future to a list of big fractions that are being
             // reduced and multiplied asynchronously.
-            .collect(FuturesCollector.toFuture())
+            .collect(toFuture())
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.

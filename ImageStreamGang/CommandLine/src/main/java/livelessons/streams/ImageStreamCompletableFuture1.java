@@ -117,7 +117,7 @@ public class ImageStreamCompletableFuture1
     }
 
     /**
-     * Apply filters asynchronously to the {@code a imageFuture} after
+     * Asynchronously apply filters to the {@code imageFuture} after
      * it finishes downloading and store the results in output files
      * on the local computer.
      *

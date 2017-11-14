@@ -30,10 +30,17 @@ abstract class ImageStreamCompletableFutureBase
     }
     
     /**
-     * Returns true if the joined {@code future} is nonNull, else false
+     * @returns True if the joined {@code urlFuture} is nonNull, else false
      */
-    boolean nonNull(CompletableFuture<URL> future) {
-        return future.thenApply(Objects::nonNull).join();
+    boolean nonNull(CompletableFuture<URL> urlFuture) {
+        return urlFuture
+            // After urlFuture completes check if the URL value is
+            // null (already cached) or non-null (not already cached).
+            .thenApply(Objects::nonNull)
+
+            // After thenApply() runs then join() with the result,
+            // which should not block.
+            .join();
     }
 
     /**
