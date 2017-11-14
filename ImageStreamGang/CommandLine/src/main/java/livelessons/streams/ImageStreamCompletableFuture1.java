@@ -53,7 +53,7 @@ public class ImageStreamCompletableFuture1
 
             // Use filter() to eliminate any future that's null (i.e.,
             // url already cached).
-            .filter(future -> future != mNullFuture)
+            .filter(future -> future.join() != null)
 
             // Use map() to transform each URL to a completable future
             // to an image (i.e., asynchronously download each image

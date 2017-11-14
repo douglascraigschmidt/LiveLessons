@@ -17,12 +17,6 @@ import livelessons.utils.Image;
 public abstract class ImageStreamCompletableFutureBase
        extends ImageStreamGang {
     /**
-     * Used to represent a null future.
-     */
-    protected static CompletableFuture<URL> mNullFuture =
-        CompletableFuture.completedFuture(null);
-
-    /**
      * Constructor initializes the superclass.
      */
     public ImageStreamCompletableFutureBase(Filter[] filters,
@@ -41,14 +35,7 @@ public abstract class ImageStreamCompletableFutureBase
     protected CompletableFuture<URL> checkUrlCachedAsync(URL url) {
         return CompletableFuture
             // Asynchronously check if the URL is cached.
-            .supplyAsync(() -> urlCached(url) ? null : url)
-
-            // Return a completable future to null if url was already
-            // cached, else return a completable future to a non-null
-            // value if url is not already cached.
-            .thenCompose(u -> u == null
-                         ? mNullFuture
-                         : CompletableFuture.completedFuture(u));
+            .supplyAsync(() -> urlCached(url) ? null : url);
     }
 
     /**
