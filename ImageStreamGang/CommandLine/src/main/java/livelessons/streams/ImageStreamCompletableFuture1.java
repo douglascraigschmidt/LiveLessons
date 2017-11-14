@@ -52,7 +52,9 @@ public class ImageStreamCompletableFuture1
         // Get the input URLs.
         List<URL> urls = getInput();
 
-        urls
+        // A future to a stream of images that are being downloaded,
+        // filtered, and stored.
+        CompletableFuture<Stream<Image>> resultsFuture = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -77,18 +79,18 @@ public class ImageStreamCompletableFuture1
             // Trigger intermediate processing and create a future
             // that can be used to wait for all operations associated
             // with the stream of futures to complete.
-            .collect(toFuture())
+            .collect(toFuture());
 
-            // This completion stage method is called after the future
-            // from the previous stage completes, which occurs when
-            // all the futures in the stream of streams complete.
+        resultsFuture
+            // thenAccept() is called when all the futures in the
+            // stream complete their processing.
             .thenAccept(resultsStream -> System.out
                         .println(TAG
                                  + ": processing of "
-                                + resultsStream
-                                // Count the number of elements in the
-                                // results stream.
-                                .count()
+                                 + resultsStream
+                                 // Count the number of elements in the
+                                 // results stream.
+                                 .count()
                                  + " image(s) from "
                                  + urls.size()
                                  + " urls is complete"))
