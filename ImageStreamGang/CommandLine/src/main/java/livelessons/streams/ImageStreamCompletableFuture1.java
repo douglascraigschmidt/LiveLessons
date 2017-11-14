@@ -2,28 +2,24 @@ package livelessons.streams;
 
 import livelessons.filters.Filter;
 import livelessons.utils.Image;
-import livelessons.utils.StreamsUtils;
 
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 
+import static livelessons.utils.FuturesCollectorStream.toFuture;
+
 /**
- * This asynchronous implementation strategy customizes the
- * ImageStreamCompletableFutureBase super class to download, process,
- * and store images asynchronously in a designated executor's thread
- * pool.
+ * This is another asynchronous implementation strategy that
+ * customizes the ImageStreamCompletableFutureBase super class to
+ * download, process, and store images asynchronously in the common
+ * fork-join pool.
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {
-    /**
-     * Maximum number of threads in a fixed-size thread pool.
-     */
-    private final int sMAX_THREADS = 100;
-
     /**
      * Constructor initializes the superclass and data members.
      */
@@ -34,20 +30,14 @@ public class ImageStreamCompletableFuture1
     }
 
     /**
-     * A hook method that's also a template method.  It sets the
-     * executor to a fixed-size thread pool and calls up to the
+     * A hook method that's also a template method.  It assigns the
+     * executor to the common fork-join pool and calls up to the
      * superclass start the processing.
      */
     @Override
     protected void initiateStream() {
-        // The thread pool size is the smaller of (1) the number of
-        // filters times the number of images to download and (2)
-        // sMAX_THREADS (which prevents allocating excessive threads).
-        int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
-                sMAX_THREADS);
-
-        // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
+        // Set the executor to the common fork-join pool.
+        setExecutor(ForkJoinPool.commonPool());
 
         // Call up to superclass to start the processing.
         super.initiateStream();
@@ -62,8 +52,7 @@ public class ImageStreamCompletableFuture1
         // Get the input URLs.
         List<URL> urls = getInput();
 
-        // Create a stream of completable futures to filtered images.
-        Stream<CompletableFuture<Image>> futureStream = urls
+        urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -72,8 +61,8 @@ public class ImageStreamCompletableFuture1
             // locally, i.e., only download non-cached images.
             .map(this::checkUrlCachedAsync)
 
-            // Use map() to ignore URLs that are already cached
-            // locally, i.e., only download non-cached images.
+            // Use filter() to call nonNull(), which eliminates any
+            // future that's null (i.e., url already cached).
             .filter(this::nonNull)
 
             // Use map() to call downloadImageAsync(), which
@@ -81,34 +70,48 @@ public class ImageStreamCompletableFuture1
             // (i.e., asynchronously download each image via its URL).
             .map(this::downloadImageAsync)
 
-            // Use flatMap() to call applyFiltersAsync(), which
-            // creates a stream of completable futures to multiple
-            // filtered/stored versions of each image.
-            .flatMap(this::applyFiltersAsync);
+            // Use flatMap() to call applyFiltersAsync(), which returns a
+            // future to a stream of filtered images.
+            .flatMap(this::applyFiltersAsync)
 
-        StreamsUtils
-            // Create a CompletableFuture that can be used to wait for
-            // all futures associated with futureStream to complete.
-            .joinAllStream(futureStream)
+            // Trigger intermediate processing and create a future
+            // that can be used to wait for all operations associated
+            // with the stream of futures to complete.
+            .collect(toFuture())
 
             // This completion stage method is called after the future
             // from the previous stage completes, which occurs when
-            // all the futures in the stream complete.
+            // all the futures in the stream of streams complete.
             .thenAccept(resultsStream -> System.out
-                        // Print the results.
                         .println(TAG
-                                + ": processing of "
+                                 + ": processing of "
                                 + resultsStream
                                 // Count the number of elements in the
                                 // results stream.
                                 .count()
-                                + " image(s) from "
-                                + urls.size() 
-                                + " urls is complete"))
+                                 + " image(s) from "
+                                 + urls.size()
+                                 + " urls is complete"))
 
             // Wait until all the images have been downloaded,
             // processed, and stored.
             .join();
+    }
+
+    /**
+     * Asynchronously download an image from the {@code urlFuture} parameter.
+     *
+     * @param urlFuture A future the URL to download
+     * @return A future that completes when the image finishes downloading
+     */
+    CompletableFuture<Image> downloadImageAsync(CompletableFuture<URL> urlFuture) {
+        // Return a future that completes when the image finishes
+        // downloading.
+        return urlFuture
+            // Use the executor to asynchronously download an image
+            // when urlFuture completes.
+            .thenApplyAsync(this::blockingDownload,
+                            getExecutor());
     }
 
     /**

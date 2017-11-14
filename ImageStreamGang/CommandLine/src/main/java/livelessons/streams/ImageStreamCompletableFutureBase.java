@@ -48,20 +48,4 @@ abstract class ImageStreamCompletableFutureBase
             // Asynchronously check if the URL is cached.
             .supplyAsync(() -> urlCached(url) ? null : url);
     }
-
-    /**
-     * Asynchronously download an image from the {@code urlFuture} parameter.
-     *
-     * @param urlFuture A future the URL to download
-     * @return A future that completes when the image finishes downloading
-     */
-    CompletableFuture<Image> downloadImageAsync(CompletableFuture<URL> urlFuture) {
-        // Return a future that completes when the image finishes
-        // downloading.
-        return urlFuture
-            // Use the executor to asynchronously download an image
-            // when urlFuture completes.
-            .thenApplyAsync(this::blockingDownload,
-                            getExecutor());
-    }
 }
