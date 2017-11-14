@@ -23,6 +23,13 @@ public abstract class ImageStreamCompletableFutureBase
                                             Iterator<List<URL>> urlListIterator) {
         super(filters, urlListIterator);
     }
+    
+    /**
+     * Returns true if the joined {@code future} is nonNull, else false
+     */
+    protected boolean nonNull(CompletableFuture<URL> future) {
+        return future.join() != null;
+    }
 
     /**
      * Asynchronously check if {@code url} is already cached.
