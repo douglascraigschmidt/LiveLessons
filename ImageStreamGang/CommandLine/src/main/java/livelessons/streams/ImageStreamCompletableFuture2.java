@@ -101,31 +101,23 @@ public class ImageStreamCompletableFuture2
                         .map(this::applyFiltersAsync);
 
                     StreamsUtils
-                        // Create a future that can be used to wait
-                        // for all futures associated with
-                        // futureStream to complete.
+                        // Create a future that is used to wait for
+                        // all futures in futureStream to complete.
                         .joinAllStream(futureStream)
 
                         // thenAccept() is called when all the futures
                         // in the stream complete their processing.
-                        .thenAccept(resultsStream -> System.out.println
-                                    (TAG
-                                     + ": processing of "
-                                     + resultsStream
-                                     // Flatten the stream of streams.
-                                     .flatMap(Function.identity())
-
-                                     // Count the number of elements
-                                     // in the flattened stream.
-                                     .count()
-                                     + " image(s) from "
-                                     + urls.size()
-                                     + " urls is complete"))
+                        .thenAccept(resultsStream ->
+                                    // Log the results.
+                                    logResults(resultsStream, urls.size()))
+                        
+                        // Wait until all images have been downloaded,
+                        // processed, and stored.
                         .join();
                 })
             
-            // Wait until all the images have been downloaded,
-            // processed, and stored.
+            // Wait until all images have been downloaded, processed,
+            // and stored.
             .join();
     }
 
@@ -179,5 +171,30 @@ public class ImageStreamCompletableFuture2
 
                          // Collect a stream of futures.
                          .collect(toFuture()));
+    }
+
+    /**
+     * Log the results.
+     * 
+     * @param resultsStream A stream of images that have been
+     * downloaded, processed, and stored
+     * @param urlsSize The number of URLs to download
+     */
+    private void logResults(Stream<Stream<Image>> resultsStream,
+                            int urlsSize) {
+        // Print the results to the log.
+        System.out
+            .println(TAG
+                     + ": processing of "
+                     + resultsStream
+                     // Flatten the stream of streams.
+                     .flatMap(Function.identity())
+
+                     // Count the number of elements in the flattened
+                     // stream.
+                     .count()
+                     + " image(s) from "
+                     + urlsSize
+                     + " urls is complete");
     }
 }

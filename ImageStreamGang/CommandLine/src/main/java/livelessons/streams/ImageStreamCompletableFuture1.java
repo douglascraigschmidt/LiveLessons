@@ -76,24 +76,11 @@ public class ImageStreamCompletableFuture1
             // with the stream of futures to complete.
             .collect(toFuture())
 
-            // This completion stage method is called after the future
-            // from the previous stage completes, which occurs when
-            // all the futures in the stream complete.
-            .thenAccept(resultsStream -> System.out.println
-                        // Print the results.
-                        (TAG
-                         + ": processing of "
-                         + resultsStream
-                         // Remove any null objects stemming from URLs
-                         // that were already cached.
-                         .filter(Objects::nonNull)
-
-                         // Count the number of elements in the
-                         // results stream.
-                         .count()
-                         + " image(s) from "
-                         + urls.size() 
-                         + " urls is complete"))
+            // thenAccept() is called when all the futures in the
+            // stream complete their processing.
+            .thenAccept(stream ->
+                        // Log the results.
+                        logResults(stream, urls.size()))
 
             // Wait until all the images have been downloaded,
             // processed, and stored.
@@ -149,5 +136,31 @@ public class ImageStreamCompletableFuture1
                                                                 image).run(),
                                  // Run in the common fork-join pool.
                                  getExecutor()));
+    }
+
+    /**
+     * Log the results.
+     * 
+     * @param resultsStream A stream of images that have been
+     * downloaded, processed, and stored
+     * @param urlsSize The number of URLs to download
+     */
+    private void logResults(Stream<Image> resultsStream,
+                            int urlsSize) {
+        // Print the results to the log.
+        System.out
+            .println(TAG
+                     + ": processing of "
+                     + resultsStream
+                     // Remove any null objects stemming from URLs
+                     // that were already cached.
+                     .filter(Objects::nonNull)
+
+                     // Count the number of elements in the results
+                     // stream.
+                     .count()
+                     + " image(s) from "
+                     + urlsSize
+                     + " urls is complete");
     }
 }
