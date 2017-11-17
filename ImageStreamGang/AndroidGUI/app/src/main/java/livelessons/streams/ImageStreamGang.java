@@ -44,11 +44,6 @@ public abstract class ImageStreamGang
     protected List<Filter> mFilters;
 
     /**
-     * Maximum number of threads in a fixed-size thread pool.
-     */
-    private final int sMAX_THREADS = 100;
-
-    /**
      * Constructor initializes the class and fields.
      */
     public ImageStreamGang(Filter[] filters,
@@ -74,15 +69,6 @@ public abstract class ImageStreamGang
      */
     @Override
     protected void initiateStream() {
-        // The thread pool size is the smaller of (1) the number of
-        // filters times the number of images to download and (2)
-        // sMAX_THREADS (which prevents allocating excessive threads).
-        int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
-                                      sMAX_THREADS);
-
-        // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
-
         // Start timing the test run.
         startTiming();
 
