@@ -77,7 +77,7 @@ public class ImageStreamCompletableFuture1
             .collect(toFuture())
 
             // thenAccept() is called when all the futures in the
-            // stream complete their processing.
+            // stream complete their asynchronous processing.
             .thenAccept(stream ->
                         // Log the results.
                         logResults(stream, urls.size()))
@@ -104,7 +104,7 @@ public class ImageStreamCompletableFuture1
                             // Ignore null URLs.
                             ? null
                             // Download non-null URLs.
-                            : downloadImage(url),
+                            : blockingDownload(url),
                             // Use the 
                             getExecutor());
     }

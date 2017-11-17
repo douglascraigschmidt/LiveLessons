@@ -133,7 +133,7 @@ public class ImageStreamCompletableFuture2
         return CompletableFuture
             // Use the executor to asynchronously download an image
             // when urlFuture completes.
-            .supplyAsync(() -> blockingDownload(url),
+            .supplyAsync(() -> downloadImage(url),
                          getExecutor());
     }
 
