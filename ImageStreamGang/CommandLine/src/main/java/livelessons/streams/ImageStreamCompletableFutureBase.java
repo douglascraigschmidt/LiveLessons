@@ -44,4 +44,27 @@ abstract class ImageStreamCompletableFutureBase
                          getExecutor());
             
     }
+
+
+    /**
+     * Log the results.
+     * 
+     * @param resultsStream A stream of images that have been
+     * downloaded, processed, and stored
+     * @param urlsSize The number of URLs to download
+     */
+    protected void logResults(Stream<Image> resultsStream,
+                              int urlsSize) {
+        // Print the results to the log.
+        System.out
+            .println(TAG
+                     + ": processing of "
+                     + resultsStream
+                     // Count the number of elements in the flattened
+                     // stream.
+                     .count()
+                     + " image(s) from "
+                     + urlsSize
+                     + " urls is complete");
+    }
 }

@@ -137,30 +137,4 @@ public class ImageStreamCompletableFuture1
                                  // Run in the common fork-join pool.
                                  getExecutor()));
     }
-
-    /**
-     * Log the results.
-     * 
-     * @param resultsStream A stream of images that have been
-     * downloaded, processed, and stored
-     * @param urlsSize The number of URLs to download
-     */
-    private void logResults(Stream<Image> resultsStream,
-                            int urlsSize) {
-        // Print the results to the log.
-        System.out
-            .println(TAG
-                     + ": processing of "
-                     + resultsStream
-                     // Remove any null objects stemming from URLs
-                     // that were already cached.
-                     .filter(Objects::nonNull)
-
-                     // Count the number of elements in the results
-                     // stream.
-                     .count()
-                     + " image(s) from "
-                     + urlsSize
-                     + " urls is complete");
-    }
 }
