@@ -102,4 +102,12 @@ Here's an overview of what's included:
   as HashSet) that do not in the context of various order-sensitive
   aggregate operations, such as limit() and distinct().
 
-. ex22 -- 
+. ex22 -- This example shows how to reduce and multiply big fractions
+  using the Java fork-join pool framework.
+
+. ex23 -- This example shows the difference between calling join() on
+  intermediate completable futures (which block and thus degrade
+  performance) vs. simply making one call to join() (and thus
+  enhancing greater parallelism).  These tests demonstrate why join()
+  shouldn't be used in a stream pipeline on a CompletableFuture that
+  hasn't completed since it may impede parallelism.

@@ -16,7 +16,9 @@ import static utils.FuturesCollectorStream.toFuture;
  * This example shows the difference between calling join() on
  * intermediate completable futures (which block and thus degrade
  * performance) vs. simply making one call to join() (and thus
- * enhancing greater parallelism).
+ * enhancing greater parallelism).  These tests demonstrate why join()
+ * shouldn't be used in a stream pipeline on a CompletableFuture that
+ * hasn't completed since it may impede parallelism.
  */
 public class ex23 {
     /**
@@ -93,8 +95,9 @@ public class ex23 {
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Filter out any null results.  The join() method causes
-            // the call to block.
+            // Filter out any null results.  join() causes the call to
+            // block, demonstrating the limitations of trying to use
+            // filter() in conjunction with completable futures.
             .filter(intFuture -> intFuture.thenApply(mAction).join() != null)
 
             // Trigger intermediate operations and return a future to
