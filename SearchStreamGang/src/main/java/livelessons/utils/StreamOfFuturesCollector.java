@@ -10,8 +10,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 /**
  * Implements a custom collector that converts a stream of
@@ -22,10 +21,10 @@ import static java.util.stream.Collectors.toList;
  * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
  * for more info.
  */
-public class FuturesCollector<T>
+public class StreamOfFuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                           List<CompletableFuture<T>>,
-                           CompletableFuture<List<T>>> {
+                 List<CompletableFuture<T>>,
+                 CompletableFuture<Stream<T>>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -74,7 +73,7 @@ public class FuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
+    public Function<List<CompletableFuture<T>>, CompletableFuture<Stream<T>>> finisher() {
         return futures
             -> CompletableFuture
             // Use CompletableFuture.allOf() to obtain a
@@ -92,10 +91,7 @@ public class FuturesCollector<T>
                        // Use map() to join() all completablefutures
                        // and yield objects of type T.  Note that
                        // join() should never block.
-                       .map(CompletableFuture::join)
-
-                       // Collect the results of type T into an array.
-                       .collect(toList()));
+                       .map(CompletableFuture::join));
     }
 
     /**
@@ -113,12 +109,12 @@ public class FuturesCollector<T>
     }
 
     /**
-     * This static factory method creates a new FuturesCollector.
+     * This static factory method creates a new StremaOfFuturesCollector.
      *
-     * @return A new FuturesCollector()
+     * @return A new StreamOfFuturesCollector()
      */
-    public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
+    public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<Stream<T>>>
         toFuture() {
-        return new FuturesCollector<>();
+        return new StreamOfFuturesCollector<>();
     }
 }

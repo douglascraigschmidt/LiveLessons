@@ -109,9 +109,9 @@ public class StreamOfFuturesCollector<T>
     }
 
     /**
-     * This static factory method creates a new FuturesCollector.
+     * This static factory method creates a new StreamOfFuturesCollector.
      *
-     * @return A new FuturesCollector()
+     * @return A new StreamOfFuturesCollector()
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<Stream<T>>>
         toFuture() {
