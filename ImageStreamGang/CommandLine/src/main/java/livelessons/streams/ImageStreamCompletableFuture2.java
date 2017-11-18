@@ -84,7 +84,8 @@ public class ImageStreamCompletableFuture2
             // thenAccept() is called when all the futures in the
             // stream complete their processing.
             .thenAccept(stream -> {
-                    // Create a stream of completable futures to filtered images.
+                    // Create a stream of completable futures to
+                    // filtered images.
                     Stream<CompletableFuture<Stream<Image>>> futureStream = stream
                         // Remove all cached URLs.
                         .filter(Objects::nonNull)
@@ -95,9 +96,10 @@ public class ImageStreamCompletableFuture2
                         // download each image via its URL).
                         .map(this::downloadImageAsync)
 
-                        // Use map() to call applyFiltersAsync(), which
-                        // creates a stream of completable futures to multiple
-                        // filtered/stored versions of each image.
+                        // Use map() to call applyFiltersAsync(),
+                        // which creates a stream of completable
+                        // futures to multiple filtered/stored
+                        // versions of each image.
                         .map(this::applyFiltersAsync);
 
                     StreamsUtils
