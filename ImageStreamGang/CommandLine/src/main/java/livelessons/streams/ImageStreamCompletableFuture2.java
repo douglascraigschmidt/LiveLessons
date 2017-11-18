@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static livelessons.utils.FuturesCollectorStream.toFuture;
+import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * This is another asynchronous implementation strategy that
@@ -111,8 +111,9 @@ public class ImageStreamCompletableFuture2
                         // in the stream complete their processing.
                         .thenAccept(resultsStream ->
                                     // Flatten the stream of streams and 
-                                    // Log the results.
-                                    logResults(resultsStream.flatMap(Function.identity()),
+                                    // log the results.
+                                    logResults(resultsStream
+                                               .flatMap(Function.identity()),
                                                urls.size()))
                         
                         // Wait until all images have been downloaded,

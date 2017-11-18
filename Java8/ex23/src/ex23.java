@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static utils.FuturesCollectorStream.toFuture;
+import static utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * This example shows the difference between calling join() on

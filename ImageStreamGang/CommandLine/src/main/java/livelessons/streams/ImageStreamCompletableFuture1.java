@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 
-import static livelessons.utils.FuturesCollectorStream.toFuture;
+import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * This asynchronous implementation strategy customizes the
@@ -81,7 +81,8 @@ public class ImageStreamCompletableFuture1
             .thenAccept(stream ->
                         // Remove any null objects and log the
                         // results.
-                        logResults(stream.filter(Objects::nonNull),
+                        logResults(stream
+                                   .filter(Objects::nonNull),
                                    urls.size()))
 
             // Wait until all the images have been downloaded,

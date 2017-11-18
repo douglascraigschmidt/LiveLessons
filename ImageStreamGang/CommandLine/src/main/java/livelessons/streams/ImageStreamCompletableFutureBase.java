@@ -3,16 +3,11 @@ package livelessons.streams;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 import livelessons.filters.Filter;
-import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
-
-import static livelessons.utils.FuturesCollectorStream.toFuture;
 
 /**
  * Super class that factors out common code so that implementation

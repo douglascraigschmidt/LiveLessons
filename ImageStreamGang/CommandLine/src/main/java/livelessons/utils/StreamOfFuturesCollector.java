@@ -1,4 +1,4 @@
-package utils;
+package livelessons.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
  * for more info.
  */
-public class FuturesCollectorStream<T>
+public class StreamOfFuturesCollector<T>
       implements Collector<CompletableFuture<T>,
                  List<CompletableFuture<T>>,
                  CompletableFuture<Stream<T>>> {
@@ -115,6 +115,6 @@ public class FuturesCollectorStream<T>
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<Stream<T>>>
         toFuture() {
-        return new FuturesCollectorStream<>();
+        return new StreamOfFuturesCollector<>();
     }
 }
