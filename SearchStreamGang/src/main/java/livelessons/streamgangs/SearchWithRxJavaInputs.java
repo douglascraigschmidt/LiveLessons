@@ -49,11 +49,12 @@ public class SearchWithRxJavaInputs
             // emits the items in the array.
             .from(getInput())
 
-           // Returns an Observable that emits items based on applying
-           // processInput() to each item emitted by the source
-           // Observable, where processInput() returns an Observable,
-           // and then merging the resulting Observables and emitting
-           // the results of this merger as a single Observable.
+            // Returns an Observable that emits items based on
+            // applying processInput() to each item emitted by the
+            // source Observable, where processInput() returns an
+            // Observable, and then merging the resulting Observables
+            // and emitting the results of this merger as a single
+            // Observable.
             .flatMap(inputString ->
                      Observable
 
@@ -71,18 +72,18 @@ public class SearchWithRxJavaInputs
                      // Observable on the computation scheduler.
                      .subscribeOn(Schedulers.computation()))
 
-           // Returns an Observable that emits a single item: a list
-           // composed of all the items emitted by the source
-           // Observable, which is itself a list of SearchResults.
-           .toList()
+            // Returns an Observable that emits a single item: a list
+            // composed of all the items emitted by the source
+            // Observable, which is itself a list of SearchResults.
+            .toList()
 
-           // Converts an Observable into a BlockingObservable (an
-           // Observable with blocking operators).
-           .toBlocking()
+            // Converts an Observable into a BlockingObservable (an
+            // Observable with blocking operators).
+            .toBlocking()
 
-           // When the blocking observable emits the single list of
-           // SearchResults item and completes, return that list.
-           .single();
+            // When the blocking observable emits the single list of
+            // SearchResults item and completes, return that list.
+            .single();
     }
 
     /**
