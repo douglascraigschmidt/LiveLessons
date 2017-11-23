@@ -15,7 +15,7 @@ public class VisitorFactory {
      */
     @FunctionalInterface
     private interface VisitorFactoryCommand {
-        public Visitor execute();
+        Visitor execute();
     }
 
     /**

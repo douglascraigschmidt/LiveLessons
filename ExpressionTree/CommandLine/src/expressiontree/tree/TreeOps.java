@@ -57,7 +57,7 @@ public class TreeOps {
      */
     public void format(String format) {
         mState.format(this, format);
-        this.mFormatted = true;
+        mFormatted = true;
     }
 
     /**

@@ -14,7 +14,7 @@ public class CommandLinePlatform
     /** 
      * Contains information for grabbing mInput from console window.
      */
-    InputStream mInput;
+    private InputStream mInput;
 
     /** 
      * Contains information for outputting to console window. 
@@ -40,7 +40,7 @@ public class CommandLinePlatform
      * a line. 
      */
     public String outputLine(String line) {
-    	this.mOutput.println(line);
+    	mOutput.println(line);
         return line;
     }
 
@@ -49,18 +49,13 @@ public class CommandLinePlatform
      * followed by newLine character). 
      */
     public String outputString(String string) {
-        this.mOutput.print(string);
+        mOutput.print(string);
         return string;
     }
 
     /** Returns a string revealing the platform in use. */
     public String platformName() {
         return System.getProperty("java.specification.vendor");
-    }
-	
-    /** Returns true if we're running on a command-line platform. */
-    public boolean isCommandLinePlatform() {
-        return true;
     }
 
     /** 

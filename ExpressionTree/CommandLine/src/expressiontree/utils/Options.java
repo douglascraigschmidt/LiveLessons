@@ -53,7 +53,7 @@ public class Options {
     /** 
      * Print out usage and default values. 
      */
-    public void printUsage() {
+    private void printUsage() {
         Platform platform = Platform.instance();
         platform.errorLog("Options",
                           "\nHelp Invoked on ");

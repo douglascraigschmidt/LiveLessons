@@ -1,7 +1,6 @@
 package expressiontree.tree;
 
 import expressiontree.nodes.ComponentNode;
-import expressiontree.tree.ExpressionTree;
 
 /**
  * This class implements the Factory Method pattern to create {@code
@@ -11,8 +10,8 @@ import expressiontree.tree.ExpressionTree;
  */
 public class ExpressionTreeFactory {
     /** 
-     * Create a new @a ExpressionTree object that encapsulates the @a
-     * componentNodeRoot that's passed as a parameter.
+     * Create a new {@code ExpressionTree} object that encapsulates the {@code
+     * componentNodeRoot} that's passed as a parameter.
      */
     public ExpressionTree makeExpressionTree(ComponentNode componentNodeRoot) {
         return new ExpressionTree(componentNodeRoot);

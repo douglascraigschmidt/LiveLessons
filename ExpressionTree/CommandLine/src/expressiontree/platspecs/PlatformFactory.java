@@ -14,7 +14,8 @@ public class PlatformFactory {
      * This interface uses the Command pattern to create @a Platform
      * implementations at runtime.
      */
-    private static interface PlatformFactoryCommand {
+    @FunctionalInterface
+    private interface PlatformFactoryCommand {
         public Platform execute();
     }
 	
@@ -34,29 +35,17 @@ public class PlatformFactory {
     public PlatformFactory(final Object input,
                            final Object output,
                            final Object activity) {
-    	/** 
-         * The "Sun Microsystems Inc." string maps to a command object
-         * that creates an @a CommandLinePlatform implementation.
-         */
+    	// The "Sun Microsystems Inc." string maps to a command object
+        // that creates an @a CommandLinePlatform implementation.
         platformMap.put("Sun Microsystems Inc.",
-                        new PlatformFactoryCommand() {
-                            public Platform execute() {
-                                return new CommandLinePlatform(input,
-                                                               output);
-                            }
-                        });
+                () -> new CommandLinePlatform(input,
+                                               output));
 
-    	/** 
-         * The "Oracle Corporation" string maps to a command object
-         * that creates an @a CommandLinePlatform implementation.
-         */
-        platformMap.put("Oracle Corporation", 
-                        new PlatformFactoryCommand() {
-                            public Platform execute() {
-                                return new CommandLinePlatform(input,
-                                                               output);
-                            }
-                        });
+    	// The "Oracle Corporation" string maps to a command object
+        // that creates an @a CommandLinePlatform implementation.
+        platformMap.put("Oracle Corporation",
+                () -> new CommandLinePlatform(input,
+                                               output));
     }
 
     /** 

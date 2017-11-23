@@ -2,8 +2,6 @@ package expressiontree.states;
 
 import expressiontree.tree.TreeOps;
 
-import java.util.HashMap;
-
 /**
  * A state without an initialized context or format.
  */

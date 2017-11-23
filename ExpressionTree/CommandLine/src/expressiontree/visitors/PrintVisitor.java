@@ -13,7 +13,7 @@ public class PrintVisitor
     /** 
      * Constructor.
      */
-    public PrintVisitor() {    
+    PrintVisitor() {
     }
 
     /**
