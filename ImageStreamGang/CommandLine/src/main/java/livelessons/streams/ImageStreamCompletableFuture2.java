@@ -7,7 +7,7 @@ import livelessons.utils.StreamsUtils;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -67,7 +67,7 @@ public class ImageStreamCompletableFuture2
         List<URL> urls = getInput();
 
         // A future to a stream of URLs.
-        CompletableFuture<Stream<URL>> urlStreamFuture = urls
+        CompletableFuture<Stream<Optional<URL>>> urlStreamFuture = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
@@ -88,7 +88,10 @@ public class ImageStreamCompletableFuture2
                     // filtered images.
                     Stream<CompletableFuture<Stream<Image>>> futureStream = stream
                         // Remove all cached URLs.
-                        .filter(Objects::nonNull)
+                        .flatMap(Optional::stream)
+                        // For JDK 8 you'll need to use 
+                        // .filter(Optional::isPresent)
+                        // .map(Optional::get)
 
                         // Use map() to call downloadImageAsync(),
                         // which transforms each URL to a completable

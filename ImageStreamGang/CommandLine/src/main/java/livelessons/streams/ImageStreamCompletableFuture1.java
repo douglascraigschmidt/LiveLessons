@@ -7,8 +7,10 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static livelessons.utils.StreamOfFuturesCollector.toFuture;
@@ -78,11 +80,14 @@ public class ImageStreamCompletableFuture1
 
             // thenAccept() is called when all the futures in the
             // stream complete their asynchronous processing.
-            .thenAccept(stream ->
-                        // Remove any null objects and log the
-                        // results.
+            .thenAccept((Stream<Optional<Image>> stream) ->
+                        // Log the results.
                         logResults(stream
-                                   .filter(Objects::nonNull),
+                                   // Remove any empty optionals.
+                                   .flatMap(Optional::stream),
+                                   // For JDK 8 you'll need to use 
+                                   // .filter(Optional::isPresent)
+                                   // .map(Optional::get),
                                    urls.size()))
 
             // Wait until all the images have been downloaded,
@@ -96,19 +101,18 @@ public class ImageStreamCompletableFuture1
      * @param urlFuture A future the URL to download
      * @return A future that completes when the image finishes downloading
      */
-    private CompletableFuture<Image> downloadImageAsync(CompletableFuture<URL> urlFuture) {
+    private CompletableFuture<Optional<Image>> downloadImageAsync
+              (CompletableFuture<Optional<URL>> urlFuture) {
         // Return a future that completes when the image finishes
         // downloading.
         return urlFuture
             // Use the executor to asynchronously download an image
             // when urlFuture completes.
-            .thenApplyAsync(url ->
-                            url == null 
-                            // Ignore null URLs.
-                            ? null
+            .thenApplyAsync(urlOpt ->
+                            urlOpt
                             // Download non-null URLs.
-                            : blockingDownload(url),
-                            // Use the 
+                            .map(this::blockingDownload),
+                            // Use the common fork-join pool.
                             getExecutor());
     }
 
@@ -120,7 +124,8 @@ public class ImageStreamCompletableFuture1
      * @param imageFuture A future to an image that's being downloaded
      @ return A stream of completable futures to images that are being filtered/stored
     */
-    private Stream<CompletableFuture<Image>> applyFiltersAsync(CompletableFuture<Image> imageFuture) {
+    private Stream<CompletableFuture<Optional<Image>>> applyFiltersAsync
+              (CompletableFuture<Optional<Image>> imageFuture) {
         return mFilters
             // Convert the list of filters to a sequential stream.
             .stream()
@@ -129,14 +134,13 @@ public class ImageStreamCompletableFuture1
             .map(filter -> imageFuture
                  // Asynchronously apply a filter action after the
                  // previous stage completes.
-                 .thenApplyAsync(image ->
-                                 image == null
-                                 // Ignore null images.
-                                 ? null
+                 .thenApplyAsync(imageOpt ->
+                                 imageOpt
                                  // Create and apply the filter to the
                                  // image.
-                                 : makeFilterDecoratorWithImage(filter,
-                                                                image).run(),
+                                 .map(image ->
+                                      makeFilterDecoratorWithImage(filter,
+                                                                   image).run()),
                                  // Run in the common fork-join pool.
                                  getExecutor()));
     }

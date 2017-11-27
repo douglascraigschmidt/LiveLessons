@@ -3,6 +3,7 @@ package livelessons.streams;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -32,10 +33,10 @@ abstract class ImageStreamCompletableFutureBase
      * completable future to a non-null value if {@code url} is not
      * already cached
      */
-    CompletableFuture<URL> checkUrlCachedAsync(URL url) {
+    CompletableFuture<Optional<URL>> checkUrlCachedAsync(URL url) {
         return CompletableFuture
             // Asynchronously check if the URL is cached.
-            .supplyAsync(() -> urlCached(url) ? null : url,
+            .supplyAsync(() -> Optional.ofNullable(urlCached(url) ? null : url),
                          getExecutor());
             
     }
