@@ -6,11 +6,9 @@ import livelessons.utils.Image;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static livelessons.utils.StreamOfFuturesCollector.toFuture;
@@ -80,15 +78,15 @@ public class ImageStreamCompletableFuture1
 
             // thenAccept() is called when all the futures in the
             // stream complete their asynchronous processing.
-            .thenAccept((Stream<Optional<Image>> stream) ->
+            .thenAccept(stream ->
                         // Log the results.
-                        logResults(stream
-                                   // Remove any empty optionals.
-                                   .flatMap(Optional::stream),
-                                   // For JDK 8 you'll need to use 
-                                   // .filter(Optional::isPresent)
-                                   // .map(Optional::get),
-                                   urls.size()))
+                        log(stream
+                            // Remove any empty optionals.
+                            .flatMap(Optional::stream),
+                            // For JDK 8 you'll need to use
+                            // .filter(Optional::isPresent)
+                            // .map(Optional::get),
+                            urls.size()))
 
             // Wait until all the images have been downloaded,
             // processed, and stored.

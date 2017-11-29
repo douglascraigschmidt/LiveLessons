@@ -113,11 +113,11 @@ public class ImageStreamCompletableFuture2
                         // thenAccept() is called when all the futures
                         // in the stream complete their processing.
                         .thenAccept(resultsStream ->
-                                    // Flatten the stream of streams and 
-                                    // log the results.
-                                    logResults(resultsStream
-                                               .flatMap(Function.identity()),
-                                               urls.size()))
+                                    // Flatten the stream of streams
+                                    // and log the results.
+                                    log(resultsStream
+                                        .flatMap(Function.identity()),
+                                        urls.size()))
                         
                         // Wait until all images have been downloaded,
                         // processed, and stored.

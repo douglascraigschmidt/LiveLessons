@@ -49,8 +49,8 @@ abstract class ImageStreamCompletableFutureBase
      * downloaded, processed, and stored
      * @param urlsSize The number of URLs to download
      */
-    protected void logResults(Stream<Image> resultsStream,
-                              int urlsSize) {
+    protected void log(Stream<Image> resultsStream,
+                       int urlsSize) {
         // Print the results to the log.
         System.out
             .println(TAG
