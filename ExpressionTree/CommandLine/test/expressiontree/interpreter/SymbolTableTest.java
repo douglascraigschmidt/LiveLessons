@@ -24,5 +24,12 @@ public class SymbolTableTest {
 		table.set("a", 1);
 		assertEquals(1,table.get("a"));
 	}
+	
+	@Test
+	public void test$reset() {
+		table.set("a", 1);
+		table.reset();
+		assertEquals(0,table.get("a"));
+	}
 
 }
