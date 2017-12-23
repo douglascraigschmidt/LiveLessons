@@ -86,12 +86,32 @@ public class TreeOpsTest {
 	public void test$set$emptyString() {
 		ops.set("");
 	}
+	
+	@Test(expected = RuntimeException.class)
+	public void test$set$someString() {
+		ops.set("a");
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void test$set$notFullExpression() {
+		ops.set("a=");
+		ops.interpreter().symbolTable().print();
+		// TODO rem dependency to Global lineSeparator
+		assertEquals("a = 1" + System.lineSeparator(), out.toString());
+	}
+	
+
+	@Test
+	public void test$set$expressionWithSpaces() {
+		ops.set("  a  =   1    ");
+		ops.interpreter().symbolTable().print();
+		assertEquals("a = 1" + System.lineSeparator(), out.toString());
+	}
 
 	@Test
 	public void test$set$expression() {
 		ops.set("a=1");
 		ops.interpreter().symbolTable().print();
-		// TODO rem dependency to Global lineSeparator
 		assertEquals("a = 1" + System.lineSeparator(), out.toString());
 	}
 	

@@ -126,6 +126,11 @@ public class ExpressionTreeTest {
 		assertEquals("1", out.toString().trim());
 	}
 	
+	@Test(expected=IllegalArgumentException.class)
+	public void test$print$randomString() throws Exception {
+		expression.print("bla-bla");
+	}
+	
 	@Test
 	public void test$print$compositeComponent$emptyString() {
 		//TODO not obvious behavior
