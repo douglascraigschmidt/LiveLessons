@@ -84,6 +84,14 @@ public class InterpreterTest {
 	}
 	
 	@Test
+	public void test$complexFromVideoLesson() throws Exception {
+		ExpressionTree expression = intepreter.interpret("-5*(3+4)");
+		assertEquals(42, expression.item());
+		assertEquals(45, expression.left().item());
+		assertEquals(43, expression.right().item());
+	}
+	
+	@Test
 	public void test$assigment() throws Exception {
 		ExpressionTree expression = intepreter.interpret("a=1");
 		assertEquals(1, expression.item());
