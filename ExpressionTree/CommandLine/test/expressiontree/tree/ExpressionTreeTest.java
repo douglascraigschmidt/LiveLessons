@@ -51,6 +51,7 @@ public class ExpressionTreeTest {
 
 	@Test
 	public void test$isNull() {
+		// TODO introduce NullExpressioinTree concept? 
 		assertFalse(expression.isNull());
 	}
 
