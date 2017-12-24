@@ -12,18 +12,18 @@ import expressiontree.nodes.CompositeNegateNode;
 import expressiontree.nodes.LeafNode;
 import expressiontree.tree.ExpressionTree;
 
-public class PreOrderIteratorTest {
+public class LevelOrderIteratorTest {
 
 	private Iterator<ExpressionTree> iter;
 
 	@Test(expected = NullPointerException.class)
 	public void test$nullArgument() {
-		iter = new PreOrderIterator(null);
+		iter = new LevelOrderIterator(null);
 	}
 
 	@Test
 	public void test$nullExpression() {
-		iter = new PreOrderIterator(new ExpressionTree(null));
+		iter = new LevelOrderIterator(new ExpressionTree(null));
 		assertFalse(iter.hasNext());
 	}
 
@@ -31,7 +31,7 @@ public class PreOrderIteratorTest {
 	public void test$negation() {
 		LeafNode leaf = new LeafNode(1);
 		ComponentNode negation = new CompositeNegateNode(leaf);
-		iter = new PreOrderIterator(new ExpressionTree(negation));
+		iter = new LevelOrderIterator(new ExpressionTree(negation));
 		assertTrue(iter.hasNext());
 		assertEquals(negation, iter.next().getRoot());
 		assertEquals(leaf, iter.next().getRoot());
@@ -42,10 +42,12 @@ public class PreOrderIteratorTest {
 		LeafNode left = new LeafNode(1);
 		LeafNode right = new LeafNode(1);
 		ComponentNode add = new CompositeAddNode(left, right);
-		iter = new PreOrderIterator(new ExpressionTree(add));
+		iter = new LevelOrderIterator(new ExpressionTree(add));
 		assertTrue(iter.hasNext());
 		assertEquals(add, iter.next().getRoot());
-		assertEquals(left, iter.next().getRoot());
 		assertEquals(right, iter.next().getRoot());
+		assertEquals(left, iter.next().getRoot());
 	}
+
+
 }
