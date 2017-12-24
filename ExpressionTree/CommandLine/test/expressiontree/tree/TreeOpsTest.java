@@ -96,7 +96,6 @@ public class TreeOpsTest {
 	public void test$set$notFullExpression() {
 		ops.set("a=");
 		ops.interpreter().symbolTable().print();
-		// TODO rem dependency to Global lineSeparator
 		assertEquals("a = 1" + System.lineSeparator(), out.toString());
 	}
 	

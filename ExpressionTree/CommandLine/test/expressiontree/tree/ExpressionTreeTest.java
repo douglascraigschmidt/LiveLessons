@@ -32,7 +32,6 @@ public class ExpressionTreeTest {
 	@Before
 	public void init() {
 		expression = new ExpressionTree(leaf);
-		// TODO brake dependency on Global
 		// TODO 'ByteArrayOutputStream' can't be cast to 'PrintStream'
 		System.setOut(new PrintStream(out));
 		Platform.instance(new PlatformFactory(System.in, new PrintStream(out),
@@ -51,7 +50,6 @@ public class ExpressionTreeTest {
 
 	@Test
 	public void test$isNull() {
-		// TODO introduce NullExpressioinTree concept? 
 		assertFalse(expression.isNull());
 	}
 
@@ -120,7 +118,6 @@ public class ExpressionTreeTest {
 
 	@Test
 	public void test$print$emptyString() throws Exception {
-		//TODO not obvious behavior
 		expression.print("");
 		//TODO '1[ ]' remove blank
 		assertEquals("1", out.toString().trim());
@@ -133,7 +130,6 @@ public class ExpressionTreeTest {
 	
 	@Test
 	public void test$print$compositeComponent$emptyString() {
-		//TODO not obvious behavior
 		new ExpressionTree(new CompositeNegateNode(leaf)).print("");
 		//TODO '1[ ]' remove blank
 		assertEquals("-1", out.toString().trim());
@@ -148,7 +144,6 @@ public class ExpressionTreeTest {
 	
 	@Test
 	public void test$evaluate$emptyString() throws Exception {
-		//TODO not obvious behavior
 		expression.evaluate("");
 		assertEquals("1", out.toString().trim());
 	}

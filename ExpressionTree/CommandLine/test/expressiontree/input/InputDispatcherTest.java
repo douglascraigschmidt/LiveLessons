@@ -57,6 +57,5 @@ public class InputDispatcherTest {
 		dispatcher.dispatchOneInput();
 		assertEquals("> 2", out.toString().trim());
 	}
-	// TODO dispatchAll with timeout
 
 }

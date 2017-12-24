@@ -1,37 +1,16 @@
 package expressiontree.commands;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import expressiontree.platspecs.Platform;
-import expressiontree.platspecs.PlatformFactory;
-import expressiontree.tree.TreeOps;
-
-public class ExprCommandTest {
-
-	private UserCommand command;
-
-	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+public class ExprCommandTest extends AbstractCommandTest {
 
 	@Before
 	public void init() {
-		// FIXME dependend on Global
-		System.setOut(new PrintStream(out));
-		Platform.instance(new PlatformFactory(System.in, new PrintStream(out),
-				null).makePlatform());
-
-		command = new ExprCommand(new TreeOps(), "");
-	}
-
-	@After
-	public void cleanUpStreams() {
-		System.setOut(null);
+		super.init();
+		command = new ExprCommand(tree, "");
 	}
 
 	@Test
@@ -69,6 +48,5 @@ public class ExprCommandTest {
 						+ System.lineSeparator() + "0c. quit", out.toString()
 						.trim());
 	}
-
 
 }

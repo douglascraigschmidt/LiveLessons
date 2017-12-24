@@ -1,37 +1,16 @@
 package expressiontree.commands;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import expressiontree.platspecs.Platform;
-import expressiontree.platspecs.PlatformFactory;
-import expressiontree.tree.TreeOps;
-
-public class SetCommandTest {
-
-	private UserCommand command;
-
-	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+public class SetCommandTest extends AbstractCommandTest {
 
 	@Before
 	public void init() {
-		// FIXME dependend on Global
-		System.setOut(new PrintStream(out));
-		Platform.instance(new PlatformFactory(System.in, new PrintStream(out),
-				null).makePlatform());
-
-		command = new SetCommand(new TreeOps(), "a=3");
-	}
-
-	@After
-	public void cleanUpStreams() {
-		System.setOut(null);
+		super.init();
+		command = new SetCommand(tree, "a=3");
 	}
 
 	@Test
@@ -47,7 +26,7 @@ public class SetCommandTest {
 	@Test
 	public void test$printValidCommands() {
 		command.printValidCommands(true);
-		//FIXME bugs in commands index numbers
+		// FIXME bugs in commands index numbers
 		assertEquals(
 				"1. format [in-order]"
 						+ System.lineSeparator()

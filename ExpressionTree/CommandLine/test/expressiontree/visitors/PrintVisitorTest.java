@@ -26,7 +26,6 @@ public class PrintVisitorTest {
 
 	@Before
 	public void init() {
-		// FIXME dependend on Global
 		System.setOut(new PrintStream(out));
 		Platform.instance(new PlatformFactory(System.in, new PrintStream(out),
 				null).makePlatform());

@@ -18,7 +18,6 @@ public abstract class AbstractStateTest {
 
 	public void init() {
 		tree = new TreeOps();
-		// FIXME dependend on Global
 		System.setOut(new PrintStream(out));
 		Platform.instance(new PlatformFactory(System.in, new PrintStream(out),
 				null).makePlatform());
