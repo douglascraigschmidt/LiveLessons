@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,6 +35,11 @@ public class EvaluationVisitorTest {
 				null).makePlatform());
 
 		visitor = new EvaluationVisitor();
+	}
+	
+	@After
+	public void cleanUpStreams() {
+		System.setOut(null);
 	}
 
 	@Test
