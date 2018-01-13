@@ -8,7 +8,54 @@ import java.util.stream.Stream;
  * use the Java 8 forEach() method.
  */
 public class ex1 {
+    /**
+     * This class demonstrates how to implement closures using Java 8.
+     */
+    static class ClosureExample {
+        /**
+         * A private field that can be updated by the closure below.
+         */
+        private int mRes;
+
+        /**
+         * This method creates a closure that runs in a background
+         * thread.
+         *
+         * @return The background thread reference
+         */
+        Thread addAndPrintInAThread(String string, int n) {
+            // Create a new thread whose runnable lambda expression
+            // defines a closure that reads the parameters and updates
+            // the mRes field.
+            Thread t = new Thread(() ->
+                                  System.out.println(string + (mRes += n)));
+
+            // Start the thread.
+            t.start();
+
+            // Return a reference to the thread.
+            return t;
+        }
+
+        /**
+         * The constructor creates/starts/runs a thread closure.
+         */
+        ClosureExample() {
+            // Create/start/run a thread closure.
+            Thread t = addAndPrintInAThread("result = ", 10);
+
+            try {
+                // Join when the thread is finished.
+                t.join();
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
     static public void main(String[] argv) {
+        // Run the closure example.
+         new ClosureExample();
+
         // The array to sort and print.
         String[] nameArray = {
             "Barbara",
