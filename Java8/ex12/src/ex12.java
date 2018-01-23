@@ -28,9 +28,10 @@ public class ex12 {
         // Create an instance of this class.
         ex12 ex = new ex12();
 
-        // Demonstrate each approach.
+        // Demonstrate various approaches.
         ex.runNonJava8();
         ex.runForEach();
+        ex.runForEachOfConcatenation();
         ex.runCollectToList();
         ex.runCollectToSet();
         ex.runCollectToMap();
@@ -107,6 +108,44 @@ public class ex12 {
                 "Hamlet",
                 "laertes",
                 "Ophelia")
+
+            // Remove any strings that don't start with 'h' or 'H'.
+            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+
+            // Capitalize the first letter in the string.
+            .map(this::capitalize)
+
+            // Sort the results in ascending order.
+            .sorted()
+
+            // Terminal operation that triggers aggregate operation
+            // processing and prints the results.
+            .forEach(System.out::println);
+    }
+
+    /**
+     * Run an example using the forEach() terminal operation and show
+     * how to concatenate lists via Stream.of().
+     */
+    private void runForEachOfConcatenation() {
+        System.out.println("\nResults from runForEachOfConcatenation():");
+
+        // Create several lists.
+        List<String> l1 = Arrays.asList("horatio",
+                                        "claudius",
+                                        "Gertrude");
+        List<String> l2 = Arrays.asList("Hamlet",
+                                        "laertes");
+        List<String> l3 = Arrays.asList("Ophelia");
+
+        Stream
+            // Create a stream of characters from William
+            // Shakespeare's Hamlet using of() to concatenate lists.
+            .of(l1, l2, l3)
+
+            // Flatten the stream of lists of strings into a stream of
+            // strings.
+            .flatMap(List::stream)
 
             // Remove any strings that don't start with 'h' or 'H'.
             .filter(s -> toLowerCase(s.charAt(0)) == 'h')
