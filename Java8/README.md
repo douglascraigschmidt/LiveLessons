@@ -111,3 +111,8 @@ Here's an overview of what's included:
   enhancing greater parallelism).  These tests demonstrate why join()
   shouldn't be used in a stream pipeline on a CompletableFuture that
   hasn't completed since it may impede parallelism.
+
+. ex24 -- This example shows the difference between a reentrant lock
+  (e.g., Java ReentrantLock) and a non-reentrant lock (e.g.,
+  StampedLock) when used in a framework that allows callbacks when a
+  lock protecting state in the framework is held.
