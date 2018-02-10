@@ -114,15 +114,23 @@ public abstract class CountDownTimer {
      * Start the countdown.
      */
     public synchronized final CountDownTimer start() {
+        // We haven't been canceled (yet).
         mCancelled = false;
+
+        // Handle odd starting point.
         if (mMillisInFuture <= 0) {
             onFinish();
             return this;
         }
+
+        // Calculate when to stop.
         mStopTimeInFuture = 
             System.currentTimeMillis() + mMillisInFuture;
 
+        // Schedule the initial timer.
         scheduleTimer();
+
+        // Return this object to support a fluent interface.
         return this;
     }
 
@@ -137,7 +145,9 @@ public abstract class CountDownTimer {
      */
     public abstract void onFinish();
 
-    // Handles counting down.
+    /**
+     * Schedules a timer that performs the count down logic.
+     */
     private void scheduleTimer() {
         // Create an object that's (re)scheduled to run periodically.
         Runnable timerHandler = new Runnable() {
@@ -199,7 +209,7 @@ public abstract class CountDownTimer {
                 }
             };
 
-        // Schedule timerHandler to run immediately.
+        // Initially schedule the timerHandler to run immediately.
         mScheduledExecutorService
             .schedule(timerHandler,
                       0,
