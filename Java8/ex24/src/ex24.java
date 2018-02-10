@@ -57,10 +57,10 @@ public class ex24 {
      * @param lock The lock used to synchronize access to the object,
      *   which can either be reentrant (good) or non-reentrant (bad) 
      * @param millisInFuture The number of millis in the future from the call
-     *   to {@link #start()} until the countdown is done and {@link #onFinish()}
+     *   to {@code start()} until the countdown is done and {@code onFinish()}
      *   is called.
      * @param countDownInterval The interval along the way to receive
-     *   {@link #onTick(long)} callbacks.
+     *   {@code onTick(long)} callbacks.
      */
     private static void testCountDownTimer(Lock lock,
                                            long millisInFuture,
