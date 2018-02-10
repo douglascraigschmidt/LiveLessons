@@ -10,9 +10,12 @@ import java.util.concurrent.locks.StampedLock;
 
 /**
  * This example shows the difference between a reentrant lock (e.g.,
- * Java ReentrantLock) and a non-reentrant lock (e.g., StampedLock)
- * when used in a framework that allows callbacks when a lock
- * protecting state in the framework is held.
+ * Java ReentrantLock) and a non-reentrant lock (e.g., Java
+ * StampedLock) when applied in a framework that allows callbacks
+ * where the framework holds a lock protecting framework state.  As
+ * you'll see when you run this program, the reentrant lock supports
+ * this use-case nicely, whereas the non-reentrant lock incurs
+ * "self-deadlock."
  */
 public class ex24 {
     /**
