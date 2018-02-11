@@ -114,24 +114,30 @@ public abstract class CountDownTimer {
      * Start the countdown.
      */
     public final CountDownTimer start() {
-        // We haven't been canceled (yet).
-        mCancelled = false;
+        mLock.lock();
+        try {
+            // We haven't been canceled (yet).
+            mCancelled = false;
 
-        // Handle odd starting point.
-        if (mMillisInFuture <= 0) {
-            onFinish();
+            // Handle odd starting point.
+            if (mMillisInFuture <= 0) {
+                onFinish();
+                return this;
+            }
+
+            // Calculate when to stop.
+            mStopTimeInFuture = 
+                System.currentTimeMillis() + mMillisInFuture;
+
+            // Schedule the initial timer.
+            scheduleTimer();
+
+            // Return this object to support a fluent interface.
             return this;
+        } finally {
+            // Always unlock the lock.
+            mLock.unlock();
         }
-
-        // Calculate when to stop.
-        mStopTimeInFuture = 
-            System.currentTimeMillis() + mMillisInFuture;
-
-        // Schedule the initial timer.
-        scheduleTimer();
-
-        // Return this object to support a fluent interface.
-        return this;
     }
 
     /**
