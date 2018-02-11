@@ -98,7 +98,7 @@ public abstract class CountDownTimer {
     /**
      * Cancel the countdown.
      */
-    public synchronized final void cancel() {
+    public final void cancel() {
         mLock.lock();
         try {
             mCancelled = true;
@@ -113,7 +113,7 @@ public abstract class CountDownTimer {
     /**
      * Start the countdown.
      */
-    public synchronized final CountDownTimer start() {
+    public final CountDownTimer start() {
         // We haven't been canceled (yet).
         mCancelled = false;
 
