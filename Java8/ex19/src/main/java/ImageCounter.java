@@ -148,9 +148,9 @@ class ImageCounter {
             // Asynchronously count the # of images on this page and
             // return a future to the count.
             CompletableFuture<Integer> imagesInPageFuture = pageFuture
-                // The getImagesOnPage() method runs synchronously, so
+                // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
-                .thenApplyAsync(this::getImagesOnPage)
+                .thenApplyAsync(this::getImagesInPage)
 
                 // Count the number of images on this page.
                 .thenApply(List::size);
@@ -216,7 +216,7 @@ class ImageCounter {
     /**
      * @return A collection of IMG SRC URLs in this page.
      */
-    private Elements getImagesOnPage(Document page) {
+    private Elements getImagesInPage(Document page) {
         // Return a collection IMG SRC URLs in this page.
         return page
             // Select all the image elements in the page.
