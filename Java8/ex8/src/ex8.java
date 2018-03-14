@@ -669,10 +669,9 @@ public class ex8 {
             // Perform the reduction asynchronously.
             .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
 
-            // thenCompose() is like flatMap(), i.e., it returns a
-            // completable future to a multiplied big fraction.
-            // Multiply BigFractions asynchronously since
-            // it may run for a long time.
+            // thenApplyAsync() returns a completable future to a big
+            // fraction that's multiplied asynchronously since it may
+            // run for a long time.
             .thenApplyAsync(reducedFraction
                             -> reducedFraction.multiply(sBigReducedFraction));
 

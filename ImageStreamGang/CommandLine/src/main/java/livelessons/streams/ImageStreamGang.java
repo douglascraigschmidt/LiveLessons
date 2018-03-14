@@ -152,10 +152,8 @@ public abstract class ImageStreamGang
      * url and creates an Image to encapsulate it.
      */
     protected Image downloadImage(URL url) {
-        byte[] imageData = NetUtils.downloadContent(url);
-
         return new Image(url,
-                         imageData);
+                         NetUtils.downloadContent(url));
     }
 
     /**
