@@ -27,7 +27,7 @@ public class ex25 {
     /**
      * Maximum value of  random numbers.
      */
-    private static long sMAX_VALUE = 100000000000000L;
+    private static long sMAX_VALUE = 1000000000L;
 
     /**
      * The list of random numbers.
@@ -38,14 +38,14 @@ public class ex25 {
      * This object checks for primality using a synchronous memoizer.
      */ 
     private Function<Long, SimpleImmutableEntry<Long, Long>> sPrimeChecker =
-        new SyncMemoizer<>(PrimeCheckers::efficientChecker);
+        new SyncMemoizer<>(PrimeCheckers::bruteForceChecker);
 
     /**
      * This object checks for primality using an asynchronous
      * memoizer.
      */
     private Function<Long, CompletableFuture<SimpleImmutableEntry<Long, Long>>> sPrimeCheckerCF =
-        new AsyncMemoizer<>(PrimeCheckers::efficientChecker);
+        new AsyncMemoizer<>(PrimeCheckers::bruteForceChecker);
 
     /**
      * Main entry point into the test program.
