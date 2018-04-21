@@ -120,8 +120,8 @@ public class ex25 {
 
             // Print out the result of each future.
             .forEach(future ->
-                     // Synchronously get future value (may block
-                     // if the computation isn't complete) and print results.
+                     // Synchronously get future value (may block if
+                     // computation isn't complete) and print results.
                       printResult(rethrowSupplier(future::get).get()));
     }
 
