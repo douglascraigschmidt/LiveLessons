@@ -43,6 +43,6 @@ public class SyncMemoizer<K, V>
      * create the value and store it in the cache before returning it.
      */
     public V apply(final K key) {
-        return mCache.computeIfAbsent(key, mFunction::apply);
+        return mCache.computeIfAbsent(key, mFunction);
     }
 }
