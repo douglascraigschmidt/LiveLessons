@@ -2,15 +2,12 @@ import utils.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static java.util.stream.Collectors.toList;
-import static utils.ExceptionUtils.rethrowConsumer;
-import static utils.ExceptionUtils.rethrowFunction;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This example shows various ways to implement and apply synchronous
