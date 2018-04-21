@@ -84,8 +84,8 @@ public class ex25 {
             .longs(count, sMAX_VALUE - count, sMAX_VALUE)
 
             // Convert each random number into a Callable.
-            .mapToObj(randomNumber ->
-                      (Callable<SimpleImmutableEntry<Long, Long>>) () -> 
+            .mapToObj((long randomNumber) ->
+                      (Callable<SimpleImmutableEntry<Long, Long>>) () ->
                       sPrimeChecker.apply(Math.abs(randomNumber)))
 
             // Submit each Callable to the ExecutorService.
@@ -96,12 +96,7 @@ public class ex25 {
                     try {
                         // Synchronously get future value (may block
                         // if the computation isn't complete).
-                        SimpleImmutableEntry<Long, Long> result = future.get();
-
-                        System.out.println("Prime candidate "
-                                           + result.getKey()
-                                           + " has a smallest factor of "
-                                           + result.getValue());
+                        printResult(future.get());
                     } catch (Exception ex) {
                         System.out.println("Exception = " + ex.getMessage());
                     }
@@ -137,11 +132,7 @@ public class ex25 {
             // Called when all asynchronous operations complete.
             .thenAccept(stream ->
                         // Print each result in the result stream.
-                        stream.forEach(result ->
-                                       System.out.println("Prime candidate "
-                                                          + result.getKey()
-                                                          + " has a smallest factor of "
-                                                          + result.getValue())))
+                        stream.forEach(ex25::printResult))
 
             // Wait for all asynchronous processing to complete.
             .join();
@@ -173,13 +164,20 @@ public class ex25 {
             // Called when all asynchronous operations complete.
             .thenAccept(stream ->
                         // Print each result in the result stream.
-                        stream.forEach(result ->
-                                       System.out.println("Prime candidate "
-                                                          + result.getKey()
-                                                          + " has a smallest factor of "
-                                                          + result.getValue())))
+                        stream.forEach(ex25::printResult))
 
             // Wait for all asynchronous processing to complete.
             .join();
+    }
+
+    /**
+     * Print the result.
+     * @param result The result to print.
+     */
+    private static void printResult(SimpleImmutableEntry<Long, Long> result) {
+        System.out.println("Prime candidate "
+                           + result.getKey()
+                           + " has a smallest factor of "
+                           + result.getValue());
     }
 }
