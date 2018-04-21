@@ -10,12 +10,12 @@ import java.util.function.Supplier;
  */
 public final class ExceptionUtils {
     @FunctionalInterface
-        public interface Consumer_WithExceptions<T> {
+    public interface Consumer_WithExceptions<T> {
         void accept(T t) throws Exception;
     }
 
     @FunctionalInterface
-        public interface Function_WithExceptions<T, R> {
+    public interface Function_WithExceptions<T, R> {
         R apply(T t) throws Exception;
     }
 
