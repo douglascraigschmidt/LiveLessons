@@ -110,6 +110,10 @@ public class ex25 {
             // Submit each Callable to the ExecutorService.
             .map(executorService::submit)
 
+            // Trigger intermediate operation processing and create a list
+            // of futures.
+            .collect(toList())
+
             // Print out the result of each future.
             .forEach(future -> {
                     try {
