@@ -85,8 +85,8 @@ public class ex25 {
 
             // Convert each random number into a Callable.
             .mapToObj(randomNumber ->
-                      (Callable<SimpleImmutableEntry<Long, Long>>) ()
-                      -> sPrimeChecker.apply(Math.abs(randomNumber)))
+                      (Callable<SimpleImmutableEntry<Long, Long>>) () -> 
+                      sPrimeChecker.apply(Math.abs(randomNumber)))
 
             // Submit each Callable to the ExecutorService.
             .map(executorService::submit)
@@ -163,7 +163,8 @@ public class ex25 {
             .longs(count, sMAX_VALUE - count, sMAX_VALUE)
 
             // Convert each random number into a completable future.
-            .mapToObj(randomNumber -> sPrimeCheckerCF.apply(Math.abs(randomNumber)))
+            .mapToObj(randomNumber ->
+                      sPrimeCheckerCF.apply(Math.abs(randomNumber)))
 
             // Create one completable future that completes when all
             // the other completable futures in the stream complete.
