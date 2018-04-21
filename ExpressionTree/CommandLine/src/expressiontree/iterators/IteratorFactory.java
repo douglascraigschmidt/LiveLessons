@@ -15,6 +15,14 @@ import java.util.Queue;
  * pattern.
  */
 public class IteratorFactory {
+    /*
+     * Constants that determine the traversal order.
+     */
+    public final static String IN_ORDER = "in-order";
+    public final static String PRE_ORDER = "pre-order";
+    public final static String POST_ORDER = "post-order";
+    public final static String LEVEL_ORDER = "level-order";
+
     /** 
      * This interface uses the Command pattern to create @a Iterator
      * implementations at runtime.
@@ -44,19 +52,19 @@ public class IteratorFactory {
 
     	// An "in-order" string maps to a command object that creates
         // an @a InOrderIterator implementation.
-        mTraversalMap.put("in-order", InOrderIterator::new);
+        mTraversalMap.put(IN_ORDER, InOrderIterator::new);
             
     	// A "pre-order" string maps to a command object that creates
         // a @a PreOrderIterator implementation.
-        mTraversalMap.put("pre-order", PreOrderIterator::new);
+        mTraversalMap.put(PRE_ORDER, PreOrderIterator::new);
             
     	// A "post-order" string maps to a command object that creates
         // a @a PostOrderIterator implementation.
-        mTraversalMap.put("post-order", PostOrderIterator::new);
+        mTraversalMap.put(POST_ORDER, PostOrderIterator::new);
             
     	// A "level-order" string maps to a command object that
         // creates a @a LevelOrderIterator implementation.
-        mTraversalMap.put("level-order", LevelOrderIterator::new);
+        mTraversalMap.put(LEVEL_ORDER, LevelOrderIterator::new);
     }
 	
     /** 

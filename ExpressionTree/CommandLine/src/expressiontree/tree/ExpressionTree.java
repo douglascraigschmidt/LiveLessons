@@ -9,6 +9,7 @@ import expressiontree.visitors.Visitor;
 import expressiontree.visitors.VisitorFactory;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 /**
  * Interface for the Composite pattern that is used to contain all the
@@ -17,7 +18,8 @@ import java.util.Iterator;
  * appropriate "Implementor" that performs the expression tree
  * operations.
  */
-public class ExpressionTree {
+public class ExpressionTree
+       implements Iterable<ExpressionTree> {
     /**
      * A factory that creates the appropriate visitors.
      */
@@ -96,6 +98,14 @@ public class ExpressionTree {
                                                  traversalOrderRequest);
     }
 
+    /**
+     * Returns an {@code Iterator} that supports pre-order traversal.
+     */
+    @Override
+    public Iterator<ExpressionTree> iterator() {
+        return makeIterator(IteratorFactory.PRE_ORDER);
+    }
+
     /** 
      * Print the operators and operands of the @a tree using the
      * designated @a traversalOrder.
@@ -119,6 +129,13 @@ public class ExpressionTree {
         StreamsUtils
             .iteratorToStream(makeIterator(traversalOrder), false)
             .forEach(expressionTree -> expressionTree.accept(printVisitor));
+
+        /*
+        for (ExpressionTree node : this)
+            node.accept(printVisitor);
+
+        this.forEach(node -> node.accept(printVisitor));
+        */
 
         /*
         // Iterate through all nodes in the expression tree and accept
