@@ -34,14 +34,14 @@ public class ex25 {
      * This object checks for primality using a synchronous memoizer.
      */ 
     private Function<Long, SimpleImmutableEntry<Long, Long>> sPrimeChecker =
-        new Memoizer<>(PrimeCheckers::efficientChecker);
+        new SyncMemoizer<>(PrimeCheckers::efficientChecker);
 
     /**
      * This object checks for primality using an asynchronous
      * memoizer.
      */
     private Function<Long, CompletableFuture<SimpleImmutableEntry<Long, Long>>> sPrimeCheckerCF =
-        new CFMemoizer<>(PrimeCheckers::efficientChecker);
+        new AsyncMemoizer<>(PrimeCheckers::efficientChecker);
 
     /**
      * Main entry point into the test program.
@@ -77,8 +77,8 @@ public class ex25 {
         t.testSupplyAsyncMemoizer(count);
 
         // Asynchronous check the primality of count random numbers
-        // using the CFMemoizer.
-        t.testCFMemoizer(count);
+        // using the AsyncMemoizer.
+        t.testAsyncMemoizer(count);
         System.out.println("Finishing ex25 test");
     }
 
@@ -162,13 +162,13 @@ public class ex25 {
 
     /*
      * Asynchronous check the primality of {@code count} random
-     * numbers using the CFMemoizer.
+     * numbers using the AsyncMemoizer.
      */
-    private void testCFMemoizer(long count)
+    private void testAsyncMemoizer(long count)
         throws ExecutionException, InterruptedException {
-        System.out.println("Running testCFMemoizer()");
+        System.out.println("Running testAsyncMemoizer()");
 
-        // Create a stream that uses the CFMemoizer to asynchronously
+        // Create a stream that uses the AsyncMemoizer to asynchronously
         // check the primality of "count" random numbers.
         sRandomNumbers
             // Convert the list into a stream.
