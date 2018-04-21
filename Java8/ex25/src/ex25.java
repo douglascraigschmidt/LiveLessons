@@ -1,6 +1,9 @@
 import utils.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -21,6 +24,11 @@ public class ex25 {
      * Maximum value of  random numbers.
      */
     private static long sMAX_VALUE = 100000000000000L;
+
+    /**
+     * The list of random numbers.
+     */
+    private static List<Long> sRandomNumbers;
 
     /**
      * This object checks for primality using a synchronous memoizer.
@@ -44,6 +52,18 @@ public class ex25 {
 
         // Conditionally override the default count.
         long count = argv.length == 0 ? sDEFAULT_COUNT : Long.valueOf(argv[0]);
+
+        // Generate a list of random numbers used by all the tests.
+        sRandomNumbers = new Random()
+            // Generate "count" random between sMAX_VALUE - count and
+            // sMAX_VALUE.
+            .longs(count, sMAX_VALUE - count, sMAX_VALUE)
+
+            // Box longs into Longs.
+            .boxed()
+
+            // Collect the random numbers into a list.
+            .collect(toList());
 
         ex25 t = new ex25();
 
@@ -78,13 +98,12 @@ public class ex25 {
 
         // Create a stream that uses the ExecutorService to
         // concurrently check the primality of "count" random numbers.
-        new Random()
-            // Generate "count" random between sMAX_VALUE - count and
-            // sMAX_VALUE.
-            .longs(count, sMAX_VALUE - count, sMAX_VALUE)
+        sRandomNumbers
+            // Convert the list into a stream.
+            .stream()
 
             // Convert each random number into a Callable.
-            .mapToObj((long randomNumber) ->
+            .map(randomNumber ->
                       (Callable<SimpleImmutableEntry<Long, Long>>) () ->
                       sPrimeChecker.apply(Math.abs(randomNumber)))
 
@@ -114,14 +133,13 @@ public class ex25 {
 
         // Create a stream that uses CompletableFuture.supplyAsync() to
         // asynchronously check the primality of "count" random numbers.
-        new Random()
-            // Generate "count" random between sMAX_VALUE - count and
-            // sMAX_VALUE.
-            .longs(count, sMAX_VALUE - count, sMAX_VALUE)
+        sRandomNumbers
+            // Convert the list into a stream.
+            .stream()
 
             // Submit each random number to CompletableFuture's
             // supplyAsync() factory method.
-            .mapToObj(randomNumber ->
+            .map(randomNumber ->
                       CompletableFuture.supplyAsync(() ->
                                                     sPrimeChecker.apply(Math.abs(randomNumber))))
 
@@ -148,13 +166,12 @@ public class ex25 {
 
         // Create a stream that uses the CFMemoizer to asynchronously
         // check the primality of "count" random numbers.
-        new Random()
-            // Generate "count" random between sMAX_VALUE - count and
-            // sMAX_VALUE.
-            .longs(count, sMAX_VALUE - count, sMAX_VALUE)
+        sRandomNumbers
+            // Convert the list into a stream.
+            .stream()
 
             // Convert each random number into a completable future.
-            .mapToObj(randomNumber ->
+            .map(randomNumber ->
                       sPrimeCheckerCF.apply(Math.abs(randomNumber)))
 
             // Create one completable future that completes when all
