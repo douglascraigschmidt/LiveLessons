@@ -50,8 +50,7 @@ public class ex25 {
     /**
      * Main entry point into the test program.
      */
-    public static void main(String[] argv)
-        throws ExecutionException, InterruptedException {
+    public static void main(String[] argv) {
         System.out.println("Starting ex25 test");
 
         // Conditionally override the default count.
@@ -73,25 +72,24 @@ public class ex25 {
 
         // Concurrently check the primality of count random numbers
         // using an ExecutorService with a fixed-size thread pool.
-        t.testCallableMemoizer(count);
+        t.testCallableMemoizer();
 
         // Asynchronous check the primality of count random numbers
         // using CompletableFuture.supplyAsync() with the common
         // fork-join pool.
-        t.testSupplyAsyncMemoizer(count);
+        t.testSupplyAsyncMemoizer();
 
         // Asynchronous check the primality of count random numbers
         // using the AsyncMemoizer.
-        t.testAsyncMemoizer(count);
+        t.testAsyncMemoizer();
         System.out.println("Finishing ex25 test");
     }
 
     /**
-     * Concurrently check the primality of {@code count} random
-     * numbers using an ExecutorService with a fixed-size thread pool.
+     * Concurrently check the primality of count random numbers using
+     * an ExecutorService with a fixed-size thread pool.
      */
-    private void testCallableMemoizer(long count)
-        throws ExecutionException, InterruptedException {
+    private void testCallableMemoizer() {
         System.out.println("Running testCallableMemoizer()");
 
         // This object manages a thread pool that matches the number
@@ -126,12 +124,10 @@ public class ex25 {
     }
 
     /**
-     * Asynchronous check the primality of {@code count} random
-     * numbers using CompletableFuture.supplyAsync() with the common
-     * fork-join pool.
+     * Asynchronous check the primality of random numbers using
+     * CompletableFuture.supplyAsync() with the common fork-join pool.
      */
-    private void testSupplyAsyncMemoizer(long count)
-        throws ExecutionException, InterruptedException {
+    private void testSupplyAsyncMemoizer() {
         System.out.println("Running testSupplyAsyncMemoizer()");
 
         // Create a stream that uses CompletableFuture.supplyAsync() to
@@ -160,11 +156,10 @@ public class ex25 {
     }
 
     /*
-     * Asynchronous check the primality of {@code count} random
-     * numbers using the AsyncMemoizer.
+     * Asynchronous check the primality of count random numbers using
+     * the AsyncMemoizer.
      */
-    private void testAsyncMemoizer(long count)
-        throws ExecutionException, InterruptedException {
+    private void testAsyncMemoizer() {
         System.out.println("Running testAsyncMemoizer()");
 
         // Create a stream that uses the AsyncMemoizer to asynchronously
