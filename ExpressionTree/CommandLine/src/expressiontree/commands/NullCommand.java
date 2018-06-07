@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * No-op command.  This plays the role of the "ConcreteCommand" in the
@@ -10,10 +10,10 @@ import expressiontree.tree.TreeOps;
 public class NullCommand 
        extends UserCommand {
     /**
-     * Constructor that provides the appropriate {@code TreeOps} and
+     * Constructor that provides the appropriate {@code TreeContext} and
      * the requested format.
      */
-    public NullCommand(TreeOps context) {
+    public NullCommand(TreeContext context) {
         super(context);
     }
 
@@ -35,7 +35,7 @@ public class NullCommand
                             "");
         platform.outputMenu("1a.",
                             "format",
-                            "[post-order]");
+                            "[in-order | post-order]");
         platform.outputMenu("1b.",
                             "set",
                             "[variable=value]");

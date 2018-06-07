@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Set the desired format, e.g., "in-order," "pre-order,"
@@ -16,17 +16,17 @@ public class FormatCommand
     private String mFormat;
 
     /** 
-     * Constructor that provides the appropriate @a TreeOps and the
+     * Constructor that provides the appropriate @a TreeContext and the
      * requested format.
      */
-    FormatCommand(TreeOps context, String newformat) {
+    FormatCommand(TreeContext context, String newformat) {
     	super(context);
     	mFormat = newformat;
     }
 
     /** Set the desired format. */
     public void execute() {
-        super.mTreeOps.format(mFormat);
+        super.mTreeContext.format(mFormat);
     }
 
     /** Print the valid commands available to users. */

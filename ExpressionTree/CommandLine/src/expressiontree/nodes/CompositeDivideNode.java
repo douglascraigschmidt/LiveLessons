@@ -17,10 +17,17 @@ public class CompositeDivideNode
         super(left, right);
     }
 
+    /**
+     * Return the type of the node.
+     */
+    public int getType() {
+        return sDIVISION;
+    }
+
     /** 
      * Return the printable character stored in the node. 
      */
-    public int item() {
+    public int getItem() {
 	return '/';
     }
 

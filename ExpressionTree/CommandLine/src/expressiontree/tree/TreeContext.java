@@ -6,12 +6,12 @@ import expressiontree.states.UninitializedState;
 
 /**
  * Plays the role of the "Context" in the State pattern that ensures
- * user operations on an expression mTree are invoked according to the
+ * user operations on an expression tree are invoked according to the
  * correct protocol.  Most of its methods delegate to the
- * corresponding methods in sublcasses of the @a State base class,
- * which then perform the requested operations.
+ * corresponding methods in subclasses of the {@code State} base
+ * class, which then perform the requested operations.
  */
-public class TreeOps {
+public class TreeContext {
     /**
      * Keep track of the current mState of the sequence of user
      * operations.
@@ -19,7 +19,7 @@ public class TreeOps {
     private State mState;
     
     /**
-     * The current @a ExpressionTree. 
+     * The current {@code ExpressionTree}.
      */
     private ExpressionTree mTree;
 
@@ -45,32 +45,42 @@ public class TreeOps {
     /**
      * Constructor.
      */
-    public TreeOps() {
+    public TreeContext() {
+        // Start out in the uninitialized state.
         mState = new UninitializedState();
+
+        // Formatting has not been performed (yet).
         mFormatted = false;
-        mInterpreter = new Interpreter();
+
+        // Create a no-op tree.
         mTree = new ExpressionTree(null);
     }
 
     /**
-     * Set the desired format to the designated {@code format}.
+     * Set the format to the given {@code format}.
      */
     public void format(String format) {
+        // Create appropriate type of interpreter for input format.
+        mInterpreter = new Interpreter(format);
+
+        // Delegate to the appropriate state handler.
         mState.format(this, format);
+
+        // Formatting has been performed.
         mFormatted = true;
     }
 
     /**
-     * Make an expression mTree based on the designated @a expression
-     * using the previously designated format.
+     * Make an expression tree based on the designated {@code
+     * expression} using the previously designated format.
      */
     public void makeTree(String expression) {
         mState.makeTree(this, expression);
     }
 
     /**
-     * Print the most recently created expression mTree using the
-     * designated @a format.
+     * Print the most recently created expression tree using the
+     * designated {@code format}.
      */
     public void print(String format) {
         mState.print(this, format);
@@ -78,7 +88,7 @@ public class TreeOps {
 
     /**
      * Evaluate the "yield" of the most recently created expression
-     * mTree using the designated @a format.
+     * tree using the designated {@code format}.
      */
     public void evaluate(String format) {
         mState.evaluate(this, format);
@@ -98,14 +108,13 @@ public class TreeOps {
         if((pos = inputString.indexOf('=')) != -1) {
             // If the position is not the first char (e.g., '=value')
             // and position is not the last char (e.g., 'key=') then
-            // split the string and set the symbol table in the
-            // mInterpreter accordingly.
+            // split the string and set symbol table in mInterpreter.
             if(pos != 0 && pos < inputString.length() - 1) {
                 String key = inputString.substring(0, pos);
                 String value = inputString.substring(pos + 1);
 
                 mInterpreter.symbolTable().set(key,
-                                              Integer.parseInt(value));
+                                               Integer.parseInt(value));
             } else
                 throw new RuntimeException("Must be in the form key=value");
         } else
@@ -113,30 +122,29 @@ public class TreeOps {
     }
 
     /** 
-     * Return a pointer to the current @a State. 
+     * Return a pointer to the current {@code State}.
      */
     State state() {
         return mState;
     }
 
     /**
-     * Set the current @a State to the designated @a
-     * newstate pointer.
+     * Set the current {@code State} to the designated {@code
+     * newstate}.
      */
     public void state(State newState) {
         this.mState = newState;
     }
 
     /** 
-     * Return the current @a ExpressionTree that's owned by this
-     * object.
+     * Return the current {@code ExpressionTree} owned by this object.
      */
     public ExpressionTree tree() {
         return mTree;
     }
 
     /** 
-     * Set the current @a ExpressionTree to @a newtree.
+     * Set the current {@code ExpressionTree} to {@code newTree}.
      */
     public void tree(ExpressionTree newTree) {
         mTree = newTree;

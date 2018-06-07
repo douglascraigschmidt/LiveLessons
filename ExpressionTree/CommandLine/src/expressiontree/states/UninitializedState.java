@@ -1,23 +1,24 @@
 package expressiontree.states;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
- * A state without an initialized context or format.
+ * A state without an initialized context or given format.
  */
 public class UninitializedState 
        implements State {
     /** 
-     * Formats the traversal order of the state. 
+     * Sets the input format for the state. 
      */
-    public void format(TreeOps context, String newFormat) {
+    public void format(TreeContext context, String newFormat) {
         if (newFormat.equals(""))
             // Default to in-order if user doesn't explicitly
             // request a format order.
             newFormat = "in-order";
-        else if (!newFormat.equals("in-order"))
+        else if (!(newFormat.equals("in-order")
+                   || newFormat.equals("post-order")))
             throw new IllegalArgumentException(newFormat 
-                                               + " evaluation is not supported yet");
+                                               + " format is not supported yet");
 
         // Transition to the designated UninitializedState. 
         context.state(mUninitializedStateFactory.makeUninitializedState(newFormat));
@@ -28,5 +29,4 @@ public class UninitializedState
      */        
     private static UninitializedStateFactory mUninitializedStateFactory =
         new UninitializedStateFactory();
-
 }

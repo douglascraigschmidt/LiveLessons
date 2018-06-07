@@ -1,13 +1,6 @@
 package expressiontree.states;
 
-import expressiontree.platspecs.Platform;
-import expressiontree.tree.ExpressionTree;
-import expressiontree.tree.TreeOps;
-import expressiontree.visitors.EvaluationVisitor;
-import expressiontree.visitors.Visitor;
-import expressiontree.visitors.VisitorFactory;
-
-import java.util.Iterator;
+import expressiontree.tree.TreeContext;
 
 /**
  * Implementation of the State pattern that is used to define the
@@ -20,14 +13,14 @@ public interface State {
     /**
      * Throws an exception if called in the wrong state.
      */
-    default void format(TreeOps context, String newFormat) {
+    default void format(TreeContext context, String newFormat) {
         throw new IllegalStateException("State.format() called in invalid state");
     }
 	  
     /** 
      * Throws an exception if called in the wrong state.
      */
-    default void makeTree(TreeOps context,
+    default void makeTree(TreeContext context,
                          String expression) {
         throw new IllegalStateException("State.makeTree() called in invalid state");
     }
@@ -35,7 +28,7 @@ public interface State {
     /** 
      * Throws an exception if called in the wrong state.
      */
-    default void print(TreeOps context,
+    default void print(TreeContext context,
                       String format) {
         throw new IllegalStateException("State.print() called in invalid state");
     }
@@ -43,7 +36,7 @@ public interface State {
     /** 
      * Throws an exception if called in the wrong state.
      */
-    default void evaluate(TreeOps context,
+    default void evaluate(TreeContext context,
                          String format) {
         throw new IllegalStateException("State.evaluate() called in invalid state");
     }

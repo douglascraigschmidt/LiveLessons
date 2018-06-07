@@ -78,7 +78,7 @@ public class CrDemo {
     /**
      * Represents a factory that accepts three arguments and produces
      * a result.  This is a functional interface whose functional
-     * method is {@link #make(Object, Object, Object)}.
+     * method is {@link #of(Object, Object, Object)}.
      */
     @FunctionalInterface
     interface TriFactory<P1,

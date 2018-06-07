@@ -33,44 +33,46 @@ public class InputDispatcher {
     }
 
     /**
-     * ...
+     * Factory that creates an InputHandler configured according to
+     * the parameters.
+     *
+     * @param verbose Determine whether to use verbose (true) or succinct (false) mode.
+     * @param platform Provides input and output according to the configured runtime platform.
      */
     public void makeHandler(boolean verbose,
-                            Object input,
-                            Object output,
-                            Object activity) {
-        // Create an InputHandler that takes the following parameters:
-        // boolean (to determine verbose or succinct)
-        // mInput   (An EditText object for the android GUI) NULL for commandLine
-        // output  (A TextView object for the android GUI)  NULL for commandLine
-        // activity(An Activity object for the android GUI) NULL for commandLine
+                            Platform platform) {
         mInputHandler = InputHandler.makeHandler(verbose,
-                                                input,
-                                                output,
-                                                activity);
+                                                 platform);
     }
 
     /**
-     * ...
+     * Factory that initializes the InputHandler from an existing
+     * {@code inputHandler}.
+     *
+     * @param platform Provides input and output according to the configured runtime platform.
+     * @param inputHandler InputHandler to use for testing.
+     */
+    public void makeHandler(Platform platform,
+                            InputHandler inputHandler) {
+        mInputHandler = InputHandler.makeHandler(platform, inputHandler);
+    }
+
+    /**
+     * Factory that creates an InputHandler configured according to
+     * the parameters and that prompts the user for input.
+     *
+     * @param verbose Determine whether to use verbose (true) or succinct (false) mode.
+     * @param platform Provides input and output according to the configured runtime platform.
      */
     public void makeHandlerAndPromptUser(boolean verbose,
-                                         Object input,
-                                         Object output,
-                                         Object activity) {
-        // Create an InputHandler that takes the following parameters:
-        // boolean (to determine verbose or succinct)
-        // mInput   (An EditText object for the android GUI) NULL for commandLine
-        // output  (A TextView object for the android GUI)  NULL for commandLIne
-        // activity(An Activity object for the android GUI) NULL for commandLine
+                                         Platform platform) {
         mInputHandler = InputHandler.makeHandler(verbose,
-                                                input,
-                                                output,
-                                                activity);
+                                                 platform);
         mInputHandler.promptUser();
     }
 
     /**
-     * ...
+     * Dispatch one input event.
      */
     public void dispatchOneInput() {
         try {
@@ -81,7 +83,8 @@ public class InputDispatcher {
     }
 
     /**
-     * ...
+     * Dispatch all the input events until endInputDispatching() is
+     * called.
      */
     public void dispatchAllInputs() {
         // Continuously runs the InputHandler.

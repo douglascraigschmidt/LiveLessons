@@ -17,9 +17,16 @@ public class CompositeNegateNode
     }
 
     /**
+     * Return the type of the node.
+     */
+    public int getType() {
+        return sNEGATION;
+    }
+
+    /**
      * Return the printable character stored in the node. 
      */
-    public int item() {
+    public int getItem() {
         return '-';
     }
 

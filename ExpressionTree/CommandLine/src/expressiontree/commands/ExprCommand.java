@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Set the desired expression, e.g., "1+2*3".  This plays the role of
@@ -15,10 +15,10 @@ public class ExprCommand
     private String mExpr;
 
     /** 
-     * Constructor that provides the appropriate @a TreeOps and the
+     * Constructor that provides the appropriate @a TreeContext and the
      * requested expression.
      */
-    ExprCommand(TreeOps context, String newexpr) {
+    ExprCommand(TreeContext context, String newexpr) {
         super(context);
         mExpr = newexpr;
     }
@@ -27,7 +27,7 @@ public class ExprCommand
      * Create the desired expression tree. 
      */
     public void execute() {
-        super.mTreeOps.makeTree(mExpr);
+        super.mTreeContext.makeTree(mExpr);
     }
 
     /** 
@@ -47,7 +47,7 @@ public class ExprCommand
                             "[in-order | pre-order | post-order| level-order]");
         platform.outputMenu("0a.",
                             "format",
-                            "[in-order]");
+                            "[in-order | post-order]");
         platform.outputMenu("0b.",
                             "set",
                             "[variable = value]");

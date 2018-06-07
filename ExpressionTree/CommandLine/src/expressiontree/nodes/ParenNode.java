@@ -3,42 +3,38 @@ package expressiontree.nodes;
 import expressiontree.visitors.Visitor;
 
 /**
- * Defines a terminal node of type integer.  It plays the role of the
- * "Leaf" in the Composite pattern.
+ * Defines a terminal node of type paren (either getLeftChild '(' or getRightChild
+ * ')').  It plays the role of the "Leaf" in the Composite pattern.
  */
-public class LeafNode 
+public class ParenNode 
        implements ComponentNode {
     /** 
-     * Integer value associated with the operand. 
+     * Char value associated with the paren, i.e., '(' or ')'.
       */
-    private int mItem;
+    private char mParen;
   
     /**
        Constructor. 
     */
-    public LeafNode(int item) {
-        mItem = item;
-    }
-
-    /**
-     * Constructor.
-     */
-    public LeafNode(String item) {
-        mItem = Integer.parseInt(item);
+    public ParenNode(char paren) {
+        mParen = paren;
     }
 
     /**
      * Return the type of the node.
      */
     public int getType() {
-        return sNUMBER;
+        if (mParen == '(')
+            return sLPAREN;
+        else
+            return sRPAREN;
     }
 
     /**
-     * Return the getItem stored in the node.
+     * Return the paren stored in the node.
      */
     public int getItem() {
-        return mItem;
+        return mParen;
     }
 
     /**

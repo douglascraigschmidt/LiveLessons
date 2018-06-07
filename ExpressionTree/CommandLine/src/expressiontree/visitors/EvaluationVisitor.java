@@ -27,10 +27,17 @@ public class EvaluationVisitor
     }
 
     /**
+     * Visit a @a ParenNode.
+     */
+    public void visit(ParenNode node) {
+        // No-op;
+    }
+
+    /**
      * Visit a {@code LeafNode}.
      */
     public void visit(LeafNode node) {
-        mStack.push(node.item());
+        mStack.push(node.getItem());
     }
 
     /** 

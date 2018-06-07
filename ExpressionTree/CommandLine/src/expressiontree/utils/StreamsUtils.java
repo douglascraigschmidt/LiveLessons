@@ -40,7 +40,7 @@ public class StreamsUtils {
             (futureList.toArray(new CompletableFuture[futureList.size()]));
 
         // When all futures have completed return a CompletableFuture to
-        // a list of joined elements of type T.
+        // a list of joined elements of getType T.
         return allDoneFuture
             .thenApply(v -> futureList
                        // Convert futureList into a stream of
@@ -48,11 +48,11 @@ public class StreamsUtils {
                        .stream()
 
                        // Use map() to join() all completable futures
-                       // and yield objects of type T.  Note that
+                       // and yield objects of getType T.  Note that
                        // join() should never block.
                        .map(CompletableFuture::join)
 
-                       // Collect the results of type T into a list.
+                       // Collect the results of getType T into a list.
                        .collect(toList()));
     }
 
@@ -75,7 +75,7 @@ public class StreamsUtils {
             (futureList.toArray(new CompletableFuture[futureList.size()]));
 
         // When all futures have completed return a CompletableFuture to
-        // a list of joined elements of type T.
+        // a list of joined elements of getType T.
         return allDoneFuture
             .thenApply(v -> futureList
                        // Convert futureList into a stream of
@@ -83,7 +83,7 @@ public class StreamsUtils {
                        .stream()
 
                        // Use map() to join() all completable futures
-                       // and yield objects of type T.  Note that
+                       // and yield objects of getType T.  Note that
                        // join() should never block.
                        .map(CompletableFuture::join));
     }
@@ -108,7 +108,7 @@ public class StreamsUtils {
                 CompletableFuture.allOf(futures);
 
         // When all futures have completed return a CompletableFuture to
-        // a list of joined elements of type T.
+        // a list of joined elements of getType T.
         return allDoneFuture
             .thenApply(v -> Arrays
                        // Convert futureList into a stream of
@@ -116,7 +116,7 @@ public class StreamsUtils {
                        .stream(futures)
 
                        // Use map() to join() all completable futures
-                       // and yield objects of type T.  Note that
+                       // and yield objects of getType T.  Note that
                        // join() should never block.
                        .map(CompletableFuture::join));
     }
@@ -144,7 +144,7 @@ public class StreamsUtils {
     }
 
     /**
-     * Maps the values of an Enum type to a corresponding array of
+     * Maps the values of an Enum getType to a corresponding array of
      * Strings.
      */
     public static String[] getNames(Class<? extends Enum<?>> e) {

@@ -1,6 +1,6 @@
 package expressiontree.commands;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Plays the role of the "Command" in the Command pattern to define an
@@ -12,15 +12,15 @@ public abstract class UserCommand {
      * Holds the expression tree that is the target of the
      * commands. 
      */
-    TreeOps mTreeOps;
+    TreeContext mTreeContext;
 
     /**
      * Constructor.
      *
-     * @param treeOps TreeOps instance
+     * @param treeContext TreeContext instance
      */
-    UserCommand(TreeOps treeOps) {
-        mTreeOps = treeOps;
+    UserCommand(TreeContext treeContext) {
+        mTreeContext = treeContext;
     }
 
     /** 

@@ -1,18 +1,18 @@
 package expressiontree.states;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
- * A state formated level order without an expression tree. 
+ * A state formated level-order without an expression tree.
  */
 class LevelOrderUninitializedState 
       extends UninitializedState {
     /**
-     * Process the @a expression using a level-order
-     * interpreter and update the state of the @a context to
-     * the @a LevelOrderInitializedState.
+     * Process the {@code expression} using a level-order interpreter
+     * and update the state of the {@code context} to the {@code
+     * LevelOrderInitializedState}.
      */
-    public void makeTree(TreeOps context, String expression) {
+    public void makeTree(TreeContext context, String expression) {
         throw new IllegalStateException("LevelOrderUninitializedState.makeTree() not yet implemented");
     }
 }

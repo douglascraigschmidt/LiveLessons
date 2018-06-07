@@ -18,9 +18,9 @@ public class MainCalculator {
         // Initializes the Platform singleton with the appropriate
         // Platform strategy, which in this case will be the
         // CommandLinePlatform.
-        Platform.instance (new PlatformFactory(System.in,
-                                               System.out,
-                                               null).makePlatform());
+        Platform.instance(new PlatformFactory(System.in,
+                                              System.out,
+                                              null).makePlatform());
 
         // Initializes the Options singleton.
         Options.instance().parseArgs(args);
@@ -33,12 +33,10 @@ public class MainCalculator {
         // Create an InputHandler to process the user input expression
         // where System.in contains the input and the System.out will
         // be the output.
-        InputDispatcher.instance().makeHandler (Options.instance().verbose(),
-                                                System.in,
-                                                System.out,
-                                                null);
+        InputDispatcher.instance().makeHandler(Options.instance().verbose(),
+                                               Platform.instance());
 
-        /// Process all user input expressions.
+        // Process all user input expressions.
         InputDispatcher.instance().dispatchAllInputs();
     }
 }

@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Evaluates the expression tree in the desired mFormat, e.g.,
@@ -16,10 +16,10 @@ public class EvalCommand
     private String mFormat;
 
     /** 
-     * Constructor that provides the appropriate TreeOps and the
+     * Constructor that provides the appropriate TreeContext and the
      * requested mFormat.
      */
-    EvalCommand(TreeOps context,
+    EvalCommand(TreeContext context,
                 String format) {
         super(context);
         mFormat = format;
@@ -29,7 +29,7 @@ public class EvalCommand
      * Evaluate the expression tree. 
      */
     public void execute() {
-        super.mTreeOps.evaluate(mFormat);
+        super.mTreeContext.evaluate(mFormat);
     }
 
     /** 
@@ -47,7 +47,7 @@ public class EvalCommand
                             "[in-order | pre-order | post-order| level-order]");
         platform.outputMenu("0a.",
                             "format",
-                            "[in-order]");
+                            "[in-order | post-order]");
         platform.outputMenu("0b.",
                             "set",
                             "[variable = value]");

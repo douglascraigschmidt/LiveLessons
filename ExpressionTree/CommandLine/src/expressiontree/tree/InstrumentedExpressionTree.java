@@ -50,11 +50,11 @@ public class InstrumentedExpressionTree
     }
 
     /** 
-     * Returns the root item. 
+     * Returns the root getItem.
      */
-    public int item() throws Exception {
+    public int getItem() throws Exception {
         System.out.println("starting mLeft() call");
-        int temp = super.item();
+        int temp = super.getItem();
         System.out.println("finished mLeft() call");
         return temp;
     }
@@ -62,9 +62,9 @@ public class InstrumentedExpressionTree
     /**
      * Returns the tree's mLeft node.
      */
-    public ExpressionTree left() {
+    public ExpressionTree getLeftChild() {
         System.out.println("starting mLeft() call");
-        ExpressionTree temp = super.left();
+        ExpressionTree temp = super.getLeftChild();
         System.out.println("finished mRight() call");
         return temp;
     }
@@ -72,9 +72,9 @@ public class InstrumentedExpressionTree
     /** 
      * Returns the tree's mRight node.
      */
-    public ExpressionTree right() {
+    public ExpressionTree getRightChild() {
         System.out.println("starting mRight() call");
-        ExpressionTree temp = super.right();
+        ExpressionTree temp = super.getRightChild();
         System.out.println("finished mRight() call");
         return temp;
     }

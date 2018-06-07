@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Prints the expression tree in the desired format, e.g., "in-order,"
@@ -16,10 +16,10 @@ public class PrintCommand
     private String format;
 
     /**
-     * Constructor that provides the appropriate @a TreeOps and the
+     * Constructor that provides the appropriate @a TreeContext and the
      * requested format.
      */
-    PrintCommand(TreeOps context,
+    PrintCommand(TreeContext context,
                  String printFormat) {
         super(context);
         format = printFormat;
@@ -29,7 +29,7 @@ public class PrintCommand
      * Print the expression tree. 
      */
     public void execute() {
-        super.mTreeOps.print(format);
+        super.mTreeContext.print(format);
     }
 
     /** 
@@ -49,7 +49,7 @@ public class PrintCommand
                             "[in-order | pre-order | post-order| level-order]");
         platform.outputMenu("0a.",
                             "format",
-                            "[in-order]");
+                            "[in-order | post-order]");
         platform.outputMenu("0b.",
                             "set",
                             "[variable = value]");

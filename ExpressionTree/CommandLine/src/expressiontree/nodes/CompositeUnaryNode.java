@@ -10,7 +10,7 @@ import expressiontree.nodes.ComponentNode;
 public class CompositeUnaryNode
        implements ComponentNode {
     /** 
-     * Reference to the mRight child.
+     * Reference to the getRightChild child.
      */
     private ComponentNode mRight;
 	
@@ -22,9 +22,9 @@ public class CompositeUnaryNode
     }
 	
     /** 
-     * Return the mRight child.
+     * Return the getRightChild child.
      */
-    public ComponentNode right() {
+    public ComponentNode getRightChild() {
         return mRight;
     }
 }

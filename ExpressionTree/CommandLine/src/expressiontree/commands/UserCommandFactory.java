@@ -1,12 +1,12 @@
 package expressiontree.commands;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 import java.util.*;
 
 /**
  * Implementation of the Factory Method pattern that dynamically
- * allocates the appropriate @a UserCommand object requested by
+ * allocates the appropriate {@code UserCommand} object requested by
  * caller.  This variant of the pattern doesn't use inheritance, so it
  * plays the role of the ConcreteCreator in the Factory Method
  * pattern.
@@ -15,11 +15,11 @@ public class UserCommandFactory {
     /** 
      * Holds the expression tree that is the target of the commands.
      */
-    private TreeOps mTreeOps;
+    private TreeContext mTreeContext;
 	
     /** 
-     * This interface uses the Command pattern to create @a
-     * UserCommand implementations at runtime.
+     * This interface uses the Command pattern to create {@code
+     * UserCommand} implementations at runtime.
      */
     @FunctionalInterface
     private interface UserCommandFactoryCommand {
@@ -27,7 +27,7 @@ public class UserCommandFactory {
     }
 	
     /**
-     * Map used to validate mInput requests for @a UserCommand
+     * Map used to validate mInput requests for {@code UserCommand}
      * implementations and dispatch the execute() method of the
      * requested user command.
      */
@@ -37,60 +37,60 @@ public class UserCommandFactory {
     /** 
      * Constructor. 
      */
-    public UserCommandFactory(final TreeOps treeOps) {
-    	// Initialize the TreeOps member. 
-        this.mTreeOps = treeOps;
+    public UserCommandFactory(final TreeContext treeContext) {
+    	// Initialize the TreeContext member.
+        this.mTreeContext = treeContext;
    
-    	// A "format" string maps to a command object that creates
-        // an @a FormatCommand implementation.
+    	// A "format" string maps to a command object that creates an
+        // {@code FormatCommand} implementation.
         commandMap.put("format",
-                       param -> new FormatCommand(treeOps, param));
+                       param -> new FormatCommand(treeContext, param));
         
-    	// An "expr" string maps to a command object that creates
-        // an @a ExprCommand implementation.
+    	// An "expr" string maps to a command object that creates an
+        // {@code ExprCommand} implementation.
         commandMap.put("expr",
-                       param -> new ExprCommand(treeOps, param));
+                       param -> new ExprCommand(treeContext, param));
         
-    	// A "print" string maps to a command object that creates
-        // an @a PrintCommand implementation.
+    	// A "print" string maps to a command object that creates an
+        // {@code PrintCommand} implementation.
         commandMap.put("print",
-                       param -> new PrintCommand(treeOps, param));
+                       param -> new PrintCommand(treeContext, param));
 		
-    	// An "eval" string maps to a command object that creates
-        // an @a EvalCommand implementation.
+    	// An "eval" string maps to a command object that creates an
+        // {@code EvalCommand} implementation.
         commandMap.put("eval",
-                       param -> new EvalCommand(treeOps, param));
+                       param -> new EvalCommand(treeContext, param));
         
-    	// A "set" string maps to a command object that creates a @a
-        // SetCommand implementation.
+    	// A "set" string maps to a command object that creates a
+        // {@code SetCommand} implementation.
         commandMap.put("set",
-                       param -> new SetCommand(treeOps, param));
+                       param -> new SetCommand(treeContext, param));
 		
-    	// A "macro" string maps to a command object that creates a @a
-        // MacroCommand implementation.
+    	// A "macro" string maps to a command object that creates a
+        // {@code MacroCommand} implementation.
         commandMap.put("macro", param -> {
             // A MacroCommand contains a "in-order"
             // FormatCommand, the user mInput expression, and a
             // "post-order" EvalCommand.  It's used to
             // implement "Succinct Mode".
-            return new MacroCommand(treeOps, Arrays
-                    .asList(new FormatCommand(treeOps,
+            return new MacroCommand(treeContext, Arrays
+                    .asList(new FormatCommand(treeContext,
                                      "in-order"),
-                            new ExprCommand(treeOps,
+                            new ExprCommand(treeContext,
                                             param),
-                            new EvalCommand(treeOps,
+                            new EvalCommand(treeContext,
                                     "post-order")));
         });
 		
-    	// A "quit" string maps to a command object that creates a @a
-        // QuitCommand implementation.
+    	// A "quit" string maps to a command object that creates a
+        // {@code QuitCommand} implementation.
         commandMap.put("quit",
-                       param -> new QuitCommand(treeOps));
+                       param -> new QuitCommand(treeContext));
     }
 
     /** 
-     * Create a new @a UserCommand object based on the caller's
-     * designated @a inputString.
+     * Create a new {@code UserCommand} object based on the caller's
+     * designated {@code inputString}.
      */
     public UserCommand makeUserCommand(String inputString) {
         String parameters = "";
@@ -114,6 +114,6 @@ public class UserCommandFactory {
         else
             // Otherwise, the user gave an unknown request, so we'll
             // quit.
-            return new QuitCommand(mTreeOps);
+            return new QuitCommand(mTreeContext);
     }
 }

@@ -16,11 +16,18 @@ public class CompositeMultiplyNode
                                  ComponentNode right) {
         super(left, right);
     }
-  
+
+    /**
+     * Return the type of the node.
+     */
+    public int getType() {
+        return sMULTIPLICATION;
+    }
+
     /**
      * Return the printable character stored in the node. 
      */
-    public int item() {
+    public int getItem() {
 	return '*';
     }
 

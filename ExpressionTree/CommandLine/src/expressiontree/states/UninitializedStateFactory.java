@@ -3,12 +3,10 @@ package expressiontree.states;
 import java.util.HashMap;
 
 /**
- * Implementation of a factory pattern that dynamically
- * allocates the appropriate {@code State} object.
- * 
- * This class is a variant of the Abstract Factory pattern
- * that has a set of related factory methods but which doesn't
- * use inheritance.
+ * Implementation of a factory pattern that dynamically allocates the
+ * appropriate {@code State} object.  This class is a variant of the
+ * Abstract Factory pattern that has a set of related factory methods
+ * but which doesn't use inheritance.
  */
 class UninitializedStateFactory {
     /**
@@ -52,6 +50,6 @@ class UninitializedStateFactory {
             // Otherwise, the user gave an unknown request, so
             // throw an exception.
             throw new IllegalArgumentException(formatRequest 
-                                               + "is not a supported format");
+                                               + " is not a supported format");
     }
 }

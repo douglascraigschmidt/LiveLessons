@@ -2,34 +2,23 @@ package expressiontree.tree;
 
 import expressiontree.iterators.IteratorFactory;
 import expressiontree.nodes.ComponentNode;
-import expressiontree.platspecs.Platform;
-import expressiontree.utils.StreamsUtils;
-import expressiontree.visitors.EvaluationVisitor;
 import expressiontree.visitors.Visitor;
-import expressiontree.visitors.VisitorFactory;
 
 import java.util.Iterator;
-import java.util.function.Consumer;
 
 /**
- * Interface for the Composite pattern that is used to contain all the
- * operator and operand nodes in the expression tree.  Plays the role
- * of the "Abstraction" in the Bridge pattern and delegates to the
- * appropriate "Implementor" that performs the expression tree
- * operations.
+ * API for the Composite pattern that's used to contain all the
+ * operator and operand nodes in the expression tree.  This class
+ * plays the role of the "Abstraction" in the Bridge pattern and
+ * delegates to the appropriate "Implementor" to perform the
+ * expression tree operations.
  */
 public class ExpressionTree
        implements Iterable<ExpressionTree> {
-    /**
-     * A factory that creates the appropriate visitors.
-     */
-    private static VisitorFactory sVisitorFactory =
-        new VisitorFactory();
-
-    /** 
+   /**
      * Base implementor. 
      */
-    ComponentNode mRoot = null;
+    ComponentNode mRoot;
 
     /** 
      * A factory class capable of creating iterators dynamically. 
@@ -46,7 +35,7 @@ public class ExpressionTree
     }
 
     /** 
-     * Returns whether a the tree is null. 
+     * Returns whether the tree is null. 
      */
     public boolean isNull() {
         return mRoot == null;
@@ -60,24 +49,24 @@ public class ExpressionTree
     }
 
     /** 
-     * Returns the root item. 
+     * Returns the root's getItem.
      */
-    public int item() throws Exception {
-        return mRoot.item();
+    public int getItem() throws Exception {
+        return mRoot.getItem();
     }
 
     /** 
-     * Returns the tree's mLeft node.
+     * Returns a new ExpressionTree containing the tree's getLeftChild child.
      */
-    public ExpressionTree left() {
-        return new ExpressionTree(mRoot.left());
+    public ExpressionTree getLeftChild() {
+        return new ExpressionTree(mRoot.getLeftChild());
     }
 
     /** 
-     * Returns the tree's mRight node.
+     * Returns a new ExpressionTree containing the tree's getRightChild child.
      */
-    public ExpressionTree right() {
-        return new ExpressionTree(mRoot.right());
+    public ExpressionTree getRightChild() {
+        return new ExpressionTree(mRoot.getRightChild());
     }
 
     /**
@@ -104,87 +93,5 @@ public class ExpressionTree
     @Override
     public Iterator<ExpressionTree> iterator() {
         return makeIterator(IteratorFactory.PRE_ORDER);
-    }
-
-    /** 
-     * Print the operators and operands of the @a tree using the
-     * designated @a traversalOrder.
-     */
-    public void print(String traversalOrder) {
-        if (traversalOrder.equals(""))
-            // Default to in-order if user doesn't explicitly request
-            // a print order.
-            traversalOrder = "in-order";
-
-        // Note the high pattern density in the code below, which uses
-        // of the Factory Method, Iterator, Bridge, Strategy, and
-        // Visitor patterns.
-
-        // Create the PrintVisitor using a factory. 
-        Visitor printVisitor = sVisitorFactory
-                .makeVisitor("print");
-
-        // Create a stream that traverses all nodes in the expression tree and
-        // accepts the printVisitor to evaluate each type of node.
-        StreamsUtils
-            .iteratorToStream(makeIterator(traversalOrder), false)
-            .forEach(expressionTree -> expressionTree.accept(printVisitor));
-
-        /*
-        for (ExpressionTree node : this)
-            node.accept(printVisitor);
-
-        this.forEach(node -> node.accept(printVisitor));
-        */
-
-        /*
-        // Iterate through all nodes in the expression tree and accept
-        // the printVisitor to evaluate each type of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
-            it.hasNext();
-            )
-            it.next().accept(printVisitor);
-        */
-    }
-	  	
-    /** 
-     * Evaluate and print the yield of the @a tree using the
-     * designated @a traversalOrder.
-     */
-    public void evaluate(String traversalOrder) {
-        if (traversalOrder.equals(""))
-            // Default to post-order if user doesn't explicitly
-            // request an eval order.
-            traversalOrder = "post-order";
-        else if (!traversalOrder.equals("post-order"))
-            throw new IllegalArgumentException(traversalOrder + " evaluation is not supported yet");
-
-        // Note the high pattern density in the code below, which uses
-        // of the Factory Method, Iterator, Bridge, Strategy, and
-        // Visitor patterns.
-
-        // Create the EvaluationVisitor using a factory. 
-        Visitor evalVisitor = sVisitorFactory
-                .makeVisitor("eval");
-
-        // Create a stream that traverses all nodes in the expression tree and
-        // accepts the evalVisitor to evaluate each type of node.
-        StreamsUtils
-            .iteratorToStream(makeIterator(traversalOrder), false)
-            .forEach(expressionTree -> expressionTree.accept(evalVisitor));
-
-        /*
-        // Iterate through all nodes in the expression tree and accept
-        // the evalVisitor to evaluate each type of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
-            it.hasNext();
-            )
-            it.next().accept(evalVisitor);
-        */
-
-        Integer total = ((EvaluationVisitor) evalVisitor).total();
-
-        // Use the platform strategy to printout the result.
-        Platform.instance().outputLine(total.toString());
     }
 }

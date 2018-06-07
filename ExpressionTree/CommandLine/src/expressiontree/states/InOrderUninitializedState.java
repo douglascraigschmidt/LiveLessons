@@ -1,7 +1,10 @@
 package expressiontree.states;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
+/**
+ * A state formated in-order without an expression tree.
+ */
 class InOrderUninitializedState
       extends UninitializedState {
     /** 
@@ -9,13 +12,13 @@ class InOrderUninitializedState
      * and update the state of {@code mTreeOps} to the {@code
      * InOrderInitializedState}.
      */
-    public void makeTree(TreeOps treeOps, String inputExpression) {
+    public void makeTree(TreeContext treeContext, String inputExpression) {
         // Use the Interpreter and Builder patterns to create
         // the expression tree designated by user mInput.
-        treeOps.tree(treeOps.interpreter().interpret(inputExpression));
+        treeContext.tree(treeContext.interpreter().interpret(inputExpression));
 
         // Transition to the InOrderInitializedState. 
-        treeOps.state(new InOrderInitializedState());
+        treeContext.state(new InOrderInitializedState());
     }
 }
 

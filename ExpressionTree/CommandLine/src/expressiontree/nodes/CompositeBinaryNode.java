@@ -7,9 +7,9 @@ package expressiontree.nodes;
 public class CompositeBinaryNode
        extends CompositeUnaryNode {
     /** 
-     * Reference to the mLeft child.
+     * Reference to the getLeftChild child.
      */
-    private ComponentNode left;
+    private ComponentNode mLeft;
   
     /**
      * Constructor initializes the fields.
@@ -17,13 +17,13 @@ public class CompositeBinaryNode
     CompositeBinaryNode(ComponentNode left,
                         ComponentNode right) {
         super(right);
-        this.left = left;
+        mLeft = left;
     }
 
     /** 
-     * Return the mLeft child.
+     * Return the getLeftChild child.
      */
-    public ComponentNode left() {
-	return left;
+    public ComponentNode getLeftChild() {
+	return mLeft;
     }
 }

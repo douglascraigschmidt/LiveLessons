@@ -1,7 +1,7 @@
 package expressiontree.commands;
 
 import expressiontree.input.InputDispatcher;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
  * Instructs the mInput dispatching loop to shut down.  This plays the
@@ -10,9 +10,9 @@ import expressiontree.tree.TreeOps;
 public class QuitCommand 
        extends UserCommand {
     /** 
-     * Constructor that provides the appropriate @a TreeOps.
+     * Constructor that provides the appropriate @a TreeContext.
      */
-    QuitCommand(TreeOps context) {
+    QuitCommand(TreeContext context) {
         super(context);
     }
 

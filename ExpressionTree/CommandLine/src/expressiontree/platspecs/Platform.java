@@ -27,6 +27,16 @@ public abstract class Platform {
         return uniqueInstance = platform;
     }
 
+    /**
+     * @return The input source for this platform.
+     */
+    public abstract Object getInputSource();
+
+    /**
+     * @return The output sink for this platform.    
+     */
+    public abstract Object getOutputSink();
+
     /** 
      * Displays a line followed by a new line character. 
      */

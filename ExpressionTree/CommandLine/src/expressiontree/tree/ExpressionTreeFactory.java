@@ -4,7 +4,7 @@ import expressiontree.nodes.ComponentNode;
 
 /**
  * This class implements the Factory Method pattern to create {@code
- * ExpressionTree} objects.  If you want a different type of {@code
+ * ExpressionTree} objects.  If you want a different getType of {@code
  * ExpressionTree} you can subclass from this class and override the
  * {@code makeExpressionTree()} factory method.
  */

@@ -52,12 +52,12 @@ public class SynchronizedExpressionTree
     }
 
     /** 
-     * Returns the root item. 
+     * Returns the root getItem.
      */
-    public int item() throws Exception {
+    public int getItem() throws Exception {
         int temp;
         synchronized(this) {
-            temp = super.item();
+            temp = super.getItem();
         }
         return temp;
     }
@@ -65,10 +65,10 @@ public class SynchronizedExpressionTree
     /** 
      * Returns the tree's mLeft node.
      */
-    public ExpressionTree left() {
+    public ExpressionTree getLeftChild() {
         ExpressionTree temp;
         synchronized(this) {
-            temp = super.left();
+            temp = super.getLeftChild();
         }
         return temp;
     }
@@ -76,10 +76,10 @@ public class SynchronizedExpressionTree
     /**
      * Returns the tree's mRight node.
      */
-    public ExpressionTree right() {
+    public ExpressionTree getRightChild() {
         ExpressionTree temp;
         synchronized(this) {
-            temp = super.right();
+            temp = super.getRightChild();
         }
         return temp;
     }

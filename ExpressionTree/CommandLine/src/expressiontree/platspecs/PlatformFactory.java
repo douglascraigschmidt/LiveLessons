@@ -28,7 +28,7 @@ public class PlatformFactory {
         new HashMap<>();
 	
     /** 
-     * Constructor that stores the objects that perform mInput and
+     * Constructor that stores the objects that perform input and
      * output for a particular platform, such as CommandLinePlatform
      * or the AndroidPlatform.
      */
@@ -38,14 +38,14 @@ public class PlatformFactory {
     	// The "Sun Microsystems Inc." string maps to a command object
         // that creates an @a CommandLinePlatform implementation.
         platformMap.put("Sun Microsystems Inc.",
-                () -> new CommandLinePlatform(input,
-                                               output));
+                        () -> new CommandLinePlatform(input,
+                                                      output));
 
     	// The "Oracle Corporation" string maps to a command object
         // that creates an @a CommandLinePlatform implementation.
         platformMap.put("Oracle Corporation",
-                () -> new CommandLinePlatform(input,
-                                               output));
+                        () -> new CommandLinePlatform(input,
+                                                      output));
     }
 
     /** 

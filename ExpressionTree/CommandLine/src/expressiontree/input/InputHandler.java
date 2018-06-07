@@ -1,33 +1,34 @@
 package expressiontree.input;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 import expressiontree.commands.NullCommand;
 import expressiontree.commands.UserCommand;
 import expressiontree.commands.UserCommandFactory;
 import expressiontree.platspecs.Platform;
 
 /**
- * Provides an abstract class for handling mInput events and commands
- * associated with the expression tree application.
+ * Provides an abstract class for handling input events and commands
+ * associated with the expression tree processing app.
  *
  * This class defines methods for use in the Template Method pattern
- * that is used to process user mInput commands.
+ * that is used to process user input commands.
  *
  * @see VerboseModeInputHandler and SuccinctModeInputHandler.
  */
 public abstract class InputHandler {
     /** 
-     * EditText object recognized on both platforms. 
+     * Input object recognized on Android and command-line platforms.
      */
-    private static Object mGlobalInput;
+    private static Object sGlobalInput;
     
     /**
-     * TextView object recognized on both platforms.  
+     * Output object recognized on Android and command-line platforms.
      */
-    private static Object mGlobalOutput;
+    private static Object sGlobalOutput;
 	
     /** 
-     * Classifies the Handler as verbose. 
+     * Classifies the InputHandler as verbose (true) or succinct
+     * (false).
      */
     static boolean sVerboseField;
 
@@ -46,84 +47,104 @@ public abstract class InputHandler {
      */
     InputHandler() {
         // The context where the expression tree state resides.
-        TreeOps treeOps = new TreeOps();
-        mUserCommandFactory = new UserCommandFactory(treeOps);
-        mLastValidCommand = new NullCommand(treeOps);
+        TreeContext treeContext = new TreeContext();
+
+        // The factory used to create commands.
+        mUserCommandFactory = new UserCommandFactory(treeContext);
+
+        // Handle to last valid command that was executed.
+        mLastValidCommand = new NullCommand(treeContext);
     }
 
     /**
-     * Factory that creates the appropriate subclass of @a
-     * InputHandler, i.e., @a VerboseModeInputHandler or @a *
-     * SuccinctModeInputHandler.
+     * Factory that creates an InputHandler configured according to
+     * the parameters.
+     *
+     * @param verbose Determine whether to use verbose (true) or succinct (false) mode.
+     * @param platform Provides input and output according to the configured runtime platform.
      */
     static InputHandler makeHandler(boolean verbose,
-                                    Object input,
-                                    Object output,
-                                    Object activity) {
-        mGlobalInput = input;
-        mGlobalOutput = output;
+                                    Platform platform) {
+        sGlobalInput = platform.getInputSource();
+        sGlobalOutput = platform.getOutputSink();
         sVerboseField = verbose;
 
-        if(verbose) 
+        if (verbose) 
             return new VerboseModeInputHandler();
         else 
             return new SuccinctModeInputHandler();
     }
+
+    /**
+     * Factory that initializes the InputHandler from an existing
+     * {@code inputHandler}.
+     *
+     * @param platform Provides input and output according to the configured runtime platform.
+     * @param inputHandler InputHandler to use for testing.
+     * @return The {@code inputHandler} parameter.
+     */
+    public static InputHandler makeHandler(Platform platform,
+                                           InputHandler inputHandler) {
+        sGlobalInput = platform.getInputSource();
+        sGlobalOutput = platform.getOutputSink();
+        return inputHandler;
+    }
 	
     /** 
-     * This method is called back when mInput is available.  It
+     * This method is called back when input is available.  It
      * implements the Template Method pattern to perform the sequence
      * of steps associated with processing expression tree application
      * commands.
      */
-    void handleInput() throws Exception {
-        // Call a hook method to obtain user mInput.
+    public void handleInput() throws Exception {
+        // Call hook method to obtain user input.
         promptUser();
 		
-        // Retrieves mInput from user.
+        // Retrieve input from user.
         String input = retrieveInput();
-        
+
+        // The empty string indicates it's time to shutdown the event
+        // loop.
         if (input.equals(""))
             InputDispatcher.instance().endInputDispatching();
         else {
-            // Call a hook method to make a command based on the user
-            // mInput.
+            // Call hook method to make command based on user input.
             UserCommand command = makeUserCommand(input);
 
-            // Call a hook method to execute the command. 
+            // Call hook method to execute the command.
             executeCommand(command);
 
-            // Saves last command to a variable. 
+            // Save last command to a variable. 
             mLastValidCommand = command;
 		
-            // Displays the menu associated the the command. 
+            // Display the menu associated the the command.
             command.printValidCommands(sVerboseField);
         }
     }
 
     /** 
      * This hook method is a placeholder for prompting the user for
-     * mInput.
+     * input.
      */
     protected abstract void promptUser();
 
     /**
-     * This hook method retrieves mInput.
+     * This hook method retrieves input.
      */
-    private String retrieveInput() {
+    protected String retrieveInput() {
         return Platform.instance().retrieveInput(sVerboseField);
     }
 
     /**
      * This hook method is a placeholder for making a command based on
-     * the user mInput.
+     * the user input.
      */
     protected abstract UserCommand makeUserCommand(String userInput);
 
     /**
      * This hook method executes a command. 
      */
-    private void executeCommand(UserCommand command) throws Exception {
+    protected void executeCommand(UserCommand command) throws Exception {
         command.execute();
     }
 }

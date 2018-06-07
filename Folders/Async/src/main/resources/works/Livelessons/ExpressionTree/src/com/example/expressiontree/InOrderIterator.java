@@ -17,11 +17,14 @@ public class InOrderIterator implements Iterator<ExpressionTree> {
     
     /** Ctor */
     public InOrderIterator(ExpressionTree tree) {
-        if(!tree.isNull()) {
+        if (!tree.isNull()) {
             stack.push(tree);
 		
-            while(!stack.peek().left().isNull()) 
+            while(!stack.peek().left().isNull()) {
+                ExpressionTree root = stack.peek();
+
                 stack.push(stack.peek().left());
+            }
         }
     }
 	

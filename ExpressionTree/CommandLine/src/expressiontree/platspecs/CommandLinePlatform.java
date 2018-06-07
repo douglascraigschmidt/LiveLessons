@@ -29,6 +29,22 @@ public class CommandLinePlatform
     }
 	
     /**
+     * @return The input source for this platform.
+     */
+    @Override
+    public Object getInputSource() {
+        return mInput;
+    }
+
+    /**
+     * @return The output sink for this platform.    
+     */
+    @Override
+    public Object getOutputSink() {
+        return mOutput;
+    }
+
+    /**
      * Retrieves mInput from console and returns the value as a string.
      */
     public String retrieveInput(boolean verbose) {

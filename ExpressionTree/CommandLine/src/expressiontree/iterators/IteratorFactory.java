@@ -131,10 +131,10 @@ public class IteratorFactory {
                 // is LIFO, this results in the mLeft child being the first
                 // evaluated, which fits into the Pre-order traversal
                 // strategy.
-                if (!temp.right().isNull())
-                    queue.add (temp.right());
-                if (!temp.left().isNull())
-                    queue.add (temp.left());
+                if (!temp.getRightChild().isNull())
+                    queue.add (temp.getRightChild());
+                if (!temp.getLeftChild().isNull())
+                    queue.add (temp.getLeftChild());
             }
 
             return result;

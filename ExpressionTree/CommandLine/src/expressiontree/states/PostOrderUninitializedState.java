@@ -1,19 +1,24 @@
 package expressiontree.states;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
- * A state formated post order without an expression tree. 
+ * A state formated post-order without an expression tree.
  */
 class PostOrderUninitializedState 
       extends UninitializedState {
     /** 
-     * Process the @a expression using a post-order
-     * interpreter and update the state of the @a context to
-     * the @a PostOrderInitializedState.
+     * Process the {@code inputExpression} using a post-order interpreter
+     * and update the state of the {@code context} to the {@code
+     * PostOrderInitializedState}.
      */
-    public void makeTree(TreeOps context, String expression) {
-        throw new IllegalStateException("PostOrderUninitializedState.makeTree() not yet implemented");
+    public void makeTree(TreeContext treeContext, String inputExpression) {
+        // Use the Interpreter and Builder patterns to create
+        // the expression tree designated by user mInput.
+        treeContext.tree(treeContext.interpreter().interpret(inputExpression));
+
+        // Transition to the InOrderInitializedState. 
+        treeContext.state(new InOrderInitializedState());
     }
 }
 

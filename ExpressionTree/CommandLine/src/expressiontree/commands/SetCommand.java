@@ -1,10 +1,10 @@
 package expressiontree.commands;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 /**
- * Sets a variable into the SymbolTable stored inside of TreeOps.
+ * Sets a variable into the SymbolTable stored inside of TreeContext.
  * This plays the role of the "ConcreteCommand" in the Command
  * pattern.
  */
@@ -16,10 +16,10 @@ public class SetCommand
     private String mKeyValuePair;
 
     /** 
-     * Constructor that provides the appropriate @a TreeOps and
+     * Constructor that provides the appropriate @a TreeContext and
      * the requested format.
      */
-    SetCommand(TreeOps context,
+    SetCommand(TreeContext context,
                String keyValuePair) {
         super(context);
         mKeyValuePair = keyValuePair;
@@ -29,7 +29,7 @@ public class SetCommand
      * Evaluate the expression tree.
      */
     public void execute() {
-        super.mTreeOps.set(mKeyValuePair);
+        super.mTreeContext.set(mKeyValuePair);
     }
 
     /**
@@ -46,11 +46,11 @@ public class SetCommand
         int step = 1;
         int substep = 0;
         String formatMessagePartOne="format";
-        String formatMessagePartTwo="[in-order]";
+        String formatMessagePartTwo="[in-order | post-order]";
 		
         platform.outputMenu("", "", "");
 
-        if(!mTreeOps.formatted()) {
+        if(!mTreeContext.formatted()) {
             platform.outputMenu(step++ +".",
                                 formatMessagePartOne,
                                 formatMessagePartTwo);
@@ -66,7 +66,7 @@ public class SetCommand
             step = 0;
         }
 
-        if(mTreeOps.formatted())
+        if(mTreeContext.formatted())
             platform.outputMenu(step +".",
                                 formatMessagePartOne,
                                 formatMessagePartTwo);

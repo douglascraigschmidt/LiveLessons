@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Iterates through an @a Tree in level-order.  Plays the role of the
- * "ConcreteStrategy" in the Strategy pattern that defines the
- * pre-order iteration algorithm.
+ * Iterates through a {@code Tree} in level-order.  Plays the role of
+ * the "ConcreteStrategy" in the Strategy pattern that defines the
+ * level-order iteration algorithm.
  */
 public class LevelOrderIterator 
        implements Iterator<ExpressionTree> {
@@ -40,14 +40,14 @@ public class LevelOrderIterator
             // node later.
             ExpressionTree temp = mQueue.remove();
 
-            // Note the order here: right first, then left. Since
-            // this is LIFO, this results in the left child being
+            // Note the order here: getRightChild first, then getLeftChild. Since
+            // this is LIFO, this results in the getLeftChild child being
             // the first evaluated, which fits into the Pre-order
             // traversal strategy.
-            if (!temp.right().isNull())
-                mQueue.add (temp.right());
-            if (!temp.left().isNull())
-                mQueue.add (temp.left());
+            if (!temp.getRightChild().isNull())
+                mQueue.add (temp.getRightChild());
+            if (!temp.getLeftChild().isNull())
+                mQueue.add (temp.getLeftChild());
         }
 		
         return result;

@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.Stack;
 
 /**
- * Iterates through an @a Tree in pre-order.  Plays the role of the
- * "ConcreteStrategy" in the Strategy pattern that defines the
+ * Iterates through a {@code Tree} in pre-order.  Plays the role of
+ * the "ConcreteStrategy" in the Strategy pattern that defines the
  * pre-order iteration algorithm.
  */
 public class PreOrderIterator 
@@ -36,14 +36,14 @@ public class PreOrderIterator
             // the children, or else we'll revisit this node later.
             ExpressionTree temp = mStack.pop();
 	
-            // Note the order here: mRight first, then left. Since this
-            // is LIFO, this results in the left child being the first
+            // Note the order here: mRight first, then getLeftChild. Since this
+            // is LIFO, this results in the getLeftChild child being the first
             // evaluated, which fits into the Pre-order traversal
             // strategy.
-            if (!temp.right().isNull())
-                mStack.push(temp.right());
-            if (!temp.left().isNull())
-                mStack.push(temp.left());
+            if (!temp.getRightChild().isNull())
+                mStack.push(temp.getRightChild());
+            if (!temp.getLeftChild().isNull())
+                mStack.push(temp.getLeftChild());
         }
 
         return result;

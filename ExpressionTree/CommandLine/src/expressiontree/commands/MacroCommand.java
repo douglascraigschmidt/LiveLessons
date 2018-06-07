@@ -1,6 +1,6 @@
 package expressiontree.commands;
 
-import expressiontree.tree.TreeOps;
+import expressiontree.tree.TreeContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +23,10 @@ public class MacroCommand
     private String expr;
 
     /**
-     * Constructor that provides the appropriate @a TreeOps and
+     * Constructor that provides the appropriate @a TreeContext and
      * sequence of commands.
      */
-    MacroCommand(TreeOps context,
+    MacroCommand(TreeContext context,
                  List<UserCommand> macroCommands) {
         super(context);
         this.macroCommands = macroCommands;

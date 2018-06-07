@@ -14,6 +14,11 @@ public interface Visitor {
     void visit(LeafNode node);
 
     /**
+     * Visit a @a ParenNode.
+     */
+    void visit(ParenNode node);
+
+    /**
      * Visit a @a CompositeNegateNode. 
      */
     void visit(CompositeNegateNode node);

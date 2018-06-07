@@ -34,7 +34,7 @@ public class VerboseModeInputHandler
         if (!prompted) {
             platform.disableAll(sVerboseField);
             platform.outputMenu("", "", "");  
-            platform.outputMenu("1a.", "format", "[in-order]");
+            platform.outputMenu("1a.", "format", "[in-order | post-order]");
             platform.outputMenu("1b.", "set", "[variable=value]");
             platform.outputMenu("2.", "expr", "[expression]");
             platform.outputMenu("3a.", "eval", "[post-order]");
