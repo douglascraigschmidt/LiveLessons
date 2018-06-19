@@ -70,6 +70,12 @@ public class PostOrderInterpreter
             // onto the stack.
             stack.push(iter.next());
 
+        // One way to get the "yield" of the expression is to say
+        //
+        // stack.pop().interpret();
+        //
+        // at this point!!
+
         // Pop the top item off the stack, which should contain the
         // complete expression tree.
         return stack.pop();
