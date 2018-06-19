@@ -18,41 +18,35 @@ public class ex1 {
         private int mRes;
 
         /**
-         * This method creates a closure that runs in a background
-         * thread.
+         * This factory method creates a closure that will run in a
+         * background thread.
          *
          * @return The background thread reference
          */
-        Thread addAndPrintInAThread(String string, int n) {
-            // Create a new thread whose runnable lambda expression
-            // defines a closure that reads the parameters and updates
-            // the mRes field.
-            Thread t = new Thread(() ->
-                                  System.out.println(string + (mRes += n)));
-
-            // Start the thread.
-            t.start();
-
-            // Return a reference to the thread.
-            return t;
+        Thread makeThreadClosure(String string, int n) {
+            // Create and return a new thread whose runnable lambda
+            // expression defines a closure that reads the parameters
+            // and updates the mRes field.
+            return new Thread(() ->
+                              System.out.println(string + (mRes += n)));
         }
 
         /**
          * The constructor creates/starts/runs a thread closure.
          */
-        ClosureExample() {
-            // Create/start/run a thread closure.
-            Thread t = addAndPrintInAThread("result = ", 10);
+        ClosureExample() throws InterruptedException {
+            // Create a thread closure.
+            Thread t = makeThreadClosure("result = ", 10);
 
-            try {
-                // Join when the thread is finished.
-                t.join();
-            } catch (InterruptedException ignored) {
-            }
+            // Start the thread.
+            t.start();
+
+            // Join when the thread is finished.
+            t.join();
         }
     }
 
-    static public void main(String[] argv) {
+    static public void main(String[] argv) throws InterruptedException {
         // Run the closure example.
          new ClosureExample();
 

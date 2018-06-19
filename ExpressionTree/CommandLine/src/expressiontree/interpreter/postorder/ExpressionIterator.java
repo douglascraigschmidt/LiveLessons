@@ -10,7 +10,7 @@ import java.util.Stack;
  * and returns each expression.
  */
 class ExpressionIterator
-      implements Iterator<Expression> {
+      implements Iterator<Expr> {
     /**
      *
      */
@@ -29,13 +29,13 @@ class ExpressionIterator
     /**
      *
      */
-    private Stack<Expression> mStack;
+    private Stack<Expr> mStack;
 
     /**
      * The prior expression (used to disambiguate unary and binary
      * minus).
      */
-    private Expression mPriorExpression;
+    private Expr mPriorExpression;
 
     /**
      * Constructor initializes the fields.
@@ -43,7 +43,7 @@ class ExpressionIterator
      * @param inputExpression User-supplied input expression.
      */
     ExpressionIterator(InterpreterImpl iteratorImpl,
-                       Stack<Expression> stack,
+                       Stack<Expr> stack,
                        String inputExpression) {
         // Store in fields.
         mInterpreterImpl = iteratorImpl;
@@ -61,7 +61,7 @@ class ExpressionIterator
     /**
      * @return The next expression in the input expression.
      */
-    public Expression next() {
+    public Expr next() {
         // Get the next input character.
         char c = mInputExpression.charAt(mIndex++);
  
@@ -69,41 +69,41 @@ class ExpressionIterator
         while (Character.isWhitespace(c))
             c = mInputExpression.charAt(mIndex++);
 
-        Expression latestExpression = null;;
+        Expr latestExpression = null;;
 
         // Handle a variable or number.
         if (Character.isLetterOrDigit(c)) {
             latestExpression = makeNumber(mInputExpression,
                                           mIndex - 1);
         } else {
-            Expression rightExpression = mStack.pop();
+            Expr rightExpression = mStack.pop();
             switch (c) {
             case '+':
                 // Addition operation.
                 latestExpression =
-                    new AddExpression(mStack.pop(),
-                                      rightExpression);
+                    new AddExpr(mStack.pop(),
+                                rightExpression);
                 break;
             case '-':
                 // Subtraction operation.
-                latestExpression = new SubtractExpression(mStack.pop(),
-                                                          rightExpression);
+                latestExpression = new SubtractExpr(mStack.pop(),
+                                                    rightExpression);
                 break;
             case '~':
                 // Negate operation.
-                latestExpression = new NegateExpression(rightExpression);
+                latestExpression = new NegateExpr(rightExpression);
                 break;
             case '*':
                 // Multiplication operation.
                 latestExpression = 
-                    new MultiplyExpression(mStack.pop(),
-                                           rightExpression);
+                    new MultiplyExpr(mStack.pop(),
+                                     rightExpression);
                 break;
             case '/':
                 // Division Operation.
                 latestExpression = 
-                    new DivideExpression(mStack.pop(),
-                                         rightExpression);
+                    new DivideExpr(mStack.pop(),
+                                   rightExpression);
                 break;
             default:
                 throw new RuntimeException("invalid character: " + c);
@@ -117,8 +117,8 @@ class ExpressionIterator
     /**
      * Make a new Number expression.
      */
-    private Expression makeNumber(String input,
-                              int startIndex) {
+    private Expr makeNumber(String input,
+                            int startIndex) {
         // Merge all consecutive number chars into a single Number
         // expression, e.g., "123" = int(123).
         int endIndex = 1;
@@ -134,18 +134,19 @@ class ExpressionIterator
                 //noinspection UnnecessaryContinue
                 continue;
 
-        NumberExpression number;
+        NumberExpr number;
 
         // Handle a number.
         if (Character.isDigit(input.charAt(startIndex)))
-            number = new NumberExpression(input.substring(startIndex,
-                                                          startIndex + endIndex));
+            number = new NumberExpr(input.substring(startIndex,
+                                                    startIndex + endIndex));
         else
             // Handle a variable by looking up its value in
             // mExpressionTable.
-            number = new NumberExpression(mInterpreterImpl.symbolTable()
-                                          .get(input.substring(startIndex,
-                                                               startIndex + endIndex)));
+            number = new NumberExpr(mInterpreterImpl
+                                    .symbolTable()
+                                    .get(input.substring(startIndex,
+                                                         startIndex + endIndex)));
 
         // Update mIndex skip past the #.
         mIndex = startIndex + endIndex;

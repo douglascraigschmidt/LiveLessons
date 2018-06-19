@@ -3,20 +3,20 @@ package expressiontree.interpreter.postorder;
 
 import expressiontree.nodes.*;
 
-interface Expression {
+interface Expr {
     int interpret();
     ComponentNode build();
 }
  
-class NumberExpression
-       implements Expression {
+class NumberExpr
+       implements Expr {
     private int mNumber;
 
-    NumberExpression(int number) {
+    NumberExpr(int number) {
         mNumber = number;
     }
 
-    NumberExpression(String number) {
+    NumberExpr(String number) {
         mNumber = Integer.parseInt(number);
     }
 
@@ -33,11 +33,11 @@ class NumberExpression
     public ComponentNode build() { return new LeafNode(mNumber); }
 }
 
-class NegateExpression
-      implements Expression {
-    private Expression mRightExpression;
+class NegateExpr
+      implements Expr {
+    private Expr mRightExpression;
 
-    NegateExpression(Expression rightExpression) {
+    NegateExpr(Expr rightExpression) {
         mRightExpression = rightExpression;
     }
 
@@ -56,23 +56,23 @@ class NegateExpression
     }
 }
 
-abstract class BinaryExpression
-      implements Expression {
-    Expression mLeftExpression;
-    Expression mRightExpression;
+abstract class BinaryExpr
+      implements Expr {
+    Expr mLeftExpression;
+    Expr mRightExpression;
 
-    BinaryExpression(Expression leftExpression,
-                     Expression rightExpresion) {
+    BinaryExpr(Expr leftExpression,
+               Expr rightExpresion) {
         mLeftExpression = leftExpression;
         mRightExpression = rightExpresion;
     }
 }
 
-class MultiplyExpression
-      extends BinaryExpression {
+class MultiplyExpr
+      extends BinaryExpr {
 
-    MultiplyExpression(Expression leftExpression,
-                       Expression rightExpression) {
+    MultiplyExpr(Expr leftExpression,
+                 Expr rightExpression) {
         super(leftExpression, rightExpression);
     }
 
@@ -93,10 +93,10 @@ class MultiplyExpression
     }
 }
 
-class DivideExpression
-      extends BinaryExpression {
-    DivideExpression(Expression leftExpression,
-                     Expression rightExpression) {
+class DivideExpr
+      extends BinaryExpr {
+    DivideExpr(Expr leftExpression,
+               Expr rightExpression) {
         super(leftExpression, rightExpression);
     }
 
@@ -117,10 +117,10 @@ class DivideExpression
     }
 }
 
-class AddExpression
-      extends BinaryExpression {
-    AddExpression(Expression leftExpression,
-                  Expression rightExpression) {
+class AddExpr
+      extends BinaryExpr {
+    AddExpr(Expr leftExpression,
+            Expr rightExpression) {
         super(leftExpression, rightExpression);
     }
 
@@ -141,10 +141,10 @@ class AddExpression
     }
 }
 
-class SubtractExpression
-      extends BinaryExpression {
-    SubtractExpression(Expression leftExpression,
-                       Expression rightExpression) {
+class SubtractExpr
+      extends BinaryExpr {
+    SubtractExpr(Expr leftExpression,
+                 Expr rightExpression) {
         super(leftExpression, rightExpression);
     }
 

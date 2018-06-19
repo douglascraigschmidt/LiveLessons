@@ -57,7 +57,7 @@ public class InOrderInterpreter
      * the {@code parseTree} prior to generating the @a
      * ExpressionTree.  By default it's a no-op.
      */
-    private void optimizeParseTree(Symbol parseTree) {
+    protected void optimizeParseTree(Symbol parseTree) {
     }
 
     /**
