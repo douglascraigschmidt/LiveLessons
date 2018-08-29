@@ -74,7 +74,7 @@ public class CrDemo
     }
 
     /**
-     * Demonstrate how a Suppliers can be used as factorys for a
+     * Demonstrate how Suppliers can be used as factories for multiple
      * zero-parameter constructor references.
      */
     private static void zeroParamConstructorRefEx() {
