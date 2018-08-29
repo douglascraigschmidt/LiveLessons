@@ -39,7 +39,7 @@ public class UserCommandFactory {
      */
     public UserCommandFactory(final TreeContext treeContext) {
     	// Initialize the TreeContext member.
-        this.mTreeContext = treeContext;
+        mTreeContext = treeContext;
    
     	// A "format" string maps to a command object that creates an
         // {@code FormatCommand} implementation.
@@ -50,7 +50,7 @@ public class UserCommandFactory {
         // {@code ExprCommand} implementation.
         commandMap.put("expr",
                        param -> new ExprCommand(treeContext, param));
-        
+
     	// A "print" string maps to a command object that creates an
         // {@code PrintCommand} implementation.
         commandMap.put("print",

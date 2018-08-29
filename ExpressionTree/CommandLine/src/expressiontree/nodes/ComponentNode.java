@@ -26,14 +26,16 @@ public interface ComponentNode {
     public final static int sDELIMITER = 9;
 
     /**
-     *
+     * The relative precedence of each terminal symbol above when
+     * it appears at the top of the stack.
      */
     public final static int mTopOfStackPrecedence[] = {
         12, 11, 7, 6, 10, 2, 3, 15, 14, 1
     };
 
     /**
-     *
+     * The relative precedence of each terminal symbol above when
+     * it appears as the current token.
      */
     public final static int mCurrentTokenPrecedence[] = {
         9, 8, 5, 4, 13, 18, 2, 17, 16, 1

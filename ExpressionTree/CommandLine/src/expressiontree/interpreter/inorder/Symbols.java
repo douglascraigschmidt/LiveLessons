@@ -11,48 +11,8 @@ import static expressiontree.nodes.ComponentNode.*;
  */
 abstract class Symbol {
     /*
-     * The following constants set the getPrecedence levels of the
-     * various operations and operands.
-     */
-
-    /** 
-     * The getPrecedence of the '$' delimiter.
-     */
-    final static int sDelimiterPrecedence = 1;
-
-    /** 
-     * The getPrecedence of the '+' and '-' operators.
-     */
-    final static int sAddSubPrecedence = 1;
-
-    /** 
-     * The getPrecedence of the '*' and '/' operators.
-     */
-    final static int sMulDivPrecedence = 2;
-
-    /** 
-     * The getPrecedence of a '-' (negate) operator.
-     */
-    final static int sNegatePrecedence = 3;
-
-    /** 
-     * The getPrecedence of a number.
-     */
-    final static int sNumberPrecedence = 4;
-
-    /**
-     * The getPrecedence of a paren.
-     */
-    final static int sParenPrecedence = 5;
-
-    /*
      * The following fields comprise the state of each Symbol.
      */
-
-    /**
-     * Precedence of a Symbol relative to other Symbols.
-     */
-    private int mPrecedence;
 
     /**
      * Symbol getType for each Symbol.
@@ -74,11 +34,9 @@ abstract class Symbol {
      */
     Symbol(Symbol left,
            Symbol right,
-           int precedence,
            int symbolType) {
         mLeft = left;
         mRight = right;
-        mPrecedence = precedence;
         mSymbolType = symbolType;
     }
 
@@ -87,14 +45,6 @@ abstract class Symbol {
      */
     public int getType() {
         return mSymbolType;
-    }
-
-    /** 
-     * @return Return precedence level (higher value == higher
-     * getPrecedence).
-     */
-    public int getPrecedence() {
-        return mPrecedence;
     }
 
     /** 
@@ -110,38 +60,24 @@ abstract class Symbol {
 class Number
       extends Symbol {
     /**
-     * Value of Number.
+     * Value of the number.
      */
     private int mNumber;
 
     /** 
      * Constructor.
      */
-    Number(String input, int accumulatedPrecedence) {
-        this(Integer.parseInt(input), accumulatedPrecedence);
+    Number(String input) {
+        this(Integer.parseInt(input));
     }
 
-    /**
-     * Constructor.
-     */
-    Number(String input) {
-        this(Integer.parseInt(input), 0);
-    }
 
     /**
      * Constructor.
      */
     Number(int input) {
-        this(input, 0);
-    }
-
-    /**
-     * Constructor.
-     */
-    Number(int input, int accumulatedPrecedence) {
         super(null,
               null,
-              sNumberPrecedence + accumulatedPrecedence,
               sNUMBER);
         mNumber = input;
     }
@@ -164,11 +100,9 @@ abstract class Operator
      */
     Operator(Symbol left,
              Symbol right,
-             int precedence,
              int tokenClass) {
         super(left,
               right,
-              precedence,
               tokenClass);
     }
 }
@@ -183,11 +117,9 @@ abstract class UnaryOperator
      * Constructor.
      */
     UnaryOperator(Symbol right,
-                  int precedence,
                   int tokenClass) {
         super(null,
               right,
-              precedence,
               tokenClass);
     }
 
@@ -207,17 +139,9 @@ class Negate
     /** 
      * Constructor.
      */
-    Negate(int accumulatedPrecedence) {
-        super(null,
-              sNegatePrecedence + accumulatedPrecedence,
-              sNEGATION);
-    }
-
-    /** 
-     * Constructor.
-     */
     Negate() {
-        this(0);
+        super(null,
+              sNEGATION);
     }
 
     /** 
@@ -238,18 +162,10 @@ class Add
     /**
      * Constructor.
      */
-    Add(int accumulatedPrecedence) {
+    Add() {
         super(null, 
               null, 
-              sAddSubPrecedence + accumulatedPrecedence,
               sADDITION);
-    }
-
-    /**
-     * Constructor.
-     */
-    Add() {
-        this(0);
     }
 
     /** 
@@ -270,18 +186,10 @@ class Subtract
     /**
      * Constructor.
      */
-    Subtract(int accumulatedPrecedence) {
+    Subtract() {
         super(null, 
               null,
-              sAddSubPrecedence + accumulatedPrecedence,
               sSUBTRACTION);
-    }
-
-    /**
-     * Constructor.
-     */
-    Subtract() {
-        this(0);
     }
 
     /** 
@@ -303,18 +211,10 @@ class Multiply
     /** 
      * Constructor.
      */
-    Multiply(int accumulatedPrecedence) {
+    Multiply() {
         super(null, 
               null,
-              sMulDivPrecedence + accumulatedPrecedence,
               sMULTIPLICATION);
-    }
-
-    /** 
-     * Constructor.
-     */
-    Multiply() {
-        this(0);
     }
 
     /** 
@@ -336,18 +236,10 @@ class Divide
     /**
      * Constructor.
      */
-    Divide(int accumulatedPrecedence) {
+    Divide() {
         super(null, 
               null, 
-              sMulDivPrecedence + accumulatedPrecedence,
               sDIVISION);
-    }
-
-    /**
-     * Constructor.
-     */
-    Divide() {
-        this(0);
     }
 
     /**
@@ -371,7 +263,6 @@ class LParen
     LParen() {
         super(null,
               null,
-              sParenPrecedence,
               sLPAREN);
     }
 }
@@ -387,7 +278,6 @@ class RParen
     RParen() {
         super(null,
               null,
-              sParenPrecedence,
               sRPAREN);
     }
 }
@@ -404,7 +294,6 @@ class Delimiter
     Delimiter() {
         super(null,
               null,
-              sDelimiterPrecedence,
               sDELIMITER);
     }
 }

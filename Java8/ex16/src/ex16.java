@@ -155,7 +155,7 @@ public class ex16 {
      * This class demonstrates how the two parameter Java 8 reduce()
      * operation avoids sharing state between Java threads altogether.
      */
-    private static class ParallelStreamFactorial2 {
+    private static class ParallelStreamFactorial {
         /**
          * Return the factorial for the given @a n using a parallel
          * stream and the reduce() terminal operation.
@@ -183,7 +183,7 @@ public class ex16 {
      * This class demonstrates how the three parameter Java 8 reduce()
      * operation avoids sharing state between Java threads altogether.
      */
-    private static class ParallelStreamFactorial3 {
+    private static class ParallelStreamFactorialEx {
         /**
          * Return the factorial for the given @a n using a parallel
          * stream and the reduce() terminal operation.
@@ -270,7 +270,7 @@ public class ex16 {
         System.out.println("Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++)
-            ParallelStreamFactorial2.factorial(BigInteger.valueOf(sDEFAULT_N));
+            ParallelStreamFactorial.factorial(BigInteger.valueOf(sDEFAULT_N));
     }
 
     /**
@@ -305,12 +305,12 @@ public class ex16 {
                      BuggyFactorial::factorial,
                      n);
 
-        test.runTest("ParallelStreamFactorial2",
-                     ParallelStreamFactorial2::factorial,
+        test.runTest("ParallelStreamFactorial",
+                     ParallelStreamFactorial::factorial,
                      n);
 
-        test.runTest("ParallelStreamFactorial3",
-                     ParallelStreamFactorial3::factorial,
+        test.runTest("ParallelStreamFactorialEx",
+                     ParallelStreamFactorialEx::factorial,
                      n);
 
         System.out.println("Ending Factorial Tests");

@@ -114,7 +114,7 @@ public class ThreadJoinTest {
             workerThreads.forEach(thread -> {
                     try {
                         thread.join();
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }});
 

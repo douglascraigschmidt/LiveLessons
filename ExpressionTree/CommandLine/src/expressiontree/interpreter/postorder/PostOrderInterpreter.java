@@ -4,7 +4,7 @@ import expressiontree.interpreter.*;
 import expressiontree.tree.ExpressionTree;
 import expressiontree.tree.ExpressionTreeFactory;
 
-import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.Stack;
 
 /**
@@ -59,22 +59,20 @@ public class PostOrderInterpreter
      * @return Return the root of a parse tree corresponding to the
      * {@code inputExpression}.
      */
-    private Expr buildParseTree(String inputExpression) {
+    private Expr buildParseTree(String inputExpr) {
+        // Create a stack to hold the intermediate and final
+        // expressions.
         Stack<Expr> stack = new Stack<>();
 
-        // Create an iterator for the inputExpression and iterate
-        // through all the expressions.
-        for (Iterator<Expr> iter = makeIterator(stack, inputExpression);
-             iter.hasNext(); ) 
-            // Get next expression from the user's input and push it
-            // onto the stack.
-            stack.push(iter.next());
+        // Create a spliterator for the inputExpr and traverse thru
+        // the input pushing/popping expressions onto/off the stack.
+        for (Spliterator<Expr> spliterator = makeSpliterator(stack, inputExpr);
+             spliterator.tryAdvance(null);)
+            continue;
 
-        // One way to get the "yield" of the expression is to say
+        // You can get the "yield" of inputExpr at this point via
         //
         // stack.pop().interpret();
-        //
-        // at this point!!
 
         // Pop the top item off the stack, which should contain the
         // complete expression tree.
@@ -95,9 +93,9 @@ public class PostOrderInterpreter
      * @return An iterator that traverses all the terminals in {@code
      * inputExpression}.
      */
-    private Iterator<Expr> makeIterator(Stack<Expr> stack,
-                                        String inputExpression) {
-        return new ExpressionIterator(this, stack, inputExpression);
+    private Spliterator<Expr> makeSpliterator(Stack<Expr> stack,
+                                           String inputExpression) {
+        return new ExprSpliterator(this, stack, inputExpression);
     }
 }
 
