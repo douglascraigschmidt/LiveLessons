@@ -14,7 +14,7 @@ public class CrDemo
     private static class CrDemoEx
             extends CrDemo {
         /**
-         *
+         * Constructor.
          */
         CrDemoEx() {
             super();
