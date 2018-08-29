@@ -21,7 +21,7 @@ public class CrDemo
         }
 
         /**
-         * Print the value of mString.
+         * Print the upper-cased value of mString.
          */
         @Override
         public void run() {
@@ -87,14 +87,14 @@ public class CrDemo
         Supplier<CrDemoEx> crDemoFactoryEx = CrDemoEx::new;
 
         // This helper method invokes the given supplier to create a
-        // new object and calls its run() method.
+        // new object and call its run() method.
         runDemo(crDemoFactory);
         runDemo(crDemoFactoryEx);
     }
 
     /**
-     * Use the factory to create a new object and call its run()
-     * method.
+     * Use the given {@code factory} to create a new object and call
+     * its run() method.
      */
     private static <T extends Runnable> void runDemo(Supplier<T> factory) {
        factory.get().run();
