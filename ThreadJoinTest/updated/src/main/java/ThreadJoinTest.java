@@ -6,12 +6,12 @@ import java.util.function.Function;
 
 /**
  * This program implements an "embarrassingly parallel" application
- * that concurrently searches for phrases in a list of strings
- * containing the complete works of William Shakespeare.  It
- * demonstrates the use of Java 8 functional programming features
- * (such as lambda expressions, method references, and functional
- * interfaces) in conjunction with Thread.start() to run threads and
- * Thread.join() to wait for all running threads.
+ * that searches for phrases in a list of strings containing the
+ * complete works of William Shakespeare.  It demonstrates the use of
+ * Java 8 functional programming features (such as lambda expressions,
+ * method references, and functional interfaces) in conjunction with
+ * Thread.start() to run threads and Thread.join() to wait for all
+ * running threads.
  */
 public class ThreadJoinTest {
     /*
@@ -50,7 +50,7 @@ public class ThreadJoinTest {
     static public void main(String[] args) {
         System.out.println("Starting SearchStream");
 
-        // Create/run an object to search for phrases concurrently.
+        // Create/run an object to search for phrases in parallel.
         new SearchOneShotThreadJoin().run();
 
         System.out.println("Ending SearchStream");
@@ -94,7 +94,7 @@ public class ThreadJoinTest {
         }
 
         /**
-         * Start the threads to perform the concurrent phrase searches.
+         * Start the threads to perform the parallel phrase searches.
          */
         @Override
         public void run() {
