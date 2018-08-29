@@ -1,4 +1,3 @@
-import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -6,7 +5,30 @@ import java.util.function.Supplier;
  * (including Supplier and a custom functional interface) can be used
  * in conjunction with Java 8 constructor references.
  */
-public class CrDemo {
+public class CrDemo
+       implements Runnable {
+    /**
+     * This class extends CrDemo and overrides its run() method to
+     * uppercase the string.
+     */
+    private static class CrDemoEx
+            extends CrDemo {
+        /**
+         *
+         */
+        CrDemoEx() {
+            super();
+        }
+
+        /**
+         * Print the value of mString.
+         */
+        @Override
+        public void run() {
+            System.out.println(mString.toUpperCase());
+        }
+    }
+
     /**
      * A field that stores a string.
      */
@@ -31,7 +53,7 @@ public class CrDemo {
     /**
      * A three-parameter constructor.
      */
-    CrDemo(String s, Integer i, Long l) {
+    private CrDemo(String s, Integer i, Long l) {
         // Assign the field to the values of the parameters.
         mString = s + i + l;
     }
@@ -40,21 +62,49 @@ public class CrDemo {
      * Demonstrate how a Supplier can be used as a factory for a
      * zero-parameter constructor reference.
      */
-    static void zeroParamConstructorRef() {
+    private static void zeroParamConstructorRef() {
         // Assign a constructor reference to a supplier that acts as a
         // factory for a zero-param object of CrDemo.
         Supplier<CrDemo> factory = CrDemo::new;
 
         // Use the factory to create a new instance of CrDemo and call
-        // its print() method.
+        // its run() method.
         CrDemo crDemo = factory.get();
-        crDemo.print();
+        crDemo.run();
+    }
+
+    /**
+     * Demonstrate how a Suppliers can be used as factorys for a
+     * zero-parameter constructor references.
+     */
+    private static void zeroParamConstructorRefEx() {
+        // Assign a constructor reference to a supplier that acts as a
+        // factory for a zero-param object of CrDemo.
+        Supplier<CrDemo> crDemoFactory = CrDemo::new;
+
+        // Assign a constructor reference to a supplier that acts as a
+        // factory for a zero-param object of CrDemoEx.
+        Supplier<CrDemoEx> crDemoFactoryEx = CrDemoEx::new;
+
+        // This helper method invokes the given supplier to create a
+        // new object and calls its run() method.
+        runDemo(crDemoFactory);
+        runDemo(crDemoFactoryEx);
+    }
+
+    /**
+     * Use the factory to create a new object and call its run()
+     * method.
+     */
+    private static <T extends Runnable> void runDemo(Supplier<T> factory) {
+       factory.get().run();
     }
 
     /**
      * Print the value of mString.
      */
-    void print() {
+    @Override
+    public void run() {
         System.out.println(mString);
     }
 
@@ -63,7 +113,7 @@ public class CrDemo {
      * which is defined below) can be used as a factory for a
      * three-parameter constructor reference.
      */
-    static void threeParamConstructorRef() {
+    private static void threeParamConstructorRef() {
         // Assign a constructor reference to a customize functional
         // interface that acts as a factory to create a
         // three-parameter constructor for CrDemo.
@@ -71,8 +121,8 @@ public class CrDemo {
             CrDemo::new;
 
         // Use the factory to create a new instance of CrDemo and call
-        // its print() method.
-        factory.of("The answer is ", 4, 2L).print();
+        // its run() method.
+        factory.of("The answer is ", 4, 2L).run();
     }
 
     /**
