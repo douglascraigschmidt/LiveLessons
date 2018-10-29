@@ -328,7 +328,7 @@ public class ex8 {
             Callable<BigFraction> call = () -> {
                 BigFraction bf1 = new BigFraction(f1);
                 BigFraction bf2 = new BigFraction(f2);
-                    
+
                 // Return the result of multiplying the fractions.
                 return bf1.multiply(bf2);
             };

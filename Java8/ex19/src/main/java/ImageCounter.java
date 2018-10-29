@@ -261,7 +261,6 @@ class ImageCounter {
             .thenApply(list -> list
                        // Convert list to a stream.
                        .stream()
-
                        // Sum all results in the list.
                        .reduce(0, Integer::sum));
     }

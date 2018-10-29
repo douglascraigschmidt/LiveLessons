@@ -37,20 +37,11 @@ public class TreeOperations {
             .forEach(expressionTree -> expressionTree.accept(printVisitor));
 
         /*
-          for (ExpressionTree node : this)
-          node.accept(printVisitor);
-
-          this.forEach(node -> node.accept(printVisitor));
-        */
-
-        /*
-        // Iterate through all nodes in the expression tree and accept
-        // the printVisitor to evaluate each getType of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
-        it.hasNext();
-        )
-        it.next().accept(printVisitor);
-        */
+          // Iterator variant.
+          for(Iterator<ExpressionTree> it = iter;
+              it.hasNext(); )
+              it.next().accept(printVisitor);
+          */
     }
 	  	
     /** 
