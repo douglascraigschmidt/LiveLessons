@@ -29,7 +29,7 @@ public class IteratorFactory {
      */
     @FunctionalInterface
     public interface IteratorFactoryCommand {
-        public Iterator<ExpressionTree> execute(ExpressionTree tree);
+        Iterator<ExpressionTree> execute(ExpressionTree tree);
     }
 
     /**
@@ -37,7 +37,7 @@ public class IteratorFactory {
      * implementations and dispatch the execute() method of the
      * requested iterator. .
      */
-    private HashMap<String, IteratorFactoryCommand> mTraversalMap =
+    private HashMap<String, IteratorFactoryCommand> mIteratorMap =
         new HashMap<>();
 	
     /** 
@@ -52,27 +52,27 @@ public class IteratorFactory {
 
     	// An "in-order" string maps to a command object that creates
         // an @a InOrderIterator implementation.
-        mTraversalMap.put(IN_ORDER, InOrderIterator::new);
+        mIteratorMap.put(IN_ORDER, InOrderIterator::new);
             
     	// A "pre-order" string maps to a command object that creates
         // a @a PreOrderIterator implementation.
-        mTraversalMap.put(PRE_ORDER, PreOrderIterator::new);
+        mIteratorMap.put(PRE_ORDER, PreOrderIterator::new);
             
     	// A "post-order" string maps to a command object that creates
         // a @a PostOrderIterator implementation.
-        mTraversalMap.put(POST_ORDER, PostOrderIterator::new);
+        mIteratorMap.put(POST_ORDER, PostOrderIterator::new);
             
     	// A "level-order" string maps to a command object that
         // creates a @a LevelOrderIterator implementation.
-        mTraversalMap.put(LEVEL_ORDER, LevelOrderIterator::new);
+        mIteratorMap.put(LEVEL_ORDER, LevelOrderIterator::new);
     }
 	
     /** 
      * Create a new @a Iterator implementation based on the caller's
      * designated @a traversalOrderRequest.
      */
-    public Iterator<ExpressionTree> makeIterator(ExpressionTree tree,
-                                                 String traversalOrderRequest) {
+    public Iterator<ExpressionTree> iterator(ExpressionTree tree,
+                                             String traversalOrderRequest) {
         if (traversalOrderRequest.equals(""))
             // Default to in-order if user doesn't explicitly request
             // a traversal order.
@@ -80,7 +80,7 @@ public class IteratorFactory {
 
         //* Try to find the pre-allocated factory command.
         IteratorFactoryCommand command =
-            mTraversalMap.get(traversalOrderRequest);
+            mIteratorMap.get(traversalOrderRequest);
 
         if (command != null)
             // If we find it then execute it.

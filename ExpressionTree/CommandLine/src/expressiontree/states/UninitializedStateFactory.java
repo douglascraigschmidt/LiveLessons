@@ -43,7 +43,7 @@ class UninitializedStateFactory {
         // implementation.
         State state = mUninitializedStateMap.get(formatRequest);
 	  				
-        if(state != null)
+        if (state != null)
             // If we find it then return it. 
             return state;
         else 

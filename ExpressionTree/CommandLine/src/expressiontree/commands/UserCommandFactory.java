@@ -23,7 +23,7 @@ public class UserCommandFactory {
      */
     @FunctionalInterface
     private interface UserCommandFactoryCommand {
-        public UserCommand execute(String param);
+        UserCommand execute(String param);
     }
 	
     /**

@@ -77,11 +77,11 @@ public class InstrumentedExpressionTree extends ExpressionTree {
      * factory method. 
      */
     public Iterator<ExpressionTree> makeIterator(String traversalOrder) {
-        System.out.println("starting makeIterator() call");
+        System.out.println("starting iterator() call");
         Iterator<ExpressionTree> temp =
             treeIteratorFactory.makeIterator(this,
                                              traversalOrder);
-        System.out.println("finished makeIterator() call");
+        System.out.println("finished iterator() call");
         return temp;
     }
 }

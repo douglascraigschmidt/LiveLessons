@@ -123,7 +123,7 @@ public class ExpressionTree {
         /*
         // Iterate through all nodes in the expression tree and accept
         // the printVisitor to evaluate each type of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
+        for(Iterator<ExpressionTree> it = iterator(traversalOrder);
             it.hasNext();
             )
             it.next().accept(printVisitor);
@@ -159,7 +159,7 @@ public class ExpressionTree {
         /*
         // Iterate through all nodes in the expression tree and accept
         // the evalVisitor to evaluate each type of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
+        for(Iterator<ExpressionTree> it = iterator(traversalOrder);
             it.hasNext();
             )
             it.next().accept(evalVisitor);

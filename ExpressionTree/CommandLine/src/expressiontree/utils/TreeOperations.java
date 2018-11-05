@@ -67,7 +67,7 @@ public class TreeOperations {
         /*
         // Iterate through all nodes in the expression tree and accept
         // the evalVisitor to evaluate each getType of node.
-        for(Iterator<ExpressionTree> it = makeIterator(traversalOrder);
+        for(Iterator<ExpressionTree> it = iterator(traversalOrder);
             it.hasNext();
             )
             it.next().accept(evalVisitor);
