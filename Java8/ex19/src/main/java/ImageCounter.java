@@ -31,7 +31,7 @@ class ImageCounter {
     /**
      * Stores a completed future with value of 0.
      */
-    private CompletableFuture<Integer> mZero = 
+    private final CompletableFuture<Integer> mZero = 
         CompletableFuture.completedFuture(0);
 
     /**

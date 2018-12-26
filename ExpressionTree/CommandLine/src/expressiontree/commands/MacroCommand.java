@@ -14,13 +14,8 @@ public class MacroCommand
     /** 
      * Vector of commands that are executed as a macro. 
      */
-    private List<UserCommand> macroCommands =
+    private List<UserCommand> mMacroCommands =
         new ArrayList<>();
-
-    /** 
-     * Expression mInput by the user.
-     */
-    private String expr;
 
     /**
      * Constructor that provides the appropriate @a TreeContext and
@@ -29,14 +24,14 @@ public class MacroCommand
     MacroCommand(TreeContext context,
                  List<UserCommand> macroCommands) {
         super(context);
-        this.macroCommands = macroCommands;
+        mMacroCommands = macroCommands;
     }
 
     /**
      * Run the event loop.
      */
     public void execute() {
-        macroCommands.forEach(UserCommand::execute);
+        mMacroCommands.forEach(UserCommand::execute);
     }
 
     /** 
