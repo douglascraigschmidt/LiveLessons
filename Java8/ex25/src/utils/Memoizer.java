@@ -64,7 +64,8 @@ public class Memoizer<K, V>
 
     /**
      * Removes the key (and its corresponding value) from this
-     * map. This method does nothing if the key is not in the map.
+     * memoizer.  This method does nothing if the key is not in the
+     * map.
      *
      * @param key The key to remove
      * @ @return The previous value associated with key, or null if
