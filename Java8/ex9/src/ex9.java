@@ -81,17 +81,17 @@ public class ex9 {
             Random random = new Random();
 
             // Runnable checks if maxIterations random numbers are prime.
-            Runnable isPrime = () -> {
-                for (long l = 0; l < maxIterations; l++) {
+            Runnable primeChecker = () -> {
+                for (int i = 0; i < maxIterations; i++) {
                     // Get the next random number.
-                    Integer primeCandidate = 
+                    int primeCandidate = 
                     Math.abs(random.nextInt(maxIterations) + 1);
 
                     // computeIfAbsent() first checks to see if the factor
                     // for this number is already in the cache.  If not,
                     // it atomically determines if this number is prime
                     // and stores it in the cache.
-                    Integer smallestFactor =
+                    int smallestFactor =
                     primeCache.computeIfAbsent(primeCandidate,
                                                this::isPrime);
 
@@ -117,9 +117,10 @@ public class ex9 {
                 exitBarrier.countDown();
             };
 
-            // Create a task running the prime checker algorithm.
+            // Create a group of tasks running the prime checker
+            // algorithm.
             for (int i = 0; i < sNUMBER_OF_CORES; i++)
-                mExecutor.execute(isPrime);
+                mExecutor.execute(primeChecker);
 
             // Wait until we're done.
             exitBarrier.await();
