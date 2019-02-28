@@ -1,6 +1,8 @@
+import utils.RunTimer;
+
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 /**
  * This example showcases the use of a Java 8 ConcurrentHashMap and a
@@ -11,14 +13,33 @@ public class ex9 {
     /**
      * Number of times each thread iterates computing prime numbers.
      */
-    private static int sMAX = 1000;
+    private static int sMAX = 100000;
+
+    /**
+     * True if we're running in verbose mode, else false.
+     */
+    private static boolean sVERBOSE = false;
+
+    /**
+     * Number of cores known to the Java execution environment.
+     */
+    private static int sNUMBER_OF_CORES =
+        Runtime.getRuntime().availableProcessors();
+
+    /**
+     * This executor runs the prime number computation tasks.
+     */
+    private ExecutorService mExecutor =
+        // Create a pool with as many threads as the Java execution
+        // environment thinks there are cores.
+        Executors.newFixedThreadPool(sNUMBER_OF_CORES);
 
     /**
      * This method provides a brute-force determination of whether
      * number @a primeCandidate is prime.  Returns 0 if it is prime,
      * or the smallest factor if it is not prime.
      */
-    private Integer primeChecker(Integer primeCandidate) {
+    private Integer isPrime(Integer primeCandidate) {
         int n = primeCandidate;
 
         if (n > 3)
@@ -39,131 +60,74 @@ public class ex9 {
     }
 
     /**
-     * Run the prime number test using a ConcurrentHashMap.
+     * Run the prime number test.
+     * 
+     * @param maxIterations Number of iterations to run the test
+     * @param primeCache Cache that maps candidate primes to their
+     * smallest factor (if they aren't prime) or 0 if they are prime
+     * @param testName Name of the test
      */
-    private void runConcurrentHashMapTest(int maxIterations)
-        throws InterruptedException {
-        System.out.println("Starting runConcurrentHashMapTest");
+    private void runTest(int maxIterations,
+                         Map<Integer, Integer> primeCache,
+                         String testName) {
+        try {
+            System.out.println("Starting " + testName);
 
-        // Random number generator.
-        final Random random = 
-            new Random();
+            // Exit barrier that keeps track of when the tasks finish.
+            CountDownLatch exitBarrier =
+                new CountDownLatch(sNUMBER_OF_CORES);
 
-        // Cache that maps candidate primes to their smallest factor
-        // (if they aren't prime) or 0 if they are prime.
-        final Map<Integer, Integer> primeCache =
-            new ConcurrentHashMap<>();
+            // Random number generator.
+            Random random = new Random();
 
-        // Runnable checks if maxIterations random numbers are prime.
-        Runnable primeChecker = () -> {
-            for (long l = 0; l < maxIterations; l++) {
-                // Get the next random number.
-                Integer primeCandidate = 
-                Math.abs(random.nextInt(maxIterations) + 1);
+            // Runnable checks if maxIterations random numbers are prime.
+            Runnable isPrime = () -> {
+                for (long l = 0; l < maxIterations; l++) {
+                    // Get the next random number.
+                    Integer primeCandidate = 
+                    Math.abs(random.nextInt(maxIterations) + 1);
 
-                // computeIfAbsent() first checks to see if the factor
-                // for this number is already in the cache.  If not,
-                // it atomically determines if this number is prime
-                // and stores it in the cache.
-                Integer smallestFactor =
-                primeCache.computeIfAbsent(primeCandidate,
-                                           this::primeChecker);
+                    // computeIfAbsent() first checks to see if the factor
+                    // for this number is already in the cache.  If not,
+                    // it atomically determines if this number is prime
+                    // and stores it in the cache.
+                    Integer smallestFactor =
+                    primeCache.computeIfAbsent(primeCandidate,
+                                               this::isPrime);
 
-                if (smallestFactor != 0)
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + ": "
-                                       + primeCandidate
-                                       + " is not prime with smallest factor "
-                                       + smallestFactor);
-                else
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + ": "
-                                       + primeCandidate
-                                       + " is prime");
-            }
-        };
+                    if (smallestFactor != 0) {
+                        if (sVERBOSE)
+                            System.out.println(""
+                                               + Thread.currentThread()
+                                               + ": "
+                                               + primeCandidate
+                                               + " is not prime with smallest factor "
+                                               + smallestFactor);
+                    } else {
+                        if (sVERBOSE)
+                            System.out.println(""
+                                               + Thread.currentThread()
+                                               + ": "
+                                               + primeCandidate
+                                               + " is prime");
+                    }
+                }
 
-        // Create a list of threads, each running the prime checker
-        // algorithm.
-        List<Thread> threads =
-            new ArrayList<>(Arrays.asList(new Thread(primeChecker),
-                                          new Thread(primeChecker),
-                                          new Thread(primeChecker)));
+                // Inform the waiting thread that we're done.
+                exitBarrier.countDown();
+            };
 
-        // Start all the threads.
-        threads.forEach(Thread::start);
+            // Create a task running the prime checker algorithm.
+            for (int i = 0; i < sNUMBER_OF_CORES; i++)
+                mExecutor.execute(isPrime);
 
-        // Wait for all the threads to finish.
-        for (Thread thread : threads)
-            thread.join();
+            // Wait until we're done.
+            exitBarrier.await();
 
-        System.out.println("Leaving runConcurrentHashMapTest");
-    }
-
-    /**
-     * Run the prime number test using a SynchronizedMap.
-     */
-    private void runSynchronizedMapTest(int maxIterations)
-        throws InterruptedException {
-        System.out.println("Starting runSynchronizedMapTest");
-
-        // Random number generator.
-        final Random random = 
-            new Random();
-
-        // Cache that maps candidate primes to their smallest factor
-        // (if they aren't prime) or 0 if they are prime.
-        final Map<Integer, Integer> primeCache =
-            Collections.synchronizedMap(new HashMap<>());
-
-        // Runnable checks if maxIterations random numbers are prime.
-        Runnable primeChecker = () -> {
-            for (long l = 0; l < maxIterations; l++) {
-                // Get the next random number.
-                Integer primeCandidate = 
-                Math.abs(random.nextInt(maxIterations) + 1);
-
-                // computeIfAbsent() first checks to see if the factor
-                // for this number is already in the cache.  If not,
-                // it atomically determines if this number is prime
-                // and stores it in the cache.
-                Integer smallestFactor =
-                primeCache.computeIfAbsent(primeCandidate,
-                                           this::primeChecker);
-
-                if (smallestFactor != 0)
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + ": "
-                                       + primeCandidate
-                                       + " is not prime with smallest factor "
-                                       + smallestFactor);
-                else
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + ": "
-                                       + primeCandidate
-                                       + " is prime");
-            }
-        };
-
-        // Create a list of threads, each running the prime checker
-        // algorithm.
-        List<Thread> threads =
-            new ArrayList<>(Arrays.asList(new Thread(primeChecker),
-                                          new Thread(primeChecker),
-                                          new Thread(primeChecker)));
-
-        // Start all the threads.
-        threads.forEach(Thread::start);
-
-        // Wait for all the threads to finish.
-        for (Thread thread : threads)
-            thread.join();
-
-        System.out.println("Leaving runSynchronizedMapTest");
+            System.out.println("Leaving " + testName);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -176,9 +140,28 @@ public class ex9 {
             : Integer.valueOf(argv[0]);
 
         ex9 test = new ex9();
-        
-        test.runConcurrentHashMapTest(maxIterations);
-        test.runSynchronizedMapTest(maxIterations);
+
+        // Time how long this test takes to run.
+        RunTimer.timeRun(() 
+                         // Run the test using a ConcurrentHashMap.
+                         -> test.runTest(maxIterations,
+                                            new ConcurrentHashMap<>(),
+                                            "ConcurrentHashMap"),
+                         "ConcurrentHashMap");
+
+        // Time how long this test takes to run.
+        RunTimer.timeRun(() ->
+                         // Run the test using a synchronized HashMap.
+                         test.runTest(maxIterations,
+                                      Collections.synchronizedMap(new HashMap<>()),
+                                      "SynchronizedHashMap"),
+                         "SynchronizedHashMap");
+
+        // Print the results.
+        System.out.println(RunTimer.getTimingResults());
+
+        // Shutdown the executor.
+        test.mExecutor.shutdownNow();
     }
 }
-
+    
