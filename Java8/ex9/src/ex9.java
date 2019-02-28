@@ -117,8 +117,8 @@ public class ex9 {
                 exitBarrier.countDown();
             };
 
-            // Create a group of tasks running the prime checker
-            // algorithm.
+            // Create a group of tasks that run the prime checker
+            // lambda.
             for (int i = 0; i < sNUMBER_OF_CORES; i++)
                 mExecutor.execute(primeChecker);
 
