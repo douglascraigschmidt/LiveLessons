@@ -121,3 +121,6 @@ Here's an overview of what's included:
   synchronous and asynchronous memoizers using Java ExecutorService,
   functional interfaces, streams, and completable futures.
   Memoization is described at https://en.wikipedia.org/wiki/Memoization.
+
+. ex26 -- This example shows various ways to apply one-shot and cyclic
+  Java Phasers.

@@ -2,7 +2,6 @@ import utils.RunTimer;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 
 /**
  * This example showcases the use of a Java 8 ConcurrentHashMap and a
