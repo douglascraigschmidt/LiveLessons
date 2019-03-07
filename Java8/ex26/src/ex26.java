@@ -152,7 +152,7 @@ public class ex26 {
     /**
      * Main entry point into the test program.
      */
-    public static void main(String[] argv) throws InterruptedException {
+    public static void main(String[] argv) {
         System.out.println("Starting ex25 test");
 
         // Create a list of tasks.
