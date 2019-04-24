@@ -12,8 +12,8 @@ class LevelOrderUninitializedState
      * and update the state of the {@code context} to the {@code
      * LevelOrderInitializedState}.
      */
-    public void makeTree(TreeContext context, String expression) {
-        throw new IllegalStateException("LevelOrderUninitializedState.makeTree() not yet implemented");
+    public void expr(TreeContext context, String expression) {
+        throw new IllegalStateException("LevelOrderUninitializedState.expr() not yet implemented");
     }
 }
 		  

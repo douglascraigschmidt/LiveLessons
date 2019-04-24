@@ -20,9 +20,9 @@ public interface State {
     /** 
      * Throws an exception if called in the wrong state.
      */
-    default void makeTree(TreeContext context,
-                         String expression) {
-        throw new IllegalStateException("State.makeTree() called in invalid state");
+    default void expr(TreeContext context,
+                      String expression) {
+        throw new IllegalStateException("State.expr() called in invalid state");
     }
 	  
     /** 

@@ -12,7 +12,7 @@ class PostOrderUninitializedState
      * and update the state of the {@code context} to the {@code
      * PostOrderInitializedState}.
      */
-    public void makeTree(TreeContext treeContext, String inputExpression) {
+    public void expr(TreeContext treeContext, String inputExpression) {
         // Use the Interpreter and Builder patterns to create
         // the expression tree designated by user mInput.
         treeContext.tree(treeContext.interpreter().interpret(inputExpression));

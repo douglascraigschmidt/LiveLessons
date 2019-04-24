@@ -22,11 +22,11 @@ public class SuccinctModeInputHandler
      * This hook method makes the appropriate set of macro commands
      * based on the user mInput.
      */
-    public UserCommand makeUserCommand(String userInputExpression) {
+    public UserCommand makeUserCommand(String userInput) {
         // Create a MacroCommand by prefixing the keyword "macro" in
-        // front of the userInputExpression.
+        // front of the userInput.
         return mUserCommandFactory
             .makeUserCommand("macro "
-                             + userInputExpression);
+                             + userInput);
     }
 }

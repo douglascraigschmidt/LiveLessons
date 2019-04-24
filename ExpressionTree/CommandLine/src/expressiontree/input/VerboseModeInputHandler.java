@@ -53,7 +53,7 @@ public class VerboseModeInputHandler
      * This hook method makes the appropriate command based on the
      * user mInput.
      */
-    public UserCommand makeUserCommand(String userinput) {
-        return mUserCommandFactory.makeUserCommand(userinput);
+    public UserCommand makeUserCommand(String userInput) {
+        return mUserCommandFactory.makeUserCommand(userInput);
     }	
 }

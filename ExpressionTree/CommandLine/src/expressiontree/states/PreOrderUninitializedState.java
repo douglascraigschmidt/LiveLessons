@@ -12,8 +12,8 @@ class PreOrderUninitializedState
      * and update the state of the {@code context} to the {@code
      * PreOrderUninitializedState}.
      */
-    public void makeTree(TreeContext context, String format) {
-        throw new IllegalStateException("PreOrderUninitializedState.makeTree() not yet implemented");
+    public void expr(TreeContext context, String format) {
+        throw new IllegalStateException("PreOrderUninitializedState.expr() not yet implemented");
     }
 }
 	  	  

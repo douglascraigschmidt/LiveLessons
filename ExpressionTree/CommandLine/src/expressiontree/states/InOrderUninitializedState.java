@@ -12,7 +12,7 @@ class InOrderUninitializedState
      * and update the state of {@code mTreeOps} to the {@code
      * InOrderInitializedState}.
      */
-    public void makeTree(TreeContext treeContext, String inputExpression) {
+    public void expr(TreeContext treeContext, String inputExpression) {
         // Use the Interpreter and Builder patterns to create
         // the expression tree designated by user mInput.
         treeContext.tree(treeContext.interpreter().interpret(inputExpression));

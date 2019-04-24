@@ -75,7 +75,7 @@ public class TreeContext {
      * expression} using the previously designated format.
      */
     public void makeTree(String expression) {
-        mState.makeTree(this, expression);
+        mState.expr(this, expression);
     }
 
     /**
