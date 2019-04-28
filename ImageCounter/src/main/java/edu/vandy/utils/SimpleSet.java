@@ -75,7 +75,7 @@ public class SimpleSet<E>
 
         // Check that there's sufficient capacity in the array,
         // expanding if it needed.
-        checkCapacityAndExpandIfNecessary(mSize + 1);  
+        ensureCapacityInternal(mSize + 1);
 
         // Add the element at the rear of the array.
         mElementData[mEnd] = element;
@@ -92,7 +92,7 @@ public class SimpleSet<E>
      * Ensure the array is large enough to hold @a minCapacity
      * elements.  The array will be expanded if necessary.
      */
-    private void checkCapacityAndExpandIfNecessary(int minCapacity) {
+    private void ensureCapacityInternal(int minCapacity) {
         if (minCapacity - mElementData.length > 0) {
             int oldCapacity = mElementData.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
