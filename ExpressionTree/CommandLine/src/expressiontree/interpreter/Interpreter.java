@@ -15,7 +15,7 @@ import expressiontree.tree.ExpressionTreeFactory;
  */
 public class Interpreter {
     /**
-     * ...
+     * Reference to the implementor hierarchy.
      */
     private InterpreterImpl mInterpreterImpl;
 
