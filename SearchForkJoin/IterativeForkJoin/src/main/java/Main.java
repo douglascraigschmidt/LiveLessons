@@ -178,8 +178,8 @@ public class Main {
 
         // Use the common fork-join pool to search the input looking
         // for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults =
-            ForkJoinPool.commonPool()
+        List<List<SearchResults>> listOfListOfSearchResults = ForkJoinPool
+            .commonPool()
             .invoke(forkJoinTask);
 
         // Record the stop time.
