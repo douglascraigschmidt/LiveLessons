@@ -16,6 +16,11 @@ import static java.util.stream.Collectors.toList;
  * recursive folder hierarchy, as well as calculate the cumulative
  * sizes of all the files.  Note that all the files have size 0, so
  * the total result is 0!
+ *
+ * Interestingly, earlier versions of Java (e.g., Java 8) seem to have
+ * a "quirk" with the common fork-join pool where it will continue to
+ * grow without bound when used with blocking I/O calls.  This doesn't
+ * seem to be a problem with later versions of Java, e.g., Java 12.
  */
 class FileCounter {
     /**
