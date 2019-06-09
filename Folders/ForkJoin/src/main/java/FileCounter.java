@@ -11,10 +11,11 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example shows how to use the Java fork-join pool framework to
- * count the number of files in a (large) recursive folder hierarchy,
- * as well as calculate the cumulative sizes of all the files.  Note
- * that all the files have size 0, so the total result is 0!
+ * This example shows how to use the Java fork-join pool framework and
+ * Java 8 sequential streams to count the number of files in a (large)
+ * recursive folder hierarchy, as well as calculate the cumulative
+ * sizes of all the files.  Note that all the files have size 0, so
+ * the total result is 0!
  */
 class FileCounter {
     /**

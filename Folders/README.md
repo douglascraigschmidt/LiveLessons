@@ -8,9 +8,9 @@ my Live Training courses.  Here's an overview of what's included:
   using the Java 8 completable futures framework.
 
 . ForkJoin -- This example shows how to use the Java fork-join pool
-  framework to count the number of files in a large recursive folder
-  hierarchy, as well as calculate the cumulative sizes of all the
-  files.
+  framework and Java 8 sequential streams to count the number of files
+  in a large recursive folder hierarchy, as well as calculate the
+  cumulative sizes of all the files.
 
 . Sync -- This example shows the use of the Java 8 sequential and
   parallel streams framework to process entries in a recursively
