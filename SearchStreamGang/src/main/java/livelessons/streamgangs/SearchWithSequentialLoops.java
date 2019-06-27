@@ -38,48 +38,54 @@ public class SearchWithSequentialLoops
             new ArrayList<>();
 
         // Process all the strings in the list.
-        for (CharSequence inputSeq : getInput()) {
+        for (CharSequence inputSeq : getInput())
+            // Map each input string to list of SearchResults
+            // containing the phrases found in the input.
+            listOfListOfSearchResults.add(processInput(inputSeq));
 
-            // Get the section title.
-            String title = getTitle(inputSeq);
-
-            // Skip over the title.
-            CharSequence input = inputSeq.subSequence(title.length(),
-                                                      inputSeq.length());
-
-            // Store the search results into a list.
-            List<SearchResults> listOfSearchResults =
-                new ArrayList<>();
-
-            // Iterate through all the phrases to find.
-            for (String phrase : mPhrasesToFind) {
-                // Create the search results (if any).
-                SearchResults results = searchForPhrase(phrase,
-                                                        input,
-                                                        title,
-                                                        false);
-
-                // Only add results if there's at least one match.
-                if (results.size() > 0)
-                    listOfSearchResults.add(results);
-            }
-                
-            // Only add a list if there's at least one match.
-            if (listOfSearchResults.size() > 0)
-                listOfListOfSearchResults.add(listOfSearchResults);
-        }
-
+        // Return the results.
         return listOfListOfSearchResults;
     }
 
     /**
-     * Looks for all instances of @a phrase in @a inputData and return
-     * a list of all the @a SearchResults (if any).
+     * Sequentially search {@code inputSeq} for all occurrences of the
+     * phrases to find.
+     */
+    List<SearchResults> processInput(CharSequence inputSeq) {
+        // Get the section title.
+        String title = getTitle(inputSeq);
+
+        // Skip over the title.
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
+
+        // Store the search results into a list.
+        List<SearchResults> listOfSearchResults =
+            new ArrayList<>();
+
+        // Iterate through all the phrases to find.
+        for (String phrase : mPhrasesToFind) {
+            // Create the search results (if any).
+            SearchResults results = searchForPhrase(phrase,
+                                                    input,
+                                                    title);
+
+            // Only add results if there's at least one match.
+            if (results.size() > 0)
+                listOfSearchResults.add(results);
+        }
+        
+        // Return the results
+        return listOfSearchResults;
+    }
+
+    /**
+     * Looks for all instances of {@code phrase} in {@code inputData}
+     * and return a list of all the {@code SearchResults} (if any).
      */
     public SearchResults searchForPhrase(String phrase,
-                                        String input,
-                                        String title,
-                                        boolean notUsed) {
+					 String input,
+					 String title) {
         // Create a list to hold the results.
         List<SearchResults.Result> resultList =
             new ArrayList<>();

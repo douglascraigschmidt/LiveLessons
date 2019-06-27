@@ -51,7 +51,7 @@ public class SearchWithSequentialStreams
     }
     
     /**
-     * Sequentially search @a inputSeq for all occurrences of the
+     * Sequentially search {@code inputSeq} for all occurrences of the
      * phrases to find.
      */
     private List<SearchResults> processInput(CharSequence inputSeq) {

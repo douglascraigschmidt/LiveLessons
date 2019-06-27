@@ -15,9 +15,8 @@ Here's an overview of what's included:
 . ex2 - This example shows the use of a simple lambda expression in
   the context of a Java List/ArrayList removeIf() method.
   
-. ex3 - This example uses a Java Function-based method reference to
-  sort a list of threads by their names.  It also demonstrates the use
-  of the Comparator.comparing() factory method.
+. ex3 - This example shows how Function objects can be composed
+  together via andThen().
   
 . ex4 - This example shows how a Java 7 BiFunction lambda can be used
   to replace all the values of all keys in a ConcurrentHashMap.  It
@@ -26,7 +25,9 @@ Here's an overview of what's included:
 
 . ex5 - This example shows how a Java 8 Consumer interface can be used
   with forEach() to print out the values in a list by binding the
-  System.out println() method to the forEach() Consumer parameter.
+  System.out println() method to the forEach() Consumer parameter.  It
+  also shows how to sort a list in ascending and descending order
+  using a Comparator and a Function interface.
 
 . ex6 - This example shows how a Java 8 Supplier interface can be used
   to print a default value if a key is not found in a map.  It also
@@ -45,8 +46,8 @@ Here's an overview of what's included:
   and a Java SynchronizedMap together with Java 8 Function-based
   method references to compute/cache/retrieve prime numbers.
 
-. ex10 - This example shows the use of a lambda expression in the
-  context of a Java ConcurrentHashMap removeIf() method.
+. ex10 - This example shows the use of predicate lambda expressions in
+  the context of a Java ConcurrentHashMap removeIf() method.
 
 . ex11 - This example shows the improper use of the Stream.peek()
   aggregate operation to interfere with a running stream.

@@ -98,7 +98,7 @@ public class SearchStreamGangTest {
     /**
      * This is the entry point into the test driver program.
      */
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) {
         System.out.println("Starting SearchStreamGangTest");
 
         // Parse the command-line arguments.
