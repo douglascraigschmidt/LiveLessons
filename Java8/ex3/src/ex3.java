@@ -28,8 +28,8 @@ public class ex3 {
 
    static public void main(String[] argv) {
        // Create a simple pipeline that builds an HTML tag.
-       Function<String, String> addHeader = HtmlTagMaker::addLessThan;
-       Function<String, String> tagger = addHeader
+       Function<String, String> lessThan = HtmlTagMaker::addLessThan;
+       Function<String, String> tagger = lessThan
            .andThen(HtmlTagMaker::addGreaterThan);
 
        // Apply the tagger pipeline multiple times to create a simple
