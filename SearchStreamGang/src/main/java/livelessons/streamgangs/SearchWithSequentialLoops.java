@@ -1,14 +1,11 @@
 package livelessons.streamgangs;
 
+import livelessons.utils.SearchResults;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import livelessons.utils.SearchResults;
-import livelessons.utils.StringUtils;
 
 /**
  * Customizes the SearchStreamGang framework to use Java loops to
@@ -51,7 +48,7 @@ public class SearchWithSequentialLoops
      * Sequentially search {@code inputSeq} for all occurrences of the
      * phrases to find.
      */
-    List<SearchResults> processInput(CharSequence inputSeq) {
+    private List<SearchResults> processInput(CharSequence inputSeq) {
         // Get the section title.
         String title = getTitle(inputSeq);
 
@@ -84,7 +81,7 @@ public class SearchWithSequentialLoops
      * and return a list of all the {@code SearchResults} (if any).
      */
     public SearchResults searchForPhrase(String phrase,
-					 String input,
+					 CharSequence input,
 					 String title) {
         // Create a list to hold the results.
         List<SearchResults.Result> resultList =

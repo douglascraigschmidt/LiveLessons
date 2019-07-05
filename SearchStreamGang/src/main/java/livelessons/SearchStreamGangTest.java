@@ -6,8 +6,8 @@ import livelessons.utils.RunTimer;
 import livelessons.utils.SearchResults;
 import livelessons.utils.TestDataFactory;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamsUtils.not;

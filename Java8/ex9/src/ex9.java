@@ -3,10 +3,16 @@ import utils.RunTimer;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 /**
  * This example showcases the use of a Java 8 ConcurrentHashMap and a
  * Java SynchronizedMap together with Java 8 Function-based method
- * references to compute/cache/retrieve prime numbers.
+ * references to compute/cache/retrieve prime numbers.  This example
+ * also demonstrates the use of stream slicing with takeWhile() and
+ * dropWhile().
  */
 public class ex9 {
     /**
@@ -131,6 +137,87 @@ public class ex9 {
     }
 
     /**
+     * Demonstrate how to slice by applying the stream dropWhile() and
+     * takeWhile() operations to the {@code map} parameter.
+     */
+    private void demonstrateSlicing(Map<Integer, Integer> map) {
+        // Create a map that's sorted by the value in map.
+        Map<Integer, Integer> sortedMap = map
+            // Get the EntrySet of the map.
+            .entrySet()
+            
+            // Convert the EntrySet into a stream.
+            .stream()
+
+            // Sort the elements in the stream by the value.
+            .sorted(comparingByValue())
+
+            // Trigger intermediate processing and collect the
+            // key/value pairs in the stream into a LinkedHashMap,
+            // which preserves the sorted order.
+            .collect(toMap(Map.Entry::getKey,
+                           Map.Entry::getValue,
+                           (e1, e2) -> e2,
+                           LinkedHashMap::new));
+
+        // Print out the entire contents of the sorted map.
+        System.out.println("sorted map = \n" + sortedMap);
+
+        printPrimes(sortedMap);
+        printNonPrimes(sortedMap);
+    }
+    
+    /**
+     * Print out the prime numbers in the {@code sortedMap}.
+     */
+    private void printPrimes(Map<Integer, Integer> sortedMap) {
+        // Create a list of prime integers.
+        List<Integer> primes = sortedMap
+            // Get the EntrySet of the map.
+            .entrySet()
+            
+            // Convert the EntrySet into a stream.
+            .stream()
+
+            // Slice the stream using a predicate that stops after a
+            // non-prime number (i.e., getValue() != 0) is reached.
+            .takeWhile(entry -> entry.getValue() == 0)
+
+            // Map the EntrySet into just the key.
+            .map(Map.Entry::getKey)
+
+            // Collect the results into a list.
+            .collect(toList());
+
+        // Print out the list of primes.
+        System.out.println("primes =\n" + primes);
+    }
+
+    /**
+     * Print out the non-prime numbers and their factors in the {@code
+     * sortedMap}.
+     */
+    private void printNonPrimes(Map<Integer, Integer> sortedMap) {
+        // Create a list of non-prime integers and their factors.
+        List<Map.Entry<Integer, Integer>> nonPrimes = sortedMap
+            // Get the EntrySet of the map.
+            .entrySet()
+            
+            // Convert the EntrySet into a stream.
+            .stream()
+
+            // Slice the stream using a predicate that skips over the
+            // non-prime numbers (i.e., getValue() == 0); 
+            .dropWhile(entry -> entry.getValue() == 0)
+
+            // Collect the results into a list.
+            .collect(toList());
+
+        // Print out the list of primes.
+        System.out.println("non-prime numbers and their factors =\n" + nonPrimes);
+    }
+
+    /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) throws InterruptedException {
@@ -142,14 +229,6 @@ public class ex9 {
         ex9 test = new ex9();
 
         // Time how long this test takes to run.
-        RunTimer.timeRun(() 
-                         // Run the test using a ConcurrentHashMap.
-                         -> test.runTest(maxIterations,
-                                            new ConcurrentHashMap<>(),
-                                            "ConcurrentHashMap"),
-                         "ConcurrentHashMap");
-
-        // Time how long this test takes to run.
         RunTimer.timeRun(() ->
                          // Run the test using a synchronized HashMap.
                          test.runTest(maxIterations,
@@ -157,8 +236,22 @@ public class ex9 {
                                       "SynchronizedHashMap"),
                          "SynchronizedHashMap");
 
+        // Create a new ConcurrentHashMap.
+        Map<Integer, Integer> concurrentHashMap = new ConcurrentHashMap<>();
+
+        // Time how long this test takes to run.
+        RunTimer.timeRun(() 
+                         // Run the test using a ConcurrentHashMap.
+                         -> test.runTest(maxIterations,
+                                         concurrentHashMap,
+                                         "ConcurrentHashMap"),
+                         "ConcurrentHashMap");
+
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
+
+        // Demonstrate slicing.
+        test.demonstrateSlicing(concurrentHashMap);
 
         // Shutdown the executor.
         test.mExecutor.shutdownNow();

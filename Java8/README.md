@@ -44,7 +44,9 @@ Here's an overview of what's included:
 
 . ex9 - This example showcases the use of a Java 8 ConcurrentHashMap
   and a Java SynchronizedMap together with Java 8 Function-based
-  method references to compute/cache/retrieve prime numbers.
+  method references to compute/cache/retrieve prime numbers.  This
+  example also demonstrates the use of stream slicing with takeWhile()
+  and dropWhile().
 
 . ex10 - This example shows the use of predicate lambda expressions in
   the context of a Java ConcurrentHashMap removeIf() method.

@@ -85,7 +85,7 @@ public class SearchStreamGang
 
         // Execute the test and time how long it runs.
         List<List<SearchResults>> results =
-            RunTimer.timeRun(() -> processStream(),
+            RunTimer.timeRun(this::processStream,
                              TAG);
 
         // Print the results.
