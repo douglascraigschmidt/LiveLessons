@@ -163,7 +163,10 @@ public class ex9 {
         // Print out the entire contents of the sorted map.
         System.out.println("sorted map = \n" + sortedMap);
 
+        // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);
+
+        // Print out the non-prime numbers using dropWhile().
         printNonPrimes(sortedMap);
     }
     
@@ -190,7 +193,8 @@ public class ex9 {
             .collect(toList());
 
         // Print out the list of primes.
-        System.out.println("primes =\n" + primes);
+        System.out.println("primes =\n"
+                           + primes);
     }
 
     /**
@@ -214,7 +218,8 @@ public class ex9 {
             .collect(toList());
 
         // Print out the list of primes.
-        System.out.println("non-prime numbers and their factors =\n" + nonPrimes);
+        System.out.println("non-prime numbers and their factors =\n"
+                           + nonPrimes);
     }
 
     /**
