@@ -176,12 +176,15 @@ public class SearchStreamGang
             // Flatten the lists into a stream of SearchResults.
             .flatMap(List::stream)
 
-            // Collect the SearchResults into a Map by their titles.
-            .collect(groupingBy(SearchResults::getTitle));
+            // Collect the SearchResults into a TreeMap, which will
+            // sort the keys by their titles.
+            .collect(groupingBy(SearchResults::getTitle,
+                                TreeMap::new,
+                                toList()));
 
-        // Print out the results in the map, where each title is
-        // first printed followed by a list of the indices where the
-        // phrase appeared in the input.
+        // Print out the results in the map, where each title is first
+        // printed followed by a list of the indices where the phrase
+        // appeared in the input.
         resultsMap.forEach((key, value)
                      -> {
                          System.out.println("Title \""
