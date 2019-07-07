@@ -176,9 +176,9 @@ public class SearchResults {
         String output = "";
 
         if (!isEmpty()) {
-            output += headerToString()
+            output += // headerToString()
                 // Create a string containing indices of all the matches.
-                + "["
+                "["
                 + mList
                 // Convert list to a stream.
                 .stream()
