@@ -59,14 +59,14 @@ public class RunTimer {
      * Call @a runnable.run() and time how long it takes to run.
      */
     public static void timeRun(Runnable runnable,
-                                String testName) {
+                               String testName) {
         startTiming();
         runnable.run();
         stopTiming();
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
-                mExecutionTime);
+                        mExecutionTime);
     }
 
     /**
@@ -81,8 +81,7 @@ public class RunTimer {
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest\n");
 
-        // Print out the contents of the mResultsMap in sorted
-        // order.
+        // Print out the contents of the mResultsMap in sorted order.
         mResultsMap
             // Get the entrySet for the mResultsMap.
             .entrySet()
@@ -93,9 +92,8 @@ public class RunTimer {
             // Create a SimpleImmutableEntry containing the timing
             // results (value) followed by the test name (key).
             .map(entry
-                 -> new AbstractMap.SimpleImmutableEntry<>
-                 (entry.getValue(),
-                  entry.getKey()))
+                 -> new AbstractMap.SimpleImmutableEntry<>(entry.getValue(),
+                                                           entry.getKey()))
 
             // Sort the stream by the timing results (key).
             .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
