@@ -1,12 +1,8 @@
+import search.SearchResults;
 import search.WordSearcher;
 import utils.TestDataFactory;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.groupingBy;
 
 /**
  * This program searches seqentially for the occurrence of words in a
@@ -41,7 +37,7 @@ public class Main {
 
         // Create an input string containing the lyrics to the
         // do-re-mi song.
-        String input = 
+        String inputString = 
             TestDataFactory.getInput(sINPUT_FILE, "@").get(0);
 
         // Get the list of words to find.
@@ -51,10 +47,17 @@ public class Main {
         // Create an object that can be used to search for words in
         // the input.
         WordSearcher wordSearcher =
-            new WordSearcher(input);
+            new WordSearcher(inputString);
                                                              
-        // Print all matching words.
-        wordSearcher.findAndPrintWords(wordsToFind);
+        // Find all matching words.
+        List<SearchResults> results =
+            wordSearcher.findWords(wordsToFind);
+
+        // Print all the results;
+        wordSearcher.printResults(results);
+
+        // Print a slice of the results starting at "La".
+        wordSearcher.printSlice("La", results);
 
         System.out.println("Ending SimpleSearchStream");
     }

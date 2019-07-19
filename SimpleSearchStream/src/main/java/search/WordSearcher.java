@@ -1,12 +1,12 @@
 package search;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static utils.StreamsUtils.not;
 
 /**
@@ -30,12 +30,12 @@ public class WordSearcher {
 
     /**
      * Search the input for all occurrences of the @ wordsToFind and
-     * print the results (if any).
+     * return the results (if any) as a list of SearchResults.
      */
-    public void findAndPrintWords(List <String> wordsToFind) {
-        // Create a list SearchResults corresponding to the index
-        // where each word occurs in the input string.
-        List<SearchResults> results = wordsToFind
+    public List<SearchResults> findWords(List <String> wordsToFind) {
+        // Create and return a list SearchResults corresponding to the
+        // index where each word occurs in the input string.
+        return wordsToFind
             // Convert the list of words to find into a stream.
             .stream()
 
@@ -50,12 +50,6 @@ public class WordSearcher {
             // This terminal operation triggers intermediate operation
             // processing and collects the SearchResults into a list.
             .collect(toList());
-
-        // Print all the results;
-        printResults(results);
-
-        // Print a slice of the results starting at "La".
-        printSlice("La", results);
     }
 
     /**
@@ -84,41 +78,25 @@ public class WordSearcher {
     }
 
     /**
-     * Print the results of the word search.
+     * Print the word and the results to the output.
      */
-    private void printResults(List<SearchResults> listOfSearchResults) {
-        // Create a map that associates words found in the input with
-        // the indices where they were found.
-        Map<String, List<SearchResults>> resultsMap = listOfSearchResults
-            // Convert the list into a stream.
-            .stream()
-
-            // Collect the SearchResults into a LinkedHashMap, which
-            // preserves the insertion order.
-            .collect(groupingBy(SearchResults::getWord,
-                     LinkedHashMap::new,
-                     toList()));
-
-        // Print out the results in the map, where each word is first
-        // printed followed by a list of the indices where the word
-        // appeared in the input.
-        resultsMap.forEach((key, value)
-                           -> {
-                               System.out.print("Word \""
-                                                + key
-                                                + "\" appeared at indices ");
-                               value.forEach(SearchResults::print);
-                           });
+    private void printResult(String word,
+                             List<SearchResults> results) {
+        // Create/return SearchResults to keep track of relevant info.
+        System.out.print("Word \""
+                    + word
+                    + "\" appeared at indices ");
+        results.forEach(SearchResults::print);
     }
 
     /**
-     * Print a slice of the word search starting at a particular word.
+     * Print the results of the word search.
      */
-    private void printSlice(String word,
-                                  List<SearchResults> listOfSearchResults) {
+    public void printResults(List<SearchResults> listOfSearchResults) {
         // Create a map that associates words found in the input with
-        // the indices where they were found.
-        Map<String, List<SearchResults>> resultsMap = listOfSearchResults
+        // the indices where they were found and then print the
+        // contents of that map.
+        listOfSearchResults
             // Convert the list into a stream.
             .stream()
 
@@ -126,12 +104,33 @@ public class WordSearcher {
             // preserves the insertion order.
             .collect(groupingBy(SearchResults::getWord,
                                 LinkedHashMap::new,
-                                toList()));
+                                toList()))
 
-        // Print out the results in the map, where each word is first
-        // printed followed by a list of the indices where the word
-        // appeared in the input.
-        resultsMap
+            // Print out the results in the map, where each word is
+            // first printed followed by a list of the indices where
+            // the word appeared in the input.
+            .forEach(this::printResult);
+    }
+
+    /**
+     * Print a slice of the {@code listOfSearchResults} starting at a particular {@code word}.
+     */
+    public void printSlice(String word,
+                           List<SearchResults> listOfSearchResults) {
+        // Create a map that associates words found in the input with
+        // the indices where they were found and print out the results
+        // in the map, where each word is first printed followed by a
+        // list of the indices where the word appeared in the input.
+        listOfSearchResults
+            // Convert the list into a stream.
+            .stream()
+
+            // Collect the SearchResults into a LinkedHashMap, which
+            // preserves the insertion order.
+            .collect(groupingBy(SearchResults::getWord,
+                                LinkedHashMap::new,
+                                toList()))
+
             // Get the EntrySet for this map.
             .entrySet()
             
@@ -141,16 +140,19 @@ public class WordSearcher {
             // Slice the stream to consist of the remaining elements
             // of this stream after dropping the subset of elements
             // that don't match the word parameter.
-            .dropWhile(entry -> !entry.getKey().equals(word))
+            .dropWhile((entry -> notEqual(entry, word)))
 
             // Print out the matching results in the map, where each
             // word is first printed followed by a list of the indices
             // where the word appeared in the input.
-            .forEach(entry -> {
-                    System.out.print("Word \""
-                                     + entry.getKey()
-                                     + "\" appeared at indices ");
-                    entry.getValue().forEach(SearchResults::print);
-                });
+            .forEach(entry -> printResult(entry.getKey(), entry.getValue()));
+    }
+
+    /**
+     * Returns true if {@code entry.getKey()} != to {@code word}, else false.
+     */
+    private boolean notEqual(Map.Entry<String, List<SearchResults>> entry, String word) {
+        return !entry.getKey().equals(word);
     }
 }
+
