@@ -78,14 +78,14 @@ public class WordSearcher {
     }
 
     /**
-     * Print the word and the results to the output.
+     * Print a word and its list of indices to the output.
      */
     private void printResult(String word,
                              List<SearchResults> results) {
-        // Create/return SearchResults to keep track of relevant info.
+        // Print the word followed by the list of search results.
         System.out.print("Word \""
-                    + word
-                    + "\" appeared at indices ");
+                         + word
+                         + "\" appeared at indices ");
         results.forEach(SearchResults::print);
     }
 
@@ -140,18 +140,20 @@ public class WordSearcher {
             // Slice the stream to consist of the remaining elements
             // of this stream after dropping the subset of elements
             // that don't match the word parameter.
-            .dropWhile((entry -> notEqual(entry, word)))
+            .dropWhile(entry -> notEqual(entry, word))
 
-            // Print out the matching results in the map, where each
-            // word is first printed followed by a list of the indices
-            // where the word appeared in the input.
+            // Print out the matching results in the stream, where
+            // each word is first printed followed by a list of the
+            // indices where the word appeared in the input.
             .forEach(entry -> printResult(entry.getKey(), entry.getValue()));
     }
 
     /**
-     * Returns true if {@code entry.getKey()} != to {@code word}, else false.
+     * Return true if {@code entry.getKey()} != to {@code word}, else false.
      */
     private boolean notEqual(Map.Entry<String, List<SearchResults>> entry, String word) {
+        // If entry.getKey() != to word return true, otherwise return
+        // false.
         return !entry.getKey().equals(word);
     }
 }
