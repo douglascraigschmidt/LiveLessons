@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Implementation of the Factory Method pattern that dynamically

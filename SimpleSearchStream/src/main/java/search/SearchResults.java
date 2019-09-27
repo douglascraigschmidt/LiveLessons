@@ -175,24 +175,31 @@ public class SearchResults {
     public String toString() {
         String output = "";
 
-        if (!isEmpty()) {
+        if (!isEmpty())
             output += // headerToString()
-                // Create a string containing indices of all the matches.
-                "["
-                + mList
-                // Convert list to a stream.
-                .stream()
-
-                // Create a custom collector to join all the results
-                // together.
-                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
-                                      (j, r) -> j.add(r.toString()),       // accumulator
-                                      StringJoiner::merge,                 // combiner
-                                      StringJoiner::toString))             // finisher
-                + "]";
-        }
+                formatList(mList);
         
         return output;
+    }
+
+    private static String formatList(List<SearchResults.Result> list) {
+         return // Create a string containing indices of all the matches.
+                    "["
+                            + list
+                            // Convert list to a stream.
+                            .stream()
+
+                            // Create a custom collector to join all the results
+                            // together.
+                            .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
+                                    (j, r) -> j.add(r.toString()),       // accumulator
+                                    StringJoiner::merge,                 // combiner
+                                    StringJoiner::toString))             // finisher
+                            + "]";
+    }
+
+    public static void printResults(List<SearchResults.Result> list) {
+        System.out.println(formatList(list));
     }
 
     /**
