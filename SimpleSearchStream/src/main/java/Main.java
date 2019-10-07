@@ -56,8 +56,14 @@ public class Main {
         // Print all the results;
         wordSearcher.printResults(results);
 
-        // Print a slice of the results starting at "La".
-        wordSearcher.printSlice("La", results);
+        // Print a "suffix slice" of the results starting at "La" and
+        // continuing to the end of the list.
+        wordSearcher.printSuffixSlice("La", results);
+
+        // Print a "prefix slice" of the results starting at the
+        // beginning of the list and continuing up to (but not
+        // including) "La".
+        wordSearcher.printPrefixSlice("La", results);
 
         System.out.println("Ending SimpleSearchStream");
     }

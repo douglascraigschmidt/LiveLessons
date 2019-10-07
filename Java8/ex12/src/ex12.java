@@ -60,7 +60,7 @@ public class ex12 {
     private void runNonJava8() {
         System.out.println("Results from runNonJava8():");
 
-        List<String> listOfCharacters = new LinkedList
+        List<String> listOfCharacters = new LinkedList<>
             (Arrays.asList("horatio",
                            "claudius",
                            "Gertrude",

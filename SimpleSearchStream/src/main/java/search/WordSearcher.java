@@ -154,12 +154,14 @@ public class WordSearcher {
             });
     }
 
+
     /**
-     * Print a slice of the {@code listOfSearchResults} starting at a
-     * particular {@code word}.
+     * Print a "prefix slice" of the {@code listOfSearchResults}
+     * starting at the beginning of the list and continuing upto (but
+     * not including) the given {@code word}.
      */
-    public void printSlice(String word,
-                           List<SearchResults> listOfSearchResults) {
+    public void printPrefixSlice(String word,
+                                 List<SearchResults> listOfSearchResults) {
         // Create a map that associates words found in the input with
         // the indices where they were found and print out the results
         // in the map, where each word is first printed followed by a
@@ -180,9 +182,46 @@ public class WordSearcher {
             // Convert EntrySet into a stream.
             .stream()
 
-            // Slice the stream to consist of the remaining elements
-            // of this stream after dropping the subset of elements
-            // that don't match the word parameter.
+            // Slice the stream to consist of the elements of this
+            // stream up to (but not including) the word parameter.
+            .takeWhile(entry -> notEqual(entry, word))
+
+            // Print out the matching results in the stream, where
+            // each word is first printed followed by a list of the
+            // indices where the word appeared in the input.
+            .forEach(entry -> printResult(entry.getKey(), entry.getValue()));
+    }
+
+    /**
+     * Print a "suffix slice" of the {@code listOfSearchResults}
+     * starting at the given {@code word} and continuing to the end of
+     * the list.
+     */
+    public void printSuffixSlice(String word,
+                                 List<SearchResults> listOfSearchResults) {
+        // Create a map that associates words found in the input with
+        // the indices where they were found and print out the results
+        // in the map, where each word is first printed followed by a
+        // list of the indices where the word appeared in the input.
+        listOfSearchResults
+            // Convert the list into a stream.
+            .stream()
+
+            // Collect the SearchResults into a LinkedHashMap, which
+            // preserves the insertion order.
+            .collect(groupingBy(SearchResults::getWord,
+                                LinkedHashMap::new,
+                                toDownstreamCollector()))
+
+            // Get the EntrySet for this map.
+            .entrySet()
+            
+            // Convert EntrySet into a stream.
+            .stream()
+
+            // Slice the stream to consist of the elements of this
+            // stream from the first match of the word parameter to
+            // the end of the list.
             .dropWhile(entry -> notEqual(entry, word))
 
             // Print out the matching results in the stream, where
