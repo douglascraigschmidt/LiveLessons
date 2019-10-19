@@ -1,17 +1,14 @@
+import org.testng.annotations.Test;
 import search.PhraseMatchSpliterator;
 import search.SearchResults;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Tests the features of the PhaseMatchSpliterator.  Thanks to Sanjeev
