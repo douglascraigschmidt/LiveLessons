@@ -48,6 +48,14 @@ public class ex17 {
         // stream and the three parameter version of reduce().
         buggyStreamReduce3(true);
 
+        // Reduce partial results into a string using a sequential
+        // stream and string concatenation with reduce().
+        streamReduceConcat(false);
+
+        // Reduce partial results into a string using a parallel
+        // stream and string concatenation with reduce().
+        streamReduceConcat(true);
+
         // Collect partial results into a string using a sequential
         // stream together with collect() and StringJoiner.
         streamCollectJoining(false);
@@ -123,7 +131,7 @@ public class ex17 {
     private static void buggyStreamReduce3(boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "BuggyStreamReduce3 implementation");
+                           + "buggyStreamReduce3 implementation");
 
         List<String> allWords =
             Arrays.asList("The quick brown fox jumps over the lazy dog\n",
@@ -157,6 +165,60 @@ public class ex17 {
                     StringBuilder::append)
             // Create a string.
             .toString();
+
+
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+
+        System.out.println("The time to collect "
+                           + words.split("\\s+").length
+                           + " words took "
+                           + stopTime
+                           + " milliseconds.  Here are the words:\n"
+                           + words);
+    }
+
+    /**
+     * Reduce partial results into a String using reduce() with string
+     * concatenation (i.e., the '+' operator).  If @a parallel is
+     * true then a parallel stream is used, else a sequential stream
+     * is used.  This solution is correct, but inefficient due to the
+     * overhead of string concatentation.
+     */
+    private static void streamReduceConcat(boolean parallel) {
+        System.out.println("\n++Running the "
+                           + (parallel ? "parallel" : "sequential")
+                           + "streamReduceConcat implementation");
+
+        List<String> allWords =
+            Arrays.asList("The quick brown fox jumps over the lazy dog\n",
+                          "A man, a plan, a canal: Panama\n",
+                          "Now is the time for all good people " 
+                          + "to come to the aid of their party");
+
+        // Record the start time.
+        long startTime = System.nanoTime();
+
+        Stream<String> wordStream = allWords
+            // Convert the list into a stream (which uses a
+            // spliterator internally).
+            .stream();
+
+        if (parallel)
+            // Convert to a parallel stream.
+            wordStream.parallel();
+
+        // A "real" application would likely do something
+        // interesting with the words at this point.
+
+        // Create a string that contains all the strings appended together.
+        String words = wordStream
+            // Use reduce() to append all the strings in the stream.
+            // This implementation works with both sequential and
+            // parallel streams, but it's inefficient since it
+            // requires string concatenation.
+            .reduce(new String(),
+                    (x, y) -> x + y);
 
 
         // Record the stop time.
