@@ -40,6 +40,22 @@ public class ex17 {
         // incorrect identity value.
         testSum(1L, true);
 
+        // Run the product reduction test sequentially with the
+        // correct identity value.
+        testProd(1L, false);
+
+        // Run the product reduction test in parallel with the
+        // correct identity value.
+        testProd(1L, true);
+
+        // Run the product reduction test sequentially with an
+        // incorrect identity value.
+        testProd(0L, false);
+
+        // Run the product reduction test in parallel with an
+        // incorrect identity value.
+        testSum(0L, true);
+
         // Reduce partial results into a string using a sequential
         // stream and the three parameter version of reduce().
         buggyStreamReduce3(false);
@@ -94,7 +110,7 @@ public class ex17 {
      * sequential stream is used.  When a sequential or parallel
      * stream is used with an identity of 0 the results of this test
      * will be correct.  When a sequential or parallel stream is used
-     * with an identity of 0, however, results of this test will be
+     * with an identity of 1, however, results of this test will be
      * incorrect.
      */
     private static void testSum(long identity,
@@ -115,6 +131,35 @@ public class ex17 {
                            + identity
                            + " = "
                            + sum);
+    }
+
+    /**
+     * Print out the results of multiplying the first 100 numbers,
+     * using @a identity as the initial value of the summation.  If @a
+     * parallel is true then a parallel stream is used, else a
+     * sequential stream is used.  When a sequential or parallel
+     * stream is used with an identity of 1 the results of this test
+     * will be correct.  When a sequential or parallel stream is used
+     * with an identity of 0, however, results of this test will be
+     * incorrect.
+     */
+    private static void testProd(long identity,
+                                 boolean parallel) {
+        LongStream rangeStream = LongStream
+            .rangeClosed(1, 10);
+
+        if (parallel)
+            rangeStream.parallel();
+
+        long product = rangeStream
+            .reduce(identity,
+                    (x, y) -> x * y);
+
+        System.out.println((parallel ? "Parallel" : "Sequential")
+                           + " product of first 10 numbers with identity "
+                           + identity
+                           + " = "
+                           + product);
     }
 
     /**
