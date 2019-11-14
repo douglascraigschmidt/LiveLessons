@@ -47,9 +47,9 @@ public class Options {
         + "parrot.jpg,"
         + "rush-logo.jpg,"
         + "complaints.jpg,"
-          /* + "mockingjay.png,"
-        + "moma.JPG,"
-        + "enigma.JPG" */
+        + "doc.jpg,"
+        + "java-ace.gif,"
+        + "bee-patterns.jpg,"
     };
 
     /**
