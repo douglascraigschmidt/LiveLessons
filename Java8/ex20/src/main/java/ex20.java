@@ -8,9 +8,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This example shows how to use Java parallel streams in conjunction
- * with the ManagedBlocker interface and the Java fork-join pool to
- * download multiple images from a remote server.
+ * This example shows how to combine Java parallel streams with the
+ * ForkJoinPool.ManagedBlocker interface and the Java fork-join
+ * framework to download multiple images from a remote server.
  */
 public class ex20 {
     /**
@@ -32,7 +32,7 @@ public class ex20 {
      * Run the program.
      */
     private void run() {
-        System.out.println("Entering the download tests with "
+        System.out.println("Entering the download tests program with "
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
 
@@ -64,7 +64,7 @@ public class ex20 {
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
-        System.out.println("Leaving the download tests");
+        System.out.println("Leaving the download tests program");
     }
 
     /**
@@ -79,12 +79,14 @@ public class ex20 {
      * Run the test named {@code testName} by appying the {@code
      * downloadAndStoreImage} function.
      */
-    private void runTest(Function<URL, File> downloadAndStoreImage, String testName) {
+    private void runTest(Function<URL, File> downloadAndStoreImage,
+                         String testName) {
         // Let the system garbage collect.
         System.gc();
 
         // Record how long the test takes to run.
         RunTimer.timeRun(() ->
+                         // Run the test with the designated function.
                          testDownloadBehavior(downloadAndStoreImage,
                                               testName),
                          testName);
@@ -191,8 +193,9 @@ public class ex20 {
     }
 
     /**
-     * Factory method that retrieves the image associated with the @a
-     * url and creates an Image to encapsulate it.
+     * Factory method that blocks while retrieving the image
+     * associated with the {@code url} and creating an Image to
+     * encapsulate it.
      */
     private Image downloadImage(URL url) {
         return new Image(url,
@@ -204,14 +207,15 @@ public class ex20 {
      */
     private void printStats(String testName, 
                             int imageCount) {
-        System.out.println(TAG 
-                           + ":"
-                           + testName
-                           + " downloaded and stored "
-                           + imageCount
-                           + " images using "
-                           + (ForkJoinPool.commonPool().getPoolSize() + 1)
-                           + " threads in the pool");
+        if (!testName.equals("warmup"))
+            System.out.println(TAG 
+                               + ": "
+                               + testName
+                               + " downloaded and stored "
+                               + imageCount
+                               + " images using "
+                               + (ForkJoinPool.commonPool().getPoolSize() + 1)
+                               + " threads in the pool");
     }
 
     /**
