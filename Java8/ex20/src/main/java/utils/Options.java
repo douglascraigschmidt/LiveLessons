@@ -42,7 +42,14 @@ public class Options {
         + "robot.png,"
         + "ace_copy.jpg,"
         + "tao_copy.jpg,"
-        + "doug_circle.png"
+        + "doug_circle.png",
+          "NYNY.jpg,"
+        + "parrot.jpg,"
+        + "rush-logo.jpg,"
+        + "mockingjay.png,"
+        + "complaints.jpg,"
+        + "moma.JPG,"
+        + "enigma.JPG"
     };
 
     /**
