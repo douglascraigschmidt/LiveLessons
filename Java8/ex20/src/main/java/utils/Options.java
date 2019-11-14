@@ -46,10 +46,10 @@ public class Options {
           "NYNY.jpg,"
         + "parrot.jpg,"
         + "rush-logo.jpg,"
-        + "mockingjay.png,"
         + "complaints.jpg,"
+          /* + "mockingjay.png,"
         + "moma.JPG,"
-        + "enigma.JPG"
+        + "enigma.JPG" */
     };
 
     /**

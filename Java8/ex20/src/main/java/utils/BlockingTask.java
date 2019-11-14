@@ -32,12 +32,7 @@ public class BlockingTask {
             new SupplierManagedBlocker<>(supplier);
 
         try {
-            /*
             // Submit managedBlock to the common ForkJoin thread pool.
-            System.out.println(TAG
-                               + "calling managedBlock() in thread "
-                               + Thread.currentThread());
-                               */
             ForkJoinPool.managedBlock(managedBlock);
         } catch (InterruptedException e) {
             throw new Error(e);
