@@ -292,7 +292,7 @@ public class ForkJoinUtils {
                                         ForkJoinPool forkJoinPool) {
         // Create a new list of callables.
         List<Callable<T>> tasks =
-            new ArrayList<>();
+                new ArrayList<>();
 
         // Add all the ops to the list.
         for (T t : list)
@@ -302,16 +302,33 @@ public class ForkJoinUtils {
         // Create a list of elements from the list of futures and
         // return it.
         return forkJoinPool
-            // Call invokeAll() to process all elements in the list.
-            .invokeAll(tasks)
+                // Call invokeAll() to process all elements in the list.
+                .invokeAll(tasks)
 
-            // Convert the list of futures to a stream.
-            .stream()
+                // Convert the list of futures to a stream.
+                .stream()
 
-            // Map the futures to elements.
-            .map(rethrowFunction(Future::get))
+                // Map the futures to elements.
+                .map(rethrowFunction(Future::get))
 
-            // Collect the results into a list.
-            .collect(toList());
+                // Collect the results into a list.
+                .collect(toList());
+    }
+
+    /**
+     * Apply {@code op} to all items in the {@code list} using the
+     * parallel stream framework.
+     */
+    public static <T> List<T> applyParallelStream(List<T> list,
+                                                  Function<T, T> op) {
+        return list
+                 // Convert the list to a parallel stream.
+                 .parallelStream()
+
+                 // Apply the op function to each element of the stream.
+                 .map(op)
+
+                 // Convert the transformed stream back into a list.
+                 .collect(toList());
     }
 }

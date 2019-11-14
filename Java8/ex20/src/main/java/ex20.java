@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This example shows how to use the ManagedBlocker interface in the
- * Java fork-join pool to download multiple images from a remote
- * server.
+ * This example shows how to use Java parallel streams in conjunction
+ * with the ManagedBlocker interface and the Java fork-join pool to
+ * download multiple images from a remote server.
  */
 public class ex20 {
     /**

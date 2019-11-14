@@ -100,6 +100,12 @@ public class ex22 {
         System.out.println("applyAllSplitIndexEx() steal count = "
                 + fjp5.getStealCount());
 
+        System.gc();
+        RunTimer.timeRun(() -> testParallelStream(fractionList, op),
+                "testParallelStream()");
+        System.out.println("applyParallelStream() steal count = "
+                + ForkJoinPool.commonPool().getStealCount());
+
         // Print the results of the tests.
         display(RunTimer.getTimingResults());
 
@@ -187,10 +193,20 @@ public class ex22 {
     private static void testInvokeAll(List<BigFraction> fractionList,
                                       Function<BigFraction, BigFraction> op,
                                       ForkJoinPool fjp) {
-        // Test big fraction operations using invokeAll()
+        // Test big fraction operations using invokeAll().
         invokeAll(fractionList,
                   op,
                   fjp);
+    }
+
+    /**
+     * Test the parallel stream implementation.
+     */
+    private static void testParallelStream(List<BigFraction> fractionList,
+                                           Function<BigFraction, BigFraction> op) {
+        // Test big fraction operations using a parallel stream.
+        applyParallelStream(fractionList,
+                            op);
     }
 
     /**
