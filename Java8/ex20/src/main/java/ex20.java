@@ -1,11 +1,9 @@
-import utils.BlockingTask;
-import utils.Image;
-import utils.NetUtils;
-import utils.Options;
+import utils.*;
 
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +31,35 @@ public class ex20 {
      * Run the program.
      */
     private void run() {
+        System.out.println("Entering the download tests with "
+                           + Runtime.getRuntime().availableProcessors()
+                           + " cores available");
+
+        // Warm up the common fork-join pool.
+        warmUpThreadPool();
+
+        // Runs the tests using the using the Java fork-join
+        // framework's default behavior, which does not add new worker
+        // threads to the pool when blocking occurs.
+        RunTimer.timeRun(() -> testDefaultDownloadBehavior(),
+                         "testDefaultDownloadBehavior()");
+
+        // Run the tests using the using the Java fork-join
+        // framework's ManagedBlocker mechanism, which adaptively adds
+        // new worker threads to the pool when blocking occurs.
+        RunTimer.timeRun(() -> testAdaptiveDownloadBehavior(),
+                         "testAdaptiveDownloadBehavior()");
+
+        // Print the results.
+        System.out.println(RunTimer.getTimingResults());
+
+        System.out.println("Leaving the download tests");
+    }
+
+    /**
+     * This method warms up the default thread pool.
+     */
+    private void warmUpThreadPool() {
         // Delete any the filtered images from the previous run.
         deleteDownloadedImages();
 
@@ -51,21 +78,98 @@ public class ex20 {
             // of images.
             .collect(Collectors.toList());
 
-        System.out.println(TAG + 
-                           ": downloaded and stored "
-                           + imageFiles.size()
-                           + " images");
+        // Let the system garbage collect.
+        System.gc();
     }
 
     /**
-     * Transform URL to a File by downloading each image via its
-     * URL and storing it.
+     * This method runs the tests using the using the Java fork-join
+     * framework's default behavior, which does not add new worker
+     * threads to the pool when blocking occurs.
      */
-    private File downloadAndStoreImage(URL url) {
+    private void testDefaultDownloadBehavior() {
+        // Delete any the filtered images from the previous run.
+        deleteDownloadedImages();
+
+        // Get the list of files to the downloaded images.
+        List<File> imageFiles = Options.instance().getUrlList()
+            // Convert the URLs in the input list into a stream and
+            // process them in parallel.
+            .parallelStream()
+
+            // Transform URL to a File by downloading each image via
+            // its URL.  This call ensures the common fork/join thread
+            // pool is expanded to handle the blocking image download.
+            .map(this::downloadAndStoreImage)
+
+            // Terminate the stream and collect the results into list
+            // of images.
+            .collect(Collectors.toList());
+
+        // Print the statistics for this test run.
+        printStats(imageFiles.size());
+
+        // Let the system garbage collect.
+        System.gc();
+    }
+
+    /**
+     * This method runs the tests using the using the Java fork-join
+     * framework's ManagedBlocker mechanism, which adaptively adds new
+     * worker threads to the pool when blocking occurs.
+     */
+    private void testAdaptiveDownloadBehavior() {
+        // Delete any the filtered images from the previous run.
+        deleteDownloadedImages();
+
+        // Get the list of files to the downloaded images.
+        List<File> imageFiles = Options.instance().getUrlList()
+            // Convert the URLs in the input list into a stream and
+            // process them in parallel.
+            .parallelStream()
+
+            // Transform URL to a File by downloading each image via
+            // its URL.  This call ensures the common fork/join thread
+            // pool is expanded to handle the blocking image download.
+            .map(this::downloadAndStoreImageEx)
+
+            // Terminate the stream and collect the results into list
+            // of images.
+            .collect(Collectors.toList());
+
+        // Print the statistics for this test run.
+        printStats(imageFiles.size());
+
+        // Let the system garbage collect.
+        System.gc();
+    }
+
+    /**
+     * Transform URL to a File by downloading each image via its URL
+     * and storing it using the Java fork-join framework's
+     * ManagedBlocker mechanism, which adaptively adds new worker
+     * threads to the pool when blocking occurs.
+     */
+    private File downloadAndStoreImageEx(URL url) {
         return BlockingTask
             // This call ensures the common fork/join thread pool
             // is expanded to handle the blocking image download.
             .callInManagedBlock(() -> downloadImage(url))
+
+            // Store the image on the local device.
+            .store();
+    }
+
+    /**
+     * Transform URL to a File by downloading each image via its URL
+     * and storing it *without* using the Java fork-join framework's
+     * ManagedBlocker mechanism, i.e., the pool of worker threads will
+     * not be expanded.
+     */
+    private File downloadAndStoreImage(URL url) {
+        return 
+            // Perform a blocking image download.
+            downloadImage(url)
 
             // Store the image on the local device.
             .store();
@@ -81,16 +185,31 @@ public class ex20 {
     }
 
     /**
+     * Display the statistics about the test.
+     */
+    private void printStats(int imageCount) {
+        System.out.println(TAG + 
+                           ": downloaded and stored "
+                           + imageCount
+                           + " images using "
+                           + (ForkJoinPool.commonPool().getPoolSize() + 1)
+                           + " threads in the pool with "
+                           + ForkJoinPool.commonPool().getStealCount()
+                           + " tasks stolen");
+    }
+
+    /**
      * Clears the filter directories.
      */
     private void deleteDownloadedImages() {
         int deletedFiles =
             deleteSubFolders(Options.instance().getDirectoryPath());
 
-        System.out.println(TAG
-                           + ": "
-                           + deletedFiles
-                           + " previously downloaded file(s) deleted");
+        if (Options.instance().diagnosticsEnabled())
+            System.out.println(TAG
+                               + ": "
+                               + deletedFiles
+                               + " previously downloaded file(s) deleted");
     }
 
     /**
