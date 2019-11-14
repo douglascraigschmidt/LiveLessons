@@ -19,17 +19,19 @@ public class ex20 {
     private static final String TAG = ex20.class.getName();
 
     /**
-     * The JVM requires a static main() entry point to run the app.
+     * The Java execution environment requires a static main() entry
+     * point method to run the app.
      */
     public static void main(String[] args) {
         // Initializes the Options singleton.
         Options.instance().parseArgs(args);
 
+        // Run the test program.
         new ex20().run();
     }
 
     /**
-     * Run the program.
+     * Run the test program.
      */
     private void run() {
         System.out.println("Entering the download tests program with "
@@ -65,14 +67,6 @@ public class ex20 {
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Leaving the download tests program");
-    }
-
-    /**
-     * This method warms up the default thread pool.
-     */
-    private void warmUpThreadPool() {
-        testDownloadBehavior(this::downloadAndStoreImage,
-                             "warmup");
     }
 
     /**
@@ -255,5 +249,13 @@ public class ex20 {
         // Don't delete the current folder.
         // currentFolder.delete();
         return deletedFiles;
+    }
+
+    /**
+     * This method warms up the default thread pool.
+     */
+    private void warmUpThreadPool() {
+        testDownloadBehavior(this::downloadAndStoreImage,
+                             "warmup");
     }
 }
