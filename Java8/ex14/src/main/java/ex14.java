@@ -38,18 +38,18 @@ public class ex14 {
     static public void main(String[] argv) {
         // Create a list of strings containing all the words in the
         // complete works of Shakespeare.
-        List<CharSequence> allBardWords =             
+        List<CharSequence> arrayBardWords =
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                      // Split input into "words" by
                                      // ignoring whitespace.
                                      "\\s+");
 
         List<CharSequence> linkedBardWords = 
-            new LinkedList<>(allBardWords);
+            new LinkedList<>(arrayBardWords);
 
         // Warm up the threads in the fork/join pool so the timing
         // results will be more accurate.
-        warmUpForkJoinPool(new LinkedList<>(allBardWords));
+        warmUpForkJoinPool(new LinkedList<>(arrayBardWords));
 
         // Compute/print the time required to split/count an ArrayList
         // via a parallel stream (and thus a parallel spliterator).
@@ -57,20 +57,18 @@ public class ex14 {
         // have low split costs (just a few arithmetic operations and
         // an object creation) and also split evenly (leading to
         // balanced computation trees).
-        timeParallelStreamCounting("ArrayList", allBardWords);
+        timeParallelStreamCounting("ArrayList", arrayBardWords);
 
         // Compute/print the time required to split/count a LinkedList
         // via a parallel stream (and thus a parallel spliterator).
         // The performance of this test will be worse than the
-        // ArrayList test since a LinkedList splits poorly because
-        // finding the midpoint requires traversing half the list, one
-        // node at a time.
+        // ArrayList test since a LinkedList splits poorly.
         timeParallelStreamCounting("LinkedList", linkedBardWords);
 
         // Compute/print the time required to join the LinkedList via
         // collect() and Collectors.joining() in a sequential stream.
         // The performance of this test will be better than the
-        // parallel stream version above since there's less overhead
+        // parallel stream version below since there's less overhead
         // for combining/joining the various partial results.
         timeStreamJoining(false, linkedBardWords);
 
@@ -84,7 +82,7 @@ public class ex14 {
         // Compute/print the time required to collect partial results
         // into a HashSet in a sequential stream.  The performance of
         // this test will be better than the parallel stream version
-        // above since there's less overhead collecting the various
+        // below since there's less overhead collecting the various
         // partial results into a HashSet.
         timeStreamCollectToSet(false, linkedBardWords);
 
@@ -96,16 +94,15 @@ public class ex14 {
 
         // Compute/print the time required to collect partial results
         // into a ConcurrentHashSet in a sequential stream.  The
-        // performance of this test will be better than the parallel
-        // stream version above since there's less overhead collecting
-        // the various partial results into a HashSet.
+        // performance of this test will be similar to the sequential
+        // stream version above.
         timeStreamCollectToConcurrentSet(false, linkedBardWords);
 
         // Compute/print the time required to collect partial results
         // into a ConcurrentHashSet in a parallel stream.  The
-        // performance of this test will be poor due to the overhead
-        // of collecting the various partial results into a HashSet in
-        // parallel.
+        // performance of this test will be good since there's no
+        // overhead of collecting the various partial results into a
+        // HashSet in parallel.
         timeStreamCollectToConcurrentSet(true, linkedBardWords);
     }
 
@@ -159,7 +156,7 @@ public class ex14 {
 
         System.out.println("The time to count "
                            + total
-                           + " all the words in Shakespeare's works took "
+                           + " words in Shakespeare's works took "
                            + stopTime
                            + " milliseconds for "
                            + testName);
