@@ -96,8 +96,9 @@ Here's an overview of what's included:
   recursively-defined folder structure using a range of
   CompletableFuture features.
 
-. ex20 -- This example shows how to use the ManagedBlocker interface in
-  the Java fork-join pool to download multiple images from a remote
+. ex20 -- This example shows how to combine Java parallel streams with
+  and without the ForkJoinPool.ManagedBlocker interface and the Java
+  fork-join framework to download multiple images from a remote
   server.
 
 . ex21 -- This program shows the difference between stream sources

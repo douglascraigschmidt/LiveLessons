@@ -8,9 +8,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This example shows how to combine Java parallel streams with the
- * ForkJoinPool.ManagedBlocker interface and the Java fork-join
- * framework to download multiple images from a remote server.
+ * This example shows how to combine Java parallel streams with and
+ * without the ForkJoinPool.ManagedBlocker interface and the Java
+ * fork-join framework to download multiple images from a remote
+ * server.
  */
 public class ex20 {
     /**
@@ -54,14 +55,12 @@ public class ex20 {
         runTest(this::downloadAndStoreImageMB,
                 "testAdaptiveMBDownloadBehavior()");
 
-        /*
         // Run the tests using the using the BlockingTask wrapper for
         // the Java fork-join framework's ManagedBlocker mechanism,
         // which adds new worker threads to the pool adaptively when
         // blocking occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
-        */
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());

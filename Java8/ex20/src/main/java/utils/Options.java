@@ -29,35 +29,55 @@ public class Options {
      * Default image names to use for testing.
      */
     private final String[] mDefaultImageNames = new String[] {
-          "ka.png,"
-        + "uci.png,"
-        + "dougs_small.jpg,"
-        + "kitten.png,"
-        + "schmidt_coursera.jpg,"
-        + "dark_rider.jpg,"
-        + "doug.jpg",
-          "lil_doug.jpg,"
-        + "ironbound.jpg,"
-        + "wm.jpg,"
-        + "robot.png,"
-        + "ace_copy.jpg,"
-        + "tao_copy.jpg,"
-        + "doug_circle.png",
-          "NYNY.jpg,"
-        + "parrot.jpg,"
-        + "rush-logo.jpg,"
-        + "complaints.jpg,"
-        + "doc.jpg,"
-        + "java-ace.gif,"
-        + "bee-patterns.jpg,"
+        "1.png,"
+        + "9.jpg,"
+        + "10.png,"
+        + "11.jpg,"
+        + "16.jpg,"
+        + "19.png,"
+        + "12.jpg",
+        "13.png,"
+        + "14.jpg,"
+        + "15.jpg,"
+        + "17.jpg,"
+        + "2.jpg,"
+        + "20.jpg,"
+        + "3.png",
+        "4.png,"
+        + "5.jpg,"
+        + "21.jpg,"
+        + "6.jpg,"
+        + "7.png,"
+        + "18.jpg,"
+        + "8.jpg",
+        "1.png,"
+        + "9.jpg,"
+        + "10.png,"
+        + "11.jpg,"
+        + "16.jpg,"
+        + "19.png,"
+        + "12.jpg",
+        "13.png,"
+        + "14.jpg,"
+        + "15.jpg,"
+        + "17.jpg,"
+        + "2.jpg,"
+        + "20.jpg,"
+        + "3.png",
+        "4.png,"
+        + "5.jpg,"
+        + "21.jpg,"
+        + "6.jpg,"
+        + "7.png,"
+        + "18.jpg,"
+        + "8.jpg"
     };
 
     /**
      * Prefix for all the URLs.
      */
     private static String sURL_PREFIX =
-        "http://www.dre.vanderbilt.edu/~schmidt/gifs/";
-    // "http://www.cse.wustl.edu/~schmidt/gifs/";
+        "http://www.dre.vanderbilt.edu/~schmidt/images/";
 
     /**
      * Controls whether debugging output will be generated (defaults
