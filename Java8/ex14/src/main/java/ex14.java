@@ -49,7 +49,13 @@ public class ex14 {
 
         // Warm up the threads in the fork/join pool so the timing
         // results will be more accurate.
-        warmUpForkJoinPool(new LinkedList<>(arrayBardWords));
+        warmUpForkJoinPool(arrayBardWords);
+
+        // Compute/print the time required to split/count a LinkedList
+        // via a parallel stream (and thus a parallel spliterator).
+        // The performance of this test will be worse than the
+        // ArrayList test since a LinkedList splits poorly.
+        timeParallelStreamCounting("LinkedList", linkedBardWords);
 
         // Compute/print the time required to split/count an ArrayList
         // via a parallel stream (and thus a parallel spliterator).
@@ -58,12 +64,6 @@ public class ex14 {
         // an object creation) and also split evenly (leading to
         // balanced computation trees).
         timeParallelStreamCounting("ArrayList", arrayBardWords);
-
-        // Compute/print the time required to split/count a LinkedList
-        // via a parallel stream (and thus a parallel spliterator).
-        // The performance of this test will be worse than the
-        // ArrayList test since a LinkedList splits poorly.
-        timeParallelStreamCounting("LinkedList", linkedBardWords);
 
         // Compute/print the time required to join the LinkedList via
         // collect() and Collectors.joining() in a sequential stream.
@@ -146,6 +146,10 @@ public class ex14 {
                 // Convert the list into a parallel stream (which uses
                 // a spliterator internally).
                 .parallelStream()
+
+                .map(CharSequence::toString)
+
+                .map(String::toUpperCase)
 
                 // Count the number of words in the stream.
                 .count();
