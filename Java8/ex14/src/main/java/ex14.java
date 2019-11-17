@@ -39,8 +39,19 @@ public class ex14 {
         // results will be more accurate.
         warmUpForkJoinPool();
 
+        // Run tests that demonstrate performance differences between
+        // ArrayList and LinkedList spliterators.
         runSpliteratorTests();
+
+
+        // Run tests that demonstrate performance differences between
+        // concurrent and non-concurrent techniques for joining results in
+        // a stream.
         runJoiningTests();
+
+        // Run tests that demonstrate the performance differences
+        // between concurrent and non-concurrent techniques for
+        // collecting results in a stream.
         runCollectorTests();
 
         System.out.println("Exiting the test program");
