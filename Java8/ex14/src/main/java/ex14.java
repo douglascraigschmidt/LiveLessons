@@ -121,7 +121,7 @@ public class ex14 {
                     // than the parallel stream version below since
                     // there's less overhead for combining/joining the
                     // various partial results.
-                    timeStreamJoining(false, arrayWords);
+                    timeStreamJoining("ArrayList", false, arrayWords);
 
                     // Compute/print the time required to join the
                     // LinkedList via collect() and
@@ -130,9 +130,9 @@ public class ex14 {
                     // sequential stream version above due to the
                     // overhead of combining/joining the various
                     // partial results in parallel.
-                    timeStreamJoining(true, arrayWords);
-                    // Print the results.
+                    timeStreamJoining("ArrayList", true, arrayWords);
 
+                    // Print the results.
                     System.out.println("..printing results\n"
                                        + RunTimer.getTimingResults());
                 });
@@ -165,7 +165,7 @@ public class ex14 {
                     // better than the parallel stream version below
                     // since there's less overhead collecting the
                     // various partial results into a HashSet.
-                    timeStreamCollectToSet(false, arrayWords);
+                    timeStreamCollectToSet("ArrayList", false, arrayWords);
 
                     // Compute/print the time required to collect
                     // partial results into a HashSet in a parallel
@@ -173,14 +173,14 @@ public class ex14 {
                     // worse than the sequential stream version above
                     // due to the overhead of collecting the various
                     // partial results into a HashSet in parallel.
-                    timeStreamCollectToSet(true, arrayWords);
+                    timeStreamCollectToSet("ArrayList", true, arrayWords);
 
                     // Compute/print the time required to collect
                     // partial results into a ConcurrentHashSet in a
                     // sequential stream.  The performance of this
                     // test will be similar to the sequential stream
                     // version of timeStreamCollectToSet() above.
-                    timeStreamCollectToConcurrentSet(false, arrayWords);
+                    timeStreamCollectToConcurrentSet("ArrayList", false, arrayWords);
 
                     // Compute/print the time required to collect
                     // partial results into a ConcurrentHashSet in a
@@ -189,7 +189,7 @@ public class ex14 {
                     // of timeStreamCollectToSet() above since there's
                     // no overhead of collecting the partial results
                     // into a HashSet in parallel.
-                    timeStreamCollectToConcurrentSet(true, arrayWords);
+                    timeStreamCollectToConcurrentSet("ArrayList", true, arrayWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -269,13 +269,14 @@ public class ex14 {
      * If @a parallel is true then a parallel stream is used, else a
      * sequential stream is used.
      */
-    private static void timeStreamJoining(boolean parallel, 
+    private static void timeStreamJoining(String testName,
+                                          boolean parallel,
                                           List<CharSequence> words) {
         // Run the garbage collector before each test.
         System.gc();
 
-        String testName = 
-            (parallel ? "parallel" : "sequential")
+        testName +=
+            (parallel ? " parallel" : " sequential")
             + " timeStreamJoining()";
 
         // System.out.println("Starting " + testName);
@@ -311,13 +312,14 @@ public class ex14 {
      * HashSet.  If @a parallel is true then a parallel stream is
      * used, else a sequential stream is used.
      */
-    private static void timeStreamCollectToSet(boolean parallel, 
+    private static void timeStreamCollectToSet(String testName,
+                                               boolean parallel,
                                                List<CharSequence> words) {
         // Run the garbage collector before each test.
         System.gc();
 
-        String testName = 
-            (parallel ? "parallel" : "sequential")
+        testName +=
+            (parallel ? " parallel" : " sequential")
             + " timeStreamCollectToSet()";
 
         // System.out.println("Starting " + testName);
@@ -357,13 +359,14 @@ public class ex14 {
      * ConcurrentHashSet.  If @a parallel is true then a parallel
      * stream is used, else a sequential stream is used.
      */
-    private static void timeStreamCollectToConcurrentSet(boolean parallel,
+    private static void timeStreamCollectToConcurrentSet(String testName,
+                                                         boolean parallel,
                                                          List<CharSequence> words) {
         // Run the garbage collector before each test.
         System.gc();
 
-        String testName = 
-            (parallel ? "parallel" : "sequential")
+        testName +=
+            (parallel ? " parallel" : " sequential")
             + " timeStreamCollectToConcurrentSet()";
 
         // System.out.println("Starting " + testName);
