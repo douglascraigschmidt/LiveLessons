@@ -3,9 +3,6 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -49,6 +46,10 @@ public class ex14 {
         System.out.println("Exiting the test program");
     }
 
+    /**
+     * Run tests that demonstrate performance differences between
+     * ArrayList and LinkedList spliterators.
+     */
     private static void runSpliteratorTests() {
         Arrays
             // Create tests for different sizes of input data.
@@ -65,34 +66,42 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
+                    // Create a LinkedList from the ArrayList.
                     List<CharSequence> linkedWords = 
                         new LinkedList<>(arrayWords);
 
-                    System.out.println("Starting spliterator tests for " + arrayWords.size() + " words..");
+                    // Print a message when the test starts.
+                    System.out.println("Starting spliterator tests for "
+                                       + arrayWords.size()
+                                       + " words..");
 
-                    // Compute/print the time required to
-                    // split/uppercase an ArrayList via a parallel
-                    // stream (and thus a parallel spliterator).  The
-                    // performance of this test will be good since
-                    // ArrayLists have low split costs (just a few
-                    // arithmetic operations and an object creation)
-                    // and also split evenly (leading to balanced
-                    // computation trees).
+                    // Compute the time required to split/uppercase an
+                    // ArrayList via a parallel stream (and thus a
+                    // parallel spliterator).  The performance of this
+                    // test will be good since ArrayLists have low
+                    // split costs (just a few arithmetic operations
+                    // and an object creation) and also split evenly
+                    // (leading to balanced computation trees).
                     timeParallelStreamUppercase("ArrayList", arrayWords);
 
-                    // Compute/print the time required to
-                    // split/uppercase a LinkedList via a parallel
-                    // stream (and thus a parallel spliterator).  The
-                    // performance of this test will be worse than the
-                    // ArrayList test since a LinkedList splits
-                    // poorly.
+                    // Compute the time required to split/uppercase a
+                    // LinkedList via a parallel stream (and thus a
+                    // parallel spliterator).  The performance of this
+                    // test will be worse than the ArrayList test
+                    // since a LinkedList splits poorly.
                     timeParallelStreamUppercase("LinkedList", linkedWords);
 
+                    // Print the results.
                     System.out.println("..printing results\n"
                                        + RunTimer.getTimingResults());
                 });
     }
 
+    /**
+     * Run tests that demonstrate performance differences between
+     * concurrent and non-concurrent techniques for joining results in
+     * a stream.
+     */
     private static void runJoiningTests() {
         Arrays
             // Create tests for different sizes of input data.
@@ -109,27 +118,26 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    List<CharSequence> linkedWords = 
-                        new LinkedList<>(arrayWords);
+                    // Print a message when the test starts.
+                    System.out.println("Starting joining tests for " 
+                                       + arrayWords.size() 
+                                       + " words..");
 
-                    System.out.println("Starting joining tests for " + arrayWords.size() + " words..");
-
-                    // Compute/print the time required to join the
-                    // LinkedList via collect() and
-                    // Collectors.joining() in a sequential stream.
-                    // The performance of this test will be better
-                    // than the parallel stream version below since
-                    // there's less overhead for combining/joining the
-                    // various partial results.
+                    // Compute the time required to join arrayWords
+                    // via collect() and Collectors.joining() in a
+                    // sequential stream.  The performance of this
+                    // test will be better than the parallel stream
+                    // version below since there's less overhead for
+                    // combining/joining the various partial results.
                     timeStreamJoining("ArrayList", false, arrayWords);
 
-                    // Compute/print the time required to join the
-                    // LinkedList via collect() and
-                    // Collectors.joining() in a parallel stream.  The
-                    // performance of this test will be worse than the
-                    // sequential stream version above due to the
-                    // overhead of combining/joining the various
-                    // partial results in parallel.
+                    // Compute the time required to join arrayWords
+                    // via collect() and Collectors.joining() in a
+                    // parallel stream.  The performance of this test
+                    // will be worse than the sequential stream
+                    // version above due to the overhead of
+                    // combining/joining the various partial results
+                    // in parallel.
                     timeStreamJoining("ArrayList", true, arrayWords);
 
                     // Print the results.
@@ -138,6 +146,11 @@ public class ex14 {
                 });
     }
 
+    /**
+     * Run tests that demonstrate the performance differences between
+     * concurrent and non-concurrent techniques for collecting results
+     * in a stream.
+     */
     private static void runCollectorTests() {
         Arrays
             // Create tests for different sizes of input data.
@@ -154,41 +167,41 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    List<CharSequence> linkedWords = 
-                        new LinkedList<>(arrayWords);
+                    // Print a message when the test starts.
+                    System.out.println("Starting collector tests for " 
+                                       + arrayWords.size() 
+                                       + " words..");
 
-                    System.out.println("Starting collector tests for " + arrayWords.size() + " words..");
-
-                    // Compute/print the time required to collect
-                    // partial results into a HashSet in a sequential
-                    // stream.  The performance of this test will be
-                    // better than the parallel stream version below
-                    // since there's less overhead collecting the
-                    // various partial results into a HashSet.
+                    // Compute the time required to collect partial
+                    // results into a HashSet in a sequential stream.
+                    // The performance of this test will be better
+                    // than the parallel stream version below since
+                    // there's less overhead collecting the various
+                    // partial results into a HashSet.
                     timeStreamCollectToSet("ArrayList", false, arrayWords);
 
-                    // Compute/print the time required to collect
-                    // partial results into a HashSet in a parallel
-                    // stream.  The performance of this test will be
-                    // worse than the sequential stream version above
-                    // due to the overhead of collecting the various
-                    // partial results into a HashSet in parallel.
+                    // Compute the time required to collect partial
+                    // results into a HashSet in a parallel stream.
+                    // The performance of this test will be worse than
+                    // the sequential stream version above due to the
+                    // overhead of collecting the various partial
+                    // results into a HashSet in parallel.
                     timeStreamCollectToSet("ArrayList", true, arrayWords);
 
-                    // Compute/print the time required to collect
-                    // partial results into a ConcurrentHashSet in a
+                    // Compute the time required to collect partial
+                    // results into a ConcurrentHashSet in a
                     // sequential stream.  The performance of this
                     // test will be similar to the sequential stream
                     // version of timeStreamCollectToSet() above.
                     timeStreamCollectToConcurrentSet("ArrayList", false, arrayWords);
 
-                    // Compute/print the time required to collect
-                    // partial results into a ConcurrentHashSet in a
-                    // parallel stream.  The performance of this test
-                    // will be better than the parallel stream version
-                    // of timeStreamCollectToSet() above since there's
-                    // no overhead of collecting the partial results
-                    // into a HashSet in parallel.
+                    // Compute the time required to collect partial
+                    // results into a ConcurrentHashSet in a parallel
+                    // stream.  The performance of this test will be
+                    // better than the parallel stream version of
+                    // timeStreamCollectToSet() above since there's no
+                    // overhead of collecting the partial results into
+                    // a HashSet in parallel.
                     timeStreamCollectToConcurrentSet("ArrayList", true, arrayWords);
 
                     // Print the results.
@@ -212,7 +225,7 @@ public class ex14 {
         // Create an empty list.
         List<String> list = new ArrayList<>();
 
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+        for (int i = 0; i < sMAX_ITERATIONS; i++) 
             // Append the new words to the end of the list.
             list.addAll(words
                         // Convert the list into a parallel stream
@@ -225,7 +238,6 @@ public class ex14 {
 
                         // Collect the stream into a list.
                         .collect(toList()));
-        }
     }
 
     /**
@@ -244,7 +256,7 @@ public class ex14 {
                 // Create an empty list.
                 List<String> list = new ArrayList<>();
 
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                for (int i = 0; i < sMAX_ITERATIONS; i++) 
                     // Append the new words to the end of the list.
                     list.addAll(words
                                 // Convert the list into a parallel stream
@@ -257,8 +269,6 @@ public class ex14 {
 
                                 // Collect the stream into a list.
                                 .collect(toList()));
-                }
-
             },
             testName);
     }
