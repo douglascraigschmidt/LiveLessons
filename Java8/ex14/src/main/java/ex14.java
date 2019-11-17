@@ -42,6 +42,14 @@ public class ex14 {
         // results will be more accurate.
         warmUpForkJoinPool();
 
+        runSpliteratorTests();
+        runJoiningTests();
+        runCollectorTests();
+
+        System.out.println("Exiting the test program");
+    }
+
+    private static void runSpliteratorTests() {
         Arrays
             // Create tests for different sizes of input data.
             .asList(1000, 10000, 100000, 1000000)
@@ -60,7 +68,7 @@ public class ex14 {
                     List<CharSequence> linkedWords = 
                         new LinkedList<>(arrayWords);
 
-                    System.out.println("Starting tests for " + arrayWords.size() + " words");
+                    System.out.println("Starting spliterator tests for " + arrayWords.size() + " words..");
 
                     // Compute/print the time required to
                     // split/uppercase an ArrayList via a parallel
@@ -80,6 +88,32 @@ public class ex14 {
                     // poorly.
                     timeParallelStreamUppercase("LinkedList", linkedWords);
 
+                    System.out.println("..printing results\n"
+                                       + RunTimer.getTimingResults());
+                });
+    }
+
+    private static void runJoiningTests() {
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1000, 10000, 100000, 1000000)
+
+            // For each input data size run the following tests.
+            .forEach (limit -> {
+                    // Create a list of strings containing all the
+                    // words in the complete works of Shakespeare.
+                    List<CharSequence> arrayWords =
+                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                 // Split input into "words" by
+                                                 // ignoring whitespace.
+                                                 "\\s+",
+                                                 limit);
+
+                    List<CharSequence> linkedWords = 
+                        new LinkedList<>(arrayWords);
+
+                    System.out.println("Starting joining tests for " + arrayWords.size() + " words..");
+
                     // Compute/print the time required to join the
                     // LinkedList via collect() and
                     // Collectors.joining() in a sequential stream.
@@ -97,6 +131,33 @@ public class ex14 {
                     // overhead of combining/joining the various
                     // partial results in parallel.
                     timeStreamJoining(true, arrayWords);
+                    // Print the results.
+
+                    System.out.println("..printing results\n"
+                                       + RunTimer.getTimingResults());
+                });
+    }
+
+    private static void runCollectorTests() {
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1000, 10000, 100000, 1000000)
+
+            // For each input data size run the following tests.
+            .forEach (limit -> {
+                    // Create a list of strings containing all the
+                    // words in the complete works of Shakespeare.
+                    List<CharSequence> arrayWords =
+                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                 // Split input into "words" by
+                                                 // ignoring whitespace.
+                                                 "\\s+",
+                                                 limit);
+
+                    List<CharSequence> linkedWords = 
+                        new LinkedList<>(arrayWords);
+
+                    System.out.println("Starting collector tests for " + arrayWords.size() + " words..");
 
                     // Compute/print the time required to collect
                     // partial results into a HashSet in a sequential
@@ -131,12 +192,9 @@ public class ex14 {
                     timeStreamCollectToConcurrentSet(true, arrayWords);
 
                     // Print the results.
-                    System.out.println("Printing results for " + arrayWords.size() + " words: \n"
+                    System.out.println("..printing results\n"
                                        + RunTimer.getTimingResults());
                 });
-
-
-        System.out.println("Exiting the test program");
     }
 
     /**

@@ -104,6 +104,9 @@ public class RunTimer {
                      .append(entry.getValue())
                      .append("\n"));
 
+        // Clear out the results map.
+        mResultsMap.clear();
+
         return stringBuffer.toString();
     }
 }
