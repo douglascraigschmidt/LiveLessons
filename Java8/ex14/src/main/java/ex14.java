@@ -1,16 +1,14 @@
 import utils.ConcurrentHashSetCollector;
+import utils.RunTimer;
 import utils.TestDataFactory;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.*;
 
 /**
  * This example shows the difference in overhead for using a parallel
@@ -24,7 +22,7 @@ public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 1;
+    private static final int sMAX_ITERATIONS = 100;
 
     /**
      * The complete works of William Shakespeare.
@@ -36,137 +34,175 @@ public class ex14 {
      * Main entry point into the program.
      */
     static public void main(String[] argv) {
-        // Create a list of strings containing all the words in the
-        // complete works of Shakespeare.
-        List<CharSequence> arrayBardWords =
-            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                     // Split input into "words" by
-                                     // ignoring whitespace.
-                                     "\\s+");
-
-        List<CharSequence> linkedBardWords = 
-            new LinkedList<>(arrayBardWords);
+        System.out.println("Entering the test program with "
+                           + Runtime.getRuntime().availableProcessors()
+                           + " cores available");
 
         // Warm up the threads in the fork/join pool so the timing
         // results will be more accurate.
-        warmUpForkJoinPool(arrayBardWords);
+        warmUpForkJoinPool();
 
-        // Compute/print the time required to split/count a LinkedList
-        // via a parallel stream (and thus a parallel spliterator).
-        // The performance of this test will be worse than the
-        // ArrayList test since a LinkedList splits poorly.
-        timeParallelStreamCounting("LinkedList", linkedBardWords);
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1000, 10000, 100000, 1000000)
 
-        // Compute/print the time required to split/count an ArrayList
-        // via a parallel stream (and thus a parallel spliterator).
-        // The performance of this test will be good since ArrayLists
-        // have low split costs (just a few arithmetic operations and
-        // an object creation) and also split evenly (leading to
-        // balanced computation trees).
-        timeParallelStreamCounting("ArrayList", arrayBardWords);
+            // For each input data size run the following tests.
+            .forEach (limit -> {
+                    // Create a list of strings containing all the
+                    // words in the complete works of Shakespeare.
+                    List<CharSequence> arrayWords =
+                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                 // Split input into "words" by
+                                                 // ignoring whitespace.
+                                                 "\\s+",
+                                                 limit);
 
-        // Compute/print the time required to join the LinkedList via
-        // collect() and Collectors.joining() in a sequential stream.
-        // The performance of this test will be better than the
-        // parallel stream version below since there's less overhead
-        // for combining/joining the various partial results.
-        timeStreamJoining(false, linkedBardWords);
+                    List<CharSequence> linkedWords = 
+                        new LinkedList<>(arrayWords);
 
-        // Compute/print the time required to join the LinkedList via
-        // collect() and Collectors.joining() in a parallel stream.
-        // The performance of this test will be poor due to the
-        // overhead of combining/joining the various partial results
-        // in parallel.
-        timeStreamJoining(true, linkedBardWords);
+                    System.out.println("Starting tests for " + arrayWords.size() + " words");
 
-        // Compute/print the time required to collect partial results
-        // into a HashSet in a sequential stream.  The performance of
-        // this test will be better than the parallel stream version
-        // below since there's less overhead collecting the various
-        // partial results into a HashSet.
-        timeStreamCollectToSet(false, linkedBardWords);
+                    // Compute/print the time required to
+                    // split/uppercase an ArrayList via a parallel
+                    // stream (and thus a parallel spliterator).  The
+                    // performance of this test will be good since
+                    // ArrayLists have low split costs (just a few
+                    // arithmetic operations and an object creation)
+                    // and also split evenly (leading to balanced
+                    // computation trees).
+                    timeParallelStreamUppercase("ArrayList", arrayWords);
 
-        // Compute/print the time required to collect partial results
-        // into a HashSet in a parallel stream.  The performance of
-        // this test will be poor due to the overhead of collecting
-        // the various partial results into a HashSet in parallel.
-        timeStreamCollectToSet(true, linkedBardWords);
+                    // Compute/print the time required to
+                    // split/uppercase a LinkedList via a parallel
+                    // stream (and thus a parallel spliterator).  The
+                    // performance of this test will be worse than the
+                    // ArrayList test since a LinkedList splits
+                    // poorly.
+                    timeParallelStreamUppercase("LinkedList", linkedWords);
 
-        // Compute/print the time required to collect partial results
-        // into a ConcurrentHashSet in a sequential stream.  The
-        // performance of this test will be similar to the sequential
-        // stream version above.
-        timeStreamCollectToConcurrentSet(false, linkedBardWords);
+                    // Compute/print the time required to join the
+                    // LinkedList via collect() and
+                    // Collectors.joining() in a sequential stream.
+                    // The performance of this test will be better
+                    // than the parallel stream version below since
+                    // there's less overhead for combining/joining the
+                    // various partial results.
+                    timeStreamJoining(false, arrayWords);
 
-        // Compute/print the time required to collect partial results
-        // into a ConcurrentHashSet in a parallel stream.  The
-        // performance of this test will be good since there's no
-        // overhead of collecting the various partial results into a
-        // HashSet in parallel.
-        timeStreamCollectToConcurrentSet(true, linkedBardWords);
+                    // Compute/print the time required to join the
+                    // LinkedList via collect() and
+                    // Collectors.joining() in a parallel stream.  The
+                    // performance of this test will be worse than the
+                    // sequential stream version above due to the
+                    // overhead of combining/joining the various
+                    // partial results in parallel.
+                    timeStreamJoining(true, arrayWords);
+
+                    // Compute/print the time required to collect
+                    // partial results into a HashSet in a sequential
+                    // stream.  The performance of this test will be
+                    // better than the parallel stream version below
+                    // since there's less overhead collecting the
+                    // various partial results into a HashSet.
+                    timeStreamCollectToSet(false, arrayWords);
+
+                    // Compute/print the time required to collect
+                    // partial results into a HashSet in a parallel
+                    // stream.  The performance of this test will be
+                    // worse than the sequential stream version above
+                    // due to the overhead of collecting the various
+                    // partial results into a HashSet in parallel.
+                    timeStreamCollectToSet(true, arrayWords);
+
+                    // Compute/print the time required to collect
+                    // partial results into a ConcurrentHashSet in a
+                    // sequential stream.  The performance of this
+                    // test will be similar to the sequential stream
+                    // version of timeStreamCollectToSet() above.
+                    timeStreamCollectToConcurrentSet(false, arrayWords);
+
+                    // Compute/print the time required to collect
+                    // partial results into a ConcurrentHashSet in a
+                    // parallel stream.  The performance of this test
+                    // will be better than the parallel stream version
+                    // of timeStreamCollectToSet() above since there's
+                    // no overhead of collecting the partial results
+                    // into a HashSet in parallel.
+                    timeStreamCollectToConcurrentSet(true, arrayWords);
+
+                    // Print the results.
+                    System.out.println("Printing results for " + arrayWords.size() + " words: \n"
+                                       + RunTimer.getTimingResults());
+                });
+
+
+        System.out.println("Exiting the test program");
     }
 
     /**
      * Warm up the threads in the fork/join pool so the timing results
      * will be more accurate.
      */
-    private static void warmUpForkJoinPool(List<CharSequence> words) {
-        System.out.println("\n++Warming up the fork/join pool");
+    private static void warmUpForkJoinPool() {
+        System.out.println("\n++Warming up the fork/join pool\n");
 
-        for (int i = 0; i < sMAX_ITERATIONS; i++) 
-            words
-                // Convert the list into a parallel stream (which uses
-                // a spliterator internally).
-                .parallelStream()
+        List<CharSequence> words =
+            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                     // Split input into "words"
+                                     // by ignoring whitespace.
+                                     "\\s+");
+        // Create an empty list.
+        List<String> list = new ArrayList<>();
 
-                // Count the number of words in the stream.
-                .count();
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            // Append the new words to the end of the list.
+            list.addAll(words
+                        // Convert the list into a parallel stream
+                        // (which uses a spliterator internally).
+                        .parallelStream()
 
-        // Run the garbage collector after each test.
-        System.gc();
+                        // Uppercase each string.
+                        .map(CharSequence::toString)
+                        .map(String::toUpperCase)
+
+                        // Collect the stream into a list.
+                        .collect(toList()));
+        }
     }
 
     /**
-     * Determines how long it takes to split the word list via a
-     * parallel spliterator for various types of lists.
+     * Determines how long it takes to split and uppercase the word
+     * list via a parallel spliterator for various types of lists.
      */
-    private static void timeParallelStreamCounting(String testName,
-                                                   List<CharSequence> words) {
-        System.out.println("\n++Timing the " 
-                           + testName 
-                           + " parallel implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        long total = 0;
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            total += words
-                // Convert the list into a parallel stream (which uses
-                // a spliterator internally).
-                .parallelStream()
-
-                .map(CharSequence::toString)
-
-                .map(String::toUpperCase)
-
-                // Count the number of words in the stream.
-                .count();
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to count "
-                           + total
-                           + " words in Shakespeare's works took "
-                           + stopTime
-                           + " milliseconds for "
-                           + testName);
-
-        // Run the garbage collector after each test.
+    private static void timeParallelStreamUppercase(String testName,
+                                                    List<CharSequence> words) {
+        // Run the garbage collector before each test.
         System.gc();
+
+        testName += " parallel";
+        // System.out.println("Starting " + testName);
+
+        RunTimer.timeRun(() -> {
+                // Create an empty list.
+                List<String> list = new ArrayList<>();
+
+                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                    // Append the new words to the end of the list.
+                    list.addAll(words
+                                // Convert the list into a parallel stream
+                                // (which uses a spliterator internally).
+                                .parallelStream()
+
+                                // Uppercase each string.
+                                .map(CharSequence::toString)
+                                .map(String::toUpperCase)
+
+                                // Collect the stream into a list.
+                                .collect(toList()));
+                }
+
+            },
+            testName);
     }
 
     /**
@@ -177,47 +213,39 @@ public class ex14 {
      */
     private static void timeStreamJoining(boolean parallel, 
                                           List<CharSequence> words) {
-        System.out.println("\n++Timing the "
-                           + (parallel ? "parallel" : "sequential")
-                           + "StreamJoining implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        StringBuilder results = new StringBuilder();
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<CharSequence> wordStream = words
-                // Convert the list into a stream (which uses a
-                // spliterator internally).
-                .stream();
-
-            if (parallel)
-                // Convert to a parallel stream.
-                wordStream.parallel();
-
-            // A "real" application would likely do something
-            // interesting with the words at this point.
-
-            // Join all the words in the stream.
-            CharSequence charSequence = wordStream
-                .collect(joining(" "));
-
-            // Add the joined results to the string builder.
-            results.append(charSequence);
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to join "
-                           + results.toString().split("\\s+").length
-                           + " words in Shakespeare's works took "
-                           + stopTime
-                           + " milliseconds");
-
-        // Run the garbage collector after each test.
+        // Run the garbage collector before each test.
         System.gc();
+
+        String testName = 
+            (parallel ? "parallel" : "sequential")
+            + " timeStreamJoining()";
+
+        // System.out.println("Starting " + testName);
+
+        RunTimer.timeRun(() -> {
+                StringBuilder results = new StringBuilder();
+
+                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                    Stream<CharSequence> wordStream = words
+                        // Convert the list into a stream (which uses a
+                        // spliterator internally).
+                        .stream();
+
+                    if (parallel)
+                        // Convert to a parallel stream.
+                        wordStream.parallel();
+
+                    // A "real" application would likely do something
+                    // interesting with the words at this point.
+
+                    // Join all the words in the stream.
+                    CharSequence charSequence = wordStream
+                        .collect(joining(" "));
+
+                    // Add the joined results to the string builder.
+                    results.append(charSequence);
+                }},
+            testName);
     }
 
     /**
@@ -226,52 +254,44 @@ public class ex14 {
      * used, else a sequential stream is used.
      */
     private static void timeStreamCollectToSet(boolean parallel, 
-                                               List<CharSequence> allWords) {
-        System.out.println("\n++Timing the "
-                           + (parallel ? "parallel" : "sequential")
-                           + "StreamCollectToSet implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        Set<CharSequence> uniqueWords = null;
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<CharSequence> wordStream = allWords
-                // Convert the list into a stream (which uses a
-                // spliterator internally).
-                .stream();
-
-            if (parallel)
-                // Convert to a parallel stream.
-                wordStream.parallel();
-
-            // A "real" application would likely do something
-            // interesting with the words at this point.
-
-            // A set of unique words in Shakespeare's works.
-            uniqueWords = wordStream
-                // Map each string to lower case.  A "real" application
-                // would likely do something interesting with the words at
-                // this point.
-                .map(charSeq -> charSeq.toString().toLowerCase())
-
-                // Trigger intermediate processing and collect unique
-                // words into a HashSet.
-                .collect(toCollection(HashSet::new));
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to collect "
-                           + uniqueWords.size()
-                           + " unique words in Shakespeare's works took "
-                           + stopTime
-                           + " milliseconds");
-
-        // Run the garbage collector after each test.
+                                               List<CharSequence> words) {
+        // Run the garbage collector before each test.
         System.gc();
+
+        String testName = 
+            (parallel ? "parallel" : "sequential")
+            + " timeStreamCollectToSet()";
+
+        // System.out.println("Starting " + testName);
+
+        RunTimer.timeRun(() -> {
+                Set<CharSequence> uniqueWords = null;
+
+                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                    Stream<CharSequence> wordStream = words
+                        // Convert the list into a stream (which uses a
+                        // spliterator internally).
+                        .stream();
+
+                    if (parallel)
+                        // Convert to a parallel stream.
+                        wordStream.parallel();
+
+                    // A "real" application would likely do something
+                    // interesting with the words at this point.
+
+                    // A set of unique words in Shakespeare's works.
+                    uniqueWords = wordStream
+                        // Map each string to lower case.  A "real" application
+                        // would likely do something interesting with the words at
+                        // this point.
+                        .map(charSeq -> charSeq.toString().toLowerCase())
+
+                        // Trigger intermediate processing and collect unique
+                        // words into a HashSet.
+                        .collect(toCollection(HashSet::new));
+                }},
+            testName);
     }
 
     /**
@@ -280,48 +300,40 @@ public class ex14 {
      * stream is used, else a sequential stream is used.
      */
     private static void timeStreamCollectToConcurrentSet(boolean parallel,
-                                                         List<CharSequence> allWords) {
-        System.out.println("\n++Timing the "
-                           + (parallel ? "parallel" : "sequential")
-                           + "StreamCollectToConcurrentSet implementation");
-
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        Set<CharSequence> uniqueWords = null;
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<CharSequence> wordStream = allWords
-                // Convert the list into a stream (which uses a
-                // spliterator internally).
-                .stream();
-
-            if (parallel)
-                // Convert to a parallel stream.
-                wordStream.parallel();
-
-            // A set of unique words in Shakespeare's works.
-            uniqueWords = wordStream
-                // Map each string to lower case.  A "real" application
-                // would likely do something interesting with the words at
-                // this point.
-                .map(charSeq -> charSeq.toString().toLowerCase())
-
-                // Trigger intermediate processing and collect unique
-                // words into a ConcurrentHashSet.
-                .collect(ConcurrentHashSetCollector.toSet());
-        }
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to collect "
-                           + uniqueWords.size()
-                           + " unique words in Shakespeare's works took "
-                           + stopTime
-                           + " milliseconds");
-
-        // Run the garbage collector after each test.
+                                                         List<CharSequence> words) {
+        // Run the garbage collector before each test.
         System.gc();
+
+        String testName = 
+            (parallel ? "parallel" : "sequential")
+            + " timeStreamCollectToConcurrentSet()";
+
+        // System.out.println("Starting " + testName);
+
+        RunTimer.timeRun(() -> {
+                Set<CharSequence> uniqueWords = null;
+
+                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                    Stream<CharSequence> wordStream = words
+                        // Convert the list into a stream (which uses a
+                        // spliterator internally).
+                        .stream();
+
+                    if (parallel)
+                        // Convert to a parallel stream.
+                        wordStream.parallel();
+
+                    // A set of unique words in Shakespeare's works.
+                    uniqueWords = wordStream
+                        // Map each string to lower case.  A "real" application
+                        // would likely do something interesting with the words at
+                        // this point.
+                        .map(charSeq -> charSeq.toString().toLowerCase())
+
+                        // Trigger intermediate processing and collect unique
+                        // words into a ConcurrentHashSet.
+                        .collect(ConcurrentHashSetCollector.toSet());
+                }},
+            testName);
     }
 }

@@ -21,8 +21,9 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the input data in the given @a filename as a list of
-     * Strings.
+     * Split the input data in the given {@code filename} using the
+     * {@code splitter} regular expression and return a list of
+     * strings.
      */
     public static List<CharSequence> getInput(String filename,
                                               String splitter) {
@@ -45,6 +46,44 @@ public class TestDataFactory {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
                 
+                // Collect the results into a string.
+                .collect(toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Split the input data in the given {@code filename} using the
+     * {@code splitter} regular expression and return a list of up to
+     * {@code limit} strings.
+     */
+    public static List<CharSequence> getInput(String filename,
+                                              String splitter,
+                                              int limit) {
+        try {
+            // Convert the filename into a pathname.
+            URI uri = ClassLoader.getSystemResource(filename).toURI();
+
+            // Open the file and get all the bytes.
+            CharSequence bytes =
+                new String(Files.readAllBytes(Paths.get(uri)));
+
+            return Pattern
+                // Compile splitter into a regular expression (regex).
+                .compile(splitter)
+
+                // Use the regex to split the file into a stream of
+                // strings.
+                .splitAsStream(bytes)
+
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
+                
+                // Only return up to 'limit' strings.
+                .limit(limit)
+
                 // Collect the results into a string.
                 .collect(toList());
         } catch (Exception e) {
