@@ -11,9 +11,8 @@ import static java.util.stream.Collectors.*;
  * This example shows the difference in overhead for using a parallel
  * spliterator to split a Java LinkedList and an ArrayList into
  * chunks.  It also shows the difference in overhead between combining
- * and collecting LinkedList results in a parallel stream
- * vs. sequential stream using concurrent and non-concurrent
- * collectors.
+ * and collecting results in a parallel stream vs. sequential stream
+ * using concurrent and non-concurrent collectors.
  */
 public class ex14 {
     /**
@@ -28,7 +27,7 @@ public class ex14 {
         "completeWorksOfShakespeare.txt";
 
     /**
-     * Main entry point into the program.
+     * Main entry point into the tests program.
      */
     static public void main(String[] argv) {
         System.out.println("Entering the test program with "
