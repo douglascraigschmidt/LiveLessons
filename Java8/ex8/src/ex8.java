@@ -76,6 +76,10 @@ public class ex8 {
         testFractionMultiplicationSupplyAsync();
 
         // Test BigFraction multiplication using a CompletableFuture and
+        // its completeAsync() factory method and join() method.
+        testFractionMultiplicationCompleteAsync();
+
+        // Test BigFraction multiplication using a CompletableFuture and
         // its supplyAsync() factory method and thenAccept()
         // completion stage method.
         testFractionMultiplicationAsyncChaining();
@@ -224,8 +228,8 @@ public class ex8 {
      * a CompletableFuture and an explicit Java Thread.
      */
     private static void testFractionConstantThread() {
-        StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionConstantThread()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionConstantThread()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -249,8 +253,8 @@ public class ex8 {
      * CompletableFuture and an explicit Java Thread.
      */
     private static void testFractionMultiplicationThread() {
-        StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationThread()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationThread()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -280,8 +284,8 @@ public class ex8 {
      * runAsync() and join() methods.
      */
     private static void testFractionMultiplicationRunAsync() {
-        StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationRunAsync()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationRunAsync()\n");
 
         // Create an empty completable future.
         CompletableFuture<BigFraction> future =
@@ -315,8 +319,8 @@ public class ex8 {
      * the common fork-join pool.
      */
     private static void testFractionMultiplicationCallable() {
-        StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationCallable()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationCallable()\n");
 
         try {
             // These "effectively final" objects are used to pass
@@ -354,8 +358,8 @@ public class ex8 {
      * supplyAsync() factory method and join() method.
      */
     private static void testFractionMultiplicationSupplyAsync() {
-        StringBuffer sb = 
-            new StringBuffer(">> Calling testFractionMultiplicationSupplyAsync()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationSupplyAsync()\n");
 
         // These "effectively final" objects are used to pass params
         // to the supplier lambda below.
@@ -378,6 +382,46 @@ public class ex8 {
         // Print the result, blocking until it's ready.
         sb.append("     supplyAsync() result = " 
                   + future.join().toMixedString());
+        display(sb.toString());
+    }
+
+    /**
+     * Test BigFraction multiplication using a CompletableFuture and
+     * its completeAsync() factory method and join() method.
+     */
+    private static void testFractionMultiplicationCompleteAsync() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationCompleteAsync()\n");
+
+        // These "effectively final" objects are used to pass params
+        // to the supplier lambda below.
+        String f1 = "62675744/15668936";
+        String f2 = "609136/913704";
+
+        // Create an empty completable future.
+        CompletableFuture<BigFraction> future =
+            new CompletableFuture<>();
+
+        // Register an action that appends a string when run.
+        future
+                .thenRun(() -> sb.append("     completeAsync() result = "));
+
+        // Complete this future with the result of multiplying two
+        // large fractions together.
+        future
+                .completeAsync(() -> {
+                    // Multiply two large fractions.
+                    BigFraction bf1 = new BigFraction(f1);
+                    BigFraction bf2 = new BigFraction(f2);
+
+                    // Return the result of multiplying the fractions.
+                    return bf1.multiply(bf2);
+                });
+
+        // Append the result, blocking until it's ready.
+        sb.append(future.join().toMixedString());
+
+        // Print the result.
         display(sb.toString());
     }
 
