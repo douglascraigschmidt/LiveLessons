@@ -46,13 +46,18 @@ public class ex27 {
                 // Asynchronously find the best price in US dollars
                 // between London and New York.
                 .supplyAsync(() -> findBestPrice("LDN - NYC"))
+
+                // Call this::convert method reference when both
+                // previous stages complete.
                 .thenCombine(CompletableFuture
                              // Asynchronously determine exchange rate
                              // between US dollars and British pounds.
                              .supplyAsync(() -> queryExchangeRateFor("USD", "GBP"))
+
                              // If this computation runs for more than
                              // 2 seconds return the default rate.
                              .completeOnTimeout(sDEFAULT_RATE, 2, TimeUnit.SECONDS),
+
                              // Convert the price in dollars to the
                              // price in pounds.
                              this::convert)
