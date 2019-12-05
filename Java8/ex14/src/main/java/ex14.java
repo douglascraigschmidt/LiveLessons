@@ -18,7 +18,7 @@ public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 100;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
      * The complete works of William Shakespeare.
@@ -41,7 +41,6 @@ public class ex14 {
         // Run tests that demonstrate performance differences between
         // ArrayList and LinkedList spliterators.
         runSpliteratorTests();
-
 
         // Run tests that demonstrate performance differences between
         // concurrent and non-concurrent techniques for joining results in
@@ -242,9 +241,10 @@ public class ex14 {
                         // (which uses a spliterator internally).
                         .parallelStream()
 
-                        // Uppercase each string.
-                        .map(CharSequence::toString)
-                        .map(String::toUpperCase)
+                        // Uppercase each string.  A "real"
+                        // application would likely do something
+                        // interesting with the words at this point.
+                        .map(charSeq -> charSeq.toString().toUpperCase())
 
                         // Collect the stream into a list.
                         .collect(toList()));
@@ -273,9 +273,10 @@ public class ex14 {
                                 // (which uses a spliterator internally).
                                 .parallelStream()
 
-                                // Uppercase each string.
-                                .map(CharSequence::toString)
-                                .map(String::toUpperCase)
+                                // Uppercase each string.  A "real"
+                                // app would do something interesting
+                                // with the words at this point.
+                                .map(charSeq -> charSeq.toString().toUpperCase())
 
                                 // Collect the stream into a list.
                                 .collect(toList()));

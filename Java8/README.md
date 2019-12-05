@@ -128,3 +128,6 @@ Here's an overview of what's included:
 
 . ex26 -- This example shows various ways to apply one-shot and cyclic
   Java Phasers.
+
+. ex27 -- This example shows how to apply Java 9 timeouts with the
+  Java completable futures framework.
