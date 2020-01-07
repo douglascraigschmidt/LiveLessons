@@ -48,27 +48,25 @@ public class ThreadJoinTest {
      * This is the main entry point into the program.
      */
     static public void main(String[] args) {
-        System.out.println("Starting SearchStream");
+        System.out.println("Starting ThreadJoinTest");
 
         // Create/run an object to search for phrases in parallel.
-        new SearchOneShotThreadJoin().run();
+        new SearchOneShotThreadJoin();
 
-        System.out.println("Ending SearchStream");
+        System.out.println("Ending ThreadJoinTest");
     }
 
     /**
      * This class starts a thread for each element in the list of
      * input strings and uses Thread.join() to wait for all threads to
      * finish.  This implementation requires no Java synchronization
-     * mechanisms other than what's provided by the Thread class.
+     * mechanisms other than what's provided by the Java Thread class.
      */
-    static class SearchOneShotThreadJoin
-           implements Runnable {
+    static class SearchOneShotThreadJoin {
         /**
          * Start the threads to perform the parallel phrase searches.
          */
-        @Override
-        public void run() {
+        SearchOneShotThreadJoin() {
             // Call the makeWorkerThreads() factory method to create a
             // list of threads that each runs the processInput()
             // method reference.  These threads will be joined after
