@@ -57,12 +57,7 @@ public class ThreadJoinTest {
          * The array of words to find.
          */
         final String[] mWordsToFind;
-        
-        /**
-         * The List of worker Threads that were created.
-         */
-        private List<Thread> mWorkerThreads;
-        
+
         /**
          * Constructor initializes the fields and runs the program.
          */
@@ -74,7 +69,10 @@ public class ThreadJoinTest {
 
             // This List holds Threads so they can be joined when
             // their processing is done.
-            mWorkerThreads = new LinkedList<>();
+            /**
+             * The List of worker Threads that were created.
+             */
+            List<Thread> mWorkerThreads = new LinkedList<>();
 
             // Create and start a Thread for each element in the
             // mInput.

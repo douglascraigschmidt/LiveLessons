@@ -39,7 +39,8 @@ class ImageCounter {
      */
     ImageCounter() {
         // Get the URI to the root of the page/folder being traversed.
-        String rootUri = Options.instance().getRootUri();
+        // var is String
+        var rootUri = Options.instance().getRootUri();
 
         // Perform the image counting starting at the root Uri, which
         // is given an initial depth count of 1.
@@ -142,12 +143,14 @@ class ImageCounter {
                                                         int depth) {
         try {
             // Get a future to the page at the root URI.
-            CompletableFuture<Document> pageFuture = 
+            // var is CompletableFuture<Document>
+            var pageFuture =
                 getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return a future to the count.
-            CompletableFuture<Integer> imagesInPageFuture = pageFuture
+            // var is CompletableFuture<Integer>
+            var imagesInPageFuture = pageFuture
                 // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .thenApplyAsync(this::getImagesInPage)
@@ -157,7 +160,8 @@ class ImageCounter {
 
             // Asynchronously count the # of images in link on this
             // page and returns a future to this count.
-            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
+            // var is CompletableFuture<Integer>
+            var imagesInLinksFuture = pageFuture
                 // The crawlLinksInPage() methods runs synchronously,
                 // so thenComposeAsync() is used to avoid blocking via
                 // "flatMap()" semantics wrt nesting of futures.
