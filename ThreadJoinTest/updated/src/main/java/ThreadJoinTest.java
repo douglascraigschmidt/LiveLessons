@@ -71,8 +71,7 @@ public class ThreadJoinTest {
             // list of threads that each runs the processInput()
             // method reference.  These threads will be joined after
             // they process the input strings.
-            // Could use List<Thread>
-            var workerThreads = makeWorkerThreads(this::processInput);
+            List<Thread> workerThreads = makeWorkerThreads(this::processInput);
 
             // Iterate through the list of threads and pass a method
             // reference that starts a thread for each input string.
@@ -106,8 +105,7 @@ public class ThreadJoinTest {
          */
         List<Thread> makeWorkerThreads(Function<String, Void> task) {
             // Create a new list.
-            // Can also use List<Thread>
-            var workerThreads = new ArrayList<Thread>();
+            List<Thread> workerThreads = new ArrayList<Thread>();
 
             // Ensure we've got non-null input!
             assert mInputList != null;
@@ -139,13 +137,13 @@ public class ThreadJoinTest {
         private Void processInput(String input) {
             // Get the title of the work.
             // Could use String title
-            var title = getTitle(input);
+            String title = getTitle(input);
 
             // Ensure we've got non-null input!
             assert mPhrasesToFind != null;
 
             // Iterate through each phrase to find.
-            for (var phrase : mPhrasesToFind)
+            for (String phrase : mPhrasesToFind)
 
                 // Check to see how many times (if any) the phrase
                 // appears in the input data.
