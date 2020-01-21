@@ -15,7 +15,7 @@ public class ex28 {
 
     static class Singleton<T> {
         /**
-         * Singleton field.
+         * Implement the singleton using an AtomicReference.
          */
         public static AtomicReference<Singleton> sSingleton =
             new AtomicReference<Singleton>(null);
@@ -46,11 +46,12 @@ public class ex28 {
 
             // Run this code if the singleton is not yet initialized.
             if (singleton == null) {
-                // Create a new singleton object.
+                // Create a new singleton object.  This constructor
+                // may be called more than once..
                 singleton = new Singleton<>();
 
-                // Atomically set the reference's value to the singleton
-                // iff the current value is null.
+                // Atomically set the reference's value to the
+                // singleton iff the current value is null.
                 if (!sSingleton.compareAndSet(null, singleton))
                     // If the return is false then this not the first
                     // time in, so just return the singleton's value.
@@ -69,7 +70,7 @@ public class ex28 {
     public static void main(String[] args) {
         // Run the test program.
 
-        // Set the value of the singleton's field to an integer with 100.
+        // Set the value of the singleton's field to an Integer.
         Singleton.instance().setField(new Integer(100));
 
         // Return the current value of the singleton.
