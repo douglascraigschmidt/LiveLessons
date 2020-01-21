@@ -69,10 +69,7 @@ public class ThreadJoinTest {
 
             // This List holds Threads so they can be joined when
             // their processing is done.
-            /**
-             * The List of worker Threads that were created.
-             */
-            List<Thread> mWorkerThreads = new LinkedList<>();
+            List<Thread> workerThreads = new LinkedList<>();
 
             // Create and start a Thread for each element in the
             // mInput.
@@ -82,20 +79,21 @@ public class ThreadJoinTest {
                 Thread t = new Thread(makeTask(i));
                 
                 // Add to the List of Threads to join.
-                mWorkerThreads.add(t);               
+                workerThreads.add(t);
             }        
 
             // Start all threads to process input in the background.
-            for (Thread thread : mWorkerThreads)
+            for (Thread thread : workerThreads)
                 thread.start();
 
             // Barrier synchronization to wait for threads to finish.
-            for (Thread thread : mWorkerThreads)
+            for (Thread thread : workerThreads) {
                 try {
                     thread.join();
                 } catch (InterruptedException e) {
                     printDebugging("join() interrupted");
                 }
+            }
         }
 
         /**
