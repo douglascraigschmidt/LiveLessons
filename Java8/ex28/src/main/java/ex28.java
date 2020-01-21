@@ -4,7 +4,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This example shows how to apply Java AtomicReference.
+ * This example shows how to implement the Singleton pattern via Java
+ * AtomicReference.
  */
 @SuppressWarnings("ALL")
 public class ex28 {

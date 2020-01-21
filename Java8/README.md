@@ -131,3 +131,6 @@ Here's an overview of what's included:
 
 . ex27 -- This example shows how to apply Java 9 timeouts with the
   Java completable futures framework.
+
+. ex28 -- This example shows how to implement the Singleton pattern
+  via Java AtomicReference.
