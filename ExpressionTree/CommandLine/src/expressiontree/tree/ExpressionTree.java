@@ -80,11 +80,11 @@ public class ExpressionTree
      * Returns an {@code Iterator} that supports the requested
      * traveralOrder.
      */
-    public Iterator<ExpressionTree> makeIterator(String traversalOrderRequest) {
+    public Iterator<ExpressionTree> iterator(String traversalOrderRequest) {
         // Use the TreeIteratorFactory to create the requested
         // iterator.
-        return mTreeIteratorFactory.makeIterator(this,
-                                                 traversalOrderRequest);
+        return mTreeIteratorFactory.iterator(this,
+                                             traversalOrderRequest);
     }
 
     /**
@@ -92,6 +92,6 @@ public class ExpressionTree
      */
     @Override
     public Iterator<ExpressionTree> iterator() {
-        return makeIterator(IteratorFactory.PRE_ORDER);
+        return iterator(IteratorFactory.PRE_ORDER);
     }
 }

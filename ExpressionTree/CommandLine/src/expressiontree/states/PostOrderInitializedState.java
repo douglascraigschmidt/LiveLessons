@@ -18,7 +18,7 @@ class PostOrderInitializedState
             // a print order.
             traversalOrder = "post-order";
 
-        TreeOperations.print(context.tree().makeIterator(traversalOrder));
+        TreeOperations.print(context.tree().iterator(traversalOrder));
     }
 
     /** 

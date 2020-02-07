@@ -18,7 +18,7 @@ class InOrderInitializedState
             // a print order.
             traversalOrder = "in-order";
 
-        TreeOperations.print(context.tree().makeIterator(traversalOrder));
+        TreeOperations.print(context.tree().iterator(traversalOrder));
     }
 			  	
     /** 
@@ -34,7 +34,7 @@ class InOrderInitializedState
             throw new IllegalArgumentException(traversalOrder 
                                                + " evaluation is not supported yet");
 
-        TreeOperations.evaluate(context.tree().makeIterator(traversalOrder));
+        TreeOperations.evaluate(context.tree().iterator(traversalOrder));
     }
 }
 

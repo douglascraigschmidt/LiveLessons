@@ -18,7 +18,7 @@ class PreOrderInitializedState
             // a print order.
             traversalOrder = "pre-order";
 
-        TreeOperations.print(context.tree().makeIterator(traversalOrder));
+        TreeOperations.print(context.tree().iterator(traversalOrder));
     }
 		  	
     /** 

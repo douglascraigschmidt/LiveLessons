@@ -97,11 +97,11 @@ public class SynchronizedExpressionTree
      * Returns the designated iterator after requesting it from
      * factory method.
      */
-    public Iterator<ExpressionTree> makeIterator(String traversalOrder) {
+    public Iterator<ExpressionTree> iterator(String traversalOrder) {
         Iterator<ExpressionTree> temp;
         synchronized(this) {
-            temp = mTreeIteratorFactory.makeIterator(this,
-                                                    traversalOrder);
+            temp = mTreeIteratorFactory.iterator(this,
+                                                 traversalOrder);
         }
         return temp;
     }

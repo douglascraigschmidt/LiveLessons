@@ -25,7 +25,7 @@ public class IteratorFactory {
     public final static String POST_ORDER = "post-order";
     public final static String LEVEL_ORDER = "level-order";
 
-    /** 
+    /**
      * This interface uses the Command pattern to create @a Iterator
      * implementations at runtime.
      */
@@ -37,7 +37,7 @@ public class IteratorFactory {
     /**
      * Map used to validate mInput requests for @a Iterator
      * implementations and dispatch the execute() method of the
-     * requested iterator. .
+     * requested iterator.
      */
     private HashMap<String, IteratorFactoryCommand> mIteratorMap =
         new HashMap<>();

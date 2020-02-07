@@ -18,7 +18,7 @@ class LevelOrderInitializedState
             // a print order.
             traversalOrder = "level-order";
 
-        TreeOperations.print(context.tree().makeIterator(traversalOrder));
+        TreeOperations.print(context.tree().iterator(traversalOrder));
     }
 			  	
     /** 
