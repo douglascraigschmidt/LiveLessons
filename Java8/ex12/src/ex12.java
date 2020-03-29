@@ -124,7 +124,7 @@ public class ex12 {
      * Run an example using the flatMap() intermediate operation that
      * illustrates how flatMap() is a stateless operation.
      */
-    private void runFlatMapLimi() {
+    private void runFlatMapLimit() {
         System.out.println("\nResults from runFlatMapLimi():");
 
         // Create several lists containing characters from Hamlet.
@@ -149,7 +149,7 @@ public class ex12 {
 
             // Flatten the stream of lists of strings into a stream of
             // strings.
-            .flatMap(List::stream)
+            .flatMap(strings -> { System.out.println (strings); return strings.stream(); })
 
             // Limit the output to the first 4 elements in the stream.
             .limit(4)
