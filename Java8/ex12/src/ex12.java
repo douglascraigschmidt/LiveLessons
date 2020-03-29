@@ -25,6 +25,7 @@ public class ex12 {
         // Demonstrate various approaches.
         ex.runNonJava8();
         ex.runForEach();
+        ex.runFlatMapLimit();
         ex.runForEachOfConcatenation();
         ex.runCollectToList();
         ex.runCollectToSet();
@@ -50,7 +51,7 @@ public class ex12 {
             .toUpperCase()
             // Lowercase the remainder of the string.
             + s.substring(1)
-               .toLowerCase();
+            .toLowerCase();
     }
 
     /**
@@ -117,6 +118,45 @@ public class ex12 {
             // Terminal operation that triggers aggregate operation
             // processing and prints the results.
             .forEach(System.out::println);
+    }
+
+    /**
+     * Run an example using the flatMap() intermediate operation that
+     * illustrates how flatMap() is a stateless operation.
+     */
+    private void runFlatMapLimi() {
+        System.out.println("\nResults from runFlatMapLimi():");
+
+        // Create several lists containing characters from Hamlet.
+        List<String> l1 = List.of("Hamlet",
+                                  "claudius",
+                                  "Gertrude");
+        List<String> l2 = List.of("Ophelia",
+                                  "laertes",
+                                  "Polonius");
+        List<String> l3 = List.of("Reynaldo",
+                                  "horatio",
+                                  "Voltemand",
+                                  "Cornelius",
+                                  "Rosencrantz",
+                                  "Gildenstern");
+        List<String> l4 = List.of("Fortinbras");
+
+        Stream
+            // Create a stream of characters from William
+            // Shakespeare's Hamlet using of() to concatenate lists.
+            .of(l1, l2, l3, l4)
+
+            // Flatten the stream of lists of strings into a stream of
+            // strings.
+            .flatMap(List::stream)
+
+            // Limit the output to the first 4 elements in the stream.
+            .limit(4)
+
+            // Terminal operation that triggers aggregate operation
+            // processing and prints the results in "encounter order".
+            .forEachOrdered(System.out::println);
     }
 
     /**
@@ -553,5 +593,5 @@ public class ex12 {
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
     }
- }
+}
 
