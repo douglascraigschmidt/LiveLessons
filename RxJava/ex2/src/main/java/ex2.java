@@ -11,10 +11,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This example shows how to combine Java parallel streams and RxJava with and
- * without the ForkJoinPool.ManagedBlocker interface and the Java
- * fork-join framework to download multiple images from a remote
- * server.
+ * This example compares the performance of Java parallel streams and RxJava with and
+ * without the ForkJoinPool.ManagedBlocker interface and the Java fork-join framework
+ * to download multiple images from a remote server.
  */
 public class ex2 {
     /**
@@ -41,7 +40,7 @@ public class ex2 {
         System.out.println("Entering the download tests program with "
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
-
+/*
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
@@ -63,7 +62,7 @@ public class ex2 {
         // blocking occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
-
+*/
         // Run the tests using the RxJava along with the BlockingTask
         // wrapper for the Java fork-join framework's ManagedBlocker
         // mechanism, which adds new worker threads to the pool
@@ -155,7 +154,8 @@ public class ex2 {
             // observables
             .fromIterable(Options.instance().getUrlList())
 
-            .observeOn(Schedulers.from(ForkJoinPool.commonPool()))
+            // Run these operations in the common fork-join thread pool.
+            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
             // Transform URL to a File by downloading each image via
             // its URL.
@@ -165,7 +165,7 @@ public class ex2 {
             .collectInto(new ArrayList<>(), List::add)
 
             // Print the statistics for this test run.
-            .subscribe(imageFiles -> printStats(testName, imageFiles.size()));
+            .blockingSubscribe(imageFiles -> printStats(testName, imageFiles.size()));
     }
 
     /**

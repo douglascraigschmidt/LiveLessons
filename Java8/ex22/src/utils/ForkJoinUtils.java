@@ -133,7 +133,7 @@ public class ForkJoinUtils {
         forkJoinPool.invoke(new SplitterTask(0, list.size()));
 
         // Create a list from the array of results and return it.
-        return Arrays.asList(results);
+        return List.of(results);
     }
 
     /**

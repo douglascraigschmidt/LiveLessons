@@ -1,13 +1,6 @@
-import com.sun.istack.internal.NotNull;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static java.lang.Character.toLowerCase;
 
 /**
  * This example shows several examples of using Java 8 Spliterators
@@ -22,10 +15,9 @@ public class ex13 {
         // Create a list of strings containing words from a famous
         // quote from the Shakespeare play "Hamlet."
         List<String> bardQuote =
-            Arrays.asList("This ", "above ", "all- ", "to ", "thine ", "own ", "self ", "be ", "true", ",\n",
-                          "And ", "it ", "must ", "follow ", "as ", "the ", "night ", "the ", "day", ",\n",
-                          "Thou ", "canst ", "not ", "then ", "be ", "false ", "to ", "any ", "man.");
-
+            List.of("This ", "above ", "all- ", "to ", "thine ", "own ", "self ", "be ", "true", ",\n",
+                    "And ", "it ", "must ", "follow ", "as ", "the ", "night ", "the ", "day", ",\n",
+                    "Thou ", "canst ", "not ", "then ", "be ", "false ", "to ", "any ", "man.");
 
         // Show the various spliterator examples.
         showTryAdvance(bardQuote);

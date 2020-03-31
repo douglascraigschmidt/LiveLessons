@@ -35,7 +35,7 @@ public class Options {
         + "11.jpg,"
         + "16.jpg,"
         + "19.png,"
-        + "12.jpg",
+        + "12.jpg" /*,
         "13.png,"
         + "14.jpg,"
         + "15.jpg,"
@@ -70,7 +70,7 @@ public class Options {
         + "6.jpg,"
         + "7.png,"
         + "18.jpg,"
-        + "8.jpg"
+        + "8.jpg" */
     };
 
     /**

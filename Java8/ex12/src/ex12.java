@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.*;
  * variants of reduce().  In addition, it includes a non-Java 8
  * example as a baseline.
  */
-public class ex12 {
+public class ex12  {
     static public void main(String[] argv) {
         // Create an instance of this class.
         ex12 ex = new ex12();
@@ -167,18 +167,18 @@ public class ex12 {
         System.out.println("\nResults from runForEachOfConcatenation():");
 
         // Create several lists containing characters from Hamlet.
-        List<String> l1 = Arrays.asList("Hamlet",
-                                        "claudius",
-                                        "Gertrude");
-        List<String> l2 = Arrays.asList("Ophelia",
-                                        "laertes",
-                                        "Polonius");
-        List<String> l3 = Arrays.asList("Reynaldo",
-                                        "horatio",
-                                        "Voltemand",
-                                        "Cornelius",
-                                        "Rosencrantz",
-                                        "Gildenstern");
+        List<String> l1 = List.of("Hamlet",
+                                  "claudius",
+                                  "Gertrude");
+        List<String> l2 = List.of("Ophelia",
+                                  "laertes",
+                                  "Polonius");
+        List<String> l3 = List.of("Reynaldo",
+                                  "horatio",
+                                  "Voltemand",
+                                  "Cornelius",
+                                  "Rosencrantz",
+                                  "Gildenstern");
         List<String> l4 = Collections.singletonList("Fortinbras");
 
         Stream
@@ -216,13 +216,13 @@ public class ex12 {
         System.out.println("\nResults from runCollectToList():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = Arrays.asList("horatio",
-                                                "claudius",
-                                                "Gertrude",
-                                                "Hamlet",
-                                                "Hamlet", // Hamlet appears twice.
-                                                "laertes",
-                                                "Ophelia");
+        List<String> characters = List.of("horatio",
+                                          "claudius",
+                                          "Gertrude",
+                                          "Hamlet",
+                                          "Hamlet", // Hamlet appears twice.
+                                          "laertes",
+                                          "Ophelia");
 
         // Create sorted list of characters starting with 'h' or 'H'.
         List<String> results = characters
@@ -256,13 +256,13 @@ public class ex12 {
         System.out.println("\nResults from runCollectToSet():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = Arrays.asList("horatio",
-                                                "claudius",
-                                                "Gertrude",
-                                                "Hamlet",
-                                                "Hamlet", // Hamlet appears twice.
-                                                "laertes",
-                                                "Ophelia");
+        List<String> characters = List.of("horatio",
+                                          "claudius",
+                                          "Gertrude",
+                                          "Hamlet",
+                                          "Hamlet", // Hamlet appears twice.
+                                          "laertes",
+                                          "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Set<String> results = characters
@@ -293,13 +293,13 @@ public class ex12 {
         System.out.println("\nResults from runCollectToMap():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = Arrays.asList("horatio",
-                                                "claudius",
-                                                "Gertrude",
-                                                "Hamlet",
-                                                "Hamlet", // Hamlet appears twice.
-                                                "laertes",
-                                                "Ophelia");
+        List<String> characters = List.of("horatio",
+                                          "claudius",
+                                          "Gertrude",
+                                          "Hamlet",
+                                          "Hamlet", // Hamlet appears twice.
+                                          "laertes",
+                                          "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Map<String, Integer> results = characters
@@ -331,13 +331,13 @@ public class ex12 {
         System.out.println("\nResults from runCollectGroupingBy():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = Arrays.asList("horatio",
-                                                "claudius",
-                                                "Gertrude",
-                                                "Hamlet",
-                                                "Hamlet", // Hamlet appears twice.
-                                                "laertes",
-                                                "Ophelia");
+        List<String> characters = List.of("horatio",
+                                          "claudius",
+                                          "Gertrude",
+                                          "Hamlet",
+                                          "Hamlet", // Hamlet appears twice.
+                                          "laertes",
+                                          "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Map<String, Long> results = characters

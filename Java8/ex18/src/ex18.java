@@ -33,15 +33,15 @@ public class ex18 {
 
         // Create a list containing all the factorial methods.
         List<Function<BigInteger, BigInteger>> factList =
-            Arrays.asList(SynchronizedParallelFactorial::factorial,
-                          SequentialStreamFactorial::factorial,
-                          ParallelStreamFactorial2::factorial,
-                          ParallelStreamFactorial3::factorial);
+            List.of(SynchronizedParallelFactorial::factorial,
+                    SequentialStreamFactorial::factorial,
+                    ParallelStreamFactorial2::factorial,
+                    ParallelStreamFactorial3::factorial);
 
         // Initialize to the default value.
         final BigInteger n = (args.length > 0)
-                ? BigInteger.valueOf(Long.valueOf(args[0]))
-                : BigInteger.valueOf(sDEFAULT_N);
+            ? BigInteger.valueOf(Long.valueOf(args[0]))
+            : BigInteger.valueOf(sDEFAULT_N);
 
         // Test the StreamsUtils.joinAll() method.
         test.testJoinAll(factList, n);

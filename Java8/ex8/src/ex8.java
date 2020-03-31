@@ -514,9 +514,9 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions1()\n");
 
-        Arrays
+        List
             // Generate results both with and without exceptions.
-            .asList(true, false)
+            .of(true, false)
 
             // Convert list to a stream.
             .stream()
@@ -563,9 +563,9 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions2()\n");
 
-        Arrays
+        List
             // Generate results both with and without exceptions.
-            .asList(true, false)
+            .of(true, false)
 
             // Convert list to a stream.
             .stream()
@@ -612,9 +612,9 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions3()\n");
 
-        Arrays
+        List
             // Generate results both with and without exceptions.
-            .asList(true, false)
+            .of(true, false)
 
             // Convert list to a stream.
             .stream()
@@ -839,7 +839,7 @@ public class ex8 {
         Arrays.sort(bigFractionArray);
 
         // Convert the array back to a list.
-        return Arrays.asList(bigFractionArray);
+        return List.of(bigFractionArray);
     }
 
     /*

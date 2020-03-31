@@ -35,7 +35,7 @@ public class ex21 {
         // Create a List of random integers between the values 100 and
         // 200 (List enforces encounter order).
         List<Integer> list =
-            Arrays.asList(random.ints(sEncounterMax, 100, 200)
+            List.of(random.ints(sEncounterMax, 100, 200)
                           .boxed()
                           .toArray(Integer[]::new));
 

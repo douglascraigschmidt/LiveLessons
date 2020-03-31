@@ -60,10 +60,10 @@ public class ex23 {
     public static void main (String[] argv) throws IOException {
         // A list of suppliers that return integers.
         List<Supplier<Integer>> suppliers =
-            Arrays.asList(mSupplier,
-                          mSupplier,
-                          mSupplier,
-                          mSupplier);
+            List.of(mSupplier,
+                    mSupplier,
+                    mSupplier,
+                    mSupplier);
 
         // Run a test that makes multiple blocking join calls on
         // completable futures.

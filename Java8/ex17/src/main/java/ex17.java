@@ -179,10 +179,10 @@ public class ex17 {
                            + "buggyStreamReduce3 implementation");
 
         List<String> allWords =
-            Arrays.asList("The quick brown fox jumps over the lazy dog\n",
-                          "A man, a plan, a canal: Panama\n",
-                          "Now is the time for all good people " 
-                          + "to come to the aid of their party");
+            List.of("The quick brown fox jumps over the lazy dog\n",
+                    "A man, a plan, a canal: Panama\n",
+                    "Now is the time for all good people " 
+                    + "to come to the aid of their party");
 
         // Record the start time.
         long startTime = System.nanoTime();
@@ -236,10 +236,10 @@ public class ex17 {
                            + "streamReduceConcat implementation");
 
         List<String> allWords =
-            Arrays.asList("The quick brown fox jumps over the lazy dog\n",
-                          "A man, a plan, a canal: Panama\n",
-                          "Now is the time for all good people " 
-                          + "to come to the aid of their party");
+            List.of("The quick brown fox jumps over the lazy dog\n",
+                    "A man, a plan, a canal: Panama\n",
+                    "Now is the time for all good people " 
+                    + "to come to the aid of their party");
 
         // Record the start time.
         long startTime = System.nanoTime();
@@ -292,10 +292,10 @@ public class ex17 {
                            + "streamCollectJoining implementation");
 
         List<String> allWords =
-            Arrays.asList("The quick brown fox jumps over the lazy dog\n",
-                          "A man, a plan, a canal: Panama\n",
-                          "Now is the time for all good people " 
-                          + "to come to the aid of their party");
+            List.of("The quick brown fox jumps over the lazy dog\n",
+                    "A man, a plan, a canal: Panama\n",
+                    "Now is the time for all good people " 
+                    + "to come to the aid of their party");
 
         // Record the start time.
         long startTime = System.nanoTime();

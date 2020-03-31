@@ -7,7 +7,7 @@ import java.util.*;
 public class ex2 {
     static public void main(String[] argv) {
         List<Integer> list = 
-            new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+            new ArrayList<>(List.of(1, 2, 3, 4, 5));
 
         System.out.println(list);
         

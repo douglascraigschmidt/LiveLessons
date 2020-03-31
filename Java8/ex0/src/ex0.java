@@ -1,7 +1,6 @@
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,11 +25,11 @@ public class ex0 {
         };
 
         // Remove "Robert" from the list created from nameArray.
-        List<String> l1 = zap7(Arrays.asList(nameArray),
+        List<String> l1 = zap7(List.of(nameArray),
                                "Robert");
 
         // Remove "Robert" from the list created from nameArray.
-        List<String> l2 = zap8(Arrays.asList(nameArray),
+        List<String> l2 = zap8(List.of(nameArray),
                                "Robert");
 
         // Check to ensure the zap*() methods work.

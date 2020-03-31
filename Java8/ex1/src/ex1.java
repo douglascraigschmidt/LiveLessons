@@ -63,7 +63,7 @@ public class ex1 {
         };
 
         System.out.println("Original array:\n"
-                           + Arrays.asList(nameArray));
+                           + List.of(nameArray));
 
         // Demonstrate the various techniques.
         showInnerClass(nameArray);
@@ -90,7 +90,7 @@ public class ex1 {
             });
 
         // Print out the sorted contents as an array.
-        System.out.println(Arrays.asList(nameArrayCopy));
+        System.out.println(List.of(nameArrayCopy));
     }
 
     /**
@@ -109,7 +109,7 @@ public class ex1 {
                     (s, t) -> s.compareToIgnoreCase(t));
 
         // Print out the sorted contents as an array.
-        System.out.println(Arrays.asList(nameArrayCopy));
+        System.out.println(List.of(nameArrayCopy));
     }
 
     /**
@@ -147,7 +147,7 @@ public class ex1 {
 
         // Print out the sorted contents using the Java 8 forEach()
         // method.
-        Arrays.asList(nameArrayCopy).forEach(System.out::print);
+        List.of(nameArrayCopy).forEach(System.out::print);
     }
 }
 
