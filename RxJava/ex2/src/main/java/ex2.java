@@ -40,7 +40,7 @@ public class ex2 {
         System.out.println("Entering the download tests program with "
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
-/*
+
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
@@ -62,7 +62,7 @@ public class ex2 {
         // blocking occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
-*/
+
         // Run the tests using the RxJava along with the BlockingTask
         // wrapper for the Java fork-join framework's ManagedBlocker
         // mechanism, which adds new worker threads to the pool
