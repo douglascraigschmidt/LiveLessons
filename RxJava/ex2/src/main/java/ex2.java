@@ -11,9 +11,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This example compares the performance of Java parallel streams and RxJava with and
- * without the ForkJoinPool.ManagedBlocker interface and the Java fork-join framework
- * to download multiple images from a remote server.
+ * This example downloads multiple images from a remote web server via
+ * several different mechanisms, including Java parallel streams and
+ * RxJava.  It also compares the performance of Java parallel streams
+ * and RxJava with and without the ForkJoinPool.ManagedBlocker
+ * interface and the Java common fork-join pool.
  */
 public class ex2 {
     /**
@@ -45,28 +47,28 @@ public class ex2 {
         warmUpThreadPool();
 
         // Runs the tests using the using the Java fork-join
-        // framework's default behavior, which does not add new worker
-        // threads to the pool when blocking occurs.
+        // framework's default behavior, which does not add any new
+        // worker threads to the pool when blocking on I/O occurs.
         runTest(this::downloadAndStoreImage,
                 "testDefaultDownloadBehavior()");
 
         // Run the tests using the using the Java fork-join
         // framework's ManagedBlocker mechanism, which adds new worker
-        // threads to the pool adaptively when blocking occurs.
+        // threads to the pool adaptively when blocking on I/O occurs.
         runTest(this::downloadAndStoreImageMB,
                 "testAdaptiveMBDownloadBehavior()");
 
         // Run the tests using the using the BlockingTask wrapper for
         // the Java fork-join framework's ManagedBlocker mechanism,
         // which adds new worker threads to the pool adaptively when
-        // blocking occurs.
+        // blocking on I/O occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
 
         // Run the tests using the RxJava along with the BlockingTask
         // wrapper for the Java fork-join framework's ManagedBlocker
         // mechanism, which adds new worker threads to the pool
-        // adaptively when blocking occurs.
+        // adaptively when blocking on I/O occurs.
         runTestRx(this::downloadAndStoreImageBT,
                   "testAdaptiveBTDownloadBehaviorBTRx()");
 
@@ -83,7 +85,7 @@ public class ex2 {
      */
     private void runTest(Function<URL, File> downloadAndStoreImage,
                          String testName) {
-        // Let the system garbage collect.
+        // First let the system garbage collect.
         System.gc();
 
         // Record how long the test takes to run.
@@ -100,7 +102,7 @@ public class ex2 {
      */
     private void runTestRx(Function<URL, File> downloadAndStoreImage,
                            String testName) {
-        // Let the system garbage collect.
+        // First let the system garbage collect.
         System.gc();
 
         // Record how long the test takes to run.
@@ -118,17 +120,18 @@ public class ex2 {
      */
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
-        // Delete any the filtered images from the previous run.
+        // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Get the list of files to the downloaded images.
+        // Get a list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
             // process them in parallel.
             .parallelStream()
 
-            // Transform URL to a File by downloading each image via
-            // its URL.
+            // Transform each URL to a File by calling the
+            // downloadAndStoreImage function, which downloads each
+            // image via its URL.
             .map(downloadAndStoreImage)
 
             // Terminate the stream and collect the results into list
@@ -145,34 +148,38 @@ public class ex2 {
      */
     private void testDownloadBehaviorRx(Function<URL, File> downloadAndStoreImage,
                                         String testName) {
-        // Delete any the filtered images from the previous run.
+        // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Get and print the list of files to the downloaded images.
+        // Get and print a list of files to the downloaded images.
         Observable
-            // Convert the URLs in the input list into a stream of and
-            // observables
+            // Convert the URLs in the input list into a stream of
+            // observables.
             .fromIterable(Options.instance().getUrlList())
 
-            // Run these operations in the common fork-join thread pool.
+            // Run these operations in the common fork-join thread
+            // pool.
             .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
-            // Transform URL to a File by downloading each image via
-            // its URL.
-            .map(this::downloadAndStoreImageBT)
+            // Transform each URL to a File by calling the
+            // downloadAndStoreImage function, which downloads each
+            // image via its URL.
+            .map(downloadAndStoreImage)
 
             // Collect the results into list of images.
             .collectInto(new ArrayList<>(), List::add)
 
             // Print the statistics for this test run.
-            .blockingSubscribe(imageFiles -> printStats(testName, imageFiles.size()));
+            .blockingSubscribe(imageFiles ->
+                               printStats(testName, imageFiles.size()));
     }
 
     /**
-     * Transform URL to a File by downloading each image via its URL
-     * and storing it *without* using the Java fork-join framework's
-     * ManagedBlocker mechanism, i.e., the pool of worker threads will
-     * not be expanded.
+     * Transform the {@code url} to a {@code File} by downloading each
+     * image via its URL and storing it to the local file system.
+     * This method does not use the {@code ManagedBlocker} mechanism
+     * in the Java fork-join framework, i.e., the pool of worker
+     * threads will not be expanded when blocking on I/O occurs.
      */
     private File downloadAndStoreImage(URL url) {
         return 
@@ -184,10 +191,11 @@ public class ex2 {
     }
 
     /**
-     * Transform URL to a File by downloading each image via its URL
-     * and storing it using the Java fork-join framework's
-     * ManagedBlocker mechanism, which adds new worker threads to the
-     * pool adaptively when blocking occurs.
+     * Transform the {@code url} to a {@code File} by downloading each
+     * image via its URL and storing it to the local file system.
+     * This method uses the {@code ManagedBlocker} mechanism in the
+     * Java fork-join framework, which adds new worker threads to the
+     * pool adaptively when blocking on I/O occurs.
      */
     private File downloadAndStoreImageMB(URL url) {
         // Create a one element array so we can update it in the
@@ -197,9 +205,9 @@ public class ex2 {
         try {
             ForkJoinPool
                 // Submit an anonymous managedBlock implementation to
-                // the common ForkJoin thread pool.  This call ensures
-                // the common fork/join thread pool is expanded to
-                // handle the blocking image download.
+                // the common fork-join thread pool.  This call
+                // ensures the common fork-join thread pool is
+                // expanded to handle the blocking image download.
                 .managedBlock(new ForkJoinPool.ManagedBlocker() {
                         /**
                          * Download the image, which will block the
@@ -226,15 +234,16 @@ public class ex2 {
     }
 
     /**
-     * Transform URL to a File to download each image
-     * via its URL and storing it using the BlockingTask wrapper
-     * around the Java fork-join framework's ManagedBlocker mechanism,
-     * which adds new worker threads to the pool adaptively when
-     * blocking occurs.
+     * Transform the {@code url} to a {@code File} by downloading each
+     * image via its URL and storing it on the local file system.
+     * This method uses the {@code BlockingTask} wrapper around the
+     * {@code ManagedBlocker} mechanism in the Java fork-join
+     * framework, which adds new worker threads to the pool adaptively
+     * when blocking on I/O occurs.
      */
     private File downloadAndStoreImageBT(URL url) {
         return BlockingTask
-                // This call ensures the common fork/join thread pool
+                // This call ensures the common fork-join thread pool
                 // is expanded to handle the blocking image download.
                 .callInManagedBlock(() -> downloadImage(url))
 
@@ -243,12 +252,13 @@ public class ex2 {
     }
 
     /**
-     * Factory method that blocks while retrieving the image
-     * associated with the {@code url} and creating an Image to
-     * encapsulate it.
+     * Factory method that retrieves the image associated with the
+     * {@code url} and creates an {@code Image} to encapsulate it.
+     * This method blocks until I/O has completed.
      */
     private Image downloadImage(URL url) {
         return new Image(url,
+                         // Download the content from the url.
                          NetUtils.downloadContent(url));
     }
 
