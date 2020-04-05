@@ -164,7 +164,7 @@ public class ex2 {
             // Transform each URL to a File by calling the
             // downloadAndStoreImage function, which downloads each
             // image via its URL.
-            .map(downloadAndStoreImage)
+            .map(downloadAndStoreImage::apply)
 
             // Collect the results into list of images.
             .collectInto(new ArrayList<>(), List::add)
