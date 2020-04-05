@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * This example downloads multiple images from a remote web server via
  * several different mechanisms, including Java parallel streams and
  * RxJava.  It also compares the performance of Java parallel streams
- * and RxJava with and without the ForkJoinPool.ManagedBlocker
+ * and RxJava with and without the {@code ForkJoinPool.ManagedBlocker}
  * interface and the Java common fork-join pool.
  */
 public class ex2 {
@@ -24,8 +24,8 @@ public class ex2 {
     private static final String TAG = ex2.class.getName();
 
     /**
-     * The Java execution environment requires a static main() entry
-     * point method to run the app.
+     * The Java execution environment requires a static {@code main()}
+     * entry point method to run the app.
      */
     public static void main(String[] args) {
         // Initializes the Options singleton.
@@ -53,22 +53,23 @@ public class ex2 {
                 "testDefaultDownloadBehavior()");
 
         // Run the tests using the using the Java fork-join
-        // framework's ManagedBlocker mechanism, which adds new worker
-        // threads to the pool adaptively when blocking on I/O occurs.
+        // framework's {@code ManagedBlocker} mechanism, which adds
+        // new worker threads to the pool adaptively when blocking on
+        // I/O occurs.
         runTest(this::downloadAndStoreImageMB,
                 "testAdaptiveMBDownloadBehavior()");
 
-        // Run the tests using the using the BlockingTask wrapper for
-        // the Java fork-join framework's ManagedBlocker mechanism,
-        // which adds new worker threads to the pool adaptively when
-        // blocking on I/O occurs.
+        // Run the tests using the using the {@code BlockingTask}
+        // wrapper for the Java fork-join framework's {@code
+        // ManagedBlocker} mechanism, which adds new worker threads to
+        // the pool adaptively when blocking on I/O occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
 
-        // Run the tests using the RxJava along with the BlockingTask
-        // wrapper for the Java fork-join framework's ManagedBlocker
-        // mechanism, which adds new worker threads to the pool
-        // adaptively when blocking on I/O occurs.
+        // Run the tests using the RxJava along with the {@code
+        // BlockingTask} wrapper for the Java fork-join framework's
+        // {@code ManagedBlocker} mechanism, which adds new worker
+        // threads to the pool adaptively when blocking on I/O occurs.
         runTestRx(this::downloadAndStoreImageBT,
                   "testAdaptiveBTDownloadBehaviorBTRx()");
 
@@ -114,9 +115,8 @@ public class ex2 {
     }
 
     /**
-     * This method runs the tests via the {@code
-     * downloadAndStoreImage} function using the parallel streams
-     * framework.
+     * This method runs the {@code downloadAndStoreImage} function
+     * using the parallel streams framework.
      */
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
@@ -143,8 +143,8 @@ public class ex2 {
     }
 
     /**
-     * This method runs the tests via the {@code
-     * downloadAndStoreImage} function using the RxJava framework.
+     * This method runs the {@code downloadAndStoreImage} function
+     * using the RxJava framework.
      */
     private void testDownloadBehaviorRx(Function<URL, File> downloadAndStoreImage,
                                         String testName) {
