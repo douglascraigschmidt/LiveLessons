@@ -71,7 +71,7 @@ public class ex2 {
         // {@code ManagedBlocker} mechanism, which adds new worker
         // threads to the pool adaptively when blocking on I/O occurs.
         runTestRx(this::downloadAndStoreImageBT,
-                  "testAdaptiveBTDownloadBehaviorBTRx()");
+                  "testAdaptiveBTDownloadBehaviorRx()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
