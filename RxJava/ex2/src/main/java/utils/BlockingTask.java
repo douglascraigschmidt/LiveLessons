@@ -4,8 +4,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
 
 /**
- * A Java utility class that simplifies the integration of blocking
- * Runnables and Suppliers with the common Java fork/join thread pool.
+ * This Java utility class simplifies the integration of blocking
+ * runnables and suppliers with the common Java fork-join thread pool.
  * This class is a variant of the one that is described at
  * http://stackoverflow.com/questions/37512662/is-there-anything-wrong
  * -with-using-i-o-managedblocker-in-java8-parallelstream.
@@ -23,7 +23,7 @@ public class BlockingTask {
     }
 
     /**
-     * This method enables blocking Suppliers to be used efficiently
+     * This method enables blocking suppliers to be used efficiently
      * with the common Java fork/join thread pool.
      */
     public static<T> T callInManagedBlock(final Supplier<T> supplier) {
@@ -43,7 +43,7 @@ public class BlockingTask {
     }
 
     /**
-     * This method enables blocking Runnables to be used efficiently
+     * This method enables blocking runnables to be used efficiently
      * with the common Java fork/join thread pool.
      */
     public static void runInManagedBlock(final Runnable runnable) {
