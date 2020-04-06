@@ -105,7 +105,6 @@ public class RunTimer {
 
             // Append the sorted entries into the string buffer.
             .forEach(entry -> stringBuffer
-                     .append("")
                      .append(entry.getValue())
                      .append(" executed in ")
                      .append(entry.getKey())
