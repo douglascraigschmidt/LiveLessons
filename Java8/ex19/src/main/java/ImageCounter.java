@@ -4,11 +4,8 @@ import utils.ConcurrentHashSet;
 import utils.FuturesCollector;
 import utils.Options;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * This class counts the number of images in a recursively-defined
@@ -40,7 +37,7 @@ class ImageCounter {
     ImageCounter() {
         // Get the URI to the root of the page/folder being traversed.
         // var is String
-        var rootUri = Options.instance().getRootUri();
+        String rootUri = Options.instance().getRootUri();
 
         // Perform the image counting starting at the root Uri, which
         // is given an initial depth count of 1.
@@ -144,13 +141,13 @@ class ImageCounter {
         try {
             // Get a future to the page at the root URI.
             // var is CompletableFuture<Document>
-            var pageFuture =
+            CompletableFuture<Document> pageFuture =
                 getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return a future to the count.
             // var is CompletableFuture<Integer>
-            var imagesInPageFuture = pageFuture
+            CompletableFuture<Integer> imagesInPageFuture = pageFuture
                 // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .thenApplyAsync(this::getImagesInPage)
@@ -161,7 +158,7 @@ class ImageCounter {
             // Asynchronously count the # of images in link on this
             // page and returns a future to this count.
             // var is CompletableFuture<Integer>
-            var imagesInLinksFuture = pageFuture
+            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
                 // The crawlLinksInPage() methods runs synchronously,
                 // so thenComposeAsync() is used to avoid blocking via
                 // "flatMap()" semantics wrt nesting of futures.
@@ -200,7 +197,7 @@ class ImageCounter {
         // Return a completable future to the results of adding the
         // two futures params after they both complete.
         return imagesInPageFuture
-            // When both futures complete sum the results.
+            // Sum the results when both futures complete.
             .thenCombine(imagesInLinksFuture,
                          Integer::sum);
     }

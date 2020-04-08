@@ -93,21 +93,14 @@ public class RunTimer {
             // Convert the entrySet into a stream.
             .stream()
 
-            // Create a SimpleImmutableEntry containing the timing
-            // results (value) followed by the test name (key).
-            .map(entry
-                 -> new AbstractMap.SimpleImmutableEntry<>
-                 (entry.getValue(),
-                  entry.getKey()))
-
             // Sort the stream by the timing results (key).
-            .sorted(Map.Entry.comparingByKey())
+            .sorted(Map.Entry.comparingByValue())
 
             // Append the sorted entries into the string buffer.
             .forEach(entry -> stringBuffer
-                     .append(entry.getValue())
-                     .append(" executed in ")
                      .append(entry.getKey())
+                     .append(" executed in ")
+                     .append(entry.getValue())
                      .append(" msecs\n"));
 
         // Convert the string buffer into a string and return it.

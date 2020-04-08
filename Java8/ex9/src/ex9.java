@@ -96,9 +96,8 @@ public class ex9 {
                     // for this number is already in the cache.  If not,
                     // it atomically determines if this number is prime
                     // and stores it in the cache.
-                    int smallestFactor =
-                    primeCache.computeIfAbsent(primeCandidate,
-                                               this::isPrime);
+                    int smallestFactor = primeCache.computeIfAbsent(primeCandidate,
+                                                                    this::isPrime);
 
                     if (smallestFactor != 0) {
                         if (sVERBOSE)

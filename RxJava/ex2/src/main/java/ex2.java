@@ -1,5 +1,7 @@
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+
 import utils.*;
 
 import java.io.File;
@@ -42,7 +44,6 @@ public class ex2 {
         System.out.println("Entering the download tests program with "
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
-
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
@@ -66,12 +67,21 @@ public class ex2 {
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
 
-        // Run the tests using the RxJava along with the {@code
-        // BlockingTask} wrapper for the Java fork-join framework's
-        // {@code ManagedBlocker} mechanism, which adds new worker
-        // threads to the pool adaptively when blocking on I/O occurs.
-        runTestRx(this::downloadAndStoreImageBT,
-                  "testAdaptiveBTDownloadBehaviorRx()");
+        // Run the tests using RxJava's flatMap() parallelism
+        // mechanism along with the {@code BlockingTask} wrapper for
+        // the Java fork-join framework's {@code ManagedBlocker}
+        // mechanism, which adds new worker threads to the pool
+        // adaptively when blocking on I/O occurs.
+        runTestRxflatMap(this::downloadAndStoreImageBT,
+                         "testAdaptiveBTDownloadBehaviorRxflatMap()");
+
+        // Run the tests using RxJava's ParallelFlowable mechanism
+        // along with the {@code BlockingTask} wrapper for the Java
+        // fork-join framework's {@code ManagedBlocker} mechanism,
+        // which adds new worker threads to the pool adaptively when
+        // blocking on I/O occurs.
+        runTestRxParallelFlowable(this::downloadAndStoreImageBT,
+                         "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -89,6 +99,9 @@ public class ex2 {
         // First let the system garbage collect.
         System.gc();
 
+        // Delete any filtered images from the previous run.
+        FileUtils.deleteDownloadedImages();
+
         // Record how long the test takes to run.
         RunTimer.timeRun(() ->
                          // Run the test with the designated function.
@@ -99,18 +112,44 @@ public class ex2 {
 
     /**
      * Run the test named {@code testName} by appying the {@code
-     * downloadAndStoreImage} function with the RxJava driver.
+     * downloadAndStoreImage} function with the RxJava driver that
+     * uses its flatMap() mechanism to download files in parallel.
      */
-    private void runTestRx(Function<URL, File> downloadAndStoreImage,
-                           String testName) {
+    private void runTestRxflatMap(Function<URL, File> downloadAndStoreImage,
+                                  String testName) {
         // First let the system garbage collect.
         System.gc();
+
+        // Delete any filtered images from the previous run.
+        FileUtils.deleteDownloadedImages();
 
         // Record how long the test takes to run.
         RunTimer.timeRun(() ->
                          // Run the test with the designated function.
-                         testDownloadBehaviorRx(downloadAndStoreImage,
-                                                testName),
+                         testDownloadBehaviorRxflatMap(downloadAndStoreImage,
+                                                       testName),
+                         testName);
+    }
+
+    /**
+     * Run the test named {@code testName} by appying the {@code
+     * downloadAndStoreImage} function with the RxJava driver that
+     * uses its ParallelFlowable mechanism to download files in
+     * parallel.
+     */
+    private void runTestRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
+                                  String testName) {
+        // First let the system garbage collect.
+        System.gc();
+
+        // Delete any filtered images from the previous run.
+        FileUtils.deleteDownloadedImages();
+
+        // Record how long the test takes to run.
+        RunTimer.timeRun(() ->
+                         // Run the test with the designated function.
+                         testDownloadBehaviorRxParallelFlowable(downloadAndStoreImage,
+                                                                testName),
                          testName);
     }
 
@@ -120,9 +159,6 @@ public class ex2 {
      */
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
-        // Delete any filtered images from the previous run.
-        FileUtils.deleteDownloadedImages();
-
         // Get a list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
@@ -144,32 +180,73 @@ public class ex2 {
 
     /**
      * This method runs the {@code downloadAndStoreImage} function
-     * using the RxJava framework.
+     * using the RxJava framework and its flatMap() method for
+     * parallelizing downloads.
      */
-    private void testDownloadBehaviorRx(Function<URL, File> downloadAndStoreImage,
-                                        String testName) {
-        // Delete any filtered images from the previous run.
-        FileUtils.deleteDownloadedImages();
-
+    private void testDownloadBehaviorRxflatMap(Function<URL, File> downloadAndStoreImage,
+                                               String testName) {
         // Get and print a list of files to the downloaded images.
         Observable
             // Convert the URLs in the input list into a stream of
             // observables.
             .fromIterable(Options.instance().getUrlList())
 
-            // Run these operations in the common fork-join thread
-            // pool.
-            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
+            // Transforms an observable by applying a set of
+            // operations to each item emitted by the source.
+            .flatMap(url -> Observable
+                     // Just omit this one object.
+                     .just(url)
 
-            // Transform each URL to a File by calling the
+                     // Run this operation in the common fork-join
+                     // pool.
+                     .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
+
+                     // Transform each URL to a file by calling the
+                     // downloadAndStoreImage function, which
+                     // downloads each image via its URL.
+                     .map(downloadAndStoreImage::apply))
+
+            // Collect the downloaded images into a list.
+            .collectInto(new ArrayList<>(), List::add)
+
+            // Print the statistics for this test run in a blocking
+            // manner.
+            .blockingSubscribe(imageFiles ->
+                               printStats(testName, imageFiles.size()));
+    }
+
+    /**
+     * This method runs the {@code downloadAndStoreImage} function
+     * using the RxJava framework and its ParallelFlowable mechanism
+     * for parallelizing downloads.
+     */
+    private void testDownloadBehaviorRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
+                                                        String testName) {
+
+        // Convert the URLs in the input list into a stream of
+        // observables.
+        Flowable
+            .fromIterable(Options.instance().getUrlList())
+
+            // Create a parallel flow of observables.
+            .parallel()
+
+            // Run the flow in the common fork-join pool.
+            .runOn(Schedulers.from(ForkJoinPool.commonPool()))
+
+            // Transform each URL to a file by calling the
             // downloadAndStoreImage function, which downloads each
             // image via its URL.
             .map(downloadAndStoreImage::apply)
 
-            // Collect the results into list of images.
+            // Merge the values back into a single flowable.
+            .sequential() 
+
+            // Collect the downloaded images into a list.
             .collectInto(new ArrayList<>(), List::add)
 
-            // Print the statistics for this test run.
+            // Print the statistics for this test run in a blocking
+            // manner.
             .blockingSubscribe(imageFiles ->
                                printStats(testName, imageFiles.size()));
     }
@@ -243,12 +320,12 @@ public class ex2 {
      */
     private File downloadAndStoreImageBT(URL url) {
         return BlockingTask
-                // This call ensures the common fork-join thread pool
-                // is expanded to handle the blocking image download.
-                .callInManagedBlock(() -> downloadImage(url))
+            // This call ensures the common fork-join thread pool
+            // is expanded to handle the blocking image download.
+            .callInManagedBlock(() -> downloadImage(url))
 
-                // Store the image on the local device.
-                .store();
+            // Store the image on the local device.
+            .store();
     }
 
     /**
