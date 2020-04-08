@@ -1,5 +1,3 @@
-package src.main.java;
-
 import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -9,7 +7,7 @@ import java.util.function.Function;
 
 /**
  */
-public class ex01 {
+public class ex1 {
     private static Random mRand = new Random();
 
     private static Observable<Integer> fetch() throws InterruptedException {
@@ -38,17 +36,17 @@ public class ex01 {
 
     private static void test2() {
         Observable
-                .create(ex01::emit)
+                .create(ex1::emit)
                 .observeOn(Schedulers.computation(), true, 2)
                 .map(data -> data)
-                .subscribe(ex01::process,
+                .subscribe(ex1::process,
                            err -> print("ERROR" + err),
                            () -> print("DONE"));
 
     }
     private static Observable<Integer> getValues() {
         return Observable
-                .fromCallable(ex01::fetch)
+                .fromCallable(ex1::fetch)
                 .flatMap(s -> s)
                 .timeout(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io());
@@ -62,7 +60,7 @@ public class ex01 {
                 .mergeWith(n2)
                 // .first()
                 .observeOn(Schedulers.computation())
-                .subscribe(ex01::print);
+                .subscribe(ex1::print);
     }
 
     private static void print(String s) {
