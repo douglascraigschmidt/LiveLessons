@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * This example demonstrates various RxJava mechanisms for determining
  * if a flow of random big integers are prime numbers or not.  It
- * shows a sequential flow and two different concurrent flows.
- * It also illustrates the use of a memoizer based on Java's
+ * shows a sequential flow and two different concurrent flows.  It
+ * also illustrates the use of a memoizer based on Java's
  * ConcurrentHashMap.
  */
 public class ex3 {
