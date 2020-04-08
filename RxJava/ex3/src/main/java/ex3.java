@@ -48,13 +48,13 @@ public class ex3 {
      */
     static public void main(String[] argv) {
         // Test the sequential flow.
-        // testSequential();
+        testSequential();
 
         // Test the concurrent flow using an observable.
         testConcurrentObservable();
 
         // Test the concurrent flow using a flowable.
-        // testConcurrentFlowable();
+        testConcurrentFlowable();
     }
 
     /**
@@ -161,7 +161,7 @@ public class ex3 {
             .map(x -> BigInteger.valueOf(rand.nextInt(sMAX_ITERATIONS) + origin))
 
             // Print the big integer as a debugging aid.
-            // .doOnNext(ex3::print)
+            .doOnNext(ex3::print)
 
             // Only take sMAX_ITERATIONS amount of big integers.
             .take(sMAX_ITERATIONS)
@@ -197,7 +197,7 @@ public class ex3 {
      * prime or the smallest factor if it is not prime.
      */
     static BigInteger isPrime(BigInteger n) {
-        // print("checking if " + n + " is prime");
+        print("checking if " + n + " is prime");
 
         BigInteger two = BigInteger.valueOf(2);
 
