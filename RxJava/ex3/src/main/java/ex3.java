@@ -1,19 +1,17 @@
 import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import src.main.java.utils.ExceptionUtils;
 
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This example demonstrates various RxJava mechanisms for determining
  * if a flow of random big integers are prime numbers or not.  It
- * shows a (largely) sequential flow and two different concurrent
- * flows.  It also illustrates the use of a memoizer based on Java's
+ * shows a sequential flow and two different concurrent flows.
+ * It also illustrates the use of a memoizer based on Java's
  * ConcurrentHashMap.
  */
 public class ex3 {
@@ -32,7 +30,7 @@ public class ex3 {
     /**
      * Max number of iterations.
      */
-    private static int sMAX_ITERATIONS = 10;
+    private static int sMAX_ITERATIONS = 100;
 
     /**
      * Duration for sleeping.
@@ -40,29 +38,36 @@ public class ex3 {
     private static long sSLEEP_DURATION = 100;
 
     /**
+     * The scheduler to use for Observable.interval().
+     */
+    private static Scheduler sScheduler = Schedulers.computation();
+
+    /**
      * The Java execution environment requires a static {@code main()}
      * entry point method to run the app.
      */
     static public void main(String[] argv) {
-        // Test the (largely) sequential flow.
-        testSequential();
+        // Test the sequential flow.
+        // testSequential();
 
         // Test the concurrent flow using an observable.
-        // testConcurrentObservable();
+        testConcurrentObservable();
 
         // Test the concurrent flow using a flowable.
         // testConcurrentFlowable();
     }
 
     /**
-     * Test the (largely) sequential flow.
+     * Test the sequential flow.
      */
     static private void testSequential() {
         System.out.println("begin testSequential()");
 
+        // Use a single-threaded scheduler.
+        sScheduler = Schedulers.trampoline();
+
         Observable
-            // Factor method creates a flow of random big integers via
-            // the computation scheduler.
+            // Factor method creates a flow of random big integers.
             .create(ex3::emit)
 
             // Use a memoizer to check if each random big integer
@@ -87,14 +92,14 @@ public class ex3 {
             // Factor method creates a flow of random big integers.
             .create(ex3::emit)
 
-            // Run checkIfPrime() in the computation thread pool.
+            // Run all the operations in the computation thread pool.
             .subscribeOn(Schedulers.computation())
 
             // Use a memoizer to check if each random big integer is
             // prime or not.
             .map(ex3::checkIfPrime)
 
-            // Block and process each big integer.
+            // Block and process each big integer (runs in the calling thread).
             .blockingSubscribe(ex3::processResult,
                                err -> print("ERROR" + err),
                                () -> print("DONE"));
@@ -122,7 +127,7 @@ public class ex3 {
             // is prime or not.
             .map(ex3::checkIfPrime)
 
-            // Merge back into a single flow.
+            // Merge parallel flows back into a single flow.
             .sequential()
 
             // Block and process each big integer in the main thread.
@@ -147,16 +152,16 @@ public class ex3 {
         Random rand = new Random();
 
         Observable
-            // Generate a flow of long every sSLEEP_DURATION
+            // Generate a flow of longs every sSLEEP_DURATION
             // milliseconds via the computation scheduler.
-            .interval(sSLEEP_DURATION, TimeUnit.MILLISECONDS)
+            .interval(sSLEEP_DURATION, TimeUnit.MILLISECONDS, sScheduler)
 
             // Generate random numbers between a range of min and max
             // values to ensure some duplicates.
             .map(x -> BigInteger.valueOf(rand.nextInt(sMAX_ITERATIONS) + origin))
 
             // Print the big integer as a debugging aid.
-            .doOnNext(ex3::print)
+            // .doOnNext(ex3::print)
 
             // Only take sMAX_ITERATIONS amount of big integers.
             .take(sMAX_ITERATIONS)
@@ -180,7 +185,7 @@ public class ex3 {
         return new PrimeResult
             (primeCandidate,
              // This atomic "check then act" method serves as
-             // a "memoizer".
+             // a "memoizer" cache.
              mPrimeCache
              .computeIfAbsent(primeCandidate,
                               ex3::isPrime));
@@ -189,10 +194,10 @@ public class ex3 {
     /**
      * This method provides a brute-force determination of whether
      * number {@code primeCandidate} is prime.  Returns 0 if it is
-     * prime, or the smallest factor if it is not prime.
+     * prime or the smallest factor if it is not prime.
      */
     static BigInteger isPrime(BigInteger n) {
-        print("checking if " + n + " is prime");
+        // print("checking if " + n + " is prime");
 
         BigInteger two = BigInteger.valueOf(2);
 
@@ -200,7 +205,7 @@ public class ex3 {
             return two;          
 
         for (BigInteger i = BigInteger.valueOf(3);
-             n.compareTo(i) >= 0;
+             n.compareTo(i.multiply(i)) >= 0;
              i = i.add(two)) 
             if (n.mod(i).compareTo(BigInteger.ZERO) == 0)
                 return i;
@@ -212,7 +217,7 @@ public class ex3 {
      * Process the {@code primeTuple} to print whether a number if prime.
      */
     private static void processResult(PrimeResult primeTuple) {
-        if (primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
+        if (!primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
             print("found a non-prime number with smallest factor "
                   + primeTuple.mSmallestFactor
                   + " for "
@@ -260,6 +265,17 @@ public class ex3 {
      */
     private static void print(BigInteger bigInteger) {
         print("emitting " + bigInteger);
+    }
+
+    /**
+     * Simple helper method that calls Thread.sleep() and catches InterruptedException.
+     */
+    private static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 

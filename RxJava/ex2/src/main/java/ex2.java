@@ -197,7 +197,7 @@ public class ex2 {
                      // Just omit this one object.
                      .just(url)
 
-                     // Run this operation in the common fork-join
+                     // Run this flow of operations in the common fork-join
                      // pool.
                      .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
@@ -231,7 +231,7 @@ public class ex2 {
             // Create a parallel flow of observables.
             .parallel()
 
-            // Run the flow in the common fork-join pool.
+            // Run this flow of operations in the common fork-join pool.
             .runOn(Schedulers.from(ForkJoinPool.commonPool()))
 
             // Transform each URL to a file by calling the
