@@ -1,4 +1,6 @@
+import utils.ListOfFuturesCollector;
 import utils.RunTimer;
+import utils.StreamOfFuturesCollector;
 
 import java.io.IOException;
 import java.util.*;
@@ -9,7 +11,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * This example shows the difference between calling join() on
@@ -64,6 +65,8 @@ public class ex23 {
             List.of(mSupplier,
                     mSupplier,
                     mSupplier,
+                    mSupplier,
+                    mSupplier,
                     mSupplier);
 
         // Run a test that makes multiple blocking join calls on
@@ -87,8 +90,8 @@ public class ex23 {
     private static void testManyJoins(List<Supplier<Integer>> suppliers) {
         System.out.println(">>> testManyJoins()");
 
-        // A future to a stream of integer results.
-        CompletableFuture<Stream<Integer>> resultsFuture = suppliers
+        // A future to a list of integer results.
+        CompletableFuture<List<Integer>> resultsFuture = suppliers
             // Convert the list of suppliers into a stream of suppliers.
             .stream()
 
@@ -102,17 +105,14 @@ public class ex23 {
 
             // Trigger intermediate operations and return a future to
             // a stream of results.
-            .collect(toFuture());
+            .collect(ListOfFuturesCollector.toFuture());
 
         resultsFuture
             // When all the futures associated with resultsFuture
             // complete then display the results.
-            .thenAccept(stream ->
+            .thenAccept(list ->
                         display("results = "
-                                + stream
-                                // Trigger intermediate processing and
-                                // return a list of results.
-                                .collect(toList())))
+                                + list))
 
             // Block caller until all processing is complete.
             .join();
@@ -140,7 +140,7 @@ public class ex23 {
 
             // Trigger intermediate operations and return a future to
             // a stream of results.
-            .collect(toFuture());
+            .collect(StreamOfFuturesCollector.toFuture());
 
         resultFuture
             // When all the futures associated with resultsFuture
