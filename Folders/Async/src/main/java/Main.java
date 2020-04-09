@@ -15,10 +15,10 @@ import java.util.stream.Stream;
 import static utils.FuturesCollector.toFuture;
 
 /**
- * This example shows the use of the Java 8 completable futures
- * framework in conjunction with the Java 8 sequential streams
- * framework to process entries in a recursively structured directory
- * folder concurrently.
+ * This example shows the use of the Java completable futures
+ * framework in conjunction with the Java sequential streams framework
+ * to process entries in a recursively structured directory folder
+ * concurrently.
  */
 public class Main {
     /**

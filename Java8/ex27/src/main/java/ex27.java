@@ -117,7 +117,7 @@ public class ex27 {
     }
 
     /**
-     * Simulate a random delay between 0.5 and 3.5 seconds.
+     * Simulate a random delay between 0.5 and 4.5 seconds.
      */
     private static void randomDelay() {
         int delay = 500 + sRandom.nextInt(4000);

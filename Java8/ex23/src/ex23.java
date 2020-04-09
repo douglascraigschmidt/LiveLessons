@@ -59,7 +59,8 @@ public class ex23 {
      */
     public static void main (String[] argv) throws IOException {
         // A list of suppliers that return integers.
-        List<Supplier<Integer>> suppliers =
+        // List<Supplier<Integer>>
+        var suppliers =
             List.of(mSupplier,
                     mSupplier,
                     mSupplier,
@@ -134,8 +135,7 @@ public class ex23 {
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Asynchronously apply the action to the results of the
-            // previous completion stage.
+            // Apply the action to the results of the previous completion stage.
             .map(intFuture -> intFuture.thenApply(mAction))
 
             // Trigger intermediate operations and return a future to
