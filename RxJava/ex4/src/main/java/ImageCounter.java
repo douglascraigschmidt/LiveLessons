@@ -1,3 +1,4 @@
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -34,8 +35,8 @@ class ImageCounter {
     /**
      * Stores a completed observable with value of 0.
      */
-    private final Single<Integer> mZero =
-        Single.just(0);
+    private final Observable<Integer> mZero =
+        Observable.just(0);
 
     /**
      * Constructor counts all the images reachable from the root URI.
@@ -63,19 +64,18 @@ class ImageCounter {
      * @param depth The current depth of the recursive processing
      * @return An observable containing the number of images counted
      */
-    private Single<Integer> countImages(String pageUri,
-                                            int depth) {
-        // Return 0 if we've reached the depth limit of the crawling.
+    private Observable<Integer> countImages(String pageUri,
+                                        int depth) {
+        // Filter out page if it exceeds the maximum depth
+        // or has already been visited.
         if (depth > Options.instance().maxDepth()) {
             print(TAG
                   + "[Depth"
                   + depth
                   + "]: Exceeded max depth of "
                   + Options.instance().maxDepth());
-
             return mZero;
         }
-
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
@@ -85,27 +85,23 @@ class ImageCounter {
                   + depth
                   + "]: Already processed "
                   + pageUri);
-
-            // Return 0 if we've already examined this url.
             return mZero;
-        }
-
-        // Asynchronously (1) count the number of images on this page
-        // and (2) crawl other hyperlinks accessible via this page and
-        // count their images.
-        else
-            return countImagesAsync(pageUri,
-                                    depth)
-                // @@ Print this output on success.
-                .doOnSuccess(totalImages -> print(TAG
-                                               + "[Depth"
-                                               + depth
-                                               + "]: found "
-                                               + totalImages
-                                               + " images for "
-                                               + pageUri
-                                               + " in thread "
-                                               + Thread.currentThread().getId()));
+        } else
+            // Asynchronously (1) count the number of images on this page
+            // and (2) crawl other hyperlinks accessible via this page and
+            // count their images.
+            return countImagesAsync(pageUri, depth)
+                // Print this output on success.
+                .doOnNext(totalImages ->
+                             print(TAG
+                                   + "[Depth"
+                                   + depth
+                                   + "]: found "
+                                   + totalImages
+                                   + " images for "
+                                   + pageUri
+                                   + " in thread "
+                                   + Thread.currentThread().getId()));
     }
 
     /**
@@ -115,16 +111,16 @@ class ImageCounter {
      * @param depth The current depth of the recursive processing
      * @return An observable to the number of images counted
      */
-    private Single<Integer> countImagesAsync(String pageUri,
+    private Observable<Integer> countImagesAsync(String pageUri,
                                              int depth) {
         try {
             // Get an observable to the page at the root URI.
-            Single<Document> pageObservable =
+            Observable<Document> pageObservable =
                 getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return an observable to the count.
-            Single<Integer> imagesInPageObservable = pageObservable
+            Observable<Integer> imagesInPageObservable = pageObservable
                 // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .map(this::getImagesInPage)
@@ -134,7 +130,7 @@ class ImageCounter {
 
             // Asynchronously count the # of images in link on this
             // page and returns an observable to this count.
-            Single<Integer> imagesInLinksObservable = pageObservable
+            Observable<Integer> imagesInLinksObservable = pageObservable
                 // The crawlLinksInPage() methods runs synchronously,
                 // so XYZ() is used to avoid blocking.
                 .flatMap(page ->
@@ -162,18 +158,18 @@ class ImageCounter {
      * Asynchronously count of the # of images on this page plus the #
      * of images on hyperlinks accessible via this page.
      *
-     * @param imagesInPageObservable A future to a count of the # of
+     * @param imagesInPageObservable An observable to a count of the # of
      *                           images on this page
-     * @param imagesInLinksObservable A future to a count of the # of
+     * @param imagesInLinksObservable An observable to a count of the # of
      *                            images in links on this page
-     * @return A future to the number of images counted
+     * @return An observable to the number of images counted
      */
-    private Single<Integer> combineImageCounts
-        (Single<Integer> imagesInPageObservable,
-         Single<Integer> imagesInLinksObservable) {
+    private Observable<Integer> combineImageCounts
+        (Observable<Integer> imagesInPageObservable,
+         Observable<Integer> imagesInLinksObservable) {
         // Return an observer to the results of adding the two
         // observable params after they both complete.
-        return Single
+        return Observable
             // Sum the results when both observables complete.
             .zip(imagesInPageObservable,
                  imagesInLinksObservable,
@@ -183,10 +179,10 @@ class ImageCounter {
     /**
      * @return An observable to the page at the root URI
      */
-    private Single<Document> getStartPage(String pageUri) {
-        return Single
+    private Observable<Document> getStartPage(String pageUri) {
+        return Observable
             // Download the page.
-            .<Document>create(s -> s.onSuccess(Options
+            .<Document>create(s -> s.onNext(Options
                              .instance()
                              .getJSuper()
                              .getPage(pageUri)))
@@ -212,7 +208,7 @@ class ImageCounter {
      * @return An observable to an integer that counts how many images
      * were in each hyperlink on the page
      */
-    private Single<Integer> crawlLinksInPage(Document page,
+    private Observable<Integer> crawlLinksInPage(Document page,
                                              int depth) {
         // Return an observable to a list of counts of the # of nested
         // hyperlinks in the page.
@@ -230,26 +226,11 @@ class ImageCounter {
                      .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
                      // Recursively visit hyperlink(s) on this url.
-                     .map(url -> countImages(Options
+                     .flatMap(url -> countImages(Options
                                              .instance()
                                              .getJSuper()
                                              .getHyperLink(url),
-                                             depth + 1)))
-
-            // Collect all these observables into a list.
-            .collectInto(new ArrayList<Single<Integer>>(), List::add)
-
-            // @@ Monte, something is amiss here - this implementation
-            // is awkward :-/ Can you think of a better way to
-            // structure it?
-
-            // Convert the list into a single total.
-            .map((ArrayList<Single<Integer>> list) -> {
-                    int total = 0;
-                    for (Single<Integer> integerSingle : list)
-                        total += integerSingle.blockingGet();
-                    return total;
-                });
+                                             depth + 1)));
     }
 
     /**
