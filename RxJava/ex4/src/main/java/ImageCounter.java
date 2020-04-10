@@ -1,17 +1,11 @@
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import rx.observables.MathObservable;
 import utils.ConcurrentHashSet;
-import utils.FuturesCollector;
 import utils.Options;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -51,9 +45,10 @@ class ImageCounter {
         countImages(rootUri, 1)
             // Use blockingSubscribe() here to ensure the main thread
             // doesn't exit prematurely.
-            .blockingSubscribe(totalImages -> print(TAG + ": " + totalImages
-                                                    + " total image(s) are reachable from "
-                                                    + rootUri));
+            .blockingSubscribe(totalImages ->
+                               print(TAG + ": " + totalImages
+                                     + " total image(s) are reachable from "
+                                     + rootUri));
     }
 
     /**
@@ -182,10 +177,13 @@ class ImageCounter {
     private Observable<Document> getStartPage(String pageUri) {
         return Observable
             // Download the page.
-            .<Document>create(s -> s.onNext(Options
-                             .instance()
-                             .getJSuper()
-                             .getPage(pageUri)))
+            .<Document>create(s -> {
+                s.onNext(Options
+                        .instance()
+                        .getJSuper()
+                        .getPage(pageUri));
+                s.onComplete();
+            })
             // Run the operation in the common fork-join pool.
             .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
@@ -212,27 +210,34 @@ class ImageCounter {
                                              int depth) {
         // Return an observable to a list of counts of the # of nested
         // hyperlinks in the page.
-        Observable<Integer> results = Observable
-            // Find all the hyperlinks on this page.
-            .fromIterable(page.select("a[href]"))
+        return Observable
+                // Find all the hyperlinks on this page.
+                .fromIterable(page.select("a[href]"))
 
-            // Map each hyperlink to an observable containing a count
-            // of the number of images found at that hyperlink.
-            .flatMap(hyperLink -> Observable
-                     // Just omit this one object.
-                     .just(hyperLink)
+                // Map each hyperlink to an observable containing a count
+                // of the number of images found at that hyperlink.
+                .flatMap(hyperLink -> Observable
+                        // Just omit this one object.
+                        .just(hyperLink)
 
-                     // Run operations in the common fork-join pool.
-                     .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
+                        // Run operations in the common fork-join pool.
+                        .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
-                     // Recursively visit hyperlink(s) on this url.
-                     .flatMap(url -> countImages(Options
-                                             .instance()
-                                             .getJSuper()
-                                             .getHyperLink(url),
-                                             depth + 1)));
+                        // Recursively visit hyperlink(s) on this url.
+                        .flatMap(url -> countImages(Options
+                                        .instance()
+                                        .getJSuper()
+                                        .getHyperLink(url),
+                                depth + 1)))
 
-        return MathObservable.sumInteger();
+                // Perform a reduction.
+                .reduce(Integer::sum)
+
+                // Return 0 if empty.
+                .defaultIfEmpty(0)
+
+                // Convert back to observable.
+                .toObservable();
     }
 
     /**
