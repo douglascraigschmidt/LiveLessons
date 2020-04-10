@@ -176,7 +176,7 @@ class ImageCounter {
                   + "': " 
                   + e.getMessage());
             // Return 0 if an exception happens.
-            return CompletableFuture.completedFuture(0);
+            return mZero;
         }
     }
 
