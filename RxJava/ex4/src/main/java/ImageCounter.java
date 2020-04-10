@@ -117,8 +117,11 @@ class ImageCounter {
             // return an observable to the count.
             Observable<Integer> imagesInPageObservable = pageObservable
                 // The getImagesInPage() method runs synchronously, so
-                // call it via thenApplyAsync().
+                // call it in the common fork-join pool (see next line).
                 .map(this::getImagesInPage)
+
+                // Run the operations in the common fork-join pool.
+                .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
 
                 // Count the number of images on this page.
                 .map(List::size);
@@ -126,8 +129,8 @@ class ImageCounter {
             // Asynchronously count the # of images in link on this
             // page and returns an observable to this count.
             Observable<Integer> imagesInLinksObservable = pageObservable
-                // The crawlLinksInPage() methods runs synchronously,
-                // so XYZ() is used to avoid blocking.
+                // The crawlLinksInPage() methods runs synchronously, so
+                // call it in the common fork-join pool (see next line).
                 .flatMap(page ->
                          crawlLinksInPage(page,
                                           depth))
@@ -150,7 +153,7 @@ class ImageCounter {
     }
 
     /**
-     * Asynchronously count of the # of images on this page plus the #
+     * Count of the # of images on this page plus the #
      * of images on hyperlinks accessible via this page.
      *
      * @param imagesInPageObservable An observable to a count of the # of
@@ -176,12 +179,14 @@ class ImageCounter {
      */
     private Observable<Document> getStartPage(String pageUri) {
         return Observable
-            // Download the page.
+            // Create an observable to download the page.
             .<Document>create(s -> {
+                // This emits the result.
                 s.onNext(Options
                         .instance()
                         .getJSuper()
                         .getPage(pageUri));
+                // This indicates we're done.
                 s.onComplete();
             })
             // Run the operation in the common fork-join pool.
@@ -207,7 +212,7 @@ class ImageCounter {
      * were in each hyperlink on the page
      */
     private Observable<Integer> crawlLinksInPage(Document page,
-                                             int depth) {
+                                                 int depth) {
         // Return an observable to a list of counts of the # of nested
         // hyperlinks in the page.
         return Observable
@@ -236,7 +241,7 @@ class ImageCounter {
                 // Return 0 if empty.
                 .defaultIfEmpty(0)
 
-                // Convert back to observable.
+                // Convert single back to observable.
                 .toObservable();
     }
 
