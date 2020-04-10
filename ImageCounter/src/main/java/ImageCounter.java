@@ -47,7 +47,8 @@ class ImageCounter {
             .handle((totalImages, ex) -> {
                     if (totalImages == null)
                         totalImages = 0;
-                    print(TAG + ": " + totalImages
+                    print(""
+                          + totalImages
                           + " total image(s) are reachable from "
                           + rootUri);
                     return 0;
@@ -59,8 +60,7 @@ class ImageCounter {
 
             // When the future completes print the total number of images.
             .thenAccept(totalImages ->
-            print(TAG
-            + ": " 
+            print("" 
             + totalImages
             + " total image(s) are reachable from "
             + rootUri))
@@ -82,10 +82,9 @@ class ImageCounter {
                                                    int depth) {
         // Return 0 if we've reached the depth limit of the crawling.
         if (depth > Options.instance().maxDepth()) {
-            print(TAG 
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Exceeded max depth of "
+                  + ") Exceeded max depth of "
                   + Options.instance().maxDepth());
 
             return mZero;
@@ -95,10 +94,9 @@ class ImageCounter {
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
         else if (!mUniqueUris.putIfAbsent(pageUri)) {
-            print(TAG 
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Already processed "
+                  + ") Already processed "
                   + pageUri);
 
             // Return 0 if we've already examined this url.
@@ -113,17 +111,16 @@ class ImageCounter {
                                     depth)
                 .whenComplete((totalImages, ex) -> {
                         if (totalImages != null)
-                            print(TAG
-                                  + "[Depth"
+                            print("(depth "
                                   + depth
-                                  + "]: found "
+                                  + ") found "
                                   + totalImages
                                   + " images for "
                                   + pageUri
                                   + " in thread " 
                                   + Thread.currentThread().getId());
                         else 
-                            print(TAG + ": exception " + ex.getMessage());
+                            print(" exception " + ex.getMessage());
                     });
 
     }
@@ -269,6 +266,9 @@ class ImageCounter {
      */
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())
-            System.out.println(string);
+            System.out.println("Thread["
+                               + Thread.currentThread().getId()
+                               + "]: "
+                               + string);
     }
 }

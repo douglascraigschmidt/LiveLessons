@@ -1,5 +1,8 @@
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableTransformer;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleTransformer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -30,8 +33,8 @@ class ImageCounter {
     /**
      * Stores a completed observable with value of 0.
      */
-    private final Observable<Integer> mZero =
-        Observable.just(0);
+    private final Single<Integer> mZero =
+        Single.just(0);
 
     /**
      * Constructor counts all the images reachable from the root URI.
@@ -46,7 +49,8 @@ class ImageCounter {
             // Use blockingSubscribe() here to ensure the main thread
             // doesn't exit prematurely.
             .blockingSubscribe(totalImages ->
-                               print(TAG + ": " + totalImages
+                               print("(depth 0) "
+                                     + totalImages
                                      + " total image(s) are reachable from "
                                      + rootUri));
     }
@@ -59,15 +63,14 @@ class ImageCounter {
      * @param depth The current depth of the recursive processing
      * @return An observable containing the number of images counted
      */
-    private Observable<Integer> countImages(String pageUri,
-                                            int depth) {
+    private Single<Integer> countImages(String pageUri,
+                                        int depth) {
         // Filter out page if it exceeds the maximum depth
         // or has already been visited.
         if (depth > Options.instance().maxDepth()) {
-            print(TAG
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Exceeded max depth of "
+                  + ") Exceeded max depth of "
                   + Options.instance().maxDepth());
             return mZero;
         }
@@ -75,28 +78,24 @@ class ImageCounter {
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
         else if (!mUniqueUris.putIfAbsent(pageUri)) {
-            print(TAG
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Already processed "
+                  + ") Already processed "
                   + pageUri);
             return mZero;
         } else
-            // Asynchronously (1) count the number of images on this page
-            // and (2) crawl other hyperlinks accessible via this page and
-            // count their images.
+            // Asynchronously (1) count the number of images on this
+            // page and (2) crawl other hyperlinks accessible via this
+            // page and count their images.
             return countImagesAsync(pageUri, depth)
                 // Print this output on success.
-                .doOnNext(totalImages ->
-                             print(TAG
-                                   + "[Depth"
+                .doOnSuccess(totalImages ->
+                             print("(depth "
                                    + depth
-                                   + "]: found "
+                                   + ") found "
                                    + totalImages
                                    + " images for "
-                                   + pageUri
-                                   + " in thread "
-                                   + Thread.currentThread().getId()));
+                                   + pageUri));
     }
 
     /**
@@ -106,8 +105,8 @@ class ImageCounter {
      * @param depth The current depth of the recursive processing
      * @return An observable to the number of images counted
      */
-    private Observable<Integer> countImagesAsync(String pageUri,
-                                                 int depth) {
+    private Single<Integer> countImagesAsync(String pageUri,
+                                             int depth) {
         try {
             // Get an observable to the page at the root URI.
             var pageObservable = getStartPage(pageUri);
@@ -152,8 +151,8 @@ class ImageCounter {
     }
 
     /**
-     * Count of the # of images on this page plus the #
-     * of images on hyperlinks accessible via this page.
+     * Count of the # of images on this page plus the # of images on
+     * hyperlinks accessible via this page.
      *
      * @param imagesInPageObservable An observable to a count of the # of
      *                           images on this page
@@ -161,12 +160,12 @@ class ImageCounter {
      *                            images in links on this page
      * @return An observable to the number of images counted
      */
-    private Observable<Integer> combineImageCounts
-        (Observable<Integer> imagesInPageObservable,
-         Observable<Integer> imagesInLinksObservable) {
+    private Single<Integer> combineImageCounts
+        (Single<Integer> imagesInPageObservable,
+         Single<Integer> imagesInLinksObservable) {
         // Return an observer to the results of adding the two
         // observable params after they both complete.
-        return Observable
+        return Single
             // Sum the results when both observables complete.
             .zip(imagesInPageObservable,
                  imagesInLinksObservable,
@@ -176,18 +175,16 @@ class ImageCounter {
     /**
      * @return An observable to the page at the root URI
      */
-    private Observable<Document> getStartPage(String pageUri) {
-        return Observable
-            // Factory method that creates an observable to download the page.
-            .<Document>create(s -> {
-                // This emits the result.
-                s.onNext(Options
-                        .instance()
-                        .getJSuper()
-                        .getPage(pageUri));
-                // This indicates we're done.
-                s.onComplete();
-            })
+    private Single<Document> getStartPage(String pageUri) {
+        return Single
+            // Factory method that creates an observable to download
+            // the page.
+            .<Document>create(s -> s
+                              .onSuccess(Options
+                                         .instance()
+                                         .getJSuper()
+                                         .getPage(pageUri)))
+
             // Run the operation in the common fork-join pool.
             .compose(applySchedulers());
     }
@@ -210,45 +207,53 @@ class ImageCounter {
      * @return An observable to an integer that counts how many images
      * were in each hyperlink on the page
      */
-    private Observable<Integer> crawlLinksInPage(Document page,
-                                                 int depth) {
+    private Single<Integer> crawlLinksInPage(Document page,
+                                             int depth) {
         // Return an observable to a list of counts of the # of nested
         // hyperlinks in the page.
         return Observable
-                // Find all the hyperlinks on this page.
-                .fromIterable(page.select("a[href]"))
+            // Find all the hyperlinks on this page.
+            .fromIterable(page.select("a[href]"))
 
-                // Map each hyperlink to an observable containing a count
-                // of the number of images found at that hyperlink.
-                .flatMap(hyperLink -> Observable
-                        // Just omit this one object.
-                        .just(hyperLink)
+            // Map each hyperlink to an observable containing a count
+            // of the number of images found at that hyperlink.
+            .flatMap(hyperLink -> Observable
+                     // Just omit this one object.
+                     .just(hyperLink)
 
-                        // Run operations in the common fork-join pool.
-                         .compose(applySchedulers())
+                     // Run operations in the common fork-join pool.
+                     .compose(applySchedulers1())
 
-                        // Recursively visit hyperlink(s) on this url.
-                        .flatMap(url -> countImages(Options
-                                        .instance()
-                                        .getJSuper()
-                                        .getHyperLink(url),
-                                depth + 1)))
+                     // Recursively visit hyperlink(s) on this url.
+                     .flatMap(url ->
+                              countImages(Options.instance()
+                                          .getJSuper()
+                                          .getHyperLink(url),
+                                          depth + 1)
+                              // Convert the single to an observable.
+                              .toObservable()
+                              ))
 
-                // Perform a reduction.
-                .reduce(Integer::sum)
+            // Sum all the counts.
+            .reduce(Integer::sum)
 
-                // Return 0 if empty.
-                .defaultIfEmpty(0)
-
-                // Convert single back to observable.
-                .toObservable();
+            // Return 0 if empty.
+            .defaultIfEmpty(0);
     }
 
     /**
-     * @return Schedule the observable to run on the common fork-join
+     * @return Schedule a single to run on the common fork-join pool.
+     */
+    <T> SingleTransformer<T, T> applySchedulers() {
+        return single -> single
+            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
+    }
+
+    /**
+     * @return Schedule an observable to run on the common fork-join
      * pool.
      */
-    <T> ObservableTransformer<T, T> applySchedulers() {
+    <T> ObservableTransformer<T, T> applySchedulers1() {
         return observable -> observable
             .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
@@ -259,6 +264,9 @@ class ImageCounter {
      */
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())
-            System.out.println(string);
+            System.out.println("Thread["
+                               + Thread.currentThread().getId()
+                               + "]: "
+                               + string);
     }
 }
