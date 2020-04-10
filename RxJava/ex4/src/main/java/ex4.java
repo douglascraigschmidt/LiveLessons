@@ -1,8 +1,8 @@
 import utils.Options;
 
 /**
- * This example shows how to count the number of images in a
- * recursively-defined folder structure using a range of RxJava
+ * This example shows how to concurrently count the number of images
+ * in a recursively-defined folder structure using a range of RxJava
  * features.
  */
 public class ex4 {

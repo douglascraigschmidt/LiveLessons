@@ -1,12 +1,11 @@
-package edu.vandy.main;
-
-import edu.vandy.utils.Options;
+import utils.Options;
 
 /**
  * This example shows how to count the number of images in a
- * recursively-defined folder structure.
+ * recursively-defined folder structure using a range of
+ * CompletableFuture features.
  */
-public class Main {
+public class main {
     /**
      * This static main() entry point runs the example.
      */
@@ -15,9 +14,6 @@ public class Main {
         Options.instance().parseArgs(args);
 
         // Create an object that count the images.
-        ImageCounter imageCounter = new ImageCounter();
-
-        // Print the URIs that were visited.
-        imageCounter.printUris();
+        new ImageCounter();
     }
 }

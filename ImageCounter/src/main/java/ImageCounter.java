@@ -1,8 +1,8 @@
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.ConcurrentHashSet;
-import utils.FuturesCollector;
 import utils.Options;
+import utils.StreamOfFuturesCollector;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -140,13 +140,13 @@ class ImageCounter {
         try {
             // Get a future to the page at the root URI.
             // var is CompletableFuture<Document>
-            CompletableFuture<Document> pageFuture =
+            var pageFuture =
                 getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return a future to the count.
             // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInPageFuture = pageFuture
+            var imagesInPageFuture = pageFuture
                 // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .thenApplyAsync(this::getImagesInPage)
@@ -157,7 +157,7 @@ class ImageCounter {
             // Asynchronously count the # of images in link on this
             // page and returns a future to this count.
             // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
+            var imagesInLinksFuture = pageFuture
                 // The crawlLinksInPage() methods runs synchronously,
                 // so thenComposeAsync() is used to avoid blocking via
                 // "flatMap()" semantics wrt nesting of futures.
@@ -253,15 +253,13 @@ class ImageCounter {
                              depth + 1))
 
             // Trigger intermediate operation processing and return a
-            // future to a list of completable futures.
-            .collect(FuturesCollector.toFuture())
+            // future to a stream of completable futures.
+            .collect(StreamOfFuturesCollector.toFuture())
 
-            // After all the futures in the list complete then sum all
-            // the integers in the list of results.
-            .thenApply(list -> list
-                       // Convert list to a stream.
-                       .stream()
-                       // Sum all results in the list.
+            // After all the futures in the stream complete then sum
+            // all the integers in the stream of results.
+            .thenApply(stream -> stream
+                       // Sum all results in the stream.
                        .reduce(0, Integer::sum));
     }
 

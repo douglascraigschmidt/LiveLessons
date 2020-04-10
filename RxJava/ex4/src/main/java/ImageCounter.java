@@ -1,4 +1,5 @@
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableTransformer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -9,10 +10,10 @@ import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * This class counts the number of images in a recursively-defined
- * folder structure using a range of RxJava features.  The root folder
- * can either reside locally (filesystem-based) or remotely
- * (web-based).
+ * This class concurrently counts the number of images in a
+ * recursively-defined folder structure using a range of RxJava
+ * features.  The root folder can either reside locally
+ * (filesystem-based) or remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -37,8 +38,7 @@ class ImageCounter {
      */
     ImageCounter() {
         // Get the URI to the root of the page/folder being traversed.
-        // var is String
-        String rootUri = Options.instance().getRootUri();
+        var rootUri = Options.instance().getRootUri();
 
         // Perform the image counting starting at the root Uri, which
         // is given an initial depth count of 1.
@@ -60,7 +60,7 @@ class ImageCounter {
      * @return An observable containing the number of images counted
      */
     private Observable<Integer> countImages(String pageUri,
-                                        int depth) {
+                                            int depth) {
         // Filter out page if it exceeds the maximum depth
         // or has already been visited.
         if (depth > Options.instance().maxDepth()) {
@@ -107,28 +107,27 @@ class ImageCounter {
      * @return An observable to the number of images counted
      */
     private Observable<Integer> countImagesAsync(String pageUri,
-                                             int depth) {
+                                                 int depth) {
         try {
             // Get an observable to the page at the root URI.
-            Observable<Document> pageObservable =
-                getStartPage(pageUri);
+            var pageObservable = getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return an observable to the count.
-            Observable<Integer> imagesInPageObservable = pageObservable
+            var imagesInPageObservable = pageObservable
                 // The getImagesInPage() method runs synchronously, so
                 // call it in the common fork-join pool (see next line).
                 .map(this::getImagesInPage)
 
                 // Run the operations in the common fork-join pool.
-                .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
+                .compose(applySchedulers())
 
                 // Count the number of images on this page.
                 .map(List::size);
 
             // Asynchronously count the # of images in link on this
             // page and returns an observable to this count.
-            Observable<Integer> imagesInLinksObservable = pageObservable
+            var imagesInLinksObservable = pageObservable
                 // The crawlLinksInPage() methods runs synchronously, so
                 // call it in the common fork-join pool (see next line).
                 .flatMap(page ->
@@ -136,7 +135,7 @@ class ImageCounter {
                                           depth))
 
                 // Run the operations in the common fork-join pool.
-                .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
+                .compose(applySchedulers());
 
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.
@@ -179,7 +178,7 @@ class ImageCounter {
      */
     private Observable<Document> getStartPage(String pageUri) {
         return Observable
-            // Create an observable to download the page.
+            // Factory method that creates an observable to download the page.
             .<Document>create(s -> {
                 // This emits the result.
                 s.onNext(Options
@@ -190,7 +189,7 @@ class ImageCounter {
                 s.onComplete();
             })
             // Run the operation in the common fork-join pool.
-            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
+            .compose(applySchedulers());
     }
 
     /**
@@ -226,7 +225,7 @@ class ImageCounter {
                         .just(hyperLink)
 
                         // Run operations in the common fork-join pool.
-                        .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()))
+                         .compose(applySchedulers())
 
                         // Recursively visit hyperlink(s) on this url.
                         .flatMap(url -> countImages(Options
@@ -243,6 +242,15 @@ class ImageCounter {
 
                 // Convert single back to observable.
                 .toObservable();
+    }
+
+    /**
+     * @return Schedule the observable to run on the common fork-join
+     * pool.
+     */
+    <T> ObservableTransformer<T, T> applySchedulers() {
+        return observable -> observable
+            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
 
     /**

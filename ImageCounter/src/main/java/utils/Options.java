@@ -1,4 +1,4 @@
-package edu.vandy.utils;
+package utils;
 
 /**
  * This class implements the Singleton pattern to handle
@@ -27,7 +27,7 @@ public class Options {
      * Controls whether debugging output will be generated (defaults
      * to false).
      */
-    private boolean mDiagnosticsEnabled = true;
+    private boolean mDiagnosticsEnabled = false;
 
     /**
      * A helper class that simplifies the web-based and local crawler
@@ -94,24 +94,21 @@ public class Options {
                 switch (argv[argc]) {
                 case "-d":
                     mDiagnosticsEnabled = argv[++argc].equals("true");
-                    argc++;
                     break;
                 case "-l":
                     mLocal = true;
                     break;
                 case "-m":
                     mMaxDepth = Integer.valueOf(argv[++argc]);
-                    argc++;
                     break;
                 case "-u":
                     mRootUrl = argv[++argc];
-                    argc++;
                     break;
                 case "-w":
                     mLocal = false;
                     break;
                 default:
-                    printUsage();
+                    printUsage(argv[argc]);
                     return false;
                 }
 
@@ -129,13 +126,13 @@ public class Options {
     /**
      * Print out usage and default values.
      */
-    public void printUsage() {
-        System.out.println("Usage: ");
+    public void printUsage(String arg) {
+        System.out.println(arg + " is an invalid argument\n" + "Usage: ");
         System.out.println("-d [true|false]");
-        System.out.println("-l [true|false]");
+        System.out.println("-l");
         System.out.println("-m [maxDepth]");
         System.out.println("-u [startingRootUrl]");
-        System.out.println("-w [true|false]");
+        System.out.println("-w");
     }
 
     /**
