@@ -212,7 +212,7 @@ class ImageCounter {
                                              int depth) {
         // Return an observable to a list of counts of the # of nested
         // hyperlinks in the page.
-        return Observable
+        Observable<Integer> results = Observable
             // Find all the hyperlinks on this page.
             .fromIterable(page.select("a[href]"))
 
@@ -231,6 +231,8 @@ class ImageCounter {
                                              .getJSuper()
                                              .getHyperLink(url),
                                              depth + 1)));
+
+        return MathObservable.sumInteger();
     }
 
     /**
