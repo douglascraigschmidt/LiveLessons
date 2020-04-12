@@ -14,7 +14,7 @@ import livelessons.filters.FilterDecoratorWithImage;
 
 /**
  * This implementation strategy customizes ImageStreamGang to use a
- * Java 8 stream to download, process, and store images sequentially.
+ * Java stream to download, process, and store images sequentially.
  */
 public class ImageStreamSequential 
        extends ImageStreamGang {
@@ -27,7 +27,7 @@ public class ImageStreamSequential
     }
 
     /**
-     * This hook method uses a Java 8 stream to download, process, and
+     * This hook method uses a Java stream to download, process, and
      * store images sequentially.
      */
     @Override

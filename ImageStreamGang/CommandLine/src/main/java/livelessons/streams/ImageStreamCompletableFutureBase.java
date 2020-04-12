@@ -12,7 +12,7 @@ import livelessons.utils.Image;
 
 /**
  * Super class that factors out common code so that implementation
- * strategies can use the Java 8 CompletableFutures framework to
+ * strategies can use the Java CompletableFutures framework to
  * download, process, and store images asynchronously.
  */
 abstract class ImageStreamCompletableFutureBase

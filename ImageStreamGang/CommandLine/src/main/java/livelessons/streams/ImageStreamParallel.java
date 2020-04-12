@@ -7,18 +7,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import livelessons.filters.Filter;
-import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.utils.Image;
-import livelessons.utils.BlockingTask;
 import livelessons.utils.StreamsUtils;
 
 /**
- * This implementation strategy customizes ImageStreamGang to use a
- * Java 8 parallelstream to download, process, and store images
- * concurrently.  A parallelstream uses the global Java ForkJoinPool,
- * which has as many threads as there are processors, as returned by
- * Runtime.getRuntime().availableProcessors().  The size of this
- * global thread pool can be changed via Java system properties.
+ * This implementation strategy customizes ImageStreamGang to use
+ * Java's parallel stream framework to download, process, and store
+ * images in parallel.  This framework uses Java's common fork-join
+ * pool, which has one less than the number of processor cores
+ * returned by Runtime.getRuntime().availableProcessors().  The size
+ * of this common fork-join pool can be changed via Java system
+ * properties.
  */
 public class ImageStreamParallel 
        extends ImageStreamGang {
@@ -31,8 +30,9 @@ public class ImageStreamParallel
     }
 
     /**
-     * Perform the ImageStreamGang processing, which uses a Java 8 parallel
-     * stream to download, process, and store images concurrently.
+     * Perform the ImageStreamGang processing, which uses Java's
+     * parallel streams framework to download, process, and store
+     * images concurrently.
      */
     @Override
     protected void processStream() {
@@ -41,25 +41,24 @@ public class ImageStreamParallel
 
         List<Image> filteredImages = urls
             // Convert the URLs in the input list into a stream and
-            // process them concurrently.
+            // process them in parallel.
             .parallelStream()
 
-            // Use filter() to ignore URLs that are already cached locally,
-            // i.e., only download non-cached images.
+            // Use filter() to ignore URLs that are already cached
+            // locally, i.e., only download non-cached images.
             .filter(StreamsUtils.not(this::urlCached))
 
-            // Transform URL to an Image by downloading each image
-            // via its URL.  This call ensures the common
-            // fork/join thread pool is expanded to handle the
-            // blocking image download.
+            // Transform URL to an Image by downloading each image via
+            // its URL.  This call ensures the common fork/join thread
+            // pool is expanded to handle the blocking image download.
             .map(this::blockingDownload)
 
-            // Use flatMap() to create a stream containing multiple filtered
-            // versions of each image.
+            // Use flatMap() to create a stream containing multiple
+            // filtered versions of each image.
             .flatMap(this::applyFilters)
 
-            // Terminate the stream and collect the results into
-            // list of images.
+            // Terminate the stream and collect the results into list
+            // of images.
             .collect(Collectors.toList());
 
         System.out.println(TAG
@@ -71,12 +70,13 @@ public class ImageStreamParallel
     }
 
     /**
-     * Apply all the image filters concurrently to each @a image.
+     * Apply all the image filters concurrently to each {@code image}
+     * @return a stream of filtered images
      */
     private Stream<Image> applyFilters(Image image) {
         return mFilters
-           // Iterate through the list of image filters concurrently and
-           // apply each one to the image.
+           // Iterate through the list of image filters concurrently
+           // and apply each one to the image.
            .parallelStream()
 
            // Use map() to create an OutputFilterDecorator for each

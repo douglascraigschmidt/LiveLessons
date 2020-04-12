@@ -58,8 +58,8 @@ public class ImageStreamCompletableFuture2
     }
 
     /**
-     * This hook method uses Java 8 CompletableFutures to download,
-     * process, and store images in asynchronously.
+     * This hook method uses the Java completable future framework to
+     * download, process, and store images in asynchronously.
      */
     @Override
     protected void processStream() {

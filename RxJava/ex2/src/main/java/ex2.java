@@ -81,7 +81,7 @@ public class ex2 {
         // which adds new worker threads to the pool adaptively when
         // blocking on I/O occurs.
         runTestRxParallelFlowable(this::downloadAndStoreImageBT,
-                         "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
+                                  "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -138,7 +138,7 @@ public class ex2 {
      * parallel.
      */
     private void runTestRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
-                                  String testName) {
+                                           String testName) {
         // First let the system garbage collect.
         System.gc();
 
@@ -223,9 +223,9 @@ public class ex2 {
     private void testDownloadBehaviorRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
                                                         String testName) {
 
-        // Convert the URLs in the input list into a stream of
-        // observables.
         Flowable
+            // Convert the URLs in the input list into a stream of
+            // observables.
             .fromIterable(Options.instance().getUrlList())
 
             // Create a parallel flow of observables.
