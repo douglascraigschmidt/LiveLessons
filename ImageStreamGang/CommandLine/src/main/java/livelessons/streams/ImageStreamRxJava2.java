@@ -21,8 +21,8 @@ import java.util.concurrent.ForkJoinPool;
  * concurrently.  This implementation uses Java's common fork-join
  * pool, which has as many threads as there are processors, as
  * returned by Runtime.getRuntime().availableProcessors().  The size
- * of this common fork-join pool can be changed via Java system
- * properties.
+ * of this common fork-join pool can be changed dynamically via Java's
+ * ManagedBlocker mechanism.
  */
 public class ImageStreamRxJava2
        extends ImageStreamGang {

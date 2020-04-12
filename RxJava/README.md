@@ -18,3 +18,8 @@ overview of what's included:
         or not.  It shows a sequential flow and two different
         concurrent flows.  It also illustrates the use of a memoizer
         based on Java's ConcurrentHashMap.
+
+. ex4 - This example shows how to concurrently count the number of
+        images in a recursively-defined folder structure using a range
+        of RxJava features.  The root folder can either reside locally
+        (filesystem-based) or remotely (web-based).

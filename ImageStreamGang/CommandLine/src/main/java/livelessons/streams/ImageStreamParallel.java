@@ -16,8 +16,8 @@ import livelessons.utils.StreamsUtils;
  * images in parallel.  This framework uses Java's common fork-join
  * pool, which has one less than the number of processor cores
  * returned by Runtime.getRuntime().availableProcessors().  The size
- * of this common fork-join pool can be changed via Java system
- * properties.
+ * of this common fork-join pool can be changed dynamically via Java's
+ * ManagedBlocker mechanism.
  */
 public class ImageStreamParallel 
        extends ImageStreamGang {

@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.ConcurrentHashSet;
 import utils.Options;
+import utils.RxUtils;
 
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
@@ -43,16 +44,20 @@ class ImageCounter {
         // Get the URI to the root of the page/folder being traversed.
         var rootUri = Options.instance().getRootUri();
 
-        // Perform the image counting starting at the root Uri, which
-        // is given an initial depth count of 1.
-        countImages(rootUri, 1)
-            // Use blockingSubscribe() here to ensure the main thread
-            // doesn't exit prematurely.
-            .blockingSubscribe(totalImages ->
-                               print("(depth 0) "
-                                     + totalImages
-                                     + " total image(s) are reachable from "
-                                     + rootUri));
+        int totalImages =
+            // Perform the image counting starting at the root Uri,
+            // which is given an initial depth count of 1.
+            countImages(rootUri, 1)
+                    
+            // Block until the stream completes or encounters an
+            // error.
+            .blockingGet();
+
+        // Print the final results of the traversal.
+        print("(depth 0) "
+              + totalImages
+              + " total image(s) are reachable from "
+              + rootUri);
     }
 
     /**
@@ -119,7 +124,7 @@ class ImageCounter {
                 .map(this::getImagesInPage)
 
                 // Run the operations in the common fork-join pool.
-                .compose(applySchedulers())
+                .compose(RxUtils.commonPoolSingle())
 
                 // Count the number of images on this page.
                 .map(List::size);
@@ -134,7 +139,7 @@ class ImageCounter {
                                           depth))
 
                 // Run the operations in the common fork-join pool.
-                .compose(applySchedulers());
+                .compose(RxUtils.commonPoolSingle());
 
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.
@@ -186,7 +191,7 @@ class ImageCounter {
                                          .getPage(pageUri)))
 
             // Run the operation in the common fork-join pool.
-            .compose(RxUtils.commonPoolSingle())
+            .compose(RxUtils.commonPoolSingle());
     }
 
     /**
