@@ -24,7 +24,8 @@ public class ImageStreamGangTest {
         PARALLEL_STREAM,
         COMPLETABLE_FUTURES_1,
         COMPLETABLE_FUTURES_2,
-        RXJAVA
+        RXJAVA1,
+        RXJAVA2
     }
     
     /**
@@ -71,7 +72,7 @@ public class ImageStreamGangTest {
             System.out.println("Starting " + test);
 
             // Delete any the filtered images from the previous run.
-            FileUtils.deleteAllFiles();
+            FileUtils.deleteAllFiles(mFilters);
 
             // Make an ImageStreamGang object via the factory method.
             ImageStreamGang streamGang =
@@ -116,9 +117,12 @@ public class ImageStreamGangTest {
         case COMPLETABLE_FUTURES_2:
             return new ImageStreamCompletableFuture2(filters,
                                                      urlIterator);
-        case RXJAVA:
-            return new ImageStreamRxJava(filters,
+        case RXJAVA1:
+            return new ImageStreamRxJava1(filters,
                                          urlIterator);
+        case RXJAVA2:
+                return new ImageStreamRxJava2(filters,
+                           urlIterator);
         }
         return null;
     }
@@ -180,13 +184,14 @@ public class ImageStreamGangTest {
         System.out.println("Warming up the fork-join pool");
 
         // Delete any the filtered images from the previous run.
-        FileUtils.deleteAllFiles();
+        FileUtils.deleteAllFiles(mFilters);
 
         // Create and run the ImageStreamParallel test to warm up
         // threads in the common fork-join pool.
         ImageStreamGang streamGang =
                 new ImageStreamParallel(mFilters,
                         Options.instance().getUrlIterator());
+
         streamGang.run();
 
         System.out.println("End warming up the fork-join pool");

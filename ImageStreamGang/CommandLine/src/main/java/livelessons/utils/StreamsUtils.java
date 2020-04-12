@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 /**
  * A utility class containing helpful methods for manipulating various
- * Java 8 Streams features.
+ * Java Streams features.
  */
 public class StreamsUtils {
     /**

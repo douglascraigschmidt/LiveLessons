@@ -186,7 +186,7 @@ class ImageCounter {
                                          .getPage(pageUri)))
 
             // Run the operation in the common fork-join pool.
-            .compose(applySchedulers());
+            .compose(RxUtils.commonPoolSingle())
     }
 
     /**
@@ -222,7 +222,7 @@ class ImageCounter {
                      .just(hyperLink)
 
                      // Run operations in the common fork-join pool.
-                     .compose(applySchedulers1())
+                     .compose(RxUtils.commonPoolObservable())
 
                      // Recursively visit hyperlink(s) on this url.
                      .flatMap(url ->
@@ -239,23 +239,6 @@ class ImageCounter {
 
             // Return 0 if empty.
             .defaultIfEmpty(0);
-    }
-
-    /**
-     * @return Schedule a single to run on the common fork-join pool.
-     */
-    <T> SingleTransformer<T, T> applySchedulers() {
-        return single -> single
-            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
-    }
-
-    /**
-     * @return Schedule an observable to run on the common fork-join
-     * pool.
-     */
-    <T> ObservableTransformer<T, T> applySchedulers1() {
-        return observable -> observable
-            .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
 
     /**

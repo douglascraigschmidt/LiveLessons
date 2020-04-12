@@ -1,5 +1,7 @@
 package livelessons.utils;
 
+import livelessons.filters.Filter;
+
 import java.io.File;
 
 /**
@@ -21,15 +23,17 @@ public final class FileUtils {
     /**
      * Clears the filter directories.
      */
-    public static void deleteAllFiles() {
-        int deletedFiles =
-            deleteSubFolders(Options.instance().getDirectoryPath());
+    public static void deleteAllFiles(Filter[] filters) {
+        int deletedFiles = 0;
 
-        if (Options.instance().diagnosticsEnabled())
-            System.out.println(TAG
-                               + ": "
-                               + deletedFiles
-                               + " previously downloaded file(s) deleted");
+        // Delete all the filter directories.
+        for (Filter filter : filters)
+            deletedFiles += deleteSubFolders
+                (new File(Options.instance().getDirectoryPath(),
+                          filter.getName()).getAbsolutePath());
+
+        System.out.println(deletedFiles
+                           + " previously downloaded file(s) deleted");
     }
 
     /**
