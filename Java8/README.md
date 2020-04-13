@@ -38,9 +38,9 @@ Here's an overview of what's included:
   in conjunction with Java 8 constructor references.
   
 . ex8 - This example shows how to reduce and/or multiply big fractions
-  using a wide range of CompletableFuture features, including many
-  factory methods, completion stage methods, arbitrary-arity methods,
-  and exception handling methods.
+  using a wide range of features in the Java completable futures
+  framework, including many factory methods, completion stage methods,
+  arbitrary-arity methods, and exception handling methods.
 
 . ex9 - This example showcases the use of a Java 8 ConcurrentHashMap
   and a Java SynchronizedMap together with Java 8 Function-based
@@ -54,15 +54,15 @@ Here's an overview of what's included:
 . ex11 - This example shows the improper use of the Stream.peek()
   aggregate operation to interfere with a running stream.
 
-. ex12 - This program provides several examples of a Java 8 stream
-  that show how it can be used with "pure" functions, i.e., functions
-  whose return values are only determined by their input values,
-  without observable side effects.  This program also shows various
-  stream terminal operations, including forEach(), collect(), and
-  several variants of reduce().  In addition, it includes a non-Java 8
+. ex12 - This program provides several examples of Java streams that
+  show how it can be used with "pure" functions, i.e., functions whose
+  return values are only determined by their input values, without
+  observable side effects.  This program also shows various stream
+  terminal operations, including forEach(), collect(), and several
+  variants of reduce().  In addition, it includes a non-Java streams
   example as a baseline.
 
-. ex13 - This example shows several examples of using Java 8
+. ex13 - This example shows several examples of using Java
   Spliterators and streams to traverse each word in a list containing
   a quote from a famous Shakespeare play.
 
@@ -82,7 +82,7 @@ Here's an overview of what's included:
   dangers of sharing unsynchronized state between threads.
 
 . ex17 -- This example shows various issues associated with using the
-  Java 8 stream reduce() terminal operation, including the need to use
+  Java streams reduce() terminal operation, including the need to use
   the correct identity value and to ensure operations are associative.
   It also demonstrates what goes wrong when reduce() performs a
   mutable reduction on a parallel stream.
@@ -93,8 +93,8 @@ Here's an overview of what's included:
   CompletableFuture.allOf()).
 
 . ex19 -- This example shows how to count the number of images in a
-  recursively-defined folder structure using a range of
-  CompletableFuture features.
+  recursively-defined folder structure using a range of features in
+  the Java completable future framework.
 
 . ex20 -- This example shows how to combine Java parallel streams with
   and without the ForkJoinPool.ManagedBlocker interface and the Java

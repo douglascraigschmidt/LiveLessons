@@ -23,3 +23,7 @@ overview of what's included:
         images in a recursively-defined folder structure using a range
         of RxJava features.  The root folder can either reside locally
         (filesystem-based) or remotely (web-based).
+
+. ex5 -- This example shows how to apply timeouts with the RxJava
+         framework.
+

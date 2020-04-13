@@ -17,9 +17,9 @@ import static utils.FuturesCollector.toFuture;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
- * using a wide range of CompletableFuture features, including many
- * factory methods, completion stage methods, arbitrary-arity methods,
- * and exception handling methods.
+ * using a wide range of features in the Java completable futures
+ * framework, including many factory methods, completion stage
+ * methods, arbitrary-arity methods, and exception handling methods.
  */
 public class ex8 {
     /**

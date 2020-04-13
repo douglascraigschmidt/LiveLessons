@@ -2,8 +2,8 @@ import utils.Options;
 
 /**
  * This example shows how to count the number of images in a
- * recursively-defined folder structure using a range of
- * CompletableFuture features.
+ * recursively-defined folder structure using a range of features from
+ * the Java completable futures framework.
  */
 public class ex19 {
     /**

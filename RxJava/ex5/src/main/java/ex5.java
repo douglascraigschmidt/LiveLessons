@@ -1,21 +1,23 @@
+import io.reactivex.rxjava3.core.Single;
+import utils.RxUtils;
+
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This example shows how to apply Java 9 timeouts with the Java
- * completable futures framework.
+ * This example shows how to apply timeouts with the RxJava framework.
  */
-public class ex27 {
+public class ex5 {
     /**
      * Logging tag.
      */
-    private static final String TAG = ex27.class.getName();
+    private static final String TAG = ex5.class.getName();
 
     /**
      * The default exchange rate if a timeout occurs.
      */
-    private static final double sDEFAULT_RATE = 1.0;
+    private static final Single<Double> sDEFAULT_RATE =
+            Single.just(1.0);
 
     /**
      * The number of iterations to run the test.
@@ -33,7 +35,7 @@ public class ex27 {
      */
     public static void main(String[] args) {
         // Run the test program.
-        new ex27().run();
+        new ex5().run();
     }
 
     /**
@@ -42,45 +44,41 @@ public class ex27 {
     private void run() {
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            CompletableFuture
+            Single<Double> priceS = Single
                 // Asynchronously find the best price in US dollars
                 // between London and New York.
-                .supplyAsync(() -> findBestPrice("LDN - NYC"))
+                .fromCallable(() -> findBestPrice("LDN - NYC"))
 
-                // Call this::convert method reference when both
-                // previous stages complete.
-                .thenCombine(CompletableFuture
-                             // Asynchronously determine exchange rate
-                             // between US dollars and British pounds.
-                             .supplyAsync(() -> queryExchangeRateFor("USD", "GBP"))
+                // Run the computation in the common fork-join pool.
+                .compose(RxUtils.commonPoolSingle());
 
-                             // If this computation runs for more than
-                             // 2 seconds return the default rate.
-                             .completeOnTimeout(sDEFAULT_RATE, 2, TimeUnit.SECONDS),
+            Single<Double> rateS = Single
+                // Asynchronously determine exchange rate
+                // between US dollars and British pounds.
+                .fromCallable(() -> queryExchangeRateFor("USD", "GBP"))
 
-                             // Convert the price in dollars to the
-                             // price in pounds.
-                             this::convert)
+                // If this computation runs for more than 2 seconds
+                // return the default rate.
+                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE)
+
+                // Run the computation in the common fork-join pool.
+                .compose(RxUtils.commonPoolSingle());
+
+            Single
+                // Call this::convert method reference to convert the
+                // price in dollars to the price in pounds when both
+                // previous singles complete.
+                .zip(priceS, rateS, this::convert)
 
                 // If async processing takes more than 3 seconds a
                 // TimeoutException will be thrown.
-                .orTimeout(3, TimeUnit.SECONDS)
-
-                // This method always gets called, regardless of
-                // whether an exception occurred or not.
-                .whenComplete((amount, ex) -> {
-                        if (amount != null) {
-                            System.out.println("The price is: " + amount + " GBP");
-                        } else {
-                            System.out.println("The exception thrown was " + ex.toString());
-                        }
-                    })
-
-                // Swallow the exception.
-                .exceptionally(ex -> null)
+                .timeout(3, TimeUnit.SECONDS)
 
                 // Block until all async processing completes.
-                .join();
+                .blockingSubscribe(amount ->
+                                   System.out.println("The price is: " + amount + " GBP"),
+                                   ex ->
+                                   System.out.println("The exception thrown was " + ex.toString()));
         }
     }
 
