@@ -1,4 +1,6 @@
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import utils.RxUtils;
 
 import java.util.Random;
@@ -16,13 +18,19 @@ public class ex5 {
     /**
      * The default exchange rate if a timeout occurs.
      */
-    private static final Single<Double> sDEFAULT_RATE =
+    private static final Single<Double> sDEFAULT_RATE_S =
             Single.just(1.0);
+
+    /**
+     * The default exchange rate if a timeout occurs.
+     */
+    private static final Flowable<Double> sDEFAULT_RATE_F =
+            Flowable.just(1.0);
 
     /**
      * The number of iterations to run the test.
      */
-    private static final int sMAX_ITERATIONS = 100;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
      * The random number generator.
@@ -42,6 +50,16 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
+        // runConcurrentSingles();
+        runParallelFlowables();
+    }
+
+    /**
+     *
+     */
+    private void runConcurrentSingles() {
+        System.out.println("begin runConcurrentSingles()");
+
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
             Single<Double> priceS = Single
@@ -53,13 +71,14 @@ public class ex5 {
                 .compose(RxUtils.commonPoolSingle());
 
             Single<Double> rateS = Single
-                // Asynchronously determine exchange rate
-                // between US dollars and British pounds.
-                .fromCallable(() -> queryExchangeRateFor("USD", "GBP"))
+                // Asynchronously determine exchange rate between US
+                // dollars and British pounds.
+                .fromCallable(() ->
+                              queryExchangeRateFor("USD:GBP"))
 
                 // If this computation runs for more than 2 seconds
                 // return the default rate.
-                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE)
+                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE_S)
 
                 // Run the computation in the common fork-join pool.
                 .compose(RxUtils.commonPoolSingle());
@@ -80,6 +99,68 @@ public class ex5 {
                                    ex ->
                                    System.out.println("The exception thrown was " + ex.toString()));
         }
+
+        System.out.println("end runConcurrentSingles()");
+    }
+
+    /**
+     *
+     */
+    private void runParallelFlowables() {
+        System.out.println("begin runParallelFlowables()");
+
+        // Iterate multiple times.
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            Flowable<Double> priceF = Flowable
+                // Asynchronously find the best price in US dollars
+                // from London to New York.
+                .just("LDN:NYC")
+
+                // Run the computation in the common fork-join pool.
+                .parallel().compose(RxUtils.commonPoolParallelFlowable())
+
+                // Find the best price.
+                .map(this::findBestPrice)
+
+                // Convert back to sequential.
+                .sequential();
+
+            Flowable<Double> rateF = Flowable
+                // Asynchronously determine exchange rate from British
+                // pounds to US dollars.
+                .just("GBP:USA")
+
+                // Run the computation in the common fork-join pool.
+                .parallel().compose(RxUtils.commonPoolParallelFlowable())
+
+                // Find the exchange rate.
+                .map(this::queryExchangeRateFor)
+
+                // Convert back to sequential.
+                .sequential()
+
+                // If this computation runs for more than 2 seconds
+                // return the default rate.
+                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE_F)                    ;
+
+            Flowable
+                // Call this::convert method reference to convert the
+                // price in dollars to the price in pounds when both
+                // previous singles complete.
+                .zip(priceF, rateF, this::convert)
+
+                // If async processing takes more than 3 seconds a
+                // TimeoutException will be thrown.
+                .timeout(3, TimeUnit.SECONDS)
+
+                // Block until all async processing completes.
+                .blockingSubscribe(amount ->
+                                   System.out.println("The price is: " + amount + " GBP"),
+                                   ex ->
+                                   System.out.println("The exception thrown was " + ex.toString()));
+        }
+
+        System.out.println("end runParallelFlowables()");
     }
 
     /**
@@ -102,15 +183,17 @@ public class ex5 {
      * This method simulates a webservice that finds the exchange rate
      * between a source and destination currency format.
      */
-    private double queryExchangeRateFor(String source, String destination) {
+    private double queryExchangeRateFor(String sourceAndDestination) {
+        String[] sAndD = sourceAndDestination.split(":");
+
         // Delay for a random amount of time.
         randomDelay();
 
         // Debugging print.
         print("Rate comparision between " 
-              + source
+              + sAndD[0]
               + " and "
-              + destination);
+              + sAndD[1]);
 
         // Simply return a constant.
         return 1.20;
