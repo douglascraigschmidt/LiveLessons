@@ -110,9 +110,10 @@ public class ex23 {
         resultsFuture
             // When all the futures associated with resultsFuture
             // complete then display the results.
-            .thenAccept(list ->
-                        display("results = "
-                                + list))
+            .thenAcceptAsync(list -> {
+                display("results = "
+                        + list);
+            })
 
             // Block caller until all processing is complete.
             .join();
@@ -145,7 +146,7 @@ public class ex23 {
         resultFuture
             // When all the futures associated with resultsFuture
             // complete then display the results.
-            .thenAccept(stream -> 
+            .thenAcceptAsync(stream ->
                         display("results = " 
                                 + stream
                                 // Filter out any null results.
