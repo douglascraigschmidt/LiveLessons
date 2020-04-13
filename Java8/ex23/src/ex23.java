@@ -113,7 +113,7 @@ public class ex23 {
 
 
             // Block caller until all processing is complete.
-            .join();
+           .join();
 
         System.out.println("<<< leave testManyJoins()");
     }

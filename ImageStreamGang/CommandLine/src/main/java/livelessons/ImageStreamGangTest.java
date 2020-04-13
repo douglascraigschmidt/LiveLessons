@@ -34,6 +34,7 @@ public class ImageStreamGangTest {
     private final static Filter[] mFilters = {
         new NullFilter(),
         new GrayScaleFilter()
+        // Other filters can go here..
     };
 
     /**
@@ -80,7 +81,7 @@ public class ImageStreamGangTest {
                                     Options.instance().getUrlIterator(),
                                     test);
 
-            // Run the garbage collector to avoid perturbing the test.
+            // Run garbage collector first to avoid perturbing test timing.
             System.gc();
 
             // Start running the test (which initiates the timer).
@@ -190,7 +191,7 @@ public class ImageStreamGangTest {
         // threads in the common fork-join pool.
         ImageStreamGang streamGang =
                 new ImageStreamParallel(mFilters,
-                        Options.instance().getUrlIterator());
+                                        Options.instance().getUrlIterator());
 
         streamGang.run();
 
