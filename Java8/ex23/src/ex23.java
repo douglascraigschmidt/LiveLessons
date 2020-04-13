@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,7 +26,9 @@ public class ex23 {
      * A counter used to monotonically/atomically generate a new value
      * each time it's called.
      */
-    private static AtomicInteger mCounter = new AtomicInteger(0);
+    private static AtomicInteger mCounter = 
+        // Start at 10.
+        new AtomicInteger(10);
 
     /**
      * This supplier increments the atomic counter, sleeps for 1
@@ -35,24 +38,20 @@ public class ex23 {
         int result = mCounter.incrementAndGet();
         display("enter Supplier with value "
                 + result);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(1000);
         display("leave Supplier");
         return result;
     };
 
     /**
-     * This function returns even numbers passed to it and null if an
-     * odd number is passed to it.
+     * This function returns odd numbers passed to it and null if an
+     * even number is passed to it.
      */
     private static Function<Integer, Integer> mAction = i -> {
         display("enter Function with value "
                 + i);
         display("leave Function");
-        return (i % 2) == 0 ? i : null;
+        return (i % 2) == 1 ? i : null;
     };
 
     /**
@@ -110,10 +109,8 @@ public class ex23 {
         resultsFuture
             // When all the futures associated with resultsFuture
             // complete then display the results.
-            .thenAcceptAsync(list -> {
-                display("results = "
-                        + list);
-            })
+            .thenAcceptAsync(ex23::displayPrimes)
+
 
             // Block caller until all processing is complete.
             .join();
@@ -136,7 +133,7 @@ public class ex23 {
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Apply the action to the results of the previous completion stage.
+            // Apply action to results of the previous completion stage.
             .map(intFuture -> intFuture.thenApply(mAction))
 
             // Trigger intermediate operations and return a future to
@@ -147,14 +144,14 @@ public class ex23 {
             // When all the futures associated with resultsFuture
             // complete then display the results.
             .thenAcceptAsync(stream ->
-                        display("results = " 
-                                + stream
-                                // Filter out any null results.
-                                .filter(Objects::nonNull)
+                             displayPrimes(stream
+                                           // Filter out null results.
+                                           .filter(Objects::nonNull)
 
-                                // Trigger intermediate processing and
-                                // return a list of results.
-                                .collect(toList())))
+                                           // Trigger intermediate
+                                           // processing and return
+                                           // a list of results.
+                                           .collect(toList())))
 
             // Block caller until all processing is complete.
             .join();
@@ -163,8 +160,33 @@ public class ex23 {
     }
 
     /**
-     * Display the {@code string} after prepending the thread id and
-     * curren time.
+     * Display elements in the {@code list} after computing which
+     * numbers are prime.
+     */
+    private static void displayPrimes(List<Integer> list) {
+        // Create a string containing all the prime numbers in the
+        // list.
+        String primes = list
+            // Convert the list to a stream.
+            .stream()
+
+            // Remove non-prime numbers.
+            .filter(ex23::isPrime)
+
+            // Convert integers to strings.
+            .map(String::valueOf)
+
+            // Concatenate the strings.
+            .collect(joining(", "));
+
+        // Display the results.
+        display("primes = "
+                + primes);
+    }
+
+    /**
+     * Display the {@code string} after prepending the current thread
+     * and time.
      */
     private static void display(String string) {
         System.out.println("["
@@ -173,5 +195,41 @@ public class ex23 {
                            + System.currentTimeMillis()
                            + "] "
                            + string);
+    }
+
+    /**
+     * This method provides a brute-force determination of whether
+     * number {@code primeCandidate} is prime.  Returns true if it is
+     * prime or false if not.
+     */
+    static private boolean isPrime(Integer primeCandidate) {
+        int n = primeCandidate;
+
+        if (n > 3)
+            // This algorithm is intentionally inefficient to burn
+            // lots of CPU time!
+            for (int factor = 2;
+                 factor <= n / 2;
+                 ++factor)
+                if (Thread.interrupted()) {
+                    System.out.println(""
+                                       + Thread.currentThread()
+                                       + " Prime checker thread interrupted");
+                    break;
+                } else if (n / factor * factor == n)
+                    return false;
+
+        return true;
+    }
+
+    /**
+     * Simple sleep() wrapper that zaps annoying checked exceptions.
+     */
+    static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
