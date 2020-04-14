@@ -102,40 +102,6 @@ public class ex29 {
     }
 
     /**
-     * Print the {@code sortedList}.
-     */
-    private void printList(List<BigFraction> sortedList) {
-        // Print the results as mixed fractions.
-        sortedList
-            .forEach(fraction ->
-                     print("     "
-                           + fraction.toMixedString()));
-    }
-
-    /**
-     * Reduce big fractions asynchronously.
-     */
-    private CompletableFuture<BigFraction> reduceBigFractionAsync(BigFraction bigFraction) {
-        return CompletableFuture
-            // Run this action in a common fork-join pool thread to
-            // reduce the big fraction.
-            .supplyAsync(() -> {
-                    BigFraction bf = BigFraction.reduce(bigFraction);
-                    print("    reduceBigFractionAsync() = " + bf);
-                    return bf;
-                });
-    }
-
-    /**
-     * @ return A collector that converts elements in a stream into a
-     * list of big fractions.
-     */
-    private Collector<BigFraction,?, List<BigFraction>> getCollectors() {
-        print("    getCollectors()");
-        return Collectors.toList();
-    }
-
-    /**
      * A factory method that returns a large random BigFraction whose
      * creation is performed synchronously.
      *
@@ -161,7 +127,31 @@ public class ex29 {
     }
 
     /**
-     * @return the sorted {@code list}.
+     * @return A future that when completed will yield the results of
+     * reducing a big fractions asynchronously
+     */
+    private CompletableFuture<BigFraction> reduceBigFractionAsync(BigFraction bigFraction) {
+        return CompletableFuture
+            // Run this action in a common fork-join pool thread to
+            // reduce the big fraction.
+            .supplyAsync(() -> {
+                    BigFraction bf = BigFraction.reduce(bigFraction);
+                    print("    reduceBigFractionAsync() = " + bf);
+                    return bf;
+                });
+    }
+
+    /**
+     * @ return A collector that converts elements in a stream into a
+     * list of big fractions
+     */
+    private Collector<BigFraction,?, List<BigFraction>> getCollectors() {
+        print("    getCollectors()");
+        return Collectors.toList();
+    }
+
+    /**
+     * @return the sorted {@code list}
      */
     private CompletableFuture<List<BigFraction>> sortList(List<BigFraction> list) {
         // This implementation uses quick sort to order the list.
@@ -181,7 +171,7 @@ public class ex29 {
     }
 
     /**
-     * Perform a quick sort on the {@code list}.
+     * Perform a quick sort on the {@code list}
      */
     private List<BigFraction> quickSort(List<BigFraction> list) {
         // Convert the list to an array.
@@ -196,7 +186,7 @@ public class ex29 {
     }
 
     /*
-     * Perform a merge sort on the {@code list}.
+     * Perform a merge sort on the {@code list}
      */
     private List<BigFraction> mergeSort(List<BigFraction> list) {
         Collections.sort(list);
@@ -204,7 +194,18 @@ public class ex29 {
     }
 
     /**
-     * Print the {@code string} together with thread information.
+     * Print the {@code sortedList}
+     */
+    private void printList(List<BigFraction> sortedList) {
+        // Print the results as mixed fractions.
+        sortedList
+            .forEach(fraction ->
+                     print("     "
+                           + fraction.toMixedString()));
+    }
+
+    /**
+     * Print the {@code string} together with thread information
      */
     private static void print(String string) {
         System.out.println("Thread["
