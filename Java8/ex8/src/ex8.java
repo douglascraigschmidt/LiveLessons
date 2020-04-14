@@ -828,7 +828,7 @@ public class ex8 {
     }
 
     /**
-     * Perform a quick sort on the @a list.
+     * Perform a quick sort on the {@code list}.
      */
     private static List<BigFraction> quickSort(List<BigFraction> list) {
         // Convert the list to an array.
@@ -843,7 +843,7 @@ public class ex8 {
     }
 
     /*
-     * Perform a merge sort on the @a list.
+     * Perform a merge sort on the {@code list}.
      */
     private static List<BigFraction> mergeSort(List<BigFraction> list) {
         Collections.sort(list);
