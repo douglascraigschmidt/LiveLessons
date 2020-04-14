@@ -97,11 +97,14 @@ public class StreamsUtils {
      */
     public static <T> CompletableFuture<Stream<T>>
         joinAllStream(Stream<CompletableFuture<T>> futureStream) {
+        // Create an array of CompletableFutures from the futureStream
+        // param.
+        CompletableFuture<T>[] futures =
+            futureStream.toArray(CompletableFuture[]::new);
+
         // Use CompletableFuture.allOf() to obtain a CompletableFuture
         // that will itself be complete when all CompletableFutures in
         // futureStream parameter have completed.
-        CompletableFuture<T>[] futures =
-            futureStream.toArray(CompletableFuture[]::new);
         CompletableFuture<Void> allDoneFuture =
                 CompletableFuture.allOf(futures);
 
@@ -109,8 +112,8 @@ public class StreamsUtils {
         // a list of joined elements of type T.
         return allDoneFuture
             .thenApply(v -> Arrays
-                       // Convert futureList into a stream of
-                       // completable futures.
+                       // Convert futures into a stream of completable
+                       // futures.
                        .stream(futures)
 
                        // Use map() to join() all completable futures

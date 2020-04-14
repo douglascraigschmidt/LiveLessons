@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
@@ -67,20 +68,20 @@ public class ImageStreamCompletableFuture2
         List<URL> urls = getInput();
 
         // A future to a stream of URLs.
-        CompletableFuture<Stream<Optional<URL>>> urlStreamFuture = urls
+        Stream<CompletableFuture<Optional<URL>>> urlStream = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .stream()
 
             // Use map() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
-            .map(this::checkUrlCachedAsync)
+            .map(this::checkUrlCachedAsync);
 
-            // Trigger intermediate processing and create a future to
-            // a stream of URLs.
-            .collect(toFuture());
+        StreamsUtils
+            // Create a future that is used to wait for
+            // all futures in urlStream to complete.
+            .joinAllStream(urlStream)
 
-        urlStreamFuture
             // thenAccept() is called when all the futures in the
             // stream complete their processing.
             .thenAccept(stream -> {

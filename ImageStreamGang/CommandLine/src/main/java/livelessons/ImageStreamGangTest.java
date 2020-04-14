@@ -24,7 +24,7 @@ public class ImageStreamGangTest {
         PARALLEL_STREAM,
         COMPLETABLE_FUTURES_1,
         COMPLETABLE_FUTURES_2,
-        RXJAVA1,
+        RXJAVA1, 
         RXJAVA2
     }
     
