@@ -41,7 +41,6 @@ abstract class ImageStreamCompletableFutureBase
             
     }
 
-
     /**
      * Log the results.
      * 

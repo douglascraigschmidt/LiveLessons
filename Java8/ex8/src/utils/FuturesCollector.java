@@ -1,6 +1,5 @@
 package utils;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -22,7 +21,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class FuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                           Collection<CompletableFuture<T>>,
+                           List<CompletableFuture<T>>,
                            CompletableFuture<List<T>>> {
     /**
      * A function that creates and returns a new mutable result
@@ -32,7 +31,7 @@ public class FuturesCollector<T>
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<Collection<CompletableFuture<T>>> supplier() {
+    public Supplier<List<CompletableFuture<T>>> supplier() {
         return ArrayList::new;
     }
 
@@ -43,7 +42,7 @@ public class FuturesCollector<T>
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<Collection<CompletableFuture<T>>, CompletableFuture<T>> accumulator() {
+    public BiConsumer<List<CompletableFuture<T>>, CompletableFuture<T>> accumulator() {
         return Collection::add;
     }
 
@@ -56,9 +55,9 @@ public class FuturesCollector<T>
      * result
      */
     @Override
-    public BinaryOperator<Collection<CompletableFuture<T>>> combiner() {
-        return (Collection<CompletableFuture<T>> one,
-                Collection<CompletableFuture<T>> another) -> {
+    public BinaryOperator<List<CompletableFuture<T>>> combiner() {
+        return (List<CompletableFuture<T>> one,
+                List<CompletableFuture<T>> another) -> {
             one.addAll(another);
             return one;
         };
@@ -72,14 +71,12 @@ public class FuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<Collection<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
-        return futures
-            -> CompletableFuture
+    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
+        return futures ->
+            CompletableFuture
             // Use CompletableFuture.allOf() to obtain a future that
             // will itself be complete when all futures complete.
-            .allOf(futures
-                   .stream()
-                   .toArray(CompletableFuture[]::new))
+            .allOf(futures.toArray(new CompletableFuture[0]))
 
             // When all futures have completed get a single future to
             // a list of joined elements of type T.

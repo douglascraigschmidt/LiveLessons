@@ -58,7 +58,7 @@ public class ImageStreamCompletableFuture1
             .stream()
 
             // Use map() to call checkUrlCachedAsync(), which
-            // asynchronously checks if a URL is aready cached.
+            // asynchronously checks if a URL is already cached.
             .map(this::checkUrlCachedAsync)
 
             // Use map() to call downloadImageAsync(), which

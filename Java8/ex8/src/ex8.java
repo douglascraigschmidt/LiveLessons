@@ -1,18 +1,17 @@
+import utils.AsyncTester;
 import utils.BigFraction;
-import utils.FuturesCollector;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
 import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static utils.FuturesCollector.toFuture;
 
 /**
@@ -28,9 +27,16 @@ public class ex8 {
     private static int sMAX_FRACTIONS = 10;
 
     /**
+     * Represents a test that's already completed running when it
+     * returns.
+     */
+    private static final CompletableFuture<Void> sCompleted =
+        CompletableFuture.completedFuture(null);
+
+    /**
      * A big reduced fraction constant.
      */
-    private static BigFraction sBigReducedFraction = 
+    private static final BigFraction sBigReducedFraction =
         BigFraction.valueOf(new BigInteger("846122553600669882"),
                             new BigInteger("188027234133482196"),
                             true);
@@ -39,80 +45,85 @@ public class ex8 {
      * Stores a completed future with a BigFraction value of
      * sBigReducedFraction.
      */
-    private static CompletableFuture<BigFraction> mBigReducedFractionFuture =
+    private static final CompletableFuture<BigFraction> mBigReducedFractionFuture =
         CompletableFuture.completedFuture(sBigReducedFraction);
 
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws IOException {
+    public static void main (String[] argv) {
         // Test BigFraction reduction using a CompletableFuture and a
         // chain of completion stage "normal" (i.e., non-*Async())
         // methods.
-        testFractionReduction();
+        AsyncTester.register(ex8::testFractionReduction);
 
         // Test BigFraction reduction using a CompletableFuture and a
         // chain of completion stage *Async() methods.
-        testAsyncFractionReduction();
+        AsyncTester.register(ex8::testAsyncFractionReduction);
 
         // Test the use of a BigFraction constant using basic features
         // of a CompletableFuture and an explicit Java Thread.
-        testFractionConstantThread();
+        AsyncTester.register(ex8::testFractionConstantThread);
 
         // Test BigFraction multiplication using basic features of
         // CompletableFuture and an explicit Java Thread.
-        testFractionMultiplicationThread();
+        AsyncTester.register(ex8::testFractionMultiplicationThread);
 
         // Test BigFraction multiplication using a CompletableFuture and
         // its runAsync() and join() methods.
-        testFractionMultiplicationRunAsync();
+        AsyncTester.register(ex8::testFractionMultiplicationRunAsync);
 
         // Test BigFraction multiplication using a Callable, Future,
         // and the common fork-join pool.
-        testFractionMultiplicationCallable();
+        AsyncTester.register(ex8::testFractionMultiplicationCallable);
 
         // Test BigFraction multiplication using a CompletableFuture and
         // its supplyAsync() factory method and join() method.
-        testFractionMultiplicationSupplyAsync();
+        AsyncTester.register(ex8::testFractionMultiplicationSupplyAsync);
 
         // Test BigFraction multiplication using a CompletableFuture and
         // its completeAsync() factory method and join() method.
-        testFractionMultiplicationCompleteAsync();
+        AsyncTester.register(ex8::testFractionMultiplicationCompleteAsync);
 
         // Test BigFraction multiplication using a CompletableFuture and
         // its supplyAsync() factory method and thenAccept()
         // completion stage method.
-        testFractionMultiplicationAsyncChaining();
+        AsyncTester.register(ex8::testFractionMultiplicationAsyncChaining);
 
         // Test big fraction multiplication and addition using a
         // supplyAsync() and thenCombine().
-        testFractionCombine();
+        AsyncTester.register(ex8::testFractionCombine);
 
         // Test BigFraction exception handling using
         // CompletableFutures and the handle() method.
-        testFractionExceptions1();
+        AsyncTester.register(ex8::testFractionExceptions1);
 
         // Test BigFraction exception handling using
         // CompletableFutures and the exceptionally() method.
-        testFractionExceptions2();
+        AsyncTester.register(ex8::testFractionExceptions2);
 
         // Test BigFraction exception handling using
         // CompletableFutures and the whenComplete() method.
-        testFractionExceptions3();
+        AsyncTester.register(ex8::testFractionExceptions3);
 
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
         // involving supplyAsync(), thenCompose(), and acceptEither().
-        testFractionMultiplications1();
+        AsyncTester.register(ex8::testFractionMultiplications1);
 
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
-        // involving supplyAsync(), thenComposeAsync(), and acceptEither().
-        testFractionMultiplications2();
+        // involving supplyAsync(), thenComposeAsync(), and
+        // acceptEither().
+        AsyncTester.register(ex8::testFractionMultiplications2);
 
-        // Block until user provides input and then exit to allow
-        // future computations to complete running asynchronously.
-        System.in.read();
+        AsyncTester
+            // Run all the asynchronous tests.
+            .runTests()
+
+            // Block until all the tests are done to allow future
+            // computations to complete running asynchronously.
+            .join();
     }
 
     /**
@@ -120,7 +131,7 @@ public class ex8 {
      * chain of completion stage "normal" (i.e., non-*Async())
      * methods.
      */
-    private static void testFractionReduction() {
+    private static CompletableFuture<Void> testFractionReduction() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionReduction()\n");
 
@@ -156,7 +167,7 @@ public class ex8 {
             display(sb.toString());
         };
 
-        CompletableFuture
+        return CompletableFuture
             // Asynchronously reduce the unreduced big fraction.
             .supplyAsync(reduceFraction)
 
@@ -173,7 +184,7 @@ public class ex8 {
      * Test BigFraction reduction using a CompletableFuture and a
      * chain of completion stage *Async() methods.
      */
-    private static void testAsyncFractionReduction() {
+    private static CompletableFuture<Void> testAsyncFractionReduction() {
         StringBuffer sb = 
             new StringBuffer(">> Calling testAsyncFractionReduction()\n");
 
@@ -210,7 +221,7 @@ public class ex8 {
             display(sb.toString());
         };
 
-        CompletableFuture
+        return CompletableFuture
             // Asynchronously reduce the unreduced big fraction.
             .supplyAsync(reduceFraction)
 
@@ -227,7 +238,7 @@ public class ex8 {
      * Test the use of a BigFraction constant using basic features of
      * a CompletableFuture and an explicit Java Thread.
      */
-    private static void testFractionConstantThread() {
+    private static CompletableFuture<Void> testFractionConstantThread() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionConstantThread()\n");
 
@@ -246,13 +257,15 @@ public class ex8 {
         sb.append("     Thread result = "
                   + future.join().toMixedString());
         display(sb.toString());
+
+        return sCompleted;
     }
 
     /**
      * Test BigFraction multiplication using basic features of a
      * CompletableFuture and an explicit Java Thread.
      */
-    private static void testFractionMultiplicationThread() {
+    private static CompletableFuture<Void> testFractionMultiplicationThread() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationThread()\n");
 
@@ -277,13 +290,15 @@ public class ex8 {
         sb.append("     Thread result = "
                   + future.join().toMixedString());
         display(sb.toString());
+
+        return sCompleted;
     }
 
     /**
      * Test BigFraction multiplication using a CompletableFuture and its
      * runAsync() and join() methods.
      */
-    private static void testFractionMultiplicationRunAsync() {
+    private static CompletableFuture<Void> testFractionMultiplicationRunAsync() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationRunAsync()\n");
 
@@ -312,13 +327,15 @@ public class ex8 {
         sb.append("     runAsync() result = "
                   + future.join().toMixedString());
         display(sb.toString());
+
+        return sCompleted;
     }
 
     /**
      * Test BigFraction multiplication using a Callable, Future, and
      * the common fork-join pool.
      */
-    private static void testFractionMultiplicationCallable() {
+    private static CompletableFuture<Void> testFractionMultiplicationCallable() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationCallable()\n");
 
@@ -351,13 +368,15 @@ public class ex8 {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
+        return sCompleted;
     }
 
     /**
      * Test BigFraction multiplication using a CompletableFuture and its
      * supplyAsync() factory method and join() method.
      */
-    private static void testFractionMultiplicationSupplyAsync() {
+    private static CompletableFuture<Void> testFractionMultiplicationSupplyAsync() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationSupplyAsync()\n");
 
@@ -383,13 +402,15 @@ public class ex8 {
         sb.append("     supplyAsync() result = " 
                   + future.join().toMixedString());
         display(sb.toString());
+
+        return sCompleted;
     }
 
     /**
      * Test BigFraction multiplication using a CompletableFuture and
      * its completeAsync() factory method and join() method.
      */
-    private static void testFractionMultiplicationCompleteAsync() {
+    private static CompletableFuture<Void> testFractionMultiplicationCompleteAsync() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationCompleteAsync()\n");
 
@@ -404,12 +425,12 @@ public class ex8 {
 
         // Register an action that appends a string when run.
         future
-                .thenRun(() -> sb.append("     completeAsync() result = "));
+            .thenRun(() -> sb.append("     completeAsync() result = "));
 
         // Complete this future with the result of multiplying two
         // large fractions together.
         future
-                .completeAsync(() -> {
+            .completeAsync(() -> {
                     // Multiply two large fractions.
                     BigFraction bf1 = new BigFraction(f1);
                     BigFraction bf2 = new BigFraction(f2);
@@ -423,6 +444,7 @@ public class ex8 {
 
         // Print the result.
         display(sb.toString());
+        return sCompleted;
     }
 
     /**
@@ -430,7 +452,7 @@ public class ex8 {
      * supplyAsync() factory method and thenAccept() completion stage
      * method.
      */
-    private static void testFractionMultiplicationAsyncChaining() {
+    private static CompletableFuture<Void> testFractionMultiplicationAsyncChaining() {
         StringBuffer sb = 
             new StringBuffer(">> Calling testFractionMultiplicationAsyncChaining()\n");
 
@@ -452,7 +474,7 @@ public class ex8 {
             display(sb.toString());
         };
 
-        CompletableFuture
+        return CompletableFuture
             // Initiate an async task whose supplier multiplies two
             // large fractions.
             .supplyAsync(fractionMultiplier)
@@ -466,7 +488,7 @@ public class ex8 {
      * Test big fraction multiplication and addition using a
      * supplyAsync() and thenCombine().
      */
-    private static void testFractionCombine() {
+    private static CompletableFuture<Void> testFractionCombine() {
         StringBuffer sb = 
             new StringBuffer(">> Calling testFractionCombine()\n");
 
@@ -496,7 +518,7 @@ public class ex8 {
             display(sb.toString());
         };
 
-        cf1
+        return cf1
             // Wait until cf1 and cf2 are complete and then add the
             // results.
             .thenCombine(cf2,
@@ -510,7 +532,7 @@ public class ex8 {
      * Test BigFraction exception handling using CompletableFutures
      * and the handle() method.
      */
-    private static void testFractionExceptions1() {
+    private static CompletableFuture<Void> testFractionExceptions1() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions1()\n");
 
@@ -553,13 +575,14 @@ public class ex8 {
 
         // Print results.
         display(sb.toString());
+        return sCompleted;
     }
 
     /**
      * Test BigFraction exception handling using CompletableFutures
      * and the exceptionally() method.
      */
-    private static void testFractionExceptions2() {
+    private static CompletableFuture<Void> testFractionExceptions2() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions2()\n");
 
@@ -597,18 +620,19 @@ public class ex8 {
                         // When future completes prepare results for output.
                         .thenAccept(fraction ->
                                     sb.append("\n     result = "
-                                    + fraction.toMixedString()));
+                                              + fraction.toMixedString()));
                 });
 
         // Print results.
         display(sb.toString());
+        return sCompleted;
     }
 
     /**
      * Test BigFraction exception handling using CompletableFutures
      * and the whenComplete() method.
      */
-    private static void testFractionExceptions3() {
+    private static CompletableFuture<Void> testFractionExceptions3() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions3()\n");
 
@@ -650,6 +674,7 @@ public class ex8 {
 
         // Print results.
         display(sb.toString());
+        return sCompleted;
     }
 
     /**
@@ -657,7 +682,7 @@ public class ex8 {
      * CompletableFutures and a chain of completion stage methods
      * involving supplyAsync(), thenCompose(), and acceptEither().
      */
-    private static void testFractionMultiplications1() {
+    private static CompletableFuture<Void> testFractionMultiplications1() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications1()\n");
 
@@ -678,7 +703,7 @@ public class ex8 {
         sb.append("     Printing sorted results:\n");
 
         // Process the two lambdas in a sequential stream.
-        Stream
+        return Stream
             // Generate sMAX_FRACTIONS random unreduced BigFractions.
             .generate(() -> makeBigFraction(new Random(), false))
             .limit(sMAX_FRACTIONS)
@@ -703,7 +728,7 @@ public class ex8 {
      * involving supplyAsync(), thenComposeAsync(), and
      * acceptEither().
      */
-    private static void testFractionMultiplications2() {
+    private static CompletableFuture<Void> testFractionMultiplications2() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications2()\n");
 
@@ -722,7 +747,7 @@ public class ex8 {
         sb.append("     Printing sorted results:\n");
 
         // Process the two lambdas in a sequential stream.
-        Stream
+        return Stream
             // Generate sMAX_FRACTIONS random unreduced BigFractions.
             .generate(() -> makeBigFraction(new Random(), false))
             .limit(sMAX_FRACTIONS)
@@ -746,8 +771,8 @@ public class ex8 {
      * and then store the results in the {@code StringBuffer}
      * parameter.
      */
-    private static void sortAndPrintList(List<BigFraction> list,
-                                         StringBuffer sb) {
+    private static CompletableFuture<Void> sortAndPrintList(List<BigFraction> list,
+                                                            StringBuffer sb) {
         // This implementation uses quick sort to order the list.
         CompletableFuture<List<BigFraction>> quickSortFuture = CompletableFuture
             // Perform quick sort asynchronously.
@@ -760,15 +785,16 @@ public class ex8 {
 
         // Select the result of whichever sort implementation
         // finishes first.
-        quickSortFuture
-            .acceptEither(mergeSortFuture, sortedList -> {
-                    // Print the results as mixed fractions.
-                    sortedList.forEach(fraction ->
-                                       sb.append("     "
-                                                 + fraction.toMixedString()
-                                                 + "\n"));
-                    display(sb.toString());
-                });
+        return quickSortFuture
+            .acceptEither(mergeSortFuture,
+                          sortedList -> {
+                              // Print the results as mixed fractions.
+                              sortedList.forEach(fraction ->
+                                                 sb.append("     "
+                                                           + fraction.toMixedString()
+                                                           + "\n"));
+                              display(sb.toString());
+                          });
     }
 
     /**

@@ -118,7 +118,7 @@ public class ImageStreamCompletableFuture2
                                     // and log the results.
                                     log(resultsStream
                                         .flatMap(Function.identity()),
-                                        urls.size()))
+                                                 urls.size()))
                         
                         // Wait until all images have been downloaded,
                         // processed, and stored.
