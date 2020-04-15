@@ -467,8 +467,7 @@ public class ex8 {
 
         // Create a consumer that print the result as a mixed fraction
         // after it's reduced.
-        Consumer<BigFraction> mixedFractionPrinter = bigFraction
-            -> { 
+        Consumer<BigFraction> mixedFractionPrinter = bigFraction -> {
             sb.append("     Async chaining result = " 
                       + bigFraction.toMixedString());
             display(sb.toString());
@@ -718,8 +717,8 @@ public class ex8 {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            .thenAccept(list -> sortAndPrintList(list,
-                                                 sb));
+            .thenCompose(list -> sortAndPrintList(list,
+                                                  sb));
     }
 
     /**
@@ -762,8 +761,8 @@ public class ex8 {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            .thenAccept(list -> sortAndPrintList(list,
-                                                 sb));
+            .thenCompose(list -> sortAndPrintList(list,
+                                                  sb));
     }
 
     /**
@@ -784,15 +783,16 @@ public class ex8 {
             .supplyAsync(() -> mergeSort(list));
 
         // Select the result of whichever sort implementation
-        // finishes first.
+        // finishes first and use it to print the sorted list.
         return quickSortFuture
             .acceptEither(mergeSortFuture,
                           sortedList -> {
                               // Print the results as mixed fractions.
-                              sortedList.forEach(fraction ->
-                                                 sb.append("     "
-                                                           + fraction.toMixedString()
-                                                           + "\n"));
+                              sortedList
+                                  .forEach(fraction ->
+                                           sb.append("     "
+                                                     + fraction.toMixedString()
+                                                     + "\n"));
                               display(sb.toString());
                           });
     }
