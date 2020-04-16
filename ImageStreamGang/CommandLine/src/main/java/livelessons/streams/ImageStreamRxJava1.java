@@ -57,7 +57,7 @@ public class ImageStreamRxJava1
 
                      // Ignore URLs that are cached locally, i.e.,
                      // only download non-cached images.
-                     .filter(lUrl -> !urlCached(lUrl))
+                     .filter(___ -> !urlCached(url))
 
                      // Transform each URL to an image by downloading
                      // it via blockingDownload(), which expands the
@@ -106,8 +106,8 @@ public class ImageStreamRxJava1
                      // Use map() to create an OutputFilterDecorator
                      // for each image and run it to filter each image
                      // and store it in an output file.
-                     .map(lFilter ->
-                          makeFilterDecoratorWithImage(lFilter, image).run()));
+                     .map(___ ->
+                          makeFilterDecoratorWithImage(filter, image).run()));
     }
 
     /**

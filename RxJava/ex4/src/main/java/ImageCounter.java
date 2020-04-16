@@ -135,7 +135,7 @@ class ImageCounter {
                     // The crawlLinksInPage() methods runs synchronously, so
                     // call it in the common fork-join pool (see next line).
                     .flatMap(page ->
-                            crawlLinksInPage(page,
+                             crawlLinksInPage(page,
                                     depth))
 
                     // Run the operations in the common fork-join pool.
