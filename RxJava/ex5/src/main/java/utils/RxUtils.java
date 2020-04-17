@@ -32,7 +32,7 @@ public class RxUtils {
      * fork-join pool.
      */
     public static <T> ParallelTransformer<T, T> commonPoolParallelFlowable() {
-        return observable -> observable
+        return flowable -> flowable
             .runOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
 

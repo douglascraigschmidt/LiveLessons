@@ -39,7 +39,7 @@ public class ex5 {
 
     /**
      * The Java execution environment requires a static main() entry
-     * point method to run the app.
+a     * point method to run the app.
      */
     public static void main(String[] args) {
         // Run the test program.
