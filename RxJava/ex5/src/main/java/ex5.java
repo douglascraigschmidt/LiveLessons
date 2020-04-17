@@ -30,7 +30,7 @@ public class ex5 {
     /**
      * The number of iterations to run the test.
      */
-    private static final int sMAX_ITERATIONS = 10;
+    private static final int sMAX_ITERATIONS = 5;
 
     /**
      * The random number generator.
@@ -50,18 +50,26 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
-        // runConcurrentSingles();
+        // Run a test that demonstrates timeouts for RxJava concurrent
+        // Singles.
+        runConcurrentSingles();
+
+        // Run a test that demonstrates timeouts for RxJava
+        // ParallelFlowables.
         runParallelFlowables();
     }
 
     /**
-     *
+     * Run a test that demonstrates timeouts for RxJava concurrent
+     * Singles.
      */
     private void runConcurrentSingles() {
         System.out.println("begin runConcurrentSingles()");
 
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            print("Iteration #" + i);
+
             Single<Double> priceS = Single
                 // Asynchronously find the best price in US dollars
                 // between London and New York.
@@ -95,22 +103,28 @@ public class ex5 {
 
                 // Block until all async processing completes.
                 .blockingSubscribe(amount ->
-                                   System.out.println("The price is: " + amount + " GBP"),
+                                   System.out.println("The price is: " 
+                                                      + amount 
+                                                      + " GBP"),
                                    ex ->
-                                   System.out.println("The exception thrown was " + ex.toString()));
+                                   System.out.println("The exception thrown was " 
+                                                      + ex.toString()));
         }
 
         System.out.println("end runConcurrentSingles()");
     }
 
     /**
-     *
+     * Run a test that demonstrates timeouts for RxJava
+     * ParallelFlowables.
      */
     private void runParallelFlowables() {
         System.out.println("begin runParallelFlowables()");
 
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            print("Iteration #" + i);
+
             Flowable<Double> priceF = Flowable
                 // Asynchronously find the best price in US dollars
                 // from London to New York.
@@ -155,9 +169,12 @@ public class ex5 {
 
                 // Block until all async processing completes.
                 .blockingSubscribe(amount ->
-                                   System.out.println("The price is: " + amount + " GBP"),
+                                   System.out.println("The price is: " 
+                                                      + amount 
+                                                      + " GBP"),
                                    ex ->
-                                   System.out.println("The exception thrown was " + ex.toString()));
+                                   System.out.println("The exception thrown was " 
+                                                      + ex.toString()));
         }
 
         System.out.println("end runParallelFlowables()");

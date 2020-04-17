@@ -1,6 +1,7 @@
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * This example shows how to apply Java 9 timeouts with the Java
@@ -20,7 +21,7 @@ public class ex27 {
     /**
      * The number of iterations to run the test.
      */
-    private static final int sMAX_ITERATIONS = 100;
+    private static final int sMAX_ITERATIONS = 5;
 
     /**
      * The random number generator.
@@ -42,22 +43,30 @@ public class ex27 {
     private void run() {
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            CompletableFuture
-                // Asynchronously find the best price in US dollars
-                // between London and New York.
-                .supplyAsync(() -> findBestPrice("LDN - NYC"))
+            print("Iteration #" + i);
 
-                // Call this::convert method reference when both
-                // previous stages complete.
-                .thenCombine(CompletableFuture
-                             // Asynchronously determine exchange rate
-                             // between US dollars and British pounds.
-                             .supplyAsync(() -> queryExchangeRateFor("USD", "GBP"))
+            // Asynchronously find the best price in US dollars
+            // between London and New York.
+            CompletableFuture<Double> bestPriceF = CompletableFuture
+                .supplyAsync(() -> findBestPrice("LDN - NYC"));
 
-                             // If this computation runs for more than
-                             // 2 seconds return the default rate.
-                             .completeOnTimeout(sDEFAULT_RATE, 2, TimeUnit.SECONDS),
+            // Asynchronously compute the exchange rate.
+            CompletableFuture<Double> exchangeRateF = CompletableFuture
+                // Asynchronously determine exchange rate between US
+                // dollars and British pounds.
+                .supplyAsync(() ->
+                             queryExchangeRateFor("USD", "GBP"))
 
+                // If this computation runs for more than 2 seconds
+                // return the default rate.
+                .completeOnTimeout(sDEFAULT_RATE,
+                                   2,
+                                   TimeUnit.SECONDS);
+
+            // Call this::convert method reference when both
+            // previous stages complete.
+            bestPriceF
+                .thenCombine(exchangeRateF,
                              // Convert the price in dollars to the
                              // price in pounds.
                              this::convert)
@@ -70,9 +79,12 @@ public class ex27 {
                 // whether an exception occurred or not.
                 .whenComplete((amount, ex) -> {
                         if (amount != null) {
-                            System.out.println("The price is: " + amount + " GBP");
+                            print("The price is: " 
+                                  + amount 
+                                  + " GBP");
                         } else {
-                            System.out.println("The exception thrown was " + ex.toString());
+                            print("The exception thrown was " 
+                                  + ex.toString());
                         }
                     })
 

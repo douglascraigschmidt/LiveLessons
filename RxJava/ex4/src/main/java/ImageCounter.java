@@ -136,7 +136,7 @@ class ImageCounter {
                     // call it in the common fork-join pool (see next line).
                     .flatMap(page ->
                              crawlLinksInPage(page,
-                                    depth))
+                                              depth))
 
                     // Run the operations in the common fork-join pool.
                     .compose(RxUtils.commonPoolSingle());
@@ -144,7 +144,7 @@ class ImageCounter {
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.
             return combineImageCounts(imagesInPageObservable,
-                    imagesInLinksObservable);
+                                      imagesInLinksObservable);
         } catch (Exception e) {
             print("For '"
                     + pageUri
