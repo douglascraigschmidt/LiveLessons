@@ -22,7 +22,7 @@ public class FolderSpliterator
     private final Iterator<Dirent> mIterator;
         
     /**
-     * Only prints @a string when the verbose option is enabled.
+     * Only prints {@code string} when the verbose option is enabled.
      */
     void debug(String string) {
         if (Options.getInstance().getVerbose())

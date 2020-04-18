@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows how to use the Java fork-join pool framework and
- * Java 8 sequential streams to count the number of files in a (large)
+ * Java sequential streams to count the number of files in a (large)
  * recursive folder hierarchy, as well as calculate the cumulative
  * sizes of all the files.  Note that all the files have size 0, so
  * the total result is 0!
@@ -38,7 +38,7 @@ class FileCounter {
     static private AtomicLong sFileCount = new AtomicLong(0);
 
     /**
-     * This taask computes the size in bytes of the file (or all the
+     * This task computes the size in bytes of the file (or all the
      * files associated with subdirectory).
      */
     static class FileTask extends RecursiveTask<Long> {
