@@ -21,12 +21,12 @@ public class ex22 {
     /**
      * Number of big fractions to process via a fork-join pool.
      */
-    private static int sMAX_FRACTIONS = 30;
+    private static final int sMAX_FRACTIONS = 30;
 
     /**
      * A big reduced fraction constant.
      */
-    private static BigFraction sBigReducedFraction = 
+    private static final BigFraction sBigReducedFraction =
         BigFraction.valueOf(new BigInteger("846122553600669882"),
                             new BigInteger("188027234133482196"),
                             true);
@@ -35,13 +35,13 @@ public class ex22 {
      * Stores a completed future with a BigFraction value of
      * sBigReducedFraction.
      */
-    private static CompletableFuture<BigFraction> mBigReducedFractionFuture =
+    private static final CompletableFuture<BigFraction> sBigReducedFractionFuture =
         CompletableFuture.completedFuture(sBigReducedFraction);
 
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws IOException {
+    public static void main (String[] argv) {
         display("Starting ForkJoinTest");
 
         // A list of random unreduced BigFractions.
@@ -64,37 +64,36 @@ public class ex22 {
             .multiply(sBigReducedFraction);
 
         ForkJoinPool fjp1 = new ForkJoinPool();
+        System.gc();
+        RunTimer.timeRun(() -> testInvokeAll(fractionList, op, fjp1),
+                "testInvokeAll()");
+        System.out.println("invokeAll() steal count = "
+                + fjp1.getStealCount());
 
+        ForkJoinPool fjp2 = new ForkJoinPool();
+        System.gc();
         // Run all the tests.
-        RunTimer.timeRun(() -> testApplyAllIter(fractionList, op, fjp1),
+        RunTimer.timeRun(() -> testApplyAllIter(fractionList, op, fjp2),
                          "testApplyAllIter()");
         System.out.println("applyAllIter() steal count = " 
-                           + fjp1.getStealCount());
-
-        System.gc();
-        ForkJoinPool fjp2 = new ForkJoinPool();
-        RunTimer.timeRun(() -> testApplyAllSplitIndex(fractionList, op, fjp2),
-                         "testApplyAllSplitIndex()");
-        System.out.println("applyAllSplitIndex() steal count = " 
                            + fjp2.getStealCount());
 
-        System.gc();
-
         ForkJoinPool fjp3 = new ForkJoinPool();
-        RunTimer.timeRun(() -> testApplyAllSplit(fractionList, op, fjp3),
-                         "testApplyAllSplit()");
-        System.out.println("applyAllSplit() steal count = "
+        System.gc();
+        RunTimer.timeRun(() -> testApplyAllSplitIndex(fractionList, op, fjp3),
+                         "testApplyAllSplitIndex()");
+        System.out.println("applyAllSplitIndex() steal count = " 
                            + fjp3.getStealCount());
 
-        System.gc();
         ForkJoinPool fjp4 = new ForkJoinPool();
-        RunTimer.timeRun(() -> testInvokeAll(fractionList, op, fjp4),
-                         "testInvokeAll()");
-        System.out.println("invokeAll() steal count = "
+        System.gc();
+        RunTimer.timeRun(() -> testApplyAllSplit(fractionList, op, fjp4),
+                         "testApplyAllSplit()");
+        System.out.println("applyAllSplit() steal count = "
                            + fjp4.getStealCount());
 
-        System.gc();
         ForkJoinPool fjp5 = new ForkJoinPool();
+        System.gc();
         RunTimer.timeRun(() -> testApplyAllSplitIndexEx(fractionList, op, fjp5),
                 "testApplyAllSplitIndexEx()");
         System.out.println("applyAllSplitIndexEx() steal count = "
@@ -170,9 +169,9 @@ public class ex22 {
         BigFraction[] results = new BigFraction[fractionList.size()];
         // Test big fraction operations using applyAllSplitIndex().
         applyAllSplitIndexEx(fractionList,
-                op,
-                fjp,
-                results);
+                             op,
+                             fjp,
+                             results);
     }
 
     /**

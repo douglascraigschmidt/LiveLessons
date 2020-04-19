@@ -14,28 +14,28 @@ import static java.util.stream.Collectors.toList;
  * This example shows how to use the Java fork-join pool framework and
  * Java sequential streams to count the number of files in a (large)
  * recursive folder hierarchy, as well as calculate the cumulative
- * sizes of all the files.  Note that all the files have size 0, so
- * the total result is 0!
+ * sizes of all the files.  To avoid swamping the file system, all
+ * test files have size 0, so the total result is 0!
  *
  * Interestingly, earlier versions of Java (e.g., Java 8) seem to have
  * a "quirk" with the common fork-join pool where it will continue to
  * grow without bound when used with blocking I/O calls.  This doesn't
- * seem to be a problem with later versions of Java, e.g., Java 12.
+ * seem to be a problem with later versions of Java, e.g., Java 11.
  */
 class FileCounter {
     /**
      * The fork-join pool to use for the program.
      */
-    private static ForkJoinPool sFJPool =
+    private static final ForkJoinPool sFJPool =
         ForkJoinPool.commonPool();
     // @@ If you change the initialization of sFJPool to use the
     // common pool you may get a runtime error with earlier versions
-    // of Java.  In that case, I recommmend using new ForkJoinPool().
+    // of Java.  In that case, I recommend using new ForkJoinPool().
 
     /**
      * Keeps track of the total number of files encountered.
      */
-    static private AtomicLong sFileCount = new AtomicLong(0);
+    static private final AtomicLong sFileCount = new AtomicLong(0);
 
     /**
      * This task computes the size in bytes of the file (or all the
@@ -45,7 +45,7 @@ class FileCounter {
         /**
          * The current file that's being analyzed.
          */
-        private File mFile;
+        private final File mFile;
 
         /**
          * Constructor initializes the file.
@@ -68,7 +68,7 @@ class FileCounter {
                 // Return the length of the file.
                 return mFile.length();
             } else {
-                // Create a list of tasks to fork.
+                // Create a list of tasks to fork to process a folder.
                 List<ForkJoinTask<Long>> forks = Stream
                     // Convert the list of files into a stream of files.
                     .of(Objects.requireNonNull(mFile.listFiles()))
@@ -80,20 +80,20 @@ class FileCounter {
                     // collect the results into a list.
                     .collect(toList());
 
+                // Update the count of files.
+                sFileCount.addAndGet(forks.size());
+
                 return forks
                     // Convert the list to a stream.
                     .stream()
                     
                     // Join the tasks.
                     .mapToLong(ForkJoinTask::join)
-                    
-                    // Increment the number of files encountered.
-                    .peek(unused -> sFileCount.incrementAndGet())
 
                     // Sum the sizes of all the files.
                     .sum();
             }
-	}
+	    }
     }
 
     /**
@@ -103,9 +103,6 @@ class FileCounter {
         // Run the GC first.
         System.gc();
 
-        // Initialize the count to 0.
-        sFileCount.set(0);
-
         // Take a snapshot of the current time.
         long start = System.currentTimeMillis();
 
@@ -113,7 +110,9 @@ class FileCounter {
         // hierarchy.
         long size = sFJPool
             .invoke(new FileTask
-                    (new File(ClassLoader.getSystemResource("works").toURI())));
+                    (new File(ClassLoader
+                              .getSystemResource("works")
+                              .toURI())));
 
         // Print the results.
         System.out.println("total time to process "

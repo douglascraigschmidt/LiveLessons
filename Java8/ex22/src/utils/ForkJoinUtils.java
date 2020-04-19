@@ -23,42 +23,43 @@ public class ForkJoinUtils {
                                            Function<T, T> op,
                                            ForkJoinPool forkJoinPool) {
         // Invoke a new task in the fork-join pool.
-        return forkJoinPool.invoke(new RecursiveTask<List<T>>() {
-                /**
-                 * Entry point into the new task.
-                 */
-                protected List<T> compute() {
-                    // Create a list to hold the forked tasks.
-                    List<ForkJoinTask<T>> forks =
+        return forkJoinPool.invoke(new RecursiveTask<>() {
+            /**
+             * Entry point into the new task.
+             */
+            protected List<T> compute() {
+                // Create a list to hold the forked tasks.
+                List<ForkJoinTask<T>> forks =
                         new LinkedList<>();
 
-                    // Create a list to hold the joined results.
-                    List<T> results =
+                // Create a list to hold the joined results.
+                List<T> results =
                         new LinkedList<>();
 
-                    // Iterate through list, fork all the tasks,
-                    // and add them to the forks list.
-                    for (T t : list)
-                        // Add each new task to the forks list.
-                        forks.add(new RecursiveTask<T>() {
-                                /**
-                                 * Apply the operation.
-                                 */
-                                protected T compute() {
-                                    return op.apply(t);
-                                }
-                            }
+                // Iterate through list, fork all the tasks,
+                // and add them to the forks list.
+                for (T t : list)
+                    // Add each new task to the forks list.
+                    forks.add(new RecursiveTask<T>() {
+                        /**
+                         * Apply the operation.
+                         */
+                        protected T compute() {
+                            return op.apply(t);
+                        }
+                    }
                             // Fork a new task.
                             .fork());
 
-                    // Join all the results of the forked tasks.
-                    for (ForkJoinTask<T> task : forks)
-                        // Add the joined results.
-                        results.add(task.join());
+                // Join all the results of the forked tasks.
+                for (ForkJoinTask<T> task : forks)
+                    // Add the joined results.
+                    results.add(task.join());
 
-                    // Return the results.
-                    return results;
-                }});
+                // Return the results.
+                return results;
+            }
+        });
     }
 
     /**
@@ -72,12 +73,12 @@ public class ForkJoinUtils {
         T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
                                               list.size());
 
-        /**
-         * This task partitions list recursively and runs each half in
-         * a ForkJoinTask.  It uses indices to avoid the overhead of
-         * copying.
+        /*
+          This task partitions list recursively and runs each half in
+          a ForkJoinTask.  It uses indices to avoid the overhead of
+          copying.
          */
-        class SplitterTask 
+        class SplitterTask
               extends RecursiveAction {
             /**
              * The lo index in this partition.
@@ -87,7 +88,7 @@ public class ForkJoinUtils {
             /**
              * The hi index in this partition.
              */
-            private int mHi;
+            private final int mHi;
 
             /**
              * Constructor initializes the fields.
@@ -103,7 +104,7 @@ public class ForkJoinUtils {
              */
             protected void compute() {
                 // Find the midpoint.
-                int mid = (mLo + mHi) >>> 1;
+                int mid = mLo + mHi >>> 1;
 
                 // If there's just a single element then apply
                 // the operation.
@@ -144,10 +145,10 @@ public class ForkJoinUtils {
                                                 Function<T, T> op,
                                                 ForkJoinPool forkJoinPool,
                                                 T[] results) {
-        /**
-         * This task partitions list recursively and runs each half in
-         * a ForkJoinTask.  It uses indices to avoid the overhead of
-         * copying.
+        /*
+          This task partitions list recursively and runs each half in
+          a ForkJoinTask.  It uses indices to avoid the overhead of
+          copying.
          */
         class SplitterTask
                 extends RecursiveAction {
@@ -159,7 +160,7 @@ public class ForkJoinUtils {
             /**
              * The hi index in this partition.
              */
-            private int mHi;
+            private final int mHi;
 
             /**
              * Constructor initializes the fields.
@@ -212,9 +213,9 @@ public class ForkJoinUtils {
     public static <T> List<T> applyAllSplit(List<T> list,
                                             Function<T, T> op,
                                             ForkJoinPool forkJoinPool) {
-        /**
-         * This task splits up the list recursively and runs
-         * each half in a ForkJoinTask.
+        /*
+          This task splits up the list recursively and runs
+          each half in a ForkJoinTask.
          */
         class SplitterTask
               extends RecursiveTask<List<T>> {
@@ -297,7 +298,6 @@ public class ForkJoinUtils {
         // Add all the ops to the list.
         for (T t : list)
             tasks.add(() -> op.apply(t));
-
 
         // Create a list of elements from the list of futures and
         // return it.
