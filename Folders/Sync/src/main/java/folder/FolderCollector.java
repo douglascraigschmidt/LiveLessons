@@ -1,13 +1,13 @@
 package folder;
 
-import utils.ExceptionUtils;
-
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
@@ -22,7 +22,7 @@ public class FolderCollector
     /**
      * Indicates whether processing should occur in parallel.
      */
-    private boolean mParallel;
+    private final boolean mParallel;
 
     /**
      * Constructor initializes the field.
@@ -89,9 +89,8 @@ public class FolderCollector
      * @return An immutable set of collector characteristics, which in
      * this case is UNORDERED and IDENTITY_FINISH.
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Collector.Characteristics> characteristics() {
         return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
                                                       Collector.Characteristics.IDENTITY_FINISH));
     }

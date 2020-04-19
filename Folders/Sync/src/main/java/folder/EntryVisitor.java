@@ -19,7 +19,7 @@ public interface EntryVisitor {
 
     /**
      * Factory method that creates an instance of @a EntryVisitor with
-     * the given @a folderConsumer and @a documentConsumer.xs
+     * the given {@code folderConsumer} and {@code documentConsumer}.
      */
     public static EntryVisitor of(Consumer<Folder> folderConsumer,
                                   Consumer<Document> documentConsumer) {

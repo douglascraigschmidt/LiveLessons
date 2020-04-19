@@ -46,7 +46,6 @@ public class RecursiveFolderSpliterator
      */
     RecursiveFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
-        //         Options.getInstance().setVerbose(true);
 
         mFoldersList = new ArrayList<>();
         mFoldersList.add(folder);

@@ -3,7 +3,6 @@ package folder;
 import utils.ExceptionUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -22,12 +21,12 @@ public class Folder
     /**
      * The list of subfolders contained in this folder.
      */
-    private List<Dirent> mSubFolders;
+    private final List<Dirent> mSubFolders;
 
     /**
      * The list of documents contained in this folder.
      */
-    private List<Dirent> mDocuments;
+    private final List<Dirent> mDocuments;
 
     /**
      * The total number of entries in this recursively structured
@@ -176,7 +175,7 @@ public class Folder
             .sum();
 
         // Count the number of documents in this folder.
-        long docCount = (long) getDocuments().size();
+        long docCount = getDocuments().size();
 
         // Update the field with the correct count.
         mSize = folderCount 

@@ -2,13 +2,12 @@ package folder;
 
 import utils.Options;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class is used in conjunction with StreamSupport.stream() and
@@ -120,12 +119,12 @@ public class BatchFolderSpliterator
         /**
          * The list of (sub)folders to process.
          */
-        private List<Dirent> mFoldersList;
+        private final List<Dirent> mFoldersList;
 
         /**
          * The list of documents to process.
          */
-        private List<Dirent> mDocsList;
+        private final List<Dirent> mDocsList;
 
         /**
          * Constructor initializes the fields.

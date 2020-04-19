@@ -132,8 +132,8 @@ public class Main {
     }
 
     /**
-     * Synchronously find all occurrences of @a searchedWord in @a
-     * rootFolder using a stream.
+     * Synchronously find all occurrences of {@code searchedWord} in {@code
+     * rootFolder} using a stream.
      */
     private static void searchFolders(Dirent rootFolder,
                                       String searchedWord,
@@ -168,7 +168,7 @@ public class Main {
     }
 
     /**
-     * Determine # of times @a searchedWord appears in @a document.
+     * Determine # of times {@code searchedWord} appears in {@code document}.
      */
     private static Long occurrencesCount(CharSequence document,
                                          String searchedWord,
@@ -224,6 +224,7 @@ public class Main {
                       -> document
                       // Get contents of document
                       .getContents().toString()
+
                       // Split document by newline.
                       .split("[\n\r]")
                       
