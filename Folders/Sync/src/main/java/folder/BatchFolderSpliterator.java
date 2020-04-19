@@ -10,15 +10,15 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * This class is used in conjunction with StreamSupport.stream() and
- * Spliterators.spliterator() to create a sequential or parallel
- * stream of Dirents from a recursively structured directory folder.
+ * This class is used in conjunction with {@code
+ * StreamSupport.stream()} and {@code Spliterators.spliterator()} to
+ * create a sequential or parallel stream of {@code Dirents} from a
+ * recursively-structured directory folder.
  */
 public class BatchFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
     /**
-     * Size of the batch to process, which is doubled every time it's
-     * used.
+     * Size of the batch to process, which doubles every time it's used.
      */
     private int mBatchSize;
 
@@ -29,7 +29,7 @@ public class BatchFolderSpliterator
     private final Iterator<Dirent> mIterator;
         
     /**
-     * Only prints @a string when the verbose option is enabled.
+     * Only prints {@code string} when the verbose option is enabled.
      */
     void debug(String string) {
         if (Options.getInstance().getVerbose())
@@ -41,14 +41,12 @@ public class BatchFolderSpliterator
      */
     public BatchFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
-        //         Options.getInstance().setVerbose(true);
 
-        // Make the intialize batch size match the number of
-        // processors.
+        // Make the initial batch size match the number of processors.
         mBatchSize =
             (int) folder.size() / Runtime.getRuntime().availableProcessors();
 
-        // Initialize the iterator.
+        // Initialize the breadth-first search iterator.
         mIterator = new BFSIterator(folder);
     }
 
@@ -89,13 +87,12 @@ public class BatchFolderSpliterator
     private Spliterator<Dirent> splitBatch() {
         // This array holds the next batch of dirents to process.
         Object[] direntArray = new Object[mBatchSize];
-        int index;
+        int index = 0;
 
-        // Iterate through mBatchSize dirents and
-        // add them to the array.
-        for (index = 0; index < mBatchSize; index++)
+        // Iterate through mBatchSize dirents and add them to the array.
+        while (index < mBatchSize)
             if (mIterator.hasNext())
-                direntArray[index] = mIterator.next();
+                direntArray[index++] = mIterator.next();
             else
                 break;
 
@@ -134,12 +131,10 @@ public class BatchFolderSpliterator
             mCurrentEntry = rootFolder;
 
             // Add all the subfolders in the rootFolder.
-            mFoldersList = new ArrayList<>();
-            mFoldersList.addAll(rootFolder.getSubFolders());
+            mFoldersList = new ArrayList<>(rootFolder.getSubFolders());
 
-            // Add all the document sin the rootFolder.
-            mDocsList = new ArrayList<>();
-            mDocsList.addAll(rootFolder.getDocuments());
+            // Add all the documents in the rootFolder.
+            mDocsList = new ArrayList<>(rootFolder.getDocuments());
         }
 
         /**
@@ -153,13 +148,14 @@ public class BatchFolderSpliterator
                 if (mFoldersList.size() > 0) {
                     // If there are subfolders left then pop the one
                     // at the end and make it the current entry.
-                    mCurrentEntry = mFoldersList.remove(mFoldersList.size() - 1);
+                    mCurrentEntry =
+                        mFoldersList.remove(mFoldersList.size() - 1);
 
                     // Add any/all subfolders from the new current
                     // entry to the end of the subfolders list.
                     mFoldersList.addAll(mCurrentEntry.getSubFolders());
 
-                    // Add any/all docuemnts from the new current
+                    // Add any/all documents from the new current
                     // entry to the end of the documents list.
                     mDocsList.addAll(mCurrentEntry.getDocuments());
                 }
@@ -167,7 +163,8 @@ public class BatchFolderSpliterator
                 else if (mDocsList.size() > 0) 
                     // Pop the document at the end of the list off and
                     // make it the current entry.
-                    mCurrentEntry = mDocsList.remove(mDocsList.size() - 1);
+                    mCurrentEntry =
+                        mDocsList.remove(mDocsList.size() - 1);
             }
 
             // Return false if there are no more entries, else true.

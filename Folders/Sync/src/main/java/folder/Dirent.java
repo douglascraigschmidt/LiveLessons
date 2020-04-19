@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 /**
  * This super class defines the common capabilities provided by a
- * directory entry.  It is inherited by the Folder and Document
+ * directory entry and is inherited by the Folder and Document
  * subclasses.
  */
 public abstract class Dirent {

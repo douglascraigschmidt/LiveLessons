@@ -32,11 +32,11 @@ public class FolderCollector
     }
 
     /**
-     * A function that creates and returns a new mutable result
-     * container that will hold all the documents and subfolders in
-     * the stream.
+     * This factory method returns a supplier that creates and returns
+     * a new mutable result container that will hold all the documents
+     * and subfolders in the stream.
      *
-     * @return a function which returns a new, mutable result container
+     * @return a supplier that returns a new, mutable result container
      */
     @Override
     public Supplier<Folder> supplier() {
@@ -44,41 +44,47 @@ public class FolderCollector
     }
     
     /**
-     * A function that folds a Path into the mutable result container.
+     * This factory method returns a biconsumer that adds a path to
+     * the mutable result container.
      *
-     * @return a function which folds a Path into a mutable result container
+     * @return a biconsumer that adds a path to the mutable result container
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
-        return (Folder folder, Path entry) 
-            -> folder.addEntry(entry,
-                               mParallel);
+        // Return a BiConsumer that adds a path to
+        // the mutable result container.
+        return (Folder folder, Path entry) ->
+                // Add entry into the folder.
+                folder.addEntry(entry,
+                                mParallel);
     }
 
     /**
-     * A function that accepts two partial results and merges them.
-     * The combiner function may fold state from one argument into the
-     * other and return that, or may return a new result container.
+     * This factory method merges the contents of two subfolders into
+     * a single folder.
      *
-     * @return a function which combines two partial results into a combined
-     * result
+     * @return a BinaryOperation that merges two subfolders
+     *         into a combined folder result
      */
     @Override
     public BinaryOperator<Folder> combiner() {
-        return Folder::addAll;
+        /// Merge contents of two subfolders.
+        return Folder::merge;
     }
 
     /**
-     * Perform the final transformation from the intermediate
-     * accumulation type {@code A} to the final result type {@code
-     * R}.
+     * This factory method returns a function that performs the final
+     * transformation of the mutable result container type {@code
+     * Folder} to the final result type {@code Folder}.
      *
      * @return a function which transforms the intermediate result to
      * the final result
      */
     @Override
     public Function<Folder, Folder> finisher() {
-        return Function.identity();
+        // @@ This method is a no-op since the IDENTITY_FINISH
+        // characteristic is set.
+        return null;
     }
 
     /**
@@ -96,11 +102,12 @@ public class FolderCollector
     }
 
     /**
-     * This static factory method creates a new FolderCollector.
+     * This factory method creates a new {@code FolderCollector}.
      *
-     * @return A new FolderCollector
+     * @return A new {@code FolderCollector}
      */
     public static Collector<Path, Folder, Folder>toFolder(boolean parallel) {
+        // Return a new folder collector.
         return new FolderCollector(parallel);
     }
 }

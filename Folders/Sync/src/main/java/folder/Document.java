@@ -22,7 +22,7 @@ public class Document
     }
 
     /**
-     * @return The contents of this Document
+     * @return The contents of this document
      */
     @Override
     public CharSequence getContents() {
@@ -30,11 +30,11 @@ public class Document
     }
 
     /**
-     * Factory method that asynchronously creates a document from the
-     * file at the given @a path.
+     * This factory method asynchronously creates a document from the
+     * file at the given {@code path}.
      *
      * @param path The path of the document in the file system
-     * @return An open document
+     * @return An {@code} Dirent} object containing the document's contents
      */
     static Dirent fromPath(Path path) {
         // Create an exception adapter.

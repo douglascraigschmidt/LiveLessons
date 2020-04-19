@@ -8,26 +8,31 @@ import utils.TestDataFactory;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-
 /**
  * This example shows the use of the Java streams framework to process
  * entries in a recursively structured directory folder using the Java
- * sequential and parallel streams frameworks.
+ * sequential and parallel streams frameworks.  This example also shows
+ * how to implement Java sequential and parallel streams spliterators
+ * and collectors.
  */
+@SuppressWarnings("ALL")
 public class Main {
     /**
-     * The input "works".
+     * The input "works", which is a large recursive folder containing
+     * thousands of subfolders and files.
      */
-    private static final String sWORKs =
+    private static final String sWORKS =
         "works";
 
     /**
-     * Display @a string if the program is run in verbose mode.
+     * Display {@code string} if the program is run in verbose mode.
      */
     static void display(String string) {
         if (Options.getInstance().getVerbose())
-            System.out.println(string);
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] "
+                               + string);
     }
 
     /**
@@ -37,16 +42,16 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Warmup the stream pool.
+        // Warmup the thread pool.
         warmupThreadPool();
 
-        // Run the tests sequentially.
+        // Run all the tests sequentially.
         runTests(false);
 
-        // Run the tests in parallel.
+        // Run all the tests in parallel.
         runTests(true);
 
-        // Print the results.
+        // Print the results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
     }
 
@@ -57,7 +62,7 @@ public class Main {
         display("Warming up the thread pool");
 
         // Create a new folder.
-        createFolder(true);
+        createFolder(sWORKS, true);
     }
 
     /**
@@ -65,62 +70,63 @@ public class Main {
      * depending on the value of @a parallel.
      */
     private static void runTests(boolean parallel) {
-        // The word to search for while the folder's been constructed.
+        // Record whether we're running in parallel or sequentially.
+        String mode = parallel ? "in parallel" : "sequentially";
+
+        display("Starting the test " + mode);
+
+        // The word to search for while the folder's being constructed.
         final String searchedWord = "CompletableFuture";
 
         // Compute the time needed to create a new folder.
         Dirent rootFolder = 
-            RunTimer.timeRun(() -> createFolder(parallel),
-                             "createFolder() in "
-                             + (parallel ? "Parallel" : "Sequential"));
-;
+            RunTimer.timeRun(() -> createFolder(sWORKS, parallel),
+                             "createFolder() in " + mode);
+
         // Compute the time taken to count the entries in the folder.
         RunTimer.timeRun(() -> countEntries(rootFolder, 
                                             parallel),
-                         "countEntries() in "
-                         + (parallel ? "Parallel" : "Sequential"));
-;
+                         "countEntries() in " + mode);
 
         // Compute the time taken to count the # of lines in the
         // folder.
         RunTimer.timeRun(() -> countLines(rootFolder,
                                           parallel),
-                         "countLines() in "
-                         + (parallel ? "Parallel" : "Sequential"));
+                         "countLines() in " + mode);
 
         // Compute the time taken to synchronously search for a word
         // in all folders starting at the rootFolder.
         RunTimer.timeRun(() -> searchFolders(rootFolder,
                                              searchedWord,
                                              parallel),
-                         "searchFolders() in "
-                         + (parallel ? "Parallel" : "Sequential"));
+                         "searchFolders() in " + mode);
+
+        display("Ending the test " + mode);
     }
 
     /**
-     * Create a new folder.
-     *
-     * @return An open folder
+     * @return A new folder containing all the works in the {@code works} folder
      */
-    private static Dirent createFolder(boolean parallel) {
-        // Count the time needed to create and return a folder
-        // containing all the works in the sWORKs directory.
+    private static Dirent createFolder(String works,
+                                       boolean parallel) {
+        // Create and return a folder containing all works
+        // in the sWORKS directory.
         return Folder
-            .fromDirectory(TestDataFactory
-                           .getRootFolderFile(sWORKs),
+            .fromDirectory(TestDataFactory.getRootFolderFile(works),
                            parallel);
     }
 
     /**
-     * Count the number of entries in the folder.
+     * Count the # of entries in the {@ rootFolder}.
      */
-    private static void countEntries(Dirent folder,
+    private static void countEntries(Dirent rootFolder,
                                      boolean parallel) {
-        // Create a stream from the folder.
-        Stream<Dirent> folderStream = folder
+        // Create a stream from the rootFolder, which triggers
+        // the use of our *FolderSpliterator.
+        Stream<Dirent> folderStream = rootFolder
             .stream();
 
-        // Convert to the parallel stream if desired.
+        // Conditionally convert to a parallel stream.
         if (parallel)
             folderStream.parallel();
 
@@ -132,68 +138,66 @@ public class Main {
     }
 
     /**
-     * Synchronously find all occurrences of {@code searchedWord} in {@code
+     * Synchronously find all occurrences of {@code searchWord} in {@code
      * rootFolder} using a stream.
      */
     private static void searchFolders(Dirent rootFolder,
-                                      String searchedWord,
+                                      String searchWord,
                                       boolean parallel) {
-        // Create a stream for the folder.
+        // Create a stream from the rootFolder, which triggers
+        // the use of our *FolderSpliterator.
         Stream<Dirent> folderStream = rootFolder
             .stream();
 
-        // Convert to the parallel stream if desired.
+        // Conditionally convert to a parallel stream.
         if (parallel)
             folderStream.parallel();
 
         // Compute the total number of matches of searchedWord.
         long matches = folderStream
             // Only search documents.
-            .filter(dirent
-                    -> dirent instanceof Document)
+            .filter(Main::isDocument)
 
             // Search the document synchronously.
-            .mapToLong(document
-                       -> occurrencesCount(document.getContents(),
-                                           searchedWord,
+            .mapToLong(document ->
+                       // Count # of times searchWord appears in the document.
+                       occurrencesCount(document.getContents(),
+                                           searchWord,
                                            parallel))
             // Sum the results.
             .sum();
 
         // Print the results.
         display("total matches of \""
-                + searchedWord
+                + searchWord
                 + "\" = "
                 + matches);
     }
 
     /**
-     * Determine # of times {@code searchedWord} appears in {@code document}.
+     * @return The # of times {@code searchWord} appears in {@code document}.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private static Long occurrencesCount(CharSequence document,
-                                         String searchedWord,
+                                         String searchWord,
                                          boolean parallel) {
         // Determine the # of times searchedWord appears in a
         // document.
-        Stream<String> wordStream = Pattern
-            // Compile word splitter into a regular expression
-            // (regex).
-            .compile("\\W+")
+        Stream<String> wordStream =
+            // Create a stream from the document around matches to
+            // individual words.
+            splitAsStream(document, "\\W+");
 
-            // Use the regex to split the file into a stream of
-            // words.
-            .splitAsStream(document);
-
-        // Convert to the parallel stream if desired.
+        // Conditionally convert to a parallel stream.
         if (parallel)
             wordStream.parallel();
 
-        // Return # of times searchedWord appears in the stream.
+        // Return # of times searchWord appears in the stream.
         return wordStream
             // Only consider words that match.
-            .filter(searchedWord::equals)
+            .filter(searchWord::equals)
 
-            // Count the results.
+            // Count # of times searchWord appears in the stream.
             .count();
     }
 
@@ -203,38 +207,62 @@ public class Main {
      */
     private static void countLines(Dirent rootFolder, 
                                    boolean parallel) {
-        // Options.getInstance().setVerbose(true);
-
-        // Create a stream for the folder.
+        // Create a stream from the rootFolder, which triggers
+        // the use of our *FolderSpliterator.
         Stream<Dirent> folderStream = rootFolder
             .stream();
 
-        // Convert to the parallel stream if desired.
+        // Conditionally convert to a parallel stream.
         if (parallel)
             folderStream.parallel();
 
         // Count # of lines in documents residing in the folder.
         long lineCount = folderStream
             // Only consider documents. 
-            .filter(dirent
-                    -> dirent instanceof Document)
+            .filter(Main::isDocument)
 
             // Count # of lines in the document.
-            .mapToInt(document
-                      -> document
-                      // Get contents of document
-                      .getContents().toString()
+            .mapToLong(document -> 
+                       // Create a stream from the document around
+                       // matches to newlines.
+                       splitAsStream(document.getContents(),
+                                        "[\n\r]")
 
-                      // Split document by newline.
-                      .split("[\n\r]")
-                      
-                      // Return length of the result.
-                      .length)
+                       // Count the number of newlines in the document.
+                       .count())
 
-            // Sum the results;
+            // Sum the results of all newlines in all the documents.
             .sum();
 
         display("total number of lines = "
                 + lineCount);
+    }
+
+    /**
+     * Creates a stream from the {@code document} around matches of
+     * this {@code regex} pattern.
+     * @param document The document to be split
+     * @param regex The regular expression to compile
+     * @return The stream of strings computed by splitting the {@code
+     *         document} around matches of this {@code regex} pattern
+     */
+    private static Stream<String> splitAsStream(CharSequence document,
+                                                String regex) {
+        // Return a stream from the document around matches of the
+        // regex pattern.
+        return Pattern
+            // Compile the regex into a pattern.
+            .compile(regex)
+
+            // Split the document into a stream around matches of the
+            // regex pattern.
+            .splitAsStream(document);
+    }
+
+    /**
+     * @return True of {@code dirent} is a document, else false
+     */
+    private static boolean isDocument(Dirent dirent) {
+        return dirent instanceof Document;
     }
 }

@@ -46,7 +46,6 @@ public class RecursiveFolderSpliterator
      */
     RecursiveFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
-
         mFoldersList = new ArrayList<>();
         mFoldersList.add(folder);
         mDocsList = new ArrayList<>();
@@ -72,14 +71,20 @@ public class RecursiveFolderSpliterator
         // If there's an available document remove it and use it as
         // the current entry.
         if (mDocsList.size() > 0)
+            // Use the last element in the list as the current entry.
             currentEntry = mDocsList.remove(mDocsList.size() - 1);
 
         // If folder is available remove it, use it as the current
         // entry, and add all its directory entries to the lists.
         else if (mFoldersList.size() > 0) {
+            // Use the last element in the list as the current entry.
             currentEntry =
                 mFoldersList.remove(mFoldersList.size() - 1);
+
+            // Add any/all folders in the current entry into the folders list.
             mFoldersList.addAll(currentEntry.getSubFolders());
+
+            // Add any/all documents in the current entry into the folders list.
             mDocsList.addAll(currentEntry.getDocuments());
         }
         // Bail out.
@@ -171,8 +176,8 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * @return A spliterator that's null if there's no current folder
-     *         one. If there is a current folder then a spliterator is
+     * @return A spliterator that's null if there's no current folder.
+     *         If there is a current folder then a spliterator is
      *         returned that contains all the documents (if any) plus
      *         the current folder.
      */

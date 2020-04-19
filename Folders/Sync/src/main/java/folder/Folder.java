@@ -1,8 +1,10 @@
 package folder;
 
 import utils.ExceptionUtils;
+import utils.StreamsUtils;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,6 +72,7 @@ public class Folder
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
+        // return new BatchFolderSpliterator(this);
         return new RecursiveFolderSpliterator(this);
     }
 
@@ -99,7 +102,7 @@ public class Folder
      */
 
     /**
-     * Factory method that creates a folder from the given @a file.
+     * Factory method that creates a folder from the given {@code} file.
      *
      * @param file The file associated with the folder in the file system
      * @param parallel A flag that indicates whether to create the
@@ -114,21 +117,22 @@ public class Folder
     }
 
     /**
-     * Factory method that creates a folder from the given @a file.
+     * Factory method that creates a folder from the given {@code rootPath}.
      *
      * @param rootPath The path of the folder in the file system
      * @param parallel A flag that indicates whether to create the
      *                 folder sequentially or in parallel
      *
-     * @return An open document
+     * @return An open folder containing all contents in the {@code rootPath}
      */
     public static Dirent fromDirectory(Path rootPath,
                                        boolean parallel) {
-        // An exception adapter.
+        // Create a function that converts a path into a stream.
         Function<Path, Stream<Path>> getStream = ExceptionUtils
+            // An adapter to convert checked to runtime exceptions.
             .rethrowFunction(path
-                             // List all subfolders and documents in
-                             // just this folder.
+                             // Stream all subfolders and documents
+                             // in this folder.
                              -> Files.walk(path, 1));
 
         // Create a stream containing all the contents at the given
@@ -146,13 +150,15 @@ public class Folder
             // Eliminate rootPath to avoid infinite recursion.
             .filter(path -> !path.equals(rootPath))
 
-            // Terminate the stream and create a Folder containing all
+            // Terminate the stream and create a folder containing all
             // entries in this folder.
             .collect(FolderCollector.toFolder(parallel));
 
-        // Set the path of the folder and compute the number of
-        // subfolders and documents are rooted at this folder.
+        // Set the path of the folder.
         folder.setPath(rootPath);
+
+        // Compute the number of subfolders and
+        // documents that are rooted at this folder.
         folder.computeSize();
 
         // Return the folder.
@@ -189,36 +195,40 @@ public class Folder
      */
 
     /**
-     * Add a new @a entry to the appropriate list of futures.
+     * Add a new {@code entry} to the appropriate list of futures.
      */
     void addEntry(Path entry,
                   boolean parallel) {
-        // This adapter simplifies exception handling.
-        Function<Path, Dirent> getFolder = ExceptionUtils
-            .rethrowFunction(file 
-                             // Create a folder from a directory file.
-                             -> Folder.fromDirectory(file,
-                                                     parallel));
-
-        // This adapter simplifies exception handling.
-        // Create a document from a path.
-        Function<Path, Dirent> getDocument = ExceptionUtils
-            .rethrowFunction(Document::fromPath);
-
         // Add entry to the appropriate list.
-        if (Files.isDirectory(entry))
+        if (Files.isDirectory(entry)) {
+            // A function that converts a file path into a folder.
+            Function<Path, Dirent> getFolder = ExceptionUtils
+                // This adapter simplifies exception handling.
+                .rethrowFunction(file
+                                 // Create a folder from a directory file.
+                                 -> Folder.fromDirectory(file,
+                                                         parallel));
+
+            // Add the entry to the list of subfolders.
             mSubFolders.add(getFolder.apply(entry));
-        else
+        } else {
+            // A function that converts a path into a document.
+            Function<Path, Dirent> getDocument = ExceptionUtils
+                // This adapter simplifies exception handling.
+                .rethrowFunction(Document::fromPath);
+
+            // Add the entry to the list of documents.
             mDocuments.add(getDocument.apply(entry));
+        }
     }
 
     /**
-     * Merge contents of @a folder into contents of this folder.
+     * Merge contents of {@code folder} into contents of this folder.
      *
      * @param folder The folder to merge from
      * @return The merged result
      */
-    Folder addAll(Folder folder) {
+    Folder merge(Folder folder) {
         // Update the lists.
         mSubFolders.addAll(folder.mSubFolders);
         mDocuments.addAll(folder.mDocuments);
