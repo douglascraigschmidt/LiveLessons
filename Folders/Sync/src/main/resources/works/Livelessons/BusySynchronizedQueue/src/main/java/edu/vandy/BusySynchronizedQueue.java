@@ -78,7 +78,7 @@ class BusySynchronizedQueue<E>
      */
     @Override
     public synchronized E poll() {
-        mList.poll();
+        return mList.poll();
     }
 
     /**

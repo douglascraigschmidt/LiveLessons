@@ -11,8 +11,8 @@ import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use RxJava in
- * conjunction with Java Streams to search how many times each phrase in
- * an array of phrases appears in input data.
+ * conjunction with Java Streams to search how many times each phrase
+ * in an array of phrases appears in input data.
  */
 public class SearchWithRxJavaPhrases
         extends SearchStreamGang {

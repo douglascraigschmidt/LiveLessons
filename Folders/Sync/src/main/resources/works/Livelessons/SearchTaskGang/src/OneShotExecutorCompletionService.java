@@ -68,14 +68,11 @@ public class OneShotExecutorCompletionService
             // This submit() call stores the Future result in the
             // ExecutorCompletionService for concurrent results
             // processing.
-            mCompletionService.submit (new Callable<SearchResults>() {
-                    @Override
-                    // call() runs in a background task.
-                    public SearchResults call() throws Exception {
-                        return searchForWord(word,
-                                             inputData);
-                    }
-                });
+            mCompletionService
+                    .submit (() ->
+                             // call() runs in a background task.
+                             searchForWord(word,
+                                           inputData));
         }
         return true;
     }

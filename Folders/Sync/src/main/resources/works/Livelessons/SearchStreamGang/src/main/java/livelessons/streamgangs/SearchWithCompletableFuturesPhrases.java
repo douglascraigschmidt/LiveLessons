@@ -49,23 +49,31 @@ public class SearchWithCompletableFuturesPhrases
                     
         // Convert all the completed CompletableFutures in the
         // listOfFutures into a list of lists of SearchResults.
-        List<List<SearchResults>> results = StreamsUtils
-            .joinAll(listOfFutures)
-            // join() blocks the calling thread until all the futures
-            // have been completed.
-            .join();
-            
-        // Return results that filter out all zero-sized results.
-        return results
-            // Convert into a stream.
-            .stream()
+        return StreamsUtils
+            // Return a single completable future to a stream of
+            // completable futures.
+            .joinAllStream(listOfFutures)
 
-            // Only keep a result that has at least one match.
-            .filter(list 
-                    -> list.stream().mapToInt(SearchResults::size).sum() > 0)
-            
-            // Terminate stream and return a list of SearchResults.
-            .collect(toList());
+            // This completion stage method is called when the future
+            // completes (which occurs after all the futures in the
+            // stream complete).
+            .thenApply(stream -> stream
+                       // Only keep a result that has at least one match.
+                       .filter(list -> list
+                               // Convert to a stream.
+                               .stream()
+                               
+                               // Return the size of each search result.
+                               .mapToInt(SearchResults::size)
+                               
+                               // Add up all the results.
+                               .sum() > 0)
+
+                       // Terminate stream and return a list of SearchResults.
+                       .collect(toList()))
+
+            // Wait for all the asynchronous processing to complete.
+            .join();
     }
 
     /**

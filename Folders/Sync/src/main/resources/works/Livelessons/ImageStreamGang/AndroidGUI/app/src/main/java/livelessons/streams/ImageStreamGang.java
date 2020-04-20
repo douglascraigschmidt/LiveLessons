@@ -1,6 +1,7 @@
 package livelessons.streams;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import livelessons.utils.BlockingTask;
 import livelessons.utils.Image;
 import livelessons.utils.NetUtils;
 import livelessons.utils.Options;
@@ -42,11 +44,6 @@ public abstract class ImageStreamGang
     protected List<Filter> mFilters;
 
     /**
-     * Maximum number of threads in a fixed-size thread pool.
-     */
-    private final int sMAX_THREADS = 100;
-
-    /**
      * Constructor initializes the class and fields.
      */
     public ImageStreamGang(Filter[] filters,
@@ -72,15 +69,6 @@ public abstract class ImageStreamGang
      */
     @Override
     protected void initiateStream() {
-        // The thread pool size is the smaller of (1) the number of
-        // filters times the number of images to download and (2)
-        // sMAX_THREADS (which prevents allocating excessive threads).
-        int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
-                                      sMAX_THREADS);
-
-        // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
-
         // Start timing the test run.
         startTiming();
 
@@ -150,6 +138,16 @@ public abstract class ImageStreamGang
     }
 
     /**
+     * Transform URL to an Image by downloading each image via its
+     * URL.  This call ensures the common fork/join thread pool is
+     * expanded to handle the blocking image download.
+     */
+    protected Image blockingDownload(URL url) {
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
+    }
+
+    /**
      * Factory method that retrieves the image associated with the @a
      * url and creates an Image to encapsulate it.
      */
@@ -170,20 +168,36 @@ public abstract class ImageStreamGang
     }
 
     /**
-     * @return true if the @a url is in the cache, else false.
+     * Checks to see if the @a url is already exists in the file
+     * system.  If not, it atomically creates a new file based on
+     * combining the @a url with the @a filterName and returns false,
+     * else true.
+
+     * @return true if the @a url already exists in file system, else
+     * false.
      */
     protected boolean urlCached(URL url,
                                 String filterName) {
-        // Construct the subdirectory for the filter.
-        File externalFile = new File(Options.instance().getDirectoryPath(),
-                                     filterName);
+        File imageFile = null;
+        try {
+            // Construct the subdirectory for the filter.
+            File externalFile =
+                new File(Options.instance().getDirectoryPath(),
+                         filterName);
 
-        // Construct the filename for the URL.
-        File imageFile = new File(externalFile,
-                                  NetUtils.getFileNameForUrl(url));
-
-        // If the image file exists then the URL is cached.
-        return imageFile.exists();
+            // Construct a new file based on the filename for the URL.
+            imageFile =
+                new File(externalFile,
+                         NetUtils.getFileNameForUrl(url));
+            
+            // The URL is already cached if imageFile exists so we
+            // negate the return value from createNewFile().
+            return !imageFile.createNewFile();
+        } catch (IOException e) {
+            // e.printStackTrace();
+            System.out.println("file " + imageFile.toString() + e);
+            return true;
+        }
     }
 
     /**

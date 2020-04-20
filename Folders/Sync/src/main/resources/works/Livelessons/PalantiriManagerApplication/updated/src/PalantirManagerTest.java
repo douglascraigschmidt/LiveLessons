@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import leasepool.LeasePool;
 import utils.Options;
+import utils.StreamsUtils;
 
 /**
  * This program demonstrates the use of Java 8 CompletableFutures,

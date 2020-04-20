@@ -29,7 +29,7 @@ public abstract class Filter {
      */
     public Filter() {
         // Default uses the class name without the package prefix.
-    	mName = this.getClass().getName();
+    	mName = this.getClass().getSimpleName();
 
     }
 

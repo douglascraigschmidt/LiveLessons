@@ -1,7 +1,0 @@
-  /Users/schmidt/Dropbox/POSA/posa/ex/m4/Primes/PrimeExecutorCompletionService/app/src/main/java/vandy/mooc/prime/activities:
-  total used in directory 144 available 123239433
-  drwxr-xr-x@ 7 schmidt  staff    238 Apr 11 14:52 .
-  drwxr-xr-x@ 4 schmidt  staff    136 Mar 28 17:43 ..
-  -rw-r--r--@ 1 schmidt  staff   6075 Mar 27 13:13 LifecycleLoggingActivity.java
-  -rw-r--r--@ 1 schmidt  staff  17562 Apr 11 14:52 MainActivity.java
-  -rw-r--r--@ 1 schmidt  staff   2170 Apr  3 14:45 PrimeCallable.java

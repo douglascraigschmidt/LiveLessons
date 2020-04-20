@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">GCD Concurrent</string>
-    <string name="runnable">Run\nRunnable</string>
-    <string name="thread">Run\nThread</string>
-    <string name="thread_runnable">Run Thread\nRunnable</string>
-</resources>

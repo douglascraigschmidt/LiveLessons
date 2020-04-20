@@ -2,6 +2,7 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import livelessons.utils.SearchResults;
 
@@ -36,7 +37,7 @@ public class SearchWithSequentialStreams
         // Get the list of input strings.
         List<CharSequence> inputList = getInput();
 
-    	// Process the input strings via a sequential stream.
+        // Process the input strings via a sequential stream.
         return inputList
             // Sequentially process each string in the input list.
             .stream()
@@ -51,7 +52,7 @@ public class SearchWithSequentialStreams
     }
     
     /**
-     * Sequentially search @a inputSeq for all occurrences of the
+     * Sequentially search {@code inputSeq} for all occurrences of the
      * phrases to find.
      */
     private List<SearchResults> processInput(CharSequence inputSeq) {

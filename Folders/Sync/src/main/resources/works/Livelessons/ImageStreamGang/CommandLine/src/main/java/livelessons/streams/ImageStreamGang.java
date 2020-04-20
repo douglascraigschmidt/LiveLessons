@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import livelessons.utils.BlockingTask;
 import livelessons.utils.Image;
 import livelessons.utils.NetUtils;
 import livelessons.utils.Options;
@@ -43,11 +44,6 @@ public abstract class ImageStreamGang
     protected List<Filter> mFilters;
 
     /**
-     * Maximum number of threads in a fixed-size thread pool.
-     */
-    private final int sMAX_THREADS = 100;
-
-    /**
      * Constructor initializes the class and fields.
      */
     public ImageStreamGang(Filter[] filters,
@@ -73,15 +69,6 @@ public abstract class ImageStreamGang
      */
     @Override
     protected void initiateStream() {
-        // The thread pool size is the smaller of (1) the number of
-        // filters times the number of images to download and (2)
-        // sMAX_THREADS (which prevents allocating excessive threads).
-        int threadPoolSize = Math.min(mFilters.size() * getInput().size(),
-                                      sMAX_THREADS);
-
-        // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
-
         // Start timing the test run.
         startTiming();
 
@@ -151,14 +138,22 @@ public abstract class ImageStreamGang
     }
 
     /**
+     * Transform URL to an Image by downloading each image via its
+     * URL.  This call ensures the common fork/join thread pool is
+     * expanded to handle the blocking image download.
+     */
+    protected Image blockingDownload(URL url) {
+        return BlockingTask.callInManagedBlock(()
+                                               -> downloadImage(url));
+    }
+
+    /**
      * Factory method that retrieves the image associated with the @a
      * url and creates an Image to encapsulate it.
      */
     protected Image downloadImage(URL url) {
-        byte[] imageData = NetUtils.downloadContent(url);
-
         return new Image(url,
-                         imageData);
+                         NetUtils.downloadContent(url));
     }
 
     /**

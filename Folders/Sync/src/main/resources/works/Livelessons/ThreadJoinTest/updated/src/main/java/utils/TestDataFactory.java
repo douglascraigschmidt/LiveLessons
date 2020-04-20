@@ -21,8 +21,8 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the input data in the given @a filename as an array of
-     * Strings.
+     * Return the input data in the given {@code filename} as an array
+     * of Strings.
      */
     public static List<String> getInput(String filename,
                                         String splitter) {
@@ -30,7 +30,7 @@ public class TestDataFactory {
             // Convert the filename into a pathname.
             URI uri = ClassLoader.getSystemResource(filename).toURI();
 
-            // Open the file and get all the bytes.
+            // Open the file and read all the bytes.
             String bytes = new String(Files.readAllBytes(Paths.get(uri)));
 
             return
@@ -41,7 +41,7 @@ public class TestDataFactory {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
-                // Collect the results into a string.
+                // Collect the results into list of strings.
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,19 +60,19 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the phrase list in the @a filename as a list of
+     * Return the phrase list in the {@code filename} as a list of
      * non-empty strings.
      */
     public static List<String> getPhraseList(String filename) {
         try {
             return Files
-                // Read all lines from filename.
+                // Read all lines from filename into a stream.
                 .lines(Paths.get(ClassLoader.getSystemResource
-                                        (filename).toURI()))
+                                 (filename).toURI()))
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
-                // Collect the results into a string.
+                // Collect the results into a list of strings.
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();

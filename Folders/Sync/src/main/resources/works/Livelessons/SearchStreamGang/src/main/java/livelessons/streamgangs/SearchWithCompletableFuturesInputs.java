@@ -2,12 +2,13 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamsUtils;
 
 import static java.util.stream.Collectors.toList;
+import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * Customizes the SearchStreamGang framework to use CompletableFutures
@@ -33,38 +34,38 @@ public class SearchWithCompletableFuturesInputs
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Convert the input strings into a list of
-        // CompletableFutures.
-        List<CompletableFuture<List<SearchResults>>> listOfFutures = getInput()
-            // Create a sequential stream of input strings.
-            .stream()
+        return getInput()
+                // Create a sequential stream of input strings.
+                .stream()
 
-            // Map each input string to a CompletableFuture to a list
-            // of SearchResults.
-            .map(this::processInputAsync)
-            
-            // Terminate stream and return a list of
-            // CompletableFutures.
-            .collect(toList());
+                // Map each input string to a CompletableFuture to a list
+                // of SearchResults.
+                .map(this::processInputAsync)
 
-        // Convert all the completed CompletableFutures in the
-        // listOfFutures into a list of lists of SearchResults.
-        List<List<SearchResults>> results = StreamsUtils
-            .joinAll(listOfFutures)
-            // join() blocks the calling thread until all the futures
-            // have been completed.
-            .join();
-            
-        // Return results that filter out all zero-sized results.
-        return results
-            // Convert into a stream.
-            .stream()
+                // Trigger intermediate operations and return a single
+                // completable future to a stream of completable futures.
+                .collect(toFuture())
 
-            // Only keep a result that has at least one match.
-            .filter(list -> list.stream().mapToInt(SearchResults::size).sum() > 0)
-            
-            // Terminate stream and return a list of SearchResults.
-            .collect(toList());
+                // This completion stage method is called when the future
+                // completes (which occurs after all the futures in the
+                // stream complete).
+                .thenApply(stream -> stream
+                           // Only keep a result that has at least one match.
+                           .filter(list -> list
+                                   // Conver to a stream.
+                                   .stream()
+
+                                   // Return the size of each search result.
+                                   .mapToInt(SearchResults::size)
+
+                                   // Add up all the results.
+                                   .sum() > 0)
+
+                           // Terminate stream and return a list of SearchResults.
+                           .collect(toList()))
+                
+                // Wait for all the asynchronous processing to complete.
+                .join();
     }
 
     /**
@@ -76,7 +77,7 @@ public class SearchWithCompletableFuturesInputs
         String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = 
+        CharSequence input =
             inputSeq.subSequence(title.length(),
                                  inputSeq.length());
 
@@ -98,7 +99,7 @@ public class SearchWithCompletableFuturesInputs
             // Terminate stream and return a list of
             // CompletableFutures.
             .collect(toList());
-                    
+
         // Return a CompletableFuture to a list of SearchResults that
         // will be complete when all the CompletableFutures in the
         // listOfFutures have completed.

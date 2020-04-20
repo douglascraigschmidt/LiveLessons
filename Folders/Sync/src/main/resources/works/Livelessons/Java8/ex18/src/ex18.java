@@ -1,3 +1,6 @@
+import utils.FuturesCollector;
+import utils.StreamsUtils;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -8,14 +11,46 @@ import java.util.stream.LongStream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program shows how to use a custom collector in conjunction
- * with a stream of completable futures.
+ * This program shows how to wait for the results of a stream of
+ * completable futures using (1) a custom collector and (2) the
+ * StreamsUtils.joinAll() method (which is a wrapper for
+ * CompletableFuture.allOf()).
  */
 public class ex18 {
     /**
      * Default factorial number.  
      */
     private static final int sDEFAULT_N = 1000;
+
+    /**
+     * This is the entry point into the test program.
+     */
+    public static void main(String[] args) {
+        System.out.println("Starting Factorial Tests");
+
+        // Create a new test object.
+        ex18 test = new ex18();
+
+        // Create a list containing all the factorial methods.
+        List<Function<BigInteger, BigInteger>> factList =
+            List.of(SynchronizedParallelFactorial::factorial,
+                    SequentialStreamFactorial::factorial,
+                    ParallelStreamFactorial2::factorial,
+                    ParallelStreamFactorial3::factorial);
+
+        // Initialize to the default value.
+        final BigInteger n = (args.length > 0)
+            ? BigInteger.valueOf(Long.valueOf(args[0]))
+            : BigInteger.valueOf(sDEFAULT_N);
+
+        // Test the StreamsUtils.joinAll() method.
+        test.testJoinAll(factList, n);
+
+        // Test the FuturesCollector.
+        test.testFuturesCollector(factList, n);
+
+        System.out.println("Ending Factorial Tests");
+    }
 
     /**
      * This class demonstrates how a synchronized statement can avoid
@@ -42,6 +77,15 @@ public class ex18 {
                     mTotal = mTotal.multiply(n);
                 }
             }
+
+            /**
+             * Synchronize get to ensure visibility of the data.
+             */
+            BigInteger get() {
+                synchronized (this) {
+                    return mTotal;
+                }
+            }
         }
 
         /**
@@ -66,7 +110,7 @@ public class ex18 {
                 .forEach(t::multiply);
 
             // Return the total.
-            return t.mTotal;
+            return t.get();
         }
     }
 
@@ -152,25 +196,46 @@ public class ex18 {
     }
 
     /**
-     * This is the entry point into the test program.
+     * Test the StreamsUtils.joinAll() method.
      */
-    public static void main(String[] args) {
-        System.out.println("Starting Factorial Tests");
+    private void testJoinAll
+        (List<Function<BigInteger, BigInteger>> factList,
+         BigInteger n) {
+        System.out.println("Testing JoinAll");
 
-        // Initialize to the default value.
-        final BigInteger n = (args.length > 0)
-            ? BigInteger.valueOf(Long.valueOf(args[0]))
-            : BigInteger.valueOf(sDEFAULT_N);
+        List<CompletableFuture<BigInteger>> resultsList = factList
+            // Convert the list into stream.
+            .stream()
+            
+            // Apply each factorial method asynchronously in the
+            // common fork-join pool.
+            .map(func
+                 -> CompletableFuture.supplyAsync(()
+                                                  -> func.apply(n)))
 
-        // Create a new test object.
-        ex18 test = new ex18();
+            // Trigger intermediate operations and return a list of
+            // completable futures.
+            .collect(toList());
 
-        // Create a list containing all the factorial methods.
-        List<Function<BigInteger, BigInteger>> factList =
-            Arrays.asList(SynchronizedParallelFactorial::factorial,
-                          SequentialStreamFactorial::factorial,
-                          ParallelStreamFactorial2::factorial,
-                          ParallelStreamFactorial3::factorial);
+        StreamsUtils
+            // Create a single future that will complete when all
+            // futures in resultsList complete.
+            .joinAll(resultsList)
+
+            // Wait for the single future to complete.
+            .join()
+
+            // Printout all the results.
+            .forEach(System.out::println);
+    }
+
+    /**
+     * Test the FuturesCollector.
+     */
+    private void testFuturesCollector
+        (List<Function<BigInteger, BigInteger>> factList,
+         BigInteger n) {
+        System.out.println("Testing FuturesCollector");
 
         // Create a single completable future to a list of completed
         // BigIntegers.
@@ -184,14 +249,15 @@ public class ex18 {
                  -> CompletableFuture.supplyAsync(()
                                                   -> func.apply(n)))
 
-            // Collect the results into a single completable future.
-            .collect(FuturesCollector.toFutures());
+            // Trigger intermediate processing and return a single
+            // completable future.
+            .collect(FuturesCollector.toFuture());
 
-        // Wait for the single future to complete and then printout
-        // all the results.
-        resultsFuture.join().forEach(System.out::println);
+        resultsFuture
+            // Wait for the single future to complete.
+            .join()
 
-        System.out.println("Ending Factorial Tests");
+            // Printout all the results.
+            .forEach(System.out::println);
     }
 }
-

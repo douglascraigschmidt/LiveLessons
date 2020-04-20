@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Prime (ExecutorService)</string>
-    <string name="hintprompt">Please touch the floating action button to set the count</string>
-    <string name="enter_count">Enter count (or return for default)</string>
-</resources>

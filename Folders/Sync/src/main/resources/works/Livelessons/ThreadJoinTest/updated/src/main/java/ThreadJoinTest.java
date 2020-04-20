@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * This program implements an "embarrassingly parallel" application
- * that concurrently searches for phrases in a list of strings
- * containing the complete works of William Shakespeare.  It
- * demonstrates the use of Java 8 functional programming features
- * (such as lambda expressions, method references, and functional
- * interfaces) in conjunction with Thread.start() to run threads and
- * Thread.join() to wait for all running threads.
+ * This program implements an "embarrassingly parallel" app that
+ * searches for phrases in a list of strings containing the complete
+ * works of William Shakespeare.  It demonstrates the use of Java
+ * functional programming features (such as lambda expressions, method
+ * references, and functional interfaces) in conjunction with
+ * Thread.start() to run threads and Thread.join() to wait for all
+ * running threads.
  */
 public class ThreadJoinTest {
     /*
@@ -48,62 +48,30 @@ public class ThreadJoinTest {
      * This is the main entry point into the program.
      */
     static public void main(String[] args) {
-        System.out.println("Starting SearchStream");
+        System.out.println("Starting ThreadJoinTest");
 
-        // Create/run an object to search for phrases concurrently.
-        new SearchOneShotThreadJoin().run();
+        // Create/run an object to search for phrases in parallel.
+        new SearchOneShotThreadJoin();
 
-        System.out.println("Ending SearchStream");
+        System.out.println("Ending ThreadJoinTest");
     }
 
     /**
      * This class starts a thread for each element in the list of
      * input strings and uses Thread.join() to wait for all threads to
      * finish.  This implementation requires no Java synchronization
-     * mechanisms other than what's provided by the Thread class.
+     * mechanisms other than what's provided by the Java Thread class.
      */
-    static class SearchOneShotThreadJoin
-           implements Runnable {
+    static class SearchOneShotThreadJoin {
         /**
-         * This factory method creates a list of threads that will be
-         * joined when their processing is done.
-         *
-         * @param task Function to run in each thread.
-         * @return List of threads that will run the @a task.
+         * Start the threads to perform the parallel phrase searches.
          */
-        List<Thread> makeWorkerThreads(Function<String, Void> task) {
-            // Create a new list.
-            List<Thread> workerThreads = new ArrayList<>();
-
-            assert mInputList != null;
-            // Create a thread for each input string to perform
-            // processing designated by the task parameter.
-            mInputList.forEach
-                (input ->
-                 // Add a new thread to the list.
-                 workerThreads.add
-                 (new Thread(()
-                             // Create lambda runnable to run in
-                             // thread.
-                             ->
-                             // Apply the task to process the input
-                             // string.
-                             task.apply(input))));
-
-            return workerThreads;
-        }
-
-        /**
-         * Start the threads to perform the concurrent phrase searches.
-         */
-        @Override
-        public void run() {
+        SearchOneShotThreadJoin() {
             // Call the makeWorkerThreads() factory method to create a
             // list of threads that each runs the processInput()
             // method reference.  These threads will be joined after
             // they process the input strings.
-            List<Thread> workerThreads =
-                makeWorkerThreads(this::processInput);
+            List<Thread> workerThreads = makeWorkerThreads(this::processInput);
 
             // Iterate through the list of threads and pass a method
             // reference that starts a thread for each input string.
@@ -114,7 +82,7 @@ public class ThreadJoinTest {
             workerThreads.forEach(thread -> {
                     try {
                         thread.join();
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }});
 
@@ -129,20 +97,59 @@ public class ThreadJoinTest {
         }
 
         /**
+         * This factory method creates a list of threads that will be
+         * joined when their processing is done.
+         *
+         * @param task Function to run in each thread.
+         * @return List of threads that will run the @a task.
+         */
+        List<Thread> makeWorkerThreads(Function<String, Void> task) {
+            // Create a new list.
+            List<Thread> workerThreads = new ArrayList<Thread>();
+
+            // Ensure we've got non-null input!
+            assert mInputList != null;
+
+            // Create a thread for each input string to perform
+            // processing designated by the task parameter.
+            mInputList.forEach
+                (input ->
+                 // Add a new thread to the list.
+                 workerThreads.add(new Thread(()
+                                              // Create lambda
+                                              // runnable to run in
+                                              // thread.
+                                              ->
+                                              // Apply the task to
+                                              // process the input
+                                              // string.
+                                              task.apply(input))));
+
+            return workerThreads;
+        }
+
+        /**
          * This method runs in a background thread and searches the @a
          * input for all occurrences of the phrases to find.
+         *
+         * @param input Input string to search for matching phrases.
          */
         private Void processInput(String input) {
+            // Get the title of the work.
+            // Could use String title
             String title = getTitle(input);
 
+            // Ensure we've got non-null input!
+            assert mPhrasesToFind != null;
+
             // Iterate through each phrase to find.
-            for (String phrase : mPhrasesToFind) 
+            for (String phrase : mPhrasesToFind)
 
                 // Check to see how many times (if any) the phrase
                 // appears in the input data.
-                for (int i = input.indexOf(phrase, 0);
-                     i != -1;
-                     i = input.indexOf(phrase, i + phrase.length()))
+                for (int offset = input.indexOf(phrase);
+                     offset != -1;
+                     offset = input.indexOf(phrase, offset + phrase.length()))
 
                     // Whenever a match is found we print out the
                     // results.
@@ -151,7 +158,7 @@ public class ThreadJoinTest {
                                        + " the phrase \""
                                        + phrase
                                        + "\" was found at character offset "
-                                       + i
+                                       + offset
                                        + " in \""
                                        + title
                                        + "\"");
@@ -162,7 +169,10 @@ public class ThreadJoinTest {
          * Return the title portion of the @a input.
          */
         String getTitle(String input) {
+            // Each title appears on the first line of a work.
             int endOfTitlePos = input.indexOf('\n');
+
+            // Extract the title.
             return input.substring(0, endOfTitlePos);
         }
     }

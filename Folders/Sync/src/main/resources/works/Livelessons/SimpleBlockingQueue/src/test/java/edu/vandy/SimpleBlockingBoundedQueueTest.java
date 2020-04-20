@@ -85,7 +85,7 @@ public class SimpleBlockingBoundedQueueTest {
 
         /**
          * This method runs in a separate Java thread and receives
-         * integers from a producer thread[q via a shared BoundedQueue.
+         * integers from a producer thread via a shared BoundedQueue.
          */
         public void run() {
             Integer integer = null;

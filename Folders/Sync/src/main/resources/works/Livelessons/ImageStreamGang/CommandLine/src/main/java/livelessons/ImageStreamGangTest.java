@@ -1,18 +1,10 @@
 package livelessons;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.File;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import livelessons.streams.ImageStreamCompletableFuture1;
-import livelessons.streams.ImageStreamCompletableFuture2;
-import livelessons.streams.ImageStreamGang;
-import livelessons.streams.ImageStreamParallel;
-import livelessons.streams.ImageStreamSequential;
+import livelessons.streams.*;
+import livelessons.utils.FileUtils;
 import livelessons.utils.Options;
 import livelessons.filters.Filter;
 import livelessons.filters.GrayScaleFilter;
@@ -24,13 +16,16 @@ import livelessons.filters.NullFilter;
  */
 public class ImageStreamGangTest {
     /**
-     * Enumerated type that lists all the implementation strategies to test.
+     * Enumerated type that lists all the implementation strategies to
+     * test.
      */
     enum TestsToRun {
         SEQUENTIAL_STREAM,
         PARALLEL_STREAM,
         COMPLETABLE_FUTURES_1,
         COMPLETABLE_FUTURES_2,
+        RXJAVA1, 
+        RXJAVA2
     }
     
     /**
@@ -39,6 +34,7 @@ public class ImageStreamGangTest {
     private final static Filter[] mFilters = {
         new NullFilter(),
         new GrayScaleFilter()
+        // Other filters can go here..
     };
 
     /**
@@ -49,8 +45,8 @@ public class ImageStreamGangTest {
     private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 
     /**
-     * The JVM requires a static main() entry point to run the console version of
-     * the ImageStreamGang app.
+     * The JVM requires a static main() entry point to run the console
+     * version of the ImageStreamGang app.
      */
     public static void main(String[] args) {
         System.out.println("Starting ImageStreamGangTest");
@@ -74,59 +70,32 @@ public class ImageStreamGangTest {
 
         // Iterate thru the implementation strategies and test them.
         for (TestsToRun test : TestsToRun.values()) {
-            System.out.println("Starting " + test); 
-
-            // Create an Iterator that contains all the image URLs to
-            // obtain and process.
-            Iterator<List<URL>> urlIterator = 
-                Options.instance().getUrlIterator();
+            System.out.println("Starting " + test);
 
             // Delete any the filtered images from the previous run.
-            deleteFilteredImages();
+            FileUtils.deleteAllFiles(mFilters);
 
             // Make an ImageStreamGang object via the factory method.
             ImageStreamGang streamGang =
                 makeImageStreamGang(mFilters,
-                                    urlIterator,
+                                    Options.instance().getUrlIterator(),
                                     test);
 
-            // Start running the test.
+            // Run garbage collector first to avoid perturbing test timing.
+            System.gc();
+
+            // Start running the test (which initiates the timer).
             streamGang.run();
 
-            // Store the execution times.
-            mResultsMap.put(test.toString(), streamGang.executionTimes());
-
-            // Run the garbage collector to avoid perturbing the test.
-            System.gc();
+            // Store the execution times for this test run.
+            mResultsMap.put(test.toString(),
+                            streamGang.executionTimes());
 
             System.out.println("Ending " + test);
         }
 
         // Print out all the timing results.
         printTimingResults(mResultsMap);
-    }
-
-    /**
-     * Warm up the threads in the common fork-join pool so the timing
-     * results will be more accurate.
-     */
-    private static void warmUpForkJoinPool() {
-        System.out.println("Warming up the fork-join pool");
-
-        // Delete any the filtered images from the previous run.
-        deleteFilteredImages();
-
-        // Create and run the ImageStreamParallel test to warm up
-        // threads in the common fork-join pool.
-        ImageStreamGang streamGang =
-            new ImageStreamParallel(mFilters,
-                                    Options.instance().getUrlIterator());
-        streamGang.run();
-
-        // Run the garbage collector to avoid perturbing the test.
-        System.gc();
-
-        System.out.println("End warming up the fork-join pool");
     }
 
     /**
@@ -149,49 +118,14 @@ public class ImageStreamGangTest {
         case COMPLETABLE_FUTURES_2:
             return new ImageStreamCompletableFuture2(filters,
                                                      urlIterator);
+        case RXJAVA1:
+            return new ImageStreamRxJava1(filters,
+                                         urlIterator);
+        case RXJAVA2:
+                return new ImageStreamRxJava2(filters,
+                           urlIterator);
         }
         return null;
-    }
-
-    /**
-     * Clears the filter directories.
-     */
-    private static void deleteFilteredImages() {
-        int deletedFiles = 0;
-
-        // Delete all the filter directories.
-        for (Filter filter : mFilters)
-            deletedFiles += deleteSubFolders
-                (new File(Options.instance().getDirectoryPath(),
-                          filter.getName()).getAbsolutePath());
-
-        System.out.println(deletedFiles
-                           + " previously downloaded file(s) deleted");
-    }
-
-    /**
-     * Recursively delete files in a specified directory.
-     */
-    private static int deleteSubFolders(String path) {
-        int deletedFiles = 0;
-        File currentFolder = new File(path);        
-        File files[] = currentFolder.listFiles();
-
-        if (files == null) 
-            return 0;
-
-        // Java doesn't delete a directory with child files, so we
-        // need to write code that handles this recursively.
-        for (File f : files) {          
-            if (f.isDirectory()) 
-                deletedFiles += deleteSubFolders(f.toString());
-            f.delete();
-            deletedFiles++;
-        }
-
-        // Don't delete the current folder.
-        // currentFolder.delete();
-        return deletedFiles;
     }
 
     /**
@@ -231,7 +165,7 @@ public class ImageStreamGangTest {
                          entry.getKey()))
 
                 // Sort the stream by the timing results (key).
-                .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
+                .sorted(Map.Entry.comparingByKey())
 
                 // Print all the entries in the sorted stream.
                 .forEach(entry
@@ -241,5 +175,26 @@ public class ImageStreamGangTest {
                                                + entry.getKey()
                                                + " msecs"));
         }
+    }
+
+    /**
+     * Warm up the threads in the common fork-join pool so the timing
+     * results will be more accurate.
+     */
+    private static void warmUpForkJoinPool() {
+        System.out.println("Warming up the fork-join pool");
+
+        // Delete any the filtered images from the previous run.
+        FileUtils.deleteAllFiles(mFilters);
+
+        // Create and run the ImageStreamParallel test to warm up
+        // threads in the common fork-join pool.
+        ImageStreamGang streamGang =
+                new ImageStreamParallel(mFilters,
+                                        Options.instance().getUrlIterator());
+
+        streamGang.run();
+
+        System.out.println("End warming up the fork-join pool");
     }
 }
