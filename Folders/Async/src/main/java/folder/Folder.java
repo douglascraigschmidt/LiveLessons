@@ -171,7 +171,11 @@ public class Folder
      * folder.
      */
     private void computeSize() {
-        long folderCount = getSubFolders()
+        List<Dirent> folderList = getSubFolders();
+
+        long folderCount = (folderList == null || folderList.size() == 0)
+            ? 0
+            : folderList
             // Convert list to a stream.
             .stream()
 
@@ -181,10 +185,15 @@ public class Folder
             // Sub up the sizes of the subfolders.
             .sum();
 
+        List<Dirent> documentList = getDocuments();
+        long documentCount = (documentList == null || documentList.size() == 0)
+           ? 0
+           : documentList.size();
+
         // Update the field with the correct count.
         mSize = folderCount 
             // Count the number of documents in this folder.
-            + (long) getDocuments().size()
+            + (long) documentCount
 
             // Add 1 to count this folder.
             + 1;

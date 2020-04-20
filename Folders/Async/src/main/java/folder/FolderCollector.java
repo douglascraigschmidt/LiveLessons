@@ -4,6 +4,7 @@ import utils.ArrayUtils;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -42,8 +43,7 @@ public class FolderCollector
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
-        return (Folder folder, Path entry) 
-            -> folder.addEntry(entry);
+        return Folder::addEntry;
     }
 
     /**
@@ -80,10 +80,18 @@ public class FolderCollector
                 ArrayUtils.concat(folder.mSubFolderFutures,
                                   folder.mDocumentFutures);
 
+            if (futures == null) {
+                System.out.println("In finisher with subfolder = "
+                        + folder.mSubFolderFutures.size()
+                        + " and document = "
+                        + folder.mDocumentFutures.size());
+                return CompletableFuture.completedFuture(folder);
+            }
+
             // Create a future that will complete when all the other
             // futures have completed.
             CompletableFuture<Void> allDoneFuture =
-                CompletableFuture.allOf(futures);
+                CompletableFuture.allOf(Objects.requireNonNull(futures));
 
             // Return a future to this folder after first initializing its
             // subfolder/document fields after allDoneFuture completes.
@@ -107,7 +115,6 @@ public class FolderCollector
                         folder.mDocuments = folder.mDocumentFutures
                             // Convert the list into a stream.
                             .stream()
-
 
                             // Convert the future to a directory entry.
                             // Note that join() won't block since all the
@@ -139,7 +146,7 @@ public class FolderCollector
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Collector.Characteristics> characteristics() {
         return Collections.emptySet();
     }
 

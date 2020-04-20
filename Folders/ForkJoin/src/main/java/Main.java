@@ -1,69 +1,127 @@
+import utils.RunTimer;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.concurrent.*;
 
 /**
- * This example shows how to use the Java fork-join pool framework and
- * Java sequential streams to count the number of files in a (large)
- * recursive folder hierarchy, as well as calculate the cumulative
- * sizes of all the files.
- *
- * Interestingly, earlier versions of Java (e.g., Java 8) seem to have
- * a "quirk" with the common fork-join pool where it will continue to
- * grow without bound when used with blocking I/O calls.  This doesn't
- * seem to be a problem with later versions of Java, e.g., Java 11.
+ * This example shows how to use various Java mechanisms (including
+ * the Java fork-join pool framework and sequential stream framework)
+ * to count the number of files in a (large) recursive folder
+ * hierarchy, as well as calculate the cumulative sizes of all the
+ * files.
  */
 class Main {
-    /**
-     * The fork-join pool to use for the program.
-     */
-    private static final ForkJoinPool sFJPool =
-        ForkJoinPool.commonPool();
-    // @@ If you change the initialization of sFJPool to use the
-    // common pool you may get a runtime error with earlier versions
-    // of Java.  In that case, I recommend using new ForkJoinPool().
-
     /**
      * Main entry point into the program runs the tests.
      */
     public static void main(String[] args) throws URISyntaxException {
         System.out.println("Starting the file counter program");
 
+        // Run a test that uses the Java fork-join framework in
+        // conjunction with Java 7 features.
+        runFileCounterTask();
+
+        // Run a test that uses the Java fork-join framework in
+        // conjunction with Java sequential streams features.
+        runFileCounterStream();
+
+        // Run a test that uses the Java Files.walk() method and
+        // a sequential stream to count the files.
+        runFileCounterWalkStream();
+
+        // Run a test that uses the Java Files.walkFileTree() method
+        // and the Visitor pattern to count the files.
+        runFileCounterWalkFileTree();
+
+        // Get and print the timing results.
+        System.out.println(RunTimer.getTimingResults());
+
+        System.out.println("Ending the file counter program");
+    }
+
+    /**
+     * Run a test that uses the Java fork-join framework in
+     * conjunction with Java 7 features.
+     */
+    private static void runFileCounterTask() throws URISyntaxException {
+        runTest(new ForkJoinPool(),
+                new FileCounterTask
+                (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterTask");
+    }
+
+    /**
+     * Run a test that uses the Java fork-join framework in
+     * conjunction with Java sequential streams features.
+     */
+    private static void runFileCounterStream() throws URISyntaxException {
+        runTest(new ForkJoinPool(),
+                new FileCounterStream
+                (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterStream");
+    }
+
+    /**
+     * Run a test that uses the Java Files.walk() method and a
+     * sequential stream to count the files.
+     */
+    private static void runFileCounterWalkFileTree() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterWalkFileTree
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterWalkFileTree");
+    }
+
+    /**
+     * Run a test that uses the Java Files.walkFileTree() method and
+     * the Visitor pattern to count the files.
+     */
+    private static void runFileCounterWalkStream() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterWalkStream
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterWalkStream");
+    }
+
+    /**
+     * Run all the tests and collect/print the results.
+     *
+     * @param fJPool The fork-join pool to use for the test
+     * @param testTask The file counter task to run
+     * @param testName The name of the test
+     */
+    private static void runTest(ForkJoinPool fJPool,
+                                AbstractFileCounter testTask,
+                                String testName) {
         // Run the GC first.
         System.gc();
 
-        // Take a snapshot of the current time.
-        long start = System.currentTimeMillis();
-
-        // Create a task that will count the number of files and sizes
-        // of the files in a large directory hierarchy.
-        FileCounterTask fileCounterTask = new FileCounterTask
-            (new File(ClassLoader.getSystemResource("works").toURI()));
-
-        // Run the FileCounterTask on the root of a large directory
-        // hierarchy.
-        long size = sFJPool.invoke(fileCounterTask);
+        // Run the task on the root of a large directory hierarchy.
+        long size = RunTimer.timeRun(() -> fJPool.invoke(testTask),
+                                     testName);
 
         // Print the results.
-        System.out.println(""
-                           + (fileCounterTask.documentCount()
-                              + fileCounterTask.folderCount())
+        System.out.println(testName
+                           + ": "
+                           + (testTask.documentCount()
+                              + testTask.folderCount())
                            + " files ("
-                           + fileCounterTask.documentCount()
+                           + testTask.documentCount()
                            + " documents and " +
-                           + fileCounterTask.folderCount()
+                           + testTask.folderCount()
                            + " folders) contained "
                            + size // / 1_000_000)
                            + " bytes");
-        System.out.println("total time taken for the processing was "
-                           + (System.currentTimeMillis() - start)
-                           + " ms");
-        System.out.println();
-        System.out.println("pool size = " + sFJPool.getPoolSize() +
-                           ", steal count = " + sFJPool.getStealCount() +
-                           ", running thread count = " + sFJPool.getRunningThreadCount());
 
-        System.out.println("Ending the file counter program");
+        // Only print these results for a non-common fork-join pools.
+        if (fJPool != ForkJoinPool.commonPool())
+            System.out.println("pool size = "
+                               + fJPool.getPoolSize()
+                               + ", steal count = "
+                               + fJPool.getStealCount()
+                               + ", running thread count = "
+                               + fJPool.getRunningThreadCount());
     }
 }
 

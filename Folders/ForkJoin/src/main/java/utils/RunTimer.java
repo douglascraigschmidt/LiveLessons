@@ -40,7 +40,7 @@ public class RunTimer {
     /**
      * Call @a supplier.get() and time how long it takes to run.
      *
-     * @return The result returned by {@code supplier.get()}
+     * @return The result returned by @a supplier.get()
      */
     public static <U> U timeRun(Supplier<U> supplier,
                                 String testName) {
@@ -66,7 +66,7 @@ public class RunTimer {
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
-                mExecutionTime);
+                        mExecutionTime);
     }
 
     /**
