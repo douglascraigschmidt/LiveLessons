@@ -26,6 +26,10 @@ class Main {
         // conjunction with Java sequential streams features.
         runFileCounterStream();
 
+        // Run a test that uses the Java fork-join framework in
+        // conjunction with Java parallel streams features.
+        runFileCounterParallelStream();
+
         // Run a test that uses the Java Files.walk() method and
         // a sequential stream to count the files.
         runFileCounterWalkStream();
@@ -48,7 +52,8 @@ class Main {
         runTest(new ForkJoinPool(),
                 new FileCounterTask
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterTask");
+                "FileCounterTask",
+                true);
     }
 
     /**
@@ -59,7 +64,20 @@ class Main {
         runTest(new ForkJoinPool(),
                 new FileCounterStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterStream");
+                "FileCounterStream",
+                true);
+    }
+
+    /**
+     * Run a test that uses the Java fork-join framework in
+     * conjunction with Java parallel streams features.
+     */
+    private static void runFileCounterParallelStream() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterParallelStream
+                (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterParallelStream",
+                true);
     }
 
     /**
@@ -70,7 +88,8 @@ class Main {
         runTest(ForkJoinPool.commonPool(),
                 new FileCounterWalkFileTree
                         (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkFileTree");
+                "FileCounterWalkFileTree",
+                false);
     }
 
     /**
@@ -81,7 +100,8 @@ class Main {
         runTest(ForkJoinPool.commonPool(),
                 new FileCounterWalkStream
                         (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkStream");
+                "FileCounterWalkStream",
+                false);
     }
 
     /**
@@ -93,7 +113,8 @@ class Main {
      */
     private static void runTest(ForkJoinPool fJPool,
                                 AbstractFileCounter testTask,
-                                String testName) {
+                                String testName,
+                                boolean printStats) {
         // Run the GC first.
         System.gc();
 
@@ -114,8 +135,8 @@ class Main {
                            + size // / 1_000_000)
                            + " bytes");
 
-        // Only print these results for a non-common fork-join pools.
-        if (fJPool != ForkJoinPool.commonPool())
+        // Only print these results for certain tests.
+        if (printStats)
             System.out.println("pool size = "
                                + fJPool.getPoolSize()
                                + ", steal count = "
