@@ -45,16 +45,17 @@ class Main {
         long size = sFJPool.invoke(fileCounterTask);
 
         // Print the results.
-        System.out.println("total time to process "
+        System.out.println(""
                            + (fileCounterTask.documentCount()
                               + fileCounterTask.folderCount())
                            + " files ("
                            + fileCounterTask.documentCount()
                            + " documents and " +
                            + fileCounterTask.folderCount()
-                           + " folders) containing "
-                           + (size / 1_000_000) 
-                           + " MBytes of data was "
+                           + " folders) contained "
+                           + size // / 1_000_000)
+                           + " bytes");
+        System.out.println("total time taken for the processing was "
                            + (System.currentTimeMillis() - start)
                            + " ms");
         System.out.println();
