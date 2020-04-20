@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Spliterators.spliterator() to create a sequential stream of Dirents
  * from a recursively structured directory folder.
  */
-public class FolderSpliterator
+public class BFSFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
     /**
      * Iterator traverses the folder contents one directory entry at a
@@ -32,7 +32,7 @@ public class FolderSpliterator
     /**
      * Constructor initializes the fields and super class.
      */
-    FolderSpliterator(Folder folder) {
+    BFSFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
         //         Options.getInstance().setVerbose(true);
 

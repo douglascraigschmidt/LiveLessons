@@ -85,7 +85,7 @@ public class Folder
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
-        return new FolderSpliterator(this);
+        return new BFSFolderSpliterator(this);
     }
 
     /**

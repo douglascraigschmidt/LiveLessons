@@ -55,6 +55,8 @@ public class Folder
     Folder() {
         mSubFolderFutures = new ArrayList<>();
         mDocumentFutures = new ArrayList<>();
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
     }
     
     /**
@@ -85,7 +87,9 @@ public class Folder
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
-        return new FolderSpliterator(this);
+        // Create a spliterator that uses breadth-first search
+        // to traverse the recursive folder structure.
+        return new BFSFolderSpliterator(this);
     }
 
     /**
@@ -105,7 +109,7 @@ public class Folder
 
     /**
      * Factory method that asynchronously creates a folder from the
-     * given @a file.
+     * given {@code file}.
      *
      * @param file The file associated with the folder in the file system
      *
@@ -118,7 +122,7 @@ public class Folder
 
     /**
      * Factory method that asynchronously creates a folder from the
-     * given @a file.
+     * given {@code file}.
      *
      * @param rootPath The path of the folder in the file system
      *
@@ -128,33 +132,40 @@ public class Folder
     public static CompletableFuture<Dirent> fromDirectory(Path rootPath) {
         // Return a future that completes once the folder's contents
         // are available.
-        return CompletableFuture.supplyAsync(() -> {
-                Function<Path, Stream<Path>> getStream = ExceptionUtils
-                    .rethrowFunction(path
-                                     // List all subfolders and
-                                     // documents in just this folder.
-                                     -> Files.walk(path, 1));
+        return CompletableFuture
+            // Arrange to run this supplier lambda in the common fork-join pool.
+            .supplyAsync(() -> {
+                    Function<Path, Stream<Path>> getStream = ExceptionUtils
+                        .rethrowFunction(path ->
+                                         // List all subfolders and
+                                         // documents in this path.
+                                         Files.walk(path,
+                                                    // Limit to just
+                                                    // this folder.
+                                                    1));
 
-                // Create a stream containing all the contents at the
-                // given rootPath.
-                Stream<Path> pathStream = getStream.apply(rootPath);
+                    // Create a stream containing all the contents at
+                    // the given rootPath.
+                    Stream<Path> pathStream = getStream.apply(rootPath);
 
-                // Create a future to the folder containing all the
-                // contents at the given rootPath.
-                return pathStream
-                    // Eliminate rootPath to avoid infinite recursion.
-                    .filter(path -> !path.equals(rootPath))
+                    // Create a future to the folder containing all
+                    // the contents at the given rootPath.
+                    return pathStream
+                        // Eliminate rootPath to avoid infinite
+                        // recursion.
+                        .filter(path -> !path.equals(rootPath))
 
-                    // Terminate the stream and create a Folder
-                    // containing all entries in this folder.
-                    .collect(FolderCollector.toFolder());
-            })
-            .thenCompose(folderFuture -> {
+                        // Terminate stream and create a Folder containing
+                        // all entries in this (sub)folder.
+                        .collect(FolderCollector.toFolder());
+                })
+            // This completion stage method is needed since supplyAsync() returns
+            // a future to a future!
+            .thenCompose(folderFuture ->
                     // Run the following code after the folder's
                     // contents are available.
-                    return folderFuture
-                        .thenApply(folder
-                                   -> {
+                    folderFuture
+                        .thenApply(folder -> {
                                        // Set the path of the folder.
                                        folder.setPath(rootPath);
                                        folder.computeSize();
@@ -162,8 +173,7 @@ public class Folder
                                        // Return the folder, which is
                                        // wrapped in a future.
                                        return folder;
-                                   });
-                });
+                                   }));
     }
 
     /**
@@ -171,11 +181,8 @@ public class Folder
      * folder.
      */
     private void computeSize() {
-        List<Dirent> folderList = getSubFolders();
-
-        long folderCount = (folderList == null || folderList.size() == 0)
-            ? 0
-            : folderList
+        // Update the field with the correct count.
+        mSize = getSubFolders()
             // Convert list to a stream.
             .stream()
 
@@ -183,44 +190,38 @@ public class Folder
             .mapToLong(subFolder -> ((Folder) subFolder).mSize)
 
             // Sub up the sizes of the subfolders.
-            .sum();
+            .sum()
 
-        List<Dirent> documentList = getDocuments();
-        long documentCount = (documentList == null || documentList.size() == 0)
-           ? 0
-           : documentList.size();
-
-        // Update the field with the correct count.
-        mSize = folderCount 
             // Count the number of documents in this folder.
-            + (long) documentCount
+            + getDocuments().size()
 
             // Add 1 to count this folder.
             + 1;
     }
 
     /*
-     * The methods below are used by the FolderCollector.
+     * The method below is used by FolderCollector.
      */
 
     /**
-     * Add a new @a entry to the appropriate list of futures.
+     * Add a new {@code entry} to the appropriate list of futures.
      */
     void addEntry(Path entry) {
-        // This adapter simplifies exception handling.
-        Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
-            // Asynchronously create a folder from a directory file.
-            .rethrowFunction(Folder::fromDirectory);
-
-        // This adapter simplifies exception handling.
-        Function<Path, CompletableFuture<Dirent>> getDocument = ExceptionUtils
-            // Asynchronously create a document from a path.
-            .rethrowFunction(Document::fromPath);
-
         // Add entry to the appropriate list of futures.
-        if (Files.isDirectory(entry))
+        if (Files.isDirectory(entry)) {
+            // This adapter simplifies checked exception handling.
+            Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
+                    // Asynchronously create a folder from a directory file.
+                    .rethrowFunction(Folder::fromDirectory);
+
             mSubFolderFutures.add(getFolder.apply(entry));
-        else
+        } else {
+            // This adapter simplifies exception handling.
+            Function<Path, CompletableFuture<Dirent>> getDocument = ExceptionUtils
+                    // Asynchronously create a document from a path.
+                    .rethrowFunction(Document::fromPath);
+
             mDocumentFutures.add(getDocument.apply(entry));
+        }
     }
 }

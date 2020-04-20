@@ -81,58 +81,60 @@ public class FolderCollector
                                   folder.mDocumentFutures);
 
             if (futures == null) {
+                /*
                 System.out.println("In finisher with subfolder = "
                         + folder.mSubFolderFutures.size()
                         + " and document = "
-                        + folder.mDocumentFutures.size());
+                        + folder.mDocumentFutures.size()); */
                 return CompletableFuture.completedFuture(folder);
+            } else {
+
+                // Create a future that will complete when all the other
+                // futures have completed.
+                CompletableFuture<Void> allDoneFuture =
+                        CompletableFuture.allOf(Objects.requireNonNull(futures));
+
+                // Return a future to this folder after first initializing its
+                // subfolder/document fields after allDoneFuture completes.
+                return allDoneFuture
+                        .thenApply(v -> {
+                            // Initialize all the subfolders.
+                            folder.mSubFolders = folder.mSubFolderFutures
+                                    // Convert the list into a stream.
+                                    .stream()
+
+                                    // Convert the future to a directory entry.
+                                    // Note that join() won't block since all the
+                                    // futures have completed by this point.
+                                    .map(CompletableFuture::join)
+
+                                    // Trigger intermediate processing and return
+                                    // a list.
+                                    .collect(toList());
+
+                            // Initialize all the documents.
+                            folder.mDocuments = folder.mDocumentFutures
+                                    // Convert the list into a stream.
+                                    .stream()
+
+                                    // Convert the future to a directory entry.
+                                    // Note that join() won't block since all the
+                                    // futures have completed by this point.
+                                    .map(CompletableFuture::join)
+
+                                    // Trigger intermediate processing and return
+                                    // a list.
+                                    .collect(toList());
+
+                            // Initialize the size.
+                            folder.mSize = folder.mSubFolders.size()
+                                    + folder.mDocuments.size();
+
+                            // Return this folder, which is converted to a
+                            // future to a folder.
+                            return folder;
+                        });
             }
-
-            // Create a future that will complete when all the other
-            // futures have completed.
-            CompletableFuture<Void> allDoneFuture =
-                CompletableFuture.allOf(Objects.requireNonNull(futures));
-
-            // Return a future to this folder after first initializing its
-            // subfolder/document fields after allDoneFuture completes.
-            return allDoneFuture
-                .thenApply(v -> {
-                        // Initialize all the subfolders.
-                        folder.mSubFolders = folder.mSubFolderFutures
-                            // Convert the list into a stream.
-                            .stream()
-
-                            // Convert the future to a directory entry.
-                            // Note that join() won't block since all the
-                            // futures have completed by this point.
-                            .map(CompletableFuture::join)
-
-                            // Trigger intermediate processing and return
-                            // a list.
-                            .collect(toList());
-
-                        // Initialize all the documents.
-                        folder.mDocuments = folder.mDocumentFutures
-                            // Convert the list into a stream.
-                            .stream()
-
-                            // Convert the future to a directory entry.
-                            // Note that join() won't block since all the
-                            // futures have completed by this point.
-                            .map(CompletableFuture::join)
-
-                            // Trigger intermediate processing and return
-                            // a list.
-                            .collect(toList());
-
-                        // Initialize the size.
-                        folder.mSize = folder.mSubFolders.size() 
-                            + folder.mDocuments.size();
-
-                        // Return this folder, which is converted to a
-                        // future to a folder.
-                        return folder;
-                    });
         };
     }
     
