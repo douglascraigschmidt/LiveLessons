@@ -1,6 +1,7 @@
 package folder;
 
 import utils.ExceptionUtils;
+import utils.Options;
 
 import java.io.File;
 import java.net.URL;
@@ -71,8 +72,10 @@ public class Folder
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
-        // return new BatchFolderSpliterator(this);
-        return new RecursiveFolderSpliterator(this);
+        if (Options.getInstance().useRecursiveSpliterator())
+            return new RecursiveFolderSpliterator(this);
+        else
+            return new BatchFolderSpliterator(this);
     }
 
     /**

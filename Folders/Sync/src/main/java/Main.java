@@ -21,8 +21,7 @@ public class Main {
      * The input "works", which is a large recursive folder containing
      * thousands of subfolders and files.
      */
-    private static final String sWORKS =
-        "works";
+    private static final String sWORKS = "works";
 
     /**
      * Display {@code string} if the program is run in verbose mode.

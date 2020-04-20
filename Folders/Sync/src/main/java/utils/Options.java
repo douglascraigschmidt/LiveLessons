@@ -26,10 +26,10 @@ public class Options {
     private boolean mVerbose = false;
 
     /**
-     * Stores whether the user wants to run the tests in parallel.  Default
-     * is not-parallel.
+     * Stores whether the user wants to create a recursive
+     * spliterators.  Default is recursive.
      */
-    private boolean mParallel = false;
+    private boolean mRecursiveSpliterator = true;
 
     /**
      * Must have a private constructor.
@@ -42,8 +42,8 @@ public class Options {
      */
     public boolean parseArgs(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-p")) 
-                mParallel = true;
+            if (args[i].equals("-r")) 
+                mRecursiveSpliterator = true;
             else if (args[i].equals("-v")) 
                 mVerbose = true;
             else {
@@ -70,17 +70,17 @@ public class Options {
     }
 
     /**
-     * @return True if the user wants to run the tests in parallel,
-     * else false
+     * @return True if the user wants to create a recursive
+     * spliterator else false
      */
-    public boolean getParallel() {
-        return mParallel;
+    public boolean useRecursiveSpliterator() {
+        return mRecursiveSpliterator;
     }
     
     /** 
      * Print out usage and default values. 
      */
     private void printUsage() {
-        System.out.println("Options usage: \n-p -v");
+        System.out.println("Options usage: \n-r -v");
     }
 }
