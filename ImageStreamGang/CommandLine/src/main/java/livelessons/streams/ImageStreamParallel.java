@@ -3,12 +3,12 @@ package livelessons.streams;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import livelessons.filters.Filter;
 import livelessons.utils.Image;
-import livelessons.utils.StreamsUtils;
 
 /**
  * This implementation strategy customizes ImageStreamGang to use
@@ -46,7 +46,7 @@ public class ImageStreamParallel
 
             // Use filter() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
-            .filter(StreamsUtils.not(this::urlCached))
+            .filter(Predicate.not(this::urlCached))
 
             // Transform URL to an Image by downloading each image via
             // its URL.  This call ensures the common fork/join thread
