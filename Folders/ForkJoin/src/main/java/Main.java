@@ -18,6 +18,15 @@ class Main {
     public static void main(String[] args) throws URISyntaxException {
         System.out.println("Starting the file counter program");
 
+        // Run a test that uses the Java Files.walkFileTree() method,
+        // Java 7 features, and the Visitor pattern to count the
+        // files.
+        runFileCounterWalkFileTree();
+
+        // Run a test that uses the Java Files.walk() method and
+        // a sequential stream to count the files.
+        runFileCounterWalkStream();
+
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.
         runFileCounterTask();
@@ -30,18 +39,34 @@ class Main {
         // conjunction with Java parallel streams features.
         runFileCounterParallelStream();
 
-        // Run a test that uses the Java Files.walk() method and
-        // a sequential stream to count the files.
-        runFileCounterWalkStream();
-
-        // Run a test that uses the Java Files.walkFileTree() method
-        // and the Visitor pattern to count the files.
-        runFileCounterWalkFileTree();
-
         // Get and print the timing results.
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending the file counter program");
+    }
+
+    /**
+     * Run a test that uses the Java Files.walkFileTree() method, Java
+     * 7 features, and the Visitor pattern to count the files.
+     */
+    private static void runFileCounterWalkFileTree() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterWalkFileTree
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterWalkFileTree",
+                false);
+    }
+
+    /**
+     * Run a test that uses the Java Files.walk() method and a
+     * sequential stream to count the files.
+     */
+    private static void runFileCounterWalkStream() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterWalkStream
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterWalkStream",
+                false);
     }
 
     /**
@@ -81,30 +106,6 @@ class Main {
     }
 
     /**
-     * Run a test that uses the Java Files.walk() method and a
-     * sequential stream to count the files.
-     */
-    private static void runFileCounterWalkFileTree() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterWalkFileTree
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkFileTree",
-                false);
-    }
-
-    /**
-     * Run a test that uses the Java Files.walkFileTree() method and
-     * the Visitor pattern to count the files.
-     */
-    private static void runFileCounterWalkStream() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterWalkStream
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkStream",
-                false);
-    }
-
-    /**
      * Run all the tests and collect/print the results.
      *
      * @param fJPool The fork-join pool to use for the test
@@ -115,7 +116,7 @@ class Main {
                                 AbstractFileCounter testTask,
                                 String testName,
                                 boolean printStats) {
-        // Run the GC first.
+        // Run the GC first to avoid perturbing the tests.
         System.gc();
 
         // Run the task on the root of a large directory hierarchy.
@@ -129,7 +130,7 @@ class Main {
                               + testTask.folderCount())
                            + " files ("
                            + testTask.documentCount()
-                           + " documents and " +
+                           + " documents and " 
                            + testTask.folderCount()
                            + " folders) contained "
                            + size // / 1_000_000)

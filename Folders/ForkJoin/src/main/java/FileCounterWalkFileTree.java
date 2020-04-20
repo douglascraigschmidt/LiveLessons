@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
- * This task uses the Java Files.walk() method and a sequential stream
+ * This task uses the Java Files.walkFileTree() method and Java 7 features
  * to count the files and compute the size in bytes of all files in
  * folders reachable from the given root file.
  */

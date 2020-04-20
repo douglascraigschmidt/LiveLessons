@@ -7,7 +7,7 @@ import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * This task uses the Java fork-join framework to compute the size in
+ * This task uses the Java fork-join framework and Java 7 features to compute the size in
  * bytes of a given file, as well as all the files in folders
  * reachable from this file.
  */
