@@ -34,7 +34,6 @@ public class BFSFolderSpliterator
      */
     BFSFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
-        //         Options.getInstance().setVerbose(true);
 
         // Initialize the iterator.
         mIterator = new BFSIterator(folder);
@@ -83,12 +82,10 @@ public class BFSFolderSpliterator
             mCurrentEntry = rootFolder;
 
             // Add all the subfolders in the rootFolder.
-            mFoldersList = new ArrayList<>();
-            mFoldersList.addAll(rootFolder.getSubFolders());
+            mFoldersList = new ArrayList<>(rootFolder.getSubFolders());
 
             // Add all the document sin the rootFolder.
-            mDocsList = new ArrayList<>();
-            mDocsList.addAll(rootFolder.getDocuments());
+            mDocsList = new ArrayList<>(rootFolder.getDocuments());
         }
 
         /**
@@ -109,7 +106,7 @@ public class BFSFolderSpliterator
                     // entry to the end of the subfolders list.
                     mFoldersList.addAll(mCurrentEntry.getSubFolders());
 
-                    // Add any/all docuemnts from the new current
+                    // Add any/all documents from the new current
                     // entry to the end of the documents list.
                     mDocsList.addAll(mCurrentEntry.getDocuments());
                 }

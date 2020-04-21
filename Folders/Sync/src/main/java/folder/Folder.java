@@ -1,16 +1,14 @@
 package folder;
 
-import utils.ExceptionUtils;
 import utils.Options;
 
 import java.io.File;
-import java.net.URL;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterator;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -113,7 +111,7 @@ public class Folder
      * @return An open document
      */
     public static Dirent fromDirectory(File file,
-                                       boolean parallel) {
+                                       boolean parallel) throws IOException {
         return fromDirectory(file.toPath(),
                              parallel);
     }
@@ -128,18 +126,14 @@ public class Folder
      * @return An open folder containing all contents in the {@code rootPath}
      */
     public static Dirent fromDirectory(Path rootPath,
-                                       boolean parallel) {
-        // Create a function that converts a path into a stream.
-        Function<Path, Stream<Path>> getStream = ExceptionUtils
-            // An adapter to convert checked to runtime exceptions.
-            .rethrowFunction(path
-                             // Stream all subfolders and documents
-                             // in this folder.
-                             -> Files.walk(path, 1));
-
+                                       boolean parallel) throws IOException {
         // Create a stream containing all the contents at the given
         // rootPath.
-        Stream<Path> pathStream = getStream.apply(rootPath);
+        Stream<Path> pathStream = Files
+            // Stream all subfolders and documents in this folder.
+            .walk(rootPath,
+                  // Just limit to this folder.
+                  1);
 
         // Convert the stream to parallel if directed.
         if (parallel)
@@ -200,27 +194,15 @@ public class Folder
      * Add a new {@code entry} to the appropriate list of futures.
      */
     void addEntry(Path entry,
-                  boolean parallel) {
+                  boolean parallel) throws IOException {
         // Add entry to the appropriate list.
         if (Files.isDirectory(entry)) {
-            // A function that converts a file path into a folder.
-            Function<Path, Dirent> getFolder = ExceptionUtils
-                // This adapter simplifies exception handling.
-                .rethrowFunction(file
-                                 // Create a folder from a directory file.
-                                 -> Folder.fromDirectory(file,
-                                                         parallel));
-
             // Add the entry to the list of subfolders.
-            mSubFolders.add(getFolder.apply(entry));
+            mSubFolders.add(Folder.fromDirectory(entry,
+                                                 parallel));
         } else {
-            // A function that converts a path into a document.
-            Function<Path, Dirent> getDocument = ExceptionUtils
-                // This adapter simplifies exception handling.
-                .rethrowFunction(Document::fromPath);
-
             // Add the entry to the list of documents.
-            mDocuments.add(getDocument.apply(entry));
+            mDocuments.add(Document.fromPath(entry));
         }
     }
 
@@ -238,6 +220,7 @@ public class Folder
         // Initialize the size.
         mSize = mSubFolders.size() + mDocuments.size();
 
+        // Return this object.
         return this;
     }
 }

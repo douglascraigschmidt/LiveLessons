@@ -33,8 +33,8 @@ public class FolderCollector
 
     /**
      * This factory method returns a supplier that creates and returns
-     * a new mutable result container that will hold all the documents
-     * and subfolders in the stream.
+     * a new mutable result container that holds all the documents and
+     * subfolders in the stream.
      *
      * @return a supplier that returns a new, mutable result container
      */
@@ -51,8 +51,8 @@ public class FolderCollector
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
-        // Return a BiConsumer that adds a path to
-        // the mutable result container.
+        // Return a biconsumer that adds a path to the mutable result
+        // container.
         return (Folder folder, Path entry) ->
                 // Add entry into the folder.
                 folder.addEntry(entry,
@@ -68,7 +68,7 @@ public class FolderCollector
      */
     @Override
     public BinaryOperator<Folder> combiner() {
-        /// Merge contents of two subfolders.
+        // Merge contents of two subfolders.
         return Folder::merge;
     }
 

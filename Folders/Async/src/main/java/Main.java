@@ -46,7 +46,7 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Warmup the stream pool and run the sync tests.
+        // Warmup the thread pool and run the sync tests.
         runSyncTests();
 
         // Run the async tests.
@@ -74,9 +74,6 @@ public class Main {
         CompletableFuture<Dirent> rootFolderF =
             RunTimer.timeRun(() -> Main.createFolder(sWORKS),
                              "async createFolder()");
-
-        // Run garbage collector to avoid perturbing the tests.
-        System.gc();
 
         final CompletableFuture<Stream<Void>> collect = Stream
                 // The of() factory method creates a stream of futures
@@ -118,6 +115,9 @@ public class Main {
         (CompletableFuture<Dirent> rootFolderF,
          Function<Dirent, CompletableFuture<Void>> func,
          String funcName) {
+        // Run garbage collector to avoid perturbing the tests.
+        System.gc();
+
         return rootFolderF
             // Completion stage method is invoked when rootFolderF
             // completes and runs action in the common fork-join pool.
@@ -144,6 +144,9 @@ public class Main {
          BiFunction<Dirent, String, CompletableFuture<Void>> biFunc,
          String param,
          String funcName) {
+        // Run garbage collector to avoid perturbing the tests.
+        System.gc();
+
         return rootFolderF
             // Completion stage method invoked when rootFolderF
             // completes and runs action in the common fork-join pool.
@@ -312,6 +315,9 @@ public class Main {
      */
     private static void runSyncTests() {
         display("Starting runSyncTests()");
+        
+        // Run garbage collector to avoid perturbing the tests.
+        System.gc();
 
         CompletableFuture<Dirent>[] cff = new CompletableFuture[1];
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -200,7 +201,7 @@ public class Folder
     }
 
     /*
-     * The method below is used by FolderCollector.
+     * The methods below are used by FolderCollector.
      */
 
     /**
@@ -209,19 +210,27 @@ public class Folder
     void addEntry(Path entry) {
         // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry)) {
-            // This adapter simplifies checked exception handling.
-            Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
-                    // Asynchronously create a folder from a directory file.
-                    .rethrowFunction(Folder::fromDirectory);
-
-            mSubFolderFutures.add(getFolder.apply(entry));
+            mSubFolderFutures.add(Folder.fromDirectory(entry));
         } else {
-            // This adapter simplifies exception handling.
-            Function<Path, CompletableFuture<Dirent>> getDocument = ExceptionUtils
-                    // Asynchronously create a document from a path.
-                    .rethrowFunction(Document::fromPath);
-
-            mDocumentFutures.add(getDocument.apply(entry));
+            mDocumentFutures.add(Document.fromPath(entry));
         }
+    }
+
+    /**
+     * Merge contents of {@code folder} into contents of this folder.
+     *
+     * @param folder The folder to merge from
+     * @return The merged result
+     */
+    Folder merge(Folder folder) {
+        // Update the lists.
+        mSubFolderFutures.addAll(folder.mSubFolderFutures);
+        mDocumentFutures.addAll(folder.mDocumentFutures);
+
+        // Initialize the size.
+        mSize = mSubFolderFutures.size() + mDocumentFutures.size();
+
+        // Return this object.
+        return this;
     }
 }
