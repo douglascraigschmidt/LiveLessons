@@ -25,10 +25,17 @@ public class FolderCollector
     private final boolean mParallel;
 
     /**
+     * Path for the folder.
+     */
+    private final Path mPath;
+
+    /**
      * Constructor initializes the field.
      */
-    private FolderCollector(boolean parallel) {
+    private FolderCollector(boolean parallel,
+                            Path path) {
         mParallel = parallel;
+        mPath = path;
     }
 
     /**
@@ -40,7 +47,7 @@ public class FolderCollector
      */
     @Override
     public Supplier<Folder> supplier() {
-        return Folder::new;
+        return () -> new Folder(mPath);
     }
     
     /**
@@ -81,9 +88,14 @@ public class FolderCollector
      */
     @Override
     public Function<Folder, Folder> finisher() {
-        // @@ This method is a no-op since the IDENTITY_FINISH
-        // characteristic is set.
-        return null;
+        return folder -> {
+            // Compute the number of subfolders and documents that are
+            // rooted at this folder.
+            folder.computeSize();
+
+            // Return this folder.
+            return folder;
+        };
     }
 
     /**
@@ -96,8 +108,7 @@ public class FolderCollector
      */
     @Override
     public Set<Collector.Characteristics> characteristics() {
-        return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
-                                                      Collector.Characteristics.IDENTITY_FINISH));
+        return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED));
     }
 
     /**
@@ -105,8 +116,9 @@ public class FolderCollector
      *
      * @return A new {@code FolderCollector}
      */
-    public static Collector<Path, Folder, Folder> toFolder(boolean parallel) {
+    public static Collector<Path, Folder, Folder> toFolder(boolean parallel,
+                                                           Path path) {
         // Return a new folder collector.
-        return new FolderCollector(parallel);
+        return new FolderCollector(parallel, path);
     }
 }

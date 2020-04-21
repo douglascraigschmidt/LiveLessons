@@ -17,7 +17,7 @@ public class Document
      */
     private Document(CharSequence input,
                      Path path) {
-        super(path);
+        super(path, 1);
         mContents = input;
     }
 
@@ -41,9 +41,10 @@ public class Document
         Function<Path, byte[]> getBytes = ExceptionUtils
             .rethrowFunction(Files::readAllBytes);
 
-        // Create and return a new document containing all bytes of
-        // the file at the given path.
-        return new Document(new String(getBytes.apply(path)),
-                            path);
+        // Create a string containing all bytes of the file at the given path.
+        String document = new String(getBytes.apply(path));
+
+        // Return a new document containing all the bytes of the file.
+        return new Document(document, path);
     }
 }

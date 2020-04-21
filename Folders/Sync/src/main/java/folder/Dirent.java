@@ -18,7 +18,13 @@ public abstract class Dirent {
     /**
      * Contents of the document.
      */
-    CharSequence mContents;
+    protected CharSequence mContents;
+
+    /**
+     * The total number of entries in this recursively structured
+     * folder.
+     */
+    private long mSize;
 
     /**
      * Default constructor.
@@ -27,10 +33,11 @@ public abstract class Dirent {
     }
 
     /**
-     * Constructor initializes the field.
+     * Constructor initializes the fields.
      */
-    public Dirent(Path path) {
+    public Dirent(Path path, long size) {
         mPath = path;
+        mSize = size;
     }
 
     /**
@@ -73,6 +80,22 @@ public abstract class Dirent {
      */
     public CharSequence getContents() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return The total number of entries in this recursively
+     * structured dirent.
+     */
+    public long getSize() {
+        return mSize;
+    }
+
+    /**
+     * Set the total number of entries in this recursively
+     * structured dirent.
+     */
+    public void setSize(long size) {
+        mSize = size;
     }
 
     /**

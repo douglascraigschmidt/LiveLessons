@@ -37,7 +37,7 @@ public class RecursiveFolderSpliterator
      * Constructor initializes the fields and super class.
      */
     RecursiveFolderSpliterator(Folder folder) {
-        super(folder.size(), NONNULL + IMMUTABLE);
+        super(folder.getSize(), NONNULL + IMMUTABLE);
 
         mDocsList = new ArrayList<>();
         mFoldersList = new ArrayList<>();

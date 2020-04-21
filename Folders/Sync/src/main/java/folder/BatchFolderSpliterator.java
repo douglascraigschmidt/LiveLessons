@@ -32,11 +32,11 @@ public class BatchFolderSpliterator
      * Constructor initializes the fields and super class.
      */
     public BatchFolderSpliterator(Folder folder) {
-        super(folder.size(), NONNULL + IMMUTABLE);
+        super(folder.getSize(), NONNULL + IMMUTABLE);
 
         // Make the initial batch size match the number of processors.
         mBatchSize =
-            (int) folder.size() / Runtime.getRuntime().availableProcessors();
+            (int) folder.getSize() / Runtime.getRuntime().availableProcessors();
 
         // Initialize the breadth-first search iterator.
         mIterator = new BFSIterator(folder);

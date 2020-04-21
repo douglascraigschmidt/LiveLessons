@@ -30,15 +30,11 @@ public class Folder
     private final List<Dirent> mDocuments;
 
     /**
-     * The total number of entries in this recursively structured
-     * folder.
-     */
-    private long mSize;
-
-    /**
      * Constructor initializes the fields.
      */
-    Folder() {
+    Folder(Path path) {
+        super(path, 0);
+
         mSubFolders = new ArrayList<>();
         mDocuments = new ArrayList<>();
     }
@@ -57,14 +53,6 @@ public class Folder
     @Override
     public List<Dirent> getDocuments() {
         return mDocuments;
-    }
-
-    /**
-     * @return The total number of entries in this recursively
-     * structured folder.
-     */
-    public long size() {
-        return mSize;
     }
 
     /**
@@ -103,7 +91,7 @@ public class Folder
      */
 
     /**
-     * Factory method that creates a folder from the given {@code} file.
+     * This factory method creates a folder from the given {@code file}.
      *
      * @param file The file associated with the folder in the file system
      * @param parallel A flag that indicates whether to create the
@@ -118,7 +106,8 @@ public class Folder
     }
 
     /**
-     * Factory method that creates a folder from the given {@code rootPath}.
+     * This factory method creates a folder from the given {@code
+     * rootPath}.
      *
      * @param rootPath The path of the folder in the file system
      * @param parallel A flag that indicates whether to create the
@@ -136,12 +125,11 @@ public class Folder
                              // List all subfolders and documents in
                              // this path.
                              .walk(path,
-                                   // Limit to just
-                                   // this folder.
+                                   // Limit to just this folder.
                                    1));
 
-        // Create a stream containing all the contents at
-        // the given rootPath.
+        // Create a stream containing all the contents at the given
+        // rootPath.
         Stream<Path> pathStream = getStream.apply(rootPath);
 
         // Convert the stream to parallel if directed.
@@ -149,51 +137,15 @@ public class Folder
             //noinspection ResultOfMethodCallIgnored
             pathStream.parallel();
 
-        // Create a folder containing all the contents at the given
-        // rootPath.
-        Folder folder = pathStream
+        // Create and return a folder containing all the contents at
+        // the given rootPath.
+        return pathStream
             // Eliminate rootPath to avoid infinite recursion.
             .filter(path -> !path.equals(rootPath))
 
             // Terminate the stream and create a folder containing all
             // entries in this folder.
-            .collect(FolderCollector.toFolder(parallel));
-
-        // Set the path of the folder.
-        folder.setPath(rootPath);
-
-        // Compute the number of subfolders and
-        // documents that are rooted at this folder.
-        folder.computeSize();
-
-        // Return the folder.
-        return folder;
-    }
-
-    /**
-     * Determine how many subfolders and documents are rooted at this
-     * folder.
-     */
-    private void computeSize() {
-        // Count the number of subfolders in this folder.
-        long folderCount = getSubFolders()
-            // Convert list to a stream.
-            .stream()
-
-            // Get the size of each subfolder.
-            .mapToLong(subFolder -> ((Folder) subFolder).mSize)
-
-            // Sub up the sizes of the subfolders.
-            .sum();
-
-        // Count the number of documents in this folder.
-        long docCount = getDocuments().size();
-
-        // Update the field with the correct count.
-        mSize = folderCount 
-            + docCount
-            // Add 1 to count this folder.
-            + 1;
+            .collect(FolderCollector.toFolder(parallel, rootPath));
     }
 
     /*
@@ -216,6 +168,8 @@ public class Folder
             // the document to the documents list.
             mDocuments.add(Document.fromPath(entry));
         }
+        // @@
+        setSize(getSize() + 1);
     }
 
     /**
@@ -230,9 +184,34 @@ public class Folder
         mDocuments.addAll(folder.mDocuments);
 
         // Initialize the size.
-        mSize = mSubFolders.size() + mDocuments.size();
+        setSize(mSubFolders.size() + mDocuments.size());
 
         // Return this object.
         return this;
+    }
+
+    /**
+     * Determine how many subfolders and documents are rooted at this
+     * folder.
+     */
+    void computeSize() {
+        // Count the number of subfolders in this folder.
+        long folderCount = getSubFolders()
+            // Convert list to a stream.
+            .stream()
+
+            // Get the size of each subfolder.
+            .mapToLong(Dirent::getSize)
+
+            // Sub up the sizes of the subfolders.
+            .sum();
+
+        // Count the number of documents in this folder.
+        long docCount = getDocuments().size();
+
+        // Update the field with the correct count.
+        setSize(folderCount + docCount
+                // Add 1 to count this folder.
+                + 1);
     }
 }
