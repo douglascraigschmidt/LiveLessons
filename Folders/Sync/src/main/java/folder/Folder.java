@@ -1,14 +1,15 @@
 package folder;
 
+import utils.ExceptionUtils;
 import utils.Options;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -111,7 +112,7 @@ public class Folder
      * @return An open document
      */
     public static Dirent fromDirectory(File file,
-                                       boolean parallel) throws IOException {
+                                       boolean parallel) {
         return fromDirectory(file.toPath(),
                              parallel);
     }
@@ -126,14 +127,22 @@ public class Folder
      * @return An open folder containing all contents in the {@code rootPath}
      */
     public static Dirent fromDirectory(Path rootPath,
-                                       boolean parallel) throws IOException {
-        // Create a stream containing all the contents at the given
-        // rootPath.
-        Stream<Path> pathStream = Files
-            // Stream all subfolders and documents in this folder.
-            .walk(rootPath,
-                  // Just limit to this folder.
-                  1);
+                                       boolean parallel) {
+        // This function creates a stream containing all the contents
+        // at the given rootPath.
+        Function<Path, Stream<Path>> getStream = ExceptionUtils
+            // An adapter that simplifies checked exceptions.
+            .rethrowFunction(path -> Files
+                             // List all subfolders and documents in
+                             // this path.
+                             .walk(path,
+                                   // Limit to just
+                                   // this folder.
+                                   1));
+
+        // Create a stream containing all the contents at
+        // the given rootPath.
+        Stream<Path> pathStream = getStream.apply(rootPath);
 
         // Convert the stream to parallel if directed.
         if (parallel)
@@ -166,6 +175,7 @@ public class Folder
      * folder.
      */
     private void computeSize() {
+        // Count the number of subfolders in this folder.
         long folderCount = getSubFolders()
             // Convert list to a stream.
             .stream()
@@ -194,14 +204,16 @@ public class Folder
      * Add a new {@code entry} to the appropriate list of futures.
      */
     void addEntry(Path entry,
-                  boolean parallel) throws IOException {
+                  boolean parallel) {
         // Add entry to the appropriate list.
         if (Files.isDirectory(entry)) {
-            // Add the entry to the list of subfolders.
+            // Synchronously create a folder from the entry and add
+            // the folder to the subfolders list.
             mSubFolders.add(Folder.fromDirectory(entry,
                                                  parallel));
         } else {
-            // Add the entry to the list of documents.
+            // Synchronously create a document from the entry and add
+            // the document to the documents list.
             mDocuments.add(Document.fromPath(entry));
         }
     }

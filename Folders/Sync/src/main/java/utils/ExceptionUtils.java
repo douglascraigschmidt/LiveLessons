@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -8,6 +9,11 @@ public final class ExceptionUtils {
     @FunctionalInterface
         public interface Consumer_WithExceptions<T> {
         void accept(T t) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface BiConsumer_WithExceptions<T, U> {
+        void accept(T t, U u) throws Exception;
     }
 
     @FunctionalInterface
@@ -29,6 +35,13 @@ public final class ExceptionUtils {
     public static <T> Consumer<T> rethrowConsumer(Consumer_WithExceptions<T> consumer) {
         return t -> {
             try { consumer.accept(t); }
+            catch (Exception exception) { throwAsUnchecked(exception); }
+        };
+    }
+
+    public static <T, U> BiConsumer<T, U> rethrowBiConsumer(BiConsumer_WithExceptions<T, U> biConsumer) {
+        return (t, u) -> {
+            try { biConsumer.accept(t, u); }
             catch (Exception exception) { throwAsUnchecked(exception); }
         };
     }

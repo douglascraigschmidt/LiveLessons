@@ -134,16 +134,20 @@ public class Folder
         // Return a future that completes once the folder's contents
         // are available.
         return CompletableFuture
-            // Arrange to run this supplier lambda in the common fork-join pool.
+            // Arrange to run this supplier lambda in the common
+            // fork-join pool.
             .supplyAsync(() -> {
+                    // This function creates a stream containing all
+                    // the contents at the given rootPath.
                     Function<Path, Stream<Path>> getStream = ExceptionUtils
-                        .rethrowFunction(path ->
+                        // An adapter that simplifies checked exceptions.
+                        .rethrowFunction(path -> Files
                                          // List all subfolders and
                                          // documents in this path.
-                                         Files.walk(path,
-                                                    // Limit to just
-                                                    // this folder.
-                                                    1));
+                                         .walk(path,
+                                               // Limit to just
+                                               // this folder.
+                                               1));
 
                     // Create a stream containing all the contents at
                     // the given rootPath.
@@ -182,8 +186,8 @@ public class Folder
      * folder.
      */
     private void computeSize() {
-        // Update the field with the correct count.
-        mSize = getSubFolders()
+        // Count the number of subfolders in this folder.
+        long folderCount = getSubFolders()
             // Convert list to a stream.
             .stream()
 
@@ -191,11 +195,13 @@ public class Folder
             .mapToLong(subFolder -> ((Folder) subFolder).mSize)
 
             // Sub up the sizes of the subfolders.
-            .sum()
+            .sum();
 
-            // Count the number of documents in this folder.
-            + getDocuments().size()
+        // Count the number of documents in this folder.
+        long docCount = getDocuments().size();
 
+        // Update the field with the correct count.
+        mSize = folderCount + docCount
             // Add 1 to count this folder.
             + 1;
     }
@@ -210,8 +216,12 @@ public class Folder
     void addEntry(Path entry) {
         // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry)) {
+            // Asynchronously create a folder from the entry and add a
+            // future to the folder futures list.
             mSubFolderFutures.add(Folder.fromDirectory(entry));
         } else {
+            // Asynchronously create a document from the entry and add
+            // a future to the document futures list.
             mDocumentFutures.add(Document.fromPath(entry));
         }
     }

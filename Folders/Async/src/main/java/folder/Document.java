@@ -43,7 +43,9 @@ public class Document
         // are available.
         return CompletableFuture
             .supplyAsync(() -> {
+                    // This function gets all bytes from a file.
                     Function<Path, byte[]> getBytes = ExceptionUtils
+                        // An adapter that simplifies checked exceptions.
                         .rethrowFunction(Files::readAllBytes);
 
                     // Create/return a new document (wrapped in a

@@ -5,6 +5,7 @@ import utils.Options;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 

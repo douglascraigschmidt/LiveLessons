@@ -53,10 +53,9 @@ public class FolderCollector
     public BiConsumer<Folder, Path> accumulator() {
         // Return a biconsumer that adds a path to the mutable result
         // container.
-        return (Folder folder, Path entry) ->
-                // Add entry into the folder.
-                folder.addEntry(entry,
-                                mParallel);
+        return (folder, entry) ->
+                // Add the entry to the folder.
+                folder.addEntry(entry, mParallel);
     }
 
     /**
@@ -106,7 +105,7 @@ public class FolderCollector
      *
      * @return A new {@code FolderCollector}
      */
-    public static Collector<Path, Folder, Folder>toFolder(boolean parallel) {
+    public static Collector<Path, Folder, Folder> toFolder(boolean parallel) {
         // Return a new folder collector.
         return new FolderCollector(parallel);
     }
