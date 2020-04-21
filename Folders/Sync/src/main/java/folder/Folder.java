@@ -79,7 +79,7 @@ public class Folder
 
     /**
      * @return A sequential stream containing all elements rooted at
-     * this directory entry
+     * this folder
      */
     @Override
     public Stream<Dirent> stream() {
@@ -89,7 +89,7 @@ public class Folder
 
     /**
      * @return A parallel stream containing all elements rooted at
-     * this directory entry
+     * this folder
      */
     @Override
     public Stream<Dirent> parallelStream() {
@@ -207,8 +207,8 @@ public class Folder
                   boolean parallel) {
         // Add entry to the appropriate list.
         if (Files.isDirectory(entry)) {
-            // Synchronously create a folder from the entry and add
-            // the folder to the subfolders list.
+            // Synchronously (and recursively) create a folder from the
+            // entry and add the folder to the subfolders list.
             mSubFolders.add(Folder.fromDirectory(entry,
                                                  parallel));
         } else {

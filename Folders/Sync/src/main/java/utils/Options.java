@@ -27,12 +27,13 @@ public class Options {
 
     /**
      * Stores whether the user wants to create a recursive
-     * spliterators.  Default is recursive.
+     * spliterators.  Default is false (i.e., a batch spliterator
+     * is used by default).
      */
-    private boolean mRecursiveSpliterator = true;
+    private boolean mRecursiveSpliterator = false;
 
     /**
-     * Must have a private constructor.
+     * A singleton should have a private constructor.
      */
     private Options() {
     }

@@ -11,9 +11,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Implements a custom collector that converts a stream of Path
+ * This custom collector recursively converts a stream of Path
  * objects into a single Folder object that forms the root of a
- * recursive directory structure.
+ * hierarchical directory structure.
  */
 public class FolderCollector
       implements Collector<Path,

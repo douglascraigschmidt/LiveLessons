@@ -10,10 +10,10 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * This class is used in conjunction with {@code
- * StreamSupport.stream()} and {@code Spliterators.spliterator()} to
- * create a sequential or parallel stream of {@code Dirents} from a
- * recursively-structured directory folder.
+ * In conjunction with {@code StreamSupport.stream()} and {@code
+ * Spliterators.spliterator()} this class creates a sequential or
+ * parallel stream of {@code Dirents} from a recursively-structured
+ * directory folder.
  */
 public class BatchFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
@@ -28,14 +28,6 @@ public class BatchFolderSpliterator
      */
     private final Iterator<Dirent> mIterator;
         
-    /**
-     * Only prints {@code string} when the verbose option is enabled.
-     */
-    void debug(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println(string);
-    }
-
     /**
      * Constructor initializes the fields and super class.
      */
@@ -89,12 +81,9 @@ public class BatchFolderSpliterator
         Object[] direntArray = new Object[mBatchSize];
         int index = 0;
 
-        // Iterate through mBatchSize dirents and add them to the array.
-        while (index < mBatchSize)
-            if (mIterator.hasNext())
-                direntArray[index++] = mIterator.next();
-            else
-                break;
+        // Iterate thru mBatchSize dirents and add them to the array.
+        while (index < mBatchSize && mIterator.hasNext())
+            direntArray[index++] = mIterator.next();
 
         // Double the batch size each time it's used.
         mBatchSize += mBatchSize;
@@ -104,7 +93,8 @@ public class BatchFolderSpliterator
     }
 
     /**
-     * This iterator traverses each element in the folder.
+     * This iterator traverses each element in the folder using
+     * (reverse) breadth-first search.
      */
     private static class BFSIterator
         implements Iterator<Dirent> {
@@ -130,10 +120,10 @@ public class BatchFolderSpliterator
             // Make the rootFolder the current entry. 
             mCurrentEntry = rootFolder;
 
-            // Add all the subfolders in the rootFolder.
+            // Add the subfolders (if any) in the rootFolder.
             mFoldersList = new ArrayList<>(rootFolder.getSubFolders());
 
-            // Add all the documents in the rootFolder.
+            // Add the documents (if any) in the rootFolder.
             mDocsList = new ArrayList<>(rootFolder.getDocuments());
         }
 
@@ -184,5 +174,13 @@ public class BatchFolderSpliterator
             // Return the current entry.
             return nextDirent;
         }
+    }
+
+    /**
+     * Only prints {@code string} when the verbose option is enabled.
+     */
+    void debug(String string) {
+        if (Options.getInstance().getVerbose())
+            System.out.println(string);
     }
 }

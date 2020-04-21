@@ -9,12 +9,12 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * This class is used in conjunction with StreamSupport.stream() and
- * Spliterators.spliterator() to create a sequential or parallel
- * stream of Dirents from a recursively structured directory folder.
- * Since it processes the contents of subfolders in parallel whenever
- * possible it works best if the contents of the recursively
- * structured directory folder are fairly balanced.
+ * In conjunction with {@code StreamSupport.stream()} and {@code
+ * Spliterators.spliterator()} this class creates a sequential or
+ * parallel stream of Dirents from a recursively-structured directory
+ * folder.  Since it processes the contents of subfolders in parallel
+ * whenever possible it works best if the contents of the
+ * recursively-structured directory folder are relatively balanced.
  */
 public class RecursiveFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
@@ -34,21 +34,14 @@ public class RecursiveFolderSpliterator
     private List<Dirent> mDocsList;
 
     /**
-     * Only prints @a string when the verbose option is enabled.
-     */
-    void debug(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println(string);
-    }
-
-    /**
      * Constructor initializes the fields and super class.
      */
     RecursiveFolderSpliterator(Folder folder) {
         super(folder.size(), NONNULL + IMMUTABLE);
+
+        mDocsList = new ArrayList<>();
         mFoldersList = new ArrayList<>();
         mFoldersList.add(folder);
-        mDocsList = new ArrayList<>();
     }
 
     /**
@@ -63,7 +56,12 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * Attempt to advance the spliterator by one Dirent.
+     * Attempt to advance the spliterator by one dirent.  This is
+     * used exclusively be sequential streams and at certain points
+     * for parallel streams.
+     *
+     * @return True if the streams framework should continue the
+     * traversal process, else false.
      */
     public boolean tryAdvance(Consumer<? super Dirent> action) {
         Dirent currentEntry;
@@ -78,8 +76,7 @@ public class RecursiveFolderSpliterator
         // entry, and add all its directory entries to the lists.
         else if (mFoldersList.size() > 0) {
             // Use the last element in the list as the current entry.
-            currentEntry =
-                mFoldersList.remove(mFoldersList.size() - 1);
+            currentEntry = mFoldersList.remove(mFoldersList.size() - 1);
 
             // Add any/all folders in the current entry into the folders list.
             mFoldersList.addAll(currentEntry.getSubFolders());
@@ -87,22 +84,26 @@ public class RecursiveFolderSpliterator
             // Add any/all documents in the current entry into the folders list.
             mDocsList.addAll(currentEntry.getDocuments());
         }
-        // Bail out.
+        // Bail out and inform the streams framework we're done.
         else
             return false;
 
-        // System.out.println("accepting " + currentEntry.getName());
+        // Pass the current entry back to the streams framework.
         action.accept(currentEntry);
         return true;
     }
 
     /**
+     * This method attempts to partition the folder contents relatively
+     * evenly for parallel streams.
+     *
      * @return A spliterator covering dirents in the current folder,
      *         that will, upon return from this method, not be covered
      *         by this spliterator (if this spliterator can be
      *         partitioned at all).
      */
     public Spliterator<Dirent> trySplit() {
+        // Determine the current size of the folders list.
         int size = mFoldersList.size();
 
         if (size >= 2)
@@ -121,24 +122,25 @@ public class RecursiveFolderSpliterator
      *
      * @param splitPos The index into mFoldersList where the split occurs
      * @return A spliterator that's null if there's only one entry in
-     *         the folder, else one that contains the "left hand"
+     *         the folder, else one that contains the "left-hand"
      *         dirents of the split.
      */
     private Spliterator<Dirent> splitMultipleFolders(int splitPos) {
         // If there are 2 or more subfolders then split them in half
         // and process them in parallel.  Create a sublist containing
-        // the left hand subfolders.
+        // the left-hand subfolders.
         List<Dirent> leftHandFolders =
             mFoldersList.subList(0,
                                  splitPos);
 
-        // Create a sublist containing the right hand subfolders.
+        // Create a sublist containing the right-hand subfolders
+        // and update "this" object accordingly.
         mFoldersList =
             mFoldersList.subList(splitPos,
                                  mFoldersList.size());
 
         // Create and return a new RecursiveFolderSpliterator
-        // containing the left hand dirents.
+        // containing the left-hand dirents.
         return new RecursiveFolderSpliterator(leftHandFolders,
                                               new ArrayList<>());
     }
@@ -167,12 +169,10 @@ public class RecursiveFolderSpliterator
         if (subFolders.size() == 0) 
             return splitCurrentFolderAndDocs();
 
-        // Split the subfolders that were contained in the current
-        // folder.
+        // Otherwise split subfolders contained in the current folder.
         else
             return new RecursiveFolderSpliterator
-                (subFolders,
-                 new ArrayList<>());
+                (subFolders, new ArrayList<>());
     }
 
     /**
@@ -184,11 +184,12 @@ public class RecursiveFolderSpliterator
     private Spliterator<Dirent> splitCurrentFolderAndDocs() {
         // See if there's no more to be done.
         if (mCurrentFolder == null)
-            // Bail out.
+            // Bail out and process any documents sequentially
+            // via tryAdvance().
             return null;
         else {
             // Add the current folder to the documents list so it's
-            // processed.
+            // processed by the spliterator created below.
             mDocsList.add(mCurrentFolder);
 
             // Convert the documents list (plus the current folder) to
@@ -199,13 +200,22 @@ public class RecursiveFolderSpliterator
                              mDocsList.size(),
                              0);
 
-            // Null out the current folder and clear the documents
-            // list.
+            // Null out the current folder.
             mCurrentFolder = null;
+
+            // Clear out the documents list.
             mDocsList.clear();
 
             // Return the spliterator.
             return spliterator;
         }
+    }
+
+    /**
+     * Only prints @a string when the verbose option is enabled.
+     */
+    void debug(String string) {
+        if (Options.getInstance().getVerbose())
+            System.out.println(string);
     }
 }

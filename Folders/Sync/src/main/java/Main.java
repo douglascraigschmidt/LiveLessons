@@ -5,35 +5,23 @@ import utils.Options;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
-import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
  * This example shows the use of the Java streams framework to process
  * entries in a recursively structured directory folder using the Java
- * sequential and parallel streams frameworks.  This example also shows
- * how to implement Java sequential and parallel streams spliterators
- * and collectors.
+ * sequential and parallel streams frameworks.  This example also
+ * shows how to implement spliterators and collectors for Java
+ * sequential and parallel streams.
  */
 @SuppressWarnings("ALL")
 public class Main {
     /**
-     * The input "works", which is a large recursive folder containing
-     * thousands of subfolders and files.
+     * The input "works" to process, which is a large recursive folder
+     * containing thousands of subfolders and files.
      */
     private static final String sWORKS = "works";
-
-    /**
-     * Display {@code string} if the program is run in verbose mode.
-     */
-    static void display(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println("["
-                               + Thread.currentThread().getId()
-                               + "] "
-                               + string);
-    }
 
     /**
      * Main entry point into the program.
@@ -109,20 +97,18 @@ public class Main {
      */
     private static Dirent createFolder(String works,
                                        boolean parallel) {
-        // Create and return a folder containing all works
-        // in the sWORKS directory.
-        return Folder
-            .fromDirectory(TestDataFactory.getRootFolderFile(works),
-                           parallel);
+        // Create and return a folder containing all works in the
+        // sWORKS directory.
+        return TestDataFactory.getRootFolder(works, parallel);
     }
 
     /**
-     * Count the # of entries in the {@ rootFolder}.
+     * Count the # of entries in the {@code rootFolder}.
      */
     private static void countEntries(Dirent rootFolder,
                                      boolean parallel) {
-        // Create a stream from the rootFolder, which triggers
-        // the use of our *FolderSpliterator.
+        // Create a stream of dirents starting at the rootFolder,
+        // which triggers the use of our *FolderSpliterator.
         Stream<Dirent> folderStream = rootFolder
             .stream();
 
@@ -144,8 +130,8 @@ public class Main {
     private static void searchFolders(Dirent rootFolder,
                                       String searchWord,
                                       boolean parallel) {
-        // Create a stream from the rootFolder, which triggers
-        // the use of our *FolderSpliterator.
+        // Create a stream of dirents starting at the rootFolder,
+        // which triggers the use of our *FolderSpliterator.
         Stream<Dirent> folderStream = rootFolder
             .stream();
 
@@ -162,8 +148,8 @@ public class Main {
             .mapToLong(document ->
                        // Count # of times searchWord appears in the document.
                        occurrencesCount(document.getContents(),
-                                           searchWord,
-                                           parallel))
+                                        searchWord,
+                                        parallel))
             // Sum the results.
             .sum();
 
@@ -207,8 +193,8 @@ public class Main {
      */
     private static void countLines(Dirent rootFolder, 
                                    boolean parallel) {
-        // Create a stream from the rootFolder, which triggers
-        // the use of our *FolderSpliterator.
+        // Create a stream of dirents starting at the rootFolder,
+        // which triggers the use of our *FolderSpliterator.
         Stream<Dirent> folderStream = rootFolder
             .stream();
 
@@ -260,9 +246,21 @@ public class Main {
     }
 
     /**
-     * @return True of {@code dirent} is a document, else false
+     * @return True if {@code dirent} is a document, else false
      */
     private static boolean isDocument(Dirent dirent) {
+        // Return true if dirent is a document, else false.
         return dirent instanceof Document;
+    }
+
+    /**
+     * Display {@code string} if the program is run in verbose mode.
+     */
+    static void display(String string) {
+        if (Options.getInstance().getVerbose())
+            System.out.println("["
+                    + Thread.currentThread().getId()
+                    + "] "
+                    + string);
     }
 }

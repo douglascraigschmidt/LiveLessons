@@ -24,10 +24,13 @@ public class TestDataFactory {
      */
     public static File getRootFolderFile(String rootFolderName){
         Function<String, File> getFile = ExceptionUtils
-                .rethrowFunction(name -> new File(ClassLoader
-                                             .getSystemResource(name)
-                                             .toURI()));
+                // An adapter that simplifies checked exceptions.
+                .rethrowFunction(name ->
+                                 new File(ClassLoader
+                                          .getSystemResource(name)
+                                          .toURI()));
 
+        // Open and return the file.
         return getFile.apply(rootFolderName);
     }
 
@@ -36,11 +39,9 @@ public class TestDataFactory {
      * directory containing the complete works of William Shakespeare.
      */
     public static Dirent getRootFolder(String rootFolderName,
-                                       boolean parallel)
-        throws URISyntaxException, IOException {
+                                       boolean parallel) {
         return Folder
-            .fromDirectory(getRootFolderFile(rootFolderName)
-                           .toPath(),
+            .fromDirectory(getRootFolderFile(rootFolderName).toPath(),
                            parallel);
     }
 }
