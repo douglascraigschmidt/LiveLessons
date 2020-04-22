@@ -1,7 +1,5 @@
 package folder;
 
-import utils.Options;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,9 +7,10 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * This class is used in conjunction with StreamSupport.stream() and
- * Spliterators.spliterator() to create a sequential stream of Dirents
- * from a recursively structured directory folder.
+ * In conjunction with {@code StreamSupport.stream()} and {@code
+ * Spliterators.spliterator()} this class creates a sequential or
+ * parallel stream of {@code Dirents} from a recursively-structured
+ * directory folder.
  */
 public class BFSFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
@@ -22,18 +21,10 @@ public class BFSFolderSpliterator
     private final Iterator<Dirent> mIterator;
         
     /**
-     * Only prints {@code string} when the verbose option is enabled.
-     */
-    void debug(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println(string);
-    }
-
-    /**
      * Constructor initializes the fields and super class.
      */
     BFSFolderSpliterator(Folder folder) {
-        super(folder.size(), NONNULL + IMMUTABLE);
+        super(folder.getSize(), NONNULL + IMMUTABLE);
 
         // Initialize the iterator.
         mIterator = new BFSIterator(folder);
@@ -67,12 +58,12 @@ public class BFSFolderSpliterator
         /**
          * The list of (sub)folders to process.
          */
-        private List<Dirent> mFoldersList;
+        private final List<Dirent> mFoldersList;
 
         /**
          * The list of documents to process.
          */
-        private List<Dirent> mDocsList;
+        private final List<Dirent> mDocsList;
 
         /**
          * Constructor initializes the fields.

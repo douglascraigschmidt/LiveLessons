@@ -16,11 +16,6 @@ public abstract class Dirent {
     private Path mPath;
 
     /**
-     * Contents of the document.
-     */
-    protected CharSequence mContents;
-
-    /**
      * The total number of entries in this recursively structured
      * folder.
      */
@@ -96,6 +91,13 @@ public abstract class Dirent {
      */
     public void setSize(long size) {
         mSize = size;
+    }
+
+    /**
+     * Add {@code size} to the current size.
+     */
+    public void addToSize(long size) {
+        mSize += size;
     }
 
     /**

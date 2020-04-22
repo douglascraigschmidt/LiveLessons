@@ -13,6 +13,11 @@ import java.util.function.Function;
 public class Document 
        extends Dirent {
     /**
+     * Contents of the document.
+     */
+    protected CharSequence mContents;
+
+    /**
      * Constructor sets the field.
      */
     private Document(CharSequence input,
@@ -39,12 +44,11 @@ public class Document
     static Dirent fromPath(Path path) {
         // Create an exception adapter.
         Function<Path, byte[]> getBytes = ExceptionUtils
+            // make it easier to use check exception.
             .rethrowFunction(Files::readAllBytes);
 
-        // Create a string containing all bytes of the file at the given path.
-        String document = new String(getBytes.apply(path));
-
-        // Return a new document containing all the bytes of the file.
-        return new Document(document, path);
+        // Create and return a new document containing all the bytes
+        // of the file at the given path.
+        return new Document(new String(getBytes.apply(path)), path);
     }
 }

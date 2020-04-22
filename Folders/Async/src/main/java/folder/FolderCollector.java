@@ -4,7 +4,7 @@ import utils.ArrayUtils;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -13,8 +13,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Implements a custom collector that converts a stream of Path
@@ -26,6 +24,18 @@ public class FolderCollector
                            Folder,
                            CompletableFuture<Folder>> {
     /**
+     * Path for the folder.
+     */
+    private final Path mPath;
+
+    /**
+     * Constructor initializes the field.
+     */
+    FolderCollector(Path path) {
+        mPath = path;
+    }
+
+    /**
      * This factory method returns a supplier that creates and returns
      * a new mutable result container that holds all the documents and
      * subfolders in the stream.
@@ -34,7 +44,7 @@ public class FolderCollector
      */
     @Override
     public Supplier<Folder> supplier() {
-        return Folder::new;
+        return () -> new Folder(mPath);
     }
     
     /**
@@ -76,13 +86,14 @@ public class FolderCollector
         return folder -> {
             // Create an array containing all the futures for
             // subfolders and documents.
-            CompletableFuture<Dirent>[] futures =
+            // CompletableFuture<Dirent>[] var
+            var futures =
                 ArrayUtils.concat(folder.mSubFolderFutures,
                                   folder.mDocumentFutures);
 
             if (futures == null) {
-                // This is an empty folder (i.e., with no subfolders or
-                // documents) so we're done.
+                // This is an empty folder (i.e., with no subfolders
+                // or documents) so we're done.
                 return CompletableFuture.completedFuture(folder);
             } else {
                 return CompletableFuture
@@ -91,51 +102,10 @@ public class FolderCollector
                     .allOf(Objects.requireNonNull(futures))
 
                     // Return a future to this folder after first
-                    // initializing its subfolder/document fields
-                    // after allDoneFuture completes.
-                    .thenApply(v -> {
-                            // Initialize all the subfolders.
-                            folder.mSubFolders =
-                                collectToList(folder.mSubFolderFutures);
-
-                            // Initialize all the documents.
-                            folder.mDocuments =
-                                collectToList(folder.mDocumentFutures);
-
-                            // Initialize the size.
-                            folder.mSize = folder.mSubFolders.size()
-                                + folder.mDocuments.size();
-
-                            // Return this folder, which is converted
-                            // to a future to a folder.
-                            return folder;
-                        });
+                    // initializing its subfolder/document fields.
+                    .thenApply(folder::whenComplete);
             }
         };
-    }
-
-    /**
-     * Converts a list of completable futures to dirents into a list
-     * of dirents by joining them, which won't block.
-     *
-     * @param listOfFutures The list of completable futures to dirents
-     *                      to convert
-     * @return A list of dirents
-     */
-    private List<Dirent> collectToList
-            (List<CompletableFuture<Dirent>> listOfFutures) {
-        return listOfFutures
-            // Convert the list into a stream.
-            .stream()
-
-            // Convert the future to a directory entry (join() won't
-            // block since all the futures have completed by this
-            // point).
-            .map(CompletableFuture::join)
-
-            // Trigger intermediate processing and return
-            // a list.
-            .collect(toList());
     }
 
     /**
@@ -144,11 +114,14 @@ public class FolderCollector
      * should be immutable.
      *
      * @return An immutable set of collector characteristics, which in
-     * this case is simply UNORDERED
+     * this case is UNORDERED
      */
     @Override
     public Set<Collector.Characteristics> characteristics() {
-        return Collections.emptySet();
+        // Return an immutable set of collector characteristics, which
+        // in this case is UNORDERED.
+        return Collections
+            .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED));
     }
 
     /**
@@ -156,7 +129,9 @@ public class FolderCollector
      *
      * @return A new FolderCollector
      */
-    public static Collector<Path, Folder, CompletableFuture<Folder>>toFolder() {
-        return new FolderCollector();
+    public static Collector<Path, Folder, CompletableFuture<Folder>> 
+        toFolder(Path path) {
+        // Return a new folder collector.        
+        return new FolderCollector(path);
     }
 }

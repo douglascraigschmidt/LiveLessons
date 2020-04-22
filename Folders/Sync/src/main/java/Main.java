@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 /**
  * This example shows the use of the Java streams framework to process
- * entries in a recursively structured directory folder using the Java
+ * entries in a recursively-structured directory folder using the Java
  * sequential and parallel streams frameworks.  This example also
  * shows how to implement spliterators and collectors for Java
  * sequential and parallel streams.
@@ -64,17 +64,17 @@ public class Main {
         display("Starting the test " + mode);
 
         // The word to search for while the folder's being constructed.
-        final String searchedWord = "CompletableFuture";
+        final String searchWord = "CompletableFuture";
 
         // Compute the time needed to create a new folder.
         Dirent rootFolder = 
             RunTimer.timeRun(() -> createFolder(sWORKS, parallel),
-                             "createFolder() in " + mode);
+                             "createFolder() " + mode);
 
         // Compute the time taken to count the entries in the folder.
         RunTimer.timeRun(() -> countEntries(rootFolder, 
                                             parallel),
-                         "countEntries() in " + mode);
+                         "countEntries() " + mode);
 
         // Compute the time taken to count the # of lines in the
         // folder.
@@ -85,7 +85,7 @@ public class Main {
         // Compute the time taken to synchronously search for a word
         // in all folders starting at the rootFolder.
         RunTimer.timeRun(() -> searchFolders(rootFolder,
-                                             searchedWord,
+                                             searchWord,
                                              parallel),
                          "searchFolders() in " + mode);
 
@@ -97,9 +97,12 @@ public class Main {
      */
     private static Dirent createFolder(String works,
                                        boolean parallel) {
-        // Create and return a folder containing all works in the
-        // sWORKS directory.
-        return TestDataFactory.getRootFolder(works, parallel);
+        // Return the initialized folder.
+        return Folder
+            // Create a folder containing all the works in the root
+            // directory.
+            .fromDirectory(TestDataFactory.getRootFolderFile(root),
+                           parallel);
     }
 
     /**
@@ -139,7 +142,7 @@ public class Main {
         if (parallel)
             folderStream.parallel();
 
-        // Compute the total number of matches of searchedWord.
+        // Compute the total number of matches of searchWord.
         long matches = folderStream
             // Only search documents.
             .filter(Main::isDocument)
@@ -167,7 +170,7 @@ public class Main {
     private static Long occurrencesCount(CharSequence document,
                                          String searchWord,
                                          boolean parallel) {
-        // Determine the # of times searchedWord appears in a
+        // Determine the # of times searchWord appears in a
         // document.
         Stream<String> wordStream =
             // Create a stream from the document around matches to

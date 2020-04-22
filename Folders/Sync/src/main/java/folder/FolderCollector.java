@@ -88,14 +88,8 @@ public class FolderCollector
      */
     @Override
     public Function<Folder, Folder> finisher() {
-        return folder -> {
-            // Compute the number of subfolders and documents that are
-            // rooted at this folder.
-            folder.computeSize();
-
-            // Return this folder.
-            return folder;
-        };
+        // This is a no-op since IDENTITY_FINISH is set.
+        return null;
     }
 
     /**
@@ -108,7 +102,11 @@ public class FolderCollector
      */
     @Override
     public Set<Collector.Characteristics> characteristics() {
-        return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED));
+        // Return an immutable set of collector characteristics, which
+        // in this case is UNORDERED and IDENTITY_FINISH.
+        return Collections
+            .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
+                                        Characteristics.IDENTITY_FINISH));
     }
 
     /**

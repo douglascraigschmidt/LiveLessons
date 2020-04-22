@@ -38,7 +38,16 @@ public class BatchFolderSpliterator
         mBatchSize =
             (int) folder.getSize() / Runtime.getRuntime().availableProcessors();
 
-        // Initialize the breadth-first search iterator.
+        // Initialize the breadth-first search iterator.  This
+        // iterator is only ever accessed from the calling thread
+        // (even when BatchFolderSpliterator is used to create a
+        // parallel stream), so it needn't be synchronized.  The
+        // reason is that the BatchFolderSpliterator never splits
+        // *itself*, but only creates a new ArraySpliterator via calls
+        // to return Spliterators.spliterator(direntArray, 0, index,
+        // 0) below.  That spliterator *will* run in a separate thread
+        // when used with parallel streams, but that's ok since it
+        // doesn't access the BFSIterator by that point.
         mIterator = new BFSIterator(folder);
     }
 
