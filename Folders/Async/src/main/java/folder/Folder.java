@@ -165,22 +165,22 @@ public class Folder
         // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry)) {
             // CompletableFuture<Dirent> folderF
-            var folderF = Folder
-                // Synchronously (and recursively) create a future to a
+            var subFolderF = Folder
+                // Asynchronously (and recursively) create a future to a
                 // folder from the entry.
                 .fromDirectory(entry)
 
                 // This completion stage method is always called and
                 // doesn't affect the future returned by fromDirectory().
-                .whenComplete((folder, ___) -> {
-                    if (folder != null)
+                .whenComplete((subFolder, ___) -> {
+                    if (subFolder != null)
                         // Increase the size of this folder
                         // by the size of the new folder.
-                        addToSize(folder.getSize());
+                        addToSize(subFolder.getSize());
                 });
 
             // Add future to the folder futures list.
-            mSubFolderFutures.add(folderF);
+            mSubFolderFutures.add(subFolderF);
         } else {
             mDocumentFutures
                 // Asynchronously create a document from the entry and

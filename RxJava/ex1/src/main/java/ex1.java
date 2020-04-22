@@ -10,16 +10,26 @@ import java.util.function.Function;
 public class ex1 {
     private static Random mRand = new Random();
 
-    private static Observable<Integer> fetch() throws InterruptedException {
-        Thread.sleep(java.lang.Math.abs(mRand.nextInt() % 1000));
+    private static Observable<Integer> fetch() {
+        sleep(java.lang.Math.abs(mRand.nextInt() % 1000));
         print("Loading from ");
         return Observable
                 .just(mRand.nextInt(), mRand.nextInt(), mRand.nextInt());
     }
 
+    /**
+     * A sensible sleep() method that doesn't throw InterruptedException.
+     */
+    private static void sleep(int sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
     private static void emit(ObservableEmitter<Integer> emitter) throws InterruptedException {
         for (int count = 0; count < 10; count++) {
-            Thread.sleep(100);
+            sleep(100);
             print("Emitting... " + count);
             emitter.onNext(count);
 
@@ -30,7 +40,7 @@ public class ex1 {
     }
 
     private static void process(int value) throws InterruptedException {
-        Thread.sleep(1000);
+        sleep(1000);
         print(value);
     }
 
@@ -70,12 +80,44 @@ public class ex1 {
     private static void print(Integer i) {
         System.out.println("Got: " + i + " in thread " + Thread.currentThread().getName());
     }
+
+    static Single<Boolean> foo() {
+        sleep(1000);
+        System.out.println("foo");
+        return Single.just(true);
+    }
+
+    static Single<Boolean> bar() {
+        sleep(2000);
+        System.out.println("bar");
+        return Single.just(false);
+    }
+
+    static Single<Boolean> baz() {
+        sleep(3000);
+        System.out.println("baz");
+        return Single.just(true);
+    }
+
+    /**
+     *
+     */
+    static void test3() {
+        Observable<Boolean> ops = Observable
+                .fromArray(foo(), bar(), baz())
+                .subscribeOn(Schedulers.computation())
+                .flatMap(Single::toObservable);
+
+        ops.blockingSubscribe(System.out::println);
+    }
+
     /**
      * 
      */
     static public void main(String[] argv) throws InterruptedException {
-        test1();
-        test2();
+        // test1();
+        // test2();
+        test3();
 
         Thread.sleep(10000);
     }

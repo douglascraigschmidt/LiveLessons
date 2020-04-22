@@ -32,14 +32,6 @@ public class Main {
         = CompletableFuture.completedFuture(null);
 
     /**
-     * Display {@code string} if the program is run in verbose mode.
-     */
-    private static void display(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println(string);
-    }
-
-    /**
      * Main entry point into the program.
      */
     static public void main(String[] argv) {
@@ -310,9 +302,10 @@ public class Main {
     }
 
     /**
-     * @return True of {@code dirent} is a document, else false
+     * @return True if {@code dirent} is a document, else false
      */
     private static boolean isDocument(Dirent dirent) {
+        // Return true if dirent is a document, else false.
         return dirent instanceof Document;
     }
 
@@ -325,6 +318,7 @@ public class Main {
         // Run garbage collector to avoid perturbing the tests.
         System.gc();
 
+        // Clever hack.. ;-)
         CompletableFuture<Dirent>[] cff = new CompletableFuture[1];
 
         // Create a new folder.
@@ -355,5 +349,13 @@ public class Main {
                            "sync searchFolders()");
 
         display("Ending runSyncTests()");
+    }
+
+    /**
+     * Display {@code string} if the program is run in verbose mode.
+     */
+    private static void display(String string) {
+        if (Options.getInstance().getVerbose())
+            System.out.println(string);
     }
 }
