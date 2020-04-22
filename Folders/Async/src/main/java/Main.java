@@ -98,7 +98,7 @@ public class Main {
 
         // Wait for async processing to finish and then return.
         RunTimer.timeRun(asyncResults::join,
-                         "collect::join");
+                         "asyncResults::join");
 
         display("Ending runAsyncTests()");
     }

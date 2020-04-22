@@ -32,7 +32,7 @@ class ImageCounter {
             new ConcurrentHashSet<>();
 
     /**
-     * Stores a completed observable with value of 0.
+     * Stores a completed single with value of 0.
      */
     private final Single<Integer> mZero =
             Single.just(0);
