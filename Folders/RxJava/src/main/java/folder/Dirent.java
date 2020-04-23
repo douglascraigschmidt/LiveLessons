@@ -1,13 +1,9 @@
 package folder;
 
-import io.reactivex.rxjava3.core.Observable;
-
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This super class defines the common capabilities provided by a
@@ -52,7 +48,7 @@ public abstract class Dirent
      * @return Name of the dirent
      */
     public String getName() {
-        return mPath.getName().toString();
+        return mPath.getName();
     }
 
     /**
@@ -117,7 +113,7 @@ public abstract class Dirent
      * This iterator traverses each element in the folder using
      * (reverse) breadth-first search.
      */
-    private class BFSIterator
+    private static class BFSIterator
         implements Iterator<Dirent> {
         /**
          * The current entry to process.
