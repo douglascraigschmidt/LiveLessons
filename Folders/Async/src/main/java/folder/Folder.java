@@ -179,16 +179,24 @@ public class Folder
                         addToSize(subFolder.getSize());
                 });
 
-            // Add future to the folder futures list.
+            // Add the future to the folder futures list.
             mSubFolderFutures.add(subFolderF);
         } else {
-            mDocumentFutures
-                // Asynchronously create a document from the entry and
-                // add a future to the document futures list.
-                .add(Document.fromPath(entry));
+            var documentF = Document
+                // Asynchronously create a document from the entry
+                .fromPath(entry)
 
-            // Increase the size by 1.
-            addToSize(1);
+                // This completion stage method is always called and
+                // doesn't affect the future returned by fromDirectory().
+                .whenComplete((document, ___) -> {
+                    if (document != null)
+                        // Count this new document.
+                        addToSize(1);
+                    });
+            
+            mDocumentFutures
+                // Add the future to the document futures list.
+                .add(documentF);
         }
     }
 

@@ -35,8 +35,10 @@ public class BatchFolderSpliterator
         super(folder.getSize(), NONNULL + IMMUTABLE);
 
         // Make the initial batch size match the number of processors.
-        mBatchSize =
-            (int) folder.getSize() / Runtime.getRuntime().availableProcessors();
+        mBatchSize = (int) Long
+            // Ensure there's at least 1 entry if the folder size is small!
+            .max(folder.getSize() / Runtime.getRuntime().availableProcessors(),
+                 1L);
 
         // Initialize the breadth-first search iterator.  This
         // iterator is only ever accessed from the calling thread

@@ -44,8 +44,8 @@ public class ImageStreamRxJava1
             // observables.
             .fromIterable(urls)
 
-            // Transform the stream of urls by downloading and
-            // filtering them in parallel.
+            // Use the RxJava flatMap() idiom to transform the stream
+            // of urls by downloading and filtering them in parallel.
             .flatMap(url ->
                      Observable
                      // Just omit this one object.

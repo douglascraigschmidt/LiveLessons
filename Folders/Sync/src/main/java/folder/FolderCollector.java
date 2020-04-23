@@ -60,6 +60,7 @@ public class FolderCollector
     public BiConsumer<Folder, Path> accumulator() {
         // Return a biconsumer that adds a path to the mutable result
         // container.
+
         return (folder, entry) ->
                 // Add the entry to the folder.
                 folder.addEntry(entry, mParallel);

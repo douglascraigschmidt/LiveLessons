@@ -5,6 +5,7 @@ import utils.Options;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -101,7 +102,7 @@ public class Main {
         return Folder
             // Create a folder containing all the works in the root
             // directory.
-            .fromDirectory(TestDataFactory.getRootFolderFile(root),
+            .fromDirectory(TestDataFactory.getRootFolderFile(works),
                            parallel);
     }
 
@@ -215,7 +216,7 @@ public class Main {
                        // Create a stream from the document around
                        // matches to newlines.
                        splitAsStream(document.getContents(),
-                                        "[\n\r]")
+                                     "\\r?\\n")
 
                        // Count the number of newlines in the document.
                        .count())
