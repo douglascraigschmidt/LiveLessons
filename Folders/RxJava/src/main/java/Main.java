@@ -165,6 +165,8 @@ public class Main {
 
             // Return 0 if empty.
             .defaultIfEmpty(0L)
+
+            // Block until complete.
             .blockingGet();
 
         // Print the results.

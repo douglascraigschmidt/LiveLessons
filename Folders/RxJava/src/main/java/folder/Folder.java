@@ -87,6 +87,7 @@ public class Folder
                      // recursion.
                      .filter(path -> !path.equals(rootPath))
 
+
                      .flatMap(path -> Folder
                               // Create and return a Dirent containing
                               // all the contents at the given path.

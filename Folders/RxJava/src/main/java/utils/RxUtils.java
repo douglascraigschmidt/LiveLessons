@@ -62,6 +62,7 @@ public class RxUtils {
      * @return Schedule an observable to run on the calling thread.
      */
     public static <T> ObservableTransformer<T, T> callingObservable() {
+        // No-op!!
         return observable -> observable;
     }
 }
