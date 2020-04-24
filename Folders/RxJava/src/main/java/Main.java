@@ -1,11 +1,8 @@
 import folder.Dirent;
 import folder.Document;
 import folder.Folder;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.subjects.SingleSubject;
 import utils.Options;
 import utils.RunTimer;
 import utils.RxUtils;
@@ -52,7 +49,7 @@ public class Main {
         // Record whether we're running in parallel or sequentially.
         String mode = parallel ? "in parallel" : "sequentially";
 
-        display("Starting the test " + mode);
+        Options.getInstance().display("Starting the test " + mode);
 
         // The word to search for while the folder's being
         // constructed.
@@ -86,7 +83,7 @@ public class Main {
                                          parallel),
                          "searchFolders() " + mode);
 
-        display("Ending the test " + mode);
+        Options.getInstance().display("Ending the test " + mode);
     }
 
     /**
@@ -99,8 +96,8 @@ public class Main {
     private static Single<Dirent> createFolder(String works,
                                                boolean parallel) {
         // Return a "hot" single to the initialized folder.
-        return RxUtils
-            .makeHotSingle(Folder
+        return RxUtils.makeHotSingle
+                    (Folder
                            // Asynchronously create a folder with all
                            // works in the root directory.
                            .fromDirectory(TestDataFactory.getRootFolderFile(works),
@@ -127,7 +124,7 @@ public class Main {
                      .count())
 
             // Block until result is available and then display it.
-            .blockingSubscribe(count -> 
+            .blockingSubscribe(count -> Options.getInstance().
                                display("number of entries in the folder = "
                                        + count));
     }
@@ -148,12 +145,9 @@ public class Main {
 
                         // Use the RxJava flatMap() idiom to count the #
                         // of lines in the folder.
-                        .flatMap(dirent -> Observable
-                                // Just omit this one dirent.
-                                .just(dirent)
-
-                                // Conditionally convert to run concurrently.
-                                .compose(RxUtils.concurrentObservableIf(parallel))
+                        .flatMap(dirent -> RxUtils
+                                // Emit direct concurrently or sequentially.
+                                .justConcurrentlyIf(dirent, parallel)
 
                                 // Only search documents.
                                 .filter(Main::isDocument)
@@ -175,8 +169,9 @@ public class Main {
                         .defaultIfEmpty(0L))
 
                 // Block until result is available and then display it.
-                .blockingSubscribe(lineCount -> display("total number of lines = "
-                        + lineCount));
+                .blockingSubscribe(lineCount -> Options.getInstance().
+                                   display("total number of lines = "
+                                   + lineCount));
     }
 
     /**
@@ -198,11 +193,11 @@ public class Main {
 
                      // Use the RxJava flatMap() idiom to count the #
                      // of times searchWord appears in the folder.
-                     .flatMap(dirent -> Observable
-                              // Just omit this one dirent.
-                              .just(dirent)
+                     .flatMap(dirent -> RxUtils
+                             // Emit direct concurrently or sequentially.
+                             .justConcurrentlyIf(dirent, parallel)
 
-                              // Conditionally convert to run
+                             // Conditionally convert to run
                               // concurrently.
                               .compose(RxUtils.concurrentObservableIf(parallel))
 
@@ -224,7 +219,7 @@ public class Main {
                      .defaultIfEmpty(0L))
 
             // Block until result is available and then display it.
-            .blockingSubscribe(wordMatches ->
+            .blockingSubscribe(wordMatches -> Options.getInstance().
                                display("total matches of \""
                                        + searchWord
                                        + "\" = "
@@ -271,8 +266,15 @@ public class Main {
      */
     private static Observable<String> splitAsObservable(Dirent document,
                                                         String regex) {
+        // Return an observable of strings.
         return Observable
-            .fromArray(document.getContents().toString()
+            // Create an observable from an array of strings.
+            .fromArray(document
+                       // Create a string containing the document's contents.
+                       .getContents().toString()
+
+                       // Split the string into an array of strings
+                       // based on the regular expression.
                        .split(regex));
     }
 
@@ -282,16 +284,5 @@ public class Main {
     private static boolean isDocument(Dirent dirent) {
         // Return true if dirent is a document, else false.
         return dirent instanceof Document;
-    }
-
-    /**
-     * Display {@code string} if the program is run in verbose mode.
-     */
-    static void display(String string) {
-        if (Options.getInstance().getVerbose())
-            System.out.println("["
-                               + Thread.currentThread().getId()
-                               + "] "
-                               + string);
     }
 }

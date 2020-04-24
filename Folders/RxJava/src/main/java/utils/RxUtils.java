@@ -1,5 +1,7 @@
 package utils;
 
+import folder.Dirent;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableTransformer;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleTransformer;
@@ -79,5 +81,21 @@ public class RxUtils {
         SingleSubject<T> subject = SingleSubject.create();
         single.subscribe(subject);
         return subject;
+    }
+
+    /**
+     * Emit {@code item} either concurrently or sequentially based on {@code parallel} flag.
+     *
+     * @param item Item to emit
+     * @param parallel True if emit concurrently, false if emit
+     * @return An observable that will be emitted concurrenty or sequentially.
+     */
+    public static <T> Observable<T> justConcurrentlyIf(T item, boolean parallel) {
+        return Observable
+                // Just omit this one item.
+                .just(item)
+
+                // Conditionally convert to run concurrently.
+                .compose(RxUtils.concurrentObservableIf(parallel));
     }
 }

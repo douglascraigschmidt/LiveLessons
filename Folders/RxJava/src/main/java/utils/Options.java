@@ -67,4 +67,15 @@ public class Options {
     private void printUsage() {
         System.out.println("Options usage: \n-v");
     }
+
+    /**
+     * Display {@code string} if the program is run in verbose mode.
+     */
+    public void display(String string) {
+        if (getVerbose())
+            System.out.println("["
+                    + Thread.currentThread().getId()
+                    + "] "
+                    + string);
+    }
 }
