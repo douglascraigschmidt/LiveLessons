@@ -1,8 +1,11 @@
 import folder.Dirent;
 import folder.Document;
 import folder.Folder;
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.SingleSubject;
 import utils.Options;
 import utils.RunTimer;
 import utils.RxUtils;
@@ -55,27 +58,32 @@ public class Main {
         // constructed.
         final String searchWord = "CompletableFuture";
 
-        // Compute the time needed to create a new folder.
-        Dirent rootFolder =
-            RunTimer.timeRun(() -> createFolder(sWORKS, parallel).blockingGet(),
+        // Get a "hot" single to a Folder.
+        Single<Dirent> rootFolderS = RunTimer
+            // Compute the time needed to create a new folder
+            // asynchronously.
+            .timeRun(() -> createFolder(sWORKS, parallel),
                              "createFolder() " + mode);
 
-        // Compute the time taken to count the entries in the folder.
-        RunTimer.timeRun(() -> countEntries(rootFolder,
-                                            parallel),
+        RunTimer
+            // Compute the time taken to count the entries in the folder.
+            .timeRun(() -> countEntries(rootFolderS,
+                                        parallel),
                          "countEntries() " + mode);
 
-        // Compute the time taken to count the # of lines in the
-        // folder.
-        RunTimer.timeRun(() -> countLines(rootFolder,
-                                          parallel),
+        RunTimer
+            // Compute the time taken to count the # of lines in the
+            // folder.
+            .timeRun(() -> countLines(rootFolderS,
+                                      parallel),
                          "countLines() " + mode);
 
-        // Compute the time taken to synchronously search for a word
-        // in all folders starting at the rootFolder.
-        RunTimer.timeRun(() -> searchFolders(rootFolder,
-                                             searchWord,
-                                             parallel),
+        RunTimer
+            // Compute the time taken to synchronously search for a
+            // word in all folders starting at the rootFolder.
+            .timeRun(() -> searchFolders(rootFolderS,
+                                         searchWord,
+                                         parallel),
                          "searchFolders() " + mode);
 
         display("Ending the test " + mode);
@@ -86,144 +94,141 @@ public class Main {
      *
      * @param works Name of the directory in the file system containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
-     * @return A folder containing all works in {@code works}
+     * @return A "hot" single to a folder containing all works in {@code works}
      */
     private static Single<Dirent> createFolder(String works,
                                                boolean parallel) {
-        // Return a single to the initialized folder.
-        return Folder
-            // Asynchronously create a folder containing all the works
-            // in the root directory.
-            .fromDirectory(TestDataFactory.getRootFolderFile(works),
-                           parallel);
+        // Return a "hot" single to the initialized folder.
+        return RxUtils
+            .makeHotSingle(Folder
+                           // Asynchronously create a folder with all
+                           // works in the root directory.
+                           .fromDirectory(TestDataFactory.getRootFolderFile(works),
+                                          parallel));
     }
 
     /**
      * Count the # of entries in the {@code rootFolder}.
      *
-     * @param rootFolder In-memory folder containing the works.
+     * @param rootFolderS "Hot" single to an in-memory folder containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
-    private static void countEntries(Dirent rootFolder,
+    private static void countEntries(Single<Dirent> rootFolderS,
                                      boolean parallel) {
-        // Count the number of entries in the rootFolder.
-        long count = Observable
-            // Create a stream of dirents starting at the rootFolder.
-            .fromIterable(rootFolder)
+        rootFolderS
+            .flatMap(rootFolder -> Observable
+                     // Create a stream of dirents starting at the rootFolder.
+                     .fromIterable(rootFolder)
 
-            // Conditionally convert to run concurrently.
-            .compose(RxUtils.concurrentObservableIf(parallel))
+                     // Conditionally convert to run concurrently.
+                     .compose(RxUtils.concurrentObservableIf(parallel))
 
-            // Count the # of elements in the stream.
-            .count()
+                     // Count the # of elements in the stream.
+                     .count())
 
-            // Block until the processing is done.
-            .blockingGet();
-
-        // Print the results.
-        display("number of entries in the folder = "
-                + count);
+            // Block until result is available and then display it.
+            .blockingSubscribe(count -> 
+                               display("number of entries in the folder = "
+                                       + count));
     }
 
     /**
      * Count # of lines in the recursively structured directory at
      * {@code rootFolder}.
      *
-     * @param rootFolder In-memory folder containing the works.
+     * @param rootFolderS "Hot" single to an in-memory folder containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
-    private static void countLines(Dirent rootFolder,
+    private static void countLines(Single<Dirent> rootFolderS,
                                    boolean parallel) {
-        long lineCount = Observable
-            // Create a stream of dirents starting at the rootFolder,
-            .fromIterable(rootFolder)
+        rootFolderS
+                .flatMap(rootFolder -> Observable
+                        // Create a stream of dirents from rootFolder.
+                        .fromIterable(rootFolder)
 
-            // Use the RxJava flatMap() idiom to count the # of lines
-            // in the folder.
-            .flatMap(dirent -> Observable
-                     // Just omit this one dirent.
-                     .just(dirent)
+                        // Use the RxJava flatMap() idiom to count the #
+                        // of lines in the folder.
+                        .flatMap(dirent -> Observable
+                                // Just omit this one dirent.
+                                .just(dirent)
 
-                     // Conditionally convert to run concurrently.
-                     .compose(RxUtils.concurrentObservableIf(parallel))
+                                // Conditionally convert to run concurrently.
+                                .compose(RxUtils.concurrentObservableIf(parallel))
 
-                     // Only search documents.
-                     .filter(Main::isDocument)
+                                // Only search documents.
+                                .filter(Main::isDocument)
 
-                     // Split the document into lines.
-                     .flatMap(document -> splitAsObservable(document,
-                                                            "\\r?\\n"))
+                                // Split the document into lines.
+                                .flatMap(document -> splitAsObservable(document,
+                                        "\\r?\\n"))
 
-                     // Count the number of newlines in the document.
-                     .count()
+                                // Count the number of newlines in the document.
+                                .count()
 
-                     // Convert the single to an observable.
-                     .toObservable())
+                                // Convert the single to an observable.
+                                .toObservable())
 
-            // Sum all the counts.
-            .reduce(Long::sum)
+                        // Sum all the counts.
+                        .reduce(Long::sum)
 
-            // Return 0 if empty.
-            .defaultIfEmpty(0L)
+                        // Return 0 if empty.
+                        .defaultIfEmpty(0L))
 
-            // Block until complete.
-            .blockingGet();
-
-        // Print the results.
-        display("total number of lines = "
-                + lineCount);
+                // Block until result is available and then display it.
+                .blockingSubscribe(lineCount -> display("total number of lines = "
+                        + lineCount));
     }
 
     /**
      * Find all occurrences of {@code searchWord} in {@code
      * rootFolder} using a stream.
      *
-     * @param rootFolder In-memory folder containing the works
+     * @param rootFolderS "Hot" single in-memory folder containing the works
      * @param searchWord Word to search for in the folder
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
-    private static void searchFolders(Dirent rootFolder,
+    private static void searchFolders(Single<Dirent> rootFolderS,
                                       String searchWord,
                                       boolean parallel) {
-        // Count the # of times searchWord appears in the folder.
-        long matches = Observable
-            // Create a stream of dirents starting at the rootFolder.
-            .fromIterable(rootFolder)
+        rootFolderS
+            .flatMap(rootFolder ->
+                     Observable
+                     // Create a stream of dirents from rootFolder.
+                     .fromIterable(rootFolder)
 
-            // Use the RxJava flatMap() idiom to count the # of times
-            // searchWord appears in the folder.
-            .flatMap(dirent -> Observable
-                     // Just omit this one dirent.
-                     .just(dirent)
+                     // Use the RxJava flatMap() idiom to count the #
+                     // of times searchWord appears in the folder.
+                     .flatMap(dirent -> Observable
+                              // Just omit this one dirent.
+                              .just(dirent)
 
-                     // Conditionally convert to run concurrently.
-                     .compose(RxUtils.concurrentObservableIf(parallel))
+                              // Conditionally convert to run
+                              // concurrently.
+                              .compose(RxUtils.concurrentObservableIf(parallel))
 
-                     // Only search documents.
-                     .filter(Main::isDocument)
+                              // Only search documents.
+                              .filter(Main::isDocument)
 
-                     // Search the document looking for matches.
-                     .flatMap(document ->
-                              // Count # of times searchWord appears
-                              // in the document.
-                              occurrencesCount(document,
-                                               searchWord,
-                                               parallel)))
+                              // Search document looking for matches.
+                              .flatMap(document ->
+                                       // Count # of times searchWord
+                                       // appears in the document.
+                                       occurrencesCount(document,
+                                                        searchWord,
+                                                        parallel)))
 
-            // Sum all the counts.
-            .reduce(Long::sum)
+                     // Sum all the counts.
+                     .reduce(Long::sum)
 
-            // Return 0 if empty.
-            .defaultIfEmpty(0L)
+                     // Return 0 if empty.
+                     .defaultIfEmpty(0L))
 
-            // Block until the result is available.
-            .blockingGet();
-
-        // Print the results.
-        display("total matches of \""
-                + searchWord
-                + "\" = "
-                + matches);
+            // Block until result is available and then display it.
+            .blockingSubscribe(wordMatches ->
+                               display("total matches of \""
+                                       + searchWord
+                                       + "\" = "
+                                       + wordMatches));
     }
 
     /**

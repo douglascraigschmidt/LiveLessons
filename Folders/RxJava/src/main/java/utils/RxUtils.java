@@ -1,9 +1,11 @@
 package utils;
 
 import io.reactivex.rxjava3.core.ObservableTransformer;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleTransformer;
 import io.reactivex.rxjava3.parallel.ParallelTransformer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.SingleSubject;
 
 import java.util.concurrent.ForkJoinPool;
 
@@ -64,5 +66,18 @@ public class RxUtils {
     public static <T> ObservableTransformer<T, T> callingObservable() {
         // No-op!!
         return observable -> observable;
+    }
+
+    /**
+     * Convert {@code single} into a "hot" single that doesn't
+     * regenerate values seen by earlier subscribers.
+     *
+     * @param single The single to make "hot"
+     * @return A "hot" single.
+     */
+    public static <T> SingleSubject<T> makeHotSingle(Single<T> single) {
+        SingleSubject<T> subject = SingleSubject.create();
+        single.subscribe(subject);
+        return subject;
     }
 }
