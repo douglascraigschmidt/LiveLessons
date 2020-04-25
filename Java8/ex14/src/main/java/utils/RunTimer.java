@@ -74,8 +74,8 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuffer stringBuffer =
-            new StringBuffer();
+        StringBuilder stringBuffer =
+            new StringBuilder();
 
         // Print out the contents of the mResultsMap in sorted
         // order.
