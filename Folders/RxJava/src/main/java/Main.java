@@ -96,12 +96,13 @@ public class Main {
     private static Single<Dirent> createFolder(String works,
                                                boolean parallel) {
         // Return a "hot" single to the initialized folder.
-        return RxUtils.makeHotSingle
+        return // RxUtils.makeHotSingle
                     (Folder
                            // Asynchronously create a folder with all
                            // works in the root directory.
                            .fromDirectory(TestDataFactory.getRootFolderFile(works),
-                                          parallel));
+                                          parallel)//);
+                            .cache());
     }
 
     /**
@@ -113,6 +114,8 @@ public class Main {
     private static void countEntries(Single<Dirent> rootFolderS,
                                      boolean parallel) {
         rootFolderS
+            // This code is called after the rootFolder has completed
+            // its initialization.
             .flatMap(rootFolder -> Observable
                      // Create a stream of dirents starting at the rootFolder.
                      .fromIterable(rootFolder)
@@ -139,39 +142,41 @@ public class Main {
     private static void countLines(Single<Dirent> rootFolderS,
                                    boolean parallel) {
         rootFolderS
-                .flatMap(rootFolder -> Observable
-                        // Create a stream of dirents from rootFolder.
-                        .fromIterable(rootFolder)
+            // This code is called after the rootFolder has completed
+            // its initialization.
+            .flatMap(rootFolder -> Observable
+                     // Create a stream of dirents from rootFolder.
+                     .fromIterable(rootFolder)
 
-                        // Use the RxJava flatMap() idiom to count the #
-                        // of lines in the folder.
-                        .flatMap(dirent -> RxUtils
-                                // Emit direct concurrently or sequentially.
-                                .justConcurrentlyIf(dirent, parallel)
+                     // Use the RxJava flatMap() idiom to count the #
+                     // of lines in the folder.
+                     .flatMap(dirent -> RxUtils
+                              // Emit direct concurrently or sequentially.
+                              .justConcurrentIf(dirent, parallel)
 
-                                // Only search documents.
-                                .filter(Main::isDocument)
+                              // Only search documents.
+                              .filter(Main::isDocument)
 
-                                // Split the document into lines.
-                                .flatMap(document -> splitAsObservable(document,
-                                        "\\r?\\n"))
+                              // Split the document into lines.
+                              .flatMap(document -> splitAsObservable(document,
+                                                                     "\\r?\\n"))
 
-                                // Count the number of newlines in the document.
-                                .count()
+                              // Count the number of newlines in the document.
+                              .count()
 
-                                // Convert the single to an observable.
-                                .toObservable())
+                              // Convert the single to an observable.
+                              .toObservable())
 
-                        // Sum all the counts.
-                        .reduce(Long::sum)
+                     // Sum all the counts.
+                     .reduce(Long::sum)
 
-                        // Return 0 if empty.
-                        .defaultIfEmpty(0L))
+                     // Return 0 if empty.
+                     .defaultIfEmpty(0L))
 
-                // Block until result is available and then display it.
-                .blockingSubscribe(lineCount -> Options.getInstance().
-                                   display("total number of lines = "
-                                   + lineCount));
+            // Block until result is available and then display it.
+            .blockingSubscribe(lineCount -> Options.getInstance().
+                               display("total number of lines = "
+                                       + lineCount));
     }
 
     /**
@@ -186,8 +191,9 @@ public class Main {
                                       String searchWord,
                                       boolean parallel) {
         rootFolderS
-            .flatMap(rootFolder ->
-                     Observable
+            // This code is called after the rootFolder has completed
+            // its initialization.
+            .flatMap(rootFolder -> Observable
                      // Create a stream of dirents from rootFolder.
                      .fromIterable(rootFolder)
 
@@ -195,7 +201,7 @@ public class Main {
                      // of times searchWord appears in the folder.
                      .flatMap(dirent -> RxUtils
                              // Emit direct concurrently or sequentially.
-                             .justConcurrentlyIf(dirent, parallel)
+                             .justConcurrentIf(dirent, parallel)
 
                              // Conditionally convert to run
                               // concurrently.

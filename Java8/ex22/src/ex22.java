@@ -16,7 +16,8 @@ import static utils.ForkJoinUtils.*;
 
 /**
  * This example shows how to reduce and multiply big fractions using
- * the Java fork-join pool framework.
+ * different programming models provided by the Java fork-join pool
+ * framework.
  */
 public class ex22 {
     /**
@@ -66,8 +67,8 @@ public class ex22 {
 
         // Create a list of test methods.
         List<BiFunction<List<BigFraction>,
-             Function<BigFraction, BigFraction>,
-             Void>>
+                        Function<BigFraction, BigFraction>,
+                        Void>>
             testMethods = List.of(ex22::testInvokeAll,
                                   ex22::testApplyAllIter,
                                   ex22::testApplyAllSplitIndex,

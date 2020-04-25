@@ -90,7 +90,7 @@ public class RxUtils {
      * @param parallel True if emit concurrently, false if emit
      * @return An observable that will be emitted concurrenty or sequentially.
      */
-    public static <T> Observable<T> justConcurrentlyIf(T item, boolean parallel) {
+    public static <T> Observable<T> justConcurrentIf(T item, boolean parallel) {
         return Observable
                 // Just omit this one item.
                 .just(item)

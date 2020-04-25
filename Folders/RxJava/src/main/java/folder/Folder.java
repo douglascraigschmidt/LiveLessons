@@ -67,36 +67,43 @@ public class Folder
             .blockingGet();
     }
 
-    public static Single<Dirent> fromDirectory(File rootPath,
+    /**
+     * This factory method creates a folder from the given {@code
+     * rootFile}.
+     *
+     * @param rootFile The root file in the file system
+     * @param parallel A flag that indicates whether to create the
+     *                 folder sequentially or in parallel
+     *
+     * @return An open folder containing all contents in the {@code rootFile}
+     */
+    public static Single<Dirent> fromDirectory(File rootFile,
                                                boolean parallel) {
         return Observable
             // Create a stream of observables from the list of files.
-            .fromArray(Objects.requireNonNull(rootPath.listFiles()))
+            .fromArray(Objects.requireNonNull(rootFile.listFiles()))
 
             // This flatMap() idiom is used to (conditionally) run
             // this code concurrently.
-            .flatMap(file -> Observable
-                     // Create an observable from this file.
-                     .just(file)
-
-                     // Conditionally convert to either sequential or
-                     // concurrent processing.
-                     .compose(RxUtils.concurrentObservableIf(parallel))
+            .flatMap(file -> RxUtils
+                     // Create an observable from this file either
+                     // sequentially or concurrently.
+                     .justConcurrentIf(file, parallel)
 
                      // Eliminate rootPath to avoid infinite
                      // recursion.
-                     .filter(path -> !path.equals(rootPath))
+                     .filter(path -> !path.equals(rootFile))
 
-
+                     // Create a stream of dirents.
                      .flatMap(path -> Folder
-                              // Create and return a Dirent containing
+                              // Create and return a dirent containing
                               // all the contents at the given path.
                               .createEntry(path, parallel)
                               .toObservable()))
 
             // Collect the results into a folder containing all the
             // entries in stream.
-            .collectInto(new Folder(rootPath),
+            .collectInto(new Folder(rootFile),
                          Folder::addEntry);
     }
 
