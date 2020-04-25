@@ -90,7 +90,7 @@ public class ex2 {
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking on I/O occurs.
         runTestReactorflatMap(this::downloadAndStoreImageBT,
-                         "testAdaptiveBTDownloadBehaviorReactorflatMap()");
+                              "testAdaptiveBTDownloadBehaviorReactorflatMap()");
 
         // Run the tests using Reactor's ParallelFlux mechanism along
         // with the {@code BlockingTask} wrapper for the Java
@@ -119,12 +119,13 @@ public class ex2 {
         // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehavior(downloadAndStoreImage,
-                                              testName),
-                         testName);
+        RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test with the designated function.
+                     testDownloadBehavior(downloadAndStoreImage,
+                                          testName),
+                     testName);
     }
 
     /**
@@ -140,12 +141,13 @@ public class ex2 {
         // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehaviorRxflatMap(downloadAndStoreImage,
-                                                       testName),
-                         testName);
+        RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test with the designated function.
+                     testDownloadBehaviorRxflatMap(downloadAndStoreImage,
+                                                   testName),
+                     testName);
     }
 
     /**
@@ -154,20 +156,22 @@ public class ex2 {
      * uses its ParallelFlowable mechanism to download files in
      * parallel.
      */
-    private void runTestRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
-                                           String testName) {
+    private void runTestRxParallelFlowable
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // First let the system garbage collect.
         System.gc();
 
         // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehaviorRxParallelFlowable(downloadAndStoreImage,
-                                                                testName),
-                         testName);
+        RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test with the designated function.
+                     testDownloadBehaviorRxParallelFlowable(downloadAndStoreImage,
+                                                            testName),
+                     testName);
     }
 
     /**
@@ -183,12 +187,13 @@ public class ex2 {
         // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehaviorReactorflatMap(downloadAndStoreImage,
-                                                            testName),
-                         testName);
+        RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test with the designated function.
+                     testDownloadBehaviorReactorflatMap(downloadAndStoreImage,
+                                                        testName),
+                     testName);
     }
 
     /**
@@ -197,28 +202,32 @@ public class ex2 {
      * uses its ParallelFlowable mechanism to download files in
      * parallel.
      */
-    private void runTestReactorParallelFlux(Function<URL, File> downloadAndStoreImage,
-                                            String testName) {
+    private void runTestReactorParallelFlux
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // First let the system garbage collect.
         System.gc();
 
         // Delete any filtered images from the previous run.
         FileUtils.deleteDownloadedImages();
 
-        // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehaviorReactorParallelFlux(downloadAndStoreImage,
-                                                                 testName),
-                         testName);
+
+        RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test with the designated function.
+                     testDownloadBehaviorReactorParallelFlux(downloadAndStoreImage,
+                                                             testName),
+                     testName);
     }
 
     /**
      * This method runs the {@code downloadAndStoreImage} function
      * using the parallel streams framework.
      */
-    private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
-                                      String testName) {
+    private void testDownloadBehavior
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get a list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
@@ -243,19 +252,20 @@ public class ex2 {
      * using the RxJava framework and its flatMap() method for
      * parallelizing downloads.
      */
-    private void testDownloadBehaviorRxflatMap(Function<URL, File> downloadAndStoreImage,
-                                               String testName) {
+    private void testDownloadBehaviorRxflatMap
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get and print a list of files to the downloaded images.
         Observable
             // Convert the URLs in the input list into a stream of
             // observables.
             .fromIterable(Options.instance().getUrlList())
 
-            // Transforms an observable by applying a set of
-            // operations to each item emitted by the source.
+            // Apply the RxJava flatMap() idiom to process each url
+            // concurrently.
             .flatMap(url -> RxUtils
-                     // Just omit this one object and run it concurrently
-                    // in the common fork-join pool.
+                     // Just omit this url and run it concurrently in
+                     // the common fork-join pool.
                      .justConcurrentIf(url, true)
 
                      // Transform each URL to a file by calling the
@@ -277,17 +287,17 @@ public class ex2 {
      * using the RxJava framework and its ParallelFlowable mechanism
      * for parallelizing downloads.
      */
-    private void testDownloadBehaviorRxParallelFlowable(Function<URL, File> downloadAndStoreImage,
-                                                        String testName) {
+    private void testDownloadBehaviorRxParallelFlowable
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
 
         RxUtils
-            // Convert the URLs in the input list into a stream of
-            // observables.
+            // Convert the URLs in the input list into a parallel
+            // flowable stream.
             .fromIterableParallel(Options.instance().getUrlList())
 
-            // Transform each URL to a file by calling the
-            // downloadAndStoreImage function, which downloads each
-            // image via its URL.
+            // Transform each url to a file via downloadAndStoreImage,
+            // which downloads each image.
             .map(downloadAndStoreImage::apply)
 
             // Merge the values back into a single flowable.
@@ -307,30 +317,31 @@ public class ex2 {
      * using the Reactor framework and its flatMap() method for
      * parallelizing downloads.
      */
-    private void testDownloadBehaviorReactorflatMap(Function<URL, File> downloadAndStoreImage,
-                                                    String testName) {
+    private void testDownloadBehaviorReactorflatMap
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get a list of files containing the downloaded images.
         List<File> imageFiles = Flux
-                // Convert the URLs in the input list into a stream of
-                // observables.
-                .fromIterable(Options.instance().getUrlList())
+            // Convert the URLs in the input list into a stream.
+            .fromIterable(Options.instance().getUrlList())
 
-                // Transforms an observable by applying a set of
-                // operations to each item emitted by the source.
-                .flatMap(url -> ReactorUtils
-                        // Just omit this one object.
-                        .justConcurrentIf(url, true)
+            // Apply the RxJava flatMap() idiom to process each url
+            // concurrently.
+            .flatMap(url -> ReactorUtils
+                     // Just omit this url and run it concurrently in
+                     // the common fork-join pool.
+                     .justConcurrentIf(url, true)
 
-                        // Transform each URL to a file by calling the
-                        // downloadAndStoreImage function, which
-                        // downloads each image via its URL.
-                        .map(downloadAndStoreImage))
+                     // Transform each url to a file via the
+                     // downloadAndStoreImage function, which
+                     // downloads each image.
+                     .map(downloadAndStoreImage))
 
-                // Collect the downloaded images into a list.
-                .collect(toList())
+            // Collect the downloaded images into a list.
+            .collect(toList())
 
-                // Block until the processing is finished.
-                .block();
+            // Block until the processing is finished.
+            .block();
 
         // Print the number of image files that were downloaded.
         printStats(testName, imageFiles.size());
@@ -341,27 +352,28 @@ public class ex2 {
      * using the Reactor framework and its ParallelFlux mechanism for
      * parallelizing downloads.
      */
-    private void testDownloadBehaviorReactorParallelFlux(Function<URL, File> downloadAndStoreImage,
-                                                         String testName) {
+    private void testDownloadBehaviorReactorParallelFlux
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get a list of files containing the downloaded images.
         List<File> imageFiles = ReactorUtils
-                // Convert the URLs in the input list into a stream of
-                // observables.
-                .fromIterableParallel(Options.instance().getUrlList())
+            // Convert the URLs in the input list into a parallel flux
+            // stream.
+            .fromIterableParallel(Options.instance().getUrlList())
 
-                // Transform each URL to a file by calling the
-                // downloadAndStoreImage function, which downloads
-                // each image via its URL.
-                .map(downloadAndStoreImage)
+            // Transform each URL to a file by calling the
+            // downloadAndStoreImage function, which downloads each
+            // image via its URL.
+            .map(downloadAndStoreImage)
 
-                // Convert the parallel flux back to flux.
-                .sequential()
+            // Convert the parallel flux back to flux.
+            .sequential()
 
-                // Collect to a list.
-                .collect(toList())
+            // Collect to a list.
+            .collect(toList())
 
-                // Block until the processing is finished.
-                .block();
+            // Block until the processing is finished.
+            .block();
 
         // Print the number of image files that were downloaded.
         printStats(testName, imageFiles.size());
