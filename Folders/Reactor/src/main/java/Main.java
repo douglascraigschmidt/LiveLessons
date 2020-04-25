@@ -17,8 +17,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * This example shows the use of the Reactor framework to process
- * entries in a recursively-structured directory folder sequentially
- * and in parallel.
+ * entries in a recursively-structured directory folder sequentially,
+ * concurrently, and in parallel.
  */
 public class Main {
     /**
@@ -36,13 +36,16 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Run all the tests sequentially.
+        // Run the tests sequentially.
         runTests(false);
 
-        // Run all the tests concurrently.
+        // Run the tests concurrently.
         runTests(true);
 
-        // Print the results sorted by decreasing order of efficiency.
+        // Run the tests in parallel.
+        runTestsParallel();
+
+        // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending ReactorFolders test");
@@ -95,6 +98,39 @@ public class Main {
     }
 
     /**
+     * Run the tests in parallel via Reactor's ParallelFlux mechanism.
+     */
+    private static void runTestsParallel() throws InterruptedException {
+        Options.getInstance().display("Starting the test in parallel");
+
+        // The word to search for while the folder's being
+        // constructed.
+        final String searchWord = "CompletableFuture";
+
+        // Get a mono to a Folder.
+        Mono<Dirent> rootFolderM = RunTimer
+                // Compute the time needed to create a new folder
+                // asynchronously.
+                .timeRun(() -> createFolderParallel(sWORKS),
+                        "createFolderParallel() in parallel");
+
+        RunTimer
+                // Compute the time taken to synchronously search for
+                // a word in all folders starting at the rootFolder.
+                .timeRun(() -> searchFoldersParallel(rootFolderM,
+                        searchWord),
+                        "searchFolders() in parallel");
+
+        RunTimer
+                // Compute the time taken to count the # of lines in
+                // the folder.
+                .timeRun(() -> countLinesParallel(rootFolderM),
+                        "countLines() in parallel");
+
+        Options.getInstance().display("Ending the test in parallel");
+    }
+
+    /**
      * Asynchronously create an in-memory folder containing all the
      * works.
      *
@@ -110,6 +146,25 @@ public class Main {
             // root directory.
             .fromDirectory(TestDataFactory.getRootFolderFile(works),
                            concurrently)
+
+            // Cache the results so that they won't be re-emitted
+            // repeatedly each time.
+            .cache();
+    }
+
+    /**
+     * Asynchronously create an in-memory folder containing all the
+     * works in parallel.
+     *
+     * @param works Name of the directory in the file system containing the works.
+     * @return A mono to a folder containing all works in {@code works}
+     */
+    private static Mono<Dirent> createFolderParallel(String works) {
+        // Return a mono to the initialized folder.
+        return Folder
+            // Asynchronously create a folder with all works in the
+            // root directory in parallel.
+            .fromDirectoryParallel(TestDataFactory.getRootFolderFile(works))
 
             // Cache the results so that they won't be re-emitted
             // repeatedly each time.
@@ -189,6 +244,45 @@ public class Main {
     }
 
     /**
+     * Count # of lines in the recursively structured directory at
+     * {@code rootFolder} in parallel.
+     *
+     * @param rootFolderM A mono to an in-memory folder containing the works.
+     */
+    private static void countLinesParallel(Mono<Dirent> rootFolderM) {
+        long lineCount = rootFolderM
+            // This code is called after the rootFolder has completed
+            // its initialization.
+            .flatMap(rootFolder -> ReactorUtils
+                     // Convert the contents of rootFolder into a
+                     // parallel flux stream.
+                     .fromIterableParallel(rootFolder)
+
+                     // Only search documents.
+                     .filter(Main::isDocument)
+
+                     // Count the # of newlines in the document.
+                     .flatMap(document -> Main.
+                              // Split the document into lines.
+                              splitAsFlux(document,
+                                          "\\r?\\n")
+                          
+                              // Count # of entries in the stream.
+                              .count())
+                          
+                     .reduce(Long::sum)
+
+                     // Return 0 if empty.
+                     .defaultIfEmpty(0L))
+
+            // Block until result is available
+            .block();
+
+        // Display the result.
+        Options.getInstance().display("total number of lines = " + lineCount);
+    }
+
+    /**
      * Find all occurrences of {@code searchWord} in {@code
      * rootFolder} using a stream.
      *
@@ -202,15 +296,14 @@ public class Main {
         long wordMatches = rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
-            .flatMap(rootFolder ->
-                     Flux
+            .flatMap(rootFolder -> Flux
                      // Create a stream of dirents from rootFolder.
                      .fromIterable(rootFolder)
 
                      // Use the Reactor flatMap() idiom to count the #
                      // of times searchWord appears in the folder.
                      .flatMap(dirent -> ReactorUtils
-                              // Emit direct concurrently or sequentially.
+                              // Emit concurrently or sequentially.
                               .justConcurrentIf(dirent, concurrently)
 
                               // Only search documents.
@@ -221,8 +314,50 @@ public class Main {
                                        // Count # of times searchWord
                                        // appears in the document.
                                        occurrencesCount(document,
-                                                        searchWord,
-                                                        concurrently)))
+                                                        searchWord)))
+
+                     // Sum all the counts.
+                     .reduce(Long::sum)
+
+                     // Return 0 if empty.
+                     .defaultIfEmpty(0L))
+
+            // Block until result is available.
+            .block();
+
+        // Display the result.
+        Options.getInstance().display("total matches of \""
+                                      + searchWord
+                                      + "\" = "
+                                      + wordMatches);
+    }
+
+    /**
+     * Find all occurrences of {@code searchWord} in {@code
+     * rootFolder} in parallel.
+     *
+     * @param rootFolderM A mono to an in-memory folder containing the works
+     * @param searchWord Word to search for in the folder
+     */
+    private static void searchFoldersParallel(Mono<Dirent> rootFolderM,
+                                              String searchWord) {
+        long wordMatches = rootFolderM
+            // This code is called after the rootFolder has completed
+            // its initialization.
+            .flatMap(rootFolder -> ReactorUtils
+                     // Convert the contents of rootFolder into a
+                     // parallel flux stream.
+                     .fromIterableParallel(rootFolder)
+
+                     // Only search documents.
+                     .filter(Main::isDocument)
+
+                     // Search document looking for matches.
+                     .flatMap(document ->
+                              // Count # of times searchWord
+                              // appears in the document.
+                              occurrencesCount(document,
+                                               searchWord))
 
                      // Sum all the counts.
                      .reduce(Long::sum)
@@ -246,12 +381,10 @@ public class Main {
      *
      * @param document In-memory document containing text
      * @param searchWord Word to search for in the document
-     * @param concurrently Flag indicating whether to run the tests concurrently or not
      * @return The # of times {@code searchWord} appears in {@code document}.
      */
     private static Mono<Long> occurrencesCount(Dirent document,
-                                               String searchWord,
-                                               boolean concurrently) {
+                                               String searchWord) {
         // Return a mono that counts the # of times searchWord appears
         // in the document.
         return 

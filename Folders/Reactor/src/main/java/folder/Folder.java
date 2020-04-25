@@ -2,6 +2,7 @@ package folder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
 import utils.ReactorUtils;
 
 import java.io.File;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collector;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Represents the contents of a folder, which can include recursive
@@ -95,6 +98,38 @@ public class Folder
     }
 
     /**
+     * This factory method creates a folder from the given {@code
+     * rootFile} in parallel.
+     *
+     * @param rootFile The root file in the file system
+     * @return An open folder containing all contents in the {@code rootFile}
+     */
+    public static Mono<Dirent> fromDirectoryParallel(File rootFile) {
+        // Create and return a dirent containing
+        // all the contents at the given path.
+        return ReactorUtils
+                // Create a stream of fluxes from the list of files.
+                .fromArrayParallel
+                        (Objects.requireNonNull(rootFile.listFiles()))
+
+                // Eliminate rootPath to avoid infinite
+                // recursion.
+                .filter(path -> !path.equals(rootFile))
+
+                // Create a stream of dirents.
+                .flatMap(Folder::createEntryParallel)
+
+                // Convert parallel flux back to flux.
+                .sequential()
+
+                // Collect the results into a folder containing all the
+                // entries in stream.
+                .collect(Collector.of(() -> new Folder(rootFile),
+                         Folder::addEntry,
+                         Folder::merge));
+    }
+
+    /**
      * Create a new {@code entry} and return it.
      */
     static Mono<Dirent> createEntry(File entry,
@@ -103,6 +138,20 @@ public class Folder
         if (entry.isDirectory()) {
             // Recursively create a folder from the entry.
             return Folder.fromDirectory(entry, parallel);
+        } else {
+            // Create a document from the entry and return it.
+            return Document.fromPath(entry);
+        }
+    }
+
+    /**
+     * Create a new {@code entry} and return it.
+     */
+    static Mono<Dirent> createEntryParallel(File entry) {
+        // Add entry to the appropriate list.
+        if (entry.isDirectory()) {
+            // Recursively create a folder from the entry.
+            return Folder.fromDirectoryParallel(entry);
         } else {
             // Create a document from the entry and return it.
             return Document.fromPath(entry);

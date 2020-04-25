@@ -118,13 +118,13 @@ public class ReactorUtils {
      * Emit {@code collection} as a parallel flux that runs in the
      * common fork-join pool.
      *
-     * @param collection The collection whos contents will be processed in parallel
+     * @param iterable The iterable whose contents will be processed in parallel
      * @return A parallel flux running on the common fork-join pool
      */
-    public static <T> ParallelFlux<T> fromIterableParallel(Collection<T> collection) {
+    public static <T> ParallelFlux<T> fromIterableParallel(Iterable<T> iterable) {
         return Flux
             // Convert collection into a flux.
-            .fromIterable(collection)
+            .fromIterable(iterable)
 
             // Create a parallel flux.
             .parallel()

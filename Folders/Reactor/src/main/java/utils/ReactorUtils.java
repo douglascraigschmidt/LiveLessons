@@ -1,8 +1,8 @@
 package utils;
 
-import folder.Dirent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.ForkJoinPool;
@@ -26,15 +26,6 @@ public class ReactorUtils {
         return mono -> mono
             .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
     }
-
-    /**
-     * @return Schedule a parallel flowable to run on the common
-     * fork-join pool.
-    public static <T> ParallelTransformer<T, T> commonPoolParallelFlowable() {
-        return observable -> observable
-            .runOn(Schedulers.from(ForkJoinPool.commonPool()));
-    }
-     */
 
     /**
      * @return Schedule an flux to run on the common fork-join pool.
@@ -65,19 +56,6 @@ public class ReactorUtils {
         // No-op!!
         return flux -> flux;
     }
-
-    /**
-     * Convert {@code mono} into a "hot" mono that doesn't
-     * regenerate values seen by earlier subscribers.
-     *
-     * @param mono The mono to make "hot"
-     * @return A "hot" mono.
-    public static <T> MonoSubject<T> makeHotMono(Mono<T> mono) {
-        MonoSubject<T> subject = MonoSubject.create();
-        mono.subscribe(subject);
-        return subject;
-    }
-     */
 
     /**
      * Use {@code Flux.just()} to emit {@code item} either
@@ -111,5 +89,43 @@ public class ReactorUtils {
 
                 // Conditionally convert to run concurrently.
                 .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));
+    }
+
+    /**
+     * Emit {@code iterable} as a parallel flux that runs in the
+     * common fork-join pool.
+     *
+     * @param iterable The iterable whose contents will be processed in parallel
+     * @return A parallel flux running on the common fork-join pool
+     */
+    public static <T> ParallelFlux<T> fromIterableParallel(Iterable<T> iterable) {
+        return Flux
+            // Convert collection into a flux.
+            .fromIterable(iterable)
+
+            // Create a parallel flux.
+            .parallel()
+
+            // Run this flow of operations in the common fork-join pool.
+            .runOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
+    }
+
+    /**
+     * Emit {@code array} as a parallel flux that runs in the
+     * common fork-join pool.
+     *
+     * @param array The array whose contents will be processed in parallel
+     * @return A parallel flux running on the common fork-join pool
+     */
+    public static <T> ParallelFlux<T> fromArrayParallel(T[] array) {
+        return Flux
+                // Convert collection into a flux.
+                .fromArray(array)
+
+                // Create a parallel flux.
+                .parallel()
+
+                // Run this flow of operations in the common fork-join pool.
+                .runOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
     }
 }
