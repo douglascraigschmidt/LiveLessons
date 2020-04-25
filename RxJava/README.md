@@ -8,10 +8,10 @@ overview of what's included:
   
 . ex2 - This example downloads multiple images from a remote web
         server via several different mechanisms, including Java
-        parallel streams and RxJava.  It also compares the performance
-        of Java parallel streams and RxJava with and without the
-        ForkJoinPool.ManagedBlocker interface and the Java common
-        fork-join pool.
+        parallel streams, RxJava, and Reactor.  It also compares the
+        performance of Java parallel streams, RxJava, and Reactor with
+        and without the ForkJoinPool.ManagedBlocker interface and the
+        Java common fork-join pool.
 
 . ex3 - This example demonstrates various RxJava mechanisms for
         determining if a flow of random big integers are prime numbers
