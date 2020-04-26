@@ -75,7 +75,7 @@ public final class ReactorTests {
      * using the Reactor framework and its flatMap() idiom for
      * parallelizing downloads.
      */
-    private void testDownloadFlatMap
+    private static void testDownloadFlatMap
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
         // Get a list of files containing the downloaded images.
@@ -110,7 +110,7 @@ public final class ReactorTests {
      * using the Reactor framework and its ParallelFlux mechanism for
      * parallelizing downloads.
      */
-    private void testDownloadParallelFlux
+    private static void testDownloadParallelFlux
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
         // Get a list of files containing the downloaded images.

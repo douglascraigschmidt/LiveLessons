@@ -1,7 +1,9 @@
 import tests.ReactorTests;
 import tests.RxJavaTests;
 import tests.StreamsTests;
-import utils.*;
+import utils.DownloadUtils;
+import utils.Options;
+import utils.RunTimer;
 
 /**
  * This example shows how to download many images from a remote web
@@ -22,20 +24,12 @@ public class ex2 {
      * entry point method to run the app.
      */
     public static void main(String[] args) {
-        // Initializes the Options singleton.
-        Options.instance().parseArgs(args);
-
-        // Run the test program.
-        new ex2().run();
-    }
-
-    /**
-     * Run the test program.
-     */
-    private void run() {
         System.out.println("Entering the download tests program with "
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
+
+        // Initializes the Options singleton.
+        Options.instance().parseArgs(args);
 
         // Warm up the common fork-join pool.
         warmUpThreadPool();
@@ -108,8 +102,8 @@ public class ex2 {
     /**
      * This method warms up the default thread pool.
      */
-    private void warmUpThreadPool() {
-        StreamsTests.testDownloadBehaviorStreams
+    private static void warmUpThreadPool() {
+        StreamsTests.testDownloadStreams
             (DownloadUtils::downloadAndStoreImage,
              "warmup");
     }
