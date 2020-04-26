@@ -218,6 +218,7 @@ public class ex22 {
 
         System.out.println("applyParallelStream() steal count = "
                 + ForkJoinPool.commonPool().getStealCount());
+
         return null;
     }
 

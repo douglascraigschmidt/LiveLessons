@@ -3,6 +3,7 @@ package utils;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -14,6 +15,11 @@ import static java.util.stream.Collectors.toList;
  * option processing.
  */
 public class Options {
+    /**
+     * Logging tag.
+     */
+    private static final String TAG = Options.class.getName();
+
     /** 
      * The singleton @a Options instance. 
      */
@@ -154,7 +160,7 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
@@ -163,11 +169,9 @@ public class Options {
                     break;
                 default:
                     printUsage();
-                    return false;
+                    return;
                 }
-            return true;
-        } else
-            return false;
+        }
     }
 
     /**
@@ -176,6 +180,22 @@ public class Options {
     private void printUsage() {
         System.out.println("Usage: ");
         System.out.println("-d [true|false]");
+    }
+
+    /**
+     * Display the statistics about the test.
+     */
+    public void printStats(String testName,
+                            int imageCount) {
+        if (!testName.equals("warmup"))
+            System.out.println(TAG
+                    + ": "
+                    + testName
+                    + " downloaded and stored "
+                    + imageCount
+                    + " images using "
+                    + (ForkJoinPool.commonPool().getPoolSize() + 1)
+                    + " threads in the pool");
     }
 
     /**
