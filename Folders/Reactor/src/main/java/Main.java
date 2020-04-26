@@ -3,17 +3,10 @@ import folder.Document;
 import folder.Folder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import utils.Options;
 import utils.ReactorUtils;
 import utils.RunTimer;
 import utils.TestDataFactory;
-
-import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * This example shows the use of the Reactor framework to process
@@ -55,7 +48,7 @@ public class Main {
      * Run all the tests, either sequentially or concurrently,
      * depending on the value of {@code concurrent}.
      */
-    private static void runTests(boolean concurrent) throws InterruptedException {
+    private static void runTests(boolean concurrent) {
         // Record whether we're running concurrently or sequentially.
         String mode = concurrent ? "concurrently" : "sequentially";
 
@@ -100,7 +93,7 @@ public class Main {
     /**
      * Run the tests in parallel via Reactor's ParallelFlux mechanism.
      */
-    private static void runTestsParallel() throws InterruptedException {
+    private static void runTestsParallel() {
         Options.getInstance().display("Starting the test in parallel");
 
         // The word to search for while the folder's being

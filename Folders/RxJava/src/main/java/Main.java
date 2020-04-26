@@ -10,8 +10,8 @@ import utils.TestDataFactory;
 
 /**
  * This example shows the use of RxJava to process entries in a
- * recursively-structured directory folder sequentially and in
- * parallel.
+ * recursively-structured directory folder sequentially and
+ * concurrently.
  */
 public class Main {
     /**
@@ -55,7 +55,7 @@ public class Main {
         // constructed.
         final String searchWord = "CompletableFuture";
 
-        // Get a "hot" single to a Folder.
+        // Get a single to a folder.
         Single<Dirent> rootFolderS = RunTimer
             // Compute the time needed to create a new folder
             // asynchronously.
@@ -91,24 +91,26 @@ public class Main {
      *
      * @param works Name of the directory in the file system containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
-     * @return A "hot" single to a folder containing all works in {@code works}
+     * @return A single to a folder containing all works in {@code works}
      */
     private static Single<Dirent> createFolder(String works,
                                                boolean parallel) {
-        // Return a "hot" single to the initialized folder.
-        return // RxUtils.makeHotSingle
-                    (Folder
-                           // Asynchronously create a folder with all
-                           // works in the root directory.
-                           .fromDirectory(TestDataFactory.getRootFolderFile(works),
-                                          parallel)//);
-                            .cache());
+        // Return a single to the initialized folder.
+        return Folder
+            // Asynchronously create a folder with all
+            // works in the root directory.
+            .fromDirectory(TestDataFactory.getRootFolderFile(works),
+                           parallel)
+            
+            // Cache the results so that they won't be re-emitted
+            // repeatedly each time.
+            .cache();
     }
 
     /**
      * Count the # of entries in the {@code rootFolder}.
      *
-     * @param rootFolderS "Hot" single to an in-memory folder containing the works.
+     * @param rootFolderS A single to an in-memory folder containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
     private static void countEntries(Single<Dirent> rootFolderS,
@@ -116,12 +118,10 @@ public class Main {
         rootFolderS
             // This code is called after the rootFolder has completed
             // its initialization.
-            .flatMap(rootFolder -> Observable
-                     // Create a stream of dirents starting at the rootFolder.
-                     .fromIterable(rootFolder)
-
-                     // Conditionally convert to run concurrently.
-                     .compose(RxUtils.concurrentObservableIf(parallel))
+            .flatMap(rootFolder -> RxUtils
+                     // Create a stream of dirents at rootFolder
+                     // either concurrently or sequentially.
+                     .fromIterableConcurrentIf(rootFolder, parallel)
 
                      // Count the # of elements in the stream.
                      .count())
@@ -136,7 +136,7 @@ public class Main {
      * Count # of lines in the recursively structured directory at
      * {@code rootFolder}.
      *
-     * @param rootFolderS "Hot" single to an in-memory folder containing the works.
+     * @param rootFolderS A single to an in-memory folder containing the works.
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
     private static void countLines(Single<Dirent> rootFolderS,
@@ -183,7 +183,7 @@ public class Main {
      * Find all occurrences of {@code searchWord} in {@code
      * rootFolder} using a stream.
      *
-     * @param rootFolderS "Hot" single in-memory folder containing the works
+     * @param rootFolderS A single in-memory folder containing the works
      * @param searchWord Word to search for in the folder
      * @param parallel Flag indicating whether to run the tests in parallel or not
      */
@@ -215,8 +215,7 @@ public class Main {
                                        // Count # of times searchWord
                                        // appears in the document.
                                        occurrencesCount(document,
-                                                        searchWord,
-                                                        parallel)))
+                                                        searchWord)))
 
                      // Sum all the counts.
                      .reduce(Long::sum)
@@ -238,12 +237,10 @@ public class Main {
      *
      * @param document In-memory document containing text
      * @param searchWord Word to search for in the document
-     * @param parallel Flag indicating whether to run the tests in parallel or not
      * @return The # of times {@code searchWord} appears in {@code document}.
      */
     private static Observable<Long> occurrencesCount(Dirent document,
-                                                     String searchWord,
-                                                     boolean parallel) {
+                                                     String searchWord) {
         // Return an observable that counts the # of times searchWord
         // appears in the document.
         return 

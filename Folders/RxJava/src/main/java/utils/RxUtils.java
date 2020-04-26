@@ -92,10 +92,28 @@ public class RxUtils {
      */
     public static <T> Observable<T> justConcurrentIf(T item, boolean parallel) {
         return Observable
-                // Just omit this one item.
-                .just(item)
+            // Just omit this one item.
+            .just(item)
 
-                // Conditionally convert to run concurrently.
-                .compose(RxUtils.concurrentObservableIf(parallel));
+            // Conditionally convert to run concurrently.
+            .compose(RxUtils.concurrentObservableIf(parallel));
     }
+
+    /**
+     * Use {@code Obervable.fromIterable()} to emit {@code item} either
+     * concurrently or sequentially based on {@code parallel} flag.
+     *
+     * @param item Item to emit via {@code Observable.fromIterable()}
+     * @param parallel True if emit concurrently, false if emit
+     * @return An flux that will be emitted concurrenty or sequentially.
+     */
+    public static <T extends Iterable<? extends T>> Observable<T> fromIterableConcurrentIf(T item, boolean parallel) {
+        return Observable
+            // Just omit this one item.
+            .fromIterable(item)
+
+            // Conditionally convert to run concurrently.
+            .compose(RxUtils.concurrentObservableIf(parallel));
+    }
+
 }
