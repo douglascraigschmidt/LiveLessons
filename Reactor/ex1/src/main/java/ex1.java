@@ -94,7 +94,8 @@ public class ex1 {
         // Test BigFraction exception handling using
         // CompletableFutures and the whenComplete() method.
         AsyncTester.register(ex1::testFractionExceptions3);
-*/
+         */
+
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
         // involving supplyAsync(), thenCompose(), and acceptEither().
@@ -160,9 +161,9 @@ public class ex1 {
             display(sb.toString());
         };
 
-        return ReactorUtils
+        return Mono
                 // Asynchronously reduce the unreduced big fraction.
-                .fromCallableConcurrent(reduceFraction)
+                .fromCallable(reduceFraction)
 
                 // After the big fraction is reduced then return a future
                 // to a computation that converts it into a string in
@@ -215,9 +216,9 @@ public class ex1 {
             display(sb.toString());
         };
 
-        return Mono
+        return ReactorUtils
             // Asynchronously reduce the unreduced big fraction.
-            .fromCallable(reduceFraction)
+            .fromCallableConcurrent(reduceFraction)
 
             // After the big fraction is reduced then return a future
             // to a computation that converts it into a string in
@@ -341,7 +342,7 @@ public class ex1 {
             // Wait until m1 and m2 are complete and then add the
             // results.
             .zipWith(m2,
-                 BigFraction::add)
+                     BigFraction::add)
 
             // Print result after converting it to a mixed fraction.
             .doOnSuccess(mixedFractionPrinter)
@@ -523,7 +524,7 @@ public class ex1 {
         sb.append("     Printing sorted results:\n");
 
         // Process the two lambdas in a sequential stream.
-        Mono<List<BigFraction>> bff = ReactorUtils
+        return ReactorUtils
             // Generate sMAX_FRACTIONS large and random fractions.
             .generate(() -> makeBigFraction(new Random(), false),
                       sMAX_FRACTIONS)
@@ -532,11 +533,14 @@ public class ex1 {
             .flatMap(reduceAndMultiplyFraction)
 
             // Collect the results into a list.
-            .collectList();
+            .collectList()
 
-        // After all the asynchronous fraction reductions have
-        // completed sort and print the results.
-        return sortAndPrintList(bff.block(), sb);
+            // Process the results of the collected list.
+            .flatMap(list ->
+                    // Sort and print the results after all
+                    // asynchronous fraction reductions have
+                    // completed.
+                    sortAndPrintList(list, sb));
     }
 
     /**
@@ -600,11 +604,13 @@ public class ex1 {
             // Perform merge sort asynchronously.
             .fromCallableConcurrent(() -> mergeSort(list));
 
-        // Select the result of whichever sort implementation
-        // finishes first and use it to print the sorted list.
         return Mono
+            // Select the result of whichever sort implementation
+            // finishes first and use it to print the sorted list.
             .first(quickSortFuture,
                    mergeSortFuture)
+
+            // Process the first sorted list.
             .doOnSuccess(sortedList -> {
                               // Print the results as mixed fractions.
                               sortedList

@@ -78,31 +78,32 @@ public final class ReactorTests {
     private static void testDownloadFlatMap
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
-        // Get a list of files containing the downloaded images.
-        List<File> imageFiles = Flux
+        Function<URL, Flux<File>> downloadAndStore = url -> ReactorUtils
+            // Just omit this url and run it concurrently in the
+            // common fork-join pool.
+            .justConcurrentIf(url, true)
+
+            // Transform each url to a file by downloading the image.
+            .map(downloadAndStoreImage);
+
+        Flux
             // Convert the URLs in the input list into a stream.
             .fromIterable(Options.instance().getUrlList())
 
             // Apply the RxJava flatMap() idiom to process each url
             // concurrently.
-            .flatMap(url -> ReactorUtils
-                     // Just omit this url and run it concurrently in
-                     // the common fork-join pool.
-                     .justConcurrentIf(url, true)
-
-                     // Transform each url to a file via the
-                     // downloadAndStoreImage function, which
-                     // downloads each image.
-                     .map(downloadAndStoreImage))
+            .flatMap(downloadAndStore)
 
             // Collect the downloaded images into a list.
-            .collect(toList())
+            .collectList()
+
+            // Process the list.
+            .doOnSuccess(imageFiles -> Options.instance()
+                         // Print the # of image files that were downloaded.
+                         .printStats(testName, imageFiles.size()))
 
             // Block until the processing is finished.
             .block();
-
-        // Print the number of image files that were downloaded.
-        Options.instance().printStats(testName, imageFiles.size());
     }
 
     /**
@@ -113,8 +114,8 @@ public final class ReactorTests {
     private static void testDownloadParallelFlux
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
-        // Get a list of files containing the downloaded images.
-        List<File> imageFiles = ReactorUtils
+
+        ReactorUtils
             // Convert the URLs in the input list into a parallel flux
             // stream.
             .fromIterableParallel(Options.instance().getUrlList())
@@ -128,12 +129,14 @@ public final class ReactorTests {
             .sequential()
 
             // Collect to a list.
-            .collect(toList())
+            .collectList()
+
+            // Process the list.
+            .doOnSuccess(imageFiles -> Options.instance()
+                        // Print the # of image files that were downloaded.
+                        .printStats(testName, imageFiles.size()))
 
             // Block until the processing is finished.
             .block();
-
-        // Print the number of image files that were downloaded.
-        Options.instance().printStats(testName, imageFiles.size());
     }
 }

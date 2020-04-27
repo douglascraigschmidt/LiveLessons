@@ -42,7 +42,8 @@ public class ReactorUtils {
      * @return {@code commonPoolFlux()} if {@code parallel} is
      * true, else {@code callingFlux()}.
      */
-    public static <T> Function<Flux<T>, Flux<T>> concurrentFluxIf(boolean parallel) {
+    public static <T> Function<Flux<T>, Flux<T>> concurrentFluxIf
+        (boolean parallel) {
         if (parallel)
             return ReactorUtils.commonPoolFlux();
         else
@@ -82,7 +83,8 @@ public class ReactorUtils {
      * @param parallel True if emit concurrently, false if emit
      * @return An flux that will be emitted concurrenty or sequentially.
      */
-    public static <T extends Iterable<? extends T>> Flux<T> fromIterableConcurrentIf(T item, boolean parallel) {
+    public static <T> Flux<T> fromIterableConcurrentIf
+        (Iterable<T> item, boolean parallel) {
         return Flux
                 // Just omit this one item.
                 .fromIterable(item)
@@ -98,7 +100,8 @@ public class ReactorUtils {
      * @param iterable The iterable whose contents will be processed in parallel
      * @return A parallel flux running on the common fork-join pool
      */
-    public static <T> ParallelFlux<T> fromIterableParallel(Iterable<T> iterable) {
+    public static <T> ParallelFlux<T> fromIterableParallel
+        (Iterable<T> iterable) {
         return Flux
             // Convert collection into a flux.
             .fromIterable(iterable)

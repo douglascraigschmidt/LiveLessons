@@ -125,8 +125,8 @@ public class Folder
                 // Collect the results into a folder containing all the
                 // entries in the stream.
                 .collect(Collector.of(() -> new Folder(rootFile),
-                         Folder::addEntry,
-                         Folder::merge));
+                                      Folder::addEntry,
+                                      Folder::merge));
     }
 
     /**

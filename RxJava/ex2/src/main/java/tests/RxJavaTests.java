@@ -77,6 +77,14 @@ public final class RxJavaTests {
     public static void testDownloadFlatMap
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
+        Function<URL, Observable<File>> downloadAndStore = url -> RxUtils
+            // Emit this url and run it concurrently in the common
+            // fork-join pool.
+            .justConcurrentIf(url, true)
+
+            // Transform each URL to a file by downloading each image.
+            .map(downloadAndStoreImage::apply);
+
         // Get and print a list of files to the downloaded images.
         Observable
             // Convert the URLs in the input list into a stream of
@@ -85,15 +93,7 @@ public final class RxJavaTests {
 
             // Apply the RxJava flatMap() idiom to process each url
             // concurrently.
-            .flatMap(url -> RxUtils
-                     // Just omit this url and run it concurrently in
-                     // the common fork-join pool.
-                     .justConcurrentIf(url, true)
-
-                     // Transform each URL to a file by calling the
-                     // downloadAndStoreImage function, which
-                     // downloads each image via its URL.
-                     .map(downloadAndStoreImage::apply))
+            .flatMap(downloadAndStore::apply)
 
             // Collect the downloaded images into a list.
             .collectInto(new ArrayList<>(), List::add)
