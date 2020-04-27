@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 /**
  * A utility class containing helpful methods for manipulating various
- * Reactor features.
+ * Reactor features more concisely.
  */
 public class ReactorUtils {
     /**

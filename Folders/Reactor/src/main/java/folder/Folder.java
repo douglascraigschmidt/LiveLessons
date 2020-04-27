@@ -108,25 +108,27 @@ public class Folder
         // Create and return a dirent containing
         // all the contents at the given path.
         return ReactorUtils
-                // Create a parallel flux stream of files from the list of files.
-                .fromArrayParallel
-                        (Objects.requireNonNull(rootFile.listFiles()))
+            // Create a parallel flux stream of files from the list of files.
+            .fromArrayParallel
+            (Objects.requireNonNull(rootFile.listFiles()))
 
-                // Eliminate rootPath to avoid infinite
-                // recursion.
-                .filter(path -> !path.equals(rootFile))
+            // Eliminate rootPath to avoid infinite
+            // recursion.
+            .filter(path -> !path.equals(rootFile))
 
-                // Create a stream of dirents.
-                .flatMap(Folder::createEntryParallel)
+            // Create and process each entry in parallel.
+            .flatMap(Folder::createEntryParallel)
 
-                // Convert parallel flux back to flux.
-                .sequential()
+            // Convert parallel flux back to flux.
+            .sequential()
 
-                // Collect the results into a folder containing all the
-                // entries in the stream.
-                .collect(Collector.of(() -> new Folder(rootFile),
-                                      Folder::addEntry,
-                                      Folder::merge));
+            // Collect the results into a folder containing all
+            // entries in the stream.
+            .collect(Collector
+                     // Create a custom collector.
+                     .of(() -> new Folder(rootFile),
+                         Folder::addEntry,
+                         Folder::merge));
     }
 
     /**
@@ -161,22 +163,22 @@ public class Folder
     /**
      * Add a new {@code entry} to the appropriate list of futures.
      */
-    static void addEntry(Folder folder, Dirent entry) {
+    void addEntry(Dirent entry) {
         // Add entry to the appropriate list.
         if (entry instanceof Folder) {
             // Add the new folder to the subfolders list.
-            folder.mSubFolders.add(entry);
+            mSubFolders.add(entry);
 
             // Increase the size of this folder by the size of the new
             // folder.
-            folder.addToSize(entry.getSize());
+            addToSize(entry.getSize());
         } else {
             // Synchronously create a document from the entry and add
             // the document to the documents list.
-            folder.mDocuments.add(entry);
+            mDocuments.add(entry);
 
             // Increase the size by 1.
-            folder.addToSize(1);
+            addToSize(1);
         }
     }
 
