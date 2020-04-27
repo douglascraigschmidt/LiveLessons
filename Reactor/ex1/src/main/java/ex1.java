@@ -1,5 +1,3 @@
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import utils.AsyncTester;
 import utils.BigFraction;
@@ -11,13 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static utils.MonosCollector.toMono;
 
 /**
@@ -27,7 +22,8 @@ import static utils.MonosCollector.toMono;
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {
     /**
-     * Number of big fractions to process asynchronously in a stream.
+     * Number of big fractions to process asynchronously in a Reactor
+     * flux stream.
      */
     private static final int sMAX_FRACTIONS = 10;
 
@@ -35,9 +31,6 @@ public class ex1 {
      * Represents a test that's already completed running when it
      * returns.
      */
-    private static final CompletableFuture<Void> sCompleted =
-        CompletableFuture.completedFuture(null);
-
     private static final Mono<Void> sVoidM =
         Mono.empty();
 
@@ -82,25 +75,15 @@ public class ex1 {
         // supplyAsync() and thenCombine().
         AsyncTester.register(ex1::testFractionCombine);
 
-        /*
         // Test BigFraction exception handling using
         // CompletableFutures and the handle() method.
         AsyncTester.register(ex1::testFractionExceptions1);
-
-        // Test BigFraction exception handling using
-        // CompletableFutures and the exceptionally() method.
-        AsyncTester.register(ex1::testFractionExceptions2);
-
-        // Test BigFraction exception handling using
-        // CompletableFutures and the whenComplete() method.
-        AsyncTester.register(ex1::testFractionExceptions3);
-         */
 
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
         // involving supplyAsync(), thenCompose(), and acceptEither().
         AsyncTester.register(ex1::testFractionMultiplications1);
-        
+
         // Test big fraction multiplication using a stream of
         // CompletableFutures and a chain of completion stage methods
         // involving supplyAsync(), thenComposeAsync(), and
@@ -108,7 +91,7 @@ public class ex1 {
         AsyncTester.register(ex1::testFractionMultiplications2);
 
         @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+            long testCount = AsyncTester
             // Run all the asynchronous tests.
             .runTests()
 
@@ -162,17 +145,17 @@ public class ex1 {
         };
 
         return Mono
-                // Asynchronously reduce the unreduced big fraction.
-                .fromCallable(reduceFraction)
+            // Asynchronously reduce the unreduced big fraction.
+            .fromCallable(reduceFraction)
 
-                // After the big fraction is reduced then return a future
-                // to a computation that converts it into a string in
-                // mixed fraction format.
-                .map(convertToMixedString)
+            // After the big fraction is reduced then return a future
+            // to a computation that converts it into a string in
+            // mixed fraction format.
+            .map(convertToMixedString)
 
-                // Print result after converting it to a mixed fraction.
-                .doOnSuccess(printResult)
-                .then();
+            // Print result after converting it to a mixed fraction.
+            .doOnSuccess(printResult)
+            .then();
     }
 
     /**
@@ -318,16 +301,16 @@ public class ex1 {
         // Create a random BigFraction and multiply it.
         Mono<BigFraction> m1 = ReactorUtils
             .fromCallableConcurrent(() ->
-                         // This code runs asynchronously.
-                         makeBigFraction(random, false)
-                         .multiply(sBigReducedFraction));
+                                    // This code runs asynchronously.
+                                    makeBigFraction(random, false)
+                                    .multiply(sBigReducedFraction));
 
         // Create another random BigFraction and multiply it.
         Mono<BigFraction> m2 = ReactorUtils
             .fromCallableConcurrent(() ->
-                         // This code runs asynchronously.
-                         makeBigFraction(random, false)
-                         .multiply(sBigReducedFraction));
+                                    // This code runs asynchronously.
+                                    makeBigFraction(random, false)
+                                    .multiply(sBigReducedFraction));
         
         // Create a consumer that print the result as a mixed fraction
         // after it's reduced.
@@ -338,7 +321,7 @@ public class ex1 {
             display(sb.toString());
         };
 
-         return m1
+        return m1
             // Wait until m1 and m2 are complete and then add the
             // results.
             .zipWith(m2,
@@ -350,10 +333,10 @@ public class ex1 {
     }
 
     /**
-     * Test BigFraction exception handling using CompletableFutures
-     * and the handle() method.
+     * Test BigFraction exception handling using Mono exception
+     * handling mechanisms.
      */
-    private static CompletableFuture<Void> testFractionExceptions1() {
+    private static Mono<Void> testFractionExceptions1() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionExceptions1()\n");
 
@@ -361,141 +344,40 @@ public class ex1 {
             // Generate results both with and without exceptions.
             .of(true, false)
 
-            // Convert list to a stream.
-            .stream()
-
-            // Iterate through the stream elements.
+            // Iterate through the elements.
             .forEach(throwException -> {
                     // If boolean is true then make the demoninator 0
                     // to trigger an exception.
                     int denominator = throwException ? 0 : 1;
 
                     // Create and process a BigFraction.
-                    CompletableFuture
-                        .supplyAsync(() ->
-                                     // Run asynchronously and maybe
-                                     // throw ArithmeticException.
-                                     BigFraction.valueOf(100, denominator))
+                    ReactorUtils
+                        .fromCallableConcurrent(() ->
+                                                // Run asynchronously
+                                                // and maybe throw
+                                                // ArithmeticException.
+                                                BigFraction.valueOf(100, 
+                                                                    denominator))
 
                         // Handle outcome of previous stage.
-                        .handle((fraction, ex) -> {
-                                // If exception occurred convert it to 0.
-                                if (fraction == null) {
-                                    sb.append("     exception = " + ex.getMessage());
-                                    return BigFraction.ZERO;
-                                } else
-                                    // Multiply fraction by a constant.
-                                    return fraction.multiply(sBigReducedFraction);
+                        .onErrorResume(t -> {
+                                // If exception occurred return 0.
+                                sb.append("     exception = " + t.getMessage());
+                                return Mono.just(BigFraction.ZERO);
                             })
 
-                        // When future completes prepare results for output.
-                        .thenAccept(fraction ->
-                                    sb.append("\n     result = "
-                                              + fraction.toMixedString()));
-                });
-
-        // Print results.
-        display(sb.toString());
-        return sCompleted;
-    }
-
-    /**
-     * Test BigFraction exception handling using CompletableFutures
-     * and the exceptionally() method.
-     */
-    private static CompletableFuture<Void> testFractionExceptions2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions2()\n");
-
-        List
-            // Generate results both with and without exceptions.
-            .of(true, false)
-
-            // Convert list to a stream.
-            .stream()
-
-            // Iterate through the stream elements.
-            .forEach(throwException -> {
-                    // If boolean is true then make the demoninator 0
-                    // to trigger an exception.
-                    int denominator = throwException ? 0 : 1;
-
-                    // Create and process a BigFraction.
-                    CompletableFuture
-                        .supplyAsync(() ->
-                                     // Run asynchronously and maybe
-                                     // throw ArithmeticException.
-                                     BigFraction.valueOf(100, denominator))
-
-                        // Multiply fraction by a constant when
-                        // previous stage completes.
-                        .thenApply(fraction ->
-                                   fraction.multiply(sBigReducedFraction))
-
-                        // If exception occurred convert it to 0.
-                        .exceptionally(ex -> {
-                                sb.append("     exception = " + ex.getMessage());
-                                return BigFraction.ZERO;
-                            })
-
-                        // When future completes prepare results for output.
-                        .thenAccept(fraction ->
-                                    sb.append("\n     result = "
-                                              + fraction.toMixedString()));
-                });
-
-        // Print results.
-        display(sb.toString());
-        return sCompleted;
-    }
-
-    /**
-     * Test BigFraction exception handling using CompletableFutures
-     * and the whenComplete() method.
-     */
-    private static CompletableFuture<Void> testFractionExceptions3() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions3()\n");
-
-        List
-            // Generate results both with and without exceptions.
-            .of(true, false)
-
-            // Convert list to a stream.
-            .stream()
-
-            // Iterate through the stream elements.
-            .forEach(throwException -> {
-                    // If boolean is true then make the demoninator 0
-                    // to trigger an exception.
-                    int denominator = throwException ? 0 : 1;
-
-                    // Create and process a BigFraction.
-                    CompletableFuture
-                        .supplyAsync(() ->
-                                     // Run asynchronously and maybe
-                                     // throw ArithmeticException.
-                                     BigFraction.valueOf(100, denominator))
-
-                        // Multiply fraction by a constant when
-                        // previous stage completes.
-                        .thenApply(fraction ->
-                                   fraction.multiply(sBigReducedFraction))
-
-                        // When future completes prepare results for output,
-                        // either normal or exceptional.
-                        .whenComplete((fraction, ex) -> {
-                                if (fraction != null)
-                                    sb.append("\n     result = "
-                                              + fraction.toMixedString());
-                                else
-                                    sb.append("     exception = " + ex.getMessage());
+                        .doOnSuccess(fraction -> {
+                                // When mono completes multipley and
+                                // store in output.
+                                fraction.multiply(sBigReducedFraction);
+                                sb.append("\n     result = "
+                                          + fraction.toMixedString());
                             });
                 });
 
         // Print results.
         display(sb.toString());
-        return sCompleted;
+        return sVoidM;
     }
 
     /**
@@ -537,10 +419,10 @@ public class ex1 {
 
             // Process the results of the collected list.
             .flatMap(list ->
-                    // Sort and print the results after all
-                    // asynchronous fraction reductions have
-                    // completed.
-                    sortAndPrintList(list, sb));
+                     // Sort and print the results after all
+                     // asynchronous fraction reductions have
+                     // completed.
+                     sortAndPrintList(list, sb));
     }
 
     /**

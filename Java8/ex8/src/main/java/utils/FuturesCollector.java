@@ -113,7 +113,7 @@ public class FuturesCollector<T>
      * @return A new FuturesCollector
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
-                          toFuture() {
+        toFuture() {
         return new FuturesCollector<T>();
     }
 }

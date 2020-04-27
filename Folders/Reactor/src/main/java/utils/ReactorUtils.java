@@ -122,7 +122,7 @@ public class ReactorUtils {
      */
     public static <T> ParallelFlux<T> fromArrayParallel(T[] array) {
         return Flux
-                // Convert collection into a flux.
+                // Convert array into a flux.
                 .fromArray(array)
 
                 // Create a parallel flux.

@@ -66,7 +66,8 @@ public final class FolderTestsParallel {
                      // Only search documents.
                      .filter(FolderTestsUtils::isDocument)
 
-                     // Count the # of lines in the document.
+                     // Count the # of lines in the document in parallel
+                     // with other documents in the dirent.
                      .flatMap(countLines)
 
                      // Sum all the counts.
@@ -93,7 +94,7 @@ public final class FolderTestsParallel {
      * @param searchWord Word to search for in the folder
      */
     public static void searchFoldersParallel(Mono<Dirent> rootFolderM,
-                                              String searchWord) {
+                                             String searchWord) {
         // This function counts # times searchWord appears in dirent.
         Function<Dirent, Mono<Long>> countMatches = document -> FolderTestsUtils
             // Count # of times searchWord appears in the document.

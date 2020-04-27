@@ -68,7 +68,7 @@ public class Folder
     public static Mono<Dirent> fromDirectory(File rootFile,
                                              boolean parallel) {
         return Flux
-            // Create a stream of fluxes from the list of files.
+            // Create a flux stream from the list of files.
             .fromArray(Objects.requireNonNull(rootFile.listFiles()))
 
             // Use the Reactor flatMap() idiom to (conditionally) run
@@ -105,15 +105,14 @@ public class Folder
      * @return An open folder containing all contents in the {@code rootFile}
      */
     public static Mono<Dirent> fromDirectoryParallel(File rootFile) {
-        // Create and return a dirent containing
-        // all the contents at the given path.
+        // Create and return a dirent containing all the contents at
+        // the given path.
         return ReactorUtils
-            // Create a parallel flux stream of files from the list of files.
+            // Create a parallel flux from the list of files.
             .fromArrayParallel
             (Objects.requireNonNull(rootFile.listFiles()))
 
-            // Eliminate rootPath to avoid infinite
-            // recursion.
+            // Eliminate rootPath to avoid infinite recursion.
             .filter(path -> !path.equals(rootFile))
 
             // Create and process each entry in parallel.

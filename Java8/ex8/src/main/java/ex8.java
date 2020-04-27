@@ -97,7 +97,7 @@ public class ex8 {
         // Test BigFraction exception handling using
         // CompletableFutures and the handle() method.
         AsyncTester.register(ex8::testFractionExceptions1);
-
+        
         // Test BigFraction exception handling using
         // CompletableFutures and the exceptionally() method.
         AsyncTester.register(ex8::testFractionExceptions2);
@@ -532,24 +532,24 @@ public class ex8 {
      * and the handle() method.
      */
     private static CompletableFuture<Void> testFractionExceptions1() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions1()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions1()\n");
 
-        List
+        return List
             // Generate results both with and without exceptions.
             .of(true, false)
 
-            // Convert list to a stream.
+            // Convert to a stream.
             .stream()
 
-            // Iterate through the stream elements.
-            .forEach(throwException -> {
+            // Iterate through the elements.
+            .map(throwException -> {
                     // If boolean is true then make the demoninator 0
                     // to trigger an exception.
                     int denominator = throwException ? 0 : 1;
 
                     // Create and process a BigFraction.
-                    CompletableFuture
+                    return CompletableFuture
                         .supplyAsync(() ->
                                      // Run asynchronously and maybe
                                      // throw ArithmeticException.
@@ -570,11 +570,17 @@ public class ex8 {
                         .thenAccept(fraction ->
                                     sb.append("\n     result = "
                                               + fraction.toMixedString()));
-                });
+                })
 
-        // Print results.
-        display(sb.toString());
-        return sCompleted;
+            // Collect to a single future.
+            .collect(toFuture())
+
+            // When that future is done display the results.
+            .thenCompose(___ -> {
+                // Print results.
+                display(sb.toString());
+                return sCompleted;
+            });
     }
 
     /**
@@ -582,24 +588,24 @@ public class ex8 {
      * and the exceptionally() method.
      */
     private static CompletableFuture<Void> testFractionExceptions2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions2()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions2()\n");
 
-        List
+        return List
             // Generate results both with and without exceptions.
             .of(true, false)
 
-            // Convert list to a stream.
+            // Convert to stream.
             .stream()
 
-            // Iterate through the stream elements.
-            .forEach(throwException -> {
+            // Iterate through the elements.
+            .map(throwException -> {
                     // If boolean is true then make the demoninator 0
                     // to trigger an exception.
                     int denominator = throwException ? 0 : 1;
 
                     // Create and process a BigFraction.
-                    CompletableFuture
+                    return CompletableFuture
                         .supplyAsync(() ->
                                      // Run asynchronously and maybe
                                      // throw ArithmeticException.
@@ -620,11 +626,17 @@ public class ex8 {
                         .thenAccept(fraction ->
                                     sb.append("\n     result = "
                                               + fraction.toMixedString()));
-                });
+                })
 
-        // Print results.
-        display(sb.toString());
-        return sCompleted;
+            // Collect to a single future.
+            .collect(toFuture())
+
+            // When that future is done display the results.
+            .thenCompose(___ -> {
+                // Print results.
+                display(sb.toString());
+                return sCompleted;
+            });
     }
 
     /**
@@ -632,24 +644,24 @@ public class ex8 {
      * and the whenComplete() method.
      */
     private static CompletableFuture<Void> testFractionExceptions3() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions3()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions3()\n");
 
-        List
+        return List
             // Generate results both with and without exceptions.
             .of(true, false)
 
-            // Convert list to a stream.
+            // Convert to a stream.
             .stream()
 
-            // Iterate through the stream elements.
-            .forEach(throwException -> {
+            // Handle both true and false elements.
+            .map(throwException -> {
                     // If boolean is true then make the demoninator 0
                     // to trigger an exception.
                     int denominator = throwException ? 0 : 1;
 
                     // Create and process a BigFraction.
-                    CompletableFuture
+                    return CompletableFuture
                         .supplyAsync(() ->
                                      // Run asynchronously and maybe
                                      // throw ArithmeticException.
@@ -668,12 +680,21 @@ public class ex8 {
                                               + fraction.toMixedString());
                                 else
                                     sb.append("     exception = " + ex.getMessage());
-                            });
-                });
+                            })
 
-        // Print results.
-        display(sb.toString());
-        return sCompleted;
+                        // Swallow the exception.
+                        .exceptionally((e) -> BigFraction.ZERO);
+                })
+
+            // Collect to a single future.
+            .collect(toFuture())
+
+            // When that future is done display the results.
+            .thenCompose(___ -> {
+                // Print results.
+                display(sb.toString());
+                return sCompleted;
+            });
     }
 
     /**

@@ -82,8 +82,8 @@ public final class FolderTests {
      *                     concurrent or not
      */
     public static void searchFolders(Mono<Dirent> rootFolderM,
-                                      String searchWord,
-                                      boolean concurrent) {
+                                     String searchWord,
+                                     boolean concurrent) {
         // This function counts # of searchWord matches in a dirent.
         Function<Dirent, Flux<Long>> countMatches = dirent -> ReactorUtils
                 // Emit concurrent or sequentially.
@@ -97,7 +97,7 @@ public final class FolderTests {
                         // Count # of times searchWord matches in
                         // document.
                         .occurrencesCount(document,
-                                searchWord));
+                                          searchWord));
 
         rootFolderM
                 // This code is called after rootFolder initialization
@@ -160,7 +160,7 @@ public final class FolderTests {
             .fromIterable(rootFolder)
 
             // Use the Reactor flatMap() idiom to count the #
-            // of lines in the folder.
+            // of lines in the folder either sequentially or concurrently.
             .flatMap(countOneDirentLines)
 
             // Sum all the counts.
