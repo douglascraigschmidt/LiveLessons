@@ -172,7 +172,8 @@ public class Main {
      */
     private static void countEntries(Mono<Dirent> rootFolderM,
                                      boolean concurrently) {
-        long count = rootFolderM
+        var countM =
+                rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
             .flatMap(rootFolder -> ReactorUtils
@@ -181,14 +182,11 @@ public class Main {
                      .fromIterableConcurrentIf(rootFolder, concurrently)
 
                      // Count the number of dirents in the stream.
-                     .count())
-
-            // Block until result is available.
-            .block();
+                     .count());
 
         // Display the result.
         Options.getInstance().display("number of entries in the folder = "
-                                      + count);
+                                      + countM.block());
     }
 
     /**
@@ -200,7 +198,7 @@ public class Main {
      */
     private static void countLines(Mono<Dirent> rootFolderM,
                                    boolean concurrently) {
-        long lineCount = rootFolderM
+        var lineCountM = rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
             .flatMap(rootFolder -> Flux
@@ -227,13 +225,11 @@ public class Main {
                      .reduce(Long::sum)
 
                      // Return 0 if empty.
-                     .defaultIfEmpty(0L))
-
-            // Block until result is available
-            .block();
+                     .defaultIfEmpty(0L));
 
         // Display the result.
-        Options.getInstance().display("total number of lines = " + lineCount);
+        Options.getInstance().display("total number of lines = "
+                                      + lineCountM.block());
     }
 
     /**
@@ -243,7 +239,7 @@ public class Main {
      * @param rootFolderM A mono to an in-memory folder containing the works.
      */
     private static void countLinesParallel(Mono<Dirent> rootFolderM) {
-        long lineCount = rootFolderM
+        var lineCountM = rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
             .flatMap(rootFolder -> ReactorUtils
@@ -266,13 +262,11 @@ public class Main {
                      .reduce(Long::sum)
 
                      // Return 0 if empty.
-                     .defaultIfEmpty(0L))
-
-            // Block until result is available
-            .block();
+                     .defaultIfEmpty(0L));
 
         // Display the result.
-        Options.getInstance().display("total number of lines = " + lineCount);
+        Options.getInstance().display("total number of lines = "
+                                      + lineCountM.block());
     }
 
     /**
@@ -286,7 +280,7 @@ public class Main {
     private static void searchFolders(Mono<Dirent> rootFolderM,
                                       String searchWord,
                                       boolean concurrently) {
-        long wordMatches = rootFolderM
+        var wordMatchesM = rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
             .flatMap(rootFolder -> Flux
@@ -313,16 +307,13 @@ public class Main {
                      .reduce(Long::sum)
 
                      // Return 0 if empty.
-                     .defaultIfEmpty(0L))
-
-            // Block until result is available.
-            .block();
+                     .defaultIfEmpty(0L));
 
         // Display the result.
         Options.getInstance().display("total matches of \""
                                       + searchWord
                                       + "\" = "
-                                      + wordMatches);
+                                      + wordMatchesM.block());
     }
 
     /**
@@ -334,7 +325,7 @@ public class Main {
      */
     private static void searchFoldersParallel(Mono<Dirent> rootFolderM,
                                               String searchWord) {
-        long wordMatches = rootFolderM
+        var wordMatchesM = rootFolderM
             // This code is called after the rootFolder has completed
             // its initialization.
             .flatMap(rootFolder -> ReactorUtils
@@ -356,16 +347,13 @@ public class Main {
                      .reduce(Long::sum)
 
                      // Return 0 if empty.
-                     .defaultIfEmpty(0L))
-
-            // Block until result is available.
-            .block();
+                     .defaultIfEmpty(0L));
 
         // Display the result.
         Options.getInstance().display("total matches of \""
                                       + searchWord
                                       + "\" = "
-                                      + wordMatches);
+                                      + wordMatchesM.block());
     }
 
     /**

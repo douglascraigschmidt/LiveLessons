@@ -108,7 +108,7 @@ public class Folder
         // Create and return a dirent containing
         // all the contents at the given path.
         return ReactorUtils
-                // Create a stream of fluxes from the list of files.
+                // Create a parallel flux stream of files from the list of files.
                 .fromArrayParallel
                         (Objects.requireNonNull(rootFile.listFiles()))
 
@@ -123,7 +123,7 @@ public class Folder
                 .sequential()
 
                 // Collect the results into a folder containing all the
-                // entries in stream.
+                // entries in the stream.
                 .collect(Collector.of(() -> new Folder(rootFile),
                          Folder::addEntry,
                          Folder::merge));
