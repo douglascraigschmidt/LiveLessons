@@ -4,6 +4,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.AsyncTester;
 import utils.BigFraction;
+import utils.HeapSort;
 import utils.ReactorUtils;
 
 import java.math.BigInteger;
@@ -476,15 +477,15 @@ public class ex1 {
         Mono<List<BigFraction>> quickSortM = ReactorUtils
             .fromCallableConcurrent(() -> quickSort(list));
 
-        // Merge sort the list asynchronously.
-        Mono<List<BigFraction>> mergeSortM = ReactorUtils
-            .fromCallableConcurrent(() -> mergeSort(list));
+        // Heap sort the list asynchronously.
+        Mono<List<BigFraction>> heapSortM = ReactorUtils
+            .fromCallableConcurrent(() -> heapSort(list));
 
         return Mono
             // Select the result of whichever sort finishes first and
             // use it to print the sorted list.
             .first(quickSortM,
-                   mergeSortM)
+                   heapSortM)
 
             // Process the first sorted list.
             .doOnSuccess(sortedList -> {
@@ -516,11 +517,18 @@ public class ex1 {
     }
 
     /*
-     * Perform a merge sort on the {@code list}.
+     * Perform a heap sort on the {@code list}.
      */
-    private static List<BigFraction> mergeSort(List<BigFraction> list) {
-        Collections.sort(list);
-        return list;
+    private static List<BigFraction> heapSort(List<BigFraction> list) {
+        // Convert the list to an array.
+        BigFraction[] bigFractionArray =
+                list.toArray(new BigFraction[0]);
+
+        // Order the array with heap sort.
+        HeapSort.heapSort(bigFractionArray);
+
+        // Convert the array back to a list.
+        return List.of(bigFractionArray);
     }
 
     /**
