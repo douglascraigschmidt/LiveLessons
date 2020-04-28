@@ -28,8 +28,8 @@ public class ex8 {
     private static int sMAX_FRACTIONS = 10;
 
     /**
-     * These final strings are used to pass params to various lambdas in the
-     * test methods below.
+     * These final strings are used to pass params to various lambdas
+     * in the test methods below.
      */
     private static final String sF1 = "62675744/15668936";
     private static final String sF2 = "609136/913704";
@@ -528,10 +528,10 @@ public class ex8 {
 
             // When that future is done display the results.
             .thenCompose(___ -> {
-                // Print results.
-                display(sb.toString());
-                return sCompleted;
-            });
+                    // Print results.
+                    display(sb.toString());
+                    return sCompleted;
+                });
     }
 
     /**
@@ -584,10 +584,10 @@ public class ex8 {
 
             // When that future is done display the results.
             .thenCompose(___ -> {
-                // Print results.
-                display(sb.toString());
-                return sCompleted;
-            });
+                    // Print results.
+                    display(sb.toString());
+                    return sCompleted;
+                });
     }
 
     /**
@@ -623,8 +623,8 @@ public class ex8 {
                         .thenApply(fraction ->
                                    fraction.multiply(sBigReducedFraction))
 
-                        // When future completes prepare results for output,
-                        // either normal or exceptional.
+                        // When future completes prepare results for
+                        // output, either normal or exceptional.
                         .whenComplete((fraction, ex) -> {
                                 if (fraction != null)
                                     sb.append("\n     result = "
@@ -642,10 +642,10 @@ public class ex8 {
 
             // When that future is done display the results.
             .thenCompose(___ -> {
-                // Print results.
-                display(sb.toString());
-                return sCompleted;
-            });
+                    // Print results.
+                    display(sb.toString());
+                    return sCompleted;
+                });
     }
 
     /**
@@ -659,7 +659,7 @@ public class ex8 {
 
         // Lambda asynchronously reduces/multiplies a big fraction. 
         Function<BigFraction, 
-                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+            CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
             .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
@@ -706,7 +706,7 @@ public class ex8 {
 
         // Function asynchronously reduces/multiplies a big fraction.
         Function<BigFraction,
-                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+            CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
             .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
@@ -781,8 +781,8 @@ public class ex8 {
             // Perform heap sort asynchronously.
             .supplyAsync(() -> heapSort(list));
 
-        // Select the result of whichever sort implementation
-        // finishes first and use it to print the sorted list.
+        // Select the result of whichever sort implementation finishes
+        // first and use it to print the sorted list.
         return quickSortF
             .acceptEither(heapSortF,
                           sortedList -> {
