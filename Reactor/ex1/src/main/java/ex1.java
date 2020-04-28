@@ -528,7 +528,7 @@ public class ex1 {
                 list.toArray(new BigFraction[0]);
 
         // Order the array with heap sort.
-        HeapSort.heapSort(bigFractionArray);
+        HeapSort.sort(bigFractionArray);
 
         // Convert the array back to a list.
         return List.of(bigFractionArray);

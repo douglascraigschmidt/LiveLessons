@@ -52,8 +52,8 @@ public class AsyncTester {
             // complete.
             .thenAccept(list ->
                         System.out.println("Completed "
-                              + list.size()
-                              + " tests"));
+                                           + list.size()
+                                           + " tests"));
     }
 }
 
