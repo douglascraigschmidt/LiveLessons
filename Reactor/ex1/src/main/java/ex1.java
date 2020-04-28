@@ -21,8 +21,8 @@ import static utils.MonosCollector.toMono;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
- * using a wide range of features in the Reactor framework, including
- * flatMap(), collectList(), zipWith(), first(), when(), and
+ * asynchronously using a wide range of features in the Reactor framework,
+ * including flatMap(), collectList(), zipWith(), first(), when(), and
  * onErrorResume().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
@@ -34,19 +34,13 @@ public class ex1 {
     private static final int sMAX_FRACTIONS = 10;
 
     /**
-     * These objects are used to pass params to various lambdas in the
+     * These final strings are used to pass params to various lambdas in the
      * test methods below.
      */
     private static final String sF1 = "62675744/15668936";
     private static final String sF2 = "609136/913704";
     private static final String sBI1 = "846122553600669882";
     private static final String sBI2 = "188027234133482196";
-
-    /**
-     * Represents a test that's completed running when it returns.
-     */
-    private static final Mono<Void> sVoidM =
-        Mono.empty();
 
     /**
      * A big reduced fraction constant.
@@ -61,6 +55,12 @@ public class ex1 {
      */
     private static final Mono<BigFraction> mBigReducedFractionM =
         Mono.just(sBigReducedFraction);
+
+    /**
+     * Represents a test that's completed running when it returns.
+     */
+    private static final Mono<Void> sVoidM =
+            Mono.empty();
 
     /**
      * Main entry point into the test program.
@@ -123,8 +123,8 @@ public class ex1 {
 
         Callable<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
-            BigFraction reducedFraction =
-            BigFraction.reduce(unreducedFraction);
+            BigFraction reducedFraction = BigFraction
+                    .reduce(unreducedFraction);
 
             sb.append("     unreducedFraction "
                       + unreducedFraction.toString()
@@ -365,7 +365,7 @@ public class ex1 {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplications1()\n");
 
-        // This async function reduces/multiplies a big fraction.
+        // This function reduces/multiplies a big fraction asynchronously.
         Function<BigFraction, Mono<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> ReactorUtils
             // Perform the reduction asynchronously.
@@ -416,8 +416,11 @@ public class ex1 {
 
             // Return a mono to a big fraction that's multiplied
             // asynchronously since it may run for a long time.
-            .map(reducedFraction
-                 -> reducedFraction.multiply(sBigReducedFraction));
+            .flatMap(reducedFraction -> ReactorUtils
+                    // Multiply BigFractions asynchronously since it
+                    // may run for a long time.
+                    .fromCallableConcurrent(() -> reducedFraction
+                            .multiply(sBigReducedFraction)));
 
         sb.append("     Printing sorted results:");
 

@@ -164,7 +164,7 @@ public class ReactorUtils {
                                        long count) {
         return Flux
             // Create a generator.
-            .create((FluxSink<T> sink) -> {
+            .create(sink -> {
             LongStream
                 // Run from 1 to count.
                 .rangeClosed(1, count)

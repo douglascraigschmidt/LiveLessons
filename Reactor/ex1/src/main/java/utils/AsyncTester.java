@@ -45,10 +45,11 @@ public class AsyncTester {
                 // Convert the list into a stream.
                 .fromIterable(sTests)
 
-                    // Run each test, which can execute asynchronously.
+                // Run each test, which can execute asynchronously.
                 .flatMap(Supplier::get)
 
-                // Get the next element.
+                // Collect into an empty list that triggers when all
+                // the tests finish running asynchronously.
                 .collectList()
 
                 // Return a mono when we're done.
