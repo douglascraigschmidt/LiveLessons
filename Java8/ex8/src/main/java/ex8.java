@@ -720,7 +720,7 @@ public class ex8 {
                          .supplyAsync(() 
                                       -> reducedFraction.multiply(sBigReducedFraction)));
 
-        sb.append("     Printing sorted results:\n");
+        sb.append("     Printing sorted results:");
 
         // Process the two lambdas in a sequential stream.
         return Stream
@@ -764,7 +764,7 @@ public class ex8 {
             .thenApplyAsync(reducedFraction
                             -> reducedFraction.multiply(sBigReducedFraction));
 
-        sb.append("     Printing sorted results:\n");
+        sb.append("     Printing sorted results:");
 
         // Process the two lambdas in a sequential stream.
         return Stream
@@ -811,9 +811,8 @@ public class ex8 {
                               // Print the results as mixed fractions.
                               sortedList
                                   .forEach(fraction ->
-                                           sb.append("     "
-                                                     + fraction.toMixedString()
-                                                     + "\n"));
+                                           sb.append("\n     "
+                                                     + fraction.toMixedString()));
                               display(sb.toString());
                           });
     }

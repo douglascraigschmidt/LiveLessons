@@ -1,6 +1,7 @@
 package tests;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import utils.FileUtils;
 import utils.Options;
 import utils.ReactorUtils;
@@ -71,6 +72,30 @@ public final class ReactorTests {
     }
 
     /**
+     * Run the test named {@code testName} by appying the {@code
+     * downloadAndStoreImage} function with the Reactor driver that
+     * uses its ParallelFlowable mechanism to download files in
+     * parallel.
+     */
+    public static void runParallelFlux1
+    (Function<URL, File> downloadAndStoreImage,
+     String testName) {
+        // First let the system garbage collect.
+        System.gc();
+
+        // Delete any filtered images from the previous run.
+        FileUtils.deleteDownloadedImages();
+
+        RunTimer
+                // Record how long the test takes to run.
+                .timeRun(() ->
+                                // Run the test with the designated function.
+                                testDownloadParallelFlux1(downloadAndStoreImage,
+                                        testName),
+                        testName);
+    }
+
+    /**
      * This method runs the {@code downloadAndStoreImage} function
      * using the Reactor framework and its flatMap() idiom for
      * parallelizing downloads.
@@ -138,5 +163,42 @@ public final class ReactorTests {
 
             // Block until the processing is finished.
             .block();
+    }
+
+    /**
+     * This method runs the {@code downloadAndStoreImage} function
+     * using the Reactor framework and its ParallelFlux mechanism for
+     * parallelizing downloads.
+     */
+    private static void testDownloadParallelFlux1
+    (Function<URL, File> downloadAndStoreImage,
+     String testName) {
+
+        Flux
+                // Convert the URLs in the input list into a parallel flux
+                // stream.
+                .fromIterable(Options.instance().getUrlList())
+
+                .parallel(1)
+                .runOn(Schedulers.parallel())
+
+                // Transform each URL to a file by calling the
+                // downloadAndStoreImage function, which downloads each
+                // image via its URL.
+                .map(downloadAndStoreImage)
+
+                // Convert the parallel flux back to flux.
+                .sequential()
+
+                // Collect to a list.
+                .collectList()
+
+                // Process the list.
+                .doOnSuccess(imageFiles -> Options.instance()
+                        // Print the # of image files that were downloaded.
+                        .printStats(testName, imageFiles.size()))
+
+                // Block until the processing is finished.
+                .block();
     }
 }

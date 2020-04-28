@@ -188,14 +188,13 @@ public class Options {
     public void printStats(String testName,
                             int imageCount) {
         if (!testName.equals("warmup"))
-            System.out.println(TAG
-                    + ": "
-                    + testName
-                    + " downloaded and stored "
-                    + imageCount
-                    + " images using "
-                    + (ForkJoinPool.commonPool().getPoolSize() + 1)
-                    + " threads in the pool");
+            System.out.println(": "
+                               + testName
+                               + " downloaded and stored "
+                               + imageCount
+                               + " images using "
+                               + (ForkJoinPool.commonPool().getPoolSize() + 1)
+                               + " threads in the pool");
     }
 
     /**

@@ -34,6 +34,8 @@ public class ex2 {
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
+        /*
+
         // Runs the tests using the using the Java fork-join
         // framework's default behavior, which does not add any new
         // worker threads to the pool when blocking on I/O occurs.
@@ -74,6 +76,7 @@ public class ex2 {
         RxJavaTests.runParallelFlowable
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
+        */
 
         // Run the tests using Reactor's flatMap() parallelism
         // mechanism along with the {@code BlockingTask} wrapper for
@@ -92,6 +95,10 @@ public class ex2 {
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux()");
+
+        ReactorTests.runParallelFlux1
+                (DownloadUtils::downloadAndStoreImageBT,
+                        "testAdaptiveBTDownloadBehaviorReactorParallelFlux1()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());

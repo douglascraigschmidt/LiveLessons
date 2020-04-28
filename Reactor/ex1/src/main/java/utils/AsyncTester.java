@@ -41,7 +41,7 @@ public class AsyncTester {
      * triggered when all the asynchronously-run tests complete.
      */
     public static Mono<Long> runTests() throws InterruptedException {
-        Flux
+        return Flux
                 // Convert the list into a stream.
                 .fromIterable(sTests)
 
@@ -49,13 +49,10 @@ public class AsyncTester {
                 .flatMap(Supplier::get)
 
                 // Get the next element.
-                .next()
+                .collectList()
 
-                // Block until we're done.
-                .block();
-
-        // Return a count of the number of tests.
-        return Mono.just((long) sTests.size());
+                // Return a mono when we're done.
+                .flatMap(l -> Mono.just((long) sTests.size()));
     }
 }
 
