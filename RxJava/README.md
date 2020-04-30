@@ -4,7 +4,8 @@ Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
 . ex1 - This example is currently just a placeholder for random things
-        I'm playing around with for RxJava.
+        I'm playing around with for RxJava.  It's likely to change
+        radically from time to time.
   
 . ex2 - This example downloads multiple images from a remote web
         server via several different Java concurrency/parallelism

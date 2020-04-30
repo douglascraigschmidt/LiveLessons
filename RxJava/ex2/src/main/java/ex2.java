@@ -41,10 +41,10 @@ public class ex2 {
         runReactorTests();
 
         // Run all the RxJavaTests.
-        runRxJavaTests();
+        // runRxJavaTests();
 
         // Run all the Streams tests.
-        runStreamsTests();
+        // runStreamsTests();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -62,18 +62,20 @@ public class ex2 {
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking on I/O occurs.
 
+        /*
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorflatMap[CFJP]()",
              Schedulers.fromExecutor(ForkJoinPool.commonPool()),
-             false);
+             Options.instance().loggingEnabled());
+        */
 
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImage,
              "testDefaultDownloadBehaviorReactorflatMap[parallel]()",
              Schedulers.parallel(),
-             false);
-
+             Options.instance().loggingEnabled());
+        /*
         // Run tests using Reactor's ParallelFlux mechanism along with
         // the {@code BlockingTask} wrapper for Java fork-join's
         // {@code ManagedBlocker} mechanism, which adds new worker
@@ -83,21 +85,23 @@ public class ex2 {
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[all cores, CFJP]()",
              Runtime.getRuntime().availableProcessors(),
              Schedulers.fromExecutor(ForkJoinPool.commonPool()),
-             false);
+             Options.instance().loggingEnabled());
 
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImage,
              "testDefaultDownloadBehaviorReactorParallelFlux[all cores, parallel]()",
              Runtime.getRuntime().availableProcessors(),
              Schedulers.parallel(),
-             false);
+             Options.instance().loggingEnabled());
 
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[1 core, CFJP]()",
              1,
              Schedulers.fromExecutor(ForkJoinPool.commonPool()),
-             false);
+             Options.instance().loggingEnabled());
+
+         */
     }
 
     /**
@@ -132,7 +136,8 @@ public class ex2 {
         // worker threads to the pool when blocking on I/O occurs.
         StreamsTests.runParallelStreams
             (DownloadUtils::downloadAndStoreImage,
-             "testDefaultDownloadBehavior()");
+             "testDefaultDownloadBehavior()",
+             Options.instance().loggingEnabled());
 
         // Run the tests using the using the Java fork-join
         // framework's {@code ManagedBlocker} mechanism, which adds
@@ -140,7 +145,8 @@ public class ex2 {
         // I/O occurs.
         StreamsTests.runParallelStreams
             (DownloadUtils::downloadAndStoreImageMB,
-             "testAdaptiveMBDownloadBehavior()");
+             "testAdaptiveMBDownloadBehavior()",
+             Options.instance().loggingEnabled());
 
         // Run the tests using the using the {@code BlockingTask}
         // wrapper for the Java fork-join framework's {@code
@@ -148,7 +154,8 @@ public class ex2 {
         // the pool adaptively when blocking on I/O occurs.
         StreamsTests.runParallelStreams
             (DownloadUtils::downloadAndStoreImageBT,
-             "testAdaptiveBTDownloadBehavior()");
+             "testAdaptiveBTDownloadBehavior()",
+             Options.instance().loggingEnabled());
     }
 
     /**

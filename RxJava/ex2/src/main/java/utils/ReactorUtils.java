@@ -105,7 +105,8 @@ public class ReactorUtils {
      * @param parallel True if emit concurrently, false if emit
      * @return An flux that will be emitted concurrenty or sequentially.
      */
-    public static <T extends Iterable<? extends T>> Flux<T> fromIterableConcurrentIf(T item, boolean parallel) {
+    public static <T> Flux<T>
+        fromIterableConcurrentIf(Iterable<T> item, boolean parallel) {
         return Flux
                 // Just omit this one item.
                 .fromIterable(item)
@@ -131,23 +132,5 @@ public class ReactorUtils {
 
             // Run this flow of operations in the common fork-join pool.
             .runOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
-    }
-
-    /**
-     * Print the {@code element} and the {@code operation} along with
-     * the current thread name to aid debugging and comprehension.
-     *
-     * @param element The given element
-     * @param operation The Reactor operation being performed
-     * @return The element parameter
-     */
-    public static <T> T logIdentity(T element, String operation) {
-        System.out.println("["
-                           + Thread.currentThread().getName()
-                           + "] "
-                           + operation
-                           + " -- " 
-                           + element);
-        return element;
     }
 }

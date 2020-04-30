@@ -3,6 +3,7 @@ package tests;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import utils.FileUtils;
 import utils.Options;
 import utils.ReactorUtils;
@@ -11,8 +12,6 @@ import utils.RunTimer;
 import java.io.File;
 import java.net.URL;
 import java.util.function.Function;
-
-import static utils.ReactorUtils.logIdentity;
 
 /**
  * This Java utility class contains static methods show how to
@@ -122,7 +121,7 @@ public final class ReactorTests {
             // Apply the RxJava flatMap() idiom to process each url
             // concurrently.
             .flatMap(url -> Mono
-                     // Omit this url
+                     // Emit this url
                      .just(url)
 
                      // Run the URL concurrently in the given scheduler.
@@ -158,28 +157,40 @@ public final class ReactorTests {
             // Convert the URLs in the input list into a stream.
             .fromIterable(Options.instance().getUrlList())
 
-            .doOnNext(url -> logIdentity(url, "Flux.fromIterable()"))
+            // If subscribeOn() is omitted here the iterable is
+            // obtained from the calling thread.
+            // .subscribeOn(scheduler)
+
+            // You can also get the iterables via a different thread pool.
+            // .subscribeOn(Schedulers.elastic())
+
+            .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 
             // Apply the RxJava flatMap() idiom to process each url
             // concurrently.
             .flatMap(url -> Mono
-                     // Omit this url
+                     // Emit this url
                      .just(url)
 
-                     .doOnNext(___ -> logIdentity(url, "Mono.just()"))
+                     .doOnNext(___ -> Options.logIdentity(url, "Mono.just()"))
+
+                     // .map(downloadAndStoreImage)
 
                      // Run URL concurrently in given scheduler.  The
                      // placement of this operation can move down in
                      // this pipeline without affecting the behavior.
                      .subscribeOn(scheduler)
 
-                     .doOnNext(___ -> logIdentity(url, "map(downLoadAndStoreImage)"))
+                     // Transform each url to a file by downloading
+                     // the image.
+                     .map(downloadAndStoreImage)
 
-                     // Transform each url to a file by downloading the image.
-                     .map(downloadAndStoreImage))
+                     .doOnNext(___ -> Options.logIdentity(url, "map(downLoadAndStoreImage)")))
 
             // Collect the downloaded images into a list.
             .collectList()
+
+            .doOnNext(file -> Options.logIdentity(file, "collectList()"))
 
             // Process the list.
             .doOnSuccess(imageFiles -> Options.instance()
@@ -213,7 +224,8 @@ public final class ReactorTests {
             // Set the parallelism level.
             .parallel(parallelism)
 
-            // Set the scheduler.
+            // Set the scheduler (moving this operation down changes
+            // the behavior).
             .runOn(scheduler)
 
             // Call downloadAndStoreImage to transform each URL to a
@@ -255,27 +267,38 @@ public final class ReactorTests {
             // stream.
             .fromIterable(Options.instance().getUrlList())
 
-            .doOnNext(url -> logIdentity(url, "Flux.fromIterable()"))
+            .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 
             // Set the parallelism level.
             .parallel(parallelism)
 
-            // Set the scheduler.
+            .doOnNext(url -> Options.logIdentity(url, "parallel()"))
+
+            // Set the scheduler (moving this operation down changes
+            // the behavior).
             .runOn(scheduler)
 
-            .doOnNext(url -> logIdentity(url, "map(downloadAndStoreImage)"))
+            .doOnNext(url -> Options.logIdentity(url, "runOn(scheduler)"))
 
             // Call downloadAndStoreImage to transform each URL to a
             // file by downloading each image via its URL.
             .map(downloadAndStoreImage)
 
+            .doOnNext(url -> Options.logIdentity(url, "map(downloadAndStoreImage)"))
+
+            // Set the scheduler (moving this operation down changes
+            // the behavior).
+            // .runOn(scheduler)
+
             // Convert the parallel flux back to flux.
             .sequential()
 
-            .doOnNext(url -> logIdentity(url, "collectList()"))
+            .doOnNext(file -> Options.logIdentity(file, "sequential()"))
 
             // Collect to a list.
             .collectList()
+
+            .doOnNext(file -> Options.logIdentity(file, "collectList()"))
 
             // Process the list.
             .doOnSuccess(imageFiles -> Options.instance()
