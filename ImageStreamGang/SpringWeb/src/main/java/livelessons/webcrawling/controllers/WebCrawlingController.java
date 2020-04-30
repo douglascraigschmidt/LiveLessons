@@ -6,30 +6,36 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import livelessons.webcrawling.services.WebCrawlingService;
 
 /**
- * Sanjeev, can you please add some comments here explaining what this
- * class does.
+ *In Spring’s approach to building RESTful web services, HTTP requests are handled by a controller. 
+ *This defines the endpoints/routes for each supported operations (@GetMapping, @PostMapping, @PutMapping and @DeleteMapping, corresponding to HTTP GET, POST, PUT, and DELETE calls).
+ *These components are identified by the @RestController annotation
+ *
  */
 @RestController
 public class WebCrawlingController {
     /**
-     * Sanjeev, can you please add some comments here explaining what
-     * this field does.
+     The @Autowired annotation  is used for automatic dependency injection. It can be used directly on properties, therefore eliminating the need for getters and setters:
      */
     @Autowired
     private WebCrawlingService webCrawlingService;
 	
     /**
-     * Iterates through all the implementation strategies to show how
-     * the tests perform.
+     * @RequestMapping annotation is used for mapping web requests onto methods in Controller classes \
+     * 
+     * POST requests to /run endpoint maps to method run()
+     * When /run is invoked from any HttpWebClient or by using Curl on command line, this method will be invoked.
+     * 
+     * ResponseEntity represents an HTTP response, including headers, body, and status.
+     * While @ResponseBody puts the return value into the body of the response, ResponseEntity also allows us to add headers and status code.
+     * This method returns the raw JSON response to the clients.
+     * 
      */
     @RequestMapping(value = "/run", method = RequestMethod.POST)
     public ResponseEntity<String> run() {
@@ -38,8 +44,14 @@ public class WebCrawlingController {
     }
 	
     /**
-     * Sanjeev, can you please add some comments here explaining what
-     * this method does.
+     * @RequestMapping annotation is used for mapping web requests onto methods in Controller classes 
+     * GET requests to /timingresults endpoint maps to method getTimingResults()
+     * When /timingresults invoked from any HttpWebClient or by using Curl on command line, this method will be invoked.
+     * 
+     * ResponseEntity represents an HTTP response, including headers, body, and status.
+     * While @ResponseBody puts the return value into the body of the response, ResponseEntity also allows us to add headers and status code.
+     * This method returns the raw JSON response to the clients.
+     * 
      */
     @RequestMapping(value = "/timingresults", method = RequestMethod.GET)
     public ResponseEntity<Map<String, List<Long>> > getTimingResults() {
@@ -50,23 +62,6 @@ public class WebCrawlingController {
                                                            HttpStatus.OK);
     }
 	
-     * Sanjeev, can you please add some comments here explaining what
-     * this method does.
-    @GetMapping("/test")
-    @ResponseBody
-    public ResponseEntity<String> test() {
-        return new ResponseEntity<String>("hello",
-                                          HttpStatus.OK);
-    }
-	
-    /*@RequestMapping(value = "/crawl", method = RequestMethod.POST)
-      public ResponseEntity<List<String>> startCrawling(@RequestParam String urlPrefix, @RequestBody List<String> urls) {
-      Options.instance().setInputSource(InputSource.DEFAULT);
-      Options.instance().setURLPrefix(urlPrefix);
-      Options.instance().setDefaultImageNames(urls);
-		
-      webCrawlingService.startCrawl();
-      return new ResponseEntity<List<String>>(urls, HttpStatus.OK);
-      }
-    */
+    
+    
 }
