@@ -659,7 +659,7 @@ public class ex8 {
 
         // Lambda asynchronously reduces/multiplies a big fraction. 
         Function<BigFraction, 
-            CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
             .supplyAsync(() -> BigFraction.reduce(unreducedFraction))

@@ -118,7 +118,7 @@ public final class ReactorTests {
             // Convert the URLs in the input list into a stream.
             .fromIterable(Options.instance().getUrlList())
 
-            // Apply the RxJava flatMap() idiom to process each url
+            // Apply the Reactor flatMap() idiom to process each url
             // concurrently.
             .flatMap(url -> Mono
                      // Emit this url
@@ -159,10 +159,10 @@ public final class ReactorTests {
 
             // If subscribeOn() is omitted here the iterable is
             // obtained from the calling thread.
-            // .subscribeOn(scheduler)
+               // .subscribeOn(scheduler)
 
             // You can also get the iterables via a different thread pool.
-            // .subscribeOn(Schedulers.elastic())
+            .subscribeOn(Schedulers.elastic())
 
             .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 
@@ -174,7 +174,7 @@ public final class ReactorTests {
 
                      .doOnNext(___ -> Options.logIdentity(url, "Mono.just()"))
 
-                     // .map(downloadAndStoreImage)
+                     //.map(downloadAndStoreImage)
 
                      // Run URL concurrently in given scheduler.  The
                      // placement of this operation can move down in
@@ -288,7 +288,7 @@ public final class ReactorTests {
 
             // Set the scheduler (moving this operation down changes
             // the behavior).
-            // .runOn(scheduler)
+            //.runOn(scheduler)
 
             // Convert the parallel flux back to flux.
             .sequential()

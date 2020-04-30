@@ -41,10 +41,10 @@ public class ex2 {
         runReactorTests();
 
         // Run all the RxJavaTests.
-        // runRxJavaTests();
+        runRxJavaTests();
 
         // Run all the Streams tests.
-        // runStreamsTests();
+        runStreamsTests();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -62,20 +62,18 @@ public class ex2 {
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking on I/O occurs.
 
-        /*
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorflatMap[CFJP]()",
              Schedulers.fromExecutor(ForkJoinPool.commonPool()),
              Options.instance().loggingEnabled());
-        */
 
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImage,
              "testDefaultDownloadBehaviorReactorflatMap[parallel]()",
              Schedulers.parallel(),
              Options.instance().loggingEnabled());
-        /*
+
         // Run tests using Reactor's ParallelFlux mechanism along with
         // the {@code BlockingTask} wrapper for Java fork-join's
         // {@code ManagedBlocker} mechanism, which adds new worker
@@ -100,8 +98,6 @@ public class ex2 {
              1,
              Schedulers.fromExecutor(ForkJoinPool.commonPool()),
              Options.instance().loggingEnabled());
-
-         */
     }
 
     /**

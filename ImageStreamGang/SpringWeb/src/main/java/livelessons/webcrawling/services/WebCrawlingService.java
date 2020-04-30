@@ -8,23 +8,23 @@ import org.springframework.stereotype.Service;
 import livelessons.ImageStreamGangTest;
 
 /**
- * Service Components are the class file which contains @Service annotation. 
- * These class files are used to write business logic in a different layer, separated from @RestController class file. 
- * 
+ * Service Components are the class file that contains the @Service
+ * annotation.  These class files are used to write business logic in
+ * a different layer, separated from @RestController class file.
  */
 @Service
 public class WebCrawlingService {
     /**
-     * Sanjeev, can you please add some comments here explaining what this
-     * method does.
+     * This Service API forwards to runTests(), which runs all the
+     * tests in ImageStreamGang.
      */
     public void startCrawl() {
         runTests();
     }
 
     /**
-     * This Service API is used  to run all tests in ImageStreamGang
-     * delegates to ImageStreamGangTest 
+     * This Service API is used to run all tests in ImageStreamGang by
+     * delegating to ImageStreamGangTest
      */
     public void runTests() {
         ImageStreamGangTest.runTests();
@@ -32,7 +32,8 @@ public class WebCrawlingService {
     }
 	
     /**
-     * This Service API is used to fetch timing results of last test invocation.
+     * This Service API is used to fetch timing results of last test
+     * invocation.
      */
     public Map<String, List<Long>> getTimingResults(){
         return ImageStreamGangTest.getTimingResults();
