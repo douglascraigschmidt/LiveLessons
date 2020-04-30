@@ -9,6 +9,7 @@ Instead of Postman, we can also use Curl utility to make HTTP requests.
 
 Also, do you have experience with Intellij?  It would be nice if we
 could set up this project using Intellij and Gradle.]
+
 [Sanjeev:] I don't have experience working with IntelliJ. But IntelliJ seems to have a very good support for building/running SpringBoot applications. Below link can be helpful
 https://www.javadevjournal.com/spring-boot/spring-boot-application-intellij/
 The following are the steps required to build and run this example.
