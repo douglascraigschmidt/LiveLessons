@@ -188,8 +188,7 @@ public class Options {
     public void printStats(String testName,
                             int imageCount) {
         if (!testName.equals("warmup"))
-            System.out.println(": "
-                               + testName
+            System.out.println(testName
                                + " downloaded and stored "
                                + imageCount
                                + " images using "

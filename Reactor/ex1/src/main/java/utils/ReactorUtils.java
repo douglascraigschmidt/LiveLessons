@@ -175,4 +175,18 @@ public class ReactorUtils {
             sink.complete();
         });
     }
+
+    /**
+     * Generate an infinite stream of instances of what's returned by
+     * {@code supplier.get()}
+     * @param supplier Generates a value
+     * @return A flux that contains the results of the generator
+     */
+    public static <T> Flux<T> generate(Supplier<T> supplier) {
+        return Flux
+                // Create an infinite generator.
+                .create(sink -> sink.onRequest(size -> {
+                    sink.next(supplier.get());
+                }));
+    }
 }

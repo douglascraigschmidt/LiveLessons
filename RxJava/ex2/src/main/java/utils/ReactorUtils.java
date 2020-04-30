@@ -132,4 +132,22 @@ public class ReactorUtils {
             // Run this flow of operations in the common fork-join pool.
             .runOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
     }
+
+    /**
+     * Print the {@code element} and the {@code operation} along with
+     * the current thread name to aid debugging and comprehension.
+     *
+     * @param element The given element
+     * @param operation The Reactor operation being performed
+     * @return The element parameter
+     */
+    public static <T> T logIdentity(T element, String operation) {
+        System.out.println("["
+                           + Thread.currentThread().getName()
+                           + "] "
+                           + operation
+                           + " -- " 
+                           + element);
+        return element;
+    }
 }

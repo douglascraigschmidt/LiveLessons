@@ -148,8 +148,8 @@ public class ex8 {
 
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
-            BigFraction reducedFraction =
-            BigFraction.reduce(unreducedFraction);
+            BigFraction reducedFraction = BigFraction
+                    .reduce(unreducedFraction);
 
             sb.append("     unreducedFraction "
                       + unreducedFraction.toString()
@@ -446,7 +446,7 @@ public class ex8 {
         // Create a random BigFraction and multiply it.
         CompletableFuture<BigFraction> cf1 = CompletableFuture
             // This code runs asynchronously.
-            .supplyAsync(() -> makeBigFraction(random, false)
+            .supplyAsync(() -> makeBigFraction(random, true)
                          // Multiply a random fraction with a constant
                          // fraction.
                          .multiply(sBigReducedFraction));
@@ -454,7 +454,7 @@ public class ex8 {
         // Create another random BigFraction and multiply it.
         CompletableFuture<BigFraction> cf2 = CompletableFuture
             // This code runs asynchronously.
-            .supplyAsync(() -> makeBigFraction(random, false)
+            .supplyAsync(() -> makeBigFraction(random, true)
                          // Multiply a random fraction with a constant
                          // fraction.
                          .multiply(sBigReducedFraction));
@@ -629,7 +629,7 @@ public class ex8 {
                                 if (fraction != null)
                                     sb.append("\n     result = "
                                               + fraction.toMixedString());
-                                else
+                                else // if (ex != null)
                                     sb.append("     exception = " + ex.getMessage());
                             })
 

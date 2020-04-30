@@ -66,6 +66,7 @@ public class ex1 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
+        /*
         // Test synchronous BigFraction reduction using a mono and a
         // pipeline of operations that run on the calling thread.
         AsyncTester.register(ex1::testFractionReductionSync);
@@ -85,14 +86,18 @@ public class ex1 {
         // Test BigFraction exception handling using mono methods.
         AsyncTester.register(ex1::testFractionExceptions1);
 
+         */
         // Test BigFraction multiplications using a stream of monos
         // and a pipeline of operations, including flatMap(),
         // collectList(), and first().
         AsyncTester.register(ex1::testFractionMultiplications1);
 
+        /*
         // Test BigFraction multiplications by combining the Java
         // streams framework with the Reactor framework.
         AsyncTester.register(ex1::testFractionMultiplications2);
+
+         */
 
         @SuppressWarnings("ConstantConditions")
             long testCount = AsyncTester
@@ -382,10 +387,10 @@ public class ex1 {
 
         // Process the function in a flux stream.
         return ReactorUtils
-            // Generate large, random, and unreduced fractions.
-            .generate(() -> makeBigFraction(new Random(), false),
-                      // Generate this many fractions.
-                      sMAX_FRACTIONS)
+            // Generate sMAX_FRACTIONS random, large, and unreduced BigFractions.
+            .generate(() -> makeBigFraction(new Random(),
+                                     false))
+            .take(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
             .flatMap(reduceAndMultiplyFraction)
@@ -426,8 +431,9 @@ public class ex1 {
 
         // Process the function in a sequential stream.
         return Stream
-            // Generate sMAX_FRACTIONS random unreduced BigFractions.
-            .generate(() -> makeBigFraction(new Random(), false))
+            // Generate sMAX_FRACTIONS random, large, and unreduced BigFractions.
+            .generate(() -> makeBigFraction(new Random(),
+                                     false))
             .limit(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
