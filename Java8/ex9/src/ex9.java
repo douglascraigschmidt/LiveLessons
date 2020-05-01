@@ -3,6 +3,7 @@ import utils.StampedLockHashMap;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toList;
@@ -56,20 +57,20 @@ public class ex9 {
 
         // Create a concurrent hash map.
         Map<Integer, Integer> concurrentHashMap =
-                new ConcurrentHashMap<>();
+            new ConcurrentHashMap<>();
 
         // Create a concurrent hash map.
         Map<Integer, Integer> stampedLockHashMap =
-                new StampedLockHashMap<>();
+            new StampedLockHashMap<>();
 
         test.timeTest(maxIterations,
-                 synchronizedHashMap, "synchronizedHashMap");
+                      synchronizedHashMap, "synchronizedHashMap");
 
         test.timeTest(maxIterations,
-                 concurrentHashMap, "concurrentHashMap");
+                      concurrentHashMap, "concurrentHashMap");
 
         test.timeTest(maxIterations,
-                 stampedLockHashMap, "stampedLockHashMap");
+                      stampedLockHashMap, "stampedLockHashMap");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -97,8 +98,8 @@ public class ex9 {
             .timeRun(() ->
                      // Run the test using a synchronized hash map.
                      runTest(maxIterations,
-                                  hashMap,
-                                  testName),
+                             hashMap,
+                             testName),
                      testName);
     }
 
@@ -126,41 +127,44 @@ public class ex9 {
 
             // Runnable checks if maxIterations random # are prime.
             Runnable primeChecker = () -> {
-                for (int i = 0; i < maxIterations; i++) {
-                    // Get the next random number.
-                    int primeCandidate = 
-                    Math.abs(random.nextInt(maxIterations) + 1);
+                IntStream
+                // Iterate from 1 to maxIterations
+                .rangeClosed(1, maxIterations)
 
-                    // computeIfAbsent() first checks to see if the
-                    // factor for this number is already in the cache.
-                    // If not, it atomically determines if this number
-                    // is prime and stores it in the cache.
-                    int smallestFactor = primeCache
-                                .computeIfAbsent(primeCandidate,
-                                             this::isPrime);
+                // Get the next random number.
+                .map(___ -> Math.abs(random.nextInt(maxIterations) + 1))
 
-                    if (smallestFactor != 0) {
-                        logDebug(""
-                                + Thread.currentThread()
-                                + ": "
-                                + primeCandidate
-                                + " is not prime with smallest factor "
-                                + smallestFactor);
-                    } else {
-                        logDebug(""
-                                + Thread.currentThread()
-                                + ": "
-                                + primeCandidate
-                                + " is prime");
-                    }
-                }
+                // Check each random to see if it's prime.
+                .forEach(primeCandidate -> {
+                        int smallestFactor = primeCache
+                        // computeIfAbsent() first checks to see if
+                        // this #'s factor is already cached.  If not,
+                        // it atomically determines if this # is prime
+                        // and stores it in the cache.
+                        .computeIfAbsent(primeCandidate, this::isPrime);
 
-                // Inform the waiting thread that we're done.
+                        // Print the results.
+                        if (smallestFactor != 0) {
+                            logDebug(""
+                                     + Thread.currentThread()
+                                     + ": "
+                                     + primeCandidate
+                                     + " is not prime with smallest factor "
+                                     + smallestFactor);
+                        } else {
+                            logDebug(""
+                                     + Thread.currentThread()
+                                     + ": "
+                                     + primeCandidate
+                                     + " is prime");
+                        }
+                    });
+
+                // Inform the waiter thread that we're done.
                 exitBarrier.countDown();
             };
 
-            // Create a group of tasks that run the prime checker
-            // lambda.
+            // Create tasks to run the prime checker lambda.
             for (int i = 0; i < sNUMBER_OF_CORES; i++)
                 mExecutor.execute(primeChecker);
 
@@ -215,9 +219,9 @@ public class ex9 {
             // Sort the elements in the stream by the value.
             .sorted(comparingByValue())
 
-            // Trigger intermediate processing and collect the
-            // key/value pairs in the stream into a LinkedHashMap,
-            // which preserves the sorted order.
+            // Trigger intermediate processing and collect key/value
+            // pairs in the stream into a LinkedHashMap, which
+            // preserves the sorted order.
             .collect(toMap(Map.Entry::getKey,
                            Map.Entry::getValue,
                            (e1, e2) -> e2,
