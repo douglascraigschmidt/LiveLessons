@@ -68,7 +68,9 @@ public class StampedLockHashMap<K, V>
     }
 
     /**
-     *
+     * If the specified key is not already associated with a value (or
+     * is mapped to null), attempts to compute its value using the
+     * given mapping function and enters it into this map unless null.
      */
     public V computeIfAbsent(K key,
                              Function<? super K,? extends V> mappingFunction) {
@@ -77,7 +79,9 @@ public class StampedLockHashMap<K, V>
         return computeIfAbsentOptimisticRead(key, mappingFunction);
     }
 
-
+    /**
+     * This implementation uses a conventional write lock.
+     */
     private V computeIfAbsentWriteLock(K key, Function<? super K,? extends V> mappingFunction) {
         // Acquire the lock for writing.
         long stamp = mStampedLock.writeLock();
@@ -106,7 +110,11 @@ public class StampedLockHashMap<K, V>
         }
     }
 
-    private V computeIfAbsentConditionalWrite(K key, Function<? super K,? extends V> mappingFunction) {
+    /**
+     * This implementation uses a conditional write lock.
+     */
+    private V computeIfAbsentConditionalWrite(K key,
+                                              Function<? super K,? extends V> mappingFunction) {
         // Acquire the lock for reading.
         long stamp = mStampedLock.readLock();
 
@@ -155,6 +163,9 @@ public class StampedLockHashMap<K, V>
         }
     }
 
+    /**
+     * This implementation uses a optimistic read lock.
+     */
     private V computeIfAbsentOptimisticRead(K key,
                                             Function<? super K,? extends V> mappingFunction) {
         // Acquire the lock for optimistic reading.
