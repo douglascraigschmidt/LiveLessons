@@ -124,24 +124,29 @@ public class StampedLockHashMap<K, V>
         long stamp = mStampedLock.readLock();
 
         try {
-            // Try to get the value from the map via key or apply
-            // mappingFunction if value's not yet computed.
-            V value = getOrComputeValueUnlocked(key,
-                                                mappingFunction);
+            // Try to get the value from the map via key.
+            V value = mMap.get(key);
 
-            // If mapping function worked then add value to map.
-            if (value != null) {
-                for (;;) {
+            // If there's already a value associated with the
+            // key just return it.
+            if (value != null)
+                return value;
+            else {
+                for(;;) {
                     // Try converting to writelock (non-blocking).
-                    long ws = mStampedLock 
+                    long ws = mStampedLock
                         .tryConvertToWriteLock(stamp);
 
                     if (ws != 0L) {
                         // Update stamp to ws.
                         stamp = ws;
 
-                        // Put the key in the map on success.
-                        mMap.put(key, value);
+                        // Apply mapping function to compute value.
+                        value = mappingFunction.apply(key);
+
+                        if (value != null)
+                            // Put the key in the map on success.
+                            mMap.put(key, value);
 
                         // Break out of the loop.
                         break;
@@ -153,11 +158,15 @@ public class StampedLockHashMap<K, V>
                         stamp = mStampedLock.writeLock();
 
                         // Start over again with the write lock held.
-                        value = getOrComputeValueUnlocked(key,
-                                                          mappingFunction);
+                        value = mMap.get(key);
 
                         if (value == null)
-                            // Something went wrong, so bail out.
+                            // Loop back around again since the key
+                            // doesn't have a value yet.
+                            continue;
+                        else
+                            // The key already has a value, so return
+                            // it.
                             break;
                     }
                 }
@@ -180,8 +189,7 @@ public class StampedLockHashMap<K, V>
         // "Acquire" the lock for optimistic reading.
         long stamp = mStampedLock.tryOptimisticRead();
 
-        // Get the current value (if any) with the optimistic read
-        // lock "acquired".
+        // Get current value (if any) via optimistic read lock.
         V value = mMap.get(key);
 
         // Check if a writer occurred during this window.
@@ -189,42 +197,23 @@ public class StampedLockHashMap<K, V>
             // Revert to conditional write strategy.
             return computeIfAbsentConditionalWrite(key,
                                                    mappingFunction);
-        } else {
-            // "Acquire" the lock for optimistic reading.
-            stamp = mStampedLock.tryOptimisticRead();
-
-            // If value is null this is the first time in.
-            if (value == null) {
+        } else if (value == null) {
+            // Try converting to writelock (non-blocking).
+            stamp = mStampedLock.tryConvertToWriteLock(stamp);
+            if (stamp != 0L) {
                 // Apply mapping function to compute the value.
                 value = mappingFunction.apply(key);
 
-                // Check if a writer occurred during this window.
-                if (!mStampedLock.validate(stamp)) {
-                    // Revert to conditional write strategy.
-                    return computeIfAbsentConditionalWrite(key,
-                                                           mappingFunction);
-                }
+                if (value != null)
+                    // Put the key in the map on success.
+                    mMap.put(key, value);
 
-                if (value != null) {
-                    // Mapping function worked so add value to map.
-
-                    // Try converting to writelock (non-blocking).
-                    stamp = mStampedLock.tryConvertToWriteLock(stamp);
-                    if (stamp != 0L) {
-                        // Put the key in the map on success.
-                        mMap.put(key, value);
-
-                        // Unlock the write lock.
-                        mStampedLock.unlockWrite(stamp);
-
-                        // Return the value.
-                        return value;
-                    } else {
-                        // Revert to conditional write strategy.
-                        return computeIfAbsentConditionalWrite(key,
-                                                               mappingFunction);
-                    }
-                }
+                // Unlock the write lock.
+                mStampedLock.unlockWrite(stamp);
+            } else {
+                // Revert to conditional write strategy.
+                return computeIfAbsentConditionalWrite(key,
+                                                       mappingFunction);
             }
         }
 
@@ -243,7 +232,7 @@ public class StampedLockHashMap<K, V>
 
         // If value is null then this is the first time in.
         if (value == null) 
-            // Apply the mapping function to compute the value.
+
             value = mappingFunction.apply(key);
         
         // Return the value.

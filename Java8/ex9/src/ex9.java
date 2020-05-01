@@ -55,10 +55,10 @@ public class ex9 {
             // Generate "count" random large ints
             .ints(count,
                    // Try to generate duplicates.
-                   Integer.MAX_VALUE - count,
-                   Integer.MAX_VALUE)
+                   5000 - count, // Integer.MAX_VALUE - count,
+                   5000) // Integer.MAX_VALUE)
 
-            // Convert each primitive long to Long.
+            // Convert each primitive int to Integer.
             .boxed()    
                    
             // Trigger intermediate operations and collect into a
@@ -141,7 +141,7 @@ public class ex9 {
 
         this
             // Generate random large numbers.
-            .emitter(false)
+            .emitter(true)
             
             // Check each random number to see if it's prime.
             .map(number -> checkIfPrime(number, primeCache))
