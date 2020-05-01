@@ -1,4 +1,5 @@
 import utils.RunTimer;
+import utils.StampedLockHashMap;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -15,54 +16,92 @@ import static java.util.stream.Collectors.toMap;
  * dropWhile().
  */
 public class ex9 {
-    /**
-     * Number of times each thread iterates computing prime numbers.
-     */
-    private static int sMAX = 100000;
 
     /**
      * True if we're running in verbose mode, else false.
      */
-    private static boolean sVERBOSE = false;
+    private static final boolean sVERBOSE = false;
 
     /**
      * Number of cores known to the Java execution environment.
      */
-    private static int sNUMBER_OF_CORES =
+    private static final int sNUMBER_OF_CORES =
         Runtime.getRuntime().availableProcessors();
 
     /**
      * This executor runs the prime number computation tasks.
      */
-    private ExecutorService mExecutor =
+    private final ExecutorService mExecutor =
         // Create a pool with as many threads as the Java execution
         // environment thinks there are cores.
         Executors.newFixedThreadPool(sNUMBER_OF_CORES);
 
     /**
-     * This method provides a brute-force determination of whether
-     * number @a primeCandidate is prime.  Returns 0 if it is prime,
-     * or the smallest factor if it is not prime.
+     * Main entry point into the test program.
      */
-    private Integer isPrime(Integer primeCandidate) {
-        int n = primeCandidate;
+    static public void main(String[] argv) throws InterruptedException {
+        // Determine the max number of iterations.
+        // Number of times each thread iterates computing prime numbers.
+        int sMAX = 100000;
+        int maxIterations = argv.length == 0
+            ? sMAX 
+            : Integer.valueOf(argv[0]);
 
-        if (n > 3)
-            // This algorithm is intentionally inefficient to burn
-            // lots of CPU time!
-            for (int factor = 2;
-                 factor <= n / 2;
-                 ++factor)
-                if (Thread.interrupted()) {
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + " Prime checker thread interrupted");
-                    break;
-                } else if (n / factor * factor == n)
-                    return factor;
+        // Create an instance to test.
+        ex9 test = new ex9();
 
-        return 0;
+        // Create a synchronized hash map.
+        Map<Integer, Integer> synchronizedHashMap = 
+            Collections.synchronizedMap(new HashMap<>());
+
+        // Create a concurrent hash map.
+        Map<Integer, Integer> concurrentHashMap =
+                new ConcurrentHashMap<>();
+
+        // Create a concurrent hash map.
+        Map<Integer, Integer> stampedLockHashMap =
+                new StampedLockHashMap<>();
+
+        test.timeTest(maxIterations,
+                 synchronizedHashMap, "synchronizedHashMap");
+
+        test.timeTest(maxIterations,
+                 concurrentHashMap, "concurrentHashMap");
+
+        test.timeTest(maxIterations,
+                 stampedLockHashMap, "stampedLockHashMap");
+
+        // Print the results.
+        System.out.println(RunTimer.getTimingResults());
+
+        // Demonstrate slicing.
+        test.demonstrateSlicing(concurrentHashMap);
+
+        // Shutdown the executor.
+        test.mExecutor.shutdownNow();
+
+        // Wait for a bit for the executor to shutdown and then exit.
+        test.mExecutor.awaitTermination(500,
+                                        TimeUnit.MILLISECONDS);
     }
+
+    /**
+     * Time the test for {@code maxIterations} using the given
+     * {@code hashMap}.
+     */
+    private void timeTest(int maxIterations,
+                          Map<Integer, Integer> hashMap,
+                          String testName) {
+        RunTimer
+            // Time how long this test takes to run.
+            .timeRun(() ->
+                     // Run the test using a synchronized hash map.
+                     runTest(maxIterations,
+                                  hashMap,
+                                  testName),
+                     testName);
+    }
+
 
     /**
      * Run the prime number test.
@@ -85,35 +124,34 @@ public class ex9 {
             // Random number generator.
             Random random = new Random();
 
-            // Runnable checks if maxIterations random numbers are prime.
+            // Runnable checks if maxIterations random # are prime.
             Runnable primeChecker = () -> {
                 for (int i = 0; i < maxIterations; i++) {
                     // Get the next random number.
                     int primeCandidate = 
                     Math.abs(random.nextInt(maxIterations) + 1);
 
-                    // computeIfAbsent() first checks to see if the factor
-                    // for this number is already in the cache.  If not,
-                    // it atomically determines if this number is prime
-                    // and stores it in the cache.
-                    int smallestFactor = primeCache.computeIfAbsent(primeCandidate,
-                                                                    this::isPrime);
+                    // computeIfAbsent() first checks to see if the
+                    // factor for this number is already in the cache.
+                    // If not, it atomically determines if this number
+                    // is prime and stores it in the cache.
+                    int smallestFactor = primeCache
+                                .computeIfAbsent(primeCandidate,
+                                             this::isPrime);
 
                     if (smallestFactor != 0) {
-                        if (sVERBOSE)
-                            System.out.println(""
-                                               + Thread.currentThread()
-                                               + ": "
-                                               + primeCandidate
-                                               + " is not prime with smallest factor "
-                                               + smallestFactor);
+                        logDebug(""
+                                + Thread.currentThread()
+                                + ": "
+                                + primeCandidate
+                                + " is not prime with smallest factor "
+                                + smallestFactor);
                     } else {
-                        if (sVERBOSE)
-                            System.out.println(""
-                                               + Thread.currentThread()
-                                               + ": "
-                                               + primeCandidate
-                                               + " is prime");
+                        logDebug(""
+                                + Thread.currentThread()
+                                + ": "
+                                + primeCandidate
+                                + " is prime");
                     }
                 }
 
@@ -136,8 +174,34 @@ public class ex9 {
     }
 
     /**
-     * Demonstrate how to slice by applying the stream dropWhile() and
-     * takeWhile() operations to the {@code map} parameter.
+     * This method provides a brute-force determination of whether
+     * number {@code primeCandidate} is prime.  Returns 0 if it is
+     * prime, or the smallest factor if it is not prime.
+     */
+    private Integer isPrime(Integer primeCandidate) {
+        int n = primeCandidate;
+
+        if (n > 3)
+            // This algorithm is intentionally inefficient to burn
+            // lots of CPU time!
+            for (int factor = 2;
+                 factor <= n / 2;
+                 ++factor)
+                if (Thread.interrupted()) {
+                    System.out.println(""
+                                       + Thread.currentThread()
+                                       + " Prime checker thread interrupted");
+                    break;
+                } else if (n / factor * factor == n)
+                    return factor;
+
+        return 0;
+    }
+
+    /**
+     * Demonstrate how to slice by applying the Java streams {@code
+     * dropWhile()} and {@code takeWhile()} operations to the {@code
+     * map} parameter.
      */
     private void demonstrateSlicing(Map<Integer, Integer> map) {
         // Create a map that's sorted by the value in map.
@@ -160,7 +224,7 @@ public class ex9 {
                            LinkedHashMap::new));
 
         // Print out the entire contents of the sorted map.
-        System.out.println("sorted map = \n" + sortedMap);
+        System.out.println("map sorted by value = \n" + sortedMap);
 
         // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);
@@ -192,8 +256,7 @@ public class ex9 {
             .collect(toList());
 
         // Print out the list of primes.
-        System.out.println("primes =\n"
-                           + primes);
+        System.out.println("primes =\n" + primes);
     }
 
     /**
@@ -210,7 +273,7 @@ public class ex9 {
             .stream()
 
             // Slice the stream using a predicate that skips over the
-            // non-prime numbers (i.e., getValue() == 0); 
+            // non-prime numbers (i.e., getValue() == 0);
             .dropWhile(entry -> entry.getValue() == 0)
 
             // Collect the results into a list.
@@ -222,43 +285,12 @@ public class ex9 {
     }
 
     /**
-     * Main entry point into the test program.
+     * Display the string if sVERBOSE is set.
      */
-    static public void main(String[] argv) throws InterruptedException {
-        // Determine the max number of iterations.
-        int maxIterations = argv.length == 0 
-            ? sMAX 
-            : Integer.valueOf(argv[0]);
-
-        ex9 test = new ex9();
-
-        // Time how long this test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test using a synchronized HashMap.
-                         test.runTest(maxIterations,
-                                      Collections.synchronizedMap(new HashMap<>()),
-                                      "SynchronizedHashMap"),
-                         "SynchronizedHashMap");
-
-        // Create a new ConcurrentHashMap.
-        Map<Integer, Integer> concurrentHashMap = new ConcurrentHashMap<>();
-
-        // Time how long this test takes to run.
-        RunTimer.timeRun(() 
-                         // Run the test using a ConcurrentHashMap.
-                         -> test.runTest(maxIterations,
-                                         concurrentHashMap,
-                                         "ConcurrentHashMap"),
-                         "ConcurrentHashMap");
-
-        // Print the results.
-        System.out.println(RunTimer.getTimingResults());
-
-        // Demonstrate slicing.
-        test.demonstrateSlicing(concurrentHashMap);
-
-        // Shutdown the executor.
-        test.mExecutor.shutdownNow();
+    private void logDebug(String string) {
+        if (sVERBOSE)
+            System.out.println();
     }
+
 }
     
