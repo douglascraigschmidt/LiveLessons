@@ -2,10 +2,15 @@ import utils.Options;
 import utils.RunTimer;
 import utils.StampedLockHashMap;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.ObjIntConsumer;
 import java.util.stream.Stream;
 
 import static java.util.Map.Entry.comparingByValue;
@@ -64,7 +69,7 @@ public class ex9 {
     /**
      * Main entry point into the test program.
      */
-    static public void main(String[] argv) throws InterruptedException {
+    static public void main(String[] argv) {
         // Create an instance to test.
         ex9 test = new ex9(argv);
 

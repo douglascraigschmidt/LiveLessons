@@ -1,13 +1,15 @@
 package utils;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Function;
 
 /**
- * Implements a wrapper that adapts the ConcurrentHashMap
- * implementation to provide a simple ConcurrentHashSet ADT, which is
- * sadly lacking from Java.
+ * A concurrent HashMap collection that's implemented using advanced
+ * features of StampedLock to protect mutable shared state.
  */
 public class StampedLockHashMap<K, V>
        extends AbstractMap<K, V> 
@@ -206,23 +208,21 @@ public class StampedLockHashMap<K, V>
                 if (value != null) {
                     // Mapping function worked so add value to map.
 
-                    for (;;) {
-                        // Try converting to writelock (non-blocking).
-                        stamp = mStampedLock.tryConvertToWriteLock(stamp);
-                        if (stamp != 0L) {
-                            // Put the key in the map on success.
-                            mMap.put(key, value);
+                    // Try converting to writelock (non-blocking).
+                    stamp = mStampedLock.tryConvertToWriteLock(stamp);
+                    if (stamp != 0L) {
+                        // Put the key in the map on success.
+                        mMap.put(key, value);
 
-                            // Unlock the write lock.
-                            mStampedLock.unlockWrite(stamp);
+                        // Unlock the write lock.
+                        mStampedLock.unlockWrite(stamp);
 
-                            // Break out of the loop.
-                            break;
-                        } else {
-                            // Revert to conditional write strategy.
-                            return computeIfAbsentConditionalWrite(key,
-                                                                   mappingFunction);
-                        }
+                        // Return the value.
+                        return value;
+                    } else {
+                        // Revert to conditional write strategy.
+                        return computeIfAbsentConditionalWrite(key,
+                                                               mappingFunction);
                     }
                 }
             }
