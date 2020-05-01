@@ -60,7 +60,7 @@ public class ex2 {
             .concatMap(Function.identity(), 1)
             .filter(Predicate.not(List::isEmpty))
             .doOnNext(items -> display("got items: " + items))
-            .take(2);
+            .take(20);
     }
 
     private static Mono<List<Integer>> pull(long size) {
