@@ -135,7 +135,7 @@ public class ex9 {
 
         this
             // Generate random large numbers.
-            .feedEmitter(false)
+            .emitter(false)
             
             // Check each random number to see if it's prime.
             .map(number -> checkIfPrime(number, primeCache))
@@ -156,12 +156,12 @@ public class ex9 {
     }
 
     /**
-     * Generate random large numbers.
+     * Emit a stream of random large numbers.
      *
      * @param parallel True if the stream should be parallel, else false
      * @return Return a stream containing random large numbers
      */
-    private Stream<Integer> feedEmitter(boolean parallel) {
+    private Stream<Integer> emitter(boolean parallel) {
         Stream<Integer> intStream = mRandomIntegers
             // Conver the list into a stream.
             .stream();
