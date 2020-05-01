@@ -43,11 +43,12 @@ Here's an overview of what's included:
         methods, arbitrary-arity methods, and exception handling
         methods.
 
-. ex9 - This example showcases the use of a Java 8 ConcurrentHashMap
-        and a Java SynchronizedMap together with Java 8 Function-based
-        method references to compute/cache/retrieve prime numbers.
-        This example also demonstrates the use of stream slicing with
-        takeWhile() and dropWhile().
+. ex9 - This example showcases and benchmarks the use of a Java
+        ConcurrentHashMap, a Java SynchronizedMap, and a HashMap
+        protected with a Java StampedLock are used to
+        compute/cache/retrieve prime numbers.  This example also
+        demonstrates the use of stream slicing with the Java streams
+        takeWhile() and dropWhile() operations.
 
 . ex10 - This example shows the use of predicate lambda expressions in
          the context of a Java ConcurrentHashMap removeIf() method.
