@@ -1,9 +1,12 @@
+import utils.Options;
 import utils.RunTimer;
 import utils.StampedLockHashMap;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.IntStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.ObjIntConsumer;
+import java.util.stream.Stream;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toList;
@@ -17,163 +20,199 @@ import static java.util.stream.Collectors.toMap;
  * with the Java streams takeWhile() and dropWhile() operations.
  */
 public class ex9 {
+    /**
+     * Count the number of calls to isPrime() as a means to determine
+     * the benefits of caching.
+     */
+    private final AtomicInteger mPrimeCheckCounter;
 
     /**
-     * True if we're running in verbose mode, else false.
+     * A list of randomly-generated large integers.
      */
-    private static final boolean sVERBOSE = false;
+    private final List<Integer> mRandomIntegers;
 
     /**
-     * Number of cores known to the Java execution environment.
+     * Constructor initializes the fields.
      */
-    private static final int sNUMBER_OF_CORES =
-        Runtime.getRuntime().availableProcessors();
+    ex9(String[] argv) {
+        // Initialize this count to 0.
+        mPrimeCheckCounter = new AtomicInteger(0);
 
-    /**
-     * This executor runs the prime number computation tasks.
-     */
-    private final ExecutorService mExecutor =
-        // Create a pool with as many threads as the Java execution
-        // environment thinks there are cores.
-        Executors.newFixedThreadPool(sNUMBER_OF_CORES);
+        // Parse the command-line arguments.
+        Options.instance().parseArgs(argv);
+
+        // Record how many integers we should generate.
+        int count = Options.instance().count();
+
+        // Generate a list of random large integers.
+        mRandomIntegers = new Random()
+            // Generate "count" random large ints
+            .ints(count,
+                   // Try to generate duplicates.
+                   Integer.MAX_VALUE - count,
+                   Integer.MAX_VALUE)
+
+            // Convert each primitive long to Long.
+            .boxed()    
+                   
+            // Trigger intermediate operations and collect into a
+            // list.
+            .collect(toList());
+    }
 
     /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) throws InterruptedException {
-        // Determine the max number of iterations.
-        // Number of times each thread iterates computing prime numbers.
-        int sMAX = 100000;
-        int maxIterations = argv.length == 0
-            ? sMAX 
-            : Integer.valueOf(argv[0]);
-
         // Create an instance to test.
-        ex9 test = new ex9();
+        ex9 test = new ex9(argv);
 
-        // Create a synchronized hash map.
-        Map<Integer, Integer> synchronizedHashMap = 
-            Collections.synchronizedMap(new HashMap<>());
+        // Run the tests.
+        test.run();
+    }
 
-        // Create a concurrent hash map.
+    /**
+     * Run all the tests and print the results.
+     */
+    private void run() {
+        // Create and time the use of a synchronized hash map.
+        Map<Integer, Integer> synchronizedHashMap =
+            timeTest(Collections.synchronizedMap(new HashMap<>()),
+                     "synchronizedHashMap");
+
+        // Create and time the use of a concurrent hash map.
         Map<Integer, Integer> concurrentHashMap =
-            new ConcurrentHashMap<>();
+                timeTest(new ConcurrentHashMap<>(),
+                         "concurrentHashMap");
 
-        // Create a concurrent hash map.
+        // Create and time the use of a stamped lock hash map.
         Map<Integer, Integer> stampedLockHashMap =
-            new StampedLockHashMap<>();
-
-        test.timeTest(maxIterations,
-                      synchronizedHashMap, "synchronizedHashMap");
-
-        test.timeTest(maxIterations,
-                      concurrentHashMap, "concurrentHashMap");
-
-        test.timeTest(maxIterations,
-                      stampedLockHashMap, "stampedLockHashMap");
+            timeTest(new StampedLockHashMap<>(),
+                     "stampedLockHashMap");                
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
         // Demonstrate slicing.
-        test.demonstrateSlicing(concurrentHashMap);
-
-        // Shutdown the executor.
-        test.mExecutor.shutdownNow();
-
-        // Wait for a bit for the executor to shutdown and then exit.
-        test.mExecutor.awaitTermination(500,
-                                        TimeUnit.MILLISECONDS);
+        demonstrateSlicing(stampedLockHashMap);
     }
 
     /**
-     * Time the test for {@code maxIterations} using the given
-     * {@code hashMap}.
+     * Time {@code testName} using the given {@code hashMap}.
+     *
+     * @param map The map used to cache the prime candidates.
+     * @param testName The name of the test.
+     * @return The map updated during the test.
      */
-    private void timeTest(int maxIterations,
-                          Map<Integer, Integer> hashMap,
-                          String testName) {
-        RunTimer
+    private Map<Integer, Integer> timeTest(Map<Integer, Integer> map,
+                                           String testName) {
+        // Return the map updated during the test.
+        return RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
-                     // Run the test using a synchronized hash map.
-                     runTest(maxIterations,
-                             hashMap,
-                             testName),
+                     // Run the test using the given map.
+                     runTest(map, testName),
                      testName);
     }
-
 
     /**
      * Run the prime number test.
      * 
-     * @param maxIterations Number of iterations to run the test
      * @param primeCache Cache that maps candidate primes to their
      * smallest factor (if they aren't prime) or 0 if they are prime
      * @param testName Name of the test
+     * @return The map updated during the test.
      */
-    private void runTest(int maxIterations,
-                         Map<Integer, Integer> primeCache,
-                         String testName) {
-        try {
-            System.out.println("Starting " + testName);
+    private Map<Integer, Integer> runTest(Map<Integer, Integer> primeCache,
+                                          String testName) {
+        System.out.println("Starting " 
+                           + testName
+                           + " with count = "
+                           + Options.instance().count());
 
-            // Exit barrier that keeps track of when the tasks finish.
-            CountDownLatch exitBarrier =
-                new CountDownLatch(sNUMBER_OF_CORES);
+        // Reset the counter.
+        mPrimeCheckCounter.set(0);
 
-            // Random number generator.
-            Random random = new Random();
+        this
+            // Generate random large numbers.
+            .feedEmitter(false)
+            
+            // Check each random number to see if it's prime.
+            .map(number -> checkIfPrime(number, primeCache))
+            
+            // Handle the results.
+            .forEach(this::handleResult);
 
-            // Runnable checks if maxIterations random # are prime.
-            Runnable primeChecker = () -> {
-                IntStream
-                // Iterate from 1 to maxIterations
-                .rangeClosed(1, maxIterations)
+        System.out.println("Leaving "
+                           + testName
+                           + " with "
+                           + mPrimeCheckCounter.get()
+                           + " prime checks ("
+                           + (Options.instance().count() - mPrimeCheckCounter.get())
+                           + ") duplicates"); 
 
-                // Get the next random number.
-                .map(___ -> Math.abs(random.nextInt(maxIterations) + 1))
+        // Return the map updated during the test.
+        return primeCache;
+    }
 
-                // Check each random to see if it's prime.
-                .forEach(primeCandidate -> {
-                        int smallestFactor = primeCache
-                        // computeIfAbsent() first checks to see if
-                        // this #'s factor is already cached.  If not,
-                        // it atomically determines if this # is prime
-                        // and stores it in the cache.
-                        .computeIfAbsent(primeCandidate, this::isPrime);
+    /**
+     * Generate random large numbers.
+     *
+     * @param parallel True if the stream should be parallel, else false
+     * @return Return a stream containing random large numbers
+     */
+    private Stream<Integer> feedEmitter(boolean parallel) {
+        Stream<Integer> intStream = mRandomIntegers
+            // Conver the list into a stream.
+            .stream();
 
-                        // Print the results.
-                        if (smallestFactor != 0) {
-                            logDebug(""
-                                     + Thread.currentThread()
-                                     + ": "
-                                     + primeCandidate
-                                     + " is not prime with smallest factor "
-                                     + smallestFactor);
-                        } else {
-                            logDebug(""
-                                     + Thread.currentThread()
-                                     + ": "
-                                     + primeCandidate
-                                     + " is prime");
-                        }
-                    });
+        // Conditionally convert the stream to a parallel stream.
+        if (parallel)
+            intStream.parallel();
 
-                // Inform the waiter thread that we're done.
-                exitBarrier.countDown();
-            };
+        // Return the stream.
+        return intStream;
+    }
 
-            // Create tasks to run the prime checker lambda.
-            for (int i = 0; i < sNUMBER_OF_CORES; i++)
-                mExecutor.execute(primeChecker);
+    /**
+     * @return A {@code Result} object that contains the original
+     * {@code primeCandidate} and either 0 if it's prime or its
+     * smallest factor if it's not prime.
+     */
+    private Result checkIfPrime(Integer primeCandidate,
+                                Map<Integer, Integer> primeCache) {
+        // Return a tuple containing the prime candidate and the
+        // result of checking if it's prime.
+        return new Result(primeCandidate,
+                          primeCache
+                          // computeIfAbsent() first checks to see if
+                          // this #'s factor is already cached.  If
+                          // not, it atomically determines if this #
+                          // is prime and stores it in the cache.
+                          .computeIfAbsent(primeCandidate,
+                                           this::isPrime));
+    }
 
-            // Wait until we're done.
-            exitBarrier.await();
-
-            System.out.println("Leaving " + testName);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    /**
+     * Handle the result by printing it if debugging is enabled.
+     *
+     * @param result The result of checking if a number is prime.
+     */
+    private void handleResult(Result result) {
+        // Print the results.
+        if (result.mSmallestFactor != 0) {
+            Options.display(""
+                     + Thread.currentThread()
+                     + ": "
+                     + result.mPrimeCandidate
+                     + " is not prime with smallest factor "
+                     + result.mSmallestFactor);
+        } else {
+            Options.display(""
+                     + Thread.currentThread()
+                     + ": "
+                     + result.mPrimeCandidate
+                     + " is prime");
         }
     }
 
@@ -183,6 +222,10 @@ public class ex9 {
      * prime, or the smallest factor if it is not prime.
      */
     private Integer isPrime(Integer primeCandidate) {
+        // Increment the counter to indicate a prime candidate wasn't
+        // already in the cache.
+        mPrimeCheckCounter.incrementAndGet();
+
         int n = primeCandidate;
 
         if (n > 3)
@@ -208,24 +251,8 @@ public class ex9 {
      * map} parameter.
      */
     private void demonstrateSlicing(Map<Integer, Integer> map) {
-        // Create a map that's sorted by the value in map.
-        Map<Integer, Integer> sortedMap = map
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
-
-            // Sort the elements in the stream by the value.
-            .sorted(comparingByValue())
-
-            // Trigger intermediate processing and collect key/value
-            // pairs in the stream into a LinkedHashMap, which
-            // preserves the sorted order.
-            .collect(toMap(Map.Entry::getKey,
-                           Map.Entry::getValue,
-                           (e1, e2) -> e2,
-                           LinkedHashMap::new));
+        // Sort the map by its values.
+        var sortedMap = sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
         System.out.println("map sorted by value = \n" + sortedMap);
@@ -289,12 +316,55 @@ public class ex9 {
     }
 
     /**
-     * Display the string if sVERBOSE is set.
+     * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
+     * @param map The map to sort
+     * @param comparator The comparator to compare map entries.
+     * @return The sorted map
      */
-    private void logDebug(String string) {
-        if (sVERBOSE)
-            System.out.println();
+    private Map<Integer, Integer> sortMap
+            (Map<Integer, Integer> map,
+             Comparator<Map.Entry<Integer, Integer>> comparator) {
+        // Create a map that's sorted by the value in map.
+        return map
+            // Get the EntrySet of the map.
+            .entrySet()
+            
+            // Convert the EntrySet into a stream.
+            .stream()
+
+            // Sort the elements in the stream using the comparator.
+            .sorted(comparator)
+
+            // Trigger intermediate processing and collect key/value
+            // pairs in the stream into a LinkedHashMap, which
+            // preserves the sorted order.
+            .collect(toMap(Map.Entry::getKey,
+                           Map.Entry::getValue,
+                           (e1, e2) -> e2,
+                           LinkedHashMap::new));
     }
 
+    /**
+     * The result returned from {@code transform()}.
+     */
+    private static class Result {
+        /**
+         * Value that was evaluated for primality.
+         */
+        int mPrimeCandidate;
+
+        /**
+         * Result of the isPrime() method.
+         */
+        int mSmallestFactor;
+
+        /**
+         * Constructor initializes the fields.
+         */
+        public Result(int primeCandidate, int smallestFactor) {
+            mPrimeCandidate = primeCandidate;
+            mSmallestFactor = smallestFactor;
+        }
+    }
 }
     

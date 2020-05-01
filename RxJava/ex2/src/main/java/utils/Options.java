@@ -205,7 +205,7 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-d [true|false] -s [true|false] -s [n]");
+        System.out.println("-d [true|false] -l [true|false] -s [n]");
     }
 
     /**

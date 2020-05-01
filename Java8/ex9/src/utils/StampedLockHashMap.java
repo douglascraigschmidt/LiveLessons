@@ -74,9 +74,12 @@ public class StampedLockHashMap<K, V>
      */
     public V computeIfAbsent(K key,
                              Function<? super K,? extends V> mappingFunction) {
-        // return computeIfAbsentWriteLock(key, mappingFunction);
-        // return computeIfAbsentConditionalWrite(key, mappingFunction);
-        return computeIfAbsentOptimisticRead(key, mappingFunction);
+        switch (Options.instance().stampedLockStrategy()) {
+        case 'W': return computeIfAbsentWriteLock(key, mappingFunction);
+        case 'C': return computeIfAbsentConditionalWrite(key, mappingFunction);
+        case 'O': return computeIfAbsentOptimisticRead(key, mappingFunction);
+        default: throw new IllegalArgumentException();
+        }
     }
 
     /**
