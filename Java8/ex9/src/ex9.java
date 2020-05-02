@@ -1,3 +1,4 @@
+import utils.Memoizer;
 import utils.Options;
 import utils.RunTimer;
 import utils.StampedLockHashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Map.Entry.comparingByValue;
@@ -38,38 +40,6 @@ public class ex9 {
     private final List<Integer> mRandomIntegers;
 
     /**
-     * Constructor initializes the fields.
-     */
-    ex9(String[] argv) {
-        // Initialize this count to 0.
-        mPrimeCheckCounter = new AtomicInteger(0);
-
-        // Parse the command-line arguments.
-        Options.instance().parseArgs(argv);
-
-        // Record how many integers we should generate.
-        int count = Options.instance().count();
-
-        // Get the max value for the random numbers.
-        int maxValue = Options.instance().maxValue();
-
-        // Generate a list of random large integers.
-        mRandomIntegers = new Random()
-            // Generate "count" random large ints
-            .ints(count,
-                   // Try to generate duplicates.
-                   maxValue - count, 
-                   maxValue)
-
-            // Convert each primitive int to Integer.
-            .boxed()    
-                   
-            // Trigger intermediate operations and collect into a
-            // list.
-            .collect(toList());
-    }
-
-    /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) {
@@ -81,59 +51,96 @@ public class ex9 {
     }
 
     /**
+     * Constructor initializes the fields.
+     */
+    ex9(String[] argv) {
+        // Initialize this count to 0.
+        mPrimeCheckCounter = new AtomicInteger(0);
+
+        // Parse the command-line arguments.
+        Options.instance().parseArgs(argv);
+
+        // Get how many integers we should generate.
+        int count = Options.instance().count();
+
+        // Get the max value for the random numbers.
+        int maxValue = Options.instance().maxValue();
+
+        // Generate a list of random large integers.
+        mRandomIntegers = new Random()
+            // Generate "count" random large ints
+            .ints(count,
+                  // Try to generate duplicates.
+                  maxValue - count, 
+                  maxValue)
+
+            // Convert each primitive int to Integer.
+            .boxed()    
+                   
+            // Trigger intermediate operations and collect into list.
+            .collect(toList());
+    }
+
+    /**
      * Run all the tests and print the results.
      */
     private void run() {
         // Create and time the use of a synchronized hash map.
-        Map<Integer, Integer> synchronizedHashMap =
-            timeTest(Collections.synchronizedMap(new HashMap<>()),
-                     "synchronizedHashMap");
+        Memoizer<Integer, Integer> synchronizedHashMapMemoizer =
+            timeTest(new Memoizer<>
+                     (this::isPrime,
+                      Collections.synchronizedMap(new HashMap<>())),
+                     "synchronizedHashMapMemoizer");
 
         // Create and time the use of a concurrent hash map.
-        Map<Integer, Integer> concurrentHashMap =
-                timeTest(new ConcurrentHashMap<>(),
-                         "concurrentHashMap");
+        Memoizer<Integer, Integer> concurrentHashMapMemoizer =
+            timeTest(new Memoizer<>(this::isPrime,
+                                    new ConcurrentHashMap<>()),
+                     "concurrentHashMapMemoizer");
 
         // Create and time the use of a stamped lock hash map.
-        Map<Integer, Integer> stampedLockHashMap =
-            timeTest(new StampedLockHashMap<>(),
-                     "stampedLockHashMap");                
+        Memoizer<Integer, Integer> stampedLockHashMapMemoizer =
+            timeTest(new Memoizer<>(this::isPrime,
+                                    new StampedLockHashMap<>()),
+                     "stampedLockHashMapMemoizer");                
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
-        // Demonstrate slicing.
-        demonstrateSlicing(stampedLockHashMap);
+        // Demonstrate slicing on the stamped lock memoizer.
+        demonstrateSlicing(stampedLockHashMapMemoizer.getCache());
     }
 
     /**
      * Time {@code testName} using the given {@code hashMap}.
      *
-     * @param map The map used to cache the prime candidates.
+     * @param memoizer The memoizer used to cache the prime candidates.
      * @param testName The name of the test.
-     * @return The map updated during the test.
+     * @return The memoizer updated during the test.
      */
-    private Map<Integer, Integer> timeTest(Map<Integer, Integer> map,
-                                           String testName) {
-        // Return the map updated during the test.
+    private Memoizer<Integer, Integer> timeTest
+        (Memoizer<Integer, Integer> memoizer,
+         String testName) {
+        // Return the memoizer updated during the test.
         return RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
-                     // Run the test using the given map.
-                     runTest(map, testName),
+                     // Run the test using the given memoizer.
+                     runTest(memoizer, testName),
                      testName);
     }
 
     /**
      * Run the prime number test.
      * 
-     * @param primeCache Cache that maps candidate primes to their
+     * @param memoizer A cache that maps candidate primes to their
      * smallest factor (if they aren't prime) or 0 if they are prime
      * @param testName Name of the test
-     * @return The map updated during the test.
+     * @return The memoizer updated during the test.
      */
-    private Map<Integer, Integer> runTest(Map<Integer, Integer> primeCache,
-                                          String testName) {
+    private Memoizer<Integer, Integer> runTest
+        (Memoizer<Integer, Integer> memoizer,
+         String testName) {
         System.out.println("Starting " 
                            + testName
                            + " with count = "
@@ -147,7 +154,7 @@ public class ex9 {
             .emitter(true)
             
             // Check each random number to see if it's prime.
-            .map(number -> checkIfPrime(number, primeCache))
+            .map(number -> checkIfPrime(number, memoizer))
             
             // Handle the results.
             .forEach(this::handleResult);
@@ -157,11 +164,12 @@ public class ex9 {
                            + " with "
                            + mPrimeCheckCounter.get()
                            + " prime checks ("
-                           + (Options.instance().count() - mPrimeCheckCounter.get())
+                           + (Options.instance().count()
+                              - mPrimeCheckCounter.get())
                            + ") duplicates"); 
 
-        // Return the map updated during the test.
-        return primeCache;
+        // Return the memoizer updated during the test.
+        return memoizer;
     }
 
     /**
@@ -184,22 +192,20 @@ public class ex9 {
     }
 
     /**
+     * Check if {@code primeCandidate} is prime or not.
+     * 
+     * @param primeCandidate The number to check if it's prime
+     * @param memoizer A cache that avoids rechecking if a # is prime
      * @return A {@code Result} object that contains the original
      * {@code primeCandidate} and either 0 if it's prime or its
      * smallest factor if it's not prime.
      */
     private Result checkIfPrime(Integer primeCandidate,
-                                Map<Integer, Integer> primeCache) {
+                                Function<Integer, Integer> memoizer) {
         // Return a tuple containing the prime candidate and the
         // result of checking if it's prime.
         return new Result(primeCandidate,
-                          primeCache
-                          // computeIfAbsent() first checks to see if
-                          // this #'s factor is already cached.  If
-                          // not, it atomically determines if this #
-                          // is prime and stores it in the cache.
-                          .computeIfAbsent(primeCandidate,
-                                           this::isPrime));
+                          memoizer.apply(primeCandidate));
     }
 
     /**
@@ -211,17 +217,17 @@ public class ex9 {
         // Print the results.
         if (result.mSmallestFactor != 0) {
             Options.display(""
-                     + Thread.currentThread()
-                     + ": "
-                     + result.mPrimeCandidate
-                     + " is not prime with smallest factor "
-                     + result.mSmallestFactor);
+                            + Thread.currentThread()
+                            + ": "
+                            + result.mPrimeCandidate
+                            + " is not prime with smallest factor "
+                            + result.mSmallestFactor);
         } else {
             Options.display(""
-                     + Thread.currentThread()
-                     + ": "
-                     + result.mPrimeCandidate
-                     + " is prime");
+                            + Thread.currentThread()
+                            + ": "
+                            + result.mPrimeCandidate
+                            + " is prime");
         }
     }
 
@@ -331,8 +337,8 @@ public class ex9 {
      * @return The sorted map
      */
     private Map<Integer, Integer> sortMap
-            (Map<Integer, Integer> map,
-             Comparator<Map.Entry<Integer, Integer>> comparator) {
+        (Map<Integer, Integer> map,
+         Comparator<Map.Entry<Integer, Integer>> comparator) {
         // Create a map that's sorted by the value in map.
         return map
             // Get the EntrySet of the map.

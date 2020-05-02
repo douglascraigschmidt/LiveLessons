@@ -17,7 +17,7 @@ public class StampedLockHashMap<K, V>
     /**
      * The HashMap that's used to implement the StampedLockHashMap.
      */
-    private final HashMap<K, V> mMap;
+    private final Map<K, V> mMap;
 
     /**
      * The StampedLock instance used to protect the HashMap.
@@ -129,16 +129,17 @@ public class StampedLockHashMap<K, V>
             // Try to get the value from the map via key.
             V value = mMap.get(key);
 
-            // If there's already a value associated with the
-            // key just return it.
+            // If a value's associated with the key just return it.
             if (value != null)
+                // No need for a write lock!
                 return value;
             else {
+                // Use a loop to avoid redundant code.
                 for(;;) {
                     // Try converting to writelock (non-blocking).
-                    long ws = mStampedLock
-                        .tryConvertToWriteLock(stamp);
+                    long ws = mStampedLock.tryConvertToWriteLock(stamp);
 
+                    // ws is non-zero on success.
                     if (ws != 0L) {
                         // Update stamp to ws.
                         stamp = ws;
@@ -163,8 +164,8 @@ public class StampedLockHashMap<K, V>
                         value = mMap.get(key);
 
                         if (value == null)
-                            // Loop back around again since the key
-                            // doesn't have a value yet.
+                            // Loop around again since the key doesn't
+                            // have a value yet.
                             continue;
                         else
                             // The key already has a value, so break
@@ -188,11 +189,13 @@ public class StampedLockHashMap<K, V>
      */
     private V computeIfAbsentOptimisticRead(K key,
                                             Function<? super K, ? extends V> mappingFunction) {
+        // Initialize some local variables.
         long stamp = 0L;
         V value = null;
         int maxTries = Options.instance().maxTries();
         int tries = 0;
 
+        // Try acquiring the lock optimistically a certain # of times.
         for (; tries < maxTries; tries++) {
             // "Acquire" the lock for optimistic reading.
             stamp = mStampedLock.tryOptimisticRead();
@@ -200,13 +203,13 @@ public class StampedLockHashMap<K, V>
             // Get current value (if any) via optimistic read lock.
             value = mMap.get(key);
 
-            // Check if a writer occurred during this window.
+            // Break out if no writer occurred during this window.
             if (mStampedLock.validate(stamp))
                 break;
         }
 
-        // If we didn't get a valid value within maxTries then
-        // revert to conditional write strategy.
+        // If we didn't get a valid value within maxTries then revert
+        // to conditional write strategy.
         if (tries == maxTries)
             return computeIfAbsentConditionalWrite(key,
                                                    mappingFunction);
@@ -215,7 +218,12 @@ public class StampedLockHashMap<K, V>
 
             // Try converting to writelock (non-blocking).
             stamp = mStampedLock.tryConvertToWriteLock(stamp);
-            if (stamp != 0L) {
+
+            if (stamp == 0L) 
+                // Revert to conditional write strategy.
+                return computeIfAbsentConditionalWrite(key,
+                                                       mappingFunction);
+            else
                 try {
                     // Apply mapping function to compute the value.
                     value = mappingFunction.apply(key);
@@ -227,11 +235,6 @@ public class StampedLockHashMap<K, V>
                     // Unlock the write lock.
                     mStampedLock.unlockWrite(stamp);
                 }
-            } else {
-                // Revert to conditional write strategy.
-                return computeIfAbsentConditionalWrite(key,
-                                                       mappingFunction);
-            }
         }
 
         // Return the value (either new or old).
