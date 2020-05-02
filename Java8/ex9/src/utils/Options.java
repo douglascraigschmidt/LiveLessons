@@ -27,6 +27,11 @@ public class Options {
     private int mCount = 100;
 
     /**
+     * Controls the max value of the random numbers.
+     */
+    private int mMaxValue = Integer.MAX_VALUE;
+
+    /**
      * Controls whether logging is enabled
      */
     private boolean mLoggingEnabled;
@@ -57,10 +62,17 @@ public class Options {
     }
 
     /**
-     * Returns whether debugging output is generated.
+     * Returns the number of integers to generate.
      */
     public int count() {
         return mCount;
+    }
+
+    /**
+     * Returns the max value
+     */
+    public int maxValue() {
+        return mMaxValue;
     }
 
     /**
@@ -104,10 +116,15 @@ public class Options {
                 case "-s":
                     mStampedLockStrategy = argv[argc + 1].charAt(0);
                     break;
+                case "-m":
+                    mMaxValue = Integer.parseInt(argv[argc + 1]);
+                    break;
                 default:
                     printUsage();
                     return;
                 }
+            if (mMaxValue - mCount <= 0)
+                throw new IllegalArgumentException("maxValue - count must be greater than 0");
         }
     }
 
@@ -116,7 +133,7 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-d [true|false] -l [true|false] -c [n] -s [W|C|O]");
+        System.out.println("-c [n] -d [true|false] -l [true|false] -m [maxValue] -s [W|C|O]");
     }
 
     /**

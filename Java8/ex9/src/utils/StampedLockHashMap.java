@@ -95,11 +95,13 @@ public class StampedLockHashMap<K, V>
         long stamp = mStampedLock.writeLock();
 
         try {
-            // Try to get the value from the map via key or apply
-            // mappingFunction if value's not yet computed.
-            V value = getOrComputeValueUnlocked(key,
-                                                mappingFunction);
+            // Get the current value (if any).
+            V value = mMap.get(key);
 
+            // If value is null then this is the first time in.
+            if (value == null) 
+                value = mappingFunction.apply(key);
+        
             // If mapping function worked then add value to map.
             if (value != null) {
                 // Put the key in the map on success.
@@ -165,8 +167,8 @@ public class StampedLockHashMap<K, V>
                             // doesn't have a value yet.
                             continue;
                         else
-                            // The key already has a value, so return
-                            // it.
+                            // The key already has a value, so break
+                            // out of the loop and return it.
                             break;
                     }
                 }
@@ -186,30 +188,45 @@ public class StampedLockHashMap<K, V>
      */
     private V computeIfAbsentOptimisticRead(K key,
                                             Function<? super K, ? extends V> mappingFunction) {
-        // "Acquire" the lock for optimistic reading.
-        long stamp = mStampedLock.tryOptimisticRead();
+        long stamp = 0L;
+        V value = null;
+        int maxTries = 2;
+        int tries = 0;
 
-        // Get current value (if any) via optimistic read lock.
-        V value = mMap.get(key);
+        for (; tries < maxTries; tries++) {
+            // "Acquire" the lock for optimistic reading.
+            stamp = mStampedLock.tryOptimisticRead();
 
-        // Check if a writer occurred during this window.
-        if (!mStampedLock.validate(stamp)) {
-            // Revert to conditional write strategy.
+            // Get current value (if any) via optimistic read lock.
+            value = mMap.get(key);
+
+            // Check if a writer occurred during this window.
+            if (mStampedLock.validate(stamp))
+                break;
+        }
+
+        // If we didn't get a valid value within maxTries then
+        // revert to conditional write strategy.
+        if (tries == maxTries)
             return computeIfAbsentConditionalWrite(key,
                                                    mappingFunction);
-        } else if (value == null) {
+        else if (value == null) {
+            // This is the first time in for that key.
+
             // Try converting to writelock (non-blocking).
             stamp = mStampedLock.tryConvertToWriteLock(stamp);
             if (stamp != 0L) {
-                // Apply mapping function to compute the value.
-                value = mappingFunction.apply(key);
+                try {
+                    // Apply mapping function to compute the value.
+                    value = mappingFunction.apply(key);
 
-                if (value != null)
-                    // Put the key in the map on success.
-                    mMap.put(key, value);
-
-                // Unlock the write lock.
-                mStampedLock.unlockWrite(stamp);
+                    if (value != null)
+                        // Put the key in the map on success.
+                        mMap.put(key, value);
+                } finally {
+                    // Unlock the write lock.
+                    mStampedLock.unlockWrite(stamp);
+                }
             } else {
                 // Revert to conditional write strategy.
                 return computeIfAbsentConditionalWrite(key,
@@ -218,24 +235,6 @@ public class StampedLockHashMap<K, V>
         }
 
         // Return the value (either new or old).
-        return value;
-    }
-
-    /**
-     * Try to get the value from the map via {@code key} or apply
-     * {@code mappingFunction} if value's not yet computed.
-     */
-    private V getOrComputeValueUnlocked(K key,
-                                        Function<? super K,? extends V> mappingFunction) {
-        // Get the current value (if any).
-        V value = mMap.get(key);
-
-        // If value is null then this is the first time in.
-        if (value == null) 
-
-            value = mappingFunction.apply(key);
-        
-        // Return the value.
         return value;
     }
 }

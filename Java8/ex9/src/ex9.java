@@ -50,13 +50,16 @@ public class ex9 {
         // Record how many integers we should generate.
         int count = Options.instance().count();
 
+        // Get the max value for the random numbers.
+        int maxValue = Options.instance().maxValue();
+
         // Generate a list of random large integers.
         mRandomIntegers = new Random()
             // Generate "count" random large ints
             .ints(count,
                    // Try to generate duplicates.
-                   5000 - count, // Integer.MAX_VALUE - count,
-                   5000) // Integer.MAX_VALUE)
+                   maxValue - count, 
+                   maxValue)
 
             // Convert each primitive int to Integer.
             .boxed()    
