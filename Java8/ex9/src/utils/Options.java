@@ -32,6 +32,11 @@ public class Options {
     private int mMaxValue = Integer.MAX_VALUE;
 
     /**
+     * Controls the max tries for optimistic reads.
+     */
+    private int mMaxTries = 2;
+
+    /**
      * Controls whether logging is enabled
      */
     private boolean mLoggingEnabled;
@@ -73,6 +78,13 @@ public class Options {
      */
     public int maxValue() {
         return mMaxValue;
+    }
+
+    /**
+     * Returns the max number of tries for the optimistic read.
+     */
+    public int maxTries() {
+        return mMaxTries;
     }
 
     /**
@@ -119,6 +131,9 @@ public class Options {
                 case "-m":
                     mMaxValue = Integer.parseInt(argv[argc + 1]);
                     break;
+                case "-t":
+                    mMaxTries = Integer.parseInt(argv[argc + 1]);
+                    break;
                 default:
                     printUsage();
                     return;
@@ -133,7 +148,7 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-c [n] -d [true|false] -l [true|false] -m [maxValue] -s [W|C|O]");
+        System.out.println("-c [n] -d [true|false] -l [true|false] -m [maxValue] -s [W|C|O] -t [maxTries]");
     }
 
     /**

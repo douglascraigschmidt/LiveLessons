@@ -190,7 +190,7 @@ public class StampedLockHashMap<K, V>
                                             Function<? super K, ? extends V> mappingFunction) {
         long stamp = 0L;
         V value = null;
-        int maxTries = 2;
+        int maxTries = Options.instance().maxTries();
         int tries = 0;
 
         for (; tries < maxTries; tries++) {
