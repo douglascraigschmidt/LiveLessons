@@ -9,7 +9,11 @@ import java.util.function.Function;
 
 /**
  * A concurrent HashMap collection that's implemented using advanced
- * features of StampedLock to protect mutable shared state.
+ * features of StampedLock to protect mutable shared state.  This
+ * implementation just focuses on the computeIfAbsent() method, so
+ * other methods are omitted for brevity.  If someone wants to
+ * implement the other HashMap methods via StampedLock please feel
+ * free to contribute to the project!
  */
 public class StampedLockHashMap<K, V>
        extends AbstractMap<K, V> 
