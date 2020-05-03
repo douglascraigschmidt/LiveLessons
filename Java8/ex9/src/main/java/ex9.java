@@ -85,30 +85,34 @@ public class ex9 {
      * Run all the tests and print the results.
      */
     private void run() {
+        // Create a StampedLockHashMap.
+        Map<Integer, Integer> stampedLockHashMap =
+            new StampedLockHashMap<>();
+
         // Create and time the use of a synchronized hash map.
-        Memoizer<Integer, Integer> synchronizedHashMapMemoizer =
+        Function<Integer, Integer> synchronizedHashMapMemoizer =
             timeTest(new Memoizer<>
                      (this::isPrime,
                       Collections.synchronizedMap(new HashMap<>())),
                      "synchronizedHashMapMemoizer");
 
         // Create and time the use of a concurrent hash map.
-        Memoizer<Integer, Integer> concurrentHashMapMemoizer =
+        Function<Integer, Integer> concurrentHashMapMemoizer =
             timeTest(new Memoizer<>(this::isPrime,
                                     new ConcurrentHashMap<>()),
                      "concurrentHashMapMemoizer");
 
         // Create and time the use of a stamped lock hash map.
-        Memoizer<Integer, Integer> stampedLockHashMapMemoizer =
+        Function<Integer, Integer> stampedLockHashMapMemoizer =
             timeTest(new Memoizer<>(this::isPrime,
-                                    new StampedLockHashMap<>()),
+                                    stampedLockHashMap),
                      "stampedLockHashMapMemoizer");                
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
         // Demonstrate slicing on the stamped lock memoizer.
-        demonstrateSlicing(stampedLockHashMapMemoizer.getCache());
+        demonstrateSlicing(stampedLockHashMap);
     }
 
     /**
@@ -118,8 +122,8 @@ public class ex9 {
      * @param testName The name of the test.
      * @return The memoizer updated during the test.
      */
-    private Memoizer<Integer, Integer> timeTest
-        (Memoizer<Integer, Integer> memoizer,
+    private Function<Integer, Integer> timeTest
+        (Function<Integer, Integer> memoizer,
          String testName) {
         // Return the memoizer updated during the test.
         return RunTimer
@@ -138,8 +142,8 @@ public class ex9 {
      * @param testName Name of the test
      * @return The memoizer updated during the test.
      */
-    private Memoizer<Integer, Integer> runTest
-        (Memoizer<Integer, Integer> memoizer,
+    private Function<Integer, Integer> runTest
+        (Function<Integer, Integer> memoizer,
          String testName) {
         System.out.println("Starting " 
                            + testName
