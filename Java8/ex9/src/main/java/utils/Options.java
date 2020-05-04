@@ -1,5 +1,8 @@
 package utils;
 
+import java.util.Map;
+import java.util.function.Function;
+
 /**
  * This class implements the Singleton pattern to handle command-line
  * option processing.
@@ -50,6 +53,12 @@ public class Options {
     private char mStampedLockStrategy = 'W';
 
     /**
+     * Keeps track of whether to run the tests using a sequential or
+     * parallel stream.
+     */
+    private boolean mParallel;
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -64,6 +73,13 @@ public class Options {
      */
     public boolean diagnosticsEnabled() {
         return mDiagnosticsEnabled;
+    }
+
+    /**
+     * Returns whether to run the stream in parallel or not.
+     */
+    public boolean parallel() {
+        return mParallel;
     }
 
     /**
@@ -102,11 +118,25 @@ public class Options {
     }
 
     /**
-     * Display the string if diagnostics are enabled.
+     * Print the string with thread information included.
      */
-    public static void display(String string) {
+    public static void print(String string) {
+        System.out.println("[" +
+                           Thread.currentThread().getName()
+                           + "] "
+                           + string);
+    }
+
+    /**
+     * Print the debug string with thread information included if
+     * diagnostics are enabled.
+     */
+    public static void debug(String string) {
         if (mUniqueInstance.mDiagnosticsEnabled)
-            System.out.println(string);
+            System.out.println("[" +
+                    Thread.currentThread().getName()
+                    + "] "
+                    + string);
     }
 
     /**
@@ -131,6 +161,9 @@ public class Options {
                 case "-m":
                     mMaxValue = Integer.parseInt(argv[argc + 1]);
                     break;
+                case "-p":
+                    mParallel = argv[argc + 1].equals("true");
+                    break;
                 case "-t":
                     mMaxTries = Integer.parseInt(argv[argc + 1]);
                     break;
@@ -148,7 +181,13 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-c [n] -d [true|false] -l [true|false] -m [maxValue] -s [W|C|O] -t [maxTries]");
+        System.out.println("-c [n] "
+                           + "-d [true|false] "
+                           + "-l [true|false] "
+                           + "-m [maxValue] "
+                           + "-p [true|false]"
+                           + "-s [W|C|O] "
+                           + "-t [maxTries]");
     }
 
     /**

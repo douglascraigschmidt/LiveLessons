@@ -1,5 +1,8 @@
 package utils;
 
+import java.util.Map;
+import java.util.function.Function;
+
 /**
  * This class implements the Singleton pattern to handle command-line
  * option processing.
@@ -50,7 +53,16 @@ public class Options {
     private char mStampedLockStrategy = 'W';
 
     /**
-     *
+     * Keeps track of the Memoizer strategy.
+     * 'M' - Memoizer
+     * 'T' - TimedMemoizer
+     * 'X' - TimedMemoizerEx
+     */
+    private char mMemoizerStrategy = 'M';
+
+    /**
+     * Keeps track of whether to run the tests using a sequential or
+     * parallel stream.
      */
     private boolean mParallel;
 
@@ -114,14 +126,42 @@ public class Options {
     }
 
     /**
-     * Display the string if diagnostics are enabled.
+     * Make the requested memoizer.
      */
-    public static void display(String string) {
+    public static Function<Integer, Integer> makeMemoizer
+        (Function<Integer, Integer> function) {
+        switch(instance().mMemoizerStrategy) {
+        case 'M': return new Memoizer<>(function);
+        case 'T': return new TimedMemoizer<>
+                (function,
+                 instance().count() * 500);
+        case 'X': return new TimedMemoizerEx<>
+                (function,
+                 instance().count() * 500);
+        default: throw new IllegalArgumentException("given memoizer type unknown");
+        }
+    }
+
+    /**
+     * Print the string with thread information included.
+     */
+    public static void print(String string) {
+        System.out.println("[" +
+                           Thread.currentThread().getName()
+                           + "] "
+                           + string);
+    }
+
+    /**
+     * Print the debug string with thread information included if
+     * diagnostics are enabled.
+     */
+    public static void debug(String string) {
         if (mUniqueInstance.mDiagnosticsEnabled)
             System.out.println("[" +
-                               Thread.currentThread().getName()
-                               + "] "
-                               + string);
+                    Thread.currentThread().getName()
+                    + "] "
+                    + string);
     }
 
     /**
@@ -145,6 +185,9 @@ public class Options {
                     break;
                 case "-m":
                     mMaxValue = Integer.parseInt(argv[argc + 1]);
+                    break;
+                case "-M":
+                    mMemoizerStrategy = argv[argc + 1].charAt(0);
                     break;
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");

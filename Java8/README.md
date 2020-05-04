@@ -56,14 +56,13 @@ Here's an overview of what's included:
 . ex11 - This example shows the improper use of the Stream.peek()
          aggregate operation to interfere with a running stream.
 
-. ex12 - This program provides several examples of Java streams that
-         show how it can be used with "pure" functions, i.e.,
-         functions whose return values are only determined by their
-         input values, without observable side effects.  This program
-         also shows various stream terminal operations, including
-         forEach(), collect(), and several variants of reduce().  In
-         addition, it includes a non-Java streams example as a
-         baseline.
+. ex12 - This program shows many Java Streams terminal operations,
+         including forEach*(), collect(), and several variants of
+         reduce().  In addition, it includes a non-Java 8 example as a
+         baseline.  It also shows how Java Streams can be used with
+         "pure" functions, i.e., functions whose return values are
+         only determined by their input values, without any side
+         effects.
 
 . ex13 - This example shows several examples of using Java
          Spliterators and streams to traverse each word in a list

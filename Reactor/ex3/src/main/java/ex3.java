@@ -1,16 +1,15 @@
-import utils.Memoizer;
-import utils.Options;
-import utils.RunTimer;
-import utils.StampedLockHashMap;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import reactor.core.Disposable;
+import reactor.core.Disposables;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+import utils.*;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -35,9 +34,36 @@ public class ex3 {
     private final AtomicInteger mPrimeCheckCounter;
 
     /**
+     * Count the number of pending items.
+     */
+    private final AtomicInteger mPendingItemCount;
+
+    /**
      * A list of randomly-generated large integers.
      */
     private final List<Integer> mRandomIntegers;
+
+    /**
+     * The scheduler used to consume random integers by checking if
+     * they are prime or not.
+     */
+    private final Scheduler mSubscriberScheduler;
+
+    /**
+     * The scheduler used to publish random integers.
+     */
+    private final Scheduler mPublisherScheduler;
+
+    /**
+     * A subscriber that applies adaptive backpressure.
+     */
+    private final AdaptiveBackpressureSubscriber mSubscriber;
+
+    /**
+     * Keeps track of all disposables so they can be disposed in one
+     * fell swoop.
+     */
+    private final Disposable.Composite mDisposables;
 
     /**
      * Main entry point into the test program.
@@ -56,6 +82,9 @@ public class ex3 {
     ex3(String[] argv) {
         // Initialize this count to 0.
         mPrimeCheckCounter = new AtomicInteger(0);
+
+        // The count initially starts at 0.
+        mPendingItemCount = new AtomicInteger(0);
 
         // Parse the command-line arguments.
         Options.instance().parseArgs(argv);
@@ -79,40 +108,49 @@ public class ex3 {
                    
             // Trigger intermediate operations and collect into list.
             .collect(toList());
+
+        // Run the subscriber in a single thread.
+        mSubscriberScheduler = Schedulers
+            .newParallel("subscriber", 1);
+
+        // Run the publisher in a different single thread.
+        mPublisherScheduler = Schedulers
+            .newParallel("publisher", 1);
+
+        // Create a subscriber that handles backpressure.
+        mSubscriber =
+            new AdaptiveBackpressureSubscriber(mPendingItemCount);
+
+        // Create a composite disposable that disposes of everything
+        // in one fell swoop.
+        mDisposables = Disposables
+            .composite(mPublisherScheduler,
+                       mSubscriberScheduler,
+                       mSubscriber);
     }
 
     /**
      * Run all the tests and print the results.
      */
     private void run() {
-        // Create a StampedLockHashMap.
-        Map<Integer, Integer> stampedLockHashMap =
-            new StampedLockHashMap<>();
-
-        // Create and time the use of a synchronized hash map.
-        Function<Integer, Integer> synchronizedHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (this::isPrime,
-                      Collections.synchronizedMap(new HashMap<>())),
-                     "synchronizedHashMapMemoizer");
+        // Create a concurrent hash map.
+        ConcurrentHashMap<Integer, Integer> concurrentHashMap =
+            new ConcurrentHashMap<>();
 
         // Create and time the use of a concurrent hash map.
         Function<Integer, Integer> concurrentHashMapMemoizer =
             timeTest(new Memoizer<>(this::isPrime,
-                                    new ConcurrentHashMap<>()),
+                                    concurrentHashMap),
                      "concurrentHashMapMemoizer");
 
-        // Create and time the use of a stamped lock hash map.
-        Function<Integer, Integer> stampedLockHashMapMemoizer =
-            timeTest(new Memoizer<>(this::isPrime,
-                                    stampedLockHashMap),
-                     "stampedLockHashMapMemoizer");                
+        // Dispose of all schedulers and subscribers.
+        mDisposables.dispose();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
-        // Demonstrate slicing on the stamped lock memoizer.
-        demonstrateSlicing(stampedLockHashMap);
+        // Demonstrate slicing on the concurrent hash map.
+        demonstrateSlicing(concurrentHashMap);
     }
 
     /**
@@ -145,54 +183,96 @@ public class ex3 {
     private Function<Integer, Integer> runTest
         (Function<Integer, Integer> memoizer,
          String testName) {
-        System.out.println("Starting " 
-                           + testName
-                           + " with count = "
-                           + Options.instance().count());
+        Options.display("Starting "
+                        + testName
+                        + " with count = "
+                        + Options.instance().count());
 
-        // Reset the counter.
+        // Reset the counters.
         mPrimeCheckCounter.set(0);
+        mPendingItemCount.set(0);
 
-        this
-            // Generate random large numbers.
-            .emitter(true)
-            
+        // Create a countdown latch that causes the main thread to
+        // block until all the processing is done.
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Create a publisher that runs on its own scheduler.
+        Flux<Integer> publisher = publisher(mPublisherScheduler);
+
+        publisher
+            // Arrange to release the latch when the subscriber is done.
+            .doOnTerminate(latch::countDown)
+
+            // Run the subscriber in a different thread.
+            .publishOn(mSubscriberScheduler, mSubscriber.nextRequestSize())
+
             // Check each random number to see if it's prime.
             .map(number -> checkIfPrime(number, memoizer))
-            
-            // Handle the results.
-            .forEach(this::handleResult);
 
-        System.out.println("Leaving "
-                           + testName
-                           + " with "
-                           + mPrimeCheckCounter.get()
-                           + " prime checks ("
-                           + (Options.instance().count()
+            // Start the wheels in motion.
+            .subscribe(mSubscriber);
+
+        Options.display("waiting in the main thread");
+
+        // Wait for all processing to complete.
+        ExceptionUtils.rethrowRunnable(latch::await);
+
+        Options.display("Leaving "
+                        + testName
+                        + " with "
+                        + mPrimeCheckCounter.get()
+                        + " prime checks ("
+                        + (Options.instance().count()
                               - mPrimeCheckCounter.get())
-                           + ") duplicates"); 
+                        + ") duplicates");
 
         // Return the memoizer updated during the test.
         return memoizer;
     }
 
     /**
-     * Emit a stream of random large numbers.
+     * Publish a stream of random large numbers.
      *
-     * @param parallel True if the stream should be parallel, else false
-     * @return Return a stream containing random large numbers
+     * @param scheduler Scheduler to publish the numbers on.
+     * @return Return a flux that publishes random large numbers
      */
-    private Stream<Integer> emitter(boolean parallel) {
-        Stream<Integer> intStream = mRandomIntegers
-            // Conver the list into a stream.
-            .stream();
+    private Flux<Integer> publisher(Scheduler scheduler) {
+        // Iterate through all the random numbers.
+        final Iterator<Integer> iterator =
+            mRandomIntegers.iterator();
 
-        // Conditionally convert the stream to a parallel stream.
-        if (parallel)
-            intStream.parallel();
+        return Flux
+            // Generate a flux of random integers.
+            .<Integer>create(sink -> sink.onRequest(size -> {
+                        Options.display("Request size = " + size);
 
-        // Return the stream.
-        return intStream;
+                        // Try to publish size items.
+                        for (int i = 0;
+                             i < size;
+                             ++i) {
+                            // Keep going if there is an item remaining
+                            // in the iterator.
+                            if (iterator.hasNext()) {
+                                // Get the next item.
+                                Integer item = iterator.next();
+
+                                Options.display("published item: "
+                                        + item
+                                        + ", pending items = "
+                                        + mPendingItemCount.incrementAndGet());
+
+                                // Publish the next item.
+                                sink.next(item);
+                            } else {
+                                // We're done publishing all the items.
+                                sink.complete();
+                                break;
+                            }
+                        }
+                    }))
+
+            // Subscribe on the given scheduler.
+            .subscribeOn(scheduler);
     }
 
     /**
@@ -210,29 +290,6 @@ public class ex3 {
         // result of checking if it's prime.
         return new Result(primeCandidate,
                           memoizer.apply(primeCandidate));
-    }
-
-    /**
-     * Handle the result by printing it if debugging is enabled.
-     *
-     * @param result The result of checking if a number is prime.
-     */
-    private void handleResult(Result result) {
-        // Print the results.
-        if (result.mSmallestFactor != 0) {
-            Options.display(""
-                            + Thread.currentThread()
-                            + ": "
-                            + result.mPrimeCandidate
-                            + " is not prime with smallest factor "
-                            + result.mSmallestFactor);
-        } else {
-            Options.display(""
-                            + Thread.currentThread()
-                            + ": "
-                            + result.mPrimeCandidate
-                            + " is prime");
-        }
     }
 
     /**
@@ -254,9 +311,7 @@ public class ex3 {
                  factor <= n / 2;
                  ++factor)
                 if (Thread.interrupted()) {
-                    System.out.println(""
-                                       + Thread.currentThread()
-                                       + " Prime checker thread interrupted");
+                    Options.display(" Prime checker thread interrupted");
                     break;
                 } else if (n / factor * factor == n)
                     return factor;
@@ -274,7 +329,7 @@ public class ex3 {
         var sortedMap = sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
-        System.out.println("map sorted by value = \n" + sortedMap);
+        Options.display("map sorted by value = \n" + sortedMap);
 
         // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);
@@ -306,7 +361,7 @@ public class ex3 {
             .collect(toList());
 
         // Print out the list of primes.
-        System.out.println("primes =\n" + primes);
+        Options.display("primes =\n" + primes);
     }
 
     /**
@@ -330,8 +385,8 @@ public class ex3 {
             .collect(toList());
 
         // Print out the list of primes.
-        System.out.println("non-prime numbers and their factors =\n"
-                           + nonPrimes);
+        Options.display("non-prime numbers and their factors =\n"
+                        + nonPrimes);
     }
 
     /**
@@ -361,29 +416,6 @@ public class ex3 {
                            Map.Entry::getValue,
                            (e1, e2) -> e2,
                            LinkedHashMap::new));
-    }
-
-    /**
-     * The result returned from {@code transform()}.
-     */
-    private static class Result {
-        /**
-         * Value that was evaluated for primality.
-         */
-        int mPrimeCandidate;
-
-        /**
-         * Result of the isPrime() method.
-         */
-        int mSmallestFactor;
-
-        /**
-         * Constructor initializes the fields.
-         */
-        public Result(int primeCandidate, int smallestFactor) {
-            mPrimeCandidate = primeCandidate;
-            mSmallestFactor = smallestFactor;
-        }
     }
 }
     

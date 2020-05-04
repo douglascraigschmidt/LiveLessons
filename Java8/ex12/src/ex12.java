@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -9,13 +7,12 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
 /**
- * This program provides several examples of a Java 8 stream that show
- * how it can be used with "pure" functions, i.e., functions whose
- * return values are only determined by their input values, without
- * observable side effects.  This program also shows various stream
- * terminal operations, including forEach(), collect(), and several
- * variants of reduce().  In addition, it includes a non-Java 8
- * example as a baseline.
+ * This program shows many Java Streams terminal operations, including
+ * forEach*(), collect(), and several variants of reduce().  In
+ * addition, it includes a non-Java 8 example as a baseline.  It also
+ * shows how Java Streams can be used with "pure" functions, i.e.,
+ * functions whose return values are only determined by their input
+ * values, without any side effects.
  */
 public class ex12  {
     static public void main(String[] argv) {
@@ -42,7 +39,7 @@ public class ex12  {
      * rest lowercase.  Note that this is a "pure" function whose
      * return value is only determined by its input.
      */
-    private String capitalize(@NotNull String s) {
+    private String capitalize(String s) {
         if (s.length() == 0)
             return s;
         return s
@@ -125,7 +122,7 @@ public class ex12  {
      * illustrates how flatMap() is a stateless operation.
      */
     private void runFlatMapLimit() {
-        System.out.println("\nResults from runFlatMapLimi():");
+        System.out.println("\nResults from runFlatMapLimit():");
 
         // Create several lists containing characters from Hamlet.
         List<String> l1 = List.of("Hamlet",
@@ -149,7 +146,11 @@ public class ex12  {
 
             // Flatten the stream of lists of strings into a stream of
             // strings.
-            .flatMap(strings -> { System.out.println (strings); return strings.stream(); })
+            .flatMap(strings -> {
+                // Print strings to see how far we go in the stream!
+                System.out.println (strings);
+                return strings.stream();
+            })
 
             // Limit the output to the first 4 elements in the stream.
             .limit(4)
@@ -186,6 +187,10 @@ public class ex12  {
             // Shakespeare's Hamlet using of() to concatenate lists.
             .of(l1, l2, l3, l4)
 
+            // Process the stream in parallel, which is overkill for
+            // this simple example.
+            .parallel()
+
             // Flatten the stream of lists of strings into a stream of
             // strings.
             .flatMap(List::stream)
@@ -198,10 +203,6 @@ public class ex12  {
 
             // Sort the results in ascending order.
             .sorted()
-
-            // Process the stream in parallel, which is overkill for
-            // this simple example.
-            .parallel()
 
             // Terminal operation that triggers aggregate operation
             // processing and prints the results in "encounter order".

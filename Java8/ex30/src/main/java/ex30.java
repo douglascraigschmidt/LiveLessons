@@ -21,13 +21,10 @@ import static java.util.stream.Collectors.toMap;
 
 /**
  * This example showcases and benchmarks the use of a Java
- * ConcurrentHashMap, a Java SynchronizedMap, and a HashMap protected
- * with a Java StampedLock are used to compute/cache/retrieve large
- * prime numbers.  This example also demonstrates several advanced
- * features of StampedLock, as well as the use of slicing with the
- * Java streams takeWhile() and dropWhile() operations.
+ * ConcurrentHashMap and various memoizer implementations to
+ * compute/cache/retrieve large prime numbers.
  */
-public class ex9 {
+public class ex30 {
     /**
      * Count the number of calls to isPrime() as a means to determine
      * the benefits of caching.
@@ -49,7 +46,7 @@ public class ex9 {
      */
     static public void main(String[] argv) {
         // Create an instance to test.
-        ex9 test = new ex9(argv);
+        ex30 test = new ex30(argv);
 
         // Run the tests.
         test.run();
@@ -58,7 +55,7 @@ public class ex9 {
     /**
      * Constructor initializes the fields.
      */
-    ex9(String[] argv) {
+    ex30(String[] argv) {
         // Initialize this count to 0.
         mPrimeCheckCounter = new AtomicInteger(0);
 
@@ -93,33 +90,13 @@ public class ex9 {
      * Run all the tests and print the results.
      */
     private void run() {
-        // Create a StampedLockHashMap.
-        Map<Integer, Integer> stampedLockHashMap =
-            new StampedLockHashMap<>();
-
-        // Create and time the use of a synchronized hash map.
-        Function<Integer, Integer> synchronizedHashMapMemoizer =
-            timeTest(new Memoizer<>(this::isPrime,
-                                    Collections.synchronizedMap(new HashMap<>())),
-                     "synchronizedHashMapMemoizer");
-
         // Create and time the use of a concurrent hash map.
         Function<Integer, Integer> concurrentHashMapMemoizer =
-            timeTest(new Memoizer<>(this::isPrime,
-                                    new ConcurrentHashMap<>()),
+            timeTest(Options.makeMemoizer(this::isPrime),
                      "concurrentHashMapMemoizer");
-
-        // Create and time the use of a stamped lock hash map.
-        Function<Integer, Integer> stampedLockHashMapMemoizer =
-            timeTest(new Memoizer<>(this::isPrime,
-                                    stampedLockHashMap),
-                     "stampedLockHashMapMemoizer");                
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
-
-        // Demonstrate slicing on the stamped lock memoizer.
-        demonstrateSlicing(stampedLockHashMap);
     }
 
     /**
@@ -129,9 +106,8 @@ public class ex9 {
      * @param testName The name of the test.
      * @return The memoizer updated during the test.
      */
-    private Function<Integer, Integer> timeTest
-        (Function<Integer, Integer> memoizer,
-         String testName) {
+    private Function<Integer, Integer> timeTest(Function<Integer, Integer> memoizer,
+                                                String testName) {
         // Return the memoizer updated during the test.
         return RunTimer
             // Time how long this test takes to run.
@@ -149,9 +125,8 @@ public class ex9 {
      * @param testName Name of the test
      * @return The memoizer updated during the test.
      */
-    private Function<Integer, Integer> runTest
-        (Function<Integer, Integer> memoizer,
-         String testName) {
+    private Function<Integer, Integer> runTest(Function<Integer, Integer> memoizer,
+                                               String testName) {
         Options.print("Starting "
                         + testName
                         + " with count = "
@@ -272,106 +247,7 @@ public class ex9 {
     }
 
     /**
-     * Demonstrate how to slice by applying the Java streams {@code
-     * dropWhile()} and {@code takeWhile()} operations to the {@code
-     * map} parameter.
-     */
-    private void demonstrateSlicing(Map<Integer, Integer> map) {
-        // Sort the map by its values.
-        var sortedMap = sortMap(map, comparingByValue());
-
-        // Print out the entire contents of the sorted map.
-        Options.print("map sorted by value = \n" + sortedMap);
-
-        // Print out the prime numbers using takeWhile().
-        printPrimes(sortedMap);
-
-        // Print out the non-prime numbers using dropWhile().
-        printNonPrimes(sortedMap);
-    }
-    
-    /**
-     * Print out the prime numbers in the {@code sortedMap}.
-     */
-    private void printPrimes(Map<Integer, Integer> sortedMap) {
-        // Create a list of prime integers.
-        List<Integer> primes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
-
-            // Slice the stream using a predicate that stops after a
-            // non-prime number (i.e., getValue() != 0) is reached.
-            .takeWhile(entry -> entry.getValue() == 0)
-
-            // Map the EntrySet into just the key.
-            .map(Map.Entry::getKey)
-
-            // Collect the results into a list.
-            .collect(toList());
-
-        // Print out the list of primes.
-        Options.print("primes =\n" + primes);
-    }
-
-    /**
-     * Print out the non-prime numbers and their factors in the {@code
-     * sortedMap}.
-     */
-    private void printNonPrimes(Map<Integer, Integer> sortedMap) {
-        // Create a list of non-prime integers and their factors.
-        List<Map.Entry<Integer, Integer>> nonPrimes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
-
-            // Slice the stream using a predicate that skips over the
-            // non-prime numbers (i.e., getValue() == 0);
-            .dropWhile(entry -> entry.getValue() == 0)
-
-            // Collect the results into a list.
-            .collect(toList());
-
-        // Print out the list of primes.
-        Options.print("non-prime numbers and their factors =\n"
-                        + nonPrimes);
-    }
-
-    /**
-     * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
-     * @param map The map to sort
-     * @param comparator The comparator to compare map entries.
-     * @return The sorted map
-     */
-    private Map<Integer, Integer> sortMap
-        (Map<Integer, Integer> map,
-         Comparator<Map.Entry<Integer, Integer>> comparator) {
-        // Create a map that's sorted by the value in map.
-        return map
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
-
-            // Sort the elements in the stream using the comparator.
-            .sorted(comparator)
-
-            // Trigger intermediate processing and collect key/value
-            // pairs in the stream into a LinkedHashMap, which
-            // preserves the sorted order.
-            .collect(toMap(Map.Entry::getKey,
-                           Map.Entry::getValue,
-                           (e1, e2) -> e2,
-                           LinkedHashMap::new));
-    }
-
-    /**
-     * The result returned from {@code transform()}.
+     * The result returned from {@code checkIfPrime()}.
      */
     private static class Result {
         /**
