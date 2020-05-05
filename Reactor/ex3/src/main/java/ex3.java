@@ -1,8 +1,7 @@
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.*;
@@ -12,19 +11,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * This example showcases and benchmarks the use of a Java
- * ConcurrentHashMap, a Java SynchronizedMap, and a HashMap protected
- * with a Java StampedLock are used to compute/cache/retrieve large
- * prime numbers.  This example also demonstrates several advanced
- * features of StampedLock, as well as the use of slicing with the
- * Java streams takeWhile() and dropWhile() operations.
+ * This example examines the use of a memoizer based on a Java
+ * ConcurrentHashMap to compute/cache/retrieve prime numbers.  It also
+ * shows how to Project Reactor features can be applied to implement
+ * adaptive backpressure between a publisher and a subscriber that run
+ * in different threads/schedulers.  This example also demonstrates
+ * the use of slicing with the Flux takeWhile() and skipWhile()
+ * operations.
  */
 public class ex3 {
     /**
@@ -34,12 +33,12 @@ public class ex3 {
     private final AtomicInteger mPrimeCheckCounter;
 
     /**
-     * Count the number of pending items.
+     * Count the number of pending items between the publisher and subscriber.
      */
     private final AtomicInteger mPendingItemCount;
 
     /**
-     * A list of randomly-generated large integers.
+     * A list of randomly-generated integers.
      */
     private final List<Integer> mRandomIntegers;
 
@@ -95,9 +94,9 @@ public class ex3 {
         // Get the max value for the random numbers.
         int maxValue = Options.instance().maxValue();
 
-        // Generate a list of random large integers.
+        // Generate a list of random integers.
         mRandomIntegers = new Random()
-            // Generate "count" random large ints
+            // Generate "count" random ints.
             .ints(count,
                   // Try to generate duplicates.
                   maxValue - count, 
@@ -113,13 +112,16 @@ public class ex3 {
         mSubscriberScheduler = Schedulers
             .newParallel("subscriber", 1);
 
-        // Run the publisher in a different single thread.
-        mPublisherScheduler = Schedulers
-            .newParallel("publisher", 1);
+        // Maybe run the publisher in a different single thread.
+        mPublisherScheduler = Options.instance().parallel()
+            // Choose a different scheduler if we're running in parallel.
+            ? Schedulers.newParallel("publisher", 1)
+
+            // Run everything in the subscriber scheduler.
+            : mSubscriberScheduler;
 
         // Create a subscriber that handles backpressure.
-        mSubscriber =
-            new AdaptiveBackpressureSubscriber(mPendingItemCount);
+        mSubscriber = new AdaptiveBackpressureSubscriber(mPendingItemCount);
 
         // Create a composite disposable that disposes of everything
         // in one fell swoop.
@@ -136,12 +138,14 @@ public class ex3 {
         // Create a concurrent hash map.
         ConcurrentHashMap<Integer, Integer> concurrentHashMap =
             new ConcurrentHashMap<>();
+        
+        // Create and time prime checking with a memoizer.
+        timeTest(new Memoizer<>(this::isPrime, concurrentHashMap),
+                 "test with memoizer");
 
-        // Create and time the use of a concurrent hash map.
-        Function<Integer, Integer> concurrentHashMapMemoizer =
-            timeTest(new Memoizer<>(this::isPrime,
-                                    concurrentHashMap),
-                     "concurrentHashMapMemoizer");
+        // Create and time prime checking without a memoizer.
+        timeTest(this::isPrime,
+                 "test without memoizer");
 
         // Dispose of all schedulers and subscribers.
         mDisposables.dispose();
@@ -156,85 +160,81 @@ public class ex3 {
     /**
      * Time {@code testName} using the given {@code hashMap}.
      *
-     * @param memoizer The memoizer used to cache the prime candidates.
+     * @param primeChecker The prime checker used evaluate prime candidates.
      * @param testName The name of the test.
-     * @return The memoizer updated during the test.
      */
-    private Function<Integer, Integer> timeTest
-        (Function<Integer, Integer> memoizer,
-         String testName) {
-        // Return the memoizer updated during the test.
-        return RunTimer
+    private void timeTest(Function<Integer, Integer> primeChecker,
+                          String testName) {
+        
+        RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
-                     // Run the test using the given memoizer.
-                     runTest(memoizer, testName),
+                     // Run the test using the given prime checker.
+                     runTest(primeChecker, testName),
                      testName);
     }
 
     /**
      * Run the prime number test.
      * 
-     * @param memoizer A cache that maps candidate primes to their
+     * @param primeChecker A function that maps candidate primes to their
      * smallest factor (if they aren't prime) or 0 if they are prime
      * @param testName Name of the test
-     * @return The memoizer updated during the test.
+     * @return The prime checker (which may be updated during the test).
      */
     private Function<Integer, Integer> runTest
-        (Function<Integer, Integer> memoizer,
+        (Function<Integer, Integer> primeChecker,
          String testName) {
-        Options.display("Starting "
-                        + testName
-                        + " with count = "
-                        + Options.instance().count());
+        Options.print("Starting "
+                      + testName
+                      + " with count = "
+                      + Options.instance().count());
 
         // Reset the counters.
         mPrimeCheckCounter.set(0);
         mPendingItemCount.set(0);
 
-        // Create a countdown latch that causes the main thread to
-        // block until all the processing is done.
-        CountDownLatch latch = new CountDownLatch(1);
-
         // Create a publisher that runs on its own scheduler.
         Flux<Integer> publisher = publisher(mPublisherScheduler);
 
         publisher
-            // Arrange to release the latch when the subscriber is done.
-            .doOnTerminate(latch::countDown)
-
-            // Run the subscriber in a different thread.
-            .publishOn(mSubscriberScheduler, mSubscriber.nextRequestSize())
+            // Run the subscriber in a different thread (maybe).
+            .publishOn(mSubscriberScheduler,
+                       // The initial request size.
+                       mSubscriber.nextRequestSize())
 
             // Check each random number to see if it's prime.
-            .map(number -> checkIfPrime(number, memoizer))
+            .map(number -> checkIfPrime(number, primeChecker))
 
-            // Start the wheels in motion.
+            // This call starts all the wheels in motion.
             .subscribe(mSubscriber);
 
-        Options.display("waiting in the main thread");
+        Options.debug("waiting in the main thread");
 
         // Wait for all processing to complete.
-        ExceptionUtils.rethrowRunnable(latch::await);
+        mSubscriber.await();
 
-        Options.display("Leaving "
-                        + testName
-                        + " with "
-                        + mPrimeCheckCounter.get()
-                        + " prime checks ("
-                        + (Options.instance().count()
-                              - mPrimeCheckCounter.get())
-                        + ") duplicates");
+        // Cleverly print out the results.
+        Options.print("Leaving "
+                      + testName
+                      + " with "
+                      + mPrimeCheckCounter.get()
+                      + " prime checks "
+                      + (primeChecker instanceof Memoizer
+                         ? "(" + (Options.instance().count()
+                                  - mPrimeCheckCounter.get())
+                         + " duplicates)"
+                         : ""));
 
-        // Return the memoizer updated during the test.
-        return memoizer;
+        // Return prime checker (which may update during the test).
+        return primeChecker;
     }
 
     /**
-     * Publish a stream of random large numbers.
+     * Publish a stream of random numbers.
      *
      * @param scheduler Scheduler to publish the numbers on.
-     * @return Return a flux that publishes random large numbers
+     * @return Return a flux that publishes random numbers
      */
     private Flux<Integer> publisher(Scheduler scheduler) {
         // Iterate through all the random numbers.
@@ -244,22 +244,22 @@ public class ex3 {
         return Flux
             // Generate a flux of random integers.
             .<Integer>create(sink -> sink.onRequest(size -> {
-                        Options.display("Request size = " + size);
+                        Options.debug("Request size = " + size);
 
                         // Try to publish size items.
                         for (int i = 0;
                              i < size;
                              ++i) {
-                            // Keep going if there is an item remaining
-                            // in the iterator.
+                            // Keep going as long as there's an item
+                            // remaining in the iterator.
                             if (iterator.hasNext()) {
                                 // Get the next item.
                                 Integer item = iterator.next();
 
-                                Options.display("published item: "
-                                        + item
-                                        + ", pending items = "
-                                        + mPendingItemCount.incrementAndGet());
+                                Options.debug("published item: "
+                                              + item
+                                              + ", pending items = "
+                                              + mPendingItemCount.incrementAndGet());
 
                                 // Publish the next item.
                                 sink.next(item);
@@ -279,17 +279,17 @@ public class ex3 {
      * Check if {@code primeCandidate} is prime or not.
      * 
      * @param primeCandidate The number to check if it's prime
-     * @param memoizer A cache that avoids rechecking if a # is prime
+     * @param primeChecker A function that checks if number is prime
      * @return A {@code Result} object that contains the original
      * {@code primeCandidate} and either 0 if it's prime or its
      * smallest factor if it's not prime.
      */
     private Result checkIfPrime(Integer primeCandidate,
-                                Function<Integer, Integer> memoizer) {
+                                Function<Integer, Integer> primeChecker) {
         // Return a tuple containing the prime candidate and the
         // result of checking if it's prime.
         return new Result(primeCandidate,
-                          memoizer.apply(primeCandidate));
+                          primeChecker.apply(primeCandidate));
     }
 
     /**
@@ -311,7 +311,7 @@ public class ex3 {
                  factor <= n / 2;
                  ++factor)
                 if (Thread.interrupted()) {
-                    Options.display(" Prime checker thread interrupted");
+                    Options.debug(" Prime checker thread interrupted");
                     break;
                 } else if (n / factor * factor == n)
                     return factor;
@@ -320,21 +320,21 @@ public class ex3 {
     }
 
     /**
-     * Demonstrate how to slice by applying the Java streams {@code
-     * dropWhile()} and {@code takeWhile()} operations to the {@code
-     * map} parameter.
+     * Demonstrate how to slice by applying the Project Reactor Flux
+     * {@code skipWhile()} and {@code takeWhile()} operations to the
+     * {@code map} parameter.
      */
     private void demonstrateSlicing(Map<Integer, Integer> map) {
         // Sort the map by its values.
         var sortedMap = sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
-        Options.display("map sorted by value = \n" + sortedMap);
+        Options.print("map sorted by value = \n" + sortedMap);
 
         // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);
 
-        // Print out the non-prime numbers using dropWhile().
+        // Print out the non-prime numbers using skipWhile().
         printNonPrimes(sortedMap);
     }
     
@@ -343,13 +343,10 @@ public class ex3 {
      */
     private void printPrimes(Map<Integer, Integer> sortedMap) {
         // Create a list of prime integers.
-        List<Integer> primes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
+        List<Integer> primes = Flux
+            // Convert EntrySet of the map into a flux stream.
+            .fromIterable(sortedMap.entrySet())
             
-            // Convert the EntrySet into a stream.
-            .stream()
-
             // Slice the stream using a predicate that stops after a
             // non-prime number (i.e., getValue() != 0) is reached.
             .takeWhile(entry -> entry.getValue() == 0)
@@ -358,10 +355,13 @@ public class ex3 {
             .map(Map.Entry::getKey)
 
             // Collect the results into a list.
-            .collect(toList());
+            .collect(toList())
+
+            // Block until processing is done.
+            .block();
 
         // Print out the list of primes.
-        Options.display("primes =\n" + primes);
+        Options.print("primes =\n" + primes);
     }
 
     /**
@@ -370,23 +370,23 @@ public class ex3 {
      */
     private void printNonPrimes(Map<Integer, Integer> sortedMap) {
         // Create a list of non-prime integers and their factors.
-        List<Map.Entry<Integer, Integer>> nonPrimes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
+        List<Map.Entry<Integer, Integer>> nonPrimes = Flux
+            // Convert EntrySet of the map into a flux stream.
+            .fromIterable(sortedMap.entrySet())
 
             // Slice the stream using a predicate that skips over the
             // non-prime numbers (i.e., getValue() == 0);
-            .dropWhile(entry -> entry.getValue() == 0)
+            .skipWhile(entry -> entry.getValue() == 0)
 
             // Collect the results into a list.
-            .collect(toList());
+            .collect(toList())
+            
+            // Block until processing is done.
+            .block();
 
         // Print out the list of primes.
-        Options.display("non-prime numbers and their factors =\n"
-                        + nonPrimes);
+        Options.print("non-prime numbers and their factors =\n"
+                      + nonPrimes);
     }
 
     /**
@@ -399,23 +399,23 @@ public class ex3 {
         (Map<Integer, Integer> map,
          Comparator<Map.Entry<Integer, Integer>> comparator) {
         // Create a map that's sorted by the value in map.
-        return map
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
+        return Flux
+                // Convert EntrySet of the map into a flux stream.
+                .fromIterable(map.entrySet())
 
-            // Sort the elements in the stream using the comparator.
-            .sorted(comparator)
+                // Sort the elements in the stream using the comparator.
+                .sort(comparator)
 
-            // Trigger intermediate processing and collect key/value
-            // pairs in the stream into a LinkedHashMap, which
-            // preserves the sorted order.
-            .collect(toMap(Map.Entry::getKey,
-                           Map.Entry::getValue,
-                           (e1, e2) -> e2,
-                           LinkedHashMap::new));
+                // Trigger intermediate processing and collect key/value
+                // pairs in the stream into a LinkedHashMap, which
+                // preserves the sorted order.
+                .collect(toMap(Map.Entry::getKey,
+                               Map.Entry::getValue,
+                               (e1, e2) -> e2,
+                               LinkedHashMap::new))
+
+                // Block until processing is done.
+                .block();
     }
 }
     

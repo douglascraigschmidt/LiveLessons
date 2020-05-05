@@ -22,6 +22,11 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
+     * Controls whether backpressure is enabled (defaults to true).
+     */
+    private boolean mBackPressureEnabled = true;
+
+    /**
      * Controls how many longs are generated.
      */
     private int mCount = 100;
@@ -32,27 +37,15 @@ public class Options {
     private int mMaxValue = Integer.MAX_VALUE;
 
     /**
-     * Controls the max tries for optimistic reads.
-     */
-    private int mMaxTries = 2;
-
-    /**
      * Controls whether logging is enabled
      */
     private boolean mLoggingEnabled;
 
     /**
-     * Keeps track of the StampedLock strategy.
-     * 'W' - write lock
-     * 'O' - optimistic read
-     * 'C' - conditional write
+     * True if the producer and consumer should run in parallel, else
+     * false.
      */
-    private char mStampedLockStrategy = 'W';
-
-    /**
-     *
-     */
-    private boolean mParallel;
+    private boolean mParallel = true;
 
     /**
      * Method to return the one and only singleton uniqueInstance.
@@ -65,63 +58,68 @@ public class Options {
     }
 
     /**
-     * Returns whether debugging output is generated.
+     * @return True if debugging output is printed, else false.
      */
     public boolean diagnosticsEnabled() {
         return mDiagnosticsEnabled;
     }
 
     /**
-     * Returns whether to run the stream in parallel or not.
+     * @return True if backpressure is enabled, else false.
+     */
+    public boolean backPressureEnabled() {
+        return mBackPressureEnabled;
+    }
+
+    /**
+     * @return True the producer and consumer should run in parallel,
+     * else false.
      */
     public boolean parallel() {
         return mParallel;
     }
 
     /**
-     * Returns the number of integers to generate.
+     * @return The number of integers to generate.
      */
     public int count() {
         return mCount;
     }
 
     /**
-     * Returns the max value
+     * @return The max value for the random numbers.
      */
     public int maxValue() {
         return mMaxValue;
     }
 
     /**
-     * Returns the max number of tries for the optimistic read.
-     */
-    public int maxTries() {
-        return mMaxTries;
-    }
-
-    /**
-     * Returns the StampedLock strategy.
-     */
-    public char stampedLockStrategy() {
-        return mStampedLockStrategy;
-    }
-
-    /**
-     * Returns whether logging is enabled or not.
+     * @return True if logging is enabled, else false.
      */
     public boolean loggingEnabled() {
         return mLoggingEnabled;
     }
 
     /**
-     * Display the string if diagnostics are enabled.
+     * Print the string with thread information included.
      */
-    public static void display(String string) {
+    public static void print(String string) {
+        System.out.println("[" +
+                           Thread.currentThread().getName()
+                           + "] "
+                           + string);
+    }
+
+    /**
+     * Print the debug string with thread information included if
+     * diagnostics are enabled.
+     */
+    public static void debug(String string) {
         if (mUniqueInstance.mDiagnosticsEnabled)
             System.out.println("[" +
-                               Thread.currentThread().getName()
-                               + "] "
-                               + string);
+                    Thread.currentThread().getName()
+                    + "] "
+                    + string);
     }
 
     /**
@@ -131,6 +129,9 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
+                case "-b":
+                    mBackPressureEnabled = argv[argc + 1].equals("true");
+                    break;
                 case "-d":
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     break;
@@ -140,17 +141,11 @@ public class Options {
                 case "-c":
                     mCount = Integer.parseInt(argv[argc + 1]);
                     break;
-                case "-s":
-                    mStampedLockStrategy = argv[argc + 1].charAt(0);
-                    break;
                 case "-m":
                     mMaxValue = Integer.parseInt(argv[argc + 1]);
                     break;
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");
-                    break;
-                case "-t":
-                    mMaxTries = Integer.parseInt(argv[argc + 1]);
                     break;
                 default:
                     printUsage();
@@ -166,13 +161,12 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-c [n] "
+        System.out.println("-b [true|false]"
+                           + "-c [n] "
                            + "-d [true|false] "
                            + "-l [true|false] "
                            + "-m [maxValue] "
-                           + "-p [true|false]"
-                           + "-s [W|C|O] "
-                           + "-t [maxTries]");
+                           + "-p [true|false]");
     }
 
     /**

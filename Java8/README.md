@@ -144,3 +144,7 @@ Here's an overview of what's included:
          and completable futures framework to generate and reduce
          random big fractions.  It also demonstrates the lazy
          processing of streams.
+
+. ex30 - This example showcases and benchmarks the use of a Java
+         ConcurrentHashMap and various memoizer implementations to
+         compute/cache/retrieve large prime numbers.

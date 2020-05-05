@@ -1,12 +1,14 @@
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
+import utils.ExceptionUtils;
 import utils.Options;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A subscriber that implements adaptive backpressure.
+ * A Flux subscriber that implements adaptive backpressure.
  */
 public class AdaptiveBackpressureSubscriber
        implements Subscriber<Result>,
@@ -27,6 +29,11 @@ public class AdaptiveBackpressureSubscriber
     private boolean mIsDisposed;
 
     /**
+     *
+     */
+    private CountDownLatch mLatch;
+
+    /**
      * Constructor initializes the field.
      */
     AdaptiveBackpressureSubscriber(AtomicInteger pendingItemCount) {
@@ -43,6 +50,10 @@ public class AdaptiveBackpressureSubscriber
      */
     @Override
     public void onSubscribe(Subscription subscription) {
+        // Create a countdown latch that causes the main thread to
+        // block until all flux processing is done.
+        mLatch = new CountDownLatch(1);
+
         // Store the subscription for later use.
         mSubscription = subscription;
 
@@ -56,17 +67,21 @@ public class AdaptiveBackpressureSubscriber
      * is computed adaptively.
      */
     int nextRequestSize() {
-        int pendingItems = mPendingItemCount.get();
+        if (!Options.instance().backPressureEnabled())
+            return Integer.MAX_VALUE;
+        else {
+            int pendingItems = mPendingItemCount.get();
 
-        if (pendingItems == 0) {
-            Options.display("pending items == 0, returning 5");
-            return 5;
-        } else if (pendingItems > 3) {
-            Options.display("pending items = " + pendingItems + ", returning 3");
-            return 3;
-        } else {
-            Options.display("return pending items = " + pendingItems);
-            return pendingItems;
+            if (pendingItems == 0) {
+                Options.debug("pending items == 0, returning 5");
+                return 5;
+            } else if (pendingItems > 3) {
+                Options.debug("pending items = " + pendingItems + ", returning 3");
+                return 3;
+            } else {
+                Options.debug("return pending items = " + pendingItems);
+                return pendingItems;
+            }
         }
     }
 
@@ -78,19 +93,19 @@ public class AdaptiveBackpressureSubscriber
     @Override
     public void onNext(Result result) {
         // Print the results of prime number checking.
+        /*
         if (result.mSmallestFactor != 0) {
-            Options.display(result.mPrimeCandidate
+            Options.debug(result.mPrimeCandidate
                             + " is not prime with smallest factor "
                             + result.mSmallestFactor);
         } else {
-            Options.display(result.mPrimeCandidate
+            Options.debug(result.mPrimeCandidate
                             + " is prime");
-        }
+        } */
 
-        Options.display("consumer pending items: "
+        Options.debug("consumer pending items: "
                         + mPendingItemCount.decrementAndGet());
 
-            
         // Adaptively update the next request size.
         mSubscription
             .request(nextRequestSize());
@@ -101,14 +116,19 @@ public class AdaptiveBackpressureSubscriber
      * exception.
      */
     @Override
-    public void onError(Throwable t) { Options.display("failure" + t); }
+    public void onError(Throwable t) { Options.print("failure" + t); }
 
     /**
      * Hook method that's called when all integers have been
      * processed.
      */
     @Override
-    public void onComplete() { Options.display("completed"); }
+    public void onComplete() {
+        Options.print("completed");
+
+        // Release the latch.
+        mLatch.countDown();
+    }
 
     /**
      * Hook method called when this subscriber is disposed.
@@ -125,5 +145,13 @@ public class AdaptiveBackpressureSubscriber
     public boolean isDisposed() {
         return mIsDisposed;
     }
+
+    /**
+     * Block waiting for the latch to be released.
+     */
+    public void await() {
+        // Wait for the latch to be released.
+        ExceptionUtils.rethrowRunnable(mLatch::await);
+     }
 }
 
