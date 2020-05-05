@@ -29,9 +29,15 @@ public class AdaptiveBackpressureSubscriber
     private boolean mIsDisposed;
 
     /**
-     *
+     * Barrier synchronizer a calling thread can use to wait until the
+     * subscriber has completed all its processing.
      */
     private CountDownLatch mLatch;
+
+    /**
+     * Request size.
+     */
+    private final int mREQUEST_SIZE = 10;
 
     /**
      * Constructor initializes the field.
@@ -73,13 +79,13 @@ public class AdaptiveBackpressureSubscriber
             int pendingItems = mPendingItemCount.get();
 
             if (pendingItems == 0) {
-                Options.debug("pending items == 0, returning 5");
-                return 5;
-            } else if (pendingItems > 3) {
-                Options.debug("pending items = " + pendingItems + ", returning 3");
-                return 3;
+                // Options.debug("pending items == 0, returning " + mINITIAL_REQUEST_SIZE);
+                return mREQUEST_SIZE;
+            } else if (pendingItems > mREQUEST_SIZE) {
+                // Options.debug("pending items = " + pendingItems + ", returning " + mINITIAL_REQUEST_SIZE);
+                return mREQUEST_SIZE;
             } else {
-                Options.debug("return pending items = " + pendingItems);
+                // Options.debug("return pending items = " + pendingItems);
                 return pendingItems;
             }
         }
@@ -103,12 +109,16 @@ public class AdaptiveBackpressureSubscriber
                             + " is prime");
         } */
 
-        Options.debug("consumer pending items: "
-                        + mPendingItemCount.decrementAndGet());
+        int pendingItems = mPendingItemCount.decrementAndGet();
 
-        // Adaptively update the next request size.
-        mSubscription
-            .request(nextRequestSize());
+        Options.debug("subscriber pending items: "
+                        + pendingItems);
+
+        if (pendingItems <= 4) {
+            // Options.debug("subscriber requesting next tranche of items");
+            // Request next tranche of items.
+            mSubscription.request(nextRequestSize());
+        }
     }
 
     /**
