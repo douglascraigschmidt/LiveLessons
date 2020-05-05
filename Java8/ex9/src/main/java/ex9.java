@@ -232,17 +232,16 @@ public class ex9 {
      * @param result The result of checking if a number is prime.
      */
     private void handleResult(Result result) {
-        /*
         // Print the results.
         if (result.mSmallestFactor != 0) {
-        Options.debug(result.mPrimeCandidate
-        + " is not prime with smallest factor "
-        + result.mSmallestFactor);
+            Options.debug(result.mPrimeCandidate
+                          + " is not prime with smallest factor "
+                          + result.mSmallestFactor);
         } else {
-        Options.debug(result.mPrimeCandidate
-        + " is prime");
+            Options.debug(result.mPrimeCandidate
+                          + " is prime");
         }
-        */
+
         Options.debug("consumer pending items: "
                       + mPendingItemCount.decrementAndGet());
     }

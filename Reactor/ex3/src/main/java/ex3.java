@@ -243,14 +243,14 @@ public class ex3 {
         var iterator = mRandomIntegers.iterator();
 
         return Flux
-            // Generate a flux of random integers.
+            // Generate a flux stream of random integers.
             .<Integer>create(sink -> sink
                        // Attach a consumer to this since that's
                        // notified of any request to this sink.
                        .onRequest(size -> {
                                   Options.debug("Request size = " + size);
 
-                                  // Try to publish size items.
+                                  // Try to publish size # of items.
                                   for (int i = 0;
                                        i < size;
                                        ++i) {

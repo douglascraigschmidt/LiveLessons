@@ -96,8 +96,7 @@ public class HybridBackpressureSubscriber
      */
     @Override
     public void onNext(Result result) {
-        // Print the results of prime number checking.
-        /*
+        // Print the results of prime number checking
         if (result.mSmallestFactor != 0) {
             Options.debug(result.mPrimeCandidate
                             + " is not prime with smallest factor "
@@ -105,7 +104,7 @@ public class HybridBackpressureSubscriber
         } else {
             Options.debug(result.mPrimeCandidate
                             + " is prime");
-        } */
+        }
 
         // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
@@ -113,8 +112,11 @@ public class HybridBackpressureSubscriber
         Options.debug("subscriber pending items: "
                       + pendingItems);
 
-        // Check to see if we've consumed our window of items.
-        if (++mItemsProcessedSinceLastRequest == mREQUEST_SIZE) {
+        // Compute 70% of mREQUEST_SIZE.
+        int seventyPercent = (int)(mREQUEST_SIZE * (70.0f/100.0f));
+
+        // Check to see if we've consumed 70% our window of items.
+        if (++mItemsProcessedSinceLastRequest == seventyPercent) {
             Options.debug("subscriber requesting next tranche of items");
 
             // Request next tranche of items.
