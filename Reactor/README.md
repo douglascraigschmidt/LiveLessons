@@ -11,3 +11,12 @@ overview of what's included:
 . ex2 - This example is currently just a placeholder for random things
         I'm playing around with for Project Reactor.  It's likely to
         change radically from time to time.
+
+. ex3 - This program applies Project Reactor features to implement
+        hybrid push/pull backpressure between a publisher and a
+        subscriber running in different threads/schedulers.  This
+        program also measures the performance of checking random
+        numbers for primality with and without a memoizer based on
+        Java ConcurrentHashMap.  In addition, it demonstrates the use
+        of slicing with the Flux takeWhile() and skipWhile()
+        operations.

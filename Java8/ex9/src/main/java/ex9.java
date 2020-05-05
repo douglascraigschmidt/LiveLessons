@@ -153,9 +153,9 @@ public class ex9 {
         (Function<Integer, Integer> memoizer,
          String testName) {
         Options.print("Starting "
-                        + testName
-                        + " with count = "
-                        + Options.instance().count());
+                      + testName
+                      + " with count = "
+                      + Options.instance().count());
 
         // Reset the counter.
         mPrimeCheckCounter.set(0);
@@ -164,11 +164,12 @@ public class ex9 {
             // Generate random large numbers.
             .publisher(Options.instance().parallel())
 
+            // Print stats if we're debugging.
             .peek(item -> Options
-                    .debug("processed item: "
-                             + item
-                             + ", publisher pending items: "
-                             + mPendingItemCount.incrementAndGet()))
+                  .debug("processed item: "
+                         + item
+                         + ", publisher pending items: "
+                         + mPendingItemCount.incrementAndGet()))
 
             // Check each random number to see if it's prime.
             .map(number -> checkIfPrime(number, memoizer))
@@ -177,13 +178,13 @@ public class ex9 {
             .forEach(this::handleResult);
 
         Options.print("Leaving "
-                        + testName
-                        + " with "
-                        + mPrimeCheckCounter.get()
-                        + " prime checks ("
-                        + (Options.instance().count()
-                              - mPrimeCheckCounter.get())
-                        + ") duplicates");
+                      + testName
+                      + " with "
+                      + mPrimeCheckCounter.get()
+                      + " prime checks ("
+                      + (Options.instance().count()
+                         - mPrimeCheckCounter.get())
+                      + ") duplicates");
 
         // Return the memoizer updated during the test.
         return memoizer;
@@ -197,7 +198,7 @@ public class ex9 {
      */
     private Stream<Integer> publisher(boolean parallel) {
         Stream<Integer> intStream = mRandomIntegers
-            // Conver the list into a stream.
+            // Convert the list into a stream.
             .stream();
 
         // Conditionally convert the stream to a parallel stream.
@@ -231,17 +232,19 @@ public class ex9 {
      * @param result The result of checking if a number is prime.
      */
     private void handleResult(Result result) {
+        /*
         // Print the results.
         if (result.mSmallestFactor != 0) {
-            Options.debug(result.mPrimeCandidate
-                            + " is not prime with smallest factor "
-                            + result.mSmallestFactor);
+        Options.debug(result.mPrimeCandidate
+        + " is not prime with smallest factor "
+        + result.mSmallestFactor);
         } else {
-            Options.debug(result.mPrimeCandidate
-                    + " is prime");
+        Options.debug(result.mPrimeCandidate
+        + " is prime");
         }
+        */
         Options.debug("consumer pending items: "
-                        + mPendingItemCount.decrementAndGet());
+                      + mPendingItemCount.decrementAndGet());
     }
 
     /**
@@ -338,7 +341,7 @@ public class ex9 {
 
         // Print out the list of primes.
         Options.print("non-prime numbers and their factors =\n"
-                        + nonPrimes);
+                      + nonPrimes);
     }
 
     /**

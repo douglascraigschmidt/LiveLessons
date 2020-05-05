@@ -1,15 +1,15 @@
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Map.Entry.comparingByValue;
@@ -17,23 +17,22 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * This example examines the use of a memoizer based on a Java
- * ConcurrentHashMap to compute/cache/retrieve prime numbers.  It also
- * shows how to Project Reactor features can be applied to implement
- * adaptive backpressure between a publisher and a subscriber that run
- * in different threads/schedulers.  This example also demonstrates
- * the use of slicing with the Flux takeWhile() and skipWhile()
- * operations.
+ * This program applies Project Reactor features to implement hybrid
+ * push/pull backpressure between a publisher and a subscriber running
+ * in different threads/schedulers.  This program also measures the
+ * performance of checking random numbers for primality with and
+ * without a memoizer based on Java ConcurrentHashMap.  In addition,
+ * it demonstrates the use of slicing with the Flux takeWhile() and
+ * skipWhile() operations.
  */
 public class ex3 {
     /**
-     * Count the number of calls to isPrime() as a means to determine
-     * the benefits of caching.
+     * Count # of calls to isPrime() to determine caching benefits.
      */
     private final AtomicInteger mPrimeCheckCounter;
 
     /**
-     * Count the number of pending items between the publisher and subscriber.
+     * Count the # of pending items between publisher and subscriber.
      */
     private final AtomicInteger mPendingItemCount;
 
@@ -54,13 +53,12 @@ public class ex3 {
     private final Scheduler mPublisherScheduler;
 
     /**
-     * A subscriber that applies adaptive backpressure.
+     * A subscriber that applies hybrid push/pull backpressure.
      */
-    private final AdaptiveBackpressureSubscriber mSubscriber;
+    private final HybridBackpressureSubscriber mSubscriber;
 
     /**
-     * Keeps track of all disposables so they can be disposed in one
-     * fell swoop.
+     * Track all disposables to dispose them all at once.
      */
     private final Disposable.Composite mDisposables;
 
@@ -120,11 +118,10 @@ public class ex3 {
             // Run everything in the subscriber scheduler.
             : mSubscriberScheduler;
 
-        // Create a subscriber that handles backpressure.
-        mSubscriber = new AdaptiveBackpressureSubscriber(mPendingItemCount);
+        // This subscriber implements hybrid push/pull backpressure.
+        mSubscriber = new HybridBackpressureSubscriber(mPendingItemCount);
 
-        // Create a composite disposable that disposes of everything
-        // in one fell swoop.
+        // Track all disposables to dispose them all at once.
         mDisposables = Disposables
             .composite(mPublisherScheduler,
                        mSubscriberScheduler,
@@ -198,6 +195,11 @@ public class ex3 {
         Flux<Integer> publisher = publisher(mPublisherScheduler);
 
         publisher
+            // Enable transformation at instantiation time.
+            .transform(ReactorUtils
+                       // Conditionally enable logging.
+                       .logIf(Options.instance().loggingEnabled()))
+
             // Run the subscriber in a different thread (maybe).
             .publishOn(mSubscriberScheduler,
                        // The initial request size.
@@ -238,38 +240,41 @@ public class ex3 {
      */
     private Flux<Integer> publisher(Scheduler scheduler) {
         // Iterate through all the random numbers.
-        final Iterator<Integer> iterator =
-            mRandomIntegers.iterator();
+        var iterator = mRandomIntegers.iterator();
 
         return Flux
             // Generate a flux of random integers.
-            .<Integer>create(sink -> sink.onRequest(size -> {
-                        Options.debug("Request size = " + size);
+            .<Integer>create(sink -> sink
+                       // Attach a consumer to this since that's
+                       // notified of any request to this sink.
+                       .onRequest(size -> {
+                                  Options.debug("Request size = " + size);
 
-                        // Try to publish size items.
-                        for (int i = 0;
-                             i < size;
-                             ++i) {
-                            // Keep going as long as there's an item
-                            // remaining in the iterator.
-                            if (iterator.hasNext()) {
-                                // Get the next item.
-                                Integer item = iterator.next();
+                                  // Try to publish size items.
+                                  for (int i = 0;
+                                       i < size;
+                                       ++i) {
+                                      // Keep going if there's an
+                                      // item in the iterator.
+                                      if (iterator.hasNext()) {
+                                          // Get the next item.
+                                          Integer item = iterator.next();
 
-                                Options.debug("published item: "
-                                              + item
-                                              + ", pending items = "
-                                              + mPendingItemCount.incrementAndGet());
+                                          Options.debug("published item: "
+                                                        + item
+                                                        + ", pending items = "
+                                                        + mPendingItemCount
+                                                            .incrementAndGet());
 
-                                // Publish the next item.
-                                sink.next(item);
-                            } else {
-                                // We're done publishing all the items.
-                                sink.complete();
-                                break;
-                            }
-                        }
-                    }))
+                                          // Publish the next item.
+                                          sink.next(item);
+                                      } else {
+                                          // We're done publishing.
+                                          sink.complete();
+                                          break;
+                                      }
+                                  }
+                              }))
 
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
@@ -343,7 +348,7 @@ public class ex3 {
      */
     private void printPrimes(Map<Integer, Integer> sortedMap) {
         // Create a list of prime integers.
-        List<Integer> primes = Flux
+        var primes = Flux
             // Convert EntrySet of the map into a flux stream.
             .fromIterable(sortedMap.entrySet())
             
@@ -370,7 +375,7 @@ public class ex3 {
      */
     private void printNonPrimes(Map<Integer, Integer> sortedMap) {
         // Create a list of non-prime integers and their factors.
-        List<Map.Entry<Integer, Integer>> nonPrimes = Flux
+        var nonPrimes = Flux
             // Convert EntrySet of the map into a flux stream.
             .fromIterable(sortedMap.entrySet())
 

@@ -8,9 +8,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A Flux subscriber that implements adaptive backpressure.
+ * A Flux subscriber that implements hybrid push/pull backpressure.
  */
-public class AdaptiveBackpressureSubscriber
+public class HybridBackpressureSubscriber
        implements Subscriber<Result>,
                   Disposable {
     /**
@@ -40,19 +40,28 @@ public class AdaptiveBackpressureSubscriber
     private final int mREQUEST_SIZE = 10;
 
     /**
+     * Number of items processed since the last request was sent.
+     */
+    private int mItemsProcessedSinceLastRequest;
+
+    /**
      * Constructor initializes the field.
      */
-    AdaptiveBackpressureSubscriber(AtomicInteger pendingItemCount) {
+    HybridBackpressureSubscriber(AtomicInteger pendingItemCount) {
         // Initially false.
         mIsDisposed = false;
 
         // Store a reference to this count.
         mPendingItemCount = pendingItemCount;
+
+        // Keep track of number of items processed since the last
+        // request was made upstream.
+        mItemsProcessedSinceLastRequest = 0;
     }
 
     /**
-     * Hook method called when this subscriber is first
-     * subscribed.  It sets the initial request size.
+     * Hook method called when this subscriber is first subscribed.
+     * It sets the initial request size.
      */
     @Override
     public void onSubscribe(Subscription subscription) {
@@ -65,36 +74,25 @@ public class AdaptiveBackpressureSubscriber
 
         // Set the initial request size.
         mSubscription
-            .request(nextRequestSize());                
+            .request(nextRequestSize());
     }
 
     /**
-     * @return The next request size for the publisher, which
-     * is computed adaptively.
+     * @return The next request size for the publisher.
      */
     int nextRequestSize() {
         if (!Options.instance().backPressureEnabled())
+            // Disable backpressure.
             return Integer.MAX_VALUE;
         else {
-            int pendingItems = mPendingItemCount.get();
-
-            if (pendingItems == 0) {
-                // Options.debug("pending items == 0, returning " + mINITIAL_REQUEST_SIZE);
-                return mREQUEST_SIZE;
-            } else if (pendingItems > mREQUEST_SIZE) {
-                // Options.debug("pending items = " + pendingItems + ", returning " + mINITIAL_REQUEST_SIZE);
-                return mREQUEST_SIZE;
-            } else {
-                // Options.debug("return pending items = " + pendingItems);
-                return pendingItems;
-            }
+            // Request only this many items.
+            return mREQUEST_SIZE;
         }
     }
 
     /**
-     * Hook method called when the next item is received.  It prints
-     * the results of the prime number checking and updates the next
-     * request size.
+     * Hook method called when next item arrives.  It prints the
+     * results of prime # checking and updates the next request size.
      */
     @Override
     public void onNext(Result result) {
@@ -109,15 +107,21 @@ public class AdaptiveBackpressureSubscriber
                             + " is prime");
         } */
 
+        // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
 
         Options.debug("subscriber pending items: "
-                        + pendingItems);
+                      + pendingItems);
 
-        if (pendingItems <= 4) {
-            // Options.debug("subscriber requesting next tranche of items");
+        // Check to see if we've consumed our window of items.
+        if (++mItemsProcessedSinceLastRequest == mREQUEST_SIZE) {
+            Options.debug("subscriber requesting next tranche of items");
+
             // Request next tranche of items.
             mSubscription.request(nextRequestSize());
+
+            // Reset the counter.
+            mItemsProcessedSinceLastRequest = 0;
         }
     }
 
@@ -136,7 +140,7 @@ public class AdaptiveBackpressureSubscriber
     public void onComplete() {
         Options.print("completed");
 
-        // Release the latch.
+        // Release the latch since we're done.
         mLatch.countDown();
     }
 
@@ -157,10 +161,10 @@ public class AdaptiveBackpressureSubscriber
     }
 
     /**
-     * Block waiting for the latch to be released.
+     * Block caller until the latch is released.
      */
     public void await() {
-        // Wait for the latch to be released.
+        // Block caller until the latch is released.
         ExceptionUtils.rethrowRunnable(mLatch::await);
      }
 }
