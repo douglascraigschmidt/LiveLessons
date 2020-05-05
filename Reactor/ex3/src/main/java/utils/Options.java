@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.function.Function;
+
 /**
  * This class implements the Singleton pattern to handle command-line
  * option processing.
@@ -46,6 +48,14 @@ public class Options {
      * false.
      */
     private boolean mParallel = true;
+
+    /**
+     * Keeps track of the Memoizer strategy.
+     * 'M' - Memoizer
+     * 'T' - TimedMemoizer
+     * 'X' - TimedMemoizerEx
+     */
+    private char mMemoizerStrategy = 'M';
 
     /**
      * Method to return the one and only singleton uniqueInstance.
@@ -101,6 +111,23 @@ public class Options {
     }
 
     /**
+     * Make the requested memoizer.
+     */
+    public static Function<Integer, Integer> makeMemoizer
+        (Function<Integer, Integer> function) {
+        switch(instance().mMemoizerStrategy) {
+        case 'M': return new Memoizer<>(function);
+        case 'T': return new TimedMemoizer<>
+                (function,
+                 instance().count() * 500);
+        case 'X': return new TimedMemoizerEx<>
+                (function,
+                 instance().count() * 500);
+        default: throw new IllegalArgumentException("given memoizer type unknown");
+        }
+    }
+
+    /**
      * Print the string with thread information included.
      */
     public static void print(String string) {
@@ -144,6 +171,9 @@ public class Options {
                 case "-m":
                     mMaxValue = Integer.parseInt(argv[argc + 1]);
                     break;
+                case "-M":
+                    mMemoizerStrategy = argv[argc + 1].charAt(0);
+                    break;
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");
                     break;
@@ -166,6 +196,7 @@ public class Options {
                            + "-d [true|false] "
                            + "-l [true|false] "
                            + "-m [maxValue] "
+                           + "-M [M|T|X]"
                            + "-p [true|false]");
     }
 

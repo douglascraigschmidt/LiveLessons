@@ -132,12 +132,11 @@ public class ex3 {
      * Run all the tests and print the results.
      */
     private void run() {
-        // Create a concurrent hash map.
-        ConcurrentHashMap<Integer, Integer> concurrentHashMap =
-            new ConcurrentHashMap<>();
-        
+        Function<Integer, Integer> memoizer =
+            Options.makeMemoizer(this::isPrime);
+
         // Create and time prime checking with a memoizer.
-        timeTest(new Memoizer<>(this::isPrime, concurrentHashMap),
+        timeTest(memoizer,
                  "test with memoizer");
 
         // Create and time prime checking without a memoizer.
@@ -150,8 +149,9 @@ public class ex3 {
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
-        // Demonstrate slicing on the concurrent hash map.
-        demonstrateSlicing(concurrentHashMap);
+        if (memoizer instanceof Memoizer)
+            // Demonstrate slicing on the concurrent hash map.
+            demonstrateSlicing(((Memoizer) memoizer).getCache());
     }
 
     /**

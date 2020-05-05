@@ -213,6 +213,7 @@ public class Options {
                            + "-d [true|false] "
                            + "-l [true|false] "
                            + "-m [maxValue] "
+                           + "-M [M|T|X]"
                            + "-p [true|false]"
                            + "-s [W|C|O] "
                            + "-t [maxTries]");

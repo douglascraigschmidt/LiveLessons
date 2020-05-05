@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -42,14 +43,11 @@ public class Memoizer<K, V>
      * Constructor initializes the fields.
      *
      * @param function The function that produces a value based on a
-     *                 key 
-     * @param map The implementation of {@code Map} used to cache a
-     *          value with its associated key  
+     *                 key
      */
-    public Memoizer(Function<K, V> function,
-                    Map<K, V> map) {
+    public Memoizer(Function<K, V> function) {
         mFunction = function;
-        mCache = map;
+        mCache = new ConcurrentHashMap<>();
     }
 
     /**
