@@ -2,7 +2,11 @@ This directory contains all the modern Java source code examples from
 my LiveLessons course on [Java
 Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava),
 as well as some other examples from my Safari Live Training courses.
-Here's an overview of what's included:
+Please note that many of these examples now use features found in
+later Java releases, so I recommend installing Java 11 (at least) to
+avoid problems.
+
+Here's an overview of what's current included in these examples:
 
 . ex0 - This example two zap() method implementations that removes
         strings from a list of strings.  One method uses basic Java 7
