@@ -6,16 +6,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
- * This class defines a "memoizing" cache that maps a key to the value
- * produced by a function.  If a value has previously been computed it
- * is returned rather than calling the function to compute it again.
- * The ConcurrentHashMap computeIfAbsent() method is used to ensure
- * only a single call to the function is run when a key/value pair is
- * first added to the cache.  The Java ScheduledExecutor class is used
- * to scalably limit the amount of time a key/value is retained in the
- * cache.  This code is based on an example in "Java Concurrency in
- * Practice" by Brian Goetz et al.  More information on memoization is
- * available at https://en.wikipedia.org/wiki/Memoization.
+ * This class implements a "timed-memoizing" cache that maps a key to
+ * the value produced by a function.  If a value has previously been
+ * computed it is returned rather than calling the function to compute
+ * it again. The Java ConcurrentHashMap.computeIfAbsent() method is
+ * used to ensure only a single call to the function is run when a
+ * key/value pair is first added to the cache and to eff.  The Java
+ * ScheduledThreadExecutorService is used in a "periodic" manner
+ * together with Java AtomicLong and ConcurrentHashMap.remove() to
+ * limit the amount of time a key/value is retained in the cache.
+ *
+ * More information on memoization is available at
+ * https://en.wikipedia.org/wiki/Memoization.
  */
 public class TimedMemoizerEx<K, V>
        extends Memoizer<K, V> {
@@ -24,11 +26,6 @@ public class TimedMemoizerEx<K, V>
      */
     private final String TAG =
         getClass().getSimpleName();
-
-    /**
-     * This function produces a value based on the key.
-     */
-    private final Function<K, V> mFunction;
 
     /**
      * The amount of time to retain a value in the cache.
@@ -178,9 +175,9 @@ public class TimedMemoizerEx<K, V>
                 // to 1, however, if ref count has currently
                 // increased between remove() above and here.
                 value
-                        .mRefCount
-                        .getAndUpdate(curCount ->
-                                curCount > oldCount ? curCount : 1);
+                    .mRefCount
+                    .getAndUpdate(curCount ->
+                                  curCount > oldCount ? curCount : 1);
             }
         });
 
@@ -201,8 +198,9 @@ public class TimedMemoizerEx<K, V>
         // Initialize the super class.
         super(function);
 
-        // Store the function for subsequent use.
-        mFunction = function;
+        // Do some sanity checking.
+        if (timeoutInMillisecs <= 0)
+            throw new IllegalArgumentException("timeoutInMillisecs must be great than 0");
 
         // Store the timeout for subsequent use.
         mTimeoutInMillisecs = timeoutInMillisecs;
@@ -302,8 +300,8 @@ public class TimedMemoizerEx<K, V>
      */
     public Map<K, V> getCache() {
         // Create a new concurrent hash map.
-        ConcurrentHashMap<K, V> cacheCopy = 
-            new ConcurrentHashMap();
+        ConcurrentHashMap<K, V> cacheCopy =
+            new ConcurrentHashMap<>();
 
         // Copy the contents of the cache into the new map.
         mCache.forEach((k, v) -> cacheCopy.put(k, v.get()));

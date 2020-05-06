@@ -48,6 +48,7 @@ public class UntimedMemoizer<K, V>
      * create the value and store it in the cache before returning it.
      */
     public V apply(final K key) {
+        // Check to see if the key already has a value in the map.
         return mCache.computeIfAbsent(key, mFunction);
     }
 

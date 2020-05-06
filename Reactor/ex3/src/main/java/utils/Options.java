@@ -51,7 +51,7 @@ public class Options {
 
     /**
      * Keeps track of the Memoizer strategy.
-     * 'M' - Memoizer
+     * 'U' - UntimedMemoizer
      * 'T' - TimedMemoizer
      * 'X' - TimedMemoizerEx
      */

@@ -6,16 +6,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
- * This class defines a "memoizing" cache that maps a key to the value
- * produced by a function.  If a value has previously been computed it
- * is returned rather than calling the function to compute it again.
- * The ConcurrentHashMap computeIfAbsent() method is used to ensure
- * only a single call to the function is run when a key/value pair is
- * first added to the cache.  The Java ScheduledExecutor class is used
- * to limit the amount of time a key/value is retained in the cache.
- * This code is based on an example in "Java Concurrency in Practice"
- * by Brian Goetz et al.  More information on memoization is available
- * at https://en.wikipedia.org/wiki/Memoization.
+ * This class implements a "timed-memoizing" cache that maps a key to
+ * the value produced by a function.  If a value has previously been
+ * computed it is returned rather than calling the function to compute
+ * it again. The Java ConcurrentHashMap.computeIfAbsent() method is
+ * used to ensure only a single call to the function is run when a
+ * key/value pair is first added to the cache and to eff.  The Java
+ * ScheduledThreadExecutorService is used in a "one-shot" manner
+ * together with Java AtomicLong and ConcurrentHashMap.remove() to
+ * limit the amount of time a key/value is retained in the cache.
+ *
+ * More information on memoization is available at
+ * https://en.wikipedia.org/wiki/Memoization.
  */
 public class TimedMemoizer<K, V>
        extends Memoizer<K, V> {
@@ -36,11 +38,6 @@ public class TimedMemoizer<K, V>
      * The amount of time to retain a value in the cache.
      */
     private final long mTimeoutInMillisecs;
-
-    /**
-     * This function produces a value based on the key.
-     */
-    private final Function<K, V> mFunction;
 
     /**
      * Executes a runnable after a given timeout to remove expired
@@ -194,14 +191,15 @@ public class TimedMemoizer<K, V>
         // Initialize the super class.
         super(function);
 
-        // Store the function for subsequent use.
-        mFunction = function;
-
-        // Create a concurrent hash map.
-        mCache = new ConcurrentHashMap<>();
+        // Do some sanity checking.
+        if (timeoutInMillisecs <= 0)
+            throw new IllegalArgumentException("timeoutInMillisecs must be great than 0");
 
         // Store the timeout for subsequent use.
         mTimeoutInMillisecs = timeoutInMillisecs;
+
+        // Create a concurrent hash map.
+        mCache = new ConcurrentHashMap<>();
 
         // Create a ScheduledThreadPoolExecutor with one thread.
         mScheduledExecutorService = 
@@ -245,12 +243,11 @@ public class TimedMemoizer<K, V>
              (k) -> {
                 // Apply the function and store the result. 
                 RefCountedValue rcv =
-                new RefCountedValue(mFunction.apply(k),
-                                    0);
+                    new RefCountedValue(mFunction.apply(k),
+                                       0);
                 // The code below *must* be done here so that it's
                 // protected by the ConcurrentHashMap lock.
-                if (!Thread.currentThread().isInterrupted()
-                    && mTimeoutInMillisecs > 0)
+                if (!Thread.currentThread().isInterrupted())
                     // Schedule a runnable that removes key from the
                     // cache if its timeout expires and it hasn't been
                     // accessed in mTimeoutInMillisecs.
@@ -289,7 +286,7 @@ public class TimedMemoizer<K, V>
     public Map<K, V> getCache() {
         // Create a new concurrent hash map.
         ConcurrentHashMap<K, V> cacheCopy =
-                new ConcurrentHashMap();
+                new ConcurrentHashMap<>();
 
         // Copy the contents of the cache into the new map.
         mCache.forEach((k, v) -> cacheCopy.put(k, v.get()));
