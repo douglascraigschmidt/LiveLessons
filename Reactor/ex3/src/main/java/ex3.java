@@ -132,12 +132,18 @@ public class ex3 {
      * Run all the tests and print the results.
      */
     private void run() {
-        Function<Integer, Integer> memoizer =
+        Memoizer<Integer, Integer> memoizer =
             Options.makeMemoizer(this::isPrime);
 
         // Create and time prime checking with a memoizer.
         timeTest(memoizer,
                  "test with memoizer");
+
+        // Get a copy of the memoizer's map.
+        Map<Integer, Integer> memoizerCopy = memoizer.getCache();
+
+        // Shutdown the memoizer.
+        memoizer.shutdown();
 
         // Create and time prime checking without a memoizer.
         timeTest(this::isPrime,
@@ -149,9 +155,8 @@ public class ex3 {
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
-        if (memoizer instanceof Memoizer)
-            // Demonstrate slicing on the concurrent hash map.
-            demonstrateSlicing(((Memoizer) memoizer).getCache());
+        // Demonstrate slicing on the concurrent hash map.
+        demonstrateSlicing(memoizerCopy);
     }
 
     /**
@@ -162,7 +167,6 @@ public class ex3 {
      */
     private void timeTest(Function<Integer, Integer> primeChecker,
                           String testName) {
-        
         RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
@@ -211,7 +215,7 @@ public class ex3 {
             // This call starts all the wheels in motion.
             .subscribe(mSubscriber);
 
-        Options.debug("waiting in the main thread");
+        // Options.debug("waiting in the main thread");
 
         // Wait for all processing to complete.
         mSubscriber.await();
@@ -245,36 +249,38 @@ public class ex3 {
         return Flux
             // Generate a flux stream of random integers.
             .<Integer>create(sink -> sink
-                       // Attach a consumer to this since that's
-                       // notified of any request to this sink.
-                       .onRequest(size -> {
-                                  Options.debug("Request size = " + size);
+                             // Attach a consumer to this since that's
+                             // notified of any request to this sink.
+                             .onRequest(size -> {
+                                     // Options.debug("Request size = " + size);
 
-                                  // Try to publish size # of items.
-                                  for (int i = 0;
-                                       i < size;
-                                       ++i) {
-                                      // Keep going if there's an
-                                      // item in the iterator.
-                                      if (iterator.hasNext()) {
-                                          // Get the next item.
-                                          Integer item = iterator.next();
+                                     // Try to publish size # of items.
+                                     for (int i = 0;
+                                          i < size;
+                                          ++i) {
+                                         // Keep going if there's an
+                                         // item in the iterator.
+                                         if (iterator.hasNext()) {
+                                             // Get the next item.
+                                             Integer item = iterator.next();
 
-                                          Options.debug("published item: "
-                                                        + item
-                                                        + ", pending items = "
-                                                        + mPendingItemCount
-                                                            .incrementAndGet());
+                                             /*
+                                             Options.debug("published item: "
+                                                           + item
+                                                           + ", pending items = "
+                                                           + mPendingItemCount
+                                                           .incrementAndGet());
+                                             */
 
-                                          // Publish the next item.
-                                          sink.next(item);
-                                      } else {
-                                          // We're done publishing.
-                                          sink.complete();
-                                          break;
-                                      }
-                                  }
-                              }))
+                                             // Publish the next item.
+                                             sink.next(item);
+                                         } else {
+                                             // We're done publishing.
+                                             sink.complete();
+                                             break;
+                                         }
+                                     }
+                                 }))
 
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
@@ -316,7 +322,7 @@ public class ex3 {
                  factor <= n / 2;
                  ++factor)
                 if (Thread.interrupted()) {
-                    Options.debug(" Prime checker thread interrupted");
+                    // Options.debug(" Prime checker thread interrupted");
                     break;
                 } else if (n / factor * factor == n)
                     return factor;
@@ -334,7 +340,9 @@ public class ex3 {
         var sortedMap = sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
-        Options.print("map sorted by value = \n" + sortedMap);
+        Options.print("map with "
+                      + sortedMap.size()
+                      + " elements sorted by value = \n" + sortedMap);
 
         // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);

@@ -58,6 +58,12 @@ public class Options {
     private char mMemoizerStrategy = 'M';
 
     /**
+     * Timeout period (in milliseconds) for the timed memoizers.
+     * Defaults to 2 seconds.
+     */
+    private int mTimeout = 2_000;
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -113,16 +119,16 @@ public class Options {
     /**
      * Make the requested memoizer.
      */
-    public static Function<Integer, Integer> makeMemoizer
+    public static Memoizer<Integer, Integer> makeMemoizer
         (Function<Integer, Integer> function) {
         switch(instance().mMemoizerStrategy) {
-        case 'M': return new Memoizer<>(function);
+        case 'U': return new UntimedMemoizer<>(function);
         case 'T': return new TimedMemoizer<>
                 (function,
-                 instance().count() * 500);
+                 instance().mTimeout);
         case 'X': return new TimedMemoizerEx<>
                 (function,
-                 instance().count() * 500);
+                 instance().mTimeout);
         default: throw new IllegalArgumentException("given memoizer type unknown");
         }
     }
@@ -177,6 +183,9 @@ public class Options {
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");
                     break;
+                case "-t":
+                     mTimeout = Integer.parseInt(argv[argc + 1]);
+                     break;
                 default:
                     printUsage();
                     return;
@@ -196,8 +205,9 @@ public class Options {
                            + "-d [true|false] "
                            + "-l [true|false] "
                            + "-m [maxValue] "
-                           + "-M [M|T|X]"
-                           + "-p [true|false]");
+                           + "-M [T|U|X]"
+                           + "-p [true|false]"
+                           + "-t [timeoutInMillis]");
     }
 
     /**

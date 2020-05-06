@@ -98,26 +98,28 @@ public class HybridBackpressureSubscriber
     public void onNext(Result result) {
         // Print the results of prime number checking
         if (result.mSmallestFactor != 0) {
+            /*
             Options.debug(result.mPrimeCandidate
-                            + " is not prime with smallest factor "
-                            + result.mSmallestFactor);
+                          + " is not prime with smallest factor "
+                          + result.mSmallestFactor);
+            */
         } else {
+            /*
             Options.debug(result.mPrimeCandidate
-                            + " is prime");
+            + " is prime"); */
         }
 
         // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
 
-        Options.debug("subscriber pending items: "
-                      + pendingItems);
+        // Options.debug("subscriber pending items: " + pendingItems);
 
         // Compute 70% of mREQUEST_SIZE.
         int seventyPercent = (int)(mREQUEST_SIZE * (70.0f/100.0f));
 
         // Check to see if we've consumed 70% our window of items.
         if (++mItemsProcessedSinceLastRequest == seventyPercent) {
-            Options.debug("subscriber requesting next tranche of items");
+            // Options.debug("subscriber requesting next tranche of items");
 
             // Request next tranche of items.
             mSubscription.request(nextRequestSize());

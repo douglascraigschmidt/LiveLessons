@@ -5,39 +5,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * This class defines a "memoizing" cache that synchronously maps a
- * key to the value produced by a {@code function} argument passed to
- * the constructor.  If a value has previously been computed it is
- * returned rather than calling the function to compute it again.  The
- * Java Map computeIfAbsent() method is used to ensure only a single
- * call to the function is run when a key and value is first added to
- * the cache.
- *
- * The {@code map} argumented passed to the constructor determines
- * what implementation of {@code Map} is used for the cache.
- * Implementations include {@code ConcurrentHashMap} (which is correct
- * and efficient in a concurrent program), {@code SynchronizedMap}
- * (which is correct, but inefficient in a concurrent program), and
- * {@code StampedLockHashMap} (which is better than {@code
- * SynchronizedMap}, but often not as scalable as {@code
- * ConcurrentHashMap}).
- *
- * This code is inspired by an example in "Java Concurrency in
- * Practice" by Brian Goetz et al.  More information on memoization is
- * available at https://en.wikipedia.org/wiki/Memoization.
+ * This abstract class defines a "memoizing" cache that synchronously
+ * maps a key to the value produced by a {@code function} argument
+ * passed to the constructor.  If a value has previously been computed
+ * it is returned rather than calling the function to compute it
+ * again.  The Java Map.computeIfAbsent() method is used to ensure
+ * only a single call to the function is run when a key and value is
+ * first added to the cache.
  */
-public class Memoizer<K, V>
+public abstract class Memoizer<K, V>
        implements Function<K, V> {
-    /**
-     * This map associates a key K with a value V that's produced by a
-     * function.
-     */
-    private final Map<K, V> mCache;
-
     /**
      * This function produces a value based on the key.
      */
-    private final Function<K, V> mFunction;
+    protected final Function<K, V> mFunction;
 
     /**
      * Constructor initializes the fields.
@@ -47,16 +28,6 @@ public class Memoizer<K, V>
      */
     public Memoizer(Function<K, V> function) {
         mFunction = function;
-        mCache = new ConcurrentHashMap<>();
-    }
-
-    /**
-     * Returns the value associated with the key in cache.  If there's
-     * no value associated with the key then the function is called to
-     * create the value and store it in the cache before returning it.
-     */
-    public V apply(final K key) {
-        return mCache.computeIfAbsent(key, mFunction);
     }
 
     /**
@@ -68,21 +39,20 @@ public class Memoizer<K, V>
      * @ @return The previous value associated with key, or null if
      * there was no mapping for key.
      */
-    public V remove(K key) {
-        return mCache.remove(key);
-    }
+    public abstract V remove(K key);
 
     /**
      * @return The number of keys in the cache.
      */
-    public long size() {
-        return mCache.size();
-    }
+    public abstract long size();
 
     /**
-     * @return The number of underlying map used as a cache.
+     * @return A map containing the key/value entries in the cache.
      */
-    public Map<K, V> getCache() {
-        return mCache;
-    }
+    public abstract Map<K, V> getCache();
+
+    /**
+     * Shutdown the memoizer.
+     */
+    public abstract void shutdown();
 }

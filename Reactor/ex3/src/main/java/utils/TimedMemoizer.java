@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -17,9 +18,9 @@ import java.util.function.Function;
  * at https://en.wikipedia.org/wiki/Memoization.
  */
 public class TimedMemoizer<K, V>
-       implements Function<K, V> {
+       extends Memoizer<K, V> {
     /**
-     * Debugging tag used by the Android logger.
+     * Debugging tag used by the logger.
      */
     private final String TAG =
         getClass().getSimpleName();
@@ -48,13 +49,6 @@ public class TimedMemoizer<K, V>
     private ScheduledExecutorService mScheduledExecutorService;
 
     /**
-     * A ref count of 1 is used to check if a key's not been accessed
-     * in mTimeoutInMillisecs.
-     */
-    private final RefCountedValue mNonAccessedValue =
-        new RefCountedValue(null, 1);
-
-    /**
      * Track # of times a key is referenced within
      * mTimeoutInMillisecs.
      */
@@ -81,10 +75,18 @@ public class TimedMemoizer<K, V>
         /**
          * Increment the ref count atomically and return the value.
          */
-        V get() {
+        V incrementAndGet() {
             // Increment ref count atomically.
-            mRefCount.getAndIncrement();
+            mRefCount.incrementAndGet();
 
+            // Return the value;
+            return mValue;
+        }
+
+        /**
+         * @return Return the value.
+         */
+        V get() {
             // Return the value;
             return mValue;
         }
@@ -98,7 +100,7 @@ public class TimedMemoizer<K, V>
                 return false;
             else {
                 @SuppressWarnings("unchecked")
-                    final RefCountedValue t = (RefCountedValue) obj;
+                final RefCountedValue t = (RefCountedValue) obj;
                 return mRefCount.get() == t.mRefCount.get();
             }
         }
@@ -125,23 +127,29 @@ public class TimedMemoizer<K, V>
                             Options.debug(
                                   "key "
                                   + key
-                                  + " removed from cache (" 
+                                  + " removed from cache (with size "
                                   + mCache.size()
                                   + ") since it wasn't accessed recently");
                         } else {
                             Options.debug(
                                   "key "
                                   + key
-                                  + " NOT removed from cache since it was accessed recently ("
+                                  + " NOT removed from cache since it was accessed recently (with ref count "
                                   + mRefCount.get()
                                   + ") and ("
                                   + mNonAccessedValue.mRefCount.get()
                                   + ")");
 
+                            /*
                             if (mCache.get(key) == null)
-                                Options.debug("key not in cache");
+                                Options.debug("key "
+                                              + key
+                                              + " not in cache");
                             else
-                                Options.debug("key IS in cache");
+                                Options.debug("key "
+                                              + key
+                                              + " IS in cache");
+                             */
 
                             // Try to reset ref count to 1 so it won't
                             // be considered as accessed (yet).  Do
@@ -172,10 +180,20 @@ public class TimedMemoizer<K, V>
     }
 
     /**
+     * A ref count of 1 is used to check if a key's not been accessed
+     * in mTimeoutInMillisecs.
+     */
+    private final RefCountedValue mNonAccessedValue =
+            new RefCountedValue(null, 1);
+
+    /**
      * Constructor initializes the fields.
      */
     public TimedMemoizer(Function<K, V> function,
                          long timeoutInMillisecs) {
+        // Initialize the super class.
+        super(function);
+
         // Store the function for subsequent use.
         mFunction = function;
 
@@ -189,9 +207,9 @@ public class TimedMemoizer<K, V>
         mScheduledExecutorService = 
             new ScheduledThreadPoolExecutor
                     (1,
-                    // Make the thread a daemon so it shutsdown!
+                    // Make thread a daemon so it shuts down automatically!
                     r -> {
-                        Thread t = new Thread(r);
+                        Thread t = new Thread(r, "reaper");
                         t.setDaemon(true);
                         return t;
                     });
@@ -242,7 +260,42 @@ public class TimedMemoizer<K, V>
              });
 
         // Return the value of the rcValue.
-        return rcValue.get();
+        return rcValue.incrementAndGet();
+    }
+
+    /**
+     * Removes the key (and its corresponding value) from this
+     * memoizer.  This method does nothing if the key is not in the
+     * map.
+     *
+     * @param key The key to remove
+     * @ @return The previous value associated with key, or null if
+     * there was no mapping for key.
+     */
+    public V remove(K key) {
+        return mCache.remove(key).get();
+    }
+
+    /**
+     * @return The number of keys in the cache.
+     */
+    public long size() {
+        return mCache.size();
+    }
+
+    /**
+     * @return A map containing the key/value entries in the cache.
+     */
+    public Map<K, V> getCache() {
+        // Create a new concurrent hash map.
+        ConcurrentHashMap<K, V> cacheCopy =
+                new ConcurrentHashMap();
+
+        // Copy the contents of the cache into the new map.
+        mCache.forEach((k, v) -> cacheCopy.put(k, v.get()));
+
+        // Return the copy.
+        return cacheCopy;
     }
 
     /**
