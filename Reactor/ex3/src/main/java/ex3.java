@@ -156,12 +156,9 @@ public class ex3 {
         // Shutdown the memoizer.
         memoizer.shutdown();
 
-        /*
         // Create and time prime checking without a memoizer.
         timeTest(this::isPrime,
         "test without memoizer");
-
-        */
 
         // Dispose of all schedulers and subscribers.
         mDisposables.dispose();
