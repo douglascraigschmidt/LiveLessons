@@ -260,10 +260,10 @@ public class TimedMemoizerEx<K, V>
                                   "scheduling mPurgeEntries for key "
                                   + k);
 
-                    // Schedule mPurgeEntries to purge keys not
-                    // accessed within mTimeoutInMillisecs.
+                    // Schedule mPurgeEntries to periodically purge keys
+                    // not accessed within mTimeoutInMillisecs.
                     mScheduledFuture = mScheduledExecutorService
-                    .scheduleAtFixedRate
+                    .scheduleWithFixedDelay
                     (mPurgeEntries,
                      mTimeoutInMillisecs, // Initial timeout
                      mTimeoutInMillisecs, // Periodic timeout
