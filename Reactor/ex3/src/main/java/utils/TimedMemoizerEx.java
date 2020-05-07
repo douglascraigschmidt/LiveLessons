@@ -11,7 +11,7 @@ import java.util.function.Function;
  * computed it is returned rather than calling the function to compute
  * it again. The Java ConcurrentHashMap.computeIfAbsent() method is
  * used to ensure only a single call to the function is run when a
- * key/value pair is first added to the cache and to eff.  The Java
+ * key/value pair is first added to the cache.  The Java
  * ScheduledThreadExecutorService is used in a "periodic" manner
  * together with Java AtomicLong and ConcurrentHashMap.remove() to
  * limit the amount of time a key/value is retained in the cache.
