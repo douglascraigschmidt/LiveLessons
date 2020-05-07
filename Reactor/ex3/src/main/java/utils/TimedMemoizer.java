@@ -24,8 +24,7 @@ public class TimedMemoizer<K, V>
     /**
      * Debugging tag used by the logger.
      */
-    private final String TAG =
-        getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     /**
      * A map associating a key K w/a value V produced by a function.
@@ -89,6 +88,10 @@ public class TimedMemoizer<K, V>
         }
 
         /**
+         * This method is used by the ConcurrentHashMap.remove()
+         * method to determine if an key/value pair hasn't been
+         * accessed during mTimeoutInMillisecs.
+         *
          * @return true if the ref counts are equal, else false.
          */
         @Override
@@ -98,6 +101,7 @@ public class TimedMemoizer<K, V>
             else {
                 @SuppressWarnings("unchecked")
                 final RefCountedValue t = (RefCountedValue) obj;
+                // Objects are equal if their ref counts are equal!
                 return mRefCount.get() == t.mRefCount.get();
             }
         }
@@ -121,38 +125,30 @@ public class TimedMemoizer<K, V>
                         // accessed in mTimeoutInMillisecs.
                         if (mCache.remove(key,
                                           mNonAccessedValue)) {
-                            Options.debug(
-                                  "key "
-                                  + key
-                                  + " removed from cache (with size "
-                                  + mCache.size()
-                                  + ") since it wasn't accessed recently");
+                            Options.debug(TAG,
+                                          "key "
+                                          + key
+                                          + " removed from cache (with size "
+                                          + mCache.size()
+                                          + ") since it wasn't accessed recently");
                         } else {
-                            Options.debug(
-                                  "key "
-                                  + key
-                                  + " NOT removed from cache since it was accessed recently (with ref count "
-                                  + mRefCount.get()
-                                  + ") and ("
-                                  + mNonAccessedValue.mRefCount.get()
+                            Options.debug(TAG,
+                                          "key "
+                                          + key
+                                          + " NOT removed from cache (with size "
+                                          + mCache.size()
+                                          + ") since it was accessed recently (with ref count "
+                                          + mRefCount.get()
+                                          + ") and ("
+                                          + mNonAccessedValue.mRefCount.get()
                                   + ")");
 
-                            /*
-                            if (mCache.get(key) == null)
-                                Options.debug("key "
-                                              + key
-                                              + " not in cache");
-                            else
-                                Options.debug("key "
-                                              + key
-                                              + " IS in cache");
-                             */
+                            assert(mCache.get(key) != null);
 
                             // Try to reset ref count to 1 so it won't
-                            // be considered as accessed (yet).  Do
-                            // NOT reset it to 1, however, if ref
-                            // count has currently increased between
-                            // remove() above and here.
+                            // be considered as accessed (yet).  Don't
+                            // reset it to 1, however, if ref count
+                            // increased between remove() and here.
                             mRefCount
                                 .getAndUpdate(curCount -> 
                                               curCount > oldCount ? curCount : 1);
@@ -235,29 +231,38 @@ public class TimedMemoizer<K, V>
      * not used within the timeout passed to the constructor.
      */
     public V apply(K key) {
-        // Try to find the key in the cache.  If the key isn't present
-        // then atomically compute the value associated with the key
-        // and return a unique RefCountedValue associated with it.
-        RefCountedValue rcValue = mCache.computeIfAbsent
-            (key,
-             (k) -> {
-                // Apply the function and store the result. 
-                RefCountedValue rcv =
-                    new RefCountedValue(mFunction.apply(k),
-                                       0);
-                // The code below *must* be done here so that it's
-                // protected by the ConcurrentHashMap lock.
-                if (!Thread.currentThread().isInterrupted())
-                    // Schedule a runnable that removes key from the
-                    // cache if its timeout expires and it hasn't been
-                    // accessed in mTimeoutInMillisecs.
-                    rcv.schedule(key);
+        // The mapping function atomically computes the value
+        // associated with the key and returns a unique
+        // RefCountedValue containing this value.
+        Function<K, RefCountedValue> mappingFunction = k -> {
+            // Apply the function and store the result.
+            RefCountedValue rcv = new RefCountedValue(mFunction.apply(k),
+                                                      0);
 
-                return rcv;
-             });
+            // Bail-out if we're interrupted.
+            if (!Thread.currentThread().isInterrupted())
+                // Schedule a runnable that removes key from the cache
+                // if its timeout expires and it hasn't been accessed
+                // in mTimeoutInMillisecs.
+                rcv.schedule(key);
 
-        // Return the value of the rcValue.
-        return rcValue.incrementAndGet();
+            // Return the ref-counted value.
+            return rcv;
+        };
+
+        // Return the value associated with the key.
+        return mCache
+            // Try to find key in cache.  If key isn't present then
+            // use the mapping function defined above to compute it.
+            .computeIfAbsent(key, 
+                             // The mappingFunction *must* be called
+                             // here so it's protected by a
+                             // ConcurrentHashMap synchronizer.
+                             mappingFunction)
+
+            // Return the value of the RefCountedValue, which
+            // increments its ref count atomically.
+            .incrementAndGet();
     }
 
     /**

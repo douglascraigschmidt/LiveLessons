@@ -1,6 +1,7 @@
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.Memoizer;
@@ -30,6 +31,11 @@ import static java.util.stream.Collectors.toMap;
  * skipWhile() operations.
  */
 public class ex3 {
+    /**
+     * Debugging tag used by the logger.
+     */
+    private final String TAG = getClass().getSimpleName();
+
     /**
      * Count # of calls to isPrime() to determine caching benefits.
      */
@@ -110,17 +116,18 @@ public class ex3 {
             // Trigger intermediate operations and collect into list.
             .collect(toList());
 
-        // Run the subscriber in a single thread.
-        mSubscriberScheduler = Schedulers
-            .newParallel("subscriber", 1);
+        // Run the publisher in a single thread.
+        mPublisherScheduler = Schedulers
+            .newParallel("publisher", 1);
 
-        // Maybe run the publisher in a different single thread.
-        mPublisherScheduler = Options.instance().parallel()
+        // Maybe run the subscriber in a different single thread.
+        mSubscriberScheduler = Options.instance().parallel()
             // Choose a different scheduler if we're running in parallel.
-            ? Schedulers.newParallel("publisher", 1)
+            ? Schedulers.newParallel("subscriber",
+                                     Options.instance().parallelism())
 
-            // Run everything in the subscriber scheduler.
-            : mSubscriberScheduler;
+            // Run everything in the publisher scheduler.
+            : mPublisherScheduler;
 
         // This subscriber implements hybrid push/pull backpressure.
         mSubscriber = new HybridBackpressureSubscriber(mPendingItemCount);
@@ -149,9 +156,12 @@ public class ex3 {
         // Shutdown the memoizer.
         memoizer.shutdown();
 
+        /*
         // Create and time prime checking without a memoizer.
         timeTest(this::isPrime,
-                 "test without memoizer");
+        "test without memoizer");
+
+        */
 
         // Dispose of all schedulers and subscribers.
         mDisposables.dispose();
@@ -208,18 +218,22 @@ public class ex3 {
                        // Conditionally enable logging.
                        .logIf(Options.instance().loggingEnabled()))
 
-            // Run the subscriber in a different thread (maybe).
-            .publishOn(mSubscriberScheduler,
-                       // The initial request size.
-                       mSubscriber.nextRequestSize())
+            // Use the flatMap() idiom to concurrently (maybe) check
+            // each random number to see if it's prime.
+            .flatMap(number -> Flux
+                     .just(number)
+                     // Subscriber may run in different thread(s).
+                     .publishOn(mSubscriberScheduler,
+                                // The initial request size.
+                                mSubscriber.nextRequestSize())
 
-            // Check each random number to see if it's prime.
-            .map(number -> checkIfPrime(number, primeChecker))
+                     // Check to see if the number is prime.
+                     .map(__ -> checkIfPrime(number, primeChecker)))
 
-            // This call starts all the wheels in motion.
+            // The subscriber starts all the wheels in motion!
             .subscribe(mSubscriber);
 
-        // Options.debug("waiting in the main thread");
+        Options.debug(TAG, "waiting in the main thread");
 
         // Wait for all processing to complete.
         mSubscriber.await();
@@ -256,7 +270,7 @@ public class ex3 {
                              // Attach a consumer to this since that's
                              // notified of any request to this sink.
                              .onRequest(size -> {
-                                     // Options.debug("Request size = " + size);
+                                     Options.debug(TAG, "Request size = " + size);
 
                                      // Try to publish size # of items.
                                      for (int i = 0;
@@ -268,13 +282,16 @@ public class ex3 {
                                              // Get the next item.
                                              Integer item = iterator.next();
 
-                                             /*
-                                             Options.debug("published item: "
+                                             // Store current pending
+                                             // item count.
+                                             int pendingItems = 
+                                                 mPendingItemCount.incrementAndGet();
+
+                                             Options.debug(TAG,
+                                                           "published item: "
                                                            + item
                                                            + ", pending items = "
-                                                           + mPendingItemCount
-                                                           .incrementAndGet());
-                                             */
+                                                           + pendingItems);
 
                                              // Publish the next item.
                                              sink.next(item);
@@ -417,22 +434,22 @@ public class ex3 {
          Comparator<Map.Entry<Integer, Integer>> comparator) {
         // Create a map that's sorted by the value in map.
         return Flux
-                // Convert EntrySet of the map into a flux stream.
-                .fromIterable(map.entrySet())
+            // Convert EntrySet of the map into a flux stream.
+            .fromIterable(map.entrySet())
 
-                // Sort the elements in the stream using the comparator.
-                .sort(comparator)
+            // Sort the elements in the stream using the comparator.
+            .sort(comparator)
 
-                // Trigger intermediate processing and collect key/value
-                // pairs in the stream into a LinkedHashMap, which
-                // preserves the sorted order.
-                .collect(toMap(Map.Entry::getKey,
-                               Map.Entry::getValue,
-                               (e1, e2) -> e2,
-                               LinkedHashMap::new))
+            // Trigger intermediate processing and collect key/value
+            // pairs in the stream into a LinkedHashMap, which
+            // preserves the sorted order.
+            .collect(toMap(Map.Entry::getKey,
+                           Map.Entry::getValue,
+                           (e1, e2) -> e2,
+                           LinkedHashMap::new))
 
-                // Block until processing is done.
-                .block();
+            // Block until processing is done.
+            .block();
     }
 }
     

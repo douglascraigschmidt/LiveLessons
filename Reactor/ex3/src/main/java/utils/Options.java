@@ -1,6 +1,11 @@
 package utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class implements the Singleton pattern to handle command-line
@@ -39,6 +44,11 @@ public class Options {
     private int mMaxValue = Integer.MAX_VALUE;
 
     /**
+     * The tags to use to control how {@code Options.debug()} behaves.
+     */
+    private List<String> mTagsList = new ArrayList<>();
+
+    /**
      * Controls whether logging is enabled
      */
     private boolean mLoggingEnabled;
@@ -48,6 +58,11 @@ public class Options {
      * false.
      */
     private boolean mParallel = true;
+
+    /**
+     * The parallelism level if mParallel is true.  Defaults to 1.
+     */
+    private int mParallelism = 1;
 
     /**
      * Keeps track of the Memoizer strategy.
@@ -93,6 +108,13 @@ public class Options {
      */
     public boolean parallel() {
         return mParallel;
+    }
+
+    /**
+     * @return The parallelism level.
+     */
+    public int parallelism() {
+        return mParallelism;
     }
 
     /**
@@ -156,6 +178,16 @@ public class Options {
     }
 
     /**
+     * Print the debug string with thread information included if
+     * diagnostics are enabled.
+     */
+    public static void debug(String tag, String string) {
+        if (mUniqueInstance.mDiagnosticsEnabled
+            && mUniqueInstance.mTagsList.contains(tag))
+            Options.debug(string);
+    }
+
+    /**
      * Parse command-line arguments and set the appropriate values.
      */
     public void parseArgs(String[] argv) {
@@ -183,9 +215,18 @@ public class Options {
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");
                     break;
+                case "-P":
+                    mParallelism = Integer.parseInt(argv[argc + 1]);
+                    break;
                 case "-t":
-                     mTimeout = Integer.parseInt(argv[argc + 1]);
-                     break;
+                    mTimeout = Integer.parseInt(argv[argc + 1]);
+                    break;
+                case "-T":
+                    mTagsList = Pattern
+                        .compile(",")
+                        .splitAsStream(argv[argc + 1])
+                        .collect(toList());
+                    break;
                 default:
                     printUsage();
                     return;
@@ -207,7 +248,9 @@ public class Options {
                            + "-m [maxValue] "
                            + "-M [T|U|X]"
                            + "-p [true|false]"
-                           + "-t [timeoutInMillis]");
+                           + "-P [parallelism]"
+                           + "-t [timeoutInMillis]"
+                           + "-T [tag,...]");
     }
 
     /**

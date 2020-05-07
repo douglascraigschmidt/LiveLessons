@@ -14,6 +14,11 @@ public class HybridBackpressureSubscriber
        implements Subscriber<Result>,
                   Disposable {
     /**
+     * Debugging tag used by the logger.
+     */
+    private final String TAG = getClass().getSimpleName();
+
+    /**
      * Count the number of pending items.
      */
     private final AtomicInteger mPendingItemCount;
@@ -112,20 +117,22 @@ public class HybridBackpressureSubscriber
         // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
 
-        // Options.debug("subscriber pending items: " + pendingItems);
+        Options.debug(TAG, "subscriber pending items: " + pendingItems);
 
-        // Compute 70% of mREQUEST_SIZE.
-        int seventyPercent = (int)(mREQUEST_SIZE * (70.0f/100.0f));
+        if (Options.instance().backPressureEnabled()) {
+            // Compute 70% of mREQUEST_SIZE.
+            int seventyPercent = (int) (mREQUEST_SIZE * (70.0f / 100.0f));
 
-        // Check to see if we've consumed 70% our window of items.
-        if (++mItemsProcessedSinceLastRequest == seventyPercent) {
-            // Options.debug("subscriber requesting next tranche of items");
+            // Check to see if we've consumed 70% our window of items.
+            if (++mItemsProcessedSinceLastRequest == seventyPercent) {
+                Options.debug(TAG, "subscriber requesting next tranche of items");
 
-            // Request next tranche of items.
-            mSubscription.request(nextRequestSize());
+                // Request next tranche of items.
+                mSubscription.request(nextRequestSize());
 
-            // Reset the counter.
-            mItemsProcessedSinceLastRequest = 0;
+                // Reset the counter.
+                mItemsProcessedSinceLastRequest = 0;
+            }
         }
     }
 

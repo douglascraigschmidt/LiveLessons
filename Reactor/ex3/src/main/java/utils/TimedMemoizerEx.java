@@ -24,8 +24,7 @@ public class TimedMemoizerEx<K, V>
     /**
      * Debugging tag used by the logger.
      */
-    private final String TAG =
-        getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     /**
      * The amount of time to retain a value in the cache.
@@ -37,14 +36,14 @@ public class TimedMemoizerEx<K, V>
      * function.  A RefCountedValue is used to keep track of how many
      * times a key/value pair is accessed.
      */
-    private final ConcurrentHashMap<K, RefCountedValue> mCache =
-            new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<K, RefCountedValue<V>> mCache =
+        new ConcurrentHashMap<>();
 
     /**
      * Records the number of times a key/value is referenced
      * (if at all) within mTimeoutInMillisecs.
      */
-    private class RefCountedValue {
+    private static class RefCountedValue<V> {
         /**
          * Records the number of times a key is referenced
          * within mTimeoutInMillisecs.
@@ -65,6 +64,10 @@ public class TimedMemoizerEx<K, V>
         }
 
         /**
+         * This method is used by the ConcurrentHashMap.remove()
+         * method to determine if an key/value pair hasn't been
+         * accessed during mTimeoutInMillisecs.
+         *
          * @return True if the ref counts are equal, else false.
          */
         @Override
@@ -73,15 +76,16 @@ public class TimedMemoizerEx<K, V>
                 return false;
             else {
                 @SuppressWarnings("unchecked")
-                final RefCountedValue t =
-                    (RefCountedValue) obj;
+                    final RefCountedValue<V> t =
+                    (RefCountedValue<V>) obj;
+                // Objects are equal if their ref counts are equal!
                 return mRefCount.get() == t.mRefCount.get();
             }
         }
 
         /**
-         * Increments the ref count atomically and
-         * return the current value.
+         * Increments the ref count atomically and return the current
+         * value.
          *
          * @return The current value.
          */
@@ -106,12 +110,12 @@ public class TimedMemoizerEx<K, V>
      * A constant whose ref count of 1 indicates its key hasn't been
      * accessed in mTimeoutInMillisecs.
      */
-    private final RefCountedValue mNonAccessedValue =
-        new RefCountedValue(null, 1);
+    private final RefCountedValue<V> mNonAccessedValue =
+        new RefCountedValue<>(null, 1);
 
     /**
-     * Keeps track of the number of entries in mCache so mPurgeEntries
-     * can be properly scheduled and cancelled.
+     * Track the # of entries in mCache so mPurgeEntries can be
+     * properly scheduled and cancelled.
      */
     private final ThresholdCrosser mCacheCount = 
         new ThresholdCrosser(0);
@@ -124,64 +128,67 @@ public class TimedMemoizerEx<K, V>
     private ScheduledFuture<?> mScheduledFuture;
 
     /** 
-     * This runnable is scheduled to run periodically by the
-     * ScheduledExecutorService to purge entries in the map that
-     * haven't been accessed in mTimeoutInMillisecs.
+     * This runnable lambda is scheduled to run periodically by
+     * the ScheduledExecutorService to purge entries in the map
+     * that haven't been accessed in mTimeoutInMillisecs.
      */
     private final Runnable mPurgeEntries = () -> {
-        Options.debug("start the purge of keys not accessed recently");
+        Options.debug(TAG, "start the purge of keys not accessed recently");
 
         // Iterate over all the keys in the map and purge those not
         // accessed recently.  This iterator is only called by the one
         // thread running ScheduledThreadPoolExecutor.
         mCache.forEach((key, value) -> {
-            // Store the current ref count.
-            long oldCount = value.mRefCount.get();
+                // Store the current ref count.
+                long oldCount = value.mRefCount.get();
 
-            // If the entry has not been accessed within
-            // mTimeoutInMillisecs then atomically remove it.
-            if (mCache.remove(key, mNonAccessedValue)) {
-                Options.debug("key "
-                        + key
-                        + " removed from cache ("
-                        + mCache.size()
-                        + ") since it wasn't accessed recently");
+                // If the entry has not been accessed within
+                // mTimeoutInMillisecs then atomically remove it.
+                if (mCache.remove(key, 
+                                  mNonAccessedValue)) {
+                    Options.debug(TAG, 
+                                  "key "
+                                  + key
+                                  + " removed from cache ("
+                                  + mCache.size()
+                                  + ") since it wasn't accessed recently");
 
-                // Decrement the count of cached entries by one, which
-                // will invoke the lambda when the count drops to 0.
-                mCacheCount.decrementAndCallAtN
+                    // Decrement the count of cached entries by one, which
+                    // will invoke the lambda when the count drops to 0.
+                    mCacheCount.decrementAndCallAtN
                         (0, () -> {
-                            // If there are no entries in the cache cancel
-                            // mPurgeEntries from being called henceforth.
+                            // If no entries remain in cache then
+                            // cancel mPurgeEntries for now.
                             mScheduledFuture.cancel(true);
-                            Options.debug("cancelling mPurgeEntries");
+                            Options.debug(TAG, "cancelling mPurgeEntries");
                         });
-            } else {
-                // Entry was accessed within mTimeoutInMillisecs,
-                // so update its reference count.
+                } else {
+                    // Entry was accessed within mTimeoutInMillisecs, so
+                    // update its reference count.
 
-                Options.debug("key "
-                        + key
-                        + " NOT removed from cache ("
-                        + mCache.size() + ") since it was accessed recently ("
-                        + value.mRefCount.get()
-                        + ") and ("
-                        + mNonAccessedValue.mRefCount.get()
-                        + ")");
-                assert(mCache.get(key) != null);
+                    Options.debug(TAG, "key "
+                                  + key
+                                  + " NOT removed from cache ("
+                                  + mCache.size() 
+                                  + ") since it was accessed recently ("
+                                  + value.mRefCount.get()
+                                  + ") and ("
+                                  + mNonAccessedValue.mRefCount.get()
+                                  + ")");
 
-                // Try to reset ref count to 1 so it won't be
-                // considered as accessed (yet).  Do NOT reset it
-                // to 1, however, if ref count has currently
-                // increased between remove() above and here.
-                value
-                    .mRefCount
-                    .getAndUpdate(curCount ->
-                                  curCount > oldCount ? curCount : 1);
-            }
-        });
+                    assert(mCache.get(key) != null);
 
-        Options.debug("ending the purge of keys not accessed recently");
+                    // Try to reset ref count to 1 so it won't be
+                    // considered as accessed (yet).  Don't reset it to 1,
+                    // however, if ref count has increased between
+                    // remove() above and here.
+                    value.mRefCount
+                        .getAndUpdate(curCount ->
+                                      curCount > oldCount ? curCount : 1);
+                }
+            });
+
+        Options.debug(TAG, "ending the purge of keys not accessed recently");
     };
 
     /**
@@ -208,13 +215,13 @@ public class TimedMemoizerEx<K, V>
         // Create a ScheduledThreadPoolExecutor with a single thread.
         mScheduledExecutorService =
             new ScheduledThreadPoolExecutor
-                    (1,
-                    // Make thread a daemon so it shuts down automatically!
-                    r -> {
-                        Thread t = new Thread(r, "reaper");
-                        t.setDaemon(true);
-                        return t;
-                    });
+            (1,
+             // Make thread a daemon so it shuts down automatically!
+             r -> {
+                Thread t = new Thread(r, "reaper");
+                t.setDaemon(true);
+                return t;
+             });
 
         // Set the policies to clean everything up on shutdown.
         ScheduledThreadPoolExecutor exec =
@@ -238,41 +245,49 @@ public class TimedMemoizerEx<K, V>
      * within the timeout passed to the constructor.
      */
     public V apply(K key) {
-        // Try to find the key in the cache.  If the key isn't present
-        // then call computeIfAbsent() to atomically compute the value
-        // for the key and return a unique RefCountedValue.
-        RefCountedValue rcValue = mCache
-            .computeIfAbsent
-            (key,
-             (k) -> {
-                // If this is the first entry added to an empty cache
-                // then schedule mPurgeEntries to run periodically.
-                mCacheCount.incrementAndCallAtN
-                (1,
-                 () -> {
-                    // Do nothing if we've shut down.
-                    if (mScheduledExecutorService != null) {
-                        Options.debug("scheduling mPurgeEntries for key "
-                              + k);
+        // The mapping function atomically computes the value
+        // associated with the key and returns a unique
+        // RefCountedValue containing this value.
+        Function<K, RefCountedValue<V>> mappingFunction = k -> {
+            // If this is the first entry added to an empty cache then
+            // schedule mPurgeEntries to run periodically.
+            mCacheCount.incrementAndCallAtN
+            (1,
+             () -> {
+                // Do nothing if we've shut down.
+                if (mScheduledExecutorService != null) {
+                    Options.debug(TAG, 
+                                  "scheduling mPurgeEntries for key "
+                                  + k);
 
-                        // Schedule mPurgeEntries to purge keys not
-                        // accessed within mTimeoutInMillisecs.
-                        mScheduledFuture = mScheduledExecutorService
-                        .scheduleAtFixedRate
-                        (mPurgeEntries,
-                         mTimeoutInMillisecs, // Initial timeout
-                         mTimeoutInMillisecs, // Periodic timeout
-                         TimeUnit.MILLISECONDS);
-                    }});
+                    // Schedule mPurgeEntries to purge keys not
+                    // accessed within mTimeoutInMillisecs.
+                    mScheduledFuture = mScheduledExecutorService
+                    .scheduleAtFixedRate
+                    (mPurgeEntries,
+                     mTimeoutInMillisecs, // Initial timeout
+                     mTimeoutInMillisecs, // Periodic timeout
+                     TimeUnit.MILLISECONDS);
+                }});
 
-                // Apply mFunction to store/return the result.
-                return new RefCountedValue(mFunction.apply(k),
-                                           0);
-             });
+            // Apply mFunction to store/return the result.
+            return new RefCountedValue<>(mFunction.apply(k),
+                                         0);
+        };
 
-        // Return the value of the rcValue, which increments its ref
-        // count atomically.
-        return rcValue.incrementAndGet();
+        // Return the value associated with the key.
+        return mCache
+            // Try to find key in cache.  If key isn't present then
+            // use the mapping function defined above to compute it.
+            .computeIfAbsent(key,
+                             // The mappingFunction *must* be called
+                             // here so it's protected by a
+                             // ConcurrentHashMap synchronizer.
+                             mappingFunction)
+
+            // Return the value of the RefCountedValue, which
+            // increments its ref count atomically.
+            .incrementAndGet();
     }
 
     /**

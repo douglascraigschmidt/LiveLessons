@@ -22,8 +22,7 @@ public class UntimedMemoizer<K, V>
     /**
      * Debugging tag used by the logger.
      */
-    private final String TAG =
-        getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
 
     /**
      * This map associates a key K with a value V that's produced by a
