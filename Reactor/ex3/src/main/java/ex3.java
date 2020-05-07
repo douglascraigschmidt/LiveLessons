@@ -1,7 +1,7 @@
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.Memoizer;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Map.Entry.comparingByValue;
@@ -164,7 +165,7 @@ public class ex3 {
         mDisposables.dispose();
 
         // Print the results.
-        System.out.println(RunTimer.getTimingResults());
+        Options.print(RunTimer.getTimingResults());
 
         // Demonstrate slicing on the concurrent hash map.
         demonstrateSlicing(memoizerCopy);
@@ -207,8 +208,21 @@ public class ex3 {
         mPendingItemCount.set(0);
 
         // Create a publisher that runs on its own scheduler.
-        Flux<Integer> publisher = publisher(mPublisherScheduler);
+        Flux<Integer> publisher = publish(mPublisherScheduler);
 
+        // This function determines if a random # is prime or not.
+        Function<Integer, Flux<Result>> determinePrimality = number -> Flux
+            .just(number)
+
+            // Subscriber may run in different thread(s).
+            .publishOn(mSubscriberScheduler,
+                       // The initial request size.
+                       mSubscriber.nextRequestSize())
+
+            // Check if the number is prime.
+            .map(__ -> checkIfPrime(number, primeChecker));
+
+        // Run the main flux pipeline.
         publisher
             // Enable transformation at instantiation time.
             .transform(ReactorUtils
@@ -217,15 +231,7 @@ public class ex3 {
 
             // Use the flatMap() idiom to concurrently (maybe) check
             // each random number to see if it's prime.
-            .flatMap(number -> Flux
-                     .just(number)
-                     // Subscriber may run in different thread(s).
-                     .publishOn(mSubscriberScheduler,
-                                // The initial request size.
-                                mSubscriber.nextRequestSize())
-
-                     // Check to see if the number is prime.
-                     .map(__ -> checkIfPrime(number, primeChecker)))
+            .flatMap(determinePrimality)
 
             // The subscriber starts all the wheels in motion!
             .subscribe(mSubscriber);
@@ -257,48 +263,48 @@ public class ex3 {
      * @param scheduler Scheduler to publish the numbers on.
      * @return Return a flux that publishes random numbers
      */
-    private Flux<Integer> publisher(Scheduler scheduler) {
+    private Flux<Integer> publish(Scheduler scheduler) {
         // Iterate through all the random numbers.
         var iterator = mRandomIntegers.iterator();
 
+        // This consumer emits a flux stream of random integers.
+        Consumer<FluxSink<Integer>> emitter = sink -> sink
+            // Hook method called when request is made to sink.
+            .onRequest(size -> {
+                    Options.debug(TAG, "Request size = " + size);
+
+                    // Try to publish size # of items.
+                    for (int i = 0;
+                         i < size;
+                         ++i) {
+                        // Keep going if iterator's not done.
+                        if (iterator.hasNext()) {
+                            // Get the next item.
+                            Integer item = iterator.next();
+
+                            // Store current pending item count.
+                            int pendingItems =
+                                mPendingItemCount.incrementAndGet();
+
+                            Options.debug(TAG,
+                                          "published item: "
+                                          + item
+                                          + ", pending items = "
+                                          + pendingItems);
+
+                            // Publish the next item.
+                            sink.next(item);
+                        } else {
+                            // We're done publishing.
+                            sink.complete();
+                            break;
+                        }
+                    }
+                });
+
         return Flux
-            // Generate a flux stream of random integers.
-            .<Integer>create(sink -> sink
-                             // Attach a consumer to this since that's
-                             // notified of any request to this sink.
-                             .onRequest(size -> {
-                                     Options.debug(TAG, "Request size = " + size);
-
-                                     // Try to publish size # of items.
-                                     for (int i = 0;
-                                          i < size;
-                                          ++i) {
-                                         // Keep going if there's an
-                                         // item in the iterator.
-                                         if (iterator.hasNext()) {
-                                             // Get the next item.
-                                             Integer item = iterator.next();
-
-                                             // Store current pending
-                                             // item count.
-                                             int pendingItems = 
-                                                 mPendingItemCount.incrementAndGet();
-
-                                             Options.debug(TAG,
-                                                           "published item: "
-                                                           + item
-                                                           + ", pending items = "
-                                                           + pendingItems);
-
-                                             // Publish the next item.
-                                             sink.next(item);
-                                         } else {
-                                             // We're done publishing.
-                                             sink.complete();
-                                             break;
-                                         }
-                                     }
-                                 }))
+            // Emit a flux stream of random integers.
+            .create(emitter)
 
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
