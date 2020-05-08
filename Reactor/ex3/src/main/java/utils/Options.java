@@ -1,5 +1,7 @@
 package utils;
 
+import reactor.core.publisher.FluxSink;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -79,6 +81,16 @@ public class Options {
     private int mTimeout = 2_000;
 
     /**
+     * Keeps track of the OverflowStrategy.
+     * 'D' - DROP
+     * 'B' - BUFFER
+     * 'E' - ERROR
+     * 'I' - IGNORE
+     * 'L' - LATEST
+     */
+    private char mOverflowStrategy = 'I';
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -115,6 +127,20 @@ public class Options {
      */
     public int parallelism() {
         return mParallelism;
+    }
+
+    /**
+     * @return Return the overflow strategy.
+     */
+    public FluxSink.OverflowStrategy overflowStrategy() {
+        switch(mOverflowStrategy) {
+        case 'D': return FluxSink.OverflowStrategy.DROP;
+        case 'B': return FluxSink.OverflowStrategy.BUFFER;
+        case 'E': return FluxSink.OverflowStrategy.ERROR;
+        case 'I': return FluxSink.OverflowStrategy.IGNORE;
+        case 'L': return FluxSink.OverflowStrategy.LATEST;
+        default: throw new IllegalArgumentException("invalid OverflowStrategy");
+        }
     }
 
     /**
@@ -212,6 +238,9 @@ public class Options {
                 case "-M":
                     mMemoizerStrategy = argv[argc + 1].charAt(0);
                     break;
+                case "-o":
+                    mOverflowStrategy = argv[argc + 1].charAt(0);
+                    break;
                 case "-p":
                     mParallel = argv[argc + 1].equals("true");
                     break;
@@ -247,6 +276,7 @@ public class Options {
                            + "-l [true|false] "
                            + "-m [maxValue] "
                            + "-M [T|U|X]"
+                           + "-o [B|D|E|I|L]"
                            + "-p [true|false]"
                            + "-P [parallelism]"
                            + "-t [timeoutInMillis]"

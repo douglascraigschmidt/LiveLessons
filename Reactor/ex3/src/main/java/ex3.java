@@ -9,11 +9,7 @@ import utils.Options;
 import utils.ReactorUtils;
 import utils.RunTimer;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -219,7 +215,7 @@ public class ex3 {
                        // The initial request size.
                        mSubscriber.nextRequestSize())
 
-            // Check if the number is prime.
+            // Check if the # is prime.
             .map(__ -> checkIfPrime(number, primeChecker));
 
         // Run the main flux pipeline.
@@ -230,7 +226,7 @@ public class ex3 {
                        .logIf(Options.instance().loggingEnabled()))
 
             // Use the flatMap() idiom to concurrently (maybe) check
-            // each random number to see if it's prime.
+            // each random # to see if it's prime.
             .flatMap(determinePrimality)
 
             // The subscriber starts all the wheels in motion!
@@ -242,16 +238,7 @@ public class ex3 {
         mSubscriber.await();
 
         // Cleverly print out the results.
-        Options.print("Leaving "
-                      + testName
-                      + " with "
-                      + mPrimeCheckCounter.get()
-                      + " prime checks "
-                      + (primeChecker instanceof Memoizer
-                         ? "(" + (Options.instance().count()
-                                  - mPrimeCheckCounter.get())
-                         + " duplicates)"
-                         : ""));
+        Options.print(makeExitString(testName, primeChecker));
 
         // Return prime checker (which may update during the test).
         return primeChecker;
@@ -264,11 +251,35 @@ public class ex3 {
      * @return Return a flux that publishes random numbers
      */
     private Flux<Integer> publish(Scheduler scheduler) {
-        // Iterate through all the random numbers.
-        var iterator = mRandomIntegers.iterator();
-
         // This consumer emits a flux stream of random integers.
-        Consumer<FluxSink<Integer>> emitter = sink -> sink
+        return Flux
+            // Emit a flux stream of random integers.
+            .create(Options.instance().backPressureEnabled()
+                    // Emit integers using backpressure.
+                    ? makeBackpressureEmitter(mRandomIntegers.iterator())
+                    // Emit integers not using backpressure.
+                    : makeNonBackpressureEmitter(mRandomIntegers.iterator()),
+                    // Set the overflow strategy.
+                    Options.instance().overflowStrategy())
+
+            // Subscribe on the given scheduler.
+            .subscribeOn(scheduler);
+    }
+
+    /**
+     * A factory method that's used to emit a flux stream of random
+     * integers using a hybrid push/pull backpressure model.
+     *
+     * @param iterator Iterator containing the random integers
+     * @return A consumer to a flux sink that emits a flux stream of
+     *         random integers using a hybrid push/pull backpressure
+     *         model
+     */
+    private Consumer<FluxSink<Integer>>
+        makeBackpressureEmitter(Iterator<Integer> iterator) {
+        // Create an emitter that uses the hybrid push/pull
+        // backpressure model.
+        return sink -> sink
             // Hook method called when request is made to sink.
             .onRequest(size -> {
                     Options.debug(TAG, "Request size = " + size);
@@ -301,18 +312,50 @@ public class ex3 {
                         }
                     }
                 });
-
-        return Flux
-            // Emit a flux stream of random integers.
-            .create(emitter)
-
-            // Subscribe on the given scheduler.
-            .subscribeOn(scheduler);
     }
 
     /**
+     * A factory method that's used to emit a flux stream of random
+     * integers without concern for backpressure
+     *
+     * @param iterator Iterator containing the random integers
+     * @return A consumer to a flux sink that emits a flux stream
+     *         of random integers without concern for backpressure
+     */
+    private Consumer<FluxSink<Integer>>
+        makeNonBackpressureEmitter(Iterator<Integer> iterator) {
+        // Create an emitter that just blasts out random integers.
+        return sink -> {
+            Options.debug(TAG, "Request size = "
+                          + mRandomIntegers.size());
+
+            // Keep going if iterator's not done.
+            while (iterator.hasNext()) {
+                // Get the next item.
+                Integer item = iterator.next();
+
+                // Store current pending item count.
+                int pendingItems =
+                    mPendingItemCount.incrementAndGet();
+
+                Options.debug(TAG,
+                              "published item: "
+                              + item
+                              + ", pending items = "
+                              + pendingItems);
+
+                // Publish the next item.
+                sink.next(item);
+            }
+            // We're done publishing.
+            sink.complete();
+        };
+    }
+
+
+    /**
      * Check if {@code primeCandidate} is prime or not.
-     * 
+     *
      * @param primeCandidate The number to check if it's prime
      * @param primeChecker A function that checks if number is prime
      * @return A {@code Result} object that contains the original
@@ -368,10 +411,10 @@ public class ex3 {
                       + sortedMap.size()
                       + " elements sorted by value = \n" + sortedMap);
 
-        // Print out the prime numbers using takeWhile().
+        // Print out the prime #'s using takeWhile().
         printPrimes(sortedMap);
 
-        // Print out the non-prime numbers using skipWhile().
+        // Print out the non-prime #'s using skipWhile().
         printNonPrimes(sortedMap);
     }
     
@@ -385,7 +428,7 @@ public class ex3 {
             .fromIterable(sortedMap.entrySet())
             
             // Slice the stream using a predicate that stops after a
-            // non-prime number (i.e., getValue() != 0) is reached.
+            // non-prime # (i.e., getValue() != 0) is reached.
             .takeWhile(entry -> entry.getValue() == 0)
 
             // Map the EntrySet into just the key.
@@ -412,7 +455,7 @@ public class ex3 {
             .fromIterable(sortedMap.entrySet())
 
             // Slice the stream using a predicate that skips over the
-            // non-prime numbers (i.e., getValue() == 0);
+            // non-prime #'s (i.e., getValue() == 0);
             .skipWhile(entry -> entry.getValue() == 0)
 
             // Collect the results into a list.
@@ -453,6 +496,31 @@ public class ex3 {
 
             // Block until processing is done.
             .block();
+    }
+
+
+    /**
+     * Create and return the proper exit string based on various conditions.
+     * @return The proper exit string.
+     */
+    private String makeExitString(String testName,
+                                  Function<Integer, Integer> primeChecker) {
+        String prefix = "Leaving "
+                + testName
+                + " with "
+                + mPrimeCheckCounter.get()
+                + " prime checks ";
+
+        if (Options.instance().overflowStrategy() == FluxSink.OverflowStrategy.DROP
+                || Options.instance().overflowStrategy() == FluxSink.OverflowStrategy.LATEST)
+            return prefix;
+        else if (primeChecker instanceof Memoizer)
+            return prefix
+                    + "(" + (Options.instance().count()
+                    - mPrimeCheckCounter.get())
+                    + " duplicates)";
+        else
+            return prefix;
     }
 }
     
