@@ -13,10 +13,12 @@ overview of what's included:
         change radically from time to time.
 
 . ex3 - This program applies Project Reactor features to implement
-        hybrid push/pull backpressure between a publisher and a
-        subscriber running in different threads/schedulers.  This
-        program also measures the performance of checking random
-        numbers for primality with and without a memoizer based on
-        Java ConcurrentHashMap.  In addition, it demonstrates the use
-        of slicing with the Flux takeWhile() and skipWhile()
+        various types of backpressure strategies (e.g., ignore,
+        buffer, error, latest, drop, and push/pull) between a
+        publisher and a subscriber that (conditionally) run in
+        different threads/schedulers.  This program also measures the
+        performance of checking random numbers for primality with and
+        without various types of memoizers (e.g., untimed and timed)
+        based on Java ConcurrentHashMap.  In addition, it demonstrates
+        the use of slicing with the Flux takeWhile() and skipWhile()
         operations.
