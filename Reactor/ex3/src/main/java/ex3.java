@@ -1,7 +1,9 @@
 import reactor.core.Disposable;
 import reactor.core.Disposables;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.Memoizer;
@@ -264,6 +266,9 @@ public class ex3 {
                     // Set the overflow strategy.
                     Options.instance().overflowStrategy())
 
+            // Return a 0 if an error occurs.
+            .onErrorResume(e -> Flux.just(0))
+
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
     }
@@ -346,14 +351,14 @@ public class ex3 {
                               + ", pending items = "
                               + pendingItems);
 
-                // Publish the next item.
+                // Publish the next item if the sink wasn't cancelled.
                 sink.next(item);
             }
+
             // We're done publishing.
             sink.complete();
         };
     }
-
 
     /**
      * Check if {@code primeCandidate} is prime or not.
