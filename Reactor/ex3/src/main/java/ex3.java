@@ -266,9 +266,6 @@ public class ex3 {
                     // Set the overflow strategy.
                     Options.instance().overflowStrategy())
 
-            // Return a 0 if an error occurs.
-            // .onErrorResume(e -> Flux.just(0))
-
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
     }
@@ -323,7 +320,7 @@ public class ex3 {
 
     /**
      * A factory method that's used to emit a flux stream of random
-     * integers without concern for backpressure
+     * integers without concern for backpressure.
      *
      * @param iterator Iterator containing the random integers
      * @return A consumer to a flux sink that emits a flux stream
