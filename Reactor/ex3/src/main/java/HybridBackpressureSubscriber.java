@@ -141,7 +141,12 @@ public class HybridBackpressureSubscriber
      * exception.
      */
     @Override
-    public void onError(Throwable t) { Options.print("failure " + t); }
+    public void onError(Throwable t) { 
+        Options.print("failure " + t); 
+
+        // Release the latch since we're done.
+        mLatch.countDown();
+    }
 
     /**
      * Hook method that's called when all integers have been

@@ -267,7 +267,7 @@ public class ex3 {
                     Options.instance().overflowStrategy())
 
             // Return a 0 if an error occurs.
-            .onErrorResume(e -> Flux.just(0))
+            // .onErrorResume(e -> Flux.just(0))
 
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
@@ -351,8 +351,10 @@ public class ex3 {
                               + ", pending items = "
                               + pendingItems);
 
-                // Publish the next item if the sink wasn't cancelled.
-                sink.next(item);
+                // Only publish an item if the sink hasn't been cancelled.
+                if (!sink.isCancelled())
+                    // Publish the next item.
+                    sink.next(item);
             }
 
             // We're done publishing.
