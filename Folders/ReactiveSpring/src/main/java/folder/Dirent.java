@@ -99,7 +99,7 @@ public abstract class Dirent
      * @return The contents of this Dirent
      */
     public CharSequence getContents() {
-       // throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
     	return null;
     }
 
@@ -188,7 +188,7 @@ public abstract class Dirent
                     // Pop the document at the end of the list off and
                     // make it the current entry.
                     mCurrentEntry =
-                            mDocsList.remove(mDocsList.size() - 1);
+                        mDocsList.remove(mDocsList.size() - 1);
                 }
             }
 

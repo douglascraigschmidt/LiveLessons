@@ -50,9 +50,9 @@ public final class FolderTests {
      * @param concurrent Flag indicating whether to run the tests concurrent or not
      */
     public static void countEntries(Mono<Dirent> rootFolderM,
-                                     boolean concurrent) {
+                                    boolean concurrent) {
         Mono<Long> countM = performCount(rootFolderM, concurrent);
-		countM
+        countM
 
             // Process results
             .doOnSuccess(entryCount -> Options.getInstance()
@@ -64,19 +64,19 @@ public final class FolderTests {
             .block();
     }
 
-	public static Mono<Long> performCount(Mono<Dirent> rootFolderM, boolean concurrent) {
-		Mono<Long> countM = rootFolderM
-										    // This code is called after rootFolder is initialized and
-										    // counts the # of entries in the folder.
-										    .flatMap(rootFolder -> ReactorUtils
-										             // Create a stream of dirents that run either concurrent
-										             // or sequentially.
-										             .fromIterableConcurrentIf(rootFolder, concurrent)
+    public static Mono<Long> performCount(Mono<Dirent> rootFolderM, boolean concurrent) {
+        Mono<Long> countM = rootFolderM
+            // This code is called after rootFolder is initialized and
+            // counts the # of entries in the folder.
+            .flatMap(rootFolder -> ReactorUtils
+                     // Create a stream of dirents that run either concurrent
+                     // or sequentially.
+                     .fromIterableConcurrentIf(rootFolder, concurrent)
 										             
-										             // Count the number of dirents in the stream.
-										             .count());
-		return countM;
-	}
+                     // Count the number of dirents in the stream.
+                     .count());
+        return countM;
+    }
 
     /**
      * Find all occurrences of {@code searchWord} in {@code
@@ -91,54 +91,54 @@ public final class FolderTests {
                                      String searchWord,
                                      boolean concurrent) {
         Mono<Long> postSearch = performFolderSearch(rootFolderM, searchWord, concurrent);
-		postSearch
+        postSearch
 
-                // Block until processing's done.
-                .block();
+            // Block until processing's done.
+            .block();
     }
 
-	public static Mono<Long> performFolderSearch(Mono<Dirent> rootFolderM, String searchWord, boolean concurrent) {
-		// This function counts # of searchWord matches in a dirent.
+    public static Mono<Long> performFolderSearch(Mono<Dirent> rootFolderM, String searchWord, boolean concurrent) {
+        // This function counts # of searchWord matches in a dirent.
         Function<Dirent, Flux<Long>> countMatches = dirent -> ReactorUtils
-                // Emit concurrent or sequentially.
-                .justConcurrentIf(dirent, concurrent)
+            // Emit concurrent or sequentially.
+            .justConcurrentIf(dirent, concurrent)
 
-                // Only search documents.
-                .filter(FolderTestsUtils::isDocument)
+            // Only search documents.
+            .filter(FolderTestsUtils::isDocument)
 
-                // Search document looking for matches.
-                .flatMap(document -> FolderTestsUtils
-                        // Count # of times searchWord matches in
-                        // document.
-                        .occurrencesCount(document,
-                                          searchWord));
+            // Search document looking for matches.
+            .flatMap(document -> FolderTestsUtils
+                     // Count # of times searchWord matches in
+                     // document.
+                     .occurrencesCount(document,
+                                       searchWord));
 
         Mono<Long> postSearch = rootFolderM
-                // This code is called after rootFolder initialization
-                // complete to count all searchWord matches in the folder.
-                .flatMap(rootFolder -> Flux
-                        // Create a stream of dirents from rootFolder.
-                        .fromIterable(rootFolder)
+            // This code is called after rootFolder initialization
+            // complete to count all searchWord matches in the folder.
+            .flatMap(rootFolder -> Flux
+                     // Create a stream of dirents from rootFolder.
+                     .fromIterable(rootFolder)
 
-                        // Use the Reactor flatMap() idiom to count the #
-                        // of times searchWord matches in the folder.
-                        .flatMap(countMatches)
+                     // Use the Reactor flatMap() idiom to count the #
+                     // of times searchWord matches in the folder.
+                     .flatMap(countMatches)
 
-                        // Sum all the counts.
-                        .reduce(Long::sum)
+                     // Sum all the counts.
+                     .reduce(Long::sum)
 
-                        // Return 0 if empty.
-                        .defaultIfEmpty(0L)
+                     // Return 0 if empty.
+                     .defaultIfEmpty(0L)
 
-                        // Process results.
-                        .doOnSuccess(wordMatches -> Options.getInstance()
-                                // Display the result.
-                                .display("total matches of \""
-                                        + searchWord
-                                        + "\" = "
-                                        + wordMatches)));
-		return postSearch;
-	}
+                     // Process results.
+                     .doOnSuccess(wordMatches -> Options.getInstance()
+                                  // Display the result.
+                                  .display("total matches of \""
+                                           + searchWord
+                                           + "\" = "
+                                           + wordMatches)));
+        return postSearch;
+    }
 
     /**
      * Count # of lines in the recursively structured directory at
