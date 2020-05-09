@@ -42,7 +42,7 @@ public class FolderController {
      *
      * @param rootDir The root directory to start the search
      * @param word The word to search for starting at {@code rootDir}
-     * @return A count of the number of times {@code} word appears in
+     * @return A count of the number of times {@code word} appears in
      *         the folder starting at {@code rootDir}  
      */
     @GetMapping("/{rootDir}/_search")
