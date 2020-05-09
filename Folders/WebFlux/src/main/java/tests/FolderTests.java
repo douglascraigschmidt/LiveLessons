@@ -2,6 +2,7 @@ package tests;
 
 import folder.Dirent;
 import folder.Folder;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.Options;
@@ -41,6 +42,18 @@ public final class FolderTests {
             // Cache the results so that they won't be re-emitted
             // repeatedly each time.
             .cache();
+    }
+
+    public static Mono<Dirent> createRemoteFolder(String uri) {
+        WebClient webClient = WebClient
+                .create("http://localhost:8080/");
+
+        // Return a mono to the folder initialized remotely.
+        return webClient
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(Dirent.class);
     }
 
     /**

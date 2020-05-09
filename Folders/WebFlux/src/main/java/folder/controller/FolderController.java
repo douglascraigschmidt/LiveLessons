@@ -27,8 +27,8 @@ import tests.FolderTests;
  *
  * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
  * requests onto methods in the {@code FolderController}.  GET
- * requests invoked from any HTTP web client (e.g., a web brower)
- * or command-line utility (e.g., Curl or Postman)
+ * requests invoked from any HTTP web client (e.g., a web browser)
+ * or command-line utility (e.g., Curl or Postman).
  */
 @RestController
 @RequestMapping("/folders")

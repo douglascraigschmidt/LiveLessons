@@ -65,7 +65,8 @@ public class Main {
             // Compute the time needed to create a new folder
             // asynchronously.
             .timeRun(() -> FolderTests
-                     .createFolder(sWORKS, concurrent),
+                     // .createFolder(sWORKS, concurrent),
+                     .createRemoteFolder("folders/works/"),
                      "createFolder() " + mode);
 
         RunTimer
