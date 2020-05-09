@@ -151,6 +151,13 @@ public class Options {
     }
 
     /**
+     * @return Return the timeout.
+     */
+    public long timeout() {
+        return mTimeout;
+    }
+
+    /**
      * @return The max value for the random numbers.
      */
     public int maxValue() {
