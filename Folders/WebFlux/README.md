@@ -1,6 +1,9 @@
 # Getting Started
 
-The following are the steps required to build and run this WebFlux example.
+This example shows how to use the Spring WebFlux framework together
+with Project Reactor to process entries in a large recursive directory
+folder concurrently as a web service.  The following are the steps
+required to build and run this WebFlux project.
 
 1. Change directory to the Folders/WebFlux folder and run the
    following command from the shell:
@@ -10,30 +13,27 @@ The following are the steps required to build and run this WebFlux example.
    This starts the Tomcat webserver by default on port 8080 and also
    starts the FolderApplication.
 
-   This application can also be run from within the IDE by selecting
-   run on FolderApplication.  Please see
-   
-   https://www.javadevjournal.com/spring-boot/spring-boot-application-intellij/
-
-   for information on how to integrate Spring Boot into Intellij.
+   Conversely, this application can be run from within the Intellij by
+   selecting run on the FolderApplication.
 
 2. Below are the end points to access the application via curl,
    postman, or any other Http/Java client (including web browers):
 
    . Search count for a key at a given root directory using HTTP GET via
 
-     http://localhost:8080/folders/works/_search?key=CompletableFuture
+     http://localhost:8080/folders/works/_search?word=CompletableFuture
 
      You can pass any root director and Search key using HTTP GET via
 
-     localhost:8080/folders/{rootDir}/_search?key="SEARCH_KEY"
+     localhost:8080/folders/{rootDir}/_search?word="SEARCH_KEY"
 
-   . Count entries recursively at a given root directory using HTTP GET via
+   . Count entries recursively at a given root directory using HTTP
+     GET via
 
      http://localhost:8080/folders/works/_count
      http://localhost:8080/folders/{rootDir}/_count
 
-   . Getting recursive Dirent at a given root director using HTTP GET via
+   . Getting recursive Dirent at a given root directory using HTTP GET via
 
      http://localhost:8080/folders/works/
      http://localhost:8080/folders/{rootDir}
