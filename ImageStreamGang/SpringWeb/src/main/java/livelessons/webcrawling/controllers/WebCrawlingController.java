@@ -24,14 +24,15 @@ import livelessons.webcrawling.services.WebCrawlingService;
 public class WebCrawlingController {
     /**
      * The @Autowired annotation is used for automatic dependency
-     * injection. It can be used directly on properties, therefore
+     * injection. It can be used directly on properties, thereby
      * eliminating the need for getters and setters:
      */
     @Autowired
     private WebCrawlingService webCrawlingService;
 	
     /**
-     * @RequestMapping annotation is used for mapping web requests onto methods in Controller classes. 
+     * @RequestMapping annotation is used for mapping web requests
+     * onto methods in Controller classes.
      * 
      * POST requests to /run endpoint maps to method run(.  When /run
      * is invoked from any HttpWebClient or by using Curl on command
@@ -61,7 +62,6 @@ public class WebCrawlingController {
      * into the body of the response, ResponseEntity also allows us to
      * add headers and status code.  This method returns the raw JSON
      * response to the clients.
-     * 
      */
     @RequestMapping(value = "/timingresults", method = RequestMethod.GET)
     public ResponseEntity<Map<String, List<Long>> > getTimingResults() {
