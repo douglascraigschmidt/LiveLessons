@@ -20,23 +20,10 @@ import static java.util.stream.Collectors.toList;
 public class Folder 
        extends Dirent {
     /**
-     * The list of subfolders contained in this folder.
-     */
-    private final List<Dirent> mSubFolders;
-
-    /**
-     * The list of documents contained in this folder.
-     */
-    private final List<Dirent> mDocuments;
-
-    /**
      * Constructor initializes the fields.
      */
     Folder() {
         super(new File(""), 1);
-
-        mSubFolders = new ArrayList<>();
-        mDocuments = new ArrayList<>();
     }
 
     /**
@@ -44,27 +31,8 @@ public class Folder
      */
     Folder(File path) {
         super(path, 1);
-
-        mSubFolders = new ArrayList<>();
-        mDocuments = new ArrayList<>();
     }
     
-    /**
-     * @return The list of subfolders in this folder
-     */
-    @Override
-    public List<Dirent> getSubFolders() {
-        return mSubFolders;
-    }
-    
-    /**
-     * @return The list of documents in this folder
-     */
-    @Override
-    public List<Dirent> getDocuments() {
-        return mDocuments;
-    }
-
     /**
      * This factory method creates a folder from the given {@code
      * rootFile}.
@@ -176,7 +144,7 @@ public class Folder
         // Add entry to the appropriate list.
         if (entry instanceof Folder) {
             // Add the new folder to the subfolders list.
-            mSubFolders.add(entry);
+            getmSubFolders().add(entry);
 
             // Increase the size of this folder by the size of the new
             // folder.
@@ -184,7 +152,7 @@ public class Folder
         } else {
             // Synchronously create a document from the entry and add
             // the document to the documents list.
-            mDocuments.add(entry);
+            getmDocuments().add(entry);
 
             // Increase the size by 1.
             addToSize(1);
@@ -199,8 +167,8 @@ public class Folder
      */
     Folder merge(Folder folder) {
         // Update the lists.
-        mSubFolders.addAll(folder.mSubFolders);
-        mDocuments.addAll(folder.mDocuments);
+        getmSubFolders().addAll(folder.getmSubFolders());
+        getmDocuments().addAll(folder.getmDocuments());
 
         // Update the size.
         addToSize(folder.getSize());

@@ -9,8 +9,50 @@ import java.util.function.Consumer;
  * directory entry and is inherited by the Folder and Document
  * subclasses.
  */
-public abstract class Dirent
+public class Dirent
        implements Iterable<Dirent> {
+    /**
+     * Contents of the document.
+     */
+    protected CharSequence mContents;
+
+    /**
+     * @return The list of subfolders in this folder
+     */
+    public List<Dirent> getmSubFolders() { return mSubFolders; }
+
+    public void setmSubFolders(List<Dirent> subFolders) {
+        mSubFolders = subFolders;
+    }
+
+    /**
+     * @return The list of documents in this folder
+     */
+    public List<Dirent> getmDocuments() {
+        return mDocuments;
+    }
+
+    /**
+     * @return The contents of this document
+     */
+    public CharSequence getmContents() {
+        return mContents;
+    }
+
+    public void setmDocuments(List<Dirent> documents) {
+        mDocuments = documents;
+    }
+
+    /**
+     * The list of subfolders contained in this folder.
+     */
+    private List<Dirent> mSubFolders;
+
+    /**
+     * The list of documents contained in this folder.
+     */
+    private List<Dirent> mDocuments;
+
     /**
      * This factory method is needed to keep Reactor fromIterable() happy..
      * @return
@@ -48,6 +90,8 @@ public abstract class Dirent
      * Default constructor.
      */
     public Dirent() {
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
     }
 
     /**
@@ -56,6 +100,22 @@ public abstract class Dirent
     public Dirent(File path, long size) {
         mPath = path;
         mSize = size;
+
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
+    }
+
+    /**
+     * Constructor initializes the fields.
+     */
+    public Dirent(File path, long size, CharSequence input) {
+        mPath = path;
+        mSize = size;
+
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
+        mContents = input;
+
     }
 
     /**
@@ -77,30 +137,6 @@ public abstract class Dirent
      */
     public File getPath() {
         return mPath;
-    }
-
-    /**
-     * @return The list of subfolders in this folder
-     */
-    public List<Dirent> getSubFolders() {
-        //throw new UnsupportedOperationException();
-    	return Collections.EMPTY_LIST;
-    }
-    
-    /**
-     * @return The list of documents in this folder
-     */
-    public List<Dirent> getDocuments() {
-        //throw new UnsupportedOperationException();
-    	return Collections.EMPTY_LIST;
-    }
-
-    /**
-     * @return The contents of this Dirent
-     */
-    public CharSequence getContents() {
-        // throw new UnsupportedOperationException();
-    	return null;
     }
 
     /**
@@ -155,10 +191,10 @@ public abstract class Dirent
             mCurrentEntry = rootFolder;
 
             // Add the subfolders (if any) in the rootFolder.
-            mFoldersList = new ArrayList<>(rootFolder.getSubFolders());
+            mFoldersList = new ArrayList<>(rootFolder.getmSubFolders());
 
             // Add the documents (if any) in the rootFolder.
-            mDocsList = new ArrayList<>(rootFolder.getDocuments());
+            mDocsList = new ArrayList<>(rootFolder.getmDocuments());
         }
 
         /**
@@ -177,11 +213,11 @@ public abstract class Dirent
 
                     // Add any/all subfolders from the new current
                     // entry to the end of the subfolders list.
-                    mFoldersList.addAll(mCurrentEntry.getSubFolders());
+                    mFoldersList.addAll(mCurrentEntry.getmSubFolders());
 
                     // Add any/all documents from the new current
                     // entry to the end of the documents list.
-                    mDocsList.addAll(mCurrentEntry.getDocuments());
+                    mDocsList.addAll(mCurrentEntry.getmDocuments());
                 }
                 // See if there are any documents left to process.
                 else if (mDocsList.size() > 0) {

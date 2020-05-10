@@ -15,25 +15,11 @@ import java.util.function.Function;
 public class Document 
        extends Dirent {
     /**
-     * Contents of the document.
-     */
-    protected CharSequence mContents;
-
-    /**
      * Constructor sets the field.
      */
     private Document(CharSequence input,
                      File path) {
-        super(path, 1);
-        mContents = input;
-    }
-
-    /**
-     * @return The contents of this document
-     */
-    @Override
-    public CharSequence getContents() {
-        return mContents;
+        super(path, 1, input);
     }
 
     /**

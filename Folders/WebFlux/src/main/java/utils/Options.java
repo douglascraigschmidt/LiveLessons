@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.logging.log4j.simple.SimpleLogger;
+
 /**
  * An options singleton.
  */
@@ -35,6 +37,8 @@ public class Options {
      * Parse command-line arguments and set the appropriate values.
      */
     public boolean parseArgs(String[] args) {
+        System.setProperty(SimpleLogger., "error");
+
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-v"))
                 mVerbose = true;

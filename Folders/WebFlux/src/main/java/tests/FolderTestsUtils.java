@@ -56,7 +56,7 @@ public final class FolderTestsUtils {
             .fromArray(document
                        // Create a string containing the document's
                        // contents.
-                       .getContents().toString()
+                       .getmContents().toString()
 
                        // Split the string into an array of strings
                        // based on the regular expression.

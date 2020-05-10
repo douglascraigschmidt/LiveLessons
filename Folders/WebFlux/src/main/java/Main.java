@@ -69,6 +69,15 @@ public class Main {
                      .createRemoteFolder("/folders/works/"),
                      "createFolder() " + mode);
 
+        Folder f = rootFolderM.block();
+/*
+                // Get a mono to a Folder.
+        Mono<Dirent> rootFolderM = RunTimer
+            // Compute the time needed to create a new folder
+            // asynchronously.
+            .timeRun(() -> FolderTests
+                     .createFolder(sWORKS, concurrent),
+                     "createFolder() " + mode);
         RunTimer
             // Compute the time taken to synchronously search for a
             // word in all folders starting at the rootFolder.
@@ -94,6 +103,8 @@ public class Main {
                      .countLines(rootFolderM, concurrent)
                      .block(),
                      "countLines() " + mode);
+
+ */
 
         Options.display("Ending the test " + mode);
     }
