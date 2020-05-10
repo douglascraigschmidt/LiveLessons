@@ -35,10 +35,10 @@ public class Main {
         runTests(false);
 
         // Run the tests concurrently.
-        runTests(true);
+        // runTests(true);
 
         // Run the tests in parallel.
-        runTestsParallel();
+        // runTestsParallel();
 
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
@@ -61,12 +61,12 @@ public class Main {
         final String searchWord = "CompletableFuture";
 
         // Get a mono to a Folder.
-        Mono<Dirent> rootFolderM = RunTimer
+        Mono<Folder> rootFolderM = RunTimer
             // Compute the time needed to create a new folder
             // asynchronously.
             .timeRun(() -> FolderTests
                      // .createFolder(sWORKS, concurrent),
-                     .createRemoteFolder("folders/works/"),
+                     .createRemoteFolder("/folders/works/"),
                      "createFolder() " + mode);
 
         RunTimer

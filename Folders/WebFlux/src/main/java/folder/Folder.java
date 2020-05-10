@@ -32,6 +32,16 @@ public class Folder
     /**
      * Constructor initializes the fields.
      */
+    Folder() {
+        super(new File(""), 1);
+
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
+    }
+
+    /**
+     * Constructor initializes the fields.
+     */
     Folder(File path) {
         super(path, 1);
 

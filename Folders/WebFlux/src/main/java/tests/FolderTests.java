@@ -2,6 +2,7 @@ package tests;
 
 import folder.Dirent;
 import folder.Folder;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,6 +22,24 @@ public final class FolderTests {
      * A Java utility class should have a private constructor.
      */
     private FolderTests() {}
+
+    /**
+     * Increase the max size for the buffer transfers!
+     */
+    private static final ExchangeStrategies sExchangeStrategies = ExchangeStrategies
+        .builder()
+        // Increase the memory size.
+        .codecs(configurer -> configurer
+                .defaultCodecs()
+                .maxInMemorySize(10 * 1024 * 1024))
+        // Build the strategy.
+        .build();
+
+    /**
+     * Where the server resides.
+     */
+    private static final String sSERVER_URL =
+        "http://localhost:8080";
 
     /**
      * Asynchronously create an in-memory folder containing all the
@@ -44,17 +63,31 @@ public final class FolderTests {
             .cache();
     }
 
-    public static Mono<Dirent> createRemoteFolder(String uri) {
+    public static Mono<Folder> createRemoteFolder(String uri) {
+        // Create a webclient.
         WebClient webClient = WebClient
-                .create("http://localhost:8080/");
+            .builder()
+            // The URL where the server is running.
+            .baseUrl(sSERVER_URL)
 
+            // Increase the max buffer size.
+            .exchangeStrategies(sExchangeStrategies)
+            .build();
+        
         // Return a mono to the folder initialized remotely.
         return webClient
-                .get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(Dirent.class);
-    }
+            // Create an HTTP GET request.
+            .get()
+
+            // Add the uri to the baseUrl.
+            .uri(uri)
+
+            // Retrieve the response.
+            .retrieve()
+
+            // Convert it to a Folder object.
+            .bodyToMono(Folder.class);
+     }
 
     /**
      * Count the number of entries in the folder starting at {@code
