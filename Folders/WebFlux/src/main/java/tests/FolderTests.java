@@ -63,7 +63,7 @@ public final class FolderTests {
             .cache();
     }
 
-    public static Mono<Folder> createRemoteFolder(String uri) {
+    public static Mono<Dirent> createRemoteFolder(String uri) {
         // Create a webclient.
         WebClient webClient = WebClient
             .builder()
@@ -86,7 +86,7 @@ public final class FolderTests {
             .retrieve()
 
             // Convert it to a Folder object.
-            .bodyToMono(Folder.class);
+            .bodyToMono(Dirent.class);
      }
 
     /**
@@ -272,5 +272,18 @@ public final class FolderTests {
                          // Display the result.
                          .display("total number of lines = "
                                   + lineCount));
+    }
+
+    public static void print(Mono<Dirent> rootFolderM) {
+        rootFolderM
+            .doOnSuccess(rootFolder -> {
+                System.out.println("Starting print with rootFolder = " + rootFolder.getSize());
+
+                Flux
+                        .fromIterable(rootFolder)
+                        .doOnNext(item -> System.out.println(item.getName()))
+                        .subscribe();
+            })
+            .block();
     }
 }

@@ -35,10 +35,10 @@ public class Main {
         runTests(false);
 
         // Run the tests concurrently.
-        // runTests(true);
+        runTests(true);
 
         // Run the tests in parallel.
-        // runTestsParallel();
+        runTestsParallel();
 
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
@@ -61,7 +61,7 @@ public class Main {
         final String searchWord = "CompletableFuture";
 
         // Get a mono to a Folder.
-        Mono<Folder> rootFolderM = RunTimer
+        Mono<Dirent> rootFolderM = RunTimer
             // Compute the time needed to create a new folder
             // asynchronously.
             .timeRun(() -> FolderTests
@@ -69,7 +69,12 @@ public class Main {
                      .createRemoteFolder("/folders/works/"),
                      "createFolder() " + mode);
 
-        Folder f = rootFolderM.block();
+        /*
+        FolderTests
+            .print(rootFolderM);
+
+         */
+
 /*
                 // Get a mono to a Folder.
         Mono<Dirent> rootFolderM = RunTimer
@@ -78,6 +83,8 @@ public class Main {
             .timeRun(() -> FolderTests
                      .createFolder(sWORKS, concurrent),
                      "createFolder() " + mode);
+                     */
+
         RunTimer
             // Compute the time taken to synchronously search for a
             // word in all folders starting at the rootFolder.
@@ -103,8 +110,6 @@ public class Main {
                      .countLines(rootFolderM, concurrent)
                      .block(),
                      "countLines() " + mode);
-
- */
 
         Options.display("Ending the test " + mode);
     }

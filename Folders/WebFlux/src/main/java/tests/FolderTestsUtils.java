@@ -68,6 +68,7 @@ public final class FolderTestsUtils {
      */
     public static boolean isDocument(Dirent dirent) {
         // Return true if dirent is a document, else false.
-        return dirent instanceof Document;
+        // return dirent instanceof Document;
+        return dirent.getmContents() != null;
     }
 }
