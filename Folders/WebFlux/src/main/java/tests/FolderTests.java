@@ -294,16 +294,20 @@ public final class FolderTests {
                                   + lineCount));
     }
 
+    /**
+     * Print the contents of the recursively-structured folder
+     * starting at {@code rootFolderM}.
+     */
     public static void print(Mono<Dirent> rootFolderM) {
         rootFolderM
-            .doOnSuccess(rootFolder -> {
-                System.out.println("Starting print with rootFolder = " + rootFolder.getSize());
+            .doOnSuccess(rootFolder -> 
+                         Flux
+                         .fromIterable(rootFolder)
+                         .doOnNext(item -> 
+                                   System.out.println(item.getName()))
+                         .subscribe())
 
-                Flux
-                        .fromIterable(rootFolder)
-                        .doOnNext(item -> System.out.println(item.getName()))
-                        .subscribe();
-            })
+            // Block until we're done.
             .block();
     }
 }

@@ -12,6 +12,9 @@ import reactor.core.publisher.Mono;
 import tests.FolderTests;
 import utils.ReactorUtils;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP GET requests via asynchronous reactive programming.
@@ -82,6 +85,16 @@ public class FolderController {
             // Asynchronously and concurrently count the # of entries
             // in the folder starting at rootDir.
             .performCount(rootDir, concurrent);
+    }
+
+    @GetMapping("/{rootDir}/_count")
+    public CompletableFuture<Long> countEntriesAsync(@PathVariable String rootDir,
+                                                     @RequestParam Boolean concurrent) {
+        return FolderTests
+                // Asynchronously and concurrently count the # of entries
+                // in the folder starting at rootDir.
+                .performCount(rootDir, concurrent)
+                .toFuture();
     }
 	
     /**

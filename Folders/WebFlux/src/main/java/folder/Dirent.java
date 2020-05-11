@@ -95,6 +95,9 @@ public class Dirent
      */
     public List<Dirent> getSubFolders() { return SubFolders; }
 
+    /**
+     * Set the subfolders field.
+     */
     public void setSubFolders(List<Dirent> subFolders) {
         SubFolders = subFolders;
     }
@@ -120,6 +123,9 @@ public class Dirent
         Contents = contents;
     }
 
+    /**
+     * Set the documents field.
+     */
     public void setDocuments(List<Dirent> documents) {
         Documents = documents;
     }
