@@ -81,7 +81,7 @@ public final class FolderTestsParallel {
                      // Handle successful result.
                      .doOnSuccess(lineCount -> Options
                                   // Display the result.
-                                  .display("total number of lines = "
+                                  .debug("total number of lines = "
                                            + lineCount)));
     }
 
@@ -123,7 +123,7 @@ public final class FolderTestsParallel {
                      // Handle successful result.
                      .doOnSuccess(wordMatches -> Options
                                   // Display the result.
-                                  .display("total matches of \""
+                                  .debug("total matches of \""
                                            + word
                                            + "\" = "
                                            + wordMatches)));

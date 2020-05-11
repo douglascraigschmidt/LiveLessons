@@ -4,6 +4,8 @@ import folder.Dirent;
 import folder.Folder;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.Options;
@@ -36,14 +38,8 @@ public final class FolderTests {
         .build();
 
     /**
-     * Where the server resides.
-     */
-    private static final String sSERVER_URL =
-        "http://localhost:8080";
-
-    /**
-     * Asynchronously create an in-memory folder containing all the
-     * works.
+     * Asynchronously and locally create an in-memory folder
+     * containing all the works.
      *
      * @param works Name of the directory in the file system containing the works.
      * @param concurrent Flag indicating whether to run the tests concurrent or not
@@ -63,17 +59,30 @@ public final class FolderTests {
             .cache();
     }
 
-    public static Mono<Dirent> createRemoteFolder(String uri) {
+    /**
+     * Asynchronously and remotely create an in-memory folder
+     * containing all the works.
+     *
+     * @param hostname Name of the host containing the works.
+     * @param uri Name of the uri in the file system on the host containing the works
+     * @param memoize Flag indicating whether to have the server memoize the result or not
+     * @param concurrent Flag indicating whether to run the test concurrently or not
+     * @return A mono to a folder containing all works in {@code works}
+     */
+    public static Mono<Dirent> createRemoteFolder(String hostname,
+                                                  String uri,
+                                                  boolean memoize,
+                                                  boolean concurrent) {
         // Create a webclient.
         WebClient webClient = WebClient
             .builder()
             // The URL where the server is running.
-            .baseUrl(sSERVER_URL)
+            .baseUrl(hostname)
 
             // Increase the max buffer size.
             .exchangeStrategies(sExchangeStrategies)
             .build();
-        
+
         // Return a mono to the folder initialized remotely.
         return webClient
             // Create an HTTP GET request.
@@ -114,7 +123,7 @@ public final class FolderTests {
             // Process results
             .doOnSuccess(entryCount -> Options
                          // Display the result.
-                         .display("number of entries in the folder = "
+                         .debug("number of entries in the folder = "
                                   + entryCount));
     }
 
@@ -189,7 +198,7 @@ public final class FolderTests {
                      // Process results.
                      .doOnSuccess(wordMatches -> Options
                                   // Display the result.
-                                  .display("total matches of \""
+                                  .debug("total matches of \""
                                            + word
                                            + "\" = "
                                            + wordMatches)));
@@ -270,7 +279,7 @@ public final class FolderTests {
             // Process results.
             .doOnSuccess(lineCount -> Options
                          // Display the result.
-                         .display("total number of lines = "
+                         .debug("total number of lines = "
                                   + lineCount));
     }
 

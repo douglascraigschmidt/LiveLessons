@@ -77,18 +77,20 @@ public class FolderController {
      * This method returns all the entries in the folder starting at
      * {@code rootDir}.
      *
-     * WebFlux maps HTTP GET requests sent to the /{rootDir} endpoint
-     * to this method.
+     * WebFlux maps HTTP GET requests sent to the /{rootDir}/_create
+     * endpoint to this method.
      *
      * @param rootDir The root directory to start the search
      * @return Returns all the entries in the folder starting 
      * at {@code rootDir}
      */
-    @GetMapping("/{rootDir}")
-    public Mono<Dirent> createFolder(@PathVariable String rootDir) {
+    @GetMapping("/{rootDir}/_create")
+    public Mono<Dirent> createFolder(@PathVariable String rootDir,
+                                     @RequestParam String memoize,
+                                     @RequestParam Boolean concurrent) {
         return FolderTests
             // Asynchronously and concurrently create and return a
             // folder starting at rootDir.
-            .createFolder(rootDir, true);
+            .createFolder(rootDir, concurrent);
     }
 }

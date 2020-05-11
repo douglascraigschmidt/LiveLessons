@@ -23,6 +23,18 @@ public class Main {
     private static final String sWORKS = "works";
 
     /**
+     * A URI to the input "works" to process, which is a large
+     * recursive folder containing thousands of subfolders and files.
+     */
+    private static final String sURI = "/folders/works/_create?memoize=false&concurrent=true";
+
+    /**
+     * Where the server resides.
+     */
+    private static final String sSERVER_URL =
+        "http://localhost:8080";
+
+    /**
      * Main entry point into the program.
      */
     static public void main(String[] argv) throws InterruptedException {
@@ -31,17 +43,21 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Run the tests sequentially and locally.
-        runTests(false, false);
+        if (Options.getInstance().sequential())
+            // Run the tests sequentially and locally.
+            runTests(false, false);
 
-        // Run the tests concurrently and locally.
-        runTests(true, false);
+        if (Options.getInstance().concurrent()) 
+            // Run the tests concurrently and locally.
+            runTests(true, false);
 
-        // Run the tests concurrently and remotely.
-        runTests(true, true);
+        if (Options.getInstance().remote())
+            // Run the tests concurrently and remotely.
+            runTests(true, Options.getInstance().concurrent());
 
-        // Run the tests in parallel.
-        runTestsParallel();
+        if (Options.getInstance().parallel())
+            // Run the tests in parallel.
+            runTestsParallel();
 
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
@@ -59,7 +75,7 @@ public class Main {
         String mode = concurrent ? "concurrently" : "sequentially";
         mode += remote ? " and remotely" : " and locally";
 
-        Options.display("Starting the test " + mode);
+        Options.print("Starting the test " + mode);
 
         // The word to search for while the folder's being
         // constructed.
@@ -97,7 +113,7 @@ public class Main {
                      .block(),
                      "countLines() " + mode);
 
-        Options.display("Ending the test " + mode);
+        Options.print("Ending the test " + mode);
     }
 
     /**
@@ -112,27 +128,29 @@ public class Main {
         if (remote)
             // Return a mono to a remote Folder.
             return RunTimer
-                    // Compute the time needed to create a new remote
-                    // folder asynchronously.
-                    .timeRun(() -> FolderTests
-                                    // .createFolder(sWORKS, concurrent),
-                                    .createRemoteFolder("/folders/works/"),
-                            "createFolder() " + mode);
+                // Compute the time needed to create a new remote
+                // folder asynchronously.
+                .timeRun(() -> FolderTests
+                         .createRemoteFolder(sSERVER_URL,
+                                             sURI,
+                                             Options.getInstance().memoize(),
+                                             Options.getInstance().concurrent()),
+                         "createFolder() " + mode);
         else
             // Return a mono to a local Folder.
             return RunTimer
                     // Compute the time needed to create a new local
                     // folder asynchronously.
-                    .timeRun(() -> FolderTests
-                                    .createFolder(sWORKS, concurrent),
-                            "createFolder() " + mode);
+                .timeRun(() -> FolderTests
+                         .createFolder(sWORKS, concurrent),
+                         "createFolder() " + mode);
     }
 
     /**
      * Run the tests in parallel via Reactor's ParallelFlux mechanism.
      */
     private static void runTestsParallel() {
-        Options.display("Starting the test in parallel");
+        Options.print("Starting the test in parallel");
 
         // The word to search for while the folder's being
         // constructed.
@@ -163,6 +181,6 @@ public class Main {
                      .block(),
                      "countLines() in parallel");
 
-        Options.display("Ending the test in parallel");
+        Options.print("Ending the test in parallel");
     }
 }

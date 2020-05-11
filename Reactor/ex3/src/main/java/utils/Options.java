@@ -22,7 +22,7 @@ public class Options {
     /** 
      * The singleton @a Options instance. 
      */
-    private static Options mUniqueInstance = null;
+    private static Options sInstance = null;
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -94,10 +94,10 @@ public class Options {
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
-        if (mUniqueInstance == null)
-            mUniqueInstance = new Options();
+        if (sInstance == null)
+            sInstance = new Options();
 
-        return mUniqueInstance;
+        return sInstance;
     }
 
     /**
@@ -189,21 +189,11 @@ public class Options {
     }
 
     /**
-     * Print the string with thread information included.
-     */
-    public static void print(String string) {
-        System.out.println("[" +
-                           Thread.currentThread().getName()
-                           + "] "
-                           + string);
-    }
-
-    /**
      * Print the debug string with thread information included if
      * diagnostics are enabled.
      */
     public static void debug(String string) {
-        if (mUniqueInstance.mDiagnosticsEnabled)
+        if (sInstance.mDiagnosticsEnabled)
             System.out.println("[" +
                     Thread.currentThread().getName()
                     + "] "
@@ -215,9 +205,19 @@ public class Options {
      * diagnostics are enabled.
      */
     public static void debug(String tag, String string) {
-        if (mUniqueInstance.mDiagnosticsEnabled
-            && mUniqueInstance.mTagsList.contains(tag))
+        if (sInstance.mDiagnosticsEnabled
+            && sInstance.mTagsList.contains(tag))
             Options.debug(string);
+    }
+
+    /**
+     * Print the string with thread information included.
+     */
+    public static void print(String string) {
+        System.out.println("[" +
+                           Thread.currentThread().getName()
+                           + "] "
+                           + string);
     }
 
     /**
