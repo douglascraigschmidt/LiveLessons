@@ -14,48 +14,62 @@ public class Dirent
     /**
      * Contents of the document.
      */
-    protected CharSequence mContents;
-
-    /**
-     * @return The list of subfolders in this folder
-     */
-    public List<Dirent> getmSubFolders() { return mSubFolders; }
-
-    public void setmSubFolders(List<Dirent> subFolders) {
-        mSubFolders = subFolders;
-    }
-
-    /**
-     * @return The list of documents in this folder
-     */
-    public List<Dirent> getmDocuments() {
-        return mDocuments;
-    }
-
-    /**
-     * @return The contents of this document
-     */
-    public CharSequence getmContents() {
-        return mContents;
-    }
-
-    public void setmDocuments(List<Dirent> documents) {
-        mDocuments = documents;
-    }
+    protected CharSequence Contents;
 
     /**
      * The list of subfolders contained in this folder.
      */
-    private List<Dirent> mSubFolders;
+    private List<Dirent> SubFolders;
 
     /**
      * The list of documents contained in this folder.
      */
-    private List<Dirent> mDocuments;
+    private List<Dirent> Documents;
+
+    /**
+     * Path of the document.
+     */
+    private File mPath;
+
+    /**
+     * The total number of entries in this recursively structured
+     * folder.
+     */
+    private long mSize;
+
+    /**
+     * Default constructor.
+     */
+    public Dirent() {
+        SubFolders = new ArrayList<>();
+        Documents = new ArrayList<>();
+    }
+
+    /**
+     * Constructor initializes the fields.
+     */
+    public Dirent(File path, long size) {
+        mPath = path;
+        mSize = size;
+
+        SubFolders = new ArrayList<>();
+        Documents = new ArrayList<>();
+    }
+
+    /**
+     * Constructor initializes the fields.
+     */
+    public Dirent(File path, long size, CharSequence input) {
+        mPath = path;
+        mSize = size;
+
+        SubFolders = new ArrayList<>();
+        Documents = new ArrayList<>();
+        Contents = input;
+    }
 
     /**
      * This factory method is needed to keep Reactor fromIterable() happy..
-     * @return
      */
     public Spliterator<Dirent> spliterator() {
         return new Spliterators
@@ -75,47 +89,39 @@ public class Dirent
         // Initialize the breadth-first search iterator.
         return new BFSIterator(this);
     }
-    /**
-     * Path of the document.
-     */
-    private File mPath;
 
     /**
-     * The total number of entries in this recursively structured
-     * folder.
+     * @return The list of subfolders in this folder
      */
-    private long mSize;
+    public List<Dirent> getSubFolders() { return SubFolders; }
 
-    /**
-     * Default constructor.
-     */
-    public Dirent() {
-        mSubFolders = new ArrayList<>();
-        mDocuments = new ArrayList<>();
+    public void setSubFolders(List<Dirent> subFolders) {
+        SubFolders = subFolders;
     }
 
     /**
-     * Constructor initializes the fields.
+     * @return The list of documents in this folder
      */
-    public Dirent(File path, long size) {
-        mPath = path;
-        mSize = size;
-
-        mSubFolders = new ArrayList<>();
-        mDocuments = new ArrayList<>();
+    public List<Dirent> getDocuments() {
+        return Documents;
     }
 
     /**
-     * Constructor initializes the fields.
+     * @return The contents of this document
      */
-    public Dirent(File path, long size, CharSequence input) {
-        mPath = path;
-        mSize = size;
+    public CharSequence getContents() {
+        return Contents;
+    }
 
-        mSubFolders = new ArrayList<>();
-        mDocuments = new ArrayList<>();
-        mContents = input;
+    /**
+     * Set the contents of this document.
+     */
+    public void setContents(CharSequence contents) {
+        Contents = contents;
+    }
 
+    public void setDocuments(List<Dirent> documents) {
+        Documents = documents;
     }
 
     /**
@@ -191,10 +197,10 @@ public class Dirent
             mCurrentEntry = rootFolder;
 
             // Add the subfolders (if any) in the rootFolder.
-            mFoldersList = new ArrayList<>(rootFolder.getmSubFolders());
+            mFoldersList = new ArrayList<>(rootFolder.getSubFolders());
 
             // Add the documents (if any) in the rootFolder.
-            mDocsList = new ArrayList<>(rootFolder.getmDocuments());
+            mDocsList = new ArrayList<>(rootFolder.getDocuments());
         }
 
         /**
@@ -213,11 +219,11 @@ public class Dirent
 
                     // Add any/all subfolders from the new current
                     // entry to the end of the subfolders list.
-                    mFoldersList.addAll(mCurrentEntry.getmSubFolders());
+                    mFoldersList.addAll(mCurrentEntry.getSubFolders());
 
                     // Add any/all documents from the new current
                     // entry to the end of the documents list.
-                    mDocsList.addAll(mCurrentEntry.getmDocuments());
+                    mDocsList.addAll(mCurrentEntry.getDocuments());
                 }
                 // See if there are any documents left to process.
                 else if (mDocsList.size() > 0) {

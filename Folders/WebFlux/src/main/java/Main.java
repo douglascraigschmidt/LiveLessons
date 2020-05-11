@@ -31,11 +31,14 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Run the tests sequentially.
-        runTests(false);
+        // Run the tests sequentially and locally.
+        runTests(false, false);
 
-        // Run the tests concurrently.
-        runTests(true);
+        // Run the tests concurrently and locally.
+        runTests(true, false);
+
+        // Run the tests concurrently and remotely.
+        runTests(true, true);
 
         // Run the tests in parallel.
         runTestsParallel();
@@ -47,12 +50,14 @@ public class Main {
     }
 
     /**
-     * Run all the tests, either sequentially or concurrently,
-     * depending on the value of {@code concurrent}.
+     * Run the tests either sequentially or concurrently (depending on
+     * the value of {@code concurrent}) and locally or remotely
+     * (depending on the value of {@code remote}).
      */
-    private static void runTests(boolean concurrent) {
+    private static void runTests(boolean concurrent, boolean remote) {
         // Record whether we're running concurrently or sequentially.
         String mode = concurrent ? "concurrently" : "sequentially";
+        mode += remote ? " and remotely" : " and locally";
 
         Options.display("Starting the test " + mode);
 
@@ -61,29 +66,10 @@ public class Main {
         final String searchWord = "CompletableFuture";
 
         // Get a mono to a Folder.
-        Mono<Dirent> rootFolderM = RunTimer
-            // Compute the time needed to create a new folder
-            // asynchronously.
-            .timeRun(() -> FolderTests
-                     // .createFolder(sWORKS, concurrent),
-                     .createRemoteFolder("/folders/works/"),
-                     "createFolder() " + mode);
-
-        /*
-        FolderTests
-            .print(rootFolderM);
-
-         */
-
-/*
-                // Get a mono to a Folder.
-        Mono<Dirent> rootFolderM = RunTimer
-            // Compute the time needed to create a new folder
-            // asynchronously.
-            .timeRun(() -> FolderTests
-                     .createFolder(sWORKS, concurrent),
-                     "createFolder() " + mode);
-                     */
+        Mono<Dirent> rootFolderM =
+            createFolder(concurrent,
+                         remote,
+                         mode);
 
         RunTimer
             // Compute the time taken to synchronously search for a
@@ -112,6 +98,34 @@ public class Main {
                      "countLines() " + mode);
 
         Options.display("Ending the test " + mode);
+    }
+
+    /**
+     * Create a folder either sequentially or concurrently (depending on
+     * the value of {@code concurrent}) and locally or remotely
+     * (depending on the value of {@code remote}).
+     * @return Return a mono to a folder.
+     */
+    private static Mono<Dirent> createFolder(boolean concurrent,
+                                             boolean remote,
+                                             String mode) {
+        if (remote)
+            // Return a mono to a remote Folder.
+            return RunTimer
+                    // Compute the time needed to create a new remote
+                    // folder asynchronously.
+                    .timeRun(() -> FolderTests
+                                    // .createFolder(sWORKS, concurrent),
+                                    .createRemoteFolder("/folders/works/"),
+                            "createFolder() " + mode);
+        else
+            // Return a mono to a local Folder.
+            return RunTimer
+                    // Compute the time needed to create a new local
+                    // folder asynchronously.
+                    .timeRun(() -> FolderTests
+                                    .createFolder(sWORKS, concurrent),
+                            "createFolder() " + mode);
     }
 
     /**

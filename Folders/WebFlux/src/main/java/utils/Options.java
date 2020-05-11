@@ -40,10 +40,12 @@ public class Options {
      * Parse command-line arguments and set the appropriate values.
      */
     public boolean parseArgs(String[] args) {
-        // Disable logging.
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        // Disable the verbose/annoying Spring "debug" logging.
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+            LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         logger.setLevel(Level.toLevel("error"));
 
+        // Process the arguments.
         for (String arg : args) {
             if (arg.equals("-v"))
                 mVerbose = true;

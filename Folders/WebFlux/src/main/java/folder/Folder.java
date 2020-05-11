@@ -144,7 +144,7 @@ public class Folder
         // Add entry to the appropriate list.
         if (entry instanceof Folder) {
             // Add the new folder to the subfolders list.
-            getmSubFolders().add(entry);
+            getSubFolders().add(entry);
 
             // Increase the size of this folder by the size of the new
             // folder.
@@ -152,7 +152,7 @@ public class Folder
         } else {
             // Synchronously create a document from the entry and add
             // the document to the documents list.
-            getmDocuments().add(entry);
+            getDocuments().add(entry);
 
             // Increase the size by 1.
             addToSize(1);
@@ -167,8 +167,8 @@ public class Folder
      */
     Folder merge(Folder folder) {
         // Update the lists.
-        getmSubFolders().addAll(folder.getmSubFolders());
-        getmDocuments().addAll(folder.getmDocuments());
+        getSubFolders().addAll(folder.getSubFolders());
+        getDocuments().addAll(folder.getDocuments());
 
         // Update the size.
         addToSize(folder.getSize());

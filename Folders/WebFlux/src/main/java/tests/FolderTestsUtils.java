@@ -56,7 +56,7 @@ public final class FolderTestsUtils {
             .fromArray(document
                        // Create a string containing the document's
                        // contents.
-                       .getmContents().toString()
+                       .getContents().toString()
 
                        // Split the string into an array of strings
                        // based on the regular expression.
@@ -69,6 +69,6 @@ public final class FolderTestsUtils {
     public static boolean isDocument(Dirent dirent) {
         // Return true if dirent is a document, else false.
         // return dirent instanceof Document;
-        return dirent.getmContents() != null;
+        return dirent.getContents() != null;
     }
 }
