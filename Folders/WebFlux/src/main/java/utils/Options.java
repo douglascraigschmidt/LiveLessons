@@ -69,6 +69,11 @@ public class Options {
     private boolean mRemote;
 
     /**
+     * Keeps track of whether to run the tests locally.
+     */
+    private boolean mLocal;
+
+    /**
      * @return True if debugging output is printed, else false.
      */
     public boolean diagnosticsEnabled() {
@@ -112,7 +117,7 @@ public class Options {
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     break;
                 case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
+                    mLocal = argv[argc + 1].equals("true");
                     break;
                 case "-m":
                     mMemoize = argv[argc + 1].equals("true");
@@ -131,6 +136,9 @@ public class Options {
                         .compile(",")
                         .splitAsStream(argv[argc + 1])
                         .collect(toList());
+                    break;
+                case "-v":
+                    mLoggingEnabled = argv[argc + 1].equals("true");
                     break;
                 default:
                     printUsage();
@@ -152,7 +160,8 @@ public class Options {
                            + "-m [true|false] "
                            + "-p [true|false]"
                            + "-r [true|false]"
-                           + "-T [tag,...]");
+                           + "-T [tag,...]"
+                           + "-v [true|false]");
     }
 
     /**
@@ -205,10 +214,18 @@ public class Options {
 
     /**
      *
-     * @return
+     * @return True if remote testing is enabled, else false.
      */
     public boolean remote() {
         return mRemote;
+    }
+
+    /**
+     *
+     * @return True if local testing is enabled, else false.
+     */
+    public boolean local() {
+        return mLocal;
     }
 
     /**

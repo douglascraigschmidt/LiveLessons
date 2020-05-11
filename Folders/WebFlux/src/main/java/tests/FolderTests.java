@@ -6,12 +6,14 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.Options;
 import utils.ReactorUtils;
 import utils.TestDataFactory;
 
+import java.net.URI;
 import java.util.function.Function;
 
 /**
@@ -75,12 +77,16 @@ public final class FolderTests {
                                                   boolean concurrent) {
         // Create a webclient.
         WebClient webClient = WebClient
+            // Start building.
             .builder()
+
             // The URL where the server is running.
             .baseUrl(hostname)
 
             // Increase the max buffer size.
             .exchangeStrategies(sExchangeStrategies)
+
+            // Build the webclient.
             .build();
 
         // Return a mono to the folder initialized remotely.
@@ -89,14 +95,19 @@ public final class FolderTests {
             .get()
 
             // Add the uri to the baseUrl.
-            .uri(uri)
+            .uri(UriComponentsBuilder
+                 .fromPath(uri)
+                 .queryParam("memoize", Options.getInstance().memoize())
+                 .queryParam("concurrent", Options.getInstance().concurrent())
+                 .build()
+                 .toString())
 
             // Retrieve the response.
             .retrieve()
 
             // Convert it to a Folder object.
             .bodyToMono(Dirent.class);
-     }
+    }
 
     /**
      * Count the number of entries in the folder starting at {@code
@@ -124,7 +135,7 @@ public final class FolderTests {
             .doOnSuccess(entryCount -> Options
                          // Display the result.
                          .debug("number of entries in the folder = "
-                                  + entryCount));
+                                  + entryCount)); 
     }
 
     /**
@@ -136,7 +147,7 @@ public final class FolderTests {
      * @return Returns a count of the number of entries in the folder
      * starting at {@code rootFolderM}
      */
-    public static Mono<Long> performCount(String rootDir,
+    public static Mono<Long>  performCount(String rootDir,
                                           boolean concurrent) {
         Mono<Dirent> rootFolderM = FolderTests
             // Asynchronously and concurrently create a folder

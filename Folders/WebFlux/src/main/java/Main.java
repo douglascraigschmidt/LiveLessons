@@ -26,7 +26,7 @@ public class Main {
      * A URI to the input "works" to process, which is a large
      * recursive folder containing thousands of subfolders and files.
      */
-    private static final String sURI = "/folders/works/_create?memoize=false&concurrent=true";
+    private static final String sURI = "/folders/works/_create";
 
     /**
      * Where the server resides.
@@ -43,17 +43,25 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        if (Options.getInstance().sequential())
+        if (Options.getInstance().sequential()
+            && Options.getInstance().local())
             // Run the tests sequentially and locally.
             runTests(false, false);
 
-        if (Options.getInstance().concurrent()) 
+        if (Options.getInstance().sequential()
+            && Options.getInstance().remote())
+            // Run the tests sequentially and remotely.
+            runTests(false, true);
+
+        if (Options.getInstance().concurrent()
+            && Options.getInstance().local())
             // Run the tests concurrently and locally.
             runTests(true, false);
 
-        if (Options.getInstance().remote())
+        if (Options.getInstance().concurrent()
+            && Options.getInstance().remote())
             // Run the tests concurrently and remotely.
-            runTests(true, Options.getInstance().concurrent());
+            runTests(true, true);
 
         if (Options.getInstance().parallel())
             // Run the tests in parallel.

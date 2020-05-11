@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import folder.Dirent;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tests.FolderTests;
+import utils.ReactorUtils;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
@@ -34,6 +36,11 @@ import tests.FolderTests;
 @RequestMapping("/folders")
 public class FolderController {
     /**
+     * Memoized copy of the Folder.
+     */
+    private Mono<Dirent> mMemoizedDirent = null;
+
+    /**
      * This method returns a count of the number of times a {@code
      * word} appears in the folder starting at {@code rootDir}.
      *
@@ -42,16 +49,18 @@ public class FolderController {
      *
      * @param rootDir The root directory to start the search
      * @param word The word to search for starting at {@code rootDir}
+     * @param concurrent True if the search should be done concurrently or not
      * @return A count of the number of times {@code word} appears in
      *         the folder starting at {@code rootDir}  
      */
     @GetMapping("/{rootDir}/_search")
     public Mono<Long> searchWord(@PathVariable String rootDir,
-                                 @RequestParam String word) {
+                                 @RequestParam String word,
+                                 @RequestParam Boolean concurrent) {
         return FolderTests
-            // Asynchronously and concurrently count the number of
-            // times word appears in the folder starting at rootDir.
-            .performFolderSearch(rootDir, word, true);
+            // Asynchronously and concurrently count the # of
+            // times word appears in folder starting at rootDir.
+            .performFolderSearch(rootDir, word, concurrent);
     }
 	
     /**
@@ -62,15 +71,17 @@ public class FolderController {
      * endpoint to this method.
      *
      * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently or not
      * @return A count of the number of entries in the folder starting
-     * at {@code rootDir}
+     *         at {@code rootDir}
      */
     @GetMapping("/{rootDir}/_count")
-    public Mono<Long> countEntries(@PathVariable String rootDir) {
+    public Mono<Long> countEntries(@PathVariable String rootDir,
+                                   @RequestParam Boolean concurrent) {
         return FolderTests
             // Asynchronously and concurrently count the # of entries
             // in the folder starting at rootDir.
-            .performCount(rootDir, true);
+            .performCount(rootDir, concurrent);
     }
 	
     /**
@@ -81,16 +92,33 @@ public class FolderController {
      * endpoint to this method.
      *
      * @param rootDir The root directory to start the search
+     * @param memoize True if the created folder should be cached
+     * @param concurrent True if the folder should be created concurrently or not
      * @return Returns all the entries in the folder starting 
-     * at {@code rootDir}
+     *         at {@code rootDir}
      */
     @GetMapping("/{rootDir}/_create")
     public Mono<Dirent> createFolder(@PathVariable String rootDir,
-                                     @RequestParam String memoize,
+                                     @RequestParam Boolean memoize,
                                      @RequestParam Boolean concurrent) {
-        return FolderTests
-            // Asynchronously and concurrently create and return a
-            // folder starting at rootDir.
-            .createFolder(rootDir, concurrent);
+        if (memoize) {
+            if (mMemoizedDirent != null)
+                // Return the cached folder contents.
+                return mMemoizedDirent;
+            else {
+                mMemoizedDirent = FolderTests
+                    // Asynchronously and concurrently create and
+                    // return a folder starting at rootDir.
+                    .createFolder(rootDir, concurrent);
+
+                // Cache the results.
+                //.cache();
+            }
+            return mMemoizedDirent;     
+        } else 
+            return FolderTests
+                // Asynchronously and concurrently create and return a
+                // folder starting at rootDir.
+                .createFolder(rootDir, true);
     }
 }
