@@ -5,10 +5,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tests.FolderTests;
 import tests.FolderTestsParallel;
+import tests.FolderTestsProxy;
 import utils.Options;
 import utils.ReactorUtils;
 import utils.RunTimer;
 import utils.TestDataFactory;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This example shows the use of a Spring WebFlux micro-service to
@@ -17,24 +20,6 @@ import utils.TestDataFactory;
  * concurrently, and in parallel.
  */
 public class Main {
-    /**
-     * The input "works" to process, which is a large recursive folder
-     * containing thousands of subfolders and files.
-     */
-    private static final String sWORKS = "works";
-
-    /**
-     * A URI to the input "works" to process, which is a large
-     * recursive folder containing thousands of subfolders and files.
-     */
-    private static final String sURI = "/folders/works/_create";
-
-    /**
-     * Host/post where the server resides.
-     */
-    private static final String sSERVER_BASE_URL =
-        "http://localhost:8080";
-
     /**
      * Main entry point into the program.
      */
@@ -67,6 +52,9 @@ public class Main {
         if (Options.getInstance().parallel())
             // Run the tests in parallel.
             runTestsParallel();
+        
+        if (Options.getInstance().remote())
+            runRemoteTests();
 
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
@@ -139,11 +127,9 @@ public class Main {
             return RunTimer
                 // Compute the time needed to create a new remote
                 // folder asynchronously.
-                .timeRun(() -> FolderTests
-                         .createRemoteFolder(sSERVER_BASE_URL,
-                                             sURI,
-                                             Options.getInstance().memoize(),
-                                             Options.getInstance().concurrent()),
+                .timeRun(() -> FolderTestsProxy
+                         .createRemoteFolder(Options.getInstance().memoize(),
+                                             concurrent),
                          "createFolder() " + mode);
         else
             // Return a mono to a local Folder.
@@ -151,7 +137,7 @@ public class Main {
                     // Compute the time needed to create a new local
                     // folder asynchronously.
                 .timeRun(() -> FolderTests
-                         .createFolder(sWORKS, concurrent),
+                         .createFolder(concurrent),
                          "createFolder() " + mode);
     }
 
@@ -170,7 +156,7 @@ public class Main {
             // Compute the time needed to create a new folder
             // asynchronously.
             .timeRun(() -> FolderTestsParallel
-                     .createFolderParallel(sWORKS),
+                     .createFolderParallel(),
                      "createFolderParallel() in parallel");
 
         RunTimer
@@ -192,4 +178,33 @@ public class Main {
 
         Options.print("Ending the test in parallel");
     }
+
+    /**
+     * Run the remote tests.
+     */
+    private static void runRemoteTests() {
+        Options.print("Starting the remote tests");
+
+        CompletableFuture<Long> countF = FolderTestsProxy
+            .countEntriesAsync(Options.getInstance().concurrent());
+
+        System.out.println("Count of entries as CompletableFuture = " 
+                           + countF.join());
+
+        Mono<Long> countM = FolderTestsProxy
+            .countEntries(Options.getInstance().concurrent());
+
+        System.out.println("Count of entries as Mono = " 
+                           + countM.block());
+
+        Mono<Long> searchM = FolderTestsProxy
+            .searchWord("CompletableFuture",
+                        Options.getInstance().concurrent());
+
+        System.out.println("Count # of times \"CompletableFuture\" appears as Mono = "
+                           + searchM.block());
+
+        Options.print("Ending the remote tests");
+    }
+
 }

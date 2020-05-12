@@ -1,5 +1,7 @@
 package folder;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
@@ -9,23 +11,10 @@ import java.util.function.Consumer;
  * directory entry and is inherited by the Folder and Document
  * subclasses.
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS,
+include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class Dirent
        implements Iterable<Dirent> {
-    /**
-     * Contents of the document.
-     */
-    protected CharSequence Contents;
-
-    /**
-     * The list of subfolders contained in this folder.
-     */
-    private List<Dirent> SubFolders;
-
-    /**
-     * The list of documents contained in this folder.
-     */
-    private List<Dirent> Documents;
-
     /**
      * Path of the document.
      */
@@ -41,8 +30,10 @@ public class Dirent
      * Default constructor.
      */
     public Dirent() {
+        /*
         SubFolders = new ArrayList<>();
         Documents = new ArrayList<>();
+        */
     }
 
     /**
@@ -52,20 +43,10 @@ public class Dirent
         mPath = path;
         mSize = size;
 
+        /*
         SubFolders = new ArrayList<>();
         Documents = new ArrayList<>();
-    }
-
-    /**
-     * Constructor initializes the fields.
-     */
-    public Dirent(File path, long size, CharSequence input) {
-        mPath = path;
-        mSize = size;
-
-        SubFolders = new ArrayList<>();
-        Documents = new ArrayList<>();
-        Contents = input;
+        */
     }
 
     /**
@@ -93,42 +74,36 @@ public class Dirent
     /**
      * @return The list of subfolders in this folder
      */
-    public List<Dirent> getSubFolders() { return SubFolders; }
+    public List<Dirent> getSubFolders() { 
+        return null;
+    }
 
     /**
      * Set the subfolders field.
      */
     public void setSubFolders(List<Dirent> subFolders) {
-        SubFolders = subFolders;
     }
 
     /**
      * @return The list of documents in this folder
      */
     public List<Dirent> getDocuments() {
-        return Documents;
-    }
-
-    /**
-     * @return The contents of this document
-     */
-    public CharSequence getContents() {
-        return Contents;
-    }
-
-    /**
-     * Set the contents of this document.
-     */
-    public void setContents(CharSequence contents) {
-        Contents = contents;
+        return null;
     }
 
     /**
      * Set the documents field.
      */
     public void setDocuments(List<Dirent> documents) {
-        Documents = documents;
     }
+
+    /**
+     * @return The contents of this document
+     */
+    public CharSequence getContents() {
+        // This is a no-op.
+        return null;
+    };
 
     /**
      * @return Name of the dirent

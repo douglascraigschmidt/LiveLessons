@@ -14,7 +14,10 @@ import utils.ReactorUtils;
 import utils.TestDataFactory;
 
 import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+
+import static tests.FolderTestsUtils.sWORKS;
 
 /**
  * This Java utility class contains Reactor-based methods that run all
@@ -28,22 +31,22 @@ public final class FolderTests {
     private FolderTests() {}
 
     /**
-     * Increase the max size for the buffer transfers!
+     * Asynchronously and locally create an in-memory folder
+     * containing all the works.
+     *
+     * @param concurrent Flag indicating whether to run the tests concurrent or not
+     * @return A mono to a folder containing all works in {@code works}
      */
-    private static final ExchangeStrategies sExchangeStrategies = ExchangeStrategies
-        .builder()
-        // Increase the memory size.
-        .codecs(configurer -> configurer
-                .defaultCodecs()
-                .maxInMemorySize(10 * 1024 * 1024))
-        // Build the strategy.
-        .build();
+    public static Mono<Dirent> createFolder(boolean concurrent) {
+        // Return a mono to the initialized folder.
+        return FolderTests.createFolder(sWORKS, concurrent);
+    }
 
     /**
      * Asynchronously and locally create an in-memory folder
      * containing all the works.
      *
-     * @param works Name of the directory in the file system containing the works.
+     * @param works The path to the directory containing the works.
      * @param concurrent Flag indicating whether to run the tests concurrent or not
      * @return A mono to a folder containing all works in {@code works}
      */
@@ -51,62 +54,14 @@ public final class FolderTests {
                                             boolean concurrent) {
         // Return a mono to the initialized folder.
         return Folder
-            // Asynchronously create a folder with all works in the
-            // root directory.
-            .fromDirectory(TestDataFactory.getRootFolderFile(works),
-                           concurrent)
+                // Asynchronously create a folder with all works in the
+                // root directory.
+                .fromDirectory(TestDataFactory.getRootFolderFile(works),
+                        concurrent)
 
-            // Cache the results so that they won't be re-emitted
-            // repeatedly each time.
-            .cache();
-    }
-
-    /**
-     * Asynchronously and remotely create an in-memory folder
-     * containing all the works.
-     *
-     * @param hostname Name of the host containing the works.
-     * @param uri Name of the uri in the file system on the host containing the works
-     * @param memoize Flag indicating whether to have the server memoize the result or not
-     * @param concurrent Flag indicating whether to run the test concurrently or not
-     * @return A mono to a folder containing all works in {@code works}
-     */
-    public static Mono<Dirent> createRemoteFolder(String hostname,
-                                                  String uri,
-                                                  boolean memoize,
-                                                  boolean concurrent) {
-        // Create a webclient.
-        WebClient webClient = WebClient
-            // Start building.
-            .builder()
-
-            // The URL where the server is running.
-            .baseUrl(hostname)
-
-            // Increase the max buffer size.
-            .exchangeStrategies(sExchangeStrategies)
-
-            // Build the webclient.
-            .build();
-
-        // Return a mono to the folder initialized remotely.
-        return webClient
-            // Create an HTTP GET request.
-            .get()
-
-            // Add the uri to the baseUrl.
-            .uri(UriComponentsBuilder
-                 .fromPath(uri)
-                 .queryParam("memoize", Options.getInstance().memoize())
-                 .queryParam("concurrent", Options.getInstance().concurrent())
-                 .build()
-                 .toString())
-
-            // Retrieve the response.
-            .retrieve()
-
-            // Convert it to a Folder object.
-            .bodyToMono(Dirent.class);
+                // Cache the results so that they won't be re-emitted
+                // repeatedly each time.
+                .cache();
     }
 
     /**
@@ -135,7 +90,7 @@ public final class FolderTests {
             .doOnSuccess(entryCount -> Options
                          // Display the result.
                          .debug("number of entries in the folder = "
-                                  + entryCount)); 
+                                + entryCount)); 
     }
 
     /**
@@ -148,7 +103,7 @@ public final class FolderTests {
      * starting at {@code rootFolderM}
      */
     public static Mono<Long>  performCount(String rootDir,
-                                          boolean concurrent) {
+                                           boolean concurrent) {
         Mono<Dirent> rootFolderM = FolderTests
             // Asynchronously and concurrently create a folder
             // starting at rootDir.
@@ -210,9 +165,9 @@ public final class FolderTests {
                      .doOnSuccess(wordMatches -> Options
                                   // Display the result.
                                   .debug("total matches of \""
-                                           + word
-                                           + "\" = "
-                                           + wordMatches)));
+                                         + word
+                                         + "\" = "
+                                         + wordMatches)));
     }
 
     /**
@@ -291,7 +246,7 @@ public final class FolderTests {
             .doOnSuccess(lineCount -> Options
                          // Display the result.
                          .debug("total number of lines = "
-                                  + lineCount));
+                                + lineCount));
     }
 
     /**

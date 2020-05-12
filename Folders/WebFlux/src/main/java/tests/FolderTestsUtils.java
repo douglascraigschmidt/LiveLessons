@@ -11,6 +11,12 @@ import reactor.core.publisher.Mono;
  */
 public final class FolderTestsUtils {
     /**
+     * The input "works" to process, which is a large recursive folder
+     * containing thousands of subfolders and files.
+     */
+    static final String sWORKS = "works";
+
+    /**
      * A Java utility class should have a private constructor.
      */
     private FolderTestsUtils() {}
@@ -69,9 +75,6 @@ public final class FolderTestsUtils {
     public static boolean isDocument(Dirent dirent) {
         // Return true if dirent is a document, else false.
         // return dirent instanceof Document;
-        if (dirent instanceof Document)
-            return true;
-        else
-            return dirent.getContents() != null;
+        return dirent instanceof Document;
     }
 }

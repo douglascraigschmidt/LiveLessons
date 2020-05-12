@@ -2,7 +2,6 @@ package folder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ParallelFlux;
 import utils.ReactorUtils;
 
 import java.io.File;
@@ -20,10 +19,23 @@ import static java.util.stream.Collectors.toList;
 public class Folder 
        extends Dirent {
     /**
+     * The list of subfolders contained in this folder.
+     */
+    private List<Dirent> SubFolders;
+
+    /**
+     * The list of documents contained in this folder.
+     */
+    private List<Dirent> Documents;
+
+    /**
      * Constructor initializes the fields.
      */
     Folder() {
-        super(new File(""), 1);
+        super(new File(""), 0);
+
+        SubFolders = new ArrayList<>();
+        Documents = new ArrayList<>();
     }
 
     /**
@@ -31,8 +43,43 @@ public class Folder
      */
     Folder(File path) {
         super(path, 1);
+
+        SubFolders = new ArrayList<>();
+        Documents = new ArrayList<>();
     }
     
+    /**
+     * @return The list of subfolders in this folder
+     */
+    @Override
+    public List<Dirent> getSubFolders() { 
+        return SubFolders; 
+    }
+
+    /**
+     * Set the subfolders field.
+     */
+    @Override
+    public void setSubFolders(List<Dirent> subFolders) {
+        SubFolders = subFolders;
+    }
+
+    /**
+     * @return The list of documents in this folder
+     */
+    @Override
+    public List<Dirent> getDocuments() {
+        return Documents;
+    }
+
+    /**
+     * Set the documents field.
+     */
+    @Override
+    public void setDocuments(List<Dirent> documents) {
+        Documents = documents;
+    }
+
     /**
      * This factory method creates a folder from the given {@code
      * rootFile}.

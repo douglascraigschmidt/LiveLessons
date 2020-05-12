@@ -87,16 +87,6 @@ public class FolderController {
             .performCount(rootDir, concurrent);
     }
 
-    @GetMapping("/{rootDir}/_count")
-    public CompletableFuture<Long> countEntriesAsync(@PathVariable String rootDir,
-                                                     @RequestParam Boolean concurrent) {
-        return FolderTests
-                // Asynchronously and concurrently count the # of entries
-                // in the folder starting at rootDir.
-                .performCount(rootDir, concurrent)
-                .toFuture();
-    }
-	
     /**
      * This method returns all the entries in the folder starting at
      * {@code rootDir}.

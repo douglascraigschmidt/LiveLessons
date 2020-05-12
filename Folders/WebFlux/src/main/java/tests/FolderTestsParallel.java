@@ -2,7 +2,6 @@ package tests;
 
 import folder.Dirent;
 import folder.Folder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.Options;
 import utils.ReactorUtils;
@@ -11,6 +10,7 @@ import utils.TestDataFactory;
 import java.util.function.Function;
 
 import static tests.FolderTestsUtils.occurrencesCount;
+import static tests.FolderTestsUtils.sWORKS;
 
 /**
  * This Java utility class contains methods that run all the tests in
@@ -26,15 +26,14 @@ public final class FolderTestsParallel {
      * Asynchronously create an in-memory folder containing all the
      * works in parallel.
      *
-     * @param works Name of the directory in the file system containing the works.
      * @return A mono to a folder containing all works in {@code works}
      */
-    public static Mono<Dirent> createFolderParallel(String works) {
+    public static Mono<Dirent> createFolderParallel() {
         // Return a mono to the initialized folder.
         return Folder
             // Asynchronously create a folder with all works in the
             // root directory in parallel.
-            .fromDirectoryParallel(TestDataFactory.getRootFolderFile(works))
+            .fromDirectoryParallel(TestDataFactory.getRootFolderFile(sWORKS))
 
             // Cache the results so that they won't be re-emitted
             // repeatedly each time.
