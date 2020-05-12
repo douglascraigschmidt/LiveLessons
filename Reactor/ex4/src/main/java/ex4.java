@@ -108,10 +108,9 @@ public class ex4 {
             // Run everything in the publisher scheduler.
             : mPublisherScheduler;
 
+        // Create a new publisher proxy, which generates which
+        // initializes the list of random integers for this test.
         mPublisherProxy = new PublisherProxy();
-
-        // Create the publisher.
-        mPublisherProxy.createPublisher();
 
         // This subscriber implements hybrid push/pull backpressure.
         mSubscriber = new HybridBackpressureSubscriber();

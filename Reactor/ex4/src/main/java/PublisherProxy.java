@@ -36,7 +36,8 @@ class PublisherProxy {
         "http://localhost:8080";
 
     /**
-     * Constructor initializes the fields.
+     * Constructor initializes the fields to initialize a publisher
+     * that emits a stream of random numbers.
      */
     public PublisherProxy() {
         mPublisher = WebClient
@@ -48,12 +49,7 @@ class PublisherProxy {
 
             // Build the webclient.
             .build();
-    }
 
-    /**
-     * Initialize a publisher that emits a stream of random numbers.
-     */
-    public void createPublisher() {
         mPublisher
             // Create an HTTP POST request.
             .post()
