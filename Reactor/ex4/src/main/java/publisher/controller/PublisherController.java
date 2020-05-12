@@ -1,9 +1,6 @@
 package publisher.controller;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import publisher.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,7 +31,6 @@ public class PublisherController {
      *
      */
     Publisher mPublisher;
-
     /**
      * This method...
      *
@@ -43,22 +39,36 @@ public class PublisherController {
      *
      * @return ...
      */
-    @GetMapping("/_create")
-    public Flux<Integer> startPublishing() {
-        mPublisher = new Publisher();
+    @PostMapping("/_create")
+    public Mono<Void> createPublisher(@RequestParam int count,
+                                      @RequestParam int maxValue) {
+        mPublisher = new Publisher(count, maxValue);
 
+        return Mono.empty();
+    }
+
+    /**
+     * This method...
+     *
+     * WebFlux maps HTTP GET requests sent to the /_start
+     * endpoint to this method.
+     *
+     * @return ...
+     */
+    @GetMapping("/_start")
+    public Flux<Integer> startPublishing() {
         return mPublisher.publish();
     }
 
     /**
      * This method...
      *
-     * WebFlux maps HTTP DELETE requests sent to the /_delete
+     * WebFlux maps HTTP DELETE requests sent to the /_stop
      * endpoint to this method.
      *
      * @return ...
      */
-    @DeleteMapping("/_delete")
+    @DeleteMapping("/_stop")
     public Mono<Void> stopPublishing() {
         return mPublisher.dispose();
     }

@@ -1,4 +1,5 @@
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
@@ -42,22 +43,6 @@ public class ex4 {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * The URI that starts the random number generator.
-     */
-    private final String mStartPublishingURI = "/publisher/_create";
-
-    /**
-     * The URI that stops the random number generator.
-     */
-    private final String mStopPublishingURI = "/publisher/_delete";
-
-    /**
-     * Host/post where the server resides.
-     */
-    private final String mSERVER_BASE_URL =
-        "http://localhost:8080";
-
-    /**
      * Count # of calls to isPrime() to determine caching benefits.
      */
     private final AtomicInteger mPrimeCheckCounter;
@@ -85,17 +70,9 @@ public class ex4 {
     private final Disposable.Composite mDisposables;
 
     /**
-     * Create a webclient to the publisher.
+     * Create a proxy to the publisher.
      */
-    WebClient mPublisher = WebClient
-        // Start building.
-        .builder()
-
-        // The URL where the server is running.
-        .baseUrl(mSERVER_BASE_URL)
-
-        // Build the webclient.
-        .build();
+    final PublisherProxy mPublisherProxy;
 
     /**
      * Main entry point into the test program.
@@ -112,11 +89,11 @@ public class ex4 {
      * Constructor initializes the fields.
      */
     ex4(String[] argv) {
-        // Initialize this count to 0.
-        mPrimeCheckCounter = new AtomicInteger(0);
-
         // Parse the command-line arguments.
         Options.instance().parseArgs(argv);
+
+        // Initialize this count to 0.
+        mPrimeCheckCounter = new AtomicInteger(0);
 
         // Run the publisher in a single thread.
         mPublisherScheduler = Schedulers
@@ -130,6 +107,11 @@ public class ex4 {
 
             // Run everything in the publisher scheduler.
             : mPublisherScheduler;
+
+        mPublisherProxy = new PublisherProxy();
+
+        // Create the publisher.
+        mPublisherProxy.createPublisher();
 
         // This subscriber implements hybrid push/pull backpressure.
         mSubscriber = new HybridBackpressureSubscriber();
@@ -208,7 +190,8 @@ public class ex4 {
         mPrimeCheckCounter.set(0);
 
         // Create a publisher that runs on its own scheduler.
-        Flux<Integer> publisher = startPublishing(mPublisherScheduler);
+        Flux<Integer> publisher = mPublisherProxy
+            .startPublishing(mPublisherScheduler);
 
         // This function determines if a random # is prime or not.
         Function<Integer, Flux<Result>> determinePrimality = number -> Flux
@@ -245,56 +228,10 @@ public class ex4 {
         Options.print(makeExitString(testName, primeChecker));
 
         // Stop publishing.
-        stopPublishing();
+        mPublisherProxy.stopPublishing();
 
         // Return prime checker (which may update during the test).
         return primeChecker;
-    }
-
-    /**
-     * Start publishing a stream of random numbers.
-     *
-     * @param scheduler Scheduler to publish the numbers on.
-     * @return Return a flux that publishes random numbers
-     */
-    private Flux<Integer> startPublishing(Scheduler scheduler) {
-        // Return a flux to the publisher initialized remotely.
-        return mPublisher
-            // Create an HTTP GET request.
-            .get()
-
-            // Add the uri to the baseUrl.
-            .uri(mStartPublishingURI)
-
-            // Retrieve the response.
-            .retrieve()
-
-            // Convert it to a flux of integers.
-            .bodyToFlux(Integer.class)
-            
-            // Schedule this to run on the given scheduler.
-            .subscribeOn(scheduler);
-    }
-
-    /**
-     * Publish a stream of random numbers.
-     *
-     * @return Return a flux that publishes random numbers
-     */
-    private Mono<Void> stopPublishing() {
-        // Return a flux to the publisher initialized remotely.
-        return mPublisher
-            // Create an HTTP DELETE request.
-            .delete()
-
-            // Add the uri to the baseUrl.
-            .uri(mStopPublishingURI)
-
-            // Retrieve the response.
-            .retrieve()
-
-            // Convert it to a void mono.
-            .bodyToMono(Void.class);
     }
 
     /**

@@ -31,15 +31,12 @@ public class Publisher {
     /**
      *
      */
-    private final Scheduler mPublisherScheduler;
+    private Scheduler mPublisherScheduler;
 
-    public Publisher() {
-        // Get how many integers we should generate.
-        int count = Options.instance().count();
-
-        // Get the max value for the random numbers.
-        int maxValue = Options.instance().maxValue();
-
+    /**
+     *
+     */
+    public Publisher(int count, int maxValue) {
         // Generate a list of random integers.
         mRandomIntegers = new Random()
             // Generate "count" random ints.
@@ -53,21 +50,6 @@ public class Publisher {
                    
             // Trigger intermediate operations and collect into list.
             .collect(toList());
-
-        // Run the publisher in a single thread.
-        mPublisherScheduler = Schedulers
-            .newParallel("publisher", 1);
-    }
-
-    /**
-     * Publish a stream of random numbers.
-     *
-     * @return ...
-     */
-    public Mono<Void> dispose() {
-        mPublisherScheduler.dispose();
-
-        return Mono.empty();
     }
 
     /**
@@ -76,6 +58,10 @@ public class Publisher {
      * @return Return a flux that publishes random numbers
      */
     public Flux<Integer> publish() {
+        // Run the publisher in a single thread.
+        mPublisherScheduler = Schedulers
+            .newParallel("publisher", 1);
+
         // This consumer emits a flux stream of random integers.
         return Flux
             // Emit a flux stream of random integers.
@@ -168,4 +154,16 @@ public class Publisher {
             sink.complete();
         };
     }
+
+    /**
+     * Publish a stream of random numbers.
+     *
+     * @return ...
+     */
+    public Mono<Void> dispose() {
+        mPublisherScheduler.dispose();
+
+        return Mono.empty();
+    }
 }
+
