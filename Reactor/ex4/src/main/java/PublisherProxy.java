@@ -85,7 +85,11 @@ class PublisherProxy {
             .get()
 
             // Add the uri to the baseUrl.
-            .uri(mStartPublishingURI)
+            .uri(UriComponentsBuilder
+                    .fromPath(mStartPublishingURI)
+                    .queryParam("backpressureEnabled", Options.instance().backPressureEnabled())
+                    .build()
+                    .toString())
 
             // Retrieve the response.
             .retrieve()

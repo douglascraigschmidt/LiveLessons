@@ -1,4 +1,3 @@
-import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
@@ -93,7 +92,7 @@ public class HybridBackpressureSubscriber
      * results of prime # checking and updates the next request size.
      */
     @Override
-    public void onNext(@NotNull Result result) {
+    public void onNext(Result result) {
         // Print the results of prime number checking
         if (result.mSmallestFactor != 0) {
             Options.debug(TAG, result.mPrimeCandidate

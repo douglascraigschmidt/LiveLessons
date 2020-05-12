@@ -61,7 +61,7 @@ public class Publisher {
      *
      * @return Return a flux that publishes random numbers
      */
-    public Flux<Integer> publish() {
+    public Flux<Integer> publish(Boolean backpressureEnabled) {
         // Run the publisher in a single thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
@@ -69,7 +69,7 @@ public class Publisher {
         // This consumer emits a flux stream of random integers.
         return Flux
             // Emit a flux stream of random integers.
-            .create(Options.instance().backPressureEnabled()
+            .create(backpressureEnabled
                     // Emit integers using backpressure.
                     ? makeBackpressureEmitter(mRandomIntegers.iterator())
                     // Emit integers not using backpressure.

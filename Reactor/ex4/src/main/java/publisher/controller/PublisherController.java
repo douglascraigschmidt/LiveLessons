@@ -60,9 +60,9 @@ public class PublisherController {
      * @return A flux stream of random integers.
      */
     @GetMapping("/_start")
-    public Flux<Integer> startPublishing() {
+    public Flux<Integer> startPublishing(@RequestParam Boolean backpressureEnabled) {
         // Forward to the publish() method.
-        return mPublisher.publish();
+        return mPublisher.publish(backpressureEnabled);
     }
 
     /**
