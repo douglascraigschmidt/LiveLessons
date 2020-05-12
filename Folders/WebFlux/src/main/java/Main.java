@@ -1,15 +1,10 @@
 import folder.Dirent;
-import folder.Document;
-import folder.Folder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tests.FolderTests;
 import tests.FolderTestsParallel;
 import tests.FolderTestsProxy;
 import utils.Options;
-import utils.ReactorUtils;
 import utils.RunTimer;
-import utils.TestDataFactory;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -155,8 +150,7 @@ public class Main {
         Mono<Dirent> rootFolderM = RunTimer
             // Compute the time needed to create a new folder
             // asynchronously.
-            .timeRun(() -> FolderTestsParallel
-                     .createFolderParallel(),
+            .timeRun(FolderTestsParallel::createFolderParallel,
                      "createFolderParallel() in parallel");
 
         RunTimer

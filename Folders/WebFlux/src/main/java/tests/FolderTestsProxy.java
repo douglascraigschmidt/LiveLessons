@@ -77,8 +77,6 @@ public final class FolderTestsProxy {
      */
     public static Mono<Dirent> createRemoteFolder(boolean memoize,
                                                   boolean concurrent) {
-
-
         // Return a mono to the folder initialized remotely.
         return sFolderProxy
             // Create an HTTP GET request.
