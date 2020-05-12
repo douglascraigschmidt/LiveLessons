@@ -72,7 +72,7 @@ public class PublisherController {
      * WebFlux maps HTTP DELETE requests sent to the /_stop endpoint
      * to this method.
      *
-     * @return ...
+     * @return An empty mono.
      */
     @DeleteMapping("/_stop")
     public Mono<Void> stopPublishing() {
