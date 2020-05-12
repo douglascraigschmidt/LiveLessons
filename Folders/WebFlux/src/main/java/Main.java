@@ -11,7 +11,8 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 /**
- * This example shows the use of the Reactor framework to process
+ * This example shows the use of a Spring WebFlux micro-service to
+ * apply reactive streams top-to-bottom and end-to-end to process
  * entries in a recursively-structured directory folder sequentially,
  * concurrently, and in parallel.
  */
@@ -29,9 +30,9 @@ public class Main {
     private static final String sURI = "/folders/works/_create";
 
     /**
-     * Where the server resides.
+     * Host/post where the server resides.
      */
-    private static final String sSERVER_URL =
+    private static final String sSERVER_BASE_URL =
         "http://localhost:8080";
 
     /**
@@ -139,7 +140,7 @@ public class Main {
                 // Compute the time needed to create a new remote
                 // folder asynchronously.
                 .timeRun(() -> FolderTests
-                         .createRemoteFolder(sSERVER_URL,
+                         .createRemoteFolder(sSERVER_BASE_URL,
                                              sURI,
                                              Options.getInstance().memoize(),
                                              Options.getInstance().concurrent()),

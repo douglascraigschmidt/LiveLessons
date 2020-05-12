@@ -1,6 +1,8 @@
 package utils;
 
 import reactor.core.publisher.FluxSink;
+import ch.qos.logback.classic.Level;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -312,5 +314,9 @@ public class Options {
      * Make the constructor private for a singleton.
      */
     private Options() {
+        // Disable the verbose/annoying Spring "debug" logging.
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+            LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        logger.setLevel(Level.toLevel("error"));
     }
 }

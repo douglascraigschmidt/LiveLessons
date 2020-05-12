@@ -123,9 +123,6 @@ public class FolderController {
                     // Asynchronously and concurrently create and
                     // return a folder starting at rootDir.
                     .createFolder(rootDir, concurrent);
-
-                // Cache the results.
-                //.cache();
             }
             return mMemoizedDirent;     
         } else 

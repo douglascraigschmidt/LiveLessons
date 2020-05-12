@@ -27,8 +27,8 @@ public class WebCrawlingService {
      * delegating to ImageStreamGangTest
      */
     public void runTests() {
+        // Run the tests.
         ImageStreamGangTest.runTests();
-		
     }
 	
     /**
@@ -36,6 +36,7 @@ public class WebCrawlingService {
      * invocation.
      */
     public Map<String, List<Long>> getTimingResults(){
+        // Return the timing results.
         return ImageStreamGangTest.getTimingResults();
     }
 }
