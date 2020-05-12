@@ -9,10 +9,13 @@ import java.util.function.Consumer;
 /**
  * This super class defines the common capabilities provided by a
  * directory entry and is inherited by the Folder and Document
- * subclasses.
+ * subclasses.  The annotations below instruct JACKSON to properly
+ * handle the inheritance relationship between the Dirent superclass
+ * and its Folder and Document subclasses.
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS,
-include=JsonTypeInfo.As.PROPERTY, property="@class")
+              include=JsonTypeInfo.As.PROPERTY,
+              property="@class")
 public class Dirent
        implements Iterable<Dirent> {
     /**
@@ -30,10 +33,6 @@ public class Dirent
      * Default constructor.
      */
     public Dirent() {
-        /*
-        SubFolders = new ArrayList<>();
-        Documents = new ArrayList<>();
-        */
     }
 
     /**
@@ -42,11 +41,6 @@ public class Dirent
     public Dirent(File path, long size) {
         mPath = path;
         mSize = size;
-
-        /*
-        SubFolders = new ArrayList<>();
-        Documents = new ArrayList<>();
-        */
     }
 
     /**
