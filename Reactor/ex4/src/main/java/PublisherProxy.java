@@ -4,6 +4,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import utils.Options;
 
+/**
+ * This class serves as a proxy to the Publisher micro-service.
+ */
 class PublisherProxy {
     /**
      * The URI that creates the random number generator.
@@ -21,7 +24,8 @@ class PublisherProxy {
     private final String mStopPublishingURI = "/publisher/_stop";
 
     /**
-     *
+     * The WebClient provides the means to access the publisher
+     * micro-service.
      */
     private final WebClient mPublisher;
 
@@ -31,24 +35,25 @@ class PublisherProxy {
     private final String mSERVER_BASE_URL =
         "http://localhost:8080";
 
+    /**
+     * Constructor initializes the fields.
+     */
     public PublisherProxy() {
         mPublisher = WebClient
-                // Start building.
-                .builder()
+            // Start building.
+            .builder()
 
-                // The URL where the server is running.
-                .baseUrl(mSERVER_BASE_URL)
+            // The URL where the server is running.
+            .baseUrl(mSERVER_BASE_URL)
 
-                // Build the webclient.
-                .build();
+            // Build the webclient.
+            .build();
     }
 
     /**
-     * Initialize a publisher that will emit a stream of random
-     * numbers.
+     * Initialize a publisher that emits a stream of random numbers.
      */
     public void createPublisher() {
-        // Return an empty mono.
         mPublisher
             // Create an HTTP POST request.
             .post()
@@ -97,12 +102,9 @@ class PublisherProxy {
     }
 
     /**
-     * Publish a stream of random numbers.
-     *
-     * @return Return a flux that publishes random numbers
+     * Stop publishing a stream of random numbers.
      */
     public void stopPublishing() {
-        // Return a flux to the publisher initialized remotely.
         mPublisher
             // Create an HTTP DELETE request.
             .delete()

@@ -15,7 +15,8 @@ import java.util.function.Consumer;
 import static java.util.stream.Collectors.toList;
 
 /**
- *
+ * This publisher generates a flux stream from a micro-service that's
+ * connected to the subscriber via WebFlux mechanisms.
  */
 public class Publisher {
     /**
@@ -29,12 +30,15 @@ public class Publisher {
     private final List<Integer> mRandomIntegers;
 
     /**
-     *
+     * The thread pool used to run the publisher.
      */
     private Scheduler mPublisherScheduler;
 
     /**
+     * Constructor initializes the list of random integers.
      *
+     * @param count The number of random integers to generate
+     * @param maxValue The max value of the random integers
      */
     public Publisher(int count, int maxValue) {
         // Generate a list of random integers.
@@ -156,13 +160,15 @@ public class Publisher {
     }
 
     /**
-     * Publish a stream of random numbers.
+     * Stop generating the stream of random integers.
      *
-     * @return ...
+     * @return An empty mono.
      */
     public Mono<Void> dispose() {
+        // Shutdown the publisher's scheduler.
         mPublisherScheduler.dispose();
 
+        // Return an empty mono.
         return Mono.empty();
     }
 }

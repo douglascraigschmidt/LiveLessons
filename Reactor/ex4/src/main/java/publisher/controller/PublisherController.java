@@ -7,9 +7,9 @@ import reactor.core.publisher.Mono;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET requests via asynchronous reactive programming.
- * These GET requests are mapped to a method that generates random
- * numbers.
+ * handle HTTP GET, POST, and DELETE requests via asynchronous
+ * reactive programming.  These requests are mapped to methods that
+ * create, start, and stop generating random integers.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -28,48 +28,55 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/publisher")
 public class PublisherController {
     /**
-     *
+     * The publisher that performs the HTTP requests.
      */
     Publisher mPublisher;
+
     /**
-     * This method...
+     * This method initializes the publisher.
      *
-     * WebFlux maps HTTP GET requests sent to the /_create
-     * endpoint to this method.
+     * WebFlux maps HTTP GET requests sent to the /_create endpoint to
+     * this method.
      *
-     * @return ...
+     * @return An empty mono.
      */
     @PostMapping("/_create")
     public Mono<Void> createPublisher(@RequestParam int count,
                                       @RequestParam int maxValue) {
+        // Create a new publisher.
         mPublisher = new Publisher(count, maxValue);
 
+        // Return an empty mono.
         return Mono.empty();
     }
 
     /**
-     * This method...
+     * This method starts publishing the flux stream of random
+     * integers.
      *
-     * WebFlux maps HTTP GET requests sent to the /_start
-     * endpoint to this method.
+     * WebFlux maps HTTP GET requests sent to the /_start endpoint to
+     * this method.
      *
-     * @return ...
+     * @return A flux stream of random integers.
      */
     @GetMapping("/_start")
     public Flux<Integer> startPublishing() {
+        // Forward to the publish() method.
         return mPublisher.publish();
     }
 
     /**
-     * This method...
+     * This method stops publishing the flux stream of random
+     * integers.
      *
-     * WebFlux maps HTTP DELETE requests sent to the /_stop
-     * endpoint to this method.
+     * WebFlux maps HTTP DELETE requests sent to the /_stop endpoint
+     * to this method.
      *
      * @return ...
      */
     @DeleteMapping("/_stop")
     public Mono<Void> stopPublishing() {
+        // Forward to the dispose() method.
         return mPublisher.dispose();
     }
 }

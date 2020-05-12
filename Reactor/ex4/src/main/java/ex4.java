@@ -189,7 +189,7 @@ public class ex4 {
         // Reset the counters.
         mPrimeCheckCounter.set(0);
 
-        // Create a publisher that runs on its own scheduler.
+        // Create a remote publisher that runs on its own scheduler.
         Flux<Integer> publisher = mPublisherProxy
             .startPublishing(mPublisherScheduler);
 
