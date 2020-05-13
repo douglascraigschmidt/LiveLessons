@@ -1,7 +1,6 @@
 package tests;
 
 import folder.Dirent;
-import folder.Document;
 import folder.Folder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -9,10 +8,8 @@ import utils.Options;
 import utils.ReactorUtils;
 import utils.TestDataFactory;
 
-import java.util.List;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.toList;
 import static tests.FolderTestsUtils.sWORKS;
 
 /**
@@ -217,7 +214,7 @@ public final class FolderTests {
             // Only consider documents containing the search
             // searchWord (non-blocking!).
             .filterWhen(document -> FolderTestsUtils
-                        .wordInDocument(document,
+                        .isWordInDocument(document,
                                         searchWord));
 
         // Return a flux containing all documents where searchWord

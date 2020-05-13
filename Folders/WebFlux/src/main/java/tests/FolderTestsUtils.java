@@ -52,8 +52,8 @@ public final class FolderTestsUtils {
      * @param searchWord Word to search for in the document
      * @return A mono containing true if {@code searchWord} appears in {@code document}.
      */
-    public static Mono<Boolean> wordInDocument(Dirent document,
-                                               String searchWord) {
+    public static Mono<Boolean> isWordInDocument(Dirent document,
+                                                 String searchWord) {
         // Return a mono that counts the # of times searchWord appears
         // in the document.
 
