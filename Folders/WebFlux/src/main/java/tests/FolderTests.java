@@ -192,19 +192,21 @@ public final class FolderTests {
     }
 
     /**
-     * This method returns all the documents where a {@code word}
+     * This method returns all the documents where a {@code searchWord}
      * appears in the folder starting at {@code rootDir}.
      *
      * @param rootFolderM A mono to an in-memory folder containing the works
-     * @param word Word to search for in the folder
+     * @param searchWord Word to search for in the folder
      * @param concurrent Flag indicating whether to run the tests
      *                     concurrent or not
-     * @return A flux containing all the documents where {@code word}
+     * @return A flux containing all the documents where {@code searchWord}
      *         appears in the folder starting at {@code rootDir}
      */
     public static Flux<Dirent> getDocuments(Mono<Dirent> rootFolderM,
-                                            String word,
+                                            String searchWord,
                                             boolean concurrent) {
+        // This function returns a flux stream of documents that
+        // contain the search searchWord.
         Function<Dirent, Flux<Dirent>> getMatchingDocuments = dirent -> ReactorUtils
             // Emit concurrent or sequentially.
             .justConcurrentIf(dirent, concurrent)
@@ -212,32 +214,29 @@ public final class FolderTests {
             // Only consider documents.
             .filter(FolderTestsUtils::isDocument)
 
-            // Only consider documents containing
-            // the search word (non-blocking!).
+            // Only consider documents containing the search
+            // searchWord (non-blocking!).
             .filterWhen(document ->
                         FolderTestsUtils
                         .wordInDocument(document,
-                                        word));
+                                        searchWord)))
 
-        // Return a flux containing all the documents where the search
-        // word appears in the folder starting at the root directory.
-         return rootFolderM
+        // Return a flux containing all documents where searchWord
+        // appears in the folder starting at the root directory.
+        return rootFolderM
             // This code is called after rootFolder initialization
-            // complete to get the documents containing word matches
-            // starting in the folder.
-            .flatMap(rootFolder -> Flux
-                     // Create a stream of dirents from rootFolder.
-                     .fromIterable(rootFolder)
+            // complete to get the documents containing searchWord
+            // matches starting in the folder.
+            .map(rootFolder -> Flux
+                 // Create a stream of dirents from rootFolder.
+                 .fromIterable(rootFolder)
 
-                     // Perform the flatMap() idiom to conditionally
-                     // run this code sequentially or concurrently.
-                     .flatMap(getMatchingDocuments)
+                 // Perform the flatMap() idiom to conditionally run
+                 // this code sequentially or concurrently.
+                 .flatMap(getMatchingDocuments))
 
-                     // Collect the matching documents into a list.
-                     .collectList())
-
-            // Convert the mono into a flux.
-            .flatMapIterable(Function.identity())
+            // Convert the Mono<Flux<Dirent> to a Flux<Dirent>.
+            .flatMapMany(Function.identity())
 
             // Conditionally print the results.
             .doOnNext(document -> Options
@@ -245,22 +244,22 @@ public final class FolderTests {
                       .debug("document "
                              + document.getPath().toString()
                              + " matches \""
-                             + word));
+                             + searchWord)); 
     }
 
     /**
-     * This method returns all the documents where a {@code word}
+     * This method returns all the documents where a {@code searchWord}
      * appears in the folder starting at {@code rootDir}.
      *
      * @param rootDir The root directory to start the search
-     * @param word Word to search for in the folder
+     * @param searchWord Word to search for in the folder
      * @param concurrent Flag indicating whether to run the tests
      *                     concurrent or not
-     * @return A flux containing all the documents where {@code word}
+     * @return A flux containing all the documents where {@code searchWord}
      *         appears in the folder starting at {@code rootDir}
      */
     public static Flux<Dirent> performGetDocuments(String rootDir,
-                                                   String word,
+                                                   String searchWord,
                                                    boolean concurrent) {
         Mono<Dirent> rootFolderM = FolderTests
                 // Asynchronously and concurrently create a folder
@@ -269,8 +268,8 @@ public final class FolderTests {
 
         return FolderTests
                 // Return a flux containing all documents where the
-                // search word appears starting from the root folder.
-                .getDocuments(rootFolderM, word, concurrent);
+                // search searchWord appears starting from the root folder.
+                .getDocuments(rootFolderM, searchWord, concurrent);
     }
 
     /**
