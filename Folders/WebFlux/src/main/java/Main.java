@@ -7,18 +7,21 @@ import utils.Options;
 import utils.RunTimer;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
  * This example shows the use of a Spring WebFlux micro-service to
  * apply reactive streams top-to-bottom and end-to-end to process
  * entries in a recursively-structured directory folder sequentially,
- * concurrently, and in parallel.
+ * concurrently, and in parallel in a distributed environment.  This example
+ * encode/decode complex objects that use inheritance relationships and
+ * transmit them between processes.
  */
 public class Main {
     /**
      * Main entry point into the program.
      */
-    static public void main(String[] argv) throws InterruptedException {
+    static public void main(String[] argv) {
         System.out.println("Starting ReactorFolders test");
 
         // Parse the options.
@@ -83,7 +86,7 @@ public class Main {
             // Compute the time taken to synchronously search for a
             // word in all folders starting at the rootFolder.
             .timeRun(() -> FolderTests
-                     .searchFolders(rootFolderM,
+                     .countWordMatches(rootFolderM,
                                     searchWord,
                                     concurrent)
                      .block(),
@@ -182,23 +185,30 @@ public class Main {
         CompletableFuture<Long> countF = FolderTestsProxy
             .countEntriesAsync(Options.getInstance().concurrent());
 
-        System.out.println("Count of entries as CompletableFuture = " 
+        System.out.println("Count of dirent entries (as CompletableFuture) = "
                            + countF.join());
 
         Mono<Long> countM = FolderTestsProxy
             .countEntries(Options.getInstance().concurrent());
 
-        System.out.println("Count of entries as Mono = " 
+        System.out.println("Count of dirent entries (as Mono) = "
                            + countM.block());
 
         Mono<Long> searchM = FolderTestsProxy
             .searchWord("CompletableFuture",
                         Options.getInstance().concurrent());
 
-        System.out.println("Count # of times \"CompletableFuture\" appears as Mono = "
+        System.out.println("Count # of times \"CompletableFuture\" appears (as Mono) = "
                            + searchM.block());
+
+        Stream<Dirent> results = FolderTestsProxy
+            .getDocumentsWithWordMatches("CompletableFuture",
+                                         Options.getInstance().concurrent());
+
+        System.out.println("Count # of documents \"CompletableFuture\" appears (as stream) = "
+                           // Count the # of documents that match.
+                           + results.count());
 
         Options.print("Ending the remote tests");
     }
-
 }

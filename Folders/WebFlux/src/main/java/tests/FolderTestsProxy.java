@@ -7,6 +7,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
  * This class is a proxy to the FolderApplication micro-service.
@@ -32,6 +33,11 @@ public final class FolderTestsProxy {
      * A URI to count the number of times a word appears in the root folder.
      */
     private static final String sSearchURI = "/folders/works/_search";
+
+    /**
+     * A URI to return all documents that include a word match in the root folder.
+     */
+    private static final String sGetDocumentsURI = "/folders/works/_getDocuments";
 
     /**
      * Host/post where the server resides.
@@ -93,7 +99,7 @@ public final class FolderTestsProxy {
             // Retrieve the response.
             .retrieve()
 
-            // Convert it to a Folder object.
+            // Convert it to a mono to a dirent.
             .bodyToMono(Dirent.class);
     }
 
@@ -119,7 +125,7 @@ public final class FolderTestsProxy {
             // Retrieve the response.
             .retrieve()
 
-            // Convert it to a Folder object.
+            // Convert it to a mono to a long.
             .bodyToMono(Long.class)
 
             // Convert to a completable future.
@@ -148,7 +154,7 @@ public final class FolderTestsProxy {
             // Retrieve the response.
             .retrieve()
 
-            // Convert it to a Folder object.
+            // Convert it to a mono to a long object.
             .bodyToMono(Long.class);
     }
 
@@ -178,7 +184,38 @@ public final class FolderTestsProxy {
             // Retrieve the response.
             .retrieve()
 
-            // Convert it to a Folder object.
+            // Convert it to a mono to a long.
             .bodyToMono(Long.class);
+    }
+
+    /**
+     *
+     * @param word
+     * @param concurrent
+     * @return
+     */
+    public static Stream<Dirent> getDocumentsWithWordMatches(String word,
+                                                             boolean concurrent) {
+        // Return a mono to the folder initialized remotely.
+        return sFolderProxy
+            // Create an HTTP GET request.
+            .get()
+
+            // Add the uri to the baseUrl.
+            .uri(UriComponentsBuilder
+                 .fromPath(sGetDocumentsURI)
+                 .queryParam("word", word)
+                 .queryParam("concurrent", concurrent)
+                 .build()
+                 .toString())
+
+            // Retrieve the response.
+            .retrieve()
+
+            // Convert it to a flux of dirents.
+            .bodyToFlux(Dirent.class)
+            
+            // Convert to a stream.
+            .toStream();
     }
 }

@@ -107,6 +107,13 @@ public class Dirent
     }
 
     /**
+     * @return The path of the dirent.
+     */
+    public String toString() {
+        return getPath().toString();
+    }
+
+    /**
      * Set path of the dirent.
      */
     public void setPath(File path) {

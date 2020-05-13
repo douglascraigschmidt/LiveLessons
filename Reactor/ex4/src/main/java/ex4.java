@@ -197,9 +197,7 @@ public class ex4 {
             .just(number)
 
             // Subscriber may run in different thread(s).
-            .publishOn(mSubscriberScheduler,
-                       // The initial request size.
-                       mSubscriber.nextRequestSize())
+            .publishOn(mSubscriberScheduler)
 
             // Check if the # is prime.
             .map(__ -> checkIfPrime(number, primeChecker));

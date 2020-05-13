@@ -10,10 +10,6 @@ import folder.Dirent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tests.FolderTests;
-import utils.ReactorUtils;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
@@ -63,7 +59,30 @@ public class FolderController {
         return FolderTests
             // Asynchronously and concurrently count the # of
             // times word appears in folder starting at rootDir.
-            .performFolderSearch(rootDir, word, concurrent);
+            .performCountWordMatches(rootDir, word, concurrent);
+    }
+
+    /**
+     * This method returns all the documents where a {@code word}
+     * appears in the folder starting at {@code rootDir}.
+     *
+     * WebFlux maps HTTP GET requests sent to the /{rootDir}/_search
+     * endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for starting at {@code rootDir}
+     * @param concurrent True if the search should be done concurrently or not
+     * @return A flux containing all the documents where {@code word} appears in
+     *         the folder starting at {@code rootDir}  
+     */
+    @GetMapping("/{rootDir}/_getDocuments")
+    public Flux<Dirent> getDocuments(@PathVariable String rootDir,
+                                     @RequestParam String word,
+                                     @RequestParam Boolean concurrent) {
+        return FolderTests
+            // Asynchronously and concurrently count the # of
+            // times word appears in folder starting at rootDir.
+            .performGetDocuments(rootDir, word, concurrent);
     }
 	
     /**

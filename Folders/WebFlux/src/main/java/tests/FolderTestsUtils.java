@@ -46,6 +46,27 @@ public final class FolderTestsUtils {
     }
 
     /**
+     * Check if the {@code searchWord} appears in the {@code document}.
+     *
+     * @param document In-memory document containing text
+     * @param searchWord Word to search for in the document
+     * @return A mono containing true if {@code searchWord} appears in {@code document}.
+     */
+    public static Mono<Boolean> wordInDocument(Dirent document,
+                                               String searchWord) {
+        // Return a mono that counts the # of times searchWord appears
+        // in the document.
+
+        // Split the document into a stream of words.
+        return splitAsFlux(document,
+                          "\\W+")
+
+            // Emit a single boolean true if any values of this
+            // flux sequence match the predicate.
+            .any(searchWord::equals);
+    }
+
+    /**
      * Creates a stream from the {@code document} around matches of
      * this {@code regex} pattern.
      *
