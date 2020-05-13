@@ -216,10 +216,9 @@ public final class FolderTests {
 
             // Only consider documents containing the search
             // searchWord (non-blocking!).
-            .filterWhen(document ->
-                        FolderTestsUtils
+            .filterWhen(document -> FolderTestsUtils
                         .wordInDocument(document,
-                                        searchWord)))
+                                        searchWord));
 
         // Return a flux containing all documents where searchWord
         // appears in the folder starting at the root directory.
