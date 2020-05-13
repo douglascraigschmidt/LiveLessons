@@ -235,10 +235,10 @@ public final class FolderTests {
                  // this code sequentially or concurrently.
                  .flatMap(getMatchingDocuments))
 
-            // Convert the Mono<Flux<Dirent> to a Flux<Dirent>.
+            // Convert the Mono<Flux<Dirent>> to a Flux<Dirent>.
             .flatMapMany(Function.identity())
 
-            // Conditionally print the results.
+            // Print some debugging information.
             .doOnNext(document -> Options
                       // Display the result.
                       .debug("document "
