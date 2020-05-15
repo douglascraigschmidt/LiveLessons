@@ -107,11 +107,11 @@ Here's an overview of what's current included in these examples:
          Java fork-join framework to download multiple images from a
          remote server.
 
-. ex21 - This program shows the difference between stream sources
-         (such as List) that enforce encounter order and stream
-         sources (such as HashSet) that do not in the context of
-         various order-sensitive aggregate operations, such as limit()
-         and distinct().
+. ex21 - This program shows the difference between Java streams
+         sources (such as List) that enforce encounter order and
+         stream sources (such as HashSet) that do not in the context
+         of various order-sensitive aggregate operations, such as
+         limit() and distinct().
 
 . ex22 - This example shows how to reduce and multiply big fractions
          using the Java fork-join pool framework.
@@ -141,8 +141,8 @@ Here's an overview of what's current included in these examples:
 . ex27 - This example shows how to apply Java 9 timeouts with the Java
          completable futures framework.
 
-. ex28 - This example shows how to implement the Singleton pattern
-         via Java AtomicReference.
+. ex28 - This example shows several ways to implement the Singleton
+         pattern via Java AtomicReference and volatile.
 
 . ex29 - This example shows how to combine the Java sequential streams
          and completable futures framework to generate and reduce

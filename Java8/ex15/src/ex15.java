@@ -11,14 +11,14 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the limitations of using inherently sequential
- * Java 8 streams operations (such as iterate() and limit()) in the
+ * Java streams operations (such as iterate() and limit()) in the
  * context of parallel streams.
  */
 public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static long sNUMBER = 10000000;
+    private static long sNUMBER = 100000;
 
     /**
      * Main entry point into the program.

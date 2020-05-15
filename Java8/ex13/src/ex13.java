@@ -3,9 +3,9 @@ import java.util.Spliterator;
 import java.util.stream.StreamSupport;
 
 /**
- * This example shows several examples of using Java 8 Spliterators
- * and streams to traverse each word in a list containing a quote from
- * a famous Shakespeare play.
+ * This example shows several examples of using Java Spliterators and
+ * streams to traverse each word in a list containing a quote from a
+ * famous Shakespeare play.
  */
 public class ex13 {
     /**

@@ -1,10 +1,8 @@
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
 
 /**
  * This example shows various issues associated with using the Java 8

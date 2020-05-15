@@ -87,8 +87,8 @@ public class Main {
             // word in all folders starting at the rootFolder.
             .timeRun(() -> FolderTests
                      .countWordMatches(rootFolderM,
-                                    searchWord,
-                                    concurrent)
+                                       searchWord,
+                                       concurrent)
                      .block(),
                      "searchFolders() " + mode);
 
@@ -107,6 +107,16 @@ public class Main {
                      .countLines(rootFolderM, concurrent)
                      .block(),
                      "countLines() " + mode);
+
+        RunTimer
+            // Compute the time taken to count the # of lines in the
+            // folder.
+            .timeRun(() -> FolderTests
+                     .getDocuments(rootFolderM,
+                                   "CompletableFuture",
+                                   concurrent)
+                     .collectList().block(),
+                     "getDocuments() " + mode);
 
         Options.print("Ending the test " + mode);
     }
