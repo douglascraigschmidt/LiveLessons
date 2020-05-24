@@ -116,7 +116,7 @@ public class ex16 {
             }
 
             /**
-             * Synchronize get to ensure visibility of the data.
+             * Synchronize get() to ensure visibility of the data.
              */
             BigInteger get() {
                 synchronized (this) {

@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 /**
- * This example shows various issues associated with using the Java 8
+ * This example shows various issues associated with using the Java
  * stream reduce() terminal operation, including the need to use the
  * correct identity value and to ensure operations are associative.
  * It also demonstrates what goes wrong when reduce() performs a
@@ -38,6 +38,10 @@ public class ex17 {
         // incorrect identity value.
         testSum(1L, true);
 
+        // Run the product reduction test in parallel with an
+        // incorrect identity value.
+        testSum(0L, true);
+
         // Run the product reduction test sequentially with the
         // correct identity value.
         testProd(1L, false);
@@ -49,10 +53,6 @@ public class ex17 {
         // Run the product reduction test sequentially with an
         // incorrect identity value.
         testProd(0L, false);
-
-        // Run the product reduction test in parallel with an
-        // incorrect identity value.
-        testSum(0L, true);
 
         // Reduce partial results into a string using a sequential
         // stream and the three parameter version of reduce().
@@ -260,7 +260,7 @@ public class ex17 {
             // This implementation works with both sequential and
             // parallel streams, but it's inefficient since it
             // requires string concatenation.
-            .reduce(new String(),
+            .reduce("",
                     (x, y) -> x + y);
 
 

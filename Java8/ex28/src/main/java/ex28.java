@@ -11,11 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @SuppressWarnings("ALL")
 public class ex28 {
     /**
-     * Logging tag.
-     */
-    private static final String TAG = ex28.class.getName();
-
-    /**
      * The Java execution environment requires a static main() entry
      * point method to run the app.
      */

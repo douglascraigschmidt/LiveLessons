@@ -9,7 +9,7 @@ class SingletonAR<T> {
      * Implement the singleton using an AtomicReference.
      */
     public static AtomicReference<SingletonAR> sSingletonAR =
-        new AtomicReference<SingletonAR>(null);
+        new AtomicReference<>(null);
 
     /**
      * Define a non-static field.
@@ -29,7 +29,7 @@ class SingletonAR<T> {
     public T setField (T f) { return mField = f; }
 
     /**
-     * The static instance() method from the SingletonAR pattern.
+     * The static instance() method from the Singleton pattern.
      */
     public static <T> SingletonAR instance() {
         // Get the current value of the singleton.

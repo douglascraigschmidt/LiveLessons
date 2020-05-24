@@ -152,3 +152,5 @@ Here's an overview of what's current included in these examples:
 . ex30 - This example showcases and benchmarks the use of a Java
          ConcurrentHashMap and various memoizer implementations to
          compute/cache/retrieve large prime numbers.
+
+. ex31 - This example ...

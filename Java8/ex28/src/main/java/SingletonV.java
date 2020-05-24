@@ -27,7 +27,7 @@ class SingletonV<T> {
     public T setField (T f) { return mField = f; }
 
     /**
-     * The static instance() method from the SingletonV pattern.
+     * The static instance() method from the Singleton pattern.
      */
     public static <T> SingletonV instance() {
         // Assign the volatile to a local variable.
@@ -36,7 +36,7 @@ class SingletonV<T> {
         // Run this code if the singleton is not yet initialized.
         if (inst == null) {
             // Only synchronize if inst == null.
-            synchronized (SingletonV.class) {
+            synchronized(SingletonV.class) {
                 inst = sSingleton;
                 // Perform the second check (i.e., double-check)
                 if (inst == null)
