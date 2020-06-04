@@ -153,4 +153,6 @@ Here's an overview of what's current included in these examples:
          ConcurrentHashMap and various memoizer implementations to
          compute/cache/retrieve large prime numbers.
 
-. ex31 - This example ...
+. ex31 - This example demonstrates how the Java volatile type
+         qualifier can be used to enable two threads to alternate
+         printing "ping" and "pong".

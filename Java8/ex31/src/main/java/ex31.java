@@ -1,7 +1,7 @@
 /**
- * This class demonstrates how the Java volatile type qualifier
- * can be used to enable two threads to alternate printing
- * "ping" and "pong," using a technique described at URL
+ * This demonstrates how the Java volatile type qualifier can be used
+ * to enable two threads to alternate printing "ping" and "pong."
+ * Additional information about this technique appears at URL
  * https://dzone.com/articles/java-volatile-keyword-0.
  */
 public class ex31 {
