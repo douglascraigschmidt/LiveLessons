@@ -188,29 +188,29 @@ public class ex17 {
                            + (parallel ? "parallel" : "sequential")
                            + "buggyStreamReduce3 implementation");
 
-        List<String> allWords =
+        List<String> allStrings =
             List.of("The quick brown fox jumps over the lazy dog\n",
                     "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people " 
-                    + "to come to the aid of their party");
+                    "Now is the time for all good people\n",
+                    "to come to the aid of their party\n");
 
         // Record the start time.
         long startTime = System.nanoTime();
 
-        Stream<String> wordStream = allWords
+        Stream<String> stringStream = allStrings
             // Convert the list into a stream (which uses a
             // spliterator internally).
             .stream();
 
         if (parallel)
             // Convert to a parallel stream.
-            wordStream.parallel();
+            stringStream.parallel();
 
-        // A "real" application would likely do something
-        // interesting with the words at this point.
+        // A "real" application would likely do something interesting
+        // with the strings at this point.
 
         // Create a string that contains all the strings appended together.
-        String words = wordStream
+        String reducedString = stringStream
             // Use reduce() to append all the strings in the stream.
             // This implementation will fail when used with a parallel
             // stream since reduce() expects to do "immutable"
@@ -225,11 +225,13 @@ public class ex17 {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to collect "
-                           + words.split("\\s+").length
-                           + " words took "
+                           + allStrings.size()
+                           + " strings into "
+                           + reducedString.split("\\n").length
+                           + " strings took "
                            + stopTime
-                           + " milliseconds.  Here are the words:\n"
-                           + words);
+                           + " milliseconds.  Here are the strings:\n"
+                           + reducedString);
     }
 
     /**
@@ -245,51 +247,53 @@ public class ex17 {
      */
     private static void buggyStreamReduce3b(boolean parallel) {
         System.out.println("\n++Running the "
-                + (parallel ? "parallel" : "sequential")
-                + "buggyStreamReduce3b implementation");
+                           + (parallel ? "parallel" : "sequential")
+                           + "buggyStreamReduce3b implementation");
 
-        List<String> allWords =
-                List.of("The quick brown fox jumps over the lazy dog\n",
-                        "A man, a plan, a canal: Panama\n",
-                        "Now is the time for all good people "
-                                + "to come to the aid of their party");
+        List<String> allStrings =
+            List.of("The quick brown fox jumps over the lazy dog\n",
+                    "A man, a plan, a canal: Panama\n",
+                    "Now is the time for all good people\n",
+                    "to come to the aid of their party\n");
 
         // Record the start time.
         long startTime = System.nanoTime();
 
-        Stream<String> wordStream = allWords
-                // Convert the list into a stream (which uses a
-                // spliterator internally).
-                .stream();
+        Stream<String> stringStream = allStrings
+            // Convert the list into a stream (which uses a
+            // spliterator internally).
+            .stream();
 
         if (parallel)
             // Convert to a parallel stream.
-            wordStream.parallel();
+            stringStream.parallel();
 
-        // A "real" application would likely do something
-        // interesting with the words at this point.
+        // A "real" application would likely do something interesting
+        // with the strings at this point.
 
         // Create a string that contains all the strings appended together.
-        String words = wordStream
-                // Use reduce() to append all the strings in the stream.
-                // This implementation will fail when used with a parallel
-                // stream since reduce() expects to do "immutable"
-                // reduction, but there's just a single StringBuffer!
-                .reduce(new StringBuffer(),
-                        StringBuffer::append,
-                        StringBuffer::append)
-                // Create a string.
-                .toString();
+        String reducedString = stringStream
+            // Use reduce() to append all the strings in the stream.
+            // This implementation will fail when used with a parallel
+            // stream since reduce() expects to do "immutable"
+            // reduction, but there's just a single StringBuffer!
+            .reduce(new StringBuffer(),
+                    StringBuffer::append,
+                    StringBuffer::append)
+            // Create a string.
+            .toString();
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to collect "
-                + words.split("\\s+").length
-                + " words took "
-                + stopTime
-                + " milliseconds.  Here are the words:\n"
-                + words);
+                           + allStrings.size()
+                           + " strings into "
+                           + reducedString.split("\\n").length
+                           + " strings took "
+                           + stopTime
+                           + " milliseconds.  Here are the strings:\n"
+                           + reducedString);
     }
 
     /**
@@ -304,29 +308,30 @@ public class ex17 {
                            + (parallel ? "parallel" : "sequential")
                            + "streamReduceConcat implementation");
 
-        List<String> allWords =
+        List<String> allStrings =
             List.of("The quick brown fox jumps over the lazy dog\n",
                     "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people " 
-                    + "to come to the aid of their party");
+                    "Now is the time for all good people\n",
+                    "to come to the aid of their party\n");
 
         // Record the start time.
         long startTime = System.nanoTime();
 
-        Stream<String> wordStream = allWords
+        Stream<String> stringStream = allStrings
             // Convert the list into a stream (which uses a
             // spliterator internally).
             .stream();
 
         if (parallel)
             // Convert to a parallel stream.
-            wordStream.parallel();
+            stringStream.parallel();
 
-        // A "real" application would likely do something
-        // interesting with the words at this point.
+        // A "real" application would likely do something interesting
+        // with the strings at this point.
 
-        // Create a string that contains all the strings appended together.
-        String words = wordStream
+        // Create a string that contains all the strings appended
+        // together.
+        String reducedString = stringStream
             // Use reduce() to append all the strings in the stream.
             // This implementation works with both sequential and
             // parallel streams, but it's inefficient since it
@@ -339,11 +344,13 @@ public class ex17 {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to collect "
-                           + words.split("\\s+").length
-                           + " words took "
+                           + allStrings.size()
+                           + " strings into "
+                           + reducedString.split("\\n").length
+                           + " strings took "
                            + stopTime
-                           + " milliseconds.  Here are the words:\n"
-                           + words);
+                           + " milliseconds.  Here are the strings:\n"
+                           + reducedString);
     }
 
     /**
@@ -360,30 +367,30 @@ public class ex17 {
                            + (parallel ? "parallel" : "sequential")
                            + "streamCollectJoining implementation");
 
-        List<String> allWords =
+        List<String> allStrings =
             List.of("The quick brown fox jumps over the lazy dog\n",
                     "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people " 
-                    + "to come to the aid of their party");
+                    "Now is the time for all good people\n",
+                    "to come to the aid of their party\n");
 
         // Record the start time.
         long startTime = System.nanoTime();
 
-        Stream<String> wordStream = allWords
+        Stream<String> stringStream = allStrings
             // Convert the list into a stream (which uses a
             // spliterator internally).
             .stream();
 
         if (parallel)
             // Convert to a parallel stream.
-            wordStream.parallel();
+            stringStream.parallel();
 
         // A "real" application would likely do something interesting
-        // with the words at this point.
+        // with the strings at this point.
 
         // Create a string that contains all the strings appended
         // together.
-        String words = wordStream
+        String reducedString = stringStream
             // Use collect() to append all the strings in the stream.
             // This implementation works when used with either a
             // sequential or a parallel stream.
@@ -393,10 +400,12 @@ public class ex17 {
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
         System.out.println("The time to collect "
-                           + words.split("\\s+").length
-                           + " words took "
+                           + allStrings.size()
+                           + " strings into "
+                           + reducedString.split("\\n").length
+                           + " strings took"
                            + stopTime
-                           + " milliseconds.  Here are the words:\n"
-                           + words);
+                           + " milliseconds.  Here are the strings:\n"
+                           + reducedString);
     }
 }
