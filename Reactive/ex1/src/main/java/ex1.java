@@ -22,6 +22,7 @@ public class ex1 {
         // stream.
         AsyncTester.register(FluxEx::testFractionMultiplication);
 
+        @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTester
             // Run all the asynchronous tests.
             .runTests()

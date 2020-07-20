@@ -52,7 +52,7 @@ public class BigFractionUtils {
      */
     public static final Mono<Void> sVoidM =
             Mono.empty();
-    
+
     /**
      * Display the {@code string} after prepending the thread id.
      */
