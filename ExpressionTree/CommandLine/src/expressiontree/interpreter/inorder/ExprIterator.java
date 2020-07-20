@@ -1,27 +1,29 @@
 package expressiontree.interpreter.inorder;
 
 import expressiontree.interpreter.InterpreterImpl;
+import expressiontree.interpreter.exprs.*;
 
 import java.util.Iterator;
 
-import static expressiontree.nodes.ComponentNode.sNUMBER;
-import static expressiontree.nodes.ComponentNode.sRPAREN;
+import static expressiontree.composites.ComponentNode.sNUMBER;
+import static expressiontree.composites.ComponentNode.sRPAREN;
 
 /**
  * An iterator that traverses through a user-supplied input expression
  * and returns each symbol.
  */
-class SymbolIterator
-      implements Iterator<Symbol> {
+class ExprIterator
+      implements Iterator<Expr> {
     /**
-     *
+     * Reference to the interpreter implementation that's currently
+     * configured.
      */
-    private InterpreterImpl mInterpreterImpl;
+    private final InterpreterImpl mInterpreterImpl;
 
     /**
      * The user-supplied input expression.
      */
-    private String mInputExpression;
+    private final String mInputExpression;
 
     /**
      * The current location in mInputExpression.
@@ -29,18 +31,17 @@ class SymbolIterator
     private int mIndex;
 
     /**
-     * The prior symbol (used to disambiguate unary and binary
-     * minus).
+     * The prior symbol (used to disambiguate unary and binary minus).
      */
-    private Symbol mPriorSymbol;
+    private Expr mPriorExpr;
 
     /**
      * Constructor initializes the fields.
      *
      * @param inputExpression User-supplied input expression.
      */
-    SymbolIterator(InterpreterImpl iteratorImpl,
-                   String inputExpression) {
+    ExprIterator(InterpreterImpl iteratorImpl,
+                 String inputExpression) {
         // Store in the field.
         mInterpreterImpl = iteratorImpl;
 
@@ -58,7 +59,7 @@ class SymbolIterator
     /**
      * @return The next symbol in the input expression.
      */
-    public Symbol next() {
+    public Expr next() {
         // Get the next input character.
         char c = mInputExpression.charAt(mIndex++);
  
@@ -66,59 +67,59 @@ class SymbolIterator
         while (Character.isWhitespace(c))
             c = mInputExpression.charAt(mIndex++);
 
-        Symbol latestSymbol = null;;
+        Expr latestExpr = null;;
 
         // Handle a variable or number.
         if (Character.isLetterOrDigit(c)) {
-            latestSymbol = makeNumber(mInputExpression,
+            latestExpr = makeNumber(mInputExpression,
                                       mIndex - 1);
         } else {
             switch (c) {
             case '+':
                 // Addition operation.
-                latestSymbol = new Add();
+                latestExpr = new AddExpr();
                 break;
             case '-':
-                if (mPriorSymbol != null
-                    && (mPriorSymbol.getType() == sNUMBER
-                        || mPriorSymbol.getType() == sRPAREN))
+                if (mPriorExpr != null
+                    && (mPriorExpr.getType() == sNUMBER
+                        || mPriorExpr.getType() == sRPAREN))
                     // Subtraction operation.
-                    latestSymbol = new Subtract();
+                    latestExpr = new SubtractExpr();
                 else
                     // Negate operation.
-                    latestSymbol = new Negate();
+                    latestExpr = new NegateExpr();
                 break;
             case '*':
                 // Multiplication operation.
-                latestSymbol = new Multiply();
+                latestExpr = new MultiplyExpr();
                 break;
             case '/':
                 // Division Operation.
-                latestSymbol = new Divide();
+                latestExpr = new DivideExpr();
                 break;
             case '(':
                 // LParen.
-                latestSymbol = new LParen();
+                latestExpr = new LParen();
                 break;
             case ')':
                 // RParen
-                latestSymbol = new RParen();
+                latestExpr = new RParen();
                 break;
             case '$':
-                latestSymbol = new Delimiter();
+                latestExpr = new Delimiter();
                 break;
             default:
                 throw new RuntimeException("invalid character: " + c);
             }
         }
-        mPriorSymbol = latestSymbol;
-        return latestSymbol;
+        mPriorExpr = latestExpr;
+        return latestExpr;
     }
 
     /**
      * Make a new Number symbol.
      */
-    private Symbol makeNumber(String input,
+    private Expr makeNumber(String input,
                               int startIndex) {
         // Merge all consecutive number chars into a single Number
         // symbol, e.g., "123" = int(123).
@@ -135,16 +136,16 @@ class SymbolIterator
                 //noinspection UnnecessaryContinue
                 continue;
 
-        Number number;
+        NumberExpr number;
 
         // Handle a number.
         if (Character.isDigit(input.charAt(startIndex)))
-            number = new Number(input.substring(startIndex,
+            number = new NumberExpr(input.substring(startIndex,
                                                 startIndex + endIndex));
         else
             // Handle a variable by looking up its value in
             // mSymbolTable.
-            number = new Number(mInterpreterImpl.symbolTable()
+            number = new NumberExpr(mInterpreterImpl.symbolTable()
                                 .get(input.substring(startIndex,
                                                      startIndex + endIndex)));
 

@@ -1,4 +1,4 @@
-package expressiontree.nodes;
+package expressiontree.composites;
 
 /**
  * Defines a mLeft and mRight node (via inheritance).  It plays the role

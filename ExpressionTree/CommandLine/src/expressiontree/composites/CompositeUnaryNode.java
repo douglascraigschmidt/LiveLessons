@@ -1,6 +1,6 @@
-package expressiontree.nodes;
+package expressiontree.composites;
 
-import expressiontree.nodes.ComponentNode;
+import expressiontree.composites.ComponentNode;
 
 /**
  * Defines a mRight child (but not a mLeft one) and thus is useful for

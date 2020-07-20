@@ -1,13 +1,13 @@
 package expressiontree.iterators;
 
-import expressiontree.nodes.ParenNode;
+import expressiontree.composites.ParenNode;
 import expressiontree.tree.ExpressionTree;
 
 import java.util.Iterator;
 import java.util.Stack;
 
-import static expressiontree.nodes.ComponentNode.mCurrentTokenPrecedence;
-import static expressiontree.nodes.ComponentNode.mTopOfStackPrecedence;
+import static expressiontree.composites.ComponentNode.mCurrentTokenPrecedence;
+import static expressiontree.composites.ComponentNode.mTopOfStackPrecedence;
 
 /**
  * Iterates through a {@code Tree} using in-order traversal.  Plays

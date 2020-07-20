@@ -1,4 +1,4 @@
-package expressiontree.nodes;
+package expressiontree.composites;
 
 import expressiontree.visitors.Visitor;
 

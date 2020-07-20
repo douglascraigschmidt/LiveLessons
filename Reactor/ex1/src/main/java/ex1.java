@@ -66,7 +66,6 @@ public class ex1 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        /*
         // Test synchronous BigFraction reduction using a mono and a
         // pipeline of operations that run on the calling thread.
         AsyncTester.register(ex1::testFractionReductionSync);
@@ -86,21 +85,16 @@ public class ex1 {
         // Test BigFraction exception handling using mono methods.
         AsyncTester.register(ex1::testFractionExceptions1);
 
-         */
         // Test BigFraction multiplications using a stream of monos
         // and a pipeline of operations, including flatMap(),
         // collectList(), and first().
         AsyncTester.register(ex1::testFractionMultiplications1);
 
-        /*
         // Test BigFraction multiplications by combining the Java
         // streams framework with the Reactor framework.
         AsyncTester.register(ex1::testFractionMultiplications2);
 
-         */
-
-        @SuppressWarnings("ConstantConditions")
-            long testCount = AsyncTester
+        long testCount = AsyncTester
             // Run all the asynchronous tests.
             .runTests()
 
@@ -122,7 +116,7 @@ public class ex1 {
 
         // Create a new unreduced big fraction.
         BigFraction unreducedFraction =
-            BigFraction.valueOf(new BigInteger (sBI1),
+            BigFraction.valueOf(new BigInteger(sBI1),
                                 new BigInteger(sBI2),
                                 false);
 

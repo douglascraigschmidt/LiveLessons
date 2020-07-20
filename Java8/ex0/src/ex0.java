@@ -2,12 +2,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example two zap() method implementations that remove strings
+ * This example two zap*() method implementations that remove strings
  * from a list of strings.  One method uses basic Java 7 features and
- * the other uses basic Java 8 features.
+ * the other uses basic modern Java features.
  */
 public class ex0 {
     static public void main(String[] argv) {
@@ -29,7 +30,7 @@ public class ex0 {
                                "Robert");
 
         // Remove "Robert" from the list created from nameArray.
-        List<String> l2 = zap8(List.of(nameArray),
+        List<String> l2 = zapModern(List.of(nameArray),
                                "Robert");
 
         // Check to ensure the zap*() methods work.
@@ -62,10 +63,10 @@ public class ex0 {
 
     /**
      * Remove any strings matching @a omit from the list of strings
-     * using basic Java 8 features.
+     * using basic modern Java features.
      */
-    static List<String> zap8(List<String> lines,
-                      String omit) {
+    static List<String> zapModern(List<String> lines,
+                                  String omit) {
         return lines
             // Convert the list to a stream.
             .stream()
@@ -76,16 +77,6 @@ public class ex0 {
             // Trigger intermediate operation processing and return
             // new list of results.
             .collect(toList());
-    }
-
-    /**
-     * A generic negation predicate that can be used to negate a
-     * predicate.
-     *
-     * @return The negation of the input predicate.
-     */
-    public static<T> Predicate<T> not(Predicate<T> p) {
-        return p.negate();
     }
 }
 

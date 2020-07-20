@@ -27,26 +27,26 @@ public class ex2 {
     public static void main (String[] argv) throws InterruptedException {
         Flux<Object> fluxAsyncBackp = Flux.create((FluxSink<Object> emitter) -> {
 
-            // Publish 1000 numbers
-            for (int i = 0; i < 1000; i++) {
-                System.out.println(Thread.currentThread().getName() + " | Publishing = " + i);
-                // BackpressureStrategy.ERROR will cause MissingBackpressureException when
-                // subscriber can't keep up. So handle exception & call error handler.
-                emitter.next(i);
-            }
-            // When all values or emitted, call complete.
-            emitter.complete();
+                // Publish 1000 numbers
+                for (int i = 0; i < 1000; i++) {
+                    System.out.println(Thread.currentThread().getName() + " | Publishing = " + i);
+                    // BackpressureStrategy.ERROR will cause MissingBackpressureException when
+                    // subscriber can't keep up. So handle exception & call error handler.
+                    emitter.next(i);
+                }
+                // When all values or emitted, call complete.
+                emitter.complete();
 
-        }, FluxSink.OverflowStrategy.ERROR);
+            }, FluxSink.OverflowStrategy.ERROR);
 
         fluxAsyncBackp.subscribeOn(Schedulers.elastic()).publishOn(Schedulers.elastic()).subscribe(i -> {
-            // Process received value.
-            System.out.println(Thread.currentThread().getName() + " | Received = " + i);
-        }, e -> {
-            // Process error
-            System.err.println(Thread.currentThread().getName() + " | Error = " + e.getClass().getSimpleName() + " "
-                    + e.getMessage());
-        });
+                // Process received value.
+                System.out.println(Thread.currentThread().getName() + " | Received = " + i);
+            }, e -> {
+                // Process error
+                System.err.println(Thread.currentThread().getName() + " | Error = " + e.getClass().getSimpleName() + " "
+                                   + e.getMessage());
+            });
         /*
          * Notice above -
          *
