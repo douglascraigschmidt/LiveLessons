@@ -26,18 +26,31 @@ import java.util.stream.Stream;
  * first(), when(), and onErrorResume().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-public class ex1 {
+public class ex2 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Test synchronous BigFraction reduction using a mono and a
-        // pipeline of operations that run on the calling thread.
-        AsyncTester.register(MonoEx::testFractionReductionSync);
+        // Test asynchronous BigFraction reduction using a Mono and a
+        // pipeline of operations that run off the calling thread.
+        AsyncTester.register(MonoEx::testFractionReductionAsync);
 
-        // Test BigFraction multiplication using a synchronous Flux
-        // stream.
-        AsyncTester.register(FluxEx::testFractionMultiplication);
+        // Test asynchronous BigFraction multiplication and addition
+        // using zipWith().
+        AsyncTester.register(MonoEx::testFractionCombine);
+
+        // Test BigFraction exception handling using a synchronous
+        // Flux stream.
+        AsyncTester.register(FluxEx::testFractionExceptions1);
+
+        // Test BigFraction multiplications using a stream of monos
+        // and a pipeline of operations, including flatMap(),
+        // collectList(), and first().
+        AsyncTester.register(FluxEx::testFractionMultiplications1);
+
+        // Test BigFraction multiplications by combining the Java
+        // streams framework with the Reactor framework.
+        AsyncTester.register(FluxEx::testFractionMultiplications2);
 
         long testCount = AsyncTester
             // Run all the asynchronous tests.
