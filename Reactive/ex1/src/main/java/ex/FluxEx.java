@@ -28,13 +28,13 @@ public class FluxEx {
         CountDownLatch latch = new CountDownLatch(1);
 
         Flux
-            // Use a Flux to generate a stream of big fractions.
+            // Use just() to generate a stream of big fractions.
             .just(BigFraction.valueOf(100, 3),
                   BigFraction.valueOf(100, 4),
                   BigFraction.valueOf(100, 2),
                   BigFraction.valueOf(100, 1))
 
-            // Perform a multiplication on each element in the stream.
+            // Multiply each element in the stream.
             .map(fraction -> {
                     sb.append("     "
                               + fraction.toMixedString()
@@ -45,7 +45,7 @@ public class FluxEx {
                     return fraction.multiply(sBigReducedFraction);
                 })
 
-            // Start all the processing in motion.
+            // Initiate all the processing.
             .subscribe(fraction ->
                        // Add next fraction to the string buffer.
                        sb.append(" = " + fraction.toMixedString() + "\n"),
@@ -63,13 +63,15 @@ public class FluxEx {
                        });
 
         try {
-            // Wait for the flux to complete all its processing.
+            // Wait for the flux to complete all its processing.  Note
+            // there are better ways of do this!
             latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // Return empty mono.
+        // Return empty mono to indicate to the AsyncTester that all
+        // the processing is done.
         return sVoidM;
     }
 }
