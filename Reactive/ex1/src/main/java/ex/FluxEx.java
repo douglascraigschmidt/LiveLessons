@@ -24,9 +24,6 @@ public class FluxEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplication()\n");
 
-        // Create a synchronizer to manage completion.
-        CountDownLatch latch = new CountDownLatch(1);
-
         Flux
             // Use just() to generate a stream of big fractions.
             .just(BigFraction.valueOf(100, 3),
@@ -46,29 +43,18 @@ public class FluxEx {
                 })
 
             // Initiate all the processing.
-            .subscribe(fraction ->
-                       // Add next fraction to the string buffer.
+            .subscribe(// Handle next event.
+                       fraction ->
+                       // Add fraction to the string buffer.
                        sb.append(" = " + fraction.toMixedString() + "\n"),
 
-                       // Handle error result.
+                       // Handle error result event.
                        error -> sb.append("error"),
 
-                       // Handle final completion.
-                       () -> {
-                           // Display results when all processing is done.
-                           BigFractionUtils.display(sb.toString());
-
-                           // Release the latch.
-                           latch.countDown();
-                       });
-
-        try {
-            // Wait for the flux to complete all its processing.  Note
-            // there are better ways of do this!
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+                       // Handle final completion event.
+                       () ->
+                           // Display results when processing is done.
+                           BigFractionUtils.display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTester that all
         // the processing is done.
