@@ -10,10 +10,10 @@ public class ex6 {
         // Create a HashMap that associates beings with their
         // personas.
         Map<String, String> beingMap = new HashMap<String, String>() {
-            { put("Demon", "Naughty");
-              put("Angel", "Nice"); 
-            } 
-        };
+                { put("Demon", "Naughty");
+                  put("Angel", "Nice"); 
+                } 
+            };
 
         // The being to search for (who is not in the map).
         String being = "Demigod";
@@ -28,7 +28,7 @@ public class ex6 {
                            // Pass a Supplier lambda expression that
                            // returns a default value if the being is
                            // not found.
-                           + disposition.orElseGet(() -> "unknown"));
+                           + disposition.orElse("unknown"));
     }
 }
 

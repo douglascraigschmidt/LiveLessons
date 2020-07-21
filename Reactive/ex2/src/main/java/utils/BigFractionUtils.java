@@ -1,6 +1,7 @@
 package utils;
 
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -86,12 +87,18 @@ public class BigFractionUtils {
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
                                               StringBuilder sb) {
         // Quick sort the list asynchronously.
-        Mono<List<BigFraction>> quickSortM = ReactorUtils
-            .fromCallableConcurrent(() -> quickSort(list));
+        Mono<List<BigFraction>> quickSortM = Mono
+            .fromCallable(() -> quickSort(list))
+
+            // Run all the processing in a thread pool.
+            .subscribeOn(Schedulers.parallel());
 
         // Heap sort the list asynchronously.
-        Mono<List<BigFraction>> heapSortM = ReactorUtils
-            .fromCallableConcurrent(() -> heapSort(list));
+        Mono<List<BigFraction>> heapSortM =  Mono
+            .fromCallable(() -> heapSort(list))
+
+            // Run all the processing in a thread pool.
+            .subscribeOn(Schedulers.parallel());
 
         return Mono
             // Select the result of whichever sort finishes first and
@@ -101,14 +108,14 @@ public class BigFractionUtils {
 
             // Process the first sorted list.
             .doOnSuccess(sortedList -> {
-                              // Print the results as mixed fractions.
-                              sortedList
-                                  .forEach(fraction ->
-                                           sb.append("\n     "
-                                                     + fraction.toMixedString()));
-                              sb.append("\n");
-                              display(sb.toString());
-                          })
+                    // Print the results as mixed fractions.
+                    sortedList
+                        .forEach(fraction ->
+                                 sb.append("\n     "
+                                           + fraction.toMixedString()));
+                    sb.append("\n");
+                    display(sb.toString());
+                })
                 
             // Return an empty mono.
             .then();

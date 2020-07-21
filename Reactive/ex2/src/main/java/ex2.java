@@ -1,29 +1,13 @@
 import ex.FluxEx;
 import ex.MonoEx;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import utils.AsyncTester;
-import utils.BigFraction;
-import utils.HeapSort;
-import utils.ReactorUtils;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
- * asynchronously using a wide range of Mono and Flux features in the
+ * asynchronously using many advanced Mono and Flux features in the
  * Reactor framework, including flatMap(), collectList(), zipWith(),
- * first(), when(), and onErrorResume().
+ * first(), take(), when(), subscribeOn(), create(), and various
+ * thread pools.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {
@@ -35,13 +19,17 @@ public class ex2 {
         // pipeline of operations that run off the calling thread.
         AsyncTester.register(MonoEx::testFractionReductionAsync);
 
+        // Test asynchronous BigFraction multiplication using a mono,
+        // callable, and the common fork-join pool.
+        AsyncTester.register(MonoEx::testFractionMultiplicationCallable);
+
         // Test asynchronous BigFraction multiplication and addition
         // using zipWith().
         AsyncTester.register(MonoEx::testFractionCombine);
 
         // Test BigFraction exception handling using a synchronous
         // Flux stream.
-        AsyncTester.register(FluxEx::testFractionExceptions1);
+        AsyncTester.register(FluxEx::testFractionExceptions);
 
         // Test BigFraction multiplications using a stream of monos
         // and a pipeline of operations, including flatMap(),
@@ -49,9 +37,11 @@ public class ex2 {
         AsyncTester.register(FluxEx::testFractionMultiplications1);
 
         // Test BigFraction multiplications by combining the Java
-        // streams framework with the Reactor framework.
+        // streams framework with the Reactor framework and the
+        // common fork-join pool.
         AsyncTester.register(FluxEx::testFractionMultiplications2);
 
+        @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTester
             // Run all the asynchronous tests.
             .runTests()

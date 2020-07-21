@@ -31,7 +31,7 @@ public class FluxEx {
                   BigFraction.valueOf(100, 2),
                   BigFraction.valueOf(100, 1))
 
-            // Multiply each element in the stream.
+            // Multiply each element in the stream by a constant.
             .map(fraction -> {
                     sb.append("     "
                               + fraction.toMixedString()
@@ -42,7 +42,7 @@ public class FluxEx {
                     return fraction.multiply(sBigReducedFraction);
                 })
 
-            // Initiate all the processing.
+            // Initiate all the processing and handle the results.
             .subscribe(// Handle next event.
                        fraction ->
                        // Add fraction to the string buffer.
@@ -53,8 +53,8 @@ public class FluxEx {
 
                        // Handle final completion event.
                        () ->
-                           // Display results when processing is done.
-                           BigFractionUtils.display(sb.toString()));
+                       // Display results when processing is done.
+                       BigFractionUtils.display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTester that all
         // the processing is done.

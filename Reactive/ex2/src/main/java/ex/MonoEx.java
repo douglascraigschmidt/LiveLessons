@@ -4,9 +4,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
-import utils.ReactorUtils;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -14,6 +14,11 @@ import java.util.function.Function;
 
 import static utils.BigFractionUtils.*;
 
+/**
+ * This class shows how to apply Project Reactor features
+ * asynchronously to perform advanced Mono operations, including
+ * subscribeOn(), and various thread pools.
+ */
 public class MonoEx {
     /**
      * Test asynchronous BigFraction reduction using a Mono and a
@@ -98,17 +103,24 @@ public class MonoEx {
             return bf1.multiply(bf2);
         };
 
-        // Submit the call to the common fork-join pool and store
-        // the future it returns.
-        Mono<BigFraction> mono = ReactorUtils
-            .fromCallableConcurrent(call);
+        // Submit the call to a thread pool and store the future it
+        // returns.
+        Mono<BigFraction> mono = Mono
+            .fromCallable(call)
 
-        // Block until the result is available.
-        BigFraction result = mono.block();
+            // Run all the processing in a (single) background thread.
+            .subscribeOn(Schedulers.single());
 
-        assert result != null;
+        // Block until the result is available, handling any errors
+        // via an optional.
+        Optional<BigFraction> result = mono.blockOptional();
+
         sb.append("     Callable.call() = "
-                  + result.toMixedString());
+                  + result.map(BigFraction::toMixedString)
+                          .orElse("error")
+                  + "\n");
+
+        // Display the results.
         BigFractionUtils.display(sb.toString());
 
         // Return an empty mono.
@@ -128,15 +140,23 @@ public class MonoEx {
 
         // Create a random BigFraction and reduce/multiply it
         // asynchronously.
-        Mono<BigFraction> m1 = ReactorUtils
-            .fromCallableConcurrent(() -> BigFractionUtils.makeBigFraction(random, true)
-                                    .multiply(sBigReducedFraction));
+        Mono<BigFraction> m1 = Mono
+            .fromCallable(() ->
+                          BigFractionUtils.makeBigFraction(random, true)
+                          .multiply(sBigReducedFraction))
+
+            // Run all the processing in a thread pool.
+            .subscribeOn(Schedulers.parallel());
 
         // Create another random BigFraction and reduce/multiply it
         // asynchronously.
-        Mono<BigFraction> m2 = ReactorUtils
-            .fromCallableConcurrent(() -> BigFractionUtils.makeBigFraction(random, true)
-                                    .multiply(sBigReducedFraction));
+        Mono<BigFraction> m2 = Mono
+            .fromCallable(() ->
+                          BigFractionUtils.makeBigFraction(random, true)
+                          .multiply(sBigReducedFraction))
+
+            // Run all the processing in a thread pool.
+            .subscribeOn(Schedulers.parallel());
         
         // Create a consumer that prints the result as a mixed
         // fraction after it's added together.
@@ -149,7 +169,7 @@ public class MonoEx {
         };
 
         return m1
-            // Wait until m1 and m2 are complete and then add the
+            // Wait until m1 and m2 both complete and then add the
             // results.
             .zipWith(m2,
                      BigFraction::add)
@@ -157,7 +177,7 @@ public class MonoEx {
             // Print result after converting it to a mixed fraction.
             .doOnSuccess(mixedFractionPrinter)
 
-            // Return an empty mono.
+            // Return an empty mono to synchronize with the AsyncTester.
             .then();
     }
 }
