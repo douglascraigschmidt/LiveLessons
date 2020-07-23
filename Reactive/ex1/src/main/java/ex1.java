@@ -3,10 +3,10 @@ import ex.MonoEx;
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously using a wide range of Mono and Flux features in the
- * Reactor framework, including flatMap(), collectList(), zipWith(),
- * first(), when(), and onErrorResume().
+ * This class shows how to apply Project Reactor features
+ * synchronously to perform basic Mono and Flux operations, including
+ * just(), map(), subscribe(), fromCallable(), map(), doOnSuccess(),
+ * and then().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {
