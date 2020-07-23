@@ -7,17 +7,15 @@ import utils.BigFractionUtils;
 
 import java.math.BigInteger;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static utils.BigFractionUtils.*;
 
 /**
- * This class shows how to apply Project Reactor features
- * asynchronously to perform advanced Mono operations, including
- * subscribeOn(), and various thread pools.
+ * This class shows how to apply the Project Reactor subscribeOn()
+ * method to asynchronously perform various Mono operations, including
+ * fromCallable(), map(), doOnSuccess(), and then().
  */
 public class MonoEx {
     /**
@@ -55,14 +53,6 @@ public class MonoEx {
             return result.toMixedString();
         };
 
-        // Create a consumer to print the mixed reduced result.
-        Consumer<String> printResult = result -> {
-            sb.append("     mixed reduced fraction = "
-                      + result
-                      + "\n");
-            BigFractionUtils.display(sb.toString());
-        };
-
         return Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
@@ -79,7 +69,7 @@ public class MonoEx {
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(printResult)
+            .doOnSuccess(result -> MonoEx.printResult(result, sb))
 
             // Return an empty mono to synchronize with the
             // AsyncTester framework.
@@ -87,12 +77,14 @@ public class MonoEx {
     }
 
     /**
-     * Test asynchronous BigFraction multiplication using a mono,
-     * callable, and the common fork-join pool.
+     * Test hybrid asynchronous BigFraction multiplication using a
+     * mono and a callable, where the processing is performed in a
+     * background thread and the result is printed in a blocking
+     * manner by the main thread.
      */
-    public static Mono<Void> testFractionMultiplicationCallable() {
+    public static Mono<Void> testFractionMultiplicationCallable1() {
         StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplicationCallable()\n");
+            new StringBuilder(">> Calling testFractionMultiplicationCallable1()\n");
 
         // Create a callable that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
@@ -103,16 +95,16 @@ public class MonoEx {
             return bf1.multiply(bf2);
         };
 
-        // Submit the call to a thread pool and store the future it
-        // returns.
+        // Submit the call to a thread pool and store the mono future
+        // it returns.
         Mono<BigFraction> mono = Mono
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single());
 
-        // Block until the result is available, handling any errors
-        // via an optional.
+        // Block the calling thread until the result is available via
+        // the mono future, handling any errors via an optional.
         Optional<BigFraction> result = mono.blockOptional();
 
         sb.append("     Callable.call() = "
@@ -128,56 +120,57 @@ public class MonoEx {
     }
 
     /**
-     * Test asynchronous BigFraction multiplication and addition using
-     * zipWith().
+     * Test asynchronous BigFraction multiplication using a mono and a
+     * callable, where the processing and the printing of the result
+     * is handled in a non-blocking manner by a background thread.
      */
-    public static Mono<Void> testFractionCombine() {
-        StringBuilder sb = 
-            new StringBuilder(">> Calling testFractionCombine()\n");
+    public static Mono<Void> testFractionMultiplicationCallable2() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationCallable2()\n");
 
-        // A random number generator.
-        Random random = new Random();
+        // Create a callable that multiplies two large fractions.
+        Callable<BigFraction> call = () -> {
+            BigFraction bf1 = new BigFraction(sF1);
+            BigFraction bf2 = new BigFraction(sF2);
 
-        // Create a random BigFraction and reduce/multiply it
-        // asynchronously.
-        Mono<BigFraction> m1 = Mono
-            .fromCallable(() ->
-                          BigFractionUtils.makeBigFraction(random, true)
-                          .multiply(sBigReducedFraction))
-
-            // Run all the processing in a thread pool.
-            .subscribeOn(Schedulers.parallel());
-
-        // Create another random BigFraction and reduce/multiply it
-        // asynchronously.
-        Mono<BigFraction> m2 = Mono
-            .fromCallable(() ->
-                          BigFractionUtils.makeBigFraction(random, true)
-                          .multiply(sBigReducedFraction))
-
-            // Run all the processing in a thread pool.
-            .subscribeOn(Schedulers.parallel());
-        
-        // Create a consumer that prints the result as a mixed
-        // fraction after it's added together.
-        Consumer<BigFraction> mixedFractionPrinter = bigFraction
-            -> { 
-            sb.append("     combined result = " 
-                      + bigFraction.toMixedString()
-                      + "\n");
-            BigFractionUtils.display(sb.toString());
+            // Return the result of multiplying the fractions.
+            return bf1.multiply(bf2);
         };
 
-        return m1
-            // Wait until m1 and m2 both complete and then add the
-            // results.
-            .zipWith(m2,
-                     BigFraction::add)
+        // Submit the call to a thread pool and process the result it
+        // returns asynchronously.
+        return Mono
+            .fromCallable(call)
 
-            // Print result after converting it to a mixed fraction.
-            .doOnSuccess(mixedFractionPrinter)
+            // Run all the processing in a (single) background thread.
+            .subscribeOn(Schedulers.single())
 
-            // Return an empty mono to synchronize with the AsyncTester.
+            .doOnSuccess(bigFraction ->
+                         MonoEx.printResult(bigFraction, sb))
+                         
+            // Return an empty mono to synchronize with AsyncTester.
             .then();
+    }
+
+    /**
+     * Print the BigFraction {@code bf} after first reducing it.
+     */
+    private static void printResult(BigFraction bf,
+                                    StringBuilder sb) {
+        sb.append("     mixed reduced fraction = "
+                  + bf.toMixedString()
+                  + "\n");
+        BigFractionUtils.display(sb.toString());
+    }
+
+    /**
+     * Print the {@code mixedString}.
+     */
+    private static void printResult(String mixedString,
+                                    StringBuilder sb) {
+        sb.append("     mixed reduced fraction = "
+                + mixedString
+                + "\n");
+        BigFractionUtils.display(sb.toString());
     }
 }

@@ -165,15 +165,15 @@ public class ReactorUtils {
         return Flux
             // Create a generator.
             .create(sink -> {
-            LongStream
-                // Run from 1 to count.
-                .rangeClosed(1, count)
-                // Generate the next item and emit it.
-                .forEach(i -> sink.next(supplier.get()));
+                    LongStream
+                        // Run from 1 to count.
+                        .rangeClosed(1, count)
+                        // Generate the next item and emit it.
+                        .forEach(i -> sink.next(supplier.get()));
 
-            // Indicate we're done.
-            sink.complete();
-        });
+                    // Indicate we're done.
+                    sink.complete();
+                });
     }
 
     /**

@@ -1,219 +1,217 @@
 package ex;
 
+import org.reactivestreams.Subscriber;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-import utils.BigFraction;
 import utils.BigFractionUtils;
 
+import java.math.BigInteger;
+import java.time.Duration;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
-import static utils.BigFractionUtils.*;
-import static utils.MonosCollector.toMono;
+import static utils.BigFractionUtils.sVoidM;
 
 /**
  * This class shows how to apply Project Reactor features
- * asynchronously to perform advanced Flux operations, including
- * flatMap(), collectList(), zipWith(), first(), take(), when(),
- * subscribeOn(), create(), and various thread pools.
+ * asynchronously to perform various Flux operations, including
+ * create(), interval(), map(), doOnNext(), take(), subscribe(), and
+ * then().
  */
 public class FluxEx {
     /**
-     * Test BigFraction exception handling using an asynchronous Flux
-     * stream and a pool of threads.
+     * Maximum random number value.
      */
-    public static Mono<Void> testFractionExceptions() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions1()\n");
+    private static final int sMAX_VALUE = 10_000_000;
 
-        // Create a synchronizer to manage completion.
-        CountDownLatch latch = new CountDownLatch(1);
+    /**
+     * Max number of iterations.
+     */
+    private static final int sMAX_ITERATIONS = 10;
 
-        Flux
-            // Use a Flux to generate a stream of denominators.
-            .just(3, 4, 2, 0, 1)
+    /**
+     * A memoizer cache that maps candidate primes to their smallest
+     * factor (if they aren't prime) or 0 if they are prime.
+     */ 
+    private static final Map<BigInteger, BigInteger> mPrimeCache
+        = new ConcurrentHashMap<>();
 
-            // Iterate through the elements using the flatMap()
-            // concurrency idiom.
-            .flatMap(denominator -> {
-                    // Create/process a BigFraction synchronously.
-                    return Mono
-                        .fromCallable(() ->
-                                      // May throw
-                                      // ArithmeticException.
-                                      BigFraction.valueOf(100,
-                                                          denominator))
+    /**
+     * 100 milllisecond duration for sleeping.
+     */
+    private static final Duration sSLEEP_DURATION =
+        Duration.ofMillis(100);
 
-                        // Run all the processing in a pool of
-                        // background threads.
-                        .subscribeOn(Schedulers.parallel())
+    /**
+     * A factory method that bridges the reactive world with the
+     * callback-style world to emit a flow of random big integers.
+     */
+    private static Consumer<FluxSink<BigInteger>> makeFluxSink(StringBuffer sb) {
+        // Starting point of the randomly-generated numbers.
+        final int lowerBound = sMAX_VALUE - sMAX_ITERATIONS;
 
-                        // Handle exception and convert result to 0.
-                        .onErrorResume(t -> {
-                                // If exception occurred return 0.
-                                sb.append("     exception = "
-                                          + t.getMessage()
-                                          + "\n");
+        // Random number generator.
+        final Random rand = new Random();
 
-                                // Convert error to 0.
-                                return Mono.just(BigFraction.ZERO);
-                            })
+        return (FluxSink<BigInteger> sink) -> {
+            Flux
+                // Generate a big integer stream periodically in
+                // a background thread.
+                .interval(sSLEEP_DURATION)
 
-                        // Perform a multiplication.
-                        .map(fraction -> {
-                                sb.append("     "
-                                          + fraction.toMixedString()
-                                          + " x "
-                                          + sBigReducedFraction.toMixedString());
-                                // When mono completes multiply and
-                                // store it in output.
-                                return fraction.multiply(sBigReducedFraction);
-                            });
-                })
+                // Generate random numbers between min and max
+                // values to ensure some duplicates.
+                .map(x -> 
+                     BigInteger.valueOf(lowerBound +
+                                        rand.nextInt(sMAX_ITERATIONS)))
 
-            // Start all the processing in motion.
-            .subscribe(fraction ->
-                       // Add next fraction to the string buffer.
-                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                // Print the big integer as a debugging aid.
+                .doOnNext(s -> FluxEx.print(s, sb))
 
-                       // Handle error result.
-                       error -> sb.append("error"),
+                // Only take sMAX_ITERATIONS of big integers.
+                .take(sMAX_ITERATIONS)
 
-                       // Handle final completion.
-                       () -> {
-                           // Display results when all processing is done.
-                           BigFractionUtils.display(sb.toString());
-
-                           // Release the latch.
-                           latch.countDown();
-                       });
-
-        try {
-            // Wait for the flux to complete all its processing.
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Return empty mono.
-        return sVoidM;
+                // Start the processing and emit each random number until
+                // complete or an error occurs.
+                .subscribe(sink::next,
+                           // Shutdown the input stream on error.
+                           error -> sink.complete(),
+                           // Shutdown the input stream.
+                           sink::complete);
+        };
     }
 
     /**
-     * Test BigFraction multiplications using a stream of monos and a
-     * pipeline of operations, including flatMap(), collectList(), and
-     * first().
+     * Test a stream of random BigIntegers to determine which values
+     * are prime using an asynchronous time-driven Flux stream.
      */
-    public static Mono<Void> testFractionMultiplications1() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications1()\n");
+    public static Mono<Void> testIsPrime() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testIsPrime()\n");
 
-        // This function reduces/multiplies a big fraction asynchronously.
-        Function<BigFraction, Mono<BigFraction>> reduceAndMultiplyFraction =
-            unreducedFraction -> Mono
-            // Omit one item that performs the reduction.
-            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
-
-            // Perform all processing asynchronously in a pool of
-            // background threads.
-            .subscribeOn(Schedulers.parallel())
-
-            // Return a mono to a multiplied big fraction.
-            .flatMap(reducedFraction -> Mono
-                     // Multiply the big fractions
-                     .fromCallable(() -> reducedFraction
-                                   .multiply(sBigReducedFraction))
-                                   
-                     // Perform all processing asynchronously in a
-                     // pool of background threads.
-                     .subscribeOn(Schedulers.parallel()));
-
-        sb.append("     Printing sorted results:");
-
-        // Process the function in a flux stream.
         return Flux
-                // Generate a stream of random, large, and unreduced
-                // big fractions.
-                .<BigFraction>create(sink ->
-                        sink.onRequest(size ->
-                                sink.next(BigFractionUtils
-                                        .makeBigFraction(new Random(),
-                                                         false))))
+            // Factor method creates a flow of random big integers
+            // that are generated in a background thread.
+            .create(makeFluxSink(sb))
 
-            // Stop after generating sMAX_FRACTIONS big fractions.
-            .take(sMAX_FRACTIONS)
+            // Use a memoizer to check if each random big integer is
+            // prime or not on the background thread.
+            .map(bigInteger ->
+                 FluxEx.checkIfPrime(bigInteger, sb))
 
-            // Reduce and multiply these fractions asynchronously.
-            .flatMap(reduceAndMultiplyFraction)
+            // Process each big integer on the background thread.
+            .doOnNext(bigInteger ->
+                       FluxEx.processResult(bigInteger,
+                                            sb))
 
-            // Collect the results into a list.
-            .collectList()
-
-            // Process the results of the collected list.
-            .flatMap(list ->
-                     // Sort and print the results after all async
-                     // fraction reductions complete.
-                     BigFractionUtils.sortAndPrintList(list, sb));
+            // Display results after all elements in flux stream are processed
+            // and return an empty mono to synchronize with AsyncTester.
+            .then(Mono.fromRunnable(() ->
+                                    BigFractionUtils.display(sb.toString())));
     }
 
     /**
-     * Test BigFraction multiplications by combining the Java streams
-     * framework with the Reactor framework and the common fork-join pool.
+     * This method checks whether the {@code primeCandidate} is prime or not.
+     *
+     * @param primeCandidate The number to check for the prime factor.
+     * @return a PrimeResult that contains the prime candidate and
+     *         either 0 (if the prime candidate is prime) or the
+     *         smallest factor (if it's not prime)
      */
-    public static Mono<Void> testFractionMultiplications2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications2()\n");
+    static PrimeResult checkIfPrime(BigInteger primeCandidate,
+                                    StringBuffer sb) {
+        return new PrimeResult
+            (primeCandidate,
+             // This atomic "check then act" method serves as
+             // a "memoizer" cache.
+             mPrimeCache
+             .computeIfAbsent(primeCandidate,
+                              pc -> (FluxEx.isPrime(pc,
+                                                    sb))));
+    }
 
-        // Function asynchronously reduces/multiplies a big fraction.
-        // This function reduces/multiplies a big fraction asynchronously.
-        Function<BigFraction, Mono<BigFraction>> reduceAndMultiplyFraction =
-            unreducedFraction -> Mono
-            // Omit one item that performs the reduction.
-            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
+    /**
+     * This method provides a brute-force determination of whether
+     * number {@code primeCandidate} is prime.  Returns 0 if it is
+     * prime or the smallest factor if it is not prime.
+     */
+    static BigInteger isPrime(BigInteger n,
+                              StringBuffer sb) {
+        print("checking if " + n + " is prime", sb);
 
-            // Perform all processing asynchronously in the common
-            // fork-join pool.
-            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()))
+        BigInteger two = BigInteger.valueOf(2);
 
-            // Return a mono to a multiplied big fraction.
-            .flatMap(reducedFraction -> Mono
-                     // Multiply the big fractions
-                     .fromCallable(() -> reducedFraction
-                                   .multiply(sBigReducedFraction))
-                                   
-                     // Perform all processing asynchronously in the
-                     // common fork-join pool.
-                     .subscribeOn(Schedulers
-                                  .fromExecutor(ForkJoinPool.commonPool())));
+        if (n.mod(two).compareTo(BigInteger.ZERO) == 0) 
+            return two;          
 
-        sb.append("     Printing sorted results:");
+        for (BigInteger i = BigInteger.valueOf(3);
+             n.compareTo(i.multiply(i)) >= 0;
+             i = i.add(two)) 
+            if (n.mod(i).compareTo(BigInteger.ZERO) == 0)
+                return i;
+    
+        return BigInteger.ZERO;
+    }
 
-        // Process the function in a sequential stream.
-        return Stream
-            // Generate a stream of random, large, and unreduced big
-            // fractions.
-            .generate(() ->
-                      BigFractionUtils.makeBigFraction(new Random(),
-                                                       false))
+    /**
+     * Process the {@code primeTuple} to print whether a number if prime.
+     */
+    private static void processResult(PrimeResult primeTuple,
+                                      StringBuffer sb) {
+        if (!primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
+            print("found a non-prime number with smallest factor "
+                  + primeTuple.mSmallestFactor
+                  + " for "
+                  + primeTuple.mPrimeCandidate, sb);
+        } else {
+            print("found a prime number "
+                  + primeTuple.mPrimeCandidate, sb);
+        }
+    }
 
-            // Stop after generating sMAX_FRACTIONS big fractions.
-            .limit(sMAX_FRACTIONS)
+    /**
+     * The result returned from checkIfPrime.
+     */
+    private static class PrimeResult {
+        /**
+         * Value that was evaluated for primality.
+         */
+        BigInteger mPrimeCandidate;
 
-            // Reduce and multiply these fractions asynchronously.
-            .map(reduceAndMultiplyFraction)
+        /**
+         * Result of the isPrime() method.
+         */
+        BigInteger mSmallestFactor;
 
-            // Trigger intermediate operation processing and return a
-            // mono to a list of big fractions that are being reduced
-            // and multiplied asynchronously.
-            .collect(toMono())
+        /**
+         * Constructor initializes the fields.
+         */
+        public PrimeResult(BigInteger primeCandidate, BigInteger smallestFactor) {
+            mPrimeCandidate = primeCandidate;
+            mSmallestFactor = smallestFactor;
+        }
+    }
 
-            // After all the asynchronous fraction reductions have
-            // completed sort and print the results.
-            .flatMap(list -> BigFractionUtils.sortAndPrintList(list,
-                                                               sb));
+    /**
+     * Print string {@code s} with the thread name appended.
+     */
+    private static void print(String s, StringBuffer sb) {
+        sb.append("["
+                  + Thread.currentThread().getName()
+                  + "] "
+                  + s
+                  + "\n");
+    }
+
+    /**
+     * Print big integer {@code bigInteger} with the thread name appended.
+     */
+    private static void print(BigInteger bigInteger, StringBuffer sb) {
+        print("emitting " + bigInteger, sb);
     }
 }

@@ -24,11 +24,11 @@ public class ex1 {
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTester
-            // Run all the asynchronous tests.
+            // Run all the tests.
             .runTests()
 
             // Block until all the tests are done to allow future
-            // computations to complete running asynchronously.
+            // computations to complete running.
             .block();
 
         // Print the results.
