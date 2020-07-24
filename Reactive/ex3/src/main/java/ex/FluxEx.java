@@ -1,6 +1,7 @@
 package ex;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -10,6 +11,7 @@ import utils.BigFractionUtils;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -34,6 +36,30 @@ public class FluxEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionExceptions1()\n");
 
+        // Create a function to handle ArithmeticException.
+        Function<Throwable,
+                 Mono<? extends BigFraction>> errorHandler = t -> {
+            // If exception occurred return 0.
+            sb.append("     exception = "
+                      + t.getMessage()
+                      + "\n");
+
+            // Convert error to 0.
+            return Mono.just(BigFraction.ZERO);
+        };
+
+        // Create a function that multiplies big fractions.
+        Function<BigFraction,
+                 BigFraction> multiplyBigFractions = fraction -> {
+            sb.append("     "
+                      + fraction.toMixedString()
+                      + " x "
+                      + sBigReducedFraction.toMixedString()
+                      + "\n");
+            // When mono completes multiply it.
+            return fraction.multiply(sBigReducedFraction);
+        };
+
         return Flux
             // Use a Flux to generate a stream of denominators.
             .just(3, 4, 2, 0, 1)
@@ -41,11 +67,10 @@ public class FluxEx {
             // Iterate through the elements using the flatMap()
             // concurrency idiom.
             .flatMap(denominator -> {
-                    // Create/process a BigFraction synchronously.
+                    // Create/process a BigFraction asynchronously.
                     return Mono
                         .fromCallable(() ->
-                                      // May throw
-                                      // ArithmeticException.
+                                      // May throw Exception.
                                       BigFraction.valueOf(100,
                                                           denominator))
 
@@ -54,26 +79,10 @@ public class FluxEx {
                         .subscribeOn(Schedulers.parallel())
 
                         // Handle exception and convert result to 0.
-                        .onErrorResume(t -> {
-                                // If exception occurred return 0.
-                                sb.append("     exception = "
-                                          + t.getMessage()
-                                          + "\n");
-
-                                // Convert error to 0.
-                                return Mono.just(BigFraction.ZERO);
-                            })
+                        .onErrorResume(errorHandler)
 
                         // Perform a multiplication.
-                        .map(fraction -> {
-                                sb.append("     "
-                                          + fraction.toMixedString()
-                                          + " x "
-                                          + sBigReducedFraction.toMixedString()
-                                          + "\n");
-                                // When mono completes multiply it.
-                                return fraction.multiply(sBigReducedFraction);
-                            });
+                        .map(multiplyBigFractions);
                 })
 
             // Collect the results into a list.
@@ -96,26 +105,27 @@ public class FluxEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplications1()\n");
 
+        // A consumer that emits a stream of random big fractions.
+        Consumer<FluxSink<BigFraction>> bigFractionEmitter = sink ->
+            sink.onRequest(size -> sink
+                           .next(BigFractionUtils.makeBigFraction(new Random(),
+                                                                  false)));
+
         sb.append("     Printing sorted results:");
 
         // Process the function in a flux stream.
         return Flux
             // Generate a stream of random, large, and unreduced big
             // fractions.
-            .<BigFraction>
-            create(sink ->
-                   sink.onRequest(size ->
-                                  sink.next(BigFractionUtils
-                                            .makeBigFraction(new Random(),
-                                                             false))))
+            .<BigFraction>create(bigFractionEmitter)
 
             // Stop after generating sMAX_FRACTIONS big fractions.
             .take(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
             .flatMap(unreducedFraction ->
-                 reduceAndMultiplyFraction(unreducedFraction,
-                                           Schedulers.parallel()))
+                     reduceAndMultiplyFraction(unreducedFraction,
+                                               Schedulers.parallel()))
 
             // Collect the results into a list.
             .collectList()
@@ -184,7 +194,7 @@ public class FluxEx {
 
             // Perform all processing asynchronously in a pool of
             // background threads.
-            .subscribeOn(scheduler);
+            .subscribeOn(scheduler)
 
             // Return a mono to a multiplied big fraction.
             .flatMap(reducedFraction -> Mono

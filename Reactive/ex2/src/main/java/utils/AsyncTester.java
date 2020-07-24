@@ -42,18 +42,25 @@ public class AsyncTester {
      */
     public static Mono<Long> runTests() throws InterruptedException {
         return Flux
-                // Convert the list into a stream.
-                .fromIterable(sTests)
+            // Factory method that converts the list into a stream.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-
+            .fromIterable(sTests)
 
-                // Run each test, which can execute asynchronously.
-                .flatMap(Supplier::get)
+            // Run each test, which can execute asynchronously.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
+            .flatMap(Supplier::get)
 
-                // Collect into an empty list that triggers when all
-                // the tests finish running asynchronously.
-                .collectList()
+            // Collect into an empty list that triggers when all
+            // the tests finish running asynchronously.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#collectList--
+            .collectList()
 
-                // Return a mono when we're done.
-                .flatMap(l -> Mono.just((long) sTests.size()));
+            // Return a mono containing the number of tests run when
+            // we're done.
+            .flatMap(l -> Mono
+                     // Use just() to return the number of tests run.
+                     // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
+                     .just((long) sTests.size()));
     }
 }
 

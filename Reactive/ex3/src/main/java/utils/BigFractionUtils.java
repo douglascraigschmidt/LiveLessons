@@ -4,9 +4,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -88,25 +86,35 @@ public class BigFractionUtils {
                                               StringBuilder sb) {
         // Quick sort the list asynchronously.
         Mono<List<BigFraction>> quickSortM = Mono
+            // Use the fromCallable() factory method to obtain the
+            // results of quick sorting the list.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() -> quickSort(list))
 
-            // Run all the processing in a thread pool.
+            // Use subscribeOn() to run all the processing in the
+            // parallel thread pool.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.parallel());
 
         // Heap sort the list asynchronously.
         Mono<List<BigFraction>> heapSortM =  Mono
+            // Use the fromCallable() factory method to obtain the
+            // results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
 
-            // Run all the processing in a thread pool.
+            // Use subscribeOn() to run all the processing in the
+            // parallel thread pool.
             .subscribeOn(Schedulers.parallel());
 
         return Mono
-            // Select the result of whichever sort finishes first and
-            // use it to print the sorted list.
+            // Use first() to select the result of whichever sort
+            // finishes first and use it to print the sorted list.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-            
             .first(quickSortM,
                    heapSortM)
 
-            // Process the first sorted list.
+            // Use doOnSuccess() to process the first sorted list.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(sortedList -> {
                     // Print the results as mixed fractions.
                     sortedList
@@ -117,7 +125,9 @@ public class BigFractionUtils {
                     display(sb.toString());
                 })
                 
-            // Return an empty mono.
+            // Use then() to return an empty mono to synchronize with
+            // the AsyncTester framework.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 
@@ -125,30 +135,24 @@ public class BigFractionUtils {
      * Perform a quick sort on the {@code list}.
      */
     public static List<BigFraction> quickSort(List<BigFraction> list) {
-        // Convert the list to an array.
-        BigFraction[] bigFractionArray =
-            list.toArray(new BigFraction[0]);
+        List<BigFraction> copy = new ArrayList<>(list);
+    
+        // Order the list with quick sort.
+        Collections.sort(copy);
 
-        // Order the array with quick sort.
-        Arrays.sort(bigFractionArray);
-
-        // Convert the array back to a list.
-        return List.of(bigFractionArray);
+        return copy;
     }
 
     /*
      * Perform a heap sort on the {@code list}.
      */
     public static List<BigFraction> heapSort(List<BigFraction> list) {
-        // Convert the list to an array.
-        BigFraction[] bigFractionArray =
-                list.toArray(new BigFraction[0]);
+        List<BigFraction> copy = new ArrayList<>(list);
 
-        // Order the array with heap sort.
-        HeapSort.sort(bigFractionArray);
+        // Order the list with heap sort.
+        HeapSort.sort(copy);
 
-        // Convert the array back to a list.
-        return List.of(bigFractionArray);
+        return copy;
     }
 
     /**

@@ -3,10 +3,7 @@ import utils.BigFraction;
 import utils.HeapSort;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -799,30 +796,24 @@ public class ex8 {
      * Perform a quick sort on the {@code list}.
      */
     private static List<BigFraction> quickSort(List<BigFraction> list) {
-        // Convert the list to an array.
-        BigFraction[] bigFractionArray =
-            list.toArray(new BigFraction[0]);
+        List<BigFraction> copy = new ArrayList<>(list);
+    
+        // Order the list with quick sort.
+        Collections.sort(copy);
 
-        // Order the array with quick sort.
-        Arrays.sort(bigFractionArray);
-
-        // Convert the array back to a list.
-        return List.of(bigFractionArray);
+        return copy;
     }
 
     /*
      * Perform a heap sort on the {@code list}.
      */
     private static List<BigFraction> heapSort(List<BigFraction> list) {
-        // Convert the list to an array.
-        BigFraction[] bigFractionArray =
-            list.toArray(new BigFraction[0]);
+        List<BigFraction> copy = new ArrayList<>(list);
 
-        // Order the array with heap sort.
-        HeapSort.sort(bigFractionArray);
+        // Order the list with heap sort.
+        HeapSort.sort(copy);
 
-        // Convert the array back to a list.
-        return List.of(bigFractionArray);
+        return copy;
     }
 
     /**
