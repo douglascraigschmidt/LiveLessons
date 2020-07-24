@@ -1,5 +1,3 @@
-import ex.FluxEx;
-import ex.MonoEx;
 import utils.AsyncTester;
 
 /**
@@ -15,11 +13,13 @@ public class ex1 {
     public static void main (String[] argv) throws InterruptedException {
         // Test synchronous BigFraction reduction using a mono and a
         // pipeline of operations that run on the calling thread.
-        AsyncTester.register(MonoEx::testFractionReductionSync);
+        AsyncTester.register(MonoEx::testFractionReductionSync1);
 
-        // Test BigFraction multiplication using a synchronous Flux
-        // stream.
-        AsyncTester.register(FluxEx::testFractionMultiplication);
+        // Test synchronous BigFraction reduction using a mono and a
+        // pipeline of operations that run on the calling thread.
+        // Combines the mono with Java functional programming
+        // features.
+        AsyncTester.register(MonoEx::testFractionReductionSync2);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTester

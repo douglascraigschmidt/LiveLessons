@@ -3,11 +3,11 @@ import utils.AsyncTester;
 /**
  * This example shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced Flux features
- * in the Project Reactor framework, including fromCallable(), map(),
- * flatMap(), collectList(), zipWith(), first(), take(), when(),
- * onErrorResult(), subscribeOn(), create(), and various types of
- * thread pools.  It also demonstrates how to combine the Java streams
- * framework with the Project Reactor framework.
+ * in the Project Reactor framework, including just(), create(),
+ * map(), flatMap(), collectList(), take(), subscribeOn(), and various
+ * types of thread pools.  It also shows advanced Mono operations,
+ * such as first() and when().  It also demonstrates how to combine
+ * the Java streams framework with the Project Reactor framework.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {

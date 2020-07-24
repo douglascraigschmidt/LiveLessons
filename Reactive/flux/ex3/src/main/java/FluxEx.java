@@ -19,11 +19,11 @@ import static utils.MonosCollector.toMono;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
- * fromCallable(), map(), flatMap(), collectList(), zipWith(),
- * first(), take(), when(), onErrorResult(), subscribeOn(), create(),
- * and various types of thread pools.  It also demonstrates how to
- * combine the Java streams framework with the Project Reactor
- * framework.
+ * just(), create(), map(), flatMap(), collectList(), take(),
+ * subscribeOn(), and various types of thread pools.  It also shows
+ * advanced Mono operations, such as first() and when().  It also
+ * demonstrates how to combine the Java streams framework with the
+ * Project Reactor framework.
  */
 public class FluxEx {
     /**
@@ -124,7 +124,7 @@ public class FluxEx {
             // Generate a stream of random, large, and unreduced big
             // fractions.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#create-java.util.function.Consumer-
-            .<BigFraction>create(bigFractionEmitter)
+            .create(bigFractionEmitter)
 
             // Stop after generating sMAX_FRACTIONS big fractions.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#take-long-
