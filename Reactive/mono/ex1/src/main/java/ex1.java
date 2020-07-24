@@ -1,7 +1,7 @@
 import utils.AsyncTester;
 
 /**
- * This class shows how to apply Project Reactor features
+ * This example shows how to apply Project Reactor features
  * synchronously to perform basic Mono operations, including
  * fromCallable(), map(), doOnSuccess(), and then().
  */
