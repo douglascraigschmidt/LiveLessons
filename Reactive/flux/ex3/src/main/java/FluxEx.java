@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import static utils.BigFractionUtils.*;
 import static utils.MonosCollector.toMono;
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 
 /**
  * This class shows how to apply Project Reactor features

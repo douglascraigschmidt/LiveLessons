@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This class asynchronously runs tests that use the Java completable
- * futures framework and ensures that the test driver doesn't exit
- * until all the asynchronous processing is completed.
+ * This class asynchronously runs tests that use the Project Reactor
+ * framework and ensures that the test driver doesn't exit until all
+ * the asynchronous processing is completed.
  * 
  */
 public class AsyncTester {
@@ -29,6 +29,8 @@ public class AsyncTester {
      * Register the {@code test} test so that it can be run
      * asynchronously.  Each test must take no parameters and return a
      * {@code Supplier<Mono<Void>>} result.
+     *
+     * @param test The function to test
      */
     public static void register(Supplier<Mono<Void>> test) {
         sTests.add(test);
@@ -38,7 +40,8 @@ public class AsyncTester {
      * Run all the register tests.
      *
      * @return a {@code Mono<Void>} that will be
-     * triggered when all the asynchronously-run tests complete.
+     * triggered when all the asynchronously-run tests complete
+     * @throws InterruptedException This exception can be thrown
      */
     public static Mono<Long> runTests() throws InterruptedException {
         return Flux

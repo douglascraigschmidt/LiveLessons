@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This class asynchronously runs tests that use the Java completable
- * futures framework and ensures that the test driver doesn't exit
- * until all the asynchronous processing is completed.
+ * This class asynchronously runs tests that use the Project Reactor
+ * framework and ensures that the test driver doesn't exit until all
+ * the asynchronous processing is completed.
  * 
  */
 public class AsyncTester {
