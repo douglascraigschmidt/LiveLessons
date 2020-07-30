@@ -6,6 +6,8 @@ import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
@@ -20,9 +22,9 @@ import static utils.MonosCollector.toMono;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
- * just(), create(), map(), flatMap(), collectList(), take(),
- * subscribeOn(), and various types of thread pools.  It also shows
- * advanced Mono operations, such as first() and when().  It also
+ * just(), create(), map(), flatMap(), collectList(), take(), and
+ * various types of thread pools.  It also shows various Mono
+ * operations, such as first(), when(), and subscribeOn().  It also
  * demonstrates how to combine the Java streams framework with the
  * Project Reactor framework.
  */
@@ -59,10 +61,13 @@ public class FluxEx {
             return fraction.multiply(sBigReducedFraction);
         };
 
+        // Create a list of denominators.
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1);
+
         return Flux
-            // Use a Flux to generate a stream of denominators.
+            // Use a Flux to generate a stream from the denominators list.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#just-T...-
-            .just(3, 4, 2, 0, 1)
+            .fromIterable(denominators)
 
             // Iterate through the elements using the flatMap()
             // concurrency idiom.

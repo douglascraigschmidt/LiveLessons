@@ -15,8 +15,8 @@ import static utils.BigFractionUtils.*;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform Mono operations, including
- * fromCallable(), subscribeOn(), zipWith(), doOnSuccess(), and the
- * parallel thread pool.
+ * fromCallable(), subscribeOn(), zipWith(), doOnSuccess(), then(),
+ * and the parallel thread pool.
  */
 public class MonoEx {
     /**
@@ -70,11 +70,10 @@ public class MonoEx {
         return Mono
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
-            .fromCallable(() ->
-                          BigFractionUtils.makeBigFraction(random, true)
-                          .multiply(sBigReducedFraction))
+            .just(BigFractionUtils.makeBigFraction(random, true)
+                    .multiply(sBigReducedFraction))
 
-            // Run all the processing in a thread pool.
+            // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.parallel());
     }
 }

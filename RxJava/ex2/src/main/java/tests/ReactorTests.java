@@ -166,8 +166,8 @@ public final class ReactorTests {
 
             .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 
-            // Apply the RxJava flatMap() idiom to process each url
-            // concurrently.
+            // Apply the Project Reactor flatMap() idiom to process
+            // each url concurrently.
             .flatMap(url -> Mono
                      // Emit this url
                      .just(url)

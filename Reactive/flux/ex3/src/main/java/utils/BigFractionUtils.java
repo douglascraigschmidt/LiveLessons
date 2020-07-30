@@ -5,6 +5,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -106,24 +107,26 @@ public class BigFractionUtils {
             // parallel thread pool.
             .subscribeOn(Schedulers.parallel());
 
+        // Display the results as mixed fractions.
+        Consumer<List<BigFraction>> displayList = sortedList -> {
+            // Iterate through each BigFraction in the sorted list.
+            sortedList.forEach(fraction ->
+                               sb.append("\n     "
+                                         + fraction.toMixedString()));
+            sb.append("\n");
+            display(sb.toString());
+        };
+
         return Mono
             // Use first() to select the result of whichever sort
             // finishes first and use it to print the sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-            
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-
             .first(quickSortM,
                    heapSortM)
 
-            // Use doOnSuccess() to process the first sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
-            .doOnSuccess(sortedList -> {
-                    // Print the results as mixed fractions.
-                    sortedList
-                        .forEach(fraction ->
-                                 sb.append("\n     "
-                                           + fraction.toMixedString()));
-                    sb.append("\n");
-                    display(sb.toString());
-                })
+            // Use doOnSuccess() to display the first sorted list.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer
+            .doOnSuccess(displayList)
                 
             // Use then() to return an empty mono to synchronize with
             // the AsyncTester framework.
