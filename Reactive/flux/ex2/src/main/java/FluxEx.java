@@ -14,9 +14,9 @@ import java.util.function.Consumer;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform various Flux operations, including
- * create(), interval(), map(), doOnNext(), take(), subscribe(),
- * then(), range(), subscribeOn(), publishOn(), and various thread
- * pools.
+ * create(), interval(), map(), filter(), doOnNext(), take(),
+ * subscribe(), then(), range(), subscribeOn(), publishOn(), and
+ * various thread pools.
  */
 public class FluxEx {
     /**
@@ -27,7 +27,7 @@ public class FluxEx {
     /**
      * Max number of iterations.
      */
-    private static final int sMAX_ITERATIONS = 20;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
      * A memoizer cache that maps candidate primes to their smallest
@@ -99,10 +99,16 @@ public class FluxEx {
                  BigInteger.valueOf(lowerBound +
                                     rand.nextInt(sMAX_ITERATIONS)))
 
+            // Eliminate even numbers from consideration since they aren't prime!
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#filter-java.util.function.Predicate-
+            .filter(bigInteger ->
+                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
+
             // Print the big integer as a debugging aid.
             .doOnNext(s -> FluxEx.print(s, sb))
 
             // Only take sMAX_ITERATIONS of big integers.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#take-long-
             .take(sMAX_ITERATIONS)
 
             // Start the processing and emit each random number until
@@ -179,6 +185,10 @@ public class FluxEx {
             .map(__ ->
                  BigInteger.valueOf(lowerBound +
                                     rand.nextInt(sMAX_ITERATIONS)))
+
+            // Eliminate even numbers from consideration since they aren't prime!
+            .filter(bigInteger ->
+                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
 
             // Print the big integer as a debugging aid.
             .doOnNext(s -> FluxEx.print(s, sb))

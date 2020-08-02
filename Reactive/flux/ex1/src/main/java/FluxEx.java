@@ -51,9 +51,9 @@ public class FluxEx {
             // types of publishers that enable asynchrony.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#subscribe-java.util.function.Consumer-java.util.function.Consumer-java.lang.Runnable-
             .subscribe(// Handle next event.
-                       fraction ->
+                       multipliedFraction ->
                        // Add fraction to the string buffer.
-                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                       sb.append(" = " + multipliedFraction.toMixedString() + "\n"),
 
                        // Handle error result event.
                        error -> sb.append("error"),
