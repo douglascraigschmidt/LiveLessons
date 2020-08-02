@@ -15,7 +15,9 @@ public class ex2 {
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous time-driven Flux
         // stream.
-        AsyncTester.register(FluxEx::testIsPrime);
+        AsyncTester.register(FluxEx::testIsPrimeTimed);
+
+        AsyncTester.register(FluxEx::testIsPrimeAsync);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTester

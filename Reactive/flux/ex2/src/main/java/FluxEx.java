@@ -1,8 +1,7 @@
-import org.reactivestreams.Subscriber;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import utils.BigFractionUtils;
 
 import java.math.BigInteger;
@@ -10,16 +9,14 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
-
-import static utils.BigFractionUtils.sVoidM;
 
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform various Flux operations, including
- * create(), interval(), map(), doOnNext(), take(), subscribe(), and
- * then().
+ * create(), interval(), map(), doOnNext(), take(), subscribe(),
+ * then(), range(), subscribeOn(), publishOn(), and various thread
+ * pools.
  */
 public class FluxEx {
     /**
@@ -30,7 +27,7 @@ public class FluxEx {
     /**
      * Max number of iterations.
      */
-    private static final int sMAX_ITERATIONS = 10;
+    private static final int sMAX_ITERATIONS = 20;
 
     /**
      * A memoizer cache that maps candidate primes to their smallest
@@ -46,56 +43,18 @@ public class FluxEx {
         Duration.ofMillis(100);
 
     /**
-     * A factory method that bridges the reactive world with the
-     * callback-style world to emit a flow of random big integers.
-     */
-    private static Consumer<FluxSink<BigInteger>> makeFluxSink(StringBuffer sb) {
-        // Starting point of the randomly-generated numbers.
-        final int lowerBound = sMAX_VALUE - sMAX_ITERATIONS;
-
-        // Random number generator.
-        final Random rand = new Random();
-
-        return (FluxSink<BigInteger> sink) -> {
-            Flux
-                // Generate a big integer stream periodically in
-                // a background thread.
-                .interval(sSLEEP_DURATION)
-
-                // Generate random numbers between min and max
-                // values to ensure some duplicates.
-                .map(x -> 
-                     BigInteger.valueOf(lowerBound +
-                                        rand.nextInt(sMAX_ITERATIONS)))
-
-                // Print the big integer as a debugging aid.
-                .doOnNext(s -> FluxEx.print(s, sb))
-
-                // Only take sMAX_ITERATIONS of big integers.
-                .take(sMAX_ITERATIONS)
-
-                // Start the processing and emit each random number until
-                // complete or an error occurs.
-                .subscribe(sink::next,
-                           // Shutdown the input stream on error.
-                           error -> sink.complete(),
-                           // Shutdown the input stream.
-                           sink::complete);
-        };
-    }
-
-    /**
      * Test a stream of random BigIntegers to determine which values
      * are prime using an asynchronous time-driven Flux stream.
      */
-    public static Mono<Void> testIsPrime() {
+    public static Mono<Void> testIsPrimeTimed() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testIsPrime()\n");
+            new StringBuffer(">> Calling testIsPrimeTimed()\n");
 
         return Flux
-            // Factor method creates a flow of random big integers
-            // that are generated in a background thread.
-            .create(makeFluxSink(sb))
+            // Factory method creates a flow of random big integers
+            // that are generated at a periodic interval in a
+            // background thread.
+            .create(makeTimedFluxSink(sb))
 
             // Use a memoizer to check if each random big integer is
             // prime or not on the background thread.
@@ -107,10 +66,130 @@ public class FluxEx {
                        FluxEx.processResult(bigInteger,
                                             sb))
 
-            // Display results after all elements in flux stream are processed
-            // and return an empty mono to synchronize with AsyncTester.
+            // Display results after all elements in flux stream are
+            // processed and return an empty mono to synchronize with
+            // AsyncTester.
             .then(Mono.fromRunnable(() ->
                                     BigFractionUtils.display(sb.toString())));
+    }
+
+    /**
+     * A factory method that bridges the reactive world with the
+     * callback-style world to emit a time-based flow of random big
+     * integers at a periodic interval.
+     */
+    private static Consumer<FluxSink<BigInteger>> makeTimedFluxSink(StringBuffer sb) {
+        // Starting point of the randomly-generated numbers.
+        final int lowerBound = sMAX_VALUE - sMAX_ITERATIONS;
+
+        // Random number generator.
+        final Random rand = new Random();
+
+        // FluxSink emits any number of next() signals followed by
+        // zero or one onError()/onComplete().
+        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html
+        return (FluxSink<BigInteger> sink) -> Flux
+            // Generate a big integer stream periodically in
+            // a background thread.
+            .interval(sSLEEP_DURATION)
+
+            // Generate random numbers between min and max
+            // values to ensure some duplicates.
+            .map(x ->
+                 BigInteger.valueOf(lowerBound +
+                                    rand.nextInt(sMAX_ITERATIONS)))
+
+            // Print the big integer as a debugging aid.
+            .doOnNext(s -> FluxEx.print(s, sb))
+
+            // Only take sMAX_ITERATIONS of big integers.
+            .take(sMAX_ITERATIONS)
+
+            // Start the processing and emit each random number until
+            // complete or an error occurs.
+            .subscribe(sink::next,
+                       // Shutdown the input stream on error.
+                       error -> sink.complete(),
+                       // Shutdown the input stream.
+                       sink::complete);
+    }
+
+    /**
+     * Test a stream of random BigIntegers to determine which values
+     * are prime using an asynchronous Flux stream.
+     */
+    public static Mono<Void> testIsPrimeAsync() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testIsPrimeAsync()\n");
+
+        return Flux
+            // Factory method creates a flow of random big integers
+            // that are generated in a background thread.
+            .create(makeAsyncFluxSink(sb))
+
+            // Arrange to perform the prime-checking computations in the
+            // "subscriber" thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#publishOn-reactor.core.scheduler.Scheduler-
+            .publishOn(Schedulers.newParallel("subscriber", 1))
+
+            // Use a memoizer to check if each random big integer is
+            // prime or not in the "subscriber" thread.
+            .map(bigInteger ->
+                 FluxEx.checkIfPrime(bigInteger, sb))
+
+            // Process each big integer in the "subscriber" thread.
+            .doOnNext(bigInteger ->
+                       FluxEx.processResult(bigInteger,
+                                            sb))
+
+            // Display results after all elements in flux stream are
+            // processed and return an empty mono to synchronize with
+            // AsyncTester.
+            .then(Mono.fromRunnable(() ->
+                                    BigFractionUtils.display(sb.toString())));
+    }
+
+    /**
+     * A factory method that bridges the reactive world with the
+     * callback-style world to emit a flow of random big integers in a
+     * background thread.
+     */
+    private static Consumer<FluxSink<BigInteger>> makeAsyncFluxSink(StringBuffer sb) {
+        // Starting point of the randomly-generated numbers.
+        final int lowerBound = sMAX_VALUE - sMAX_ITERATIONS;
+
+        // Random number generator.
+        final Random rand = new Random();
+
+        // FluxSink emits any number of next() signals followed by
+        // zero or one onError()/onComplete().
+        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html
+        return (FluxSink<BigInteger> sink) -> Flux
+            // Run from 1 to sMAX_ITERATIONS.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#range-int-int-
+            .range(1, sMAX_ITERATIONS)
+
+            // Arrange to generate the random big integers in the
+            // "publisher" thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#subscribeOn-reactor.core.scheduler.Scheduler-
+            .subscribeOn(Schedulers.newParallel("publisher", 1))
+
+            // Generate random numbers between min and max values
+            // to ensure some duplicates.
+            .map(__ ->
+                 BigInteger.valueOf(lowerBound +
+                                    rand.nextInt(sMAX_ITERATIONS)))
+
+            // Print the big integer as a debugging aid.
+            .doOnNext(s -> FluxEx.print(s, sb))
+
+            // Start the processing and emit each random number until
+            // complete or an error occurs.
+            .subscribe(sink::next,
+                       // Shutdown the input stream on error.
+                       error -> sink.complete(),
+                       // Shutdown the input stream.
+                       sink::complete);
     }
 
     /**
