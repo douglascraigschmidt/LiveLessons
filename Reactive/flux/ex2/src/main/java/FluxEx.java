@@ -59,10 +59,12 @@ public class FluxEx {
 
             // Use a memoizer to check if each random big integer is
             // prime or not on the background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(bigInteger ->
                  FluxEx.checkIfPrime(bigInteger, sb))
 
             // Process each big integer on the background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#doOnNext-java.util.function.Consumer-
             .doOnNext(bigInteger ->
                        FluxEx.processResult(bigInteger,
                                             sb))
@@ -116,6 +118,7 @@ public class FluxEx {
 
             // Start the processing and emit each random number until
             // complete or an error occurs.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#subscribe-java.util.function.Consumer-java.util.function.Consumer-java.lang.Runnable-
             .subscribe(sink::next,
                        // Shutdown the input stream on error.
                        error -> sink.complete(),
