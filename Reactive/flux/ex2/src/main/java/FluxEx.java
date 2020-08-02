@@ -54,6 +54,7 @@ public class FluxEx {
             // Factory method creates a flow of random big integers
             // that are generated at a periodic interval in a
             // background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#create-java.util.function.Consumer-
             .create(makeTimedFluxSink(sb))
 
             // Use a memoizer to check if each random big integer is
@@ -69,6 +70,7 @@ public class FluxEx {
             // Display results after all elements in flux stream are
             // processed and return an empty mono to synchronize with
             // AsyncTester.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#then-reactor.core.publisher.Mono-
             .then(Mono.fromRunnable(() ->
                                     BigFractionUtils.display(sb.toString())));
     }
@@ -91,6 +93,7 @@ public class FluxEx {
         return (FluxSink<BigInteger> sink) -> Flux
             // Generate a big integer stream periodically in
             // a background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#interval-java.time.Duration-
             .interval(sSLEEP_DURATION)
 
             // Generate random numbers between min and max

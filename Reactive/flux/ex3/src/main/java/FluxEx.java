@@ -39,7 +39,7 @@ public class FluxEx {
 
         // Create a function to handle ArithmeticException.
         Function<Throwable,
-                 Mono<? extends BigFraction>> errorHandler = t -> {
+            Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -51,7 +51,7 @@ public class FluxEx {
 
         // Create a function that multiplies big fractions.
         Function<BigFraction,
-                 BigFraction> multiplyBigFractions = fraction -> {
+            BigFraction> multiplyBigFractions = fraction -> {
             sb.append("     "
                       + fraction.toMixedString()
                       + " x "
