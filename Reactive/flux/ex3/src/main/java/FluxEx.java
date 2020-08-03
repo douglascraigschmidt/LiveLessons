@@ -6,27 +6,27 @@ import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static utils.BigFractionUtils.*;
+import static utils.BigFractionUtils.sBigReducedFraction;
+import static utils.BigFractionUtils.sMAX_FRACTIONS;
 import static utils.MonosCollector.toMono;
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
+
+@SuppressWarnings("ALL")
 
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
- * just(), create(), map(), flatMap(), collectList(), take(), and
- * various types of thread pools.  It also shows various Mono
- * operations, such as first(), when(), and subscribeOn().  It also
- * demonstrates how to combine the Java streams framework with the
- * Project Reactor framework.
+ * fromIterable(), create(), map(), flatMap(), collectList(), take(),
+ * filter(), and various types of thread pools.  It also shows various
+ * Mono operations, such as first(), when(), flatMap(), subscribeOn(),
+ * and the parallel thread pool.  It also demonstrates how to combine
+ * the Java streams framework with the Project Reactor framework.
  */
 public class FluxEx {
     /**
@@ -37,9 +37,9 @@ public class FluxEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionExceptions1()\n");
 
-        // Create a function to handle ArithmeticException.
+        // Create a function to handle an ArithmeticException.
         Function<Throwable,
-            Mono<? extends BigFraction>> errorHandler = t -> {
+                 Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -51,7 +51,7 @@ public class FluxEx {
 
         // Create a function that multiplies big fractions.
         Function<BigFraction,
-            BigFraction> multiplyBigFractions = fraction -> {
+                 BigFraction> multiplyBigFractions = fraction -> {
             sb.append("     "
                       + fraction.toMixedString()
                       + " x "
@@ -61,7 +61,8 @@ public class FluxEx {
             return fraction.multiply(sBigReducedFraction);
         };
 
-        // Create a list of denominators.
+        // Create a list of denominators, including 0 that
+        // will trigger an ArithmeticException.
         List<Integer> denominators = List.of(3, 4, 2, 0, 1);
 
         return Flux
@@ -73,11 +74,11 @@ public class FluxEx {
             // concurrency idiom.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(denominator -> {
-                    // Create/process a BigFraction asynchronously.
+                    // Create/process each denominator asynchronously.
                     return Mono
                         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
                         .fromCallable(() ->
-                                      // May throw Exception.
+                                      // Throws ArithmeticException if denominator is 0.
                                       BigFraction.valueOf(100,
                                                           denominator))
 
@@ -86,7 +87,7 @@ public class FluxEx {
                         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
                         .subscribeOn(Schedulers.parallel())
 
-                        // Handle exception and convert result to 0.
+                        // Convert ArithmeticException to 0.
                         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#onErrorResume-java.util.function.Function-
                         .onErrorResume(errorHandler)
 
@@ -95,12 +96,16 @@ public class FluxEx {
                         .map(multiplyBigFractions);
                 })
 
-            // Collect the results into a list.
+            // Remove any big fractions that are <= 0.
+            .filter(fraction -> fraction.compareTo(0) > 0)
+
+            // Collect the BigFractions into a list.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#collectList--
             .collectList()
 
-            // Process results of the collected list and return a mono
-            // used to synchronize with the AsyncTester framework.
+            // Process the collected list and return a mono used
+            // to synchronize with the AsyncTester framework.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -109,21 +114,22 @@ public class FluxEx {
 
     /**
      * Test BigFraction multiplications using a stream of monos and a
-     * pipeline of operations, including flatMap(), collectList(), and
-     * first().
+     * pipeline of operations, including create(), take(), flatMap(),
+     * collectList(), and first().
      */
     public static Mono<Void> testFractionMultiplications1() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplications1()\n");
 
+        sb.append("     Printing sorted results:");
+
         // A consumer that emits a stream of random big fractions.
         Consumer<FluxSink<BigFraction>> bigFractionEmitter = sink -> sink
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html#onRequest-java.util.function.LongConsumer-
             .onRequest(size -> sink
+                       // Emit a random big fraction every time a request is made.
                        .next(BigFractionUtils.makeBigFraction(new Random(),
                                                               false)));
-
-        sb.append("     Printing sorted results:");
 
         // Process the function in a flux stream.
         return Flux
@@ -149,6 +155,7 @@ public class FluxEx {
             // Process the results of the collected list and return a
             // mono that's used to synchronize with the AsyncTester
             // framework.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -196,9 +203,9 @@ public class FluxEx {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#flatMap-java.util.function.Function-
-            .flatMap(list -> BigFractionUtils.sortAndPrintList(list,
-                                                               sb));
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
+            .flatMap(list ->
+                     BigFractionUtils.sortAndPrintList(list, sb));
     }
 
     /**
@@ -219,6 +226,7 @@ public class FluxEx {
             .subscribeOn(scheduler)
 
             // Return a mono to a multiplied big fraction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(reducedFraction -> Mono
                      // Multiply the big fractions
                      .fromCallable(() -> reducedFraction

@@ -18,6 +18,7 @@ import java.util.function.Consumer;
  * subscribe(), then(), range(), subscribeOn(), publishOn(), and
  * various thread pools.
  */
+@SuppressWarnings("ALL")
 public class FluxEx {
     /**
      * Maximum random number value.
@@ -100,7 +101,7 @@ public class FluxEx {
 
             // Generate random numbers between min and max
             // values to ensure some duplicates.
-            .map(x ->
+            .map(__ ->
                  BigInteger.valueOf(lowerBound +
                                     rand.nextInt(sMAX_ITERATIONS)))
 
@@ -135,7 +136,7 @@ public class FluxEx {
             new StringBuffer(">> Calling testIsPrimeAsync()\n");
 
         return Flux
-            // Factory method creates a flow of random big integers
+            // Factory method creates a stream of random big integers
             // that are generated in a background thread.
             .create(makeAsyncFluxSink(sb))
 
@@ -154,7 +155,7 @@ public class FluxEx {
                        FluxEx.processResult(bigInteger,
                                             sb))
 
-            // Display results after all elements in flux stream are
+            // Display results after all elements in the flux stream are
             // processed and return an empty mono to synchronize with
             // AsyncTester.
             .then(Mono.fromRunnable(() ->
@@ -177,11 +178,11 @@ public class FluxEx {
         // zero or one onError()/onComplete().
         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html
         return (FluxSink<BigInteger> sink) -> Flux
-            // Run from 1 to sMAX_ITERATIONS.
+            // Emit sMAX_ITERATIONS integers starting at 1.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#range-int-int-
             .range(1, sMAX_ITERATIONS)
 
-            // Arrange to generate the random big integers in the
+            // Arrange to emit the random big integers in the
             // "publisher" thread.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.newParallel("publisher", 1))
@@ -222,10 +223,8 @@ public class FluxEx {
             (primeCandidate,
              // This atomic "check then act" method serves as
              // a "memoizer" cache.
-             mPrimeCache
-             .computeIfAbsent(primeCandidate,
-                              pc -> (FluxEx.isPrime(pc,
-                                                    sb))));
+             mPrimeCache.computeIfAbsent(primeCandidate,
+                                         pc -> (FluxEx.isPrime(pc, sb))));
     }
 
     /**
@@ -235,16 +234,16 @@ public class FluxEx {
      */
     static BigInteger isPrime(BigInteger n,
                               StringBuffer sb) {
-        print("checking if " + n + " is prime", sb);
+        print("checking if " + n + " is prime",
+                sb);
 
-        BigInteger two = BigInteger.valueOf(2);
-
-        if (n.mod(two).compareTo(BigInteger.ZERO) == 0) 
-            return two;          
+        // Even numbers can't be prime.
+        if (n.mod(BigInteger.TWO).compareTo(BigInteger.TWO) == 0)
+            return BigInteger.TWO;
 
         for (BigInteger i = BigInteger.valueOf(3);
              n.compareTo(i.multiply(i)) >= 0;
-             i = i.add(two)) 
+             i = i.add(BigInteger.TWO))
             if (n.mod(i).compareTo(BigInteger.ZERO) == 0)
                 return i;
     

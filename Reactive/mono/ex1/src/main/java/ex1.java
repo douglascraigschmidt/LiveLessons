@@ -2,8 +2,9 @@ import utils.AsyncTester;
 
 /**
  * This example shows how to apply Project Reactor features
- * synchronously to perform basic Mono operations, including
- * fromCallable(), map(), doOnSuccess(), and then().
+ * synchronously to reduce and display BigFractions via basic
+ * Mono operations, includingfromCallable(), map(), doOnSuccess(),
+ * and then().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {

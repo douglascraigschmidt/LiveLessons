@@ -12,8 +12,11 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply the Project Reactor subscribeOn()
- * method to asynchronously perform various Mono operations, including
- * fromCallable(), subscribeOn(), map(), doOnSuccess(), and then().
+ * method to asynchronously reduce, multiply, and/or display
+ * BigFractions via various Mono operations, including fromCallable(),
+ * subscribeOn(), map(), doOnSuccess(), blockOptional(), then(), and
+ * the Scheduler.single() thread "pool".
+ * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  */
 public class MonoEx {
     /**
@@ -26,15 +29,16 @@ public class MonoEx {
             new StringBuilder(">> Calling testFractionReductionAsync()\n");
 
         // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = 
-            BigFraction.valueOf(new BigInteger (sBI1),
-                                new BigInteger(sBI2),
-                                false);
+        BigFraction unreducedFraction = BigFraction
+            .valueOf(new BigInteger (sBI1),
+                     new BigInteger(sBI2),
+                     false);
 
+        // Create a callable lambda expression that
         Callable<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
-            BigFraction reducedFraction =
-            BigFraction.reduce(unreducedFraction);
+            BigFraction reducedFraction = BigFraction
+                .reduce(unreducedFraction);
 
             sb.append("     unreducedFraction "
                       + unreducedFraction.toString()
@@ -45,6 +49,8 @@ public class MonoEx {
             return reducedFraction;
         };
 
+        // Create a function lambda that converts an improper big
+        // fraction into a mixed big fraction.
         Function<BigFraction, String> convertToMixedString = result -> {
             sb.append("\n     calling BigFraction::toMixedString\n");
 
@@ -54,23 +60,30 @@ public class MonoEx {
         return Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(reduceFraction)
 
             // Run all the processing in a (single) background thread.
-            .subscribeOn(Schedulers.single())
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
+            .subscribeOn(Schedulers
+                         // https://projectreactor.io/docs/core/release/api/reactor/core/scheduler/Schedulers.html#single--
+                         .single())
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(convertToMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(result -> MonoEx.printResult(result, sb))
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework.
+            // AsyncTester framework!
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 
@@ -96,24 +109,30 @@ public class MonoEx {
         // Submit the call to a thread pool and store the mono future
         // it returns.
         Mono<BigFraction> mono = Mono
+            // Use fromCallable() to begin the process of
+            // asynchronously reducing a big fraction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.single());
 
         // Block the calling thread until the result is available via
         // the mono future, handling any errors via an optional.
-        Optional<BigFraction> result = mono.blockOptional();
+        Optional<BigFraction> result = mono
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#blockOptional--
+            .blockOptional();
 
         sb.append("     Callable.call() = "
                   + result.map(BigFraction::toMixedString)
-                          .orElse("error")
+                  .orElse("error")
                   + "\n");
 
         // Display the results.
         BigFractionUtils.display(sb.toString());
 
-        // Return an empty mono.
+        // Return an empty mono since the processing is done.
         return sVoidM;
     }
 
@@ -138,15 +157,25 @@ public class MonoEx {
         // Submit the call to a thread pool and process the result it
         // returns asynchronously.
         return Mono
+            // Use fromCallable() to begin the process of
+            // asynchronously reducing a big fraction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.single())
 
+            // Use doOnSuccess() to print the result after it's been
+            // successfully converted to a mixed fraction.  If an
+            // exception is thrown doOnSuccess() will be skipped.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(bigFraction ->
                          MonoEx.printResult(bigFraction, sb))
                          
-            // Return an empty mono to synchronize with AsyncTester.
+            // Return an empty mono to synchronize with the
+            // AsyncTester framework.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 
@@ -167,8 +196,8 @@ public class MonoEx {
     private static void printResult(String mixedString,
                                     StringBuilder sb) {
         sb.append("     mixed reduced fraction = "
-                + mixedString
-                + "\n");
+                  + mixedString
+                  + "\n");
         BigFractionUtils.display(sb.toString());
     }
 }

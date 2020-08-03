@@ -1,8 +1,8 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously using Mono features in the Reactor framework,
+ * This example shows how to reduce, multiply, and display BigFractions
+ * asynchronously using various Mono features in the Reactor framework,
  * including fromCallable(), subscribeOn(), map(), doOnSuccess(), and
  * then().
  */
