@@ -46,7 +46,9 @@ public class FluxEx {
                       + "\n");
 
             // Convert error to 0.
-            return Mono.just(BigFraction.ZERO);
+            return Mono
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
+            .just(BigFraction.ZERO);
         };
 
         // Create a function that multiplies big fractions.
@@ -218,11 +220,13 @@ public class FluxEx {
                                   Scheduler scheduler) {
         return Mono
             // Omit one item that performs the reduction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() ->
                           BigFraction.reduce(unreducedFraction))
 
             // Perform all processing asynchronously in a pool of
             // background threads.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(scheduler)
 
             // Return a mono to a multiplied big fraction.
