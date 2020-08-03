@@ -25,25 +25,25 @@ public class MonoEx {
      * zipWith().
      */
     public static Mono<Void> testFractionCombine() {
-        StringBuilder sb = 
-            new StringBuilder(">> Calling testFractionCombine()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionCombine()\n");
 
         // A random number generator.
         Random random = new Random();
 
         // Create a random BigFraction and reduce/multiply it
         // asynchronously.
-        Mono<BigFraction> m1 = makeBigFraction(random);
+        Mono<BigFraction> m1 = makeBigFraction(random, sb);
 
         // Create another random BigFraction and reduce/multiply it
         // asynchronously.
-        Mono<BigFraction> m2 = makeBigFraction(random);
+        Mono<BigFraction> m2 = makeBigFraction(random, sb);
         
         // Create a consumer that prints the result as a mixed
         // fraction after it's added together.
         Consumer<BigFraction> mixedFractionPrinter = bigFraction
             -> { 
-            sb.append("     combined result = " 
+            sb.append("     combining result = "
                       + bigFraction.toMixedString()
                       + "\n");
             BigFractionUtils.display(sb.toString());
@@ -69,7 +69,19 @@ public class MonoEx {
      * A factory method that creates a random big fraction and
      * subscribes it to be reduced and multiplied in a thread pool.
      */
-    private static Mono<BigFraction> makeBigFraction(Random random) {
+    private static Mono<BigFraction> makeBigFraction(Random random,
+                                                     StringBuffer sb) {
+        // Create a consumer that prints the result as a mixed
+        // fraction after it's multiplied.
+        Consumer<BigFraction> fractionPrinter = bigFraction
+                -> {
+            sb.append("     ["
+                      + Thread.currentThread().getId()
+                      + "] bigFraction = "
+                    + bigFraction.toMixedString()
+                    + "\n");
+        };
+
         return Mono
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
@@ -77,6 +89,10 @@ public class MonoEx {
                   .makeBigFraction(random, 
                                    true)
                   .multiply(sBigReducedFraction))
+
+            // Print result after multiplying it.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
+            .doOnSuccess(fractionPrinter)
 
             // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.parallel());
