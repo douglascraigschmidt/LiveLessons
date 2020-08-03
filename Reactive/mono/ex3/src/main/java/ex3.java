@@ -1,9 +1,9 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using more advanced Mono features
- * in the Project Reactor framework, including fromCallable(),
+ * This example shows how to apply Project Reactor features
+ * asynchronously and concurrently reduce, multiply, and display
+ * BigFractions via various Mono operations, including fromCallable(),
  * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
  * thread pool.
  */

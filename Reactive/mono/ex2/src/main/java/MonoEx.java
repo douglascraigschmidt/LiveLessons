@@ -12,7 +12,7 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply the Project Reactor subscribeOn()
- * method to asynchronously reduce, multiply, and/or display
+ * method to asynchronously reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
  * subscribeOn(), map(), doOnSuccess(), blockOptional(), then(), and
  * the Scheduler.single() thread "pool".
@@ -82,7 +82,7 @@ public class MonoEx {
             .doOnSuccess(result -> MonoEx.printResult(result, sb))
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework!
+            // AsyncTester framework.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }

@@ -1,10 +1,11 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce, multiply, and display BigFractions
- * asynchronously using various Mono features in the Reactor framework,
- * including fromCallable(), subscribeOn(), map(), doOnSuccess(), and
- * then().
+ * This example shows how to reduce, multiply, and display
+ * BigFractions asynchronously using various Mono features in the
+ * Reactor framework, including fromCallable(), subscribeOn(), map(),
+ * doOnSuccess(), blockOptional(), then(), and the Scheduler.single()
+ * thread "pool".
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {

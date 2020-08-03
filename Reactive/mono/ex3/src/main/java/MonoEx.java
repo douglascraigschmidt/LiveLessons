@@ -14,9 +14,10 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply Project Reactor features
- * asynchronously to perform Mono operations, including
- * fromCallable(), subscribeOn(), zipWith(), doOnSuccess(), then(),
- * and the parallel thread pool.
+ * asynchronously and concurrently reduce, multiply, and display
+ * BigFractions via various Mono operations, including fromCallable(),
+ * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
+ * thread pool.
  */
 public class MonoEx {
     /**
@@ -49,17 +50,19 @@ public class MonoEx {
         };
 
         return m1
-            // Add results after m1 and m2 both complete.
+            // Add BigFraction results after m1 and m2 both complete.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#zipWith-reactor.core.publisher.Mono-java.util.function.BiFunction-
             .zipWith(m2,
                      BigFraction::add)
 
             // Print result after converting it to a mixed fraction.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(mixedFractionPrinter)
 
             // Return an empty mono to synchronize with the
-            // AsyncTester.
-            .then();
+            // AsyncTester framework.
+             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
+           .then();
     }
 
     /**
@@ -70,8 +73,10 @@ public class MonoEx {
         return Mono
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
-            .just(BigFractionUtils.makeBigFraction(random, true)
-                    .multiply(sBigReducedFraction))
+            .just(BigFractionUtils
+                  .makeBigFraction(random, 
+                                   true)
+                  .multiply(sBigReducedFraction))
 
             // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.parallel());
