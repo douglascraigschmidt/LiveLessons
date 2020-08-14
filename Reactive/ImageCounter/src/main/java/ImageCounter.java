@@ -8,6 +8,7 @@ import utils.ReactorUtils;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class asynchronously and concurrently counts the number of
@@ -52,8 +53,7 @@ public class ImageCounter {
         // Get the URI to the root of the page/folder being traversed.
         var rootUri = Options.instance().getRootUri();
 
-        @SuppressWarnings("ConstantConditions")
-        int totalImages =
+        Optional<Integer> totalImages =
             // Perform the image counting starting at the root
             // Uri, which is given an initial depth count of 1.
             countImages(rootUri, 1)
@@ -61,11 +61,11 @@ public class ImageCounter {
             // Block until the stream completes, encounters an
             // error, or times out.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#block-java.time.Duration-
-            .block(sTIMEOUT_DURATION);
+            .blockOptional(sTIMEOUT_DURATION);
 
         // Print the final results of the traversal.
         print("(depth 0) "
-              + totalImages
+              + totalImages.orElse(0)
               + " total image(s) are reachable from "
               + rootUri);
     }
