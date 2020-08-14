@@ -2,24 +2,27 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 import utils.ConcurrentHashSet;
 import utils.Options;
 import utils.ReactorUtils;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 
 /**
- * This class concurrently counts the number of images in a
- * recursively-defined folder structure using a range of Project
- * Reactor features, including ...  The root folder can either reside
- * locally (filesystem-based) or remotely (web-based).
+ * This class asynchronously and concurrently counts the number of
+ * images in a recursively-defined folder structure using a range of
+ * Project Reactor features, including Mono features (e.g., just(),
+ * block(), doOnSuccess(), map(), transformDeferred(), subscribeOn(),
+ * flatMap(), zipWith(), defaultIfEmpty()), and Flux features (e.g.,
+ * fromIterable(), flatMap(), and reduce()).  The root folder can
+ * either reside locally (filesystem-based) or remotely (web-based).
  */
-class ImageCounter {
+public class ImageCounter {
     /**
      * Debugging tag.
      */
+    @SuppressWarnings("unused")
     private final String TAG = this.getClass().getName();
 
     /**
@@ -31,13 +34,21 @@ class ImageCounter {
     /**
      * Stores a completed single with value of 0.
      */
-    private final Mono<Integer> mZero =
+    private static final Mono<Integer> sZero =
+        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
         Mono.just(0);
+
+    /**
+     * 10 second duration to wait for all operations to
+     * complete.
+     */
+    private static final Duration sTIMEOUT_DURATION =
+        Duration.ofSeconds(10);
 
     /**
      * Constructor counts all the images reachable from the root URI.
      */
-    ImageCounter() {
+    public ImageCounter() {
         // Get the URI to the root of the page/folder being traversed.
         var rootUri = Options.instance().getRootUri();
 
@@ -47,9 +58,10 @@ class ImageCounter {
             // Uri, which is given an initial depth count of 1.
             countImages(rootUri, 1)
 
-            // Block until the stream completes or
-            // encounters an error.
-            .block();
+            // Block until the stream completes, encounters an
+            // error, or times out.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#block-java.time.Duration-
+            .block(sTIMEOUT_DURATION);
 
         // Print the final results of the traversal.
         print("(depth 0) "
@@ -75,7 +87,7 @@ class ImageCounter {
                   + depth
                   + ") Exceeded max depth of "
                   + Options.instance().maxDepth());
-            return mZero;
+            return sZero;
         }
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset so we don't try to
@@ -85,13 +97,14 @@ class ImageCounter {
                   + depth
                   + ") Already processed "
                   + pageUri);
-            return mZero;
+            return sZero;
         } else
             // Asynchronously (1) count the number of images on this
             // page and (2) crawl other hyperlinks accessible via this
             // page and count their images.
             return countImagesAsync(pageUri, depth)
                 // Print this output on success.
+                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
                 .doOnSuccess(totalImages ->
                              print("(depth "
                                    + depth
@@ -119,9 +132,11 @@ class ImageCounter {
             var imagesInPageMono = pageMono
                 // The getImagesInPage() method runs synchronously, so
                 // call it in the common fork-join pool (see next line).
+                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#map-java.util.function.Function-
                 .map(this::getImagesInPage)
 
                 // Run the operations in the common fork-join pool.
+                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#transformDeferred-java.util.function.Function-
                 .transformDeferred(ReactorUtils.commonPoolMono())
 
                 // Count the number of images on this page.
@@ -132,6 +147,7 @@ class ImageCounter {
             var imagesInLinksMono = pageMono
                 // The crawlLinksInPage() methods runs synchronously, so
                 // call it in the common fork-join pool (see next line).
+                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
                 .flatMap(page ->
                          crawlLinksInPage(page,
                                           depth))
@@ -149,7 +165,7 @@ class ImageCounter {
                   + "': "
                   + e.getMessage());
             // Return 0 if an exception happens.
-            return mZero;
+            return sZero;
         }
     }
 
@@ -161,7 +177,7 @@ class ImageCounter {
      *                           images on this page
      * @param imagesInLinksMono An mono to a count of the # of
      *                            images in links on this page
-     * @return A mono to the number of images counted
+     * @return A mono to the total number of images counted
      */
     private Mono<Integer> combineImageCounts
         (Mono<Integer> imagesInPageMono,
@@ -170,11 +186,15 @@ class ImageCounter {
         // mono params after they both complete.
         return imagesInPageMono
             // Sum the results when both monos complete.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#zipWith-reactor.core.publisher.Mono-java.util.function.BiFunction-
             .zipWith(imagesInLinksMono,
                      Integer::sum);
     }
 
     /**
+     * Factory method returns a mono to the page at the root URI
+     *
+     * @param pageUri URI to the start page containing HTML
      * @return A mono to the page at the root URI
      */
     private Mono<Document> getStartPage(String pageUri) {
@@ -190,19 +210,23 @@ class ImageCounter {
     }
 
     /**
-     * @return A collection of IMG SRC URLs in this page.
+     * Factory method that returns a collection of IMG SRC URLs in this page
+     *
+     * @param page An HTML page that may contain embedded images
+     * @return A collection of IMG SRC URLs in this page
      */
     private Elements getImagesInPage(Document page) {
         // Return a collection IMG SRC URLs in this page.
         return page
             // Select all the image elements in the page.
+            // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#select(java.lang.String)
             .select("img");
     }
 
     /**
-     * Recursively crawl through hyperlinks that are in a @a page.
+     * Recursively crawl through hyperlinks that are in a {@code page}.
      *
-     * @param page The page containing HTML
+     * @param page TAn HTML page that may contain embedded hyperlinks
      * @param depth The depth of the level of web page traversal
      * @return A mono to an integer that counts how many images
      * were in each hyperlink on the page
@@ -213,10 +237,12 @@ class ImageCounter {
         // hyperlinks in the page.
         return Flux
             // Find all the hyperlinks on this page.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-
             .fromIterable(page.select("a[href]"))
 
             // Map each hyperlink to a mono containing a count of the
             // number of images found at that hyperlink.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(hyperLink -> Mono
                      // Just omit this one object.
                      .just(hyperLink)
@@ -232,15 +258,19 @@ class ImageCounter {
                                           depth + 1)))
 
             // Sum all the counts.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#reduce-java.util.function.BiFunction-
             .reduce(Integer::sum)
 
             // Return 0 if empty.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#defaultIfEmpty-T-
             .defaultIfEmpty(0);
     }
 
     /**
      * Conditionally prints the {@code string} depending on the
      * current setting of the Options singleton.
+     *
+     * @param string The string to print
      */
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())

@@ -3,8 +3,9 @@ import utils.AsyncTester;
 /**
  * This example shows how to reduce and/or multiply big fractions
  * asynchronously using Flux features in the Reactor framework,
- * including create(), interval(), map(), doOnNext(), take(), and
- * subscribe().
+ * including create(), interval(), map(), filter(), doOnNext(),
+ * take(), subscribe(), then(), range(), subscribeOn(), publishOn(),
+ * and various thread pools.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {

@@ -8,9 +8,11 @@ LiveLesson tutorial.  This version compiles/runs in Eclipse configured
 with Android.
 
 CommandLine -- This folder provides an updated command-line-only
-version of my LiveLessons tutorial that uses Java 8 features, such as
-lambdas and method references.  This version compiles/runs in Intellij.
+version of my LiveLessons tutorial that uses modern Java features,
+such as lambdas and method references.  This version compiles/runs in
+Intellij.
 
 AndroidGUI -- This folder provides an updated Android GUI-only version
-of my LiveLessons tutorial that uses Java 8 features, such as lambdas
-and method references.  This version compiles/runs in Android Studio.
+of my LiveLessons tutorial that uses modern Java features, such as
+lambdas and method references.  This version compiles/runs in Android
+Studio.

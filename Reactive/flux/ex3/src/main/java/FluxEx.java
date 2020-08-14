@@ -76,7 +76,8 @@ public class FluxEx {
             // concurrency idiom.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(denominator -> {
-                    // Create/process each denominator asynchronously.
+                    // Create/process each denominator asynchronously via an
+                    // "inner publisher".
                     return Mono
                         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
                         .fromCallable(() ->
