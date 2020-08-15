@@ -1,11 +1,11 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to apply Project Reactor features
- * asynchronously and concurrently reduce, multiply, and display
- * BigFractions via various Mono operations, including fromCallable(),
- * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
- * thread pool.
+ * This example shows how to apply RxJava features asynchronously and
+ * concurrently reduce, multiply, and display BigFractions via various
+ * Mono operations, including fromCallable(), subscribeOn(),
+ * zipWith(), doOnSuccess(), ambArray(), ignoreElement(), and the
+ * parallel thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {
@@ -15,16 +15,16 @@ public class ex3 {
     public static void main (String[] argv) throws InterruptedException {
         // Test asynchronous BigFraction multiplication and addition
         // using zipWith().
-        AsyncTester.register(MonoEx::testFractionCombine);
+        AsyncTester.register(SingleEx::testFractionCombine);
 
         @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+            long testCount = AsyncTester
             // Run all the tests.
             .runTests()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.
-            .block();
+            .blockingGet();
 
         // Print the results.
         System.out.println("Completed " + testCount + " tests");

@@ -91,12 +91,10 @@ public class BigFractionUtils {
         Single<List<BigFraction>> quickSortM = Single
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() -> quickSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.computation());
 
         // Heap sort the list asynchronously.
@@ -112,12 +110,10 @@ public class BigFractionUtils {
         return Single
             // Use first() to select the result of whichever sort
             // finishes first and use it to print the sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-            
             .ambArray(quickSortM,
                       heapSortM)
 
             // Use doOnSuccess() to process the first sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(sortedList -> {
                     // Print the results as mixed fractions.
                     sortedList

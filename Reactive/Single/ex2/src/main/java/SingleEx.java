@@ -14,7 +14,8 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply RxJava to asynchronously reduce,
  * multiply, and display BigFractions via various Single operations,
  * including fromCallable(), subscribeOn(), map(), doOnSuccess(),
- * blockOptional(), then(), and the Scheduler.single() thread "pool".
+ * blockingGet(), ambArray(), ignoreElement(), and the
+ * Scheduler.single() thread "pool".
  */
 public class SingleEx {
     /**

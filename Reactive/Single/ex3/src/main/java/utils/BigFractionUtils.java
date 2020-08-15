@@ -1,10 +1,13 @@
 package utils;
 
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -36,21 +39,21 @@ public class BigFractionUtils {
      * A big reduced fraction constant.
      */
     public static final BigFraction sBigReducedFraction =
-            BigFraction.valueOf(new BigInteger("846122553600669882"),
-                    new BigInteger("188027234133482196"),
-                    true);
+        BigFraction.valueOf(new BigInteger("846122553600669882"),
+                            new BigInteger("188027234133482196"),
+                            true);
 
     /**
      * Stores a completed mono with a value of sBigReducedFraction.
      */
-    public static final Mono<BigFraction> mBigReducedFractionM =
-            Mono.just(sBigReducedFraction);
+    public static final Single<BigFraction> mBigReducedFractionM =
+        Single.just(sBigReducedFraction);
 
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Mono<Void> sVoidM =
-            Mono.empty();
+    public static final Completable sVoidM =
+        Completable.complete();
 
     /**
      * A factory method that returns a large random BigFraction whose
@@ -82,39 +85,35 @@ public class BigFractionUtils {
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
-    public static Mono<Void> sortAndPrintList(List<BigFraction> list,
+    public static Completable sortAndPrintList(List<BigFraction> list,
                                               StringBuilder sb) {
         // Quick sort the list asynchronously.
-        Mono<List<BigFraction>> quickSortM = Mono
+        Single<List<BigFraction>> quickSortM = Single
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() -> quickSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
-            .subscribeOn(Schedulers.parallel());
+            .subscribeOn(Schedulers.computation());
 
         // Heap sort the list asynchronously.
-        Mono<List<BigFraction>> heapSortM =  Mono
+        Single<List<BigFraction>> heapSortM =  Single
             // Use the fromCallable() factory method to obtain the
             // results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            .subscribeOn(Schedulers.parallel());
+            .subscribeOn(Schedulers.computation());
 
-        return Mono
+        return Single
             // Use first() to select the result of whichever sort
             // finishes first and use it to print the sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-            
-            .first(quickSortM,
-                   heapSortM)
+            .ambArray(quickSortM,
+                      heapSortM)
 
             // Use doOnSuccess() to process the first sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(sortedList -> {
                     // Print the results as mixed fractions.
                     sortedList
@@ -125,34 +124,39 @@ public class BigFractionUtils {
                     display(sb.toString());
                 })
                 
-            // Use then() to return an empty mono to synchronize with
+            // Return a completable to synchronize with
             // the AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
-            .then();
+            .ignoreElement();
     }
 
     /**
      * Perform a quick sort on the {@code list}.
      */
     public static List<BigFraction> quickSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
-    
-        // Order the list with quick sort.
-        Collections.sort(copy);
+        // Convert the list to an array.
+        BigFraction[] bigFractionArray =
+            list.toArray(new BigFraction[0]);
 
-        return copy;
+        // Order the array with quick sort.
+        Arrays.sort(bigFractionArray);
+
+        // Convert the array back to a list.
+        return List.of(bigFractionArray);
     }
 
     /*
      * Perform a heap sort on the {@code list}.
      */
     public static List<BigFraction> heapSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
+        // Convert the list to an array.
+        BigFraction[] bigFractionArray =
+            list.toArray(new BigFraction[0]);
 
-        // Order the list with heap sort.
-        HeapSort.sort(copy);
+        // Order the array with heap sort.
+        HeapSort.sort(bigFractionArray);
 
-        return copy;
+        // Convert the array back to a list.
+        return List.of(bigFractionArray);
     }
 
     /**

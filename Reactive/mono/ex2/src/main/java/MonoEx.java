@@ -14,8 +14,8 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor to asynchronously
  * reduce, multiply, and display BigFractions via various Mono
  * operations, including fromCallable(), subscribeOn(), map(),
- * doOnSuccess(), blockOptional(), then(), and the Scheduler.single()
- * thread "pool".
+ * doOnSuccess(), blockOptional(), first(), then(), and the
+ * Scheduler.single() thread "pool".
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  */
 public class MonoEx {

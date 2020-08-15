@@ -1,59 +1,58 @@
 package utils;
 
-import org.reactivestreams.Subscriber;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
-
-import static java.util.stream.Collectors.toList;
 
 /**
- * This class asynchronously runs tests that use the Project Reactor
- * framework and ensures that the test driver doesn't exit until all
- * the asynchronous processing is completed.
+ * This class asynchronously runs tests that use the RxJava framework
+ * and ensures that the test driver doesn't exit until all the
+ * asynchronous processing is completed.
  * 
  */
 public class AsyncTester {
     /**
      * Keeps track of all the registered tests to run.
      */
-    private static final List<Supplier<Mono<Void>>> sTests =
+    private static final List<Supplier<Completable>> sTests =
         new ArrayList<>();
 
     /**
      * Register the {@code test} test so that it can be run
      * asynchronously.  Each test must take no parameters and return a
-     * {@code Supplier<Mono<Void>>} result.
+     * {@code Supplier<Completable>} result.
      */
-    public static void register(Supplier<Mono<Void>> test) {
+    public static void register(Supplier<Completable> test) {
         sTests.add(test);
     }
 
     /**
      * Run all the register tests.
      *
-     * @return a {@code Mono<Void>} that will be
-     * triggered when all the asynchronously-run tests complete.
+     * @return a {@code Single<Long>} that will be triggered when all
+     * the asynchronously-run tests complete.
      */
-    public static Mono<Long> runTests() throws InterruptedException {
-        return Flux
-                // Convert the list into a stream.
-                .fromIterable(sTests)
+    public static Single<Long> runTests() throws InterruptedException {
+        return Observable
+            // Factory method that converts the list into an
+            // Observable.
+            .fromIterable(sTests)
 
-                // Run each test, which can execute asynchronously.
-                .flatMap(Supplier::get)
+            // Run each test, which can execute asynchronously.
+            .map(Supplier::get)
 
-                // Collect into an empty list that triggers when all
-                // the tests finish running asynchronously.
-                .collectList()
+            // Map each element of the Observable into
+            // CompletableSources, subscribes to them, and waits until
+            // the upstream and all CompletableSources complete.
+            .flatMapCompletable(c -> c)
 
-                // Return a mono when we're done.
-                .flatMap(l -> Mono.just((long) sTests.size()));
+            // Convert the returned Completable into a Single that
+            // returns the number of tests when it completes.
+            .toSingleDefault((long) sTests.size());
     }
 }
 
