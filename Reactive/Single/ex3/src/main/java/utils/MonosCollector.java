@@ -71,27 +71,32 @@ public class MonosCollector<T>
     public Function<List<Mono<T>>, Mono<List<T>>> finisher() {
         // Return a mono to a list of completed elements of type T.
         return monos -> Mono
-                // Return a new mono that completes when all monos in
-                // the list complete.
-                .when(monos)
+            // Return a new mono that completes when all monos in the
+            // list complete.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#when-java.lang.Iterable-
+            .when(monos)
 
-                // Return a mono that signals when all the monos
-                // complete.
-                .materialize()
+            // Return a mono that signals when all the monos complete.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#materialize--
+            .materialize()
 
-                // When all monos have completed get a single mono to
-                // a list of elements of type T.
-                .flatMap(v -> Flux
-                        // Create a flux stream of completable monos.
-                        .fromIterable(monos)
+            // When all monos have completed get a single mono to a
+            // list of elements of type T.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
+            .flatMap(v -> Flux
+                     // Create a flux stream of completable monos.
+                     // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-
+                     .fromIterable(monos)
 
-                        // Use map() to block() all monos and yield
-                        // objects of type T (block() will not
-                        // actually block).
-                        .map(Mono::block)
+                     // Use map() to block() all monos and yield
+                     // objects of type T (block() will not
+                     // actually block).
+                     // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
+                     .map(Mono::block)
 
-                        // Collect the results of type T into a list.
-                        .collect(toList()));
+                     // Collect the results of type T into a list.
+                     // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#collect-java.util.stream.Collector-
+                     .collect(toList()));
     }
 
     /**

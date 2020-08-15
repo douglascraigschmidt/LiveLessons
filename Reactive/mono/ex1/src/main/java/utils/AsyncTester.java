@@ -37,12 +37,13 @@ public class AsyncTester {
     /**
      * Run all the register tests.
      *
-     * @return a {@code Mono<Void>} that will be
-     * triggered when all the asynchronously-run tests complete.
+     * @return a {@code Mono<Long>} that will be triggered when all
+     * the asynchronously-run tests complete to indicate how many
+     * tests were run.
      */
     public static Mono<Long> runTests() throws InterruptedException {
         return Flux
-            // Factory method that converts the list into a stream.
+            // Factory method that converts the list into a flux.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-
             .fromIterable(sTests)
 
@@ -57,7 +58,7 @@ public class AsyncTester {
 
             // Return a mono containing the number of tests run when
             // we're done.
-            .flatMap(l -> Mono
+            .flatMap(__ -> Mono
                      // Use just() to return the number of tests run.
                      // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
                      .just((long) sTests.size()));

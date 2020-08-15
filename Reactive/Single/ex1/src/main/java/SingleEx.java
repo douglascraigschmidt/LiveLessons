@@ -1,11 +1,13 @@
-import reactor.core.publisher.Mono;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Notification;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static utils.BigFractionUtils.*;
 
@@ -14,14 +16,13 @@ import static utils.BigFractionUtils.*;
  * synchronously to to reduce and display BigFractions via
  * basic Mono operations, including fromCallable(), map(),
  * doOnSuccess(), and then().
- * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  */
-public class MonoEx {
+public class SingleEx {
     /**
      * Test synchronous BigFraction reduction using a mono and a
      * pipeline of operations that run on the calling thread.
      */
-    public static Mono<Void> testFractionReductionSync1() {
+    public static Completable testFractionReductionSync1() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReductionSync1()\n");
 
@@ -31,32 +32,28 @@ public class MonoEx {
                      new BigInteger(sBI2),
                      false);
 
-        return Mono
+        return Single
             // Use fromCallable() to begin synchronously reducing a
             // big fraction in the calling thread.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() -> BigFraction.reduce(unreducedFraction))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(BigFraction::toMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If an
             // exception is thrown doOnSuccess() will be skipped.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(result -> {
                     sb.append("     mixed reduced fraction = " + result + "\n");
                     // Display the result.
-                    BigFractionUtils.display(sb.toString());
+                    display(sb.toString());
                 })
 
-            // Return an empty mono to synchronize with the
+            // Return a Completable to synchronize with the
             // AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
-            .then();
+            .ignoreElement();
     }
 
     /**
@@ -64,7 +61,7 @@ public class MonoEx {
      * pipeline of operations that run on the calling thread.
      * Combines mono with Java functional programming features.
      */
-    public static Mono<Void> testFractionReductionSync2() {
+    public static Completable testFractionReductionSync2() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReductionSync2()\n");
 
@@ -105,27 +102,23 @@ public class MonoEx {
             BigFractionUtils.display(sb.toString());
         };
 
-        return Mono
+        return Single
             // Use fromCallable() to begin synchronously reducing a
             // big fraction in the calling thread.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(reduceFraction)
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(convertToMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(printResult)
 
-            // Return an empty mono to synchronize with the
+            // Return a Completable to synchronize with the
             // AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
-            .then();
+            .ignoreElement();
     }
 }

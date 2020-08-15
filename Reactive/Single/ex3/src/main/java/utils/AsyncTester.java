@@ -37,24 +37,23 @@ public class AsyncTester {
     /**
      * Run all the register tests.
      *
-     * @return a {@code Mono<Long>} that will be triggered when all
-     * the asynchronously-run tests complete to indicate how many
-     * tests were run.
+     * @return a {@code Mono<Void>} that will be
+     * triggered when all the asynchronously-run tests complete.
      */
     public static Mono<Long> runTests() throws InterruptedException {
         return Flux
-            // Factory method that converts the list into a flux.
-            .fromIterable(sTests)
+                // Convert the list into a stream.
+                .fromIterable(sTests)
 
-            // Run each test, which can execute asynchronously.
-            .flatMap(Supplier::get)
+                // Run each test, which can execute asynchronously.
+                .flatMap(Supplier::get)
 
-            // Collect into an empty list that triggers when all
-            // the tests finish running asynchronously.
-            .collectList()
+                // Collect into an empty list that triggers when all
+                // the tests finish running asynchronously.
+                .collectList()
 
-            // Return a mono when we're done.
-            .flatMap(l -> Mono.just((long) sTests.size()));
+                // Return a mono when we're done.
+                .flatMap(l -> Mono.just((long) sTests.size()));
     }
 }
 
