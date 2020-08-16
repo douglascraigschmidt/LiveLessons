@@ -5,7 +5,6 @@ import utils.AsyncTester;
  * synchronously to perform basic Flux operations, including just(),
  * map(), and subscribe().
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {
     /**
      * Main entry point into the test program.

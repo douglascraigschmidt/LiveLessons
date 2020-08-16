@@ -1,16 +1,11 @@
 package utils;
 
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class asynchronously runs tests that use the Project Reactor
@@ -40,7 +35,7 @@ public class AsyncTester {
      * @return a {@code Mono<Void>} that will be
      * triggered when all the asynchronously-run tests complete.
      */
-    public static Mono<Long> runTests() throws InterruptedException {
+    public static Mono<Long> runTests() {
         return Flux
             // Factory method that converts the list into a stream.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-

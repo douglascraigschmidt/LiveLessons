@@ -10,7 +10,6 @@ import utils.AsyncTester;
  * and the parallel thread pool.  It also demonstrates how to combine
  * the Java streams framework with the Project Reactor framework.
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {
     /**
      * Main entry point into the test program.

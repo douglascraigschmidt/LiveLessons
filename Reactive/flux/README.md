@@ -7,14 +7,16 @@ features, as follows:
 
 . ex2 - This example shows how to reduce and/or multiply big fractions
         asynchronously using Flux features in the Reactor framework,
-        including create(), interval(), map(), doOnNext(), take(), and
-        subscribe().
+        including create(), interval(), map(), filter(), doOnNext(),
+        take(), subscribe(), then(), range(), subscribeOn(),
+        publishOn(), and various thread pools.
 
 . ex3 - This example shows how to reduce and/or multiply big fractions
         asynchronously and concurrently using many advanced Flux
-        features in the Project Reactor framework, including just(),
-        create(), map(), flatMap(), collectList(), subscribeOn(),
-        take(), and various types of thread pools.  It also shows
-        advanced Mono operations, such as first() and when().  It also
-        demonstrates how to combine the Java streams framework with
-        the Project Reactor framework.
+        features in the Project Reactor framework, including
+        fromIterable(), map(), create(), flatMap(), filter(),
+        collectList(), subscribeOn(), take(), and various types of
+        thread pools.  It also shows advanced Mono operations, such as
+        first(), when(), flatMap(), subscribeOn(), and the parallel
+        thread pool.  It also demonstrates how to combine the Java
+        streams framework with the Project Reactor framework.

@@ -17,8 +17,6 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sMAX_FRACTIONS;
 import static utils.MonosCollector.toMono;
 
-@SuppressWarnings("ALL")
-
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
@@ -29,6 +27,11 @@ import static utils.MonosCollector.toMono;
  * the Java streams framework with the Project Reactor framework.
  */
 public class FluxEx {
+    /**
+     * Create a random number generator.
+     */
+    private static final Random sRANDOM = new Random();
+
     /**
      * Test BigFraction exception handling using an asynchronous Flux
      * stream and a pool of threads.
@@ -81,8 +84,9 @@ public class FluxEx {
                     return Mono
                         // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
                         .fromCallable(() ->
-                                      // Throws ArithmeticException if denominator is 0.
-                                      BigFraction.valueOf(100,
+                                      // Throws ArithmeticException if
+                                      // denominator is 0.
+                                      BigFraction.valueOf(Math.abs(sRANDOM.nextInt()),
                                                           denominator))
 
                         // Run all the processing in a pool of
@@ -131,7 +135,7 @@ public class FluxEx {
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html#onRequest-java.util.function.LongConsumer-
             .onRequest(size -> sink
                        // Emit a random big fraction every time a request is made.
-                       .next(BigFractionUtils.makeBigFraction(new Random(),
+                       .next(BigFractionUtils.makeBigFraction(sRANDOM,
                                                               false)));
 
         // Process the function in a flux stream.

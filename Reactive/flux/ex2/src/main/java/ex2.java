@@ -1,18 +1,17 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously using Flux features in the Reactor framework,
- * including create(), interval(), map(), filter(), doOnNext(),
- * take(), subscribe(), then(), range(), subscribeOn(), publishOn(),
- * and various thread pools.
+ * This example shows how to apply Project Reactor features
+ * asynchronously to perform various Flux operations, including
+ * create(), interval(), map(), filter(), doOnNext(), take(),
+ * subscribe(), then(), range(), subscribeOn(), publishOn(), and
+ * various thread pools.
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws InterruptedException {
+    public static void main (String[] argv) {
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous time-driven Flux
         // stream.

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
  * A utility class containing helpful methods for manipulating various
  * BigFraction features.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class BigFractionUtils {
     /**
      * A utility class should always define a private constructor.
@@ -28,8 +29,6 @@ public class BigFractionUtils {
      * These final strings are used to pass params to various lambdas in the
      * test methods below.
      */
-    public static final String sF1 = "62675744/15668936";
-    public static final String sF2 = "609136/913704";
     public static final String sBI1 = "846122553600669882";
     public static final String sBI2 = "188027234133482196";
 
@@ -37,21 +36,9 @@ public class BigFractionUtils {
      * A big reduced fraction constant.
      */
     public static final BigFraction sBigReducedFraction =
-            BigFraction.valueOf(new BigInteger("846122553600669882"),
-                    new BigInteger("188027234133482196"),
+            BigFraction.valueOf(new BigInteger(sBI1),
+                    new BigInteger(sBI2),
                     true);
-
-    /**
-     * Stores a completed mono with a value of sBigReducedFraction.
-     */
-    public static final Mono<BigFraction> mBigReducedFractionM =
-            Mono.just(sBigReducedFraction);
-
-    /**
-     * Represents a test that's completed running when it returns.
-     */
-    public static final Mono<Void> sVoidM =
-            Mono.empty();
 
     /**
      * A factory method that returns a large random BigFraction whose
