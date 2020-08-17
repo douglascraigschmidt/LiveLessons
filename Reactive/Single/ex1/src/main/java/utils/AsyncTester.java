@@ -25,6 +25,8 @@ public class AsyncTester {
      * Register the {@code test} test so that it can be run
      * asynchronously.  Each test must take no parameters and return a
      * {@code Supplier<Completable>} result.
+     *
+     * @param test The test to register with the {@code AsyncTester} framework.
      */
     public static void register(Supplier<Completable> test) {
         sTests.add(test);
@@ -36,7 +38,7 @@ public class AsyncTester {
      * @return a {@code Single<Long>} that will be triggered when all
      * the asynchronously-run tests complete.
      */
-    public static Single<Long> runTests() throws InterruptedException {
+    public static Single<Long> runTests() {
         return Observable
             // Factory method that converts the list into an
             // Observable.
