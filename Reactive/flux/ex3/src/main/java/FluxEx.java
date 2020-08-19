@@ -40,7 +40,7 @@ public class FluxEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionExceptions1()\n");
 
-        // Create a function to handle an ArithmeticException.
+        // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
                  Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
@@ -54,7 +54,7 @@ public class FluxEx {
             .just(BigFraction.ZERO);
         };
 
-        // Create a function that multiplies big fractions.
+        // Create a function lambda that multiplies big fractions.
         Function<BigFraction,
                  BigFraction> multiplyBigFractions = fraction -> {
             sb.append("     "

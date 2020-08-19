@@ -11,7 +11,7 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply Project Reactor features
- * synchronously to to reduce and display BigFractions via
+ * synchronously to reduce and display BigFractions via
  * basic Mono operations, including fromCallable(), map(),
  * doOnSuccess(), and then().
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html

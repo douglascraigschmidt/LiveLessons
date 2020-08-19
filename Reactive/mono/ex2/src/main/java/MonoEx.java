@@ -97,7 +97,7 @@ public class MonoEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationCallable1()\n");
 
-        // Create a callable that multiplies two large fractions.
+        // Create a callable lambda that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
             BigFraction bf1 = new BigFraction(sF1);
             BigFraction bf2 = new BigFraction(sF2);

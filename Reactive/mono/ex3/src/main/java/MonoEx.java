@@ -90,11 +90,11 @@ public class MonoEx {
                                    true)
                   .multiply(sBigReducedFraction))
 
+            // Run all the processing in the parallel thread pool.
+            .subscribeOn(Schedulers.parallel())
+
             // Print result after multiplying it.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
-            .doOnSuccess(fractionPrinter)
-
-            // Run all the processing in the parallel thread pool.
-            .subscribeOn(Schedulers.parallel());
+            .doOnSuccess(fractionPrinter);
     }
 }
