@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile 'io.reactivex.rxjava3:rxjava:3.0.5'
+    compile 'io.reactivex.rxjava3:rxjava:3.0.6'
 }

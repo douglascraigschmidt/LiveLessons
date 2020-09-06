@@ -11,9 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toList;
-import static livelessons.utils.StreamsUtils.not;
-
 /**
  * This test driver showcases how implementation strategies customize
  * the SearchStreamGang framework with different modern Java
@@ -25,6 +22,7 @@ public class SearchStreamGangTest {
      * Enumerate all the implementation strategies to run.
      */
     enum TestsToRun {
+        WARMUP_FORK_JOIN_THREAD_POOL,
         COMPLETABLE_FUTURES_INPUTS,
         COMPLETABLE_FUTURES_PHASES,
         FORK_JOIN,
@@ -32,6 +30,8 @@ public class SearchStreamGangTest {
         PARALLEL_STREAMS,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_PHASES,
+        REACTOR,
+        RXJAVA,
         RXJAVA_INPUTS,
         RXJAVA_PHASES,
         SEQUENTIAL_LOOPS,
@@ -40,7 +40,8 @@ public class SearchStreamGangTest {
 
     /**
      * Maps each of the TestsToRun to the associated SearchStreamGang strategy that
-     * implements this test.
+     * implements this test.  A LinkedHashMap is used to ensure the tests run in
+     * the same order as the enumerals in the TestsToRun enum.
      */
     private static final Map<TestsToRun, SearchStreamGang> sSTRATEGY_MAP =
         new LinkedHashMap<>();
@@ -54,6 +55,10 @@ public class SearchStreamGangTest {
         // Initialize sSTRATEGY_MAP.
         for (TestsToRun test : TestsToRun.values()) {
             switch (test) {
+            case WARMUP_FORK_JOIN_THREAD_POOL:
+                sSTRATEGY_MAP.put(test, new SearchWithForkJoin(phraseList,
+                                                               inputData));
+                break;
             case SEQUENTIAL_LOOPS:
                 sSTRATEGY_MAP.put(test, new SearchWithSequentialLoops(phraseList,
                                                                       inputData));
@@ -90,6 +95,14 @@ public class SearchStreamGangTest {
                 sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesInputs(phraseList,
                                                                                inputData));
                 break;
+           case REACTOR:
+                sSTRATEGY_MAP.put(test, new SearchWithReactor(phraseList,
+                                                              inputData));
+                    break;
+            case RXJAVA:
+                sSTRATEGY_MAP.put(test, new SearchWithRxJava(phraseList,
+                                                             inputData));
+                    break;
             case RXJAVA_INPUTS:
                 sSTRATEGY_MAP.put(test, new SearchWithRxJavaInputs(phraseList,
                                                                    inputData));
@@ -154,9 +167,6 @@ public class SearchStreamGangTest {
      */
     private static void runTests(List<String> phraseList,
                                  List<List<CharSequence>> inputData) {
-        // Warm up the fork-join pool.
-        warmUpForkJoinPool(phraseList, inputData);
-
         // Initialize the map.
         makeStrategyMap(phraseList, inputData);
 
@@ -176,98 +186,6 @@ public class SearchStreamGangTest {
 
         // Sort and display all the timing results.
         System.out.println(RunTimer.getTimingResults());
-    }
-
-    /**
-     * Warm up the threads in the fork-join pool so the timing results
-     * will be more accurate.
-     */
-    private static void warmUpForkJoinPool(List<String> phraseList,
-                                           List<List<CharSequence>> inputData) {
-        System.out.println("Warming up the fork-join pool");
-        // Create a SearchStreamGang that's used to find the # of
-        // times each phrase in phraseList appears in the inputData.
-        SearchStreamGang streamGang =
-            new SearchStreamGang(phraseList,
-                                 inputData);
- 
-        inputData
-            // Process the stream of input strings in parallel.
-            .parallelStream()
- 
-            // Iterate for each array of input strings.
-            .forEach(listOfStrings -> {
-                    // The results are stored in a list of input streams,
-                    // where each input string is associated with a list
-                    // of SearchResults corresponding to phrases that
-                    // matched the input string.
-                    List<SearchResults> listOfSearchResults = listOfStrings
-                        // Process the stream of input data in parallel.
-                        .parallelStream()
- 
-                        // Concurrently search each input string for all
-                        // occurrences of the phrases to find.
-                        .map(inputString -> {
-                                // Get the section title.
-                                String title = streamGang.getTitle(inputString);
- 
-                                // Skip over the title.
-                                CharSequence input = inputString.subSequence(title.length(),
-                                                                             inputString.length());
- 
-                                return phraseList
-                                // Process the stream of phrases in parallel.
-                                .parallelStream()
- 
-                                // Search for all places in the input
-                                // String where the phrase appears and
-                                // return a SearchResults object.
-                                .map(phrase ->
-                                     streamGang.searchForPhrase(phrase,
-                                                                input,
-                                                                title,
-                                                                true))
- 
-                                // Only keep a result that has at least one match.
-                                .filter(not(SearchResults::isEmpty))
- 
-                                // Collect a list of SearchResults for
-                                // each phrase that matched this input
-                                // string.
-                                .collect(toList());
-                            })
- 
-                        // Flatten the stream of lists of SearchResults
-                        // into a stream of SearchResults.
-                        .flatMap(List::stream)
- 
-                        // Collect a list of containing SearchResults
-                        // for each input string.
-                        .collect(toList());
- 
-                    // Determine how many word matches we obtained.
-                    // SearchResults::print();
-                    int totalWordsMatched = listOfSearchResults
-                        .stream()
- 
-                        // Compute the total number of times each word
-                        // matched the input string.
-                        .mapToInt(SearchResults::size)
- 
-                        // Sum the results.
-                        .sum();
-                        
-                    System.out.println("warmUpForkJoinPool"
-                                       + ": The search returned = "
-                                       + totalWordsMatched
-                                       + " word matches for "
-                                       + listOfStrings.size()
-                                       + " input strings");
-                });
-
-        // Run the garbage collector to free up memory and
-        // minimize timing perturbations on each test.
-        System.gc();
     }
 }
 
