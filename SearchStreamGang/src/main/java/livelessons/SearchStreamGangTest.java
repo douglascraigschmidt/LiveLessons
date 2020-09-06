@@ -7,76 +7,99 @@ import livelessons.utils.SearchResults;
 import livelessons.utils.TestDataFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamsUtils.not;
 
 /**
  * This test driver showcases how implementation strategies customize
- * the SearchStreamGang framework with different Java 8 mechanisms to
- * implement an "embarrassingly parallel" program that searches for
- * phases in a list of input strings.
+ * the SearchStreamGang framework with different modern Java
+ * mechanisms to implement an "embarrassingly parallel" program that
+ * searches for phases in a list of input strings.
  */
 public class SearchStreamGangTest {
     /**
      * Enumerate all the implementation strategies to run.
      */
     enum TestsToRun {
-        RXJAVA_PHASES,
-        RXJAVA_INPUTS,
-        SEQUENTIAL_LOOPS,
-        SEQUENTIAL_STREAM,
+        COMPLETABLE_FUTURES_INPUTS,
+        COMPLETABLE_FUTURES_PHASES,
+        FORK_JOIN,
+        PARALLEL_SPLITERATOR,
+        PARALLEL_STREAMS,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_PHASES,
-        PARALLEL_STREAMS,
-        PARALLEL_SPLITERATOR,
-        FORK_JOIN,
-        COMPLETABLE_FUTURES_PHASES,
-        COMPLETABLE_FUTURES_INPUTS
+        RXJAVA_INPUTS,
+        RXJAVA_PHASES,
+        SEQUENTIAL_LOOPS,
+        SEQUENTIAL_STREAM
     }
 
     /**
-     * Factory method that creates the desired type of
-     * SearchStreamGang subclass implementation strategy.
+     * Maps each of the TestsToRun to the associated SearchStreamGang strategy that
+     * implements this test.
      */
-    private static SearchStreamGang makeSearchStreamGang(List<String> phraseList,
-                                                         List<List<CharSequence>> inputData,
-                                                         TestsToRun choice) {
-        switch (choice) {
-        case SEQUENTIAL_LOOPS:
-            return new SearchWithSequentialLoops(phraseList,
-                        inputData);
-        case SEQUENTIAL_STREAM:
-            return new SearchWithSequentialStreams(phraseList,
-                                                  inputData);
-        case FORK_JOIN:
-            return new SearchWithForkJoin(phraseList,
-                                          inputData);
-        case PARALLEL_SPLITERATOR:
-            return new SearchWithParallelSpliterator(phraseList,
-                                                     inputData);
-        case PARALLEL_STREAM_INPUTS:
-            return new SearchWithParallelStreamInputs(phraseList,
-                                                      inputData);
-        case PARALLEL_STREAM_PHASES:
-            return new SearchWithParallelStreamPhrases(phraseList,
-                                                     inputData);
-        case PARALLEL_STREAMS:
-            return new SearchWithParallelStreams(phraseList,
-                                                 inputData);
-        case COMPLETABLE_FUTURES_PHASES:
-            return new SearchWithCompletableFuturesPhrases(phraseList,
-                                                         inputData);
-        case COMPLETABLE_FUTURES_INPUTS:
-            return new SearchWithCompletableFuturesInputs(phraseList,
-                                                          inputData);
-        case RXJAVA_INPUTS:
-            return new SearchWithRxJavaInputs(phraseList, inputData);
-        case RXJAVA_PHASES:
-            return new SearchWithRxJavaPhrases(phraseList, inputData);
+    private static final Map<TestsToRun, SearchStreamGang> sSTRATEGY_MAP =
+        new LinkedHashMap<>();
+
+    /**
+     * Factory method that initializes the {@code sSTRATEGY_MAP} with
+     * all the SearchStreamGang subclass implementation strategies.
+     */
+    private static void makeStrategyMap(List<String> phraseList,
+                                        List<List<CharSequence>> inputData) {
+        // Initialize sSTRATEGY_MAP.
+        for (TestsToRun test : TestsToRun.values()) {
+            switch (test) {
+            case SEQUENTIAL_LOOPS:
+                sSTRATEGY_MAP.put(test, new SearchWithSequentialLoops(phraseList,
+                                                                      inputData));
+                break;
+            case SEQUENTIAL_STREAM:
+                sSTRATEGY_MAP.put(test, new SearchWithSequentialStreams(phraseList,
+                                                                        inputData));
+                break;
+            case FORK_JOIN:
+                sSTRATEGY_MAP.put(test, new SearchWithForkJoin(phraseList,
+                                                               inputData));
+                break;
+            case PARALLEL_SPLITERATOR:
+                sSTRATEGY_MAP.put(test, new SearchWithParallelSpliterator(phraseList,
+                                                                          inputData));
+                break;
+            case PARALLEL_STREAM_INPUTS:
+                sSTRATEGY_MAP.put(test, new SearchWithParallelStreamInputs(phraseList,
+                                                                           inputData));
+                break;
+            case PARALLEL_STREAM_PHASES:
+                sSTRATEGY_MAP.put(test, new SearchWithParallelStreamPhrases(phraseList,
+                                                                            inputData));
+                break;
+            case PARALLEL_STREAMS:
+                sSTRATEGY_MAP.put(test, new SearchWithParallelStreams(phraseList,
+                                                                      inputData));
+                break;
+            case COMPLETABLE_FUTURES_PHASES:
+                sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesPhrases(phraseList,
+                                                                                inputData));
+                break;
+            case COMPLETABLE_FUTURES_INPUTS:
+                sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesInputs(phraseList,
+                                                                               inputData));
+                break;
+            case RXJAVA_INPUTS:
+                sSTRATEGY_MAP.put(test, new SearchWithRxJavaInputs(phraseList,
+                                                                   inputData));
+                break;
+            case RXJAVA_PHASES:
+                sSTRATEGY_MAP.put(test, new SearchWithRxJavaPhrases(phraseList,
+                                                                    inputData));
+                break;
+            }
         }
-        return null;
     }
 
     /*
@@ -85,7 +108,7 @@ public class SearchStreamGangTest {
     /**
      * The complete works of William Shakespeare.
      */
-    private static String sSHAKESPEARE_DATA_FILE =
+    private static final String sSHAKESPEARE_DATA_FILE =
         "completeWorksOfShakespeare.txt";
 
     /**
@@ -106,15 +129,14 @@ public class SearchStreamGangTest {
 
         // All the input is initialized here.
         List<List<CharSequence>> inputData = 
-            new ArrayList<List<CharSequence>>() {
-                { // Create a list of input from the complete works of
-                  // William Shakespeare.
-                  add(TestDataFactory
-                      // Split input by input separator from Options singleton.
-                      .getSharedInput(sSHAKESPEARE_DATA_FILE,
-                                      Options.getInstance().getInputSeparator()));
-                }
-            };
+            new ArrayList<>() { {
+                // Create a list of input from the complete works of
+                // William Shakespeare.
+                add(TestDataFactory
+                    // Split input via Options singleton separator.
+                    .getSharedInput(sSHAKESPEARE_DATA_FILE, Options
+                                    .getInstance().getInputSeparator()));
+            }};
 
         // Get the list of input phases to find.
         List<String> phaseList = 
@@ -128,36 +150,29 @@ public class SearchStreamGangTest {
     }
 
     /**
-     * Create/run appropriate type of StreamGang to search for phases.
+     * Create/run appropriate type of StreamGang to search for phrases.
      */
-    private static void runTests(List<String> phaseList,
+    private static void runTests(List<String> phraseList,
                                  List<List<CharSequence>> inputData) {
         // Warm up the fork-join pool.
-        warmUpForkJoinPool(phaseList, inputData);
+        warmUpForkJoinPool(phraseList, inputData);
+
+        // Initialize the map.
+        makeStrategyMap(phraseList, inputData);
 
         // Run all the SearchStreamGang tests.
-        for (TestsToRun test : TestsToRun.values()) {
-            System.out.println("Starting " + test);
+        sSTRATEGY_MAP.forEach((test, searchStreamGang) -> {
+                System.out.println("Starting " + test);
 
-            // Use the factory method to make the appropriate
-            // SearchStreamGang.
-            SearchStreamGang streamGang =
-                makeSearchStreamGang(phaseList,
-                                     inputData,
-                                     test);
+                // Execute the test.
+                searchStreamGang.run();
 
-            // Ensure nothing weird happened..
-            assert streamGang != null;
+                // Run the garbage collector to free up memory and
+                // minimize timing perturbations on each test.
+                System.gc();
 
-            // Execute the test.
-            streamGang.run();
-
-            // Run the garbage collector to free up memory and
-            // minimize timing perturbations on each test.
-            System.gc();
-
-            System.out.println("Ending " + test);
-        }
+                System.out.println("Ending " + test);
+            });
 
         // Sort and display all the timing results.
         System.out.println(RunTimer.getTimingResults());
@@ -250,9 +265,9 @@ public class SearchStreamGangTest {
                                        + " input strings");
                 });
 
-            // Run the garbage collector to free up memory and
-            // minimize timing perturbations on each test.
-            System.gc();
+        // Run the garbage collector to free up memory and
+        // minimize timing perturbations on each test.
+        System.gc();
     }
 }
 

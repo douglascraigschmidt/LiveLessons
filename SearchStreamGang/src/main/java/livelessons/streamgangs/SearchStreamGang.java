@@ -1,9 +1,6 @@
 package livelessons.streamgangs;
 
-import livelessons.utils.Options;
-import livelessons.utils.PhraseMatchSpliterator;
-import livelessons.utils.RunTimer;
-import livelessons.utils.SearchResults;
+import livelessons.utils.*;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -75,7 +72,7 @@ public class SearchStreamGang
     }
 
     /**
-     * This template method starts the Java 8 stream processing to
+     * This template method starts the Java stream processing to
      * search the list of input strings for the given phrases to find.
      */
     @Override
@@ -148,7 +145,7 @@ public class SearchStreamGang
      */
     private void printResults(String test,
                               List<List<SearchResults>> listOfListOfSearchResults) {
-        System.out.println(test +
+        System.out.println(StringUtils.lastSegment(test, '.') +
                            ": The search returned "
                            + listOfListOfSearchResults.stream()
                            .mapToInt(list 

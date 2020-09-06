@@ -17,12 +17,12 @@ public abstract class StreamGang<E>
 
     /**
      * The input List that's processed, which can be initialized via
-     * the @code makeInputList() factory method.
+     * the {@code makeInputList()} factory method.
      */
     protected volatile List<E> mInput = null;
 
     /**
-     * Executes submitted Runnable tasks in a Thread pool.
+     * Executes submitted runnable tasks in a thread pool.
      */
     private Executor mExecutor = null;
 

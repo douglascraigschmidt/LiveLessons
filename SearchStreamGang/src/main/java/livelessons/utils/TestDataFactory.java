@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This utility class contains methods for obtaining test data.
+ * This utility class contains methods that obtain test data.
  */
 public class TestDataFactory {
     /**

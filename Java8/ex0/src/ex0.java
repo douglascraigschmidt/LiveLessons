@@ -31,7 +31,7 @@ public class ex0 {
 
         // Remove "Robert" from the list created from nameArray.
         List<String> l2 = zapModern(List.of(nameArray),
-                               "Robert");
+                                    "Robert");
 
         // Check to ensure the zap*() methods work.
         if (l1.contains("Robert") 
