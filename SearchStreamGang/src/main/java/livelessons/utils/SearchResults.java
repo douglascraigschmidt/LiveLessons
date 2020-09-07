@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collector;
 
-import static java.util.stream.Collectors.joining;
-
 /**
  * Keeps track of how many times a word appears in an input string.
  */
@@ -19,7 +17,7 @@ public class SearchResults {
          * The index in the search String where the word that was
          * found.
          */
-        private int mIndex;
+        private final int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search

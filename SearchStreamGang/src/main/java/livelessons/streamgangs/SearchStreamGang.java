@@ -14,10 +14,10 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This class factors out the common code used by all instantiations
- * of the StreamGang framework in the SearchStreamGang program.  It
- * customizes the StreamGang framework to search a list of input
- * Strings for phrases provided in a list of phrases to find.
+ * This class factors out common code used by all StreamGang framework
+ * implementation strategies in the SearchStreamGang program.  It
+ * customizes this framework to search a list of input character
+ * sequences for phrases provided in a list of phrases to find.
  */
 public abstract class SearchStreamGang
        extends StreamGang<CharSequence> {
@@ -44,26 +44,26 @@ public abstract class SearchStreamGang
     }
 
     /**
-     * Factory method that returns the next list of character sequences that
-     * will be searched by the StreamGang implementation strategies.
+     * This factory method returns the next list of character
+     * sequences to search for via the implementation strategies.
      */
     @Override
     protected List<CharSequence> getNextInput() {
         if (!mInputIterator.hasNext())
             // No more input, so we're done.
-        	return null;
+            return null;
         else {
             // Start a new cycle.
             incrementCycle();
 
-            // Return a list containing the character sequences to search.
+            // Return a list containing character sequences to search.
             return mInputIterator.next();
         }
     }
 
     /**
-     * This template method starts the Java stream processing to
-     * search the list of input strings for the given phrases to find.
+     * This template method starts the processing to search the list
+     * of input character sequences for the given phrases to find.
      */
     @Override
     protected void initiateStream() {
@@ -114,15 +114,14 @@ public abstract class SearchStreamGang
             // Flatten the lists into a stream of SearchResults.
             .flatMap(List::stream)
 
-            // Collect the SearchResults into a TreeMap, which will
-            // sort the keys by their titles.
+            // Collect the SearchResults into a TreeMap, which sorts
+            // the keys by their titles.
             .collect(groupingBy(SearchResults::getTitle,
                                 TreeMap::new,
                                 toList()));
 
-        // Print out the results in the map, where each title is first
-        // printed followed by a list of the indices where the phrase
-        // appeared in the input.
+        // Print the map results, where each title is printed followed
+        // by a list of indices where phrase appeared in the input.
         resultsMap
             .forEach((key, value)
                      -> {
@@ -135,7 +134,7 @@ public abstract class SearchStreamGang
     }
 
     /**
-     * Looks for all instances of {@code phrase} in {@code inputData} and
+     * Looks for all instances of {@code phrase} in {@code input} and
      * return a list of all the {@code SearchResults} (if any).
      */
     public SearchResults searchForPhrase(String phrase,
@@ -144,10 +143,10 @@ public abstract class SearchStreamGang
                                          boolean parallel) {
         List<SearchResults.Result> resultList =
             // Use a PhraseMatchSpliterator to add the indices of all
-            // places in the inputData where phrase matches.
+            // places in the input where the phrase matches.
             StreamSupport
                 // Create a stream of Results to record the indices
-                // (if any) where the phrase matched the input data.
+                // (if any) where the phrase matched the input.
                 .stream(new PhraseMatchSpliterator(input, phrase),
                         parallel)
                     
@@ -155,7 +154,7 @@ public abstract class SearchStreamGang
                 // operation processing and returns a list of Results.
                 .collect(toList());
 
-    	// Create/return SearchResults to keep track of relevant info.
+    	// Create/return a SearchResults to track the relevant info.
         return new SearchResults(Thread.currentThread().getId(),
                                  currentCycle(),
                                  phrase,
