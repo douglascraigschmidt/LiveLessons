@@ -24,16 +24,18 @@ public class SearchStreamGangTest {
     enum TestsToRun {
         WARMUP_FORK_JOIN_THREAD_POOL,
         COMPLETABLE_FUTURES_INPUTS,
-        COMPLETABLE_FUTURES_PHASES,
+        COMPLETABLE_FUTURES_PHRASES,
         FORK_JOIN,
         PARALLEL_SPLITERATOR,
         PARALLEL_STREAMS,
         PARALLEL_STREAM_INPUTS,
-        PARALLEL_STREAM_PHASES,
+        PARALLEL_STREAM_PHRASES,
         REACTOR,
+        REACTOR_INPUTS,
+        REACTOR_PHRASES,
         RXJAVA,
         RXJAVA_INPUTS,
-        RXJAVA_PHASES,
+        RXJAVA_PHRASES,
         SEQUENTIAL_LOOPS,
         SEQUENTIAL_STREAM
     }
@@ -79,7 +81,7 @@ public class SearchStreamGangTest {
                 sSTRATEGY_MAP.put(test, new SearchWithParallelStreamInputs(phraseList,
                                                                            inputData));
                 break;
-            case PARALLEL_STREAM_PHASES:
+            case PARALLEL_STREAM_PHRASES:
                 sSTRATEGY_MAP.put(test, new SearchWithParallelStreamPhrases(phraseList,
                                                                             inputData));
                 break;
@@ -87,7 +89,7 @@ public class SearchStreamGangTest {
                 sSTRATEGY_MAP.put(test, new SearchWithParallelStreams(phraseList,
                                                                       inputData));
                 break;
-            case COMPLETABLE_FUTURES_PHASES:
+            case COMPLETABLE_FUTURES_PHRASES:
                 sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesPhrases(phraseList,
                                                                                 inputData));
                 break;
@@ -99,6 +101,14 @@ public class SearchStreamGangTest {
                 sSTRATEGY_MAP.put(test, new SearchWithReactor(phraseList,
                                                               inputData));
                     break;
+           case REACTOR_INPUTS:
+                sSTRATEGY_MAP.put(test, new SearchWithReactorInputs(phraseList,
+                                                                    inputData));
+                    break;
+           case REACTOR_PHRASES:
+                sSTRATEGY_MAP.put(test, new SearchWithReactorPhrases(phraseList,
+                                                                     inputData));
+                    break;
             case RXJAVA:
                 sSTRATEGY_MAP.put(test, new SearchWithRxJava(phraseList,
                                                              inputData));
@@ -107,7 +117,7 @@ public class SearchStreamGangTest {
                 sSTRATEGY_MAP.put(test, new SearchWithRxJavaInputs(phraseList,
                                                                    inputData));
                 break;
-            case RXJAVA_PHASES:
+            case RXJAVA_PHRASES:
                 sSTRATEGY_MAP.put(test, new SearchWithRxJavaPhrases(phraseList,
                                                                     inputData));
                 break;

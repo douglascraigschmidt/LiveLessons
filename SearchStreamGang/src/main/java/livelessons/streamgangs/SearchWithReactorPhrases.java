@@ -11,24 +11,24 @@ import java.util.concurrent.ForkJoinPool;
 
 /**
  * Customizes the SearchStreamGang framework to use Project Reactor to
- * perform a parallel search of each input data string and each phrase
- * (from a list of phrases) within each input data string.
+ * perform a parallel search of each each phrase (from a list of
+ * phrases) within each input data string.
  */
-public class SearchWithReactor
+public class SearchWithReactorPhrases
        extends SearchStreamGang {
     /**
      * Constructor initializes the super class.
      */
-    public SearchWithReactor(List<String> phrasesToFind,
-                             List<List<CharSequence>> stringsToSearch) {
+    public SearchWithReactorPhrases(List<String> phrasesToFind,
+                                    List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
     }
 
     /**
-     * Perform the processing, which uses an Reactor Stream to
-     * concurrently search for phrases in the input data.
+     * Perform the processing, which uses an Reactor Stream to search
+     * for phrases in parallel from the input data.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -51,11 +51,7 @@ public class SearchWithReactor
                      // processInput() method to each item emitted by
                      // the source Mono and emits a list of
                      // SearchResults.
-                     .flatMap(this::processInput)
-
-                     // Asynchronously subscribes Monos to this
-                     // Mono on the designated thread pool.
-                     .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool())))
+                     .flatMap(this::processInput))
 
             // Returns an Mono that emits a single item, which
             // is composed of all the items emitted by the source
