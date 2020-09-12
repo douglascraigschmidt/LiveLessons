@@ -81,7 +81,8 @@ public abstract class StreamGang<E>
     protected abstract List<E> getNextInput();
 
     /**
-     * Hook method that starts the StreamGang processing.
+     * Hook method that starts the StreamGang processing for
+     * a particular implementation strategy.
      */
     protected abstract void initiateStream();
 

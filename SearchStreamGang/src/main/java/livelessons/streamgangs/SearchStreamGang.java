@@ -141,20 +141,20 @@ public abstract class SearchStreamGang
                                          CharSequence input,
                                          String title,
                                          boolean parallel) {
-        List<SearchResults.Result> resultList =
-            // Use a PhraseMatchSpliterator to add the indices of all
-            // places in the input where the phrase matches.
-            StreamSupport
+
+        // Use a PhraseMatchSpliterator to add the indices of all
+        // places in the input where the phrase matches.
+        List<SearchResults.Result> resultList = StreamSupport
                 // Create a stream of Results to record the indices
                 // (if any) where the phrase matched the input.
                 .stream(new PhraseMatchSpliterator(input, phrase),
                         parallel)
-                    
+
                 // This terminal operation triggers aggregate
                 // operation processing and returns a list of Results.
                 .collect(toList());
 
-    	// Create/return a SearchResults to track the relevant info.
+        // Create/return a SearchResults to track the relevant info.
         return new SearchResults(Thread.currentThread().getId(),
                                  currentCycle(),
                                  phrase,

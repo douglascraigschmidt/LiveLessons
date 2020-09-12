@@ -5,7 +5,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -117,12 +116,9 @@ public class PhraseMatchTask
      * Try to find phrase matches sequentially.
      */
     private List<SearchResults.Result> computeSequentially () {
-        return StreamSupport
-            // Use the MatcherSpliterator to create a new stream of
-            // MatchResults.
-            .stream(new MatcherSpliterator(mPhraseMatcher),
-                    // Create a sequential stream.
-                    false)
+        return mPhraseMatcher
+            // Create a sequential stream of MatchResults.
+            .results()
 
             // Map each MatchResult into a SearchResults.Result.
             .map(mr -> new SearchResults.Result(mOffset + mr.start()))

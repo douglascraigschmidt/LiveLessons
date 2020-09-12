@@ -14,7 +14,8 @@ import java.util.Map;
  * This test driver showcases how implementation strategies customize
  * the SearchStreamGang framework with different modern Java
  * mechanisms to implement an "embarrassingly parallel" program that
- * searches for phases in a list of input strings.
+ * searches for famous Bard phases in a list of input strings
+ * containing the complete works of William Shakespeare.
  */
 public class SearchStreamGangTest {
     /**
@@ -40,16 +41,14 @@ public class SearchStreamGangTest {
     }
 
     /**
-     * Maps each of the TestsToRun to the associated SearchStreamGang strategy that
-     * implements this test.  A LinkedHashMap is used to ensure the tests run in
-     * the same order as the enumerals in the TestsToRun enum.
+     * Maps each of the TestsToRun to the associated SearchStreamGang
+     * strategy that implements this test.  A LinkedHashMap is used to
+     * ensure the tests run in the same order as the enumerals in the
+     * TestsToRun enum.
      */
     private static final Map<TestsToRun, SearchStreamGang> sSTRATEGY_MAP =
         new LinkedHashMap<>();
 
-    /*
-     * Input files.
-     */
     /**
      * The complete works of William Shakespeare.
      */
@@ -57,7 +56,7 @@ public class SearchStreamGangTest {
         "completeWorksOfShakespeare.txt";
 
     /**
-     * A list of phrases to search for in the complete works of
+     * A list of Bard phrases to search for in the complete works of
      * Shakespeare.
      */
     private static final String sPHASE_LIST_FILE =
@@ -80,28 +79,29 @@ public class SearchStreamGangTest {
                 add(TestDataFactory
                     // Split input via Options singleton separator.
                     .getSharedInput(sSHAKESPEARE_DATA_FILE, Options
-                                    .getInstance().getInputSeparator()));
+                                    .getInstance()
+                                    .getInputSeparator()));
             }};
 
-        // Get the list of input phases to find.
-        List<String> phaseList = 
+        // Get the list of famous Bard phases to find.
+        List<String> phraseList =
             TestDataFactory.getPhraseList(sPHASE_LIST_FILE);
 
-        // Create/run all StreamGang strategies to search for phrases.
-        runTests(phaseList,
-                 inputData);
+        // Initialize the map with all the implementation strategies.
+        makeStrategyMap(phraseList, inputData);
+
+        // Run all the SearchStreamGang implementation strategies to
+        // search for Bard phrases.
+        runTests();
 
         System.out.println("Ending SearchStreamGangTest");
     }
 
     /**
-     * Create/run appropriate type of StreamGang to search for phrases.
+     * Run all the SearchStreamGang implementation strategies to
+     * search for Bard phrases.
      */
-    private static void runTests(List<String> phraseList,
-                                 List<List<CharSequence>> inputData) {
-        // Initialize the map.
-        makeStrategyMap(phraseList, inputData);
-
+    private static void runTests() {
         // Run all the SearchStreamGang tests.
         sSTRATEGY_MAP
             .forEach((test, searchStreamGang) -> {
