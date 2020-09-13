@@ -141,18 +141,17 @@ public abstract class SearchStreamGang
                                          CharSequence input,
                                          String title,
                                          boolean parallel) {
-
-        // Use a PhraseMatchSpliterator to add the indices of all
-        // places in the input where the phrase matches.
+        // Use PhraseMatchSpliterator to add the indices of all
+        // locations in the input where the phrase matches.
         List<SearchResults.Result> resultList = StreamSupport
-                // Create a stream of Results to record the indices
-                // (if any) where the phrase matched the input.
-                .stream(new PhraseMatchSpliterator(input, phrase),
-                        parallel)
+            // Create a stream of Results to record the indices
+            // (if any) where the phrase matched the input.
+            .stream(new PhraseMatchSpliterator(input, phrase),
+                    parallel)
 
-                // This terminal operation triggers aggregate
-                // operation processing and returns a list of Results.
-                .collect(toList());
+            // Terminal operation triggers aggregate operation
+            // processing and returns a list of Result objects.
+            .collect(toList());
 
         // Create/return a SearchResults to track the relevant info.
         return new SearchResults(Thread.currentThread().getId(),
@@ -168,21 +167,21 @@ public abstract class SearchStreamGang
     public String getTitle(CharSequence input) {
         // Create a Matcher.
         Matcher m = Pattern
-                // Compile a regex that matches only the first line in the input.
-                .compile("(?m)^.*$")
+            // Compile a regex that matches only the first line in the input.
+            .compile("(?m)^.*$")
 
-                // Create a matcher for this pattern.
-                .matcher(input);
+            // Create a matcher for this pattern.
+            .matcher(input);
 
         // Find/return the first line in the string.
         return m.find()
+            // Return the title string if there's a match.
             ? m.group()
+
+            // Return null if there's no match.
             : "";
         /* Could also use
-          
-        int index = inputData.indexOf('\n');
-        return inputData.substring(0,
-                                   index);
+           return inputData.substring(0, inputData.indexOf('\n'));
         */
     }
 

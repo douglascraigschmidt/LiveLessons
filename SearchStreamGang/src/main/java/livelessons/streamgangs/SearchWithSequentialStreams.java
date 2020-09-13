@@ -60,12 +60,12 @@ public class SearchWithSequentialStreams
                                                   inputSeq.length());
 
         // Iterate through each phrase we're searching for, try to
-        // find it in the inputData, and return the results.
+        // find it in the input, and return the results.
         return mPhrasesToFind
             // Convert the list of phrases into a sequential stream.
             .stream()
 
-            // Find all indices where phrase matches the input data.
+            // Find all indices where phrase matches the input.
             .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
