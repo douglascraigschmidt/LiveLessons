@@ -9,11 +9,11 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This class is used in conjunction with the Java 7 fork-join pool to
+ * This class is used in conjunction with the Java fork-join pool to
  * create a list of SearchResults.Result objects that match the number
  * of times a phrase appears in an input string.  The comparison is
- * case-insensitive.  This version uses Java 8 streams to implement
- * the class logic more concisely.
+ * case-insensitive.  This version uses Java streams to implement the
+ * class logic more concisely.
  */
 public class PhraseMatchTask
        extends RecursiveTask<List<SearchResults.Result>> {

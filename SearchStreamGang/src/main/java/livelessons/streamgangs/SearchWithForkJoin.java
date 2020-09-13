@@ -5,7 +5,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
-import livelessons.utils.SearchForPhrasesTask;
+import livelessons.utils.PhraseMatchTask;
 import livelessons.utils.SearchResults;
 
 import static java.util.stream.Collectors.toList;
@@ -38,18 +38,20 @@ public class SearchWithForkJoin
         // Use the fork-join common pool to search the input looking
         // for phrases that match.
         return ForkJoinPool
+            // Get a reference to the common fork-join pool.
             .commonPool()
+
+            // This two-way call blocks until processing is complete.
             .invoke(new SearchWithForkJoinTask(getInput(),
                                                mPhrasesToFind));
     }
     
     /**
-     * This class demonstrates the use of the Java 7 fork-join
-     * framework to search for phrases in the works of Shakespeare.
-     * This version uses Java 8 streams to implement the class logic
-     * more concisely.
+     * This class demonstrates the Java fork-join framework to search
+     * for phrases in the works of Shakespeare.  This version uses
+     * Java streams to implement the class logic more concisely.
      */
-    private static class SearchWithForkJoinTask
+    private class SearchWithForkJoinTask
         extends RecursiveTask<List<List<SearchResults>>> {
         /**
          * The list of strings to search.
@@ -59,7 +61,7 @@ public class SearchWithForkJoin
         /**
          * The list of phrases to find.
          */
-        private List<String> mPhrasesToFind;
+        private final List<String> mPhrasesToFind;
 
         /**
          * The minimum size of an input list to split.
@@ -118,7 +120,7 @@ public class SearchWithForkJoin
          * Searches for phrases to find in the input list.
          */
         @Override
-        protected List<List<SearchResults>> compute() {
+            protected List<List<SearchResults>> compute() {
             if (mInputList.size() <= mMinSplitSize)
                 return computeSequentially();
             else 
@@ -153,6 +155,132 @@ public class SearchWithForkJoin
 
             // Wait and join the results from the left task.
             List<List<SearchResults>> leftResult = leftTask.join();
+
+            // sConcatenate the left result with the right result.
+            leftResult.addAll(rightResult);
+
+            // Return the result.
+            return leftResult;
+        }
+    }
+
+    /**
+     * A RecursiveTask that searches an input string for a list of
+     * phrases using Java streams to implement the logic concisely.
+     */
+    private class SearchForPhrasesTask
+            extends RecursiveTask<List<SearchResults>> {
+        /**
+         * The input string to search.
+         */
+        private final CharSequence mInputString;
+
+        /**
+         * The list of phrases to find.
+         */
+        private List<String> mPhraseList;
+
+        /**
+         * The minimum size of the phrases list to split.
+         */
+        private final int mMinSplitSize;
+
+        /**
+         * Constructor initializes the field.
+         */
+        public SearchForPhrasesTask(CharSequence inputString,
+                                    List<String> phraseList) {
+            mInputString = inputString;
+            mPhraseList = phraseList;
+            mMinSplitSize = phraseList.size()/ 2;
+        }
+
+        /**
+         * This constructor is used internally by the compute() method.
+         * It initializes all the fields for the "left hand size" of a
+         * split.
+         */
+        private SearchForPhrasesTask(CharSequence inputString,
+                                     List<String> phraseList,
+                                     int minSplitSize) {
+            mInputString = inputString;
+            mPhraseList = phraseList;
+            mMinSplitSize = minSplitSize;
+        }
+
+        /**
+         * Perform the computations sequentially at this point.
+         */
+        private List<SearchResults> computeSequentially() {
+            // Get the section title.
+            String title = getTitle(mInputString);
+
+            // Skip over the title.
+            CharSequence input = mInputString.subSequence(title.length(),
+                                                          mInputString.length());
+
+            // Return the list of SearchResults.
+            return mPhraseList
+                // Convert the list of phrases into a stream.
+                .stream()
+
+                // Find all indices where the phrase matches in the input
+                // data.
+                .map(phrase
+                     -> new SearchResults
+                     (Thread.currentThread().getId(),
+                      1,
+                      phrase,
+                      title,
+                      // Use a PhraseMatchTask to add the indices of all
+                      // places in the inputData where phrase matches.
+                      new PhraseMatchTask(input,
+                                          phrase).compute()))
+
+                // If a phrase was found add it to the list of results.
+                .filter(not(SearchResults::isEmpty))
+
+                // Trigger stream processing & collect results into a list.
+                .collect(toList());
+        }
+
+        /**
+         * This method searches the @a inputString for all occurrences of
+         * the phrases to find.
+         */
+        @Override
+        public List<SearchResults> compute() {
+            if (mPhraseList.size() < mMinSplitSize)
+                return computeSequentially();
+            else 
+                // Compute position to split the phrase list and forward
+                // to the splitPhraseList() method to perform the split.
+                return splitPhraseList(mPhraseList.size() / 2);
+        }
+
+        /**
+         * Use the fork-join framework to recursively split the input list
+         * and return a list of SearchResults that contain all matching
+         * phrases in the input list.
+         */
+        private List<SearchResults> splitPhraseList(int splitPos) {
+            // Create and fork a new SearchWithForkJoinTask that
+            // concurrently handles the "left hand" part of the input,
+            // while "this" handles the "right hand" part of the input.
+            ForkJoinTask<List<SearchResults>> leftTask =
+                new SearchForPhrasesTask(mInputString,
+                                         mPhraseList.subList(0, splitPos),
+                                         mMinSplitSize).fork();
+
+            // Update "this" SearchForPhrasesTask to handle the "right
+            // hand" portion of the input.
+            mPhraseList = mPhraseList.subList(splitPos, mPhraseList.size());
+
+            // Recursively call compute() to continue the splitting.
+            List<SearchResults> rightResult = compute();
+
+            // Wait and join the results from the left task.
+            List<SearchResults> leftResult = leftTask.join();
 
             // sConcatenate the left result with the right result.
             leftResult.addAll(rightResult);

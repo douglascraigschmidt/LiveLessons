@@ -56,15 +56,18 @@ public class PhraseMatchSpliterator
         
         // Create a regex that will match the phrase across lines.
         String regexPhrase = 
-            // Start with a word boundary.
+            // Start phase with a word boundary.
             "\\b"
             + phrase
+
             // Remove leading/trailing whitespace.
             .trim()
+
             // Replace multiple spaces with one whitespace boundary
             // expression and delimit words.
             .replaceAll("\\s+", "\\\\b\\\\s+\\\\b")
-            // End with a word boundary.
+
+            // End phrase with a word boundary.
             + "\\b";
 
         regexPhrase = regexPhrase

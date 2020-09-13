@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This utility class contains methods for manipulating various Java 8
+ * This utility class contains methods for manipulating various Java
  * Streams features.
  */
 public class StreamsUtils {

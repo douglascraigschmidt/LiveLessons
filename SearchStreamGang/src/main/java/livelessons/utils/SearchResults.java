@@ -183,10 +183,10 @@ public class SearchResults {
 
                 // Create a custom collector to join all the results
                 // together.
-                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
-                                      (j, r) -> j.add(r.toString()),       // accumulator
-                                      StringJoiner::merge,                 // combiner
-                                      StringJoiner::toString))             // finisher
+                .collect(Collector.of(() -> new StringJoiner("|"),   // supplier
+                                      (j, r) -> j.add(r.toString()), // accumulator
+                                      StringJoiner::merge,           // combiner
+                                      StringJoiner::toString))       // finisher
                 + "]";
         }
         
