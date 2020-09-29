@@ -9,9 +9,9 @@ import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamsUtils.not;
 
 /**
- * Customizes the SearchStreamGang superclass to use CompletableFutures
- * in conjunction with Java streams to asynchronously search the input
- * data for each phrase in an list of phrases.
+ * Customizes the SearchStreamGang framework to use a Java Stream to
+ * sequentially search each input String and then concurrently search
+ * for each phrase (from a list of phrases) in the input String.
  */
 public class SearchWithParallelStreamPhrases
        extends SearchStreamGang {
@@ -26,13 +26,13 @@ public class SearchWithParallelStreamPhrases
     }
 
     /**
-     * Perform the processing, which uses a Java 8 Stream to
+     * Perform the processing, which uses a Java stream to
      * concurrently search for phrases in the input strings.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Concurrently iterate through each phrase we're searching for
-        // and try to find it in the input strings.
+        // Concurrently iterate through each phrase we're searching
+        // for and try to find it in the input strings.
         return mPhrasesToFind
             // Convert the list of phrases into a parallel stream.
             .parallelStream()
@@ -48,7 +48,7 @@ public class SearchWithParallelStreamPhrases
     
     /**
      * Sequentially search the list of input strings for all
-     * occurrences of the @a phrase passed as a parameter.
+     * occurrences of the {@code phrase} passed as a parameter.
      */
     private List<SearchResults> processPhrase(String phrase) {
      	// Get the input.

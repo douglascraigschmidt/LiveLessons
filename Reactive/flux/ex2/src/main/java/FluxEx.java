@@ -69,6 +69,7 @@ public class FluxEx {
             .create(makeTimedFluxSink())
 
             // Print the big integer as a debugging aid.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#doOnNext-java.util.function.Consumer-
             .doOnNext(s -> FluxEx.print(s, sb))
 
             // Use a memoizer to check if each random big integer is
@@ -108,6 +109,7 @@ public class FluxEx {
 
             // Generate random numbers between min and max
             // values to ensure some duplicates.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(__ ->
                  BigInteger.valueOf(sLOWER_BOUND +
                                     sRANDOM.nextInt(sMAX_ITERATIONS)))
@@ -145,6 +147,7 @@ public class FluxEx {
             .create(makeAsyncFluxSink())
 
             // Print the big integer as a debugging aid.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#doOnNext-java.util.function.Consumer-
             .doOnNext(s -> FluxEx.print(s, sb))
 
             // Arrange to perform the prime-checking computations in the
