@@ -1,9 +1,11 @@
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.parallel.ParallelFlowable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.RxUtils;
 
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -91,7 +93,7 @@ public class ex1 {
                 .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE_S)
 
                 // Run the computation in the common fork-join pool.
-                .compose(RxUtils.commonPoolSingle());
+                .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
 
             Single
                 // Call this::convert method reference to convert the
@@ -147,7 +149,7 @@ public class ex1 {
                 .just("GBP:USA")
 
                 // Run the computation in the common fork-join pool.
-                .parallel().compose(RxUtils.commonPoolParallelFlowable())
+                .parallel().runOn(Schedulers.from(ForkJoinPool.commonPool()))
 
                 // Find the exchange rate.
                 .map(this::queryExchangeRateFor)
