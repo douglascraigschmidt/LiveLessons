@@ -52,13 +52,13 @@ public class SearchWithParallelStreams
      * Concurrently search {@code input} for all occurrences of the
      * phrases to find.
      */
-    private List<SearchResults> processInput(CharSequence input) {
+    private List<SearchResults> processInput(CharSequence inputSeq) {
         // Get the section title.
-        String title = getTitle(input);
+        String title = getTitle(inputSeq);
 
         // Skip over the title.
-        CharSequence input = input.subSequence(title.length(),
-                                               input.length());
+        CharSequence input = inputSeq.subSequence(title.length(),
+                                                  inputSeq.length());
 
         // Iterate through each phrase we're searching for and try to
         // find it in the inputData.

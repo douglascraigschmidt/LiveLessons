@@ -40,7 +40,7 @@ public class ex14 {
 
         // Run tests that demonstrate performance differences between
         // ArrayList and LinkedList spliterators.
-        //runSpliteratorTests();
+        runSpliteratorTests();
 
         // Run tests that demonstrate performance differences between
         // concurrent and non-concurrent techniques for joining results in
@@ -50,7 +50,7 @@ public class ex14 {
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent techniques for
         // collecting results in a stream.
-        runCollectorTests();
+        // runCollectorTests();
 
         System.out.println("Exiting the test program");
     }

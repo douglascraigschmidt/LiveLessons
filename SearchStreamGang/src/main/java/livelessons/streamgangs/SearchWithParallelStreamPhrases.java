@@ -10,8 +10,8 @@ import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use a Java Stream to
- * sequentially search each input String and then concurrently search
- * for each phrase (from a list of phrases) in the input String.
+ * concurrently search for each phrase (from a list of phrases) and
+ * sequentially search each input string to try and find a match.
  */
 public class SearchWithParallelStreamPhrases
        extends SearchStreamGang {
@@ -19,7 +19,7 @@ public class SearchWithParallelStreamPhrases
      * Constructor initializes the super class.
      */
     public SearchWithParallelStreamPhrases(List<String> phrasesToFind,
-                                         List<List<CharSequence>> stringsToSearch) {
+                                           List<List<CharSequence>> stringsToSearch) {
         // Pass input to superclass constructor.
         super(phrasesToFind,
               stringsToSearch);
