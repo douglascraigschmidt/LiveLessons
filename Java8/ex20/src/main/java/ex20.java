@@ -140,7 +140,7 @@ public class ex20 {
 
         try {
             ForkJoinPool
-                // Submit an anonymous managedBlock implementation to
+                // Submit an anonymous managedBlocker implementation to
                 // the common ForkJoin thread pool.  This call ensures
                 // the common fork/join thread pool is expanded to
                 // handle the blocking image download.
