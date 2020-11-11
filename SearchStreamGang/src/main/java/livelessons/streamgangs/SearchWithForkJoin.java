@@ -69,12 +69,14 @@ public class SearchWithForkJoin
         private final int mMinSplitSize;
 
         /**
-         * Construtor initializes the fields.
+         * Constructor initializes the fields.  This is the main
+         * entry point into this class.
          */
         SearchWithForkJoinTask(List<? extends CharSequence> inputList,
                                List<String> phrasesToFind) {
             mInputList = inputList;
             mPhrasesToFind = phrasesToFind;
+            // Can readjust as needed.
             mMinSplitSize = inputList.size() / 2;
         }
 
@@ -89,6 +91,19 @@ public class SearchWithForkJoin
             mInputList = inputList;
             mPhrasesToFind = phrasesToFind;
             mMinSplitSize = minSplitSize;
+        }
+
+        /**
+         * Searches for phrases to find in the input list.
+         */
+        @Override
+        protected List<List<SearchResults>> compute() {
+            if (mInputList.size() <= mMinSplitSize)
+                return computeSequentially();
+            else
+                // Compute position to split the input list and forward to
+                // the splitInputList() method to perform the split.
+                return splitInputList(mInputList.size() / 2);
         }
 
         /**
@@ -114,19 +129,6 @@ public class SearchWithForkJoin
                 // Trigger stream processing and collect the results into a
                 // list.
                 .collect(toList());
-        }
-
-        /**
-         * Searches for phrases to find in the input list.
-         */
-        @Override
-            protected List<List<SearchResults>> compute() {
-            if (mInputList.size() <= mMinSplitSize)
-                return computeSequentially();
-            else 
-                // Compute position to split the input list and forward to
-                // the splitInputList() method to perform the split.
-                return splitInputList(mInputList.size() / 2);
         }
 
         /**
@@ -156,17 +158,18 @@ public class SearchWithForkJoin
             // Wait and join the results from the left task.
             List<List<SearchResults>> leftResult = leftTask.join();
 
-            // sConcatenate the left result with the right result.
+            // Concatenate the left result with the right result.
             leftResult.addAll(rightResult);
 
-            // Return the result.
+            // Return the concatenated result.
             return leftResult;
         }
     }
 
     /**
      * A RecursiveTask that searches an input string for a list of
-     * phrases using Java streams to implement the logic concisely.
+     * phrases using Java streams to implement the logic concisely, but
+     * it uses the fork-join pool to search for the phrases concurrently.
      */
     private class SearchForPhrasesTask
             extends RecursiveTask<List<SearchResults>> {
@@ -186,12 +189,14 @@ public class SearchWithForkJoin
         private final int mMinSplitSize;
 
         /**
-         * Constructor initializes the field.
+         * Constructor initializes the field.  This is called by the
+         * SearchWithForkJoinTask.
          */
         public SearchForPhrasesTask(CharSequence inputString,
                                     List<String> phraseList) {
             mInputString = inputString;
             mPhraseList = phraseList;
+            // Can readjust as needed.
             mMinSplitSize = phraseList.size()/ 2;
         }
 
@@ -209,42 +214,6 @@ public class SearchWithForkJoin
         }
 
         /**
-         * Perform the computations sequentially at this point.
-         */
-        private List<SearchResults> computeSequentially() {
-            // Get the section title.
-            String title = getTitle(mInputString);
-
-            // Skip over the title.
-            CharSequence input = mInputString.subSequence(title.length(),
-                                                          mInputString.length());
-
-            // Return the list of SearchResults.
-            return mPhraseList
-                // Convert the list of phrases into a stream.
-                .stream()
-
-                // Find all indices where the phrase matches in the input
-                // data.
-                .map(phrase
-                     -> new SearchResults
-                     (Thread.currentThread().getId(),
-                      1,
-                      phrase,
-                      title,
-                      // Use a PhraseMatchTask to add the indices of all
-                      // places in the inputData where phrase matches.
-                      new PhraseMatchTask(input,
-                                          phrase).compute()))
-
-                // If a phrase was found add it to the list of results.
-                .filter(not(SearchResults::isEmpty))
-
-                // Trigger stream processing & collect results into a list.
-                .collect(toList());
-        }
-
-        /**
          * This method searches the @a inputString for all occurrences of
          * the phrases to find.
          */
@@ -256,6 +225,43 @@ public class SearchWithForkJoin
                 // Compute position to split the phrase list and forward
                 // to the splitPhraseList() method to perform the split.
                 return splitPhraseList(mPhraseList.size() / 2);
+        }
+
+        /**
+         * Perform the computations sequentially at this point.
+         */
+        private List<SearchResults> computeSequentially() {
+            // Get the section title.
+            String title = getTitle(mInputString);
+
+            // Skip over the title.
+            CharSequence input =
+                mInputString.subSequence(title.length(),
+                                         mInputString.length());
+
+            // Return the list of SearchResults.
+            return mPhraseList
+                    // Convert the list of phrases into a stream.
+                    .stream()
+
+                    // Find all indices where the phrase matches in the input
+                    // data.
+                    .map(phrase
+                            -> new SearchResults
+                            (Thread.currentThread().getId(),
+                                    1,
+                                    phrase,
+                                    title,
+                                    // Use a PhraseMatchTask to add the indices of all
+                                    // places in the inputData where phrase matches.
+                                    new PhraseMatchTask(input,
+                                                        phrase).compute()))
+
+                    // If a phrase was found add it to the list of results.
+                    .filter(not(SearchResults::isEmpty))
+
+                    // Trigger stream processing & collect results into a list.
+                    .collect(toList());
         }
 
         /**
@@ -282,10 +288,10 @@ public class SearchWithForkJoin
             // Wait and join the results from the left task.
             List<SearchResults> leftResult = leftTask.join();
 
-            // sConcatenate the left result with the right result.
+            // Concatenate the left result with the right result.
             leftResult.addAll(rightResult);
 
-            // Return the result.
+            // Return the concatenated result.
             return leftResult;
         }
     }

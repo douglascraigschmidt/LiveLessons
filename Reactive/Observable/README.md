@@ -8,8 +8,8 @@ The folders in this directory demonstrate various RxJava Observable
 . ex2 - This example shows how to apply RxJava features asynchronously
         to perform various Observable operations, including create(),
         interval(), map(), filter(), doOnNext(), doOnComplete(),
-        take(), subscribe(), ignoreElement(), range(), subscribeOn(),
-        observeOn(), count(), and various thread pools.
+        take(), subscribe(), range(), subscribeOn(), observeOn(),
+        count(), and various thread pools.
 
 . ex3 - This example shows how to reduce and/or multiply big fractions
         asynchronously and concurrently using many advanced RxJava

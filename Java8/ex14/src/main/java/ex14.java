@@ -40,7 +40,7 @@ public class ex14 {
 
         // Run tests that demonstrate performance differences between
         // ArrayList and LinkedList spliterators.
-        runSpliteratorTests();
+        // runSpliteratorTests();
 
         // Run tests that demonstrate performance differences between
         // concurrent and non-concurrent techniques for joining results in
@@ -50,7 +50,7 @@ public class ex14 {
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent techniques for
         // collecting results in a stream.
-        // runCollectorTests();
+        runCollectorTests();
 
         System.out.println("Exiting the test program");
     }
@@ -287,7 +287,7 @@ public class ex14 {
     /**
      * Determines how long it takes to combine partial results in the
      * word list via collect() and Collectors.joining() in a stream.
-     * If @a parallel is true then a parallel stream is used, else a
+     * If {@code parallel} is true then a parallel stream is used, else a
      * sequential stream is used.
      */
     private static void timeStreamJoining(String testName,
@@ -330,8 +330,8 @@ public class ex14 {
 
     /**
      * Determines how long it takes to collect partial results into a
-     * HashSet.  If @a parallel is true then a parallel stream is
-     * used, else a sequential stream is used.
+     * HashSet using a non-concurrent collector.  If {@code parallel} is
+     * true then a parallel stream is used, else a sequential stream is used.
      */
     private static void timeStreamCollectToSet(String testName,
                                                boolean parallel,
@@ -377,8 +377,8 @@ public class ex14 {
 
     /**
      * Determines how long it takes to collect partial results into a
-     * ConcurrentHashSet.  If @a parallel is true then a parallel
-     * stream is used, else a sequential stream is used.
+     * ConcurrentHashSet using a concurrent collector.  If {@code parallel}
+     * is true then a parallel stream is used, else a sequential stream is used.
      */
     private static void timeStreamCollectToConcurrentSet(String testName,
                                                          boolean parallel,
