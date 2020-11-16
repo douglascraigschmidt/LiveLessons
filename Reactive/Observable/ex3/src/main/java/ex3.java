@@ -4,10 +4,10 @@ import utils.AsyncTester;
  * This example shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
  * Observable operations, including fromIterable(), map(), create(),
- * flatMap(), filter(), collectList(), subscribeOn(), take(), and
- * various types of thread pools.  It also shows advanced RxJava
- * Single operations, such as first(), when(), flatMap(),
- * subscribeOn(), and the parallel thread pool.
+ * flatMap(), flatMapCompletable(), filter(), collectInto(), take(),
+ * subscribeOn(), and various types of thread pools.  It also shows
+ * advanced RxJava Single operations, such as ambArray(), when(),
+ * flatMap(), subscribeOn(), and the parallel thread pool.
  */
 public class ex3 {
     /**

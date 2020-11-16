@@ -107,11 +107,12 @@ public class BigFractionUtils {
             .subscribeOn(Schedulers.parallel());
 
         return Mono
-            // Use first() to select the result of whichever sort
-            // finishes first and use it to print the sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-            
-            .first(quickSortM,
-                   heapSortM)
+            // Use firstWithSignal() to select the result of whichever
+            // sort finishes first and use it to print the sorted
+            // list.
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#firstWithSignal-org.reactivestreams.Publisher...-
+            .firstWithSignal(quickSortM,
+                             heapSortM)
 
             // Use doOnSuccess() to process the first sorted list.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-

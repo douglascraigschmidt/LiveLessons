@@ -22,6 +22,7 @@ public class ObservableEx {
 
         Observable
             // Use just() to generate a stream of big fractions.
+            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#just-T-T-T-T-
             .just(BigFraction.valueOf(100, 3),
                   BigFraction.valueOf(100, 4),
                   BigFraction.valueOf(100, 2),
@@ -29,6 +30,7 @@ public class ObservableEx {
 
             // Use map() to multiply each element in the stream by a
             // constant.
+            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#map-io.reactivex.rxjava3.functions.Function-
             .map(fraction -> {
                     sb.append("     "
                               + fraction.toMixedString()
@@ -46,6 +48,7 @@ public class ObservableEx {
             // return until the final completion event is received.
             // Subsequent examples show more interesting types of
             // publishers that enable asynchrony.
+            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#blockingSubscribe-io.reactivex.rxjava3.functions.Consumer-io.reactivex.rxjava3.functions.Consumer-io.reactivex.rxjava3.functions.Action-
             .blockingSubscribe(// Handle next event.
                                multipliedFraction ->
                                // Add fraction to the string buffer.

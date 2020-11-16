@@ -36,6 +36,7 @@ public class ObservableEx {
     /**
      * Starting point of the randomly-generated numbers.
      */
+
     private static final int sLOWER_BOUND = sMAX_VALUE - sMAX_ITERATIONS;
 
     /**
@@ -99,7 +100,7 @@ public class ObservableEx {
     /**
      * A factory method that bridges the reactive world with the
      * callback-style world to emit a time-based flow of random big
-     * integers at a periodic interval.
+     * integers at a periodic interval in a background thread.
      */
     private static void emitInterval(ObservableEmitter<BigInteger> emitter) {
         Observable
