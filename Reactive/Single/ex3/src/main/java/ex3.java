@@ -3,9 +3,8 @@ import utils.AsyncTester;
 /**
  * This example shows how to apply RxJava features asynchronously and
  * concurrently reduce, multiply, and display BigFractions via various
- * Mono operations, including fromCallable(), subscribeOn(),
- * zipWith(), doOnSuccess(), ambArray(), ignoreElement(), and the
- * parallel thread pool.
+ * Single operations, including fromCallable(), subscribeOn(), zipWith(),
+ * doOnSuccess(), ignoreElement(), and Schedulers.computation().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {

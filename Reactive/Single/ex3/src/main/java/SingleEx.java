@@ -10,11 +10,10 @@ import java.util.Random;
 import static utils.BigFractionUtils.sBigReducedFraction;
 
 /**
- * This class shows how to apply Project Reactor features
- * asynchronously and concurrently reduce, multiply, and display
- * BigFractions via various Mono operations, including fromCallable(),
- * subscribeOn(), zipWith(), doOnSuccess(), ambArray(),
- * ignoreElement(), and the parallel thread pool.
+ * This class shows how to apply RxJava features asynchronously and
+ * concurrently reduce, multiply, and display BigFractions via various
+ * Single operations, including fromCallable(), subscribeOn(), zipWith(),
+ * doOnSuccess(), ignoreElement(), and Schedulers.computation().
  */
 public class SingleEx {
     /**

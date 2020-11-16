@@ -110,7 +110,7 @@ public class BigFractionUtils {
             // Use firstWithSignal() to select the result of whichever
             // sort finishes first and use it to print the sorted
             // list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#firstWithSignal-org.reactivestreams.Publisher...-
+            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#firstWithSignal-reactor.core.publisher.Mono...-
             .firstWithSignal(quickSortM,
                              heapSortM)
 

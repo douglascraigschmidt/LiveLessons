@@ -14,8 +14,8 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply RxJava to asynchronously reduce,
  * multiply, and display BigFractions via various Single operations,
  * including fromCallable(), subscribeOn(), map(), doOnSuccess(),
- * blockingGet(), ambArray(), ignoreElement(), and the
- * Scheduler.single() thread "pool".
+ * blockingGet(), ignoreElement(), and the Scheduler.single() thread
+ * "pool".
  */
 public class SingleEx {
     /**
@@ -33,7 +33,7 @@ public class SingleEx {
                      new BigInteger(sBI2),
                      false);
 
-        // Create a callable lambda expression that
+        // Create a callable lambda that reduces a big fraction.
         Callable<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction = BigFraction
@@ -62,8 +62,7 @@ public class SingleEx {
             .fromCallable(reduceFraction)
 
             // Run all the processing in a (single) background thread.
-            .subscribeOn(Schedulers
-                         .single())
+            .subscribeOn(Schedulers.single())
 
             // After big fraction is reduced return a single and use
             // map() to call a function that converts the reduced
@@ -125,7 +124,7 @@ public class SingleEx {
     }
 
     /**
-     * Test asynchronous BigFraction multiplication using a single and a
+     * Test asynchronous BigFraction multiplication using a Single and a
      * callable, where the processing and the printing of the result
      * is handled in a non-blocking manner by a background thread.
      */

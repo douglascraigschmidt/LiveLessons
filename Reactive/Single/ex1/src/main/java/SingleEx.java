@@ -1,5 +1,4 @@
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Notification;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
@@ -12,14 +11,13 @@ import java.util.concurrent.Callable;
 import static utils.BigFractionUtils.*;
 
 /**
- * This class shows how to apply Project Reactor features
- * synchronously to to reduce and display BigFractions via
- * basic Mono operations, including fromCallable(), map(),
- * doOnSuccess(), and then().
+ * This class shows how to apply RxJava features synchronously to reduce,
+ * multiply, and display BigFractions via basic Single operations, including
+ * fromCallable(), map(), doOnSuccess(), and ignoreElement().
  */
 public class SingleEx {
     /**
-     * Test synchronous BigFraction reduction using a mono and a
+     * Test synchronous BigFraction reduction using a Single and a
      * pipeline of operations that run on the calling thread.
      */
     public static Completable testFractionReductionSync1() {
@@ -37,7 +35,7 @@ public class SingleEx {
             // big fraction in the calling thread.
             .fromCallable(() -> BigFraction.reduce(unreducedFraction))
 
-            // After big fraction is reduced return a mono and use
+            // After big fraction is reduced return a Single and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
             .map(BigFraction::toMixedString)
@@ -57,9 +55,9 @@ public class SingleEx {
     }
 
     /**
-     * Test synchronous BigFraction reduction using a mono and a
+     * Test synchronous BigFraction reduction using a Single and a
      * pipeline of operations that run on the calling thread.
-     * Combines mono with Java functional programming features.
+     * Combines Single with Java functional programming features.
      */
     public static Completable testFractionReductionSync2() {
         StringBuilder sb =
@@ -107,7 +105,7 @@ public class SingleEx {
             // big fraction in the calling thread.
             .fromCallable(reduceFraction)
 
-            // After big fraction is reduced return a mono and use
+            // After big fraction is reduced return a Single and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
             .map(convertToMixedString)

@@ -1,10 +1,10 @@
 import utils.AsyncTester;
 
 /**
- * This example shows how to reduce, multiply, and display
- * BigFractions asynchronously using various Mono features in the
- * Reactor framework, including fromCallable(), subscribeOn(), map(),
- * doOnSuccess(), blockOptional(), then(), and the Scheduler.single()
+ * This example shows how to reduce, multiply, and display BigFractions
+ * asynchronously using various Single features in the RxJava framework,
+ * including fromCallable(), subscribeOn(), map(), doOnSuccess(),
+ * blockOptional(), ignoreElement(), and the Scheduler.single()
  * thread "pool".
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
@@ -13,17 +13,17 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Test asynchronous BigFraction reduction using a Mono and a
+        // Test asynchronous BigFraction reduction using a Single and a
         // pipeline of operations that run off the calling thread.
         AsyncTester.register(SingleEx::testFractionReductionAsync);
 
         // Test hybrid asynchronous BigFraction multiplication using a
-        // mono and a callable, where the processing is performed in a
+        // Single and a callable, where the processing is performed in a
         // background thread and the result is printed in a blocking
         // manner by the main thread.
         AsyncTester.register(SingleEx::testFractionMultiplicationCallable1);
 
-        // Test asynchronous BigFraction multiplication using a mono
+        // Test asynchronous BigFraction multiplication using a Single
         // and a callable, where the processing and the printing of
         // the result is handled in a non-blocking manner by a
         // background thread.
