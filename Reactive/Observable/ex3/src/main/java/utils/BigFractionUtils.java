@@ -80,11 +80,11 @@ public class BigFractionUtils {
 
     /**
      * Sort the {@code list} in parallel using quicksort and mergesort
-     * and then store the results in the {@code StringBuilder}
+     * and then store the results in the {@code StringBuffer}
      * parameter.
      */
     public static Completable sortAndPrintList(List<BigFraction> list,
-                                                StringBuilder sb) {
+                                               StringBuffer sb) {
         // Quick sort the list asynchronously.
         Single<List<BigFraction>> quickSortS = Single
             // Use the just() factory method to obtain the

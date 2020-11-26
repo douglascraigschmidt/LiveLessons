@@ -18,9 +18,10 @@ import static utils.BigFractionUtils.sMAX_FRACTIONS;
  * asynchronously and concurrently using many advanced RxJava
  * Observable operations, including fromIterable(), map(), create(),
  * flatMap(), flatMapCompletable(), fromCallable(), filter(),
- * collectInto(), subscribeOn(), onErrorReturn(), and
- * Schedulers.computation().  It also shows advanced RxJava Single
- * operations, such as ambArray() and subscribeOn().
+ * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
+ * Schedulers.computation().  It also shows advanced RxJava Single and
+ * Maybe operations, such as ambArray(), subscribeOn(), and
+ * doOnSuccess().
  */
 @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "ResultOfMethodCallIgnored"})
 public class ObservableEx {
@@ -34,8 +35,8 @@ public class ObservableEx {
      * showcase exception handling of BigFraction objects.
      */
     public static Completable testFractionExceptions() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions1()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions1()\n");
 
         // Create a function to handle an ArithmeticException.
         Function<Throwable,
@@ -49,16 +50,19 @@ public class ObservableEx {
             return BigFraction.ZERO;
         };
 
-        // Create a function that multiplies big fractions.
-        Function<BigFraction,
-            BigFraction> multiplyBigFractions = fraction -> {
+        // Create a Function that multiplies big fractions.
+        Function<BigFraction, BigFraction> multiplyBigFractions = bf -> {
+            // Multiply bf by a constant.
+            BigFraction result = bf.multiply(sBigReducedFraction);
+
             sb.append("     "
-                      + fraction.toMixedString()
+                      + bf.toMixedString()
                       + " x "
                       + sBigReducedFraction.toMixedString()
+                      + " = "
+                      + result.toMixedString()
                       + "\n");
-            // When Single completes multiply it.
-            return fraction.multiply(sBigReducedFraction);
+            return result;
         };
 
         // Create a list of denominators, including 0 that will
@@ -110,11 +114,76 @@ public class ObservableEx {
 
     /**
      * Use an asynchronous Observable stream and a pool of threads to
-     * perform BigFraction object reductions and multiplications.
+     * perform BigFraction multiplication.
      */
-    public static Completable testFractionMultiplications() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications1()\n");
+    public static Completable testFractionMultiplications1() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications1()\n");
+
+        // Create a list of BigFraction objects.
+        List<BigFraction> bigFractions = List.of(BigFraction.valueOf(1000, 30),
+                                                 BigFraction.valueOf(1000, 40),
+                                                 BigFraction.valueOf(1000, 20),
+                                                 BigFraction.valueOf(1000, 10));
+
+        // Create a Function that multiplies big fractions.
+        Function<BigFraction, BigFraction> multiplyBigFractions = bf -> {
+            // Multiply bf by a constant.
+            BigFraction result = bf.multiply(sBigReducedFraction);
+
+            sb.append("     "
+                      + bf.toMixedString()
+                      + " x "
+                      + sBigReducedFraction.toMixedString()
+                      + " = "
+                      + result.toMixedString()
+                      + "\n");
+            return result;
+        };
+
+        // Process the function in a observable stream.
+        return Observable
+            // Emit a stream of big fractions.
+            .fromIterable(bigFractions)
+
+            // Iterate thru the elements using RxJava's flatMap()
+            // concurrency idiom to multiply these big fractions
+            // asynchronously in a thread pool.
+            .flatMap(bf -> Observable
+                     // Just emit the BigFraction
+                     .just(bf)
+                     
+                     // Run all the processing in a pool of
+                     // background threads.
+                     .subscribeOn(Schedulers.computation())
+
+                     // Perform the multiplication in a background
+                     // thread.
+                     .map(multiplyBigFractions))
+
+            // Reduce the results into one Maybe<BigFraction>.
+            .reduce(BigFraction::add)
+
+            // Display the results if all goes well.
+            .doOnSuccess(result -> {
+                    sb.append("    sum of BigFractions = " 
+                              + result
+                              + "\n");
+                    BigFractionUtils.display(sb.toString());
+                })
+
+            // Return a Completable to synchronize with the
+            // AsyncTester framework.
+            .ignoreElement();
+    }
+
+    /**
+     * Use an asynchronous Observable stream and a pool of threads to
+     * perform BigFraction reductions and multiplications.
+     */
+    public static Completable testFractionMultiplications2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications2()\n");
 
         sb.append("     Printing sorted results:");
 
