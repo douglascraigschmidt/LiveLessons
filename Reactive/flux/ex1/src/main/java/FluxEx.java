@@ -12,7 +12,6 @@ import static utils.BigFractionUtils.sVoidM;
  * This class shows how to apply Project Reactor features
  * synchronously to perform basic Flux operations, including just(),
  * map(), and subscribe().
- * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html
  */
 public class FluxEx {
     /**
@@ -25,7 +24,6 @@ public class FluxEx {
 
         Flux
             // Use just() to generate a stream of big fractions.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#just-T...-
             .just(BigFraction.valueOf(100, 3),
                   BigFraction.valueOf(100, 4),
                   BigFraction.valueOf(100, 2),
@@ -33,7 +31,6 @@ public class FluxEx {
 
             // Use map() to multiply each element in the stream by a
             // constant.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(fraction -> {
                     sb.append("     "
                               + fraction.toMixedString()
@@ -49,7 +46,6 @@ public class FluxEx {
             // the publisher (just()) is synchronous and runs in the
             // calling thread.  However, there are more interesting
             // types of publishers that enable asynchrony.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#subscribe-java.util.function.Consumer-java.util.function.Consumer-java.lang.Runnable-
             .subscribe(// Handle next event.
                        multipliedFraction ->
                        // Add fraction to the string buffer.

@@ -17,10 +17,10 @@ import static utils.BigFractionUtils.sMAX_FRACTIONS;
  * This class shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
  * Observable operations, including fromIterable(), map(), create(),
- * flatMap(), flatMapCompletable(), filter(), collectInto(),
- * subscribeOn(), take(), and various types of thread pools.  It also
- * shows advanced RxJava Single operations, such as first(), when(),
- * flatMap(), subscribeOn(), and the parallel thread pool.
+ * flatMap(), flatMapCompletable(), fromCallable(), filter(),
+ * collectInto(), subscribeOn(), onErrorReturn(), and
+ * Schedulers.computation().  It also shows advanced RxJava Single
+ * operations, such as ambArray() and subscribeOn().
  */
 @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "ResultOfMethodCallIgnored"})
 public class ObservableEx {
@@ -30,8 +30,8 @@ public class ObservableEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * Test BigFraction exception handling using an asynchronous Observable
-     * stream and a pool of threads.
+     * Use an asynchronous Observable stream and a pool of threads to
+     * showcase exception handling of BigFraction objects.
      */
     public static Completable testFractionExceptions() {
         StringBuilder sb =
@@ -68,13 +68,11 @@ public class ObservableEx {
         return Observable
             // Use an Observable to generate a stream from the
             // denominators list.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#fromIterable-java.lang.Iterable-
             .fromIterable(denominators)
 
             // Iterate thru the elements using RxJava's flatMap()
             // concurrency idiom to reduce and multiply big fractions
             // asynchronously in a thread pool.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#flatMap-io.reactivex.rxjava3.functions.Function-
             .flatMap(denominator -> {
                     // Create/process each denominator asynchronously
                     // via an "inner publisher".
@@ -97,16 +95,13 @@ public class ObservableEx {
                 })
 
             // Remove any big fractions that are <= 0.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#filter-io.reactivex.rxjava3.functions.Predicate-
             .filter(fraction -> fraction.compareTo(0) > 0)
 
-            // Collect the results into an ArrayList.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#collectInto-U-io.reactivex.rxjava3.functions.BiConsumer-
+            // Collect the non-0 results into an ArrayList.
             .collectInto(new ArrayList<BigFraction>(), List::add)
 
             // Process the ArrayList and return a Completable that
             // synchronizes with the AsyncTester framework.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#flatMapCompletable-io.reactivex.rxjava3.functions.Function-
             .flatMapCompletable(list ->
                                 // Sort/print results after all async
                                 // fraction operations complete.
@@ -114,11 +109,10 @@ public class ObservableEx {
     }
 
     /**
-     * Test BigFraction reductions/multiplications using an Observable
-     * and its operations, including create(), flatMap(),
-     * collectInto(), flatMapComplete(), and ambArray().
+     * Use an asynchronous Observable stream and a pool of threads to
+     * perform BigFraction object reductions and multiplications.
      */
-    public static Completable testFractionMultiplications1() {
+    public static Completable testFractionMultiplications() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplications1()\n");
 
@@ -127,24 +121,20 @@ public class ObservableEx {
         // Process the function in a observable stream.
         return Observable
             // Emit a stream of random unreduced big fractions.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#create-io.reactivex.rxjava3.core.ObservableOnSubscribe-
             .create(ObservableEx::bigFractionEmitter)
 
             // Iterate thru the elements using RxJava's flatMap()
             // concurrency idiom to reduce and multiply these
             // fractions asynchronously in a thread pool.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#flatMap-io.reactivex.rxjava3.functions.Function-
             .flatMap(unreducedFraction ->
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.computation()))
 
             // Collect the results into an ArrayList.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#collectInto-U-io.reactivex.rxjava3.functions.BiConsumer-
             .collectInto(new ArrayList<BigFraction>(), List::add)
 
             // Process the ArrayList and return a Completable that
             // synchronizes with the AsyncTester framework.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#flatMapCompletable-io.reactivex.rxjava3.functions.Function-
             .flatMapCompletable(list ->
                                 // Sort/print results after all async
                                 // fraction operations complete.
@@ -157,11 +147,9 @@ public class ObservableEx {
     private static void bigFractionEmitter(ObservableEmitter<BigFraction> emitter) {
         Observable
             // Generate sMAX_FRACTIONS.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#range-int-int-
             .range(1, sMAX_FRACTIONS)
 
             // Emit random numbers until the range is complete.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#subscribe-io.reactivex.rxjava3.functions.Consumer-io.reactivex.rxjava3.functions.Consumer-io.reactivex.rxjava3.functions.Action-
             .subscribe(__ -> emitter
                        // Generate a random unreduced big fraction.
                        .onNext(BigFractionUtils.makeBigFraction(sRANDOM,
@@ -180,17 +168,14 @@ public class ObservableEx {
          Scheduler scheduler) {
         return Observable
             // Omit one item that performs the reduction.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() ->
                           BigFraction.reduce(unreducedFraction))
 
             // Perform all processing asynchronously in a pool of
             // background threads.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#subscribeOn-io.reactivex.rxjava3.core.Scheduler-
             .subscribeOn(scheduler)
 
             // Return an Observable to a multiplied big fraction.
-            // http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observable.html#flatMap-io.reactivex.rxjava3.functions.Function-
             .flatMap(reducedFraction -> Observable
                      // Multiply the big fraction
 

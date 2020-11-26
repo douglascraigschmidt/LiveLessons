@@ -42,13 +42,13 @@ public class BigFractionUtils {
     /**
      * Stores a completed mono with a value of sBigReducedFraction.
      */
-    public static final Single<BigFraction> mBigReducedFractionM =
+    public static final Single<BigFraction> mBigReducedFractionS =
         Single.just(sBigReducedFraction);
 
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Completable sVoidM =
+    public static final Completable sVoid =
         Completable.complete();
 
     /**

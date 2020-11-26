@@ -15,8 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class shows how to apply RxJava features asynchronously to
- * perform various Observable operations, including create(),
+ * This class shows how to apply RxJava features to determine whether
+ * randomly-generated BigInteger objects are prime or not.  It
+ * demonstrates various Observable operations, including create(),
  * interval(), map(), filter(), doOnNext(), doOnComplete(), take(),
  * subscribe(), range(), subscribeOn(), observeOn(), count(), and
  * various thread pools.
@@ -58,10 +59,11 @@ public class ObservableEx {
         Duration.ofMillis(500);
 
     /**
-     * Test a stream of random BigIntegers to determine which values
-     * are prime using an asynchronous time-driven Observable stream.
+     * Use an asynchronous time-driven Observable stream that
+     * processes random BigIntegers to determine which ones are prime.
      */
     public static Completable testIsPrimeTimed() {
+        // We use a StringBuffer because it is thread-safe!
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeTimed()\n");
 
@@ -105,7 +107,8 @@ public class ObservableEx {
     private static void emitInterval(ObservableEmitter<BigInteger> emitter) {
         Observable
             // Generate a big integer stream periodically in
-            // a background thread.
+            // a background thread (by default on the Schedulers.computation()
+            // thread pool).
             .interval(sSLEEP_DURATION.toMillis(),
                       TimeUnit.MILLISECONDS)
 
@@ -132,8 +135,8 @@ public class ObservableEx {
     }
 
     /**
-     * Test a stream of random BigIntegers to determine which values
-     * are prime using an asynchronous Observable stream.
+     * Use an asynchronous Observable stream that processes random
+     * BigIntegers to determine which ones are prime.
      */
     public static Completable testIsPrimeAsync() {
         StringBuffer sb =
@@ -164,13 +167,10 @@ public class ObservableEx {
             // Display results after all elements in observable stream
             // are processed.
             .doOnComplete(() -> BigFractionUtils.display(sb.toString()))
-
-            // Convert the Observable to a Single.
-            .count()
-
+                
             // Return a Completable to synchronize with the
             // AsyncTester framework.
-            .ignoreElement();
+            .ignoreElements();
     }
 
     /**

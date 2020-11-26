@@ -47,17 +47,14 @@ public class MonoEx {
 
         return m1
             // Add BigFraction results after m1 and m2 both complete.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#zipWith-reactor.core.publisher.Mono-java.util.function.BiFunction-
             .zipWith(m2,
                      BigFraction::add)
 
             // Print result after converting it to a mixed fraction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(mixedFractionPrinter)
 
             // Return an empty mono to synchronize with the
             // AsyncTester framework.
-             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
            .then();
     }
 
@@ -90,7 +87,6 @@ public class MonoEx {
             .subscribeOn(Schedulers.parallel())
 
             // Print result after multiplying it.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(fractionPrinter);
     }
 }

@@ -50,7 +50,6 @@ public class FluxEx {
 
             // Convert error to 0.
             return Mono
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
             .just(BigFraction.ZERO);
         };
 
@@ -72,17 +71,14 @@ public class FluxEx {
 
         return Flux
             // Use a Flux to generate a stream from the denominators list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#just-T...-
             .fromIterable(denominators)
 
             // Iterate through the elements using the flatMap()
             // concurrency idiom.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(denominator -> {
                     // Create/process each denominator asynchronously via an
                     // "inner publisher".
                     return Mono
-                        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
                         .fromCallable(() ->
                                       // Throws ArithmeticException if
                                       // denominator is 0.
@@ -91,15 +87,12 @@ public class FluxEx {
 
                         // Run all the processing in a pool of
                         // background threads.
-                        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
                         .subscribeOn(Schedulers.parallel())
 
                         // Convert ArithmeticException to 0.
-                        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#onErrorResume-java.util.function.Function-
                         .onErrorResume(errorHandler)
 
                         // Perform a multiplication.
-                        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
                         .map(multiplyBigFractions);
                 })
 
@@ -107,12 +100,10 @@ public class FluxEx {
             .filter(fraction -> fraction.compareTo(0) > 0)
 
             // Collect the BigFractions into a list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#collectList--
             .collectList()
 
             // Process the collected list and return a mono used
             // to synchronize with the AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -132,7 +123,6 @@ public class FluxEx {
 
         // A consumer that emits a stream of random big fractions.
         Consumer<FluxSink<BigFraction>> bigFractionEmitter = sink -> sink
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/FluxSink.html#onRequest-java.util.function.LongConsumer-
             .onRequest(size -> sink
                        // Emit a random big fraction every time a request is made.
                        .next(BigFractionUtils.makeBigFraction(sRANDOM,
@@ -142,27 +132,22 @@ public class FluxEx {
         return Flux
             // Generate a stream of random, large, and unreduced big
             // fractions.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#create-java.util.function.Consumer-
             .create(bigFractionEmitter)
 
             // Stop after generating sMAX_FRACTIONS big fractions.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#take-long-
             .take(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(unreducedFraction ->
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.parallel()))
 
             // Collect the results into a list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#collectList--
             .collectList()
 
             // Process the results of the collected list and return a
             // mono that's used to synchronize with the AsyncTester
             // framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -184,33 +169,27 @@ public class FluxEx {
         return Stream
             // Generate a stream of random, large, and unreduced big
             // fractions.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#generate-java.util.function.Supplier-
             .generate(() ->
                       BigFractionUtils.makeBigFraction(new Random(),
                                                        false))
 
             // Stop after generating sMAX_FRACTIONS big fractions.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#limit-long-
             .limit(sMAX_FRACTIONS)
 
             // Reduce and multiply these fractions asynchronously.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#map-java.util.function.Function-
             .map(unreducedBigFraction ->
                  reduceAndMultiplyFraction(unreducedBigFraction,
                                            Schedulers
-                                           // https://projectreactor.io/docs/core/release/api/reactor/core/scheduler/Schedulers.html#fromExecutor-java.util.concurrent.Executor-
                                            .fromExecutor(ForkJoinPool
                                                          .commonPool())))
 
             // Trigger intermediate operation processing and return a
             // mono to a list of big fractions that are being reduced
             // and multiplied asynchronously.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-
             .collect(toMono())
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(list ->
                      BigFractionUtils.sortAndPrintList(list, sb));
     }
@@ -225,17 +204,14 @@ public class FluxEx {
                                   Scheduler scheduler) {
         return Mono
             // Omit one item that performs the reduction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() ->
                           BigFraction.reduce(unreducedFraction))
 
             // Perform all processing asynchronously in a pool of
             // background threads.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(scheduler)
 
             // Return a mono to a multiplied big fraction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
             .flatMap(reducedFraction -> Mono
                      // Multiply the big fractions
                      .fromCallable(() -> reducedFraction

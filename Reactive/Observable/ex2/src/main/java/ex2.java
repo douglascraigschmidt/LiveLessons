@@ -14,12 +14,12 @@ public class ex2 {
      */
     public static void main (String[] argv) throws InterruptedException {
         // Test a stream of random BigIntegers to determine which
-        // values are prime using an asynchronous time-driven Flux
+        // values are prime using an asynchronous time-driven Observable
         // stream.
         AsyncTester.register(ObservableEx::testIsPrimeTimed);
 
         // Test a stream of random BigIntegers to determine which
-        // values are prime using an asynchronous Flux stream.
+        // values are prime using an asynchronous Observable stream.
         AsyncTester.register(ObservableEx::testIsPrimeAsync);
 
         long testCount = AsyncTester

@@ -16,7 +16,6 @@ import static utils.BigFractionUtils.*;
  * operations, including fromCallable(), subscribeOn(), map(),
  * doOnSuccess(), blockOptional(), first(), then(), and the
  * Scheduler.single() thread "pool".
- * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  */
 public class MonoEx {
     /**
@@ -60,30 +59,23 @@ public class MonoEx {
         return Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(reduceFraction)
 
             // Run all the processing in a (single) background thread.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
-            .subscribeOn(Schedulers
-                         // https://projectreactor.io/docs/core/release/api/reactor/core/scheduler/Schedulers.html#single--
-                         .single())
+            .subscribeOn(Schedulers.single())
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#map-java.util.function.Function-
             .map(convertToMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(result -> MonoEx.printResult(result, sb))
 
             // Return an empty mono to synchronize with the
             // AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 
@@ -111,17 +103,14 @@ public class MonoEx {
         Mono<BigFraction> mono = Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.single());
 
         // Block the calling thread until the result is available via
         // the mono future, handling any errors via an optional.
         Optional<BigFraction> result = mono
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#blockOptional--
             .blockOptional();
 
         sb.append("     Callable.call() = "
@@ -159,23 +148,19 @@ public class MonoEx {
         return Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.single())
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If an
             // exception is thrown doOnSuccess() will be skipped.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
             .doOnSuccess(bigFraction ->
                          MonoEx.printResult(bigFraction, sb))
                          
             // Return an empty mono to synchronize with the
             // AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 

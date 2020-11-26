@@ -4,24 +4,24 @@ import utils.AsyncTester;
  * This example shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
  * Observable operations, including fromIterable(), map(), create(),
- * flatMap(), flatMapCompletable(), filter(), collectInto(), take(),
- * subscribeOn(), and various types of thread pools.  It also shows
- * advanced RxJava Single operations, such as ambArray(), when(),
- * flatMap(), subscribeOn(), and the parallel thread pool.
+ * flatMap(), flatMapCompletable(), fromCallable(), filter(),
+ * collectInto(), onErrorReturn(), subscribeOn(), and
+ * Schedulers.computation().  It also shows advanced RxJava Single
+ * operations, such as ambArray() and subscribeOn().
  */
 public class ex3 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        // Test BigFraction exception handling using a synchronous
-        // Observable stream.
+        // Use an asynchronous Observable stream and a pool of threads
+        // to showcase exception handling of BigFraction objects.
         AsyncTester.register(ObservableEx::testFractionExceptions);
 
-        // Test BigFraction multiplications using a stream of Singles
-        // and a pipeline of operations, including create(), take(),
-        // flatMap(), collectList(), and first().
-        AsyncTester.register(ObservableEx::testFractionMultiplications1);
+        // Use an asynchronous Observable stream and a pool of threads
+        // to perform BigFraction object reductions and
+        // multiplications.
+        AsyncTester.register(ObservableEx::testFractionMultiplications);
 
         long testCount = AsyncTester
             // Run all the tests.

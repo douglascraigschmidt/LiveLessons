@@ -4,6 +4,7 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -48,8 +49,33 @@ public class BigFractionUtils {
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Completable sVoidM =
+    public static final Completable sVoidS =
         Completable.complete();
+
+    /**
+     * A factory method that returns a large random BigFraction whose
+     * creation is performed synchronously.
+     *
+     * @param random A random number generator
+     * @param reduced A flag indicating whether to reduce the fraction or not
+     * @return A large random BigFraction
+     */
+    public static BigFraction makeBigFraction(Random random,
+                                              boolean reduced) {
+        // Create a large random big integer.
+        BigInteger numerator =
+            new BigInteger(150000, random);
+
+        // Create a denominator that's between 1 to 10 times smaller
+        // than the numerator.
+        BigInteger denominator =
+            numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
+
+        // Return a big fraction.
+        return BigFraction.valueOf(numerator,
+                                   denominator,
+                                   reduced);
+    }
 
     /**
      * Display the {@code string} after prepending the thread id.
