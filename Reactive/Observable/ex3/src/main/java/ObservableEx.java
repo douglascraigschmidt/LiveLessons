@@ -1,6 +1,7 @@
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
@@ -141,7 +142,14 @@ public class ObservableEx {
             return result;
         };
 
-        // Process the function in a observable stream.
+        // Display the results.
+        Consumer<? super BigFraction> displayResults = result -> {
+            sb.append("    sum of BigFractions = "
+                    + result
+                    + "\n");
+            BigFractionUtils.display(sb.toString());
+        };
+
         return Observable
             // Emit a stream of big fractions.
             .fromIterable(bigFractions)
@@ -165,12 +173,7 @@ public class ObservableEx {
             .reduce(BigFraction::add)
 
             // Display the results if all goes well.
-            .doOnSuccess(result -> {
-                    sb.append("    sum of BigFractions = " 
-                              + result
-                              + "\n");
-                    BigFractionUtils.display(sb.toString());
-                })
+            .doOnSuccess(displayResults)
 
             // Return a Completable to synchronize with the
             // AsyncTester framework.
