@@ -44,8 +44,8 @@ public class ImageStreamRxJava1
             // stream.
             .fromIterable(urls)
 
-            // Use the RxJava flatMap() idiom to transform the stream
-            // of urls by downloading and filtering them in parallel.
+            // Use the RxJava flatMap() concurrency idiom to transform the
+            // stream of urls by downloading and filtering them in parallel.
             .flatMap(url ->
                      Observable
                      // Just omit this one object.
@@ -93,7 +93,8 @@ public class ImageStreamRxJava1
             // observables.
             .fromIterable(mFilters)
 
-            // Transforms an observable by applying a set of
+            // Use the RxJava flatMap() concurrency idiom to
+            // transform an observable by applying a set of
             // operations to each item emitted by the source.
             .flatMap(filter -> Observable
                      // Just omit this one object.

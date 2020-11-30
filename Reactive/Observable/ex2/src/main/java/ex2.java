@@ -3,9 +3,9 @@ import utils.AsyncTester;
 /**
  * This example shows how to apply RxJava features asynchronously to
  * perform various Observable operations, including create(),
- * interval(), map(), filter(), doOnNext(), doOnComplete(), take(),
- * subscribe(), range(), subscribeOn(), observeOn(), count(), and
- * various thread pools.
+ * interval(), filter(), doOnNext(), doOnComplete(), doFinally(),
+ * take(), map(), subscribe(), range(), subscribeOn(), observeOn(),
+ * count(), and various thread pools.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {

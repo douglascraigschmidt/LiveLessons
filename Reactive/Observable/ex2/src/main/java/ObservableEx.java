@@ -1,14 +1,15 @@
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.functions.Predicate;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFractionUtils;
 
 import java.math.BigInteger;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,9 +19,9 @@ import java.util.concurrent.TimeUnit;
  * This class shows how to apply RxJava features to determine whether
  * randomly-generated BigInteger objects are prime or not.  It
  * demonstrates various Observable operations, including create(),
- * interval(), map(), filter(), doOnNext(), doOnComplete(), take(),
- * subscribe(), range(), subscribeOn(), observeOn(), count(), and
- * various thread pools.
+ * interval(), filter(), doOnNext(), doOnComplete(), doFinally(),
+ * take(), map(), subscribe(), range(), subscribeOn(), observeOn(),
+ * count(), and various thread pools.
  */
 @SuppressWarnings("ALL")
 public class ObservableEx {
@@ -67,6 +68,10 @@ public class ObservableEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeTimed()\n");
 
+        // Callback that writes the BigInteger to the StringBuffer.
+        Consumer<BigInteger> logBigInteger =
+            s -> ObservableEx.print(s, sb);
+
         return Observable
             // Factory method creates a flow of random big integers
             // that are generated at a periodic interval in a
@@ -74,8 +79,7 @@ public class ObservableEx {
             .create(ObservableEx::emitInterval)
 
             // Print the big integer as a debugging aid.
-            .doOnNext(s ->
-                      ObservableEx.print(s, sb))
+            .doOnNext(logBigInteger)
 
             // Use a memoizer to check if each random big integer is
             // prime or not on the background thread.
@@ -88,7 +92,7 @@ public class ObservableEx {
                                                  sb))
 
             // Display results after all elements in observable stream
-            // are processed.
+            // are processed and the publisher emits onComplete().
             .doOnComplete(() -> BigFractionUtils.display(sb.toString()))
 
             // Convert the Observable to a Single.
@@ -105,6 +109,15 @@ public class ObservableEx {
      * integers at a periodic interval in a background thread.
      */
     private static void emitInterval(ObservableEmitter<BigInteger> emitter) {
+        // Define a predicate that only matches odd numbers.
+        Predicate<BigInteger> onlyOdd = bigInteger ->
+                !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO);
+
+        // Generate a random BigInteger.
+        Function<Long, BigInteger> generateRandomBigInteger = __ ->
+                BigInteger.valueOf(sLOWER_BOUND +
+                        sRANDOM.nextInt(sMAX_ITERATIONS));
+
         Observable
             // Generate a big integer stream periodically in
             // a background thread (by default on the Schedulers.computation()
@@ -114,15 +127,12 @@ public class ObservableEx {
 
             // Generate random numbers between min and max
             // values to ensure some duplicates.
-            .map(__ ->
-                 BigInteger.valueOf(sLOWER_BOUND +
-                                    sRANDOM.nextInt(sMAX_ITERATIONS)))
+            .map(generateRandomBigInteger)
 
             // Eliminate even numbers from consideration since they aren't prime!
-            .filter(bigInteger ->
-                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
+            .filter(onlyOdd)
 
-            // Only take sMAX_ITERATIONS of big integers.
+            // Only take sMAX_ITERATIONS of odd big integers.
             .take(sMAX_ITERATIONS)
 
             // Start the processing and emit each random number until
@@ -166,7 +176,7 @@ public class ObservableEx {
 
             // Display results after all elements in observable stream
             // are processed.
-            .doOnComplete(() -> BigFractionUtils.display(sb.toString()))
+            .doFinally(() -> BigFractionUtils.display(sb.toString()))
                 
             // Return a Completable to synchronize with the
             // AsyncTester framework.

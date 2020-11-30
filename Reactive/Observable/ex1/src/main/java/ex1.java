@@ -3,7 +3,7 @@ import utils.AsyncTester;
 /**
  * This example shows how to apply RxJava features synchronously to
  * perform various Observable operations, including fromCallable(),
- *  * repeat(), just(), map(), mergeWith(), and blockingSubscribe().
+ * repeat(), just(), map(), mergeWith(), and blockingSubscribe().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {
