@@ -91,8 +91,8 @@ public final class RxJavaTests {
             // observables.
             .fromIterable(Options.instance().getUrlList())
 
-            // Apply the RxJava flatMap() idiom to process each url
-            // concurrently.
+            // Apply the RxJava flatMap() concurrency idiom to process
+            // each url concurrently.
             .flatMap(downloadAndStore::apply)
 
             // Collect the downloaded images into a list.
