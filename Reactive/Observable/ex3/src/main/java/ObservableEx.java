@@ -35,11 +35,11 @@ public class ObservableEx {
      */
     public static Completable testFractionExceptions() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionExceptions1()\n");
+            new StringBuffer(">> Calling testFractionExceptions()\n");
 
         // Create a function to handle an ArithmeticException.
         Function<Throwable,
-            ? extends BigFraction> errorHandler = t -> {
+                 ? extends BigFraction> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -258,7 +258,8 @@ public class ObservableEx {
             // thread from the given scheduler.
             .subscribeOn(scheduler)
 
-            // Return an Observable to a multiplied big fraction.
+            // Return an Observable to a multiplied big fraction using
+            // the RxJava flatMap() concurrency idiom.
             .flatMap(reducedFraction -> Observable
                      // Multiply the big fraction, which runs in a
                      // background thread.

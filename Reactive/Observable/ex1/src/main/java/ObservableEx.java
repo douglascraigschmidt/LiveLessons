@@ -61,9 +61,9 @@ public class ObservableEx {
                                // Display results when processing is done.
                                BigFractionUtils.display(sb.toString()));
 
-        // Return empty mono to indicate to the AsyncTester that all
+        // Return empty completable to indicate to the AsyncTester that all
         // the processing is done.
-        return BigFractionUtils.sVoidS;
+        return BigFractionUtils.sVoidC;
     }
 
     /**
@@ -133,6 +133,6 @@ public class ObservableEx {
 
         // Return empty mono to indicate to the AsyncTester that all
         // the processing is done.
-        return BigFractionUtils.sVoidS;
+        return BigFractionUtils.sVoidC;
     }
 }

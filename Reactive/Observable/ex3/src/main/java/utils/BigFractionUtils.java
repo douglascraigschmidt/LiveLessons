@@ -87,9 +87,9 @@ public class BigFractionUtils {
                                                StringBuffer sb) {
         // Quick sort the list asynchronously.
         Single<List<BigFraction>> quickSortS = Single
-            // Use the just() factory method to obtain the
+            // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
-            .just(quickSort(list))
+            .fromCallable(() -> quickSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
@@ -99,7 +99,7 @@ public class BigFractionUtils {
         Single<List<BigFraction>> heapSortS =  Single
             // Use the just() factory method to obtain the
             // results of heap sorting the list.
-            .just(heapSort(list))
+            .fromCallable(() -> heapSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.

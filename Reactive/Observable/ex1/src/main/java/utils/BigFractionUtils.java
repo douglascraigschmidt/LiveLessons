@@ -49,7 +49,7 @@ public class BigFractionUtils {
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Completable sVoidS =
+    public static final Completable sVoidC =
         Completable.complete();
 
     /**
