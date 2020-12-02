@@ -179,11 +179,10 @@ class ImageCounter {
         return Single
             // Factory method that creates a single to download
             // the page.
-            .<Document>create(s -> s
-                              .onSuccess(Options
-                                         .instance()
-                                         .getJSuper()
-                                         .getPage(pageUri)))
+            .fromCallable(() -> Options
+                          .instance()
+                          .getJSuper()
+                          .getPage(pageUri))
 
             // Run the operation in the common fork-join pool.
             .compose(RxUtils.commonPoolSingle());
