@@ -1,5 +1,8 @@
+import proxies.ExchangeRateProxy;
+import proxies.FlightPriceProxy;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import utils.AsyncTester;
 import utils.Options;
 
 import java.time.Duration;
@@ -13,6 +16,7 @@ import java.util.function.Function;
  * this program after both microservices have completed their
  * asynchronous computations.
  */
+@SuppressWarnings("ConstantConditions")
 public class ex5 {
     /**
      * Debugging tag used by the logger.
@@ -37,11 +41,19 @@ public class ex5 {
      */
     private static final int sMAX_ITERATIONS = 5;
 
+    // Create a new proxy that's used to communicate with the
+    // FlightProxy microservice.
+    FlightPriceProxy mFlightPriceProxy = new FlightPriceProxy();
+
+    // Create a new proxy that's used to communicate with the
+    // Exchangerate microservice.
+    ExchangeRateProxy mExchangeRateProxy = new ExchangeRateProxy();
+
     /**
      * The Java execution environment requires a static main() entry
      * point method to run the app.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         // Parse the command-line arguments.
         Options.instance().parseArgs(args);
 
@@ -52,10 +64,10 @@ public class ex5 {
     /**
      * Run the test program.
      */
-    private void run() {
+    private void run() throws InterruptedException {
         // Run a test that demonstrates timeouts for Project Reactor
         // concurrent Monos.
-        runConcurrentMonos();
+        runAsyncMonos();
     }
 
     /**
@@ -63,66 +75,97 @@ public class ex5 {
      * determine the best price for a flight from London to New York city
      * and the current exchange rate of US dollars to British pounds.
      */
-    private void runConcurrentMonos() {
-        System.out.println("begin runConcurrentMonos()");
-
-        // Create a new proxy that's used to communicate with the
-        // FlightProxy microservice.
-        FlightPriceProxy flightPriceProxy = new FlightPriceProxy();
-
-        // Create a new proxy that's used to communicate with the
-        // Exchangerate microservice.
-        ExchangeRateProxy exchangeRateProxy = new ExchangeRateProxy();
-
-        // The behavior to perform if an exception occurs.
-        Function<? super Throwable,? extends Mono<? extends Double>> fallback = ex -> {
-            print("The exception thrown was " + ex.toString());
-            return Mono.just(0.0);
-        };
+    private void runAsyncMonos() throws InterruptedException {
+        System.out.println("begin runAsyncMonos()");
 
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            print("Iteration #" + i);
-
-            Mono<Double> priceM = flightPriceProxy
-                // Asynchronously find the best price in US dollars
-                // between London and New York.
-                .findBestPrice(Schedulers.parallel(),
-                               "LDN - NYC");
-
-            Mono<Double> rateM = exchangeRateProxy
-                // Asynchronously determine exchange rate between US
-                // dollars and British pounds.
-                .queryExchangeRateFor(Schedulers.parallel(),
-                                      "USD:GBP",
-                                      sDEFAULT_RATE_M);
-
-            Mono
-                // Call the this::convert method reference to convert
-                // the price in dollars to the price in pounds when
-                // both previous Monos complete their async processing.
-                .zip(priceM, rateM, this::convert)
-
-                // If the total async processing takes more than
-                // sMAX_TIME a TimeoutException will be thrown.
-                .timeout(sMAX_TIME)
-
-                // Print the price if the call completed within
-                // sMAX_TIME seconds.
-                .doOnSuccess(amount ->
-                             print("The price is: "
-                                   + amount
-                                   + " GBP"))
-                    
-                // Consume and print the TimeoutException if the call
-                // took longer than sMAX_TIME.
-                .onErrorResume(fallback)
-
-                // Block until all async processing completes.
-                .block();
+            int iteration = i + 1;
+            AsyncTester.register(() -> getBestPriceInPounds(iteration));
         }
 
-        System.out.println("end runConcurrentMonos()");
+        long testCount = AsyncTester
+            // Run all the tests.
+            .runTests()
+
+            // Block until all the tests are done to allow all the
+            // computations to complete running asynchronously.
+            .block();
+
+        System.out.println("end runAsyncMonos()");
+    }
+
+    private Mono<Void> getBestPriceInPounds(int iteration) {
+        Mono<Double> priceM = mFlightPriceProxy
+            // Asynchronously find the best price in US dollars
+            // between London and New York.
+            .findBestPriceAsync(Schedulers.parallel(),
+                           "LDN - NYC");
+
+        Mono<Double> rateM = mExchangeRateProxy
+            // Asynchronously determine exchange rate between US
+            // dollars and British pounds.
+            .queryExchangeRateForAsync(Schedulers.parallel(),
+                                  "USD:GBP",
+                                  sDEFAULT_RATE_M);
+
+
+        // The behavior to perform if an exception occurs.
+        Function<? super Throwable,
+                ? extends Mono<? extends Double>> handleEx = ex -> {
+            print("Iteration #"
+                  + iteration
+                  + " The exception thrown was " + ex.toString());
+            return Mono.just(0.0);
+        };
+
+        // When priceM and rateM complete convert the price in US
+        // dollars to the price in British pounds.  If these async
+        // operations take more than {@code maxTime} then throw
+        // the TimeoutException.
+        return combineAndConvertAsyncResults(priceM, rateM, sMAX_TIME)
+            // Print the price if the call completed within
+            // sMAX_TIME seconds.
+            .doOnSuccess(amount ->
+                         print("Iteration #"
+                               + iteration
+                               + " The price is: "
+                               + amount
+                               + " GBP"))
+                    
+            // Consume and print the TimeoutException if the call
+            // took longer than sMAX_TIME.
+            .onErrorResume(handleEx)
+
+            // Return an empty mono to synchronize with the
+            // AsyncTester framework.
+            .then();
+    }
+
+
+    /**
+     * When {@code priceM} and {@code rateM} complete convert the
+     * price in US dollars to the price in British pounds.  If these
+     * async operations take more than {@code maxTime} then throw the
+     * TimeoutException.
+     *
+     * @param priceM Returns the best price for a flight leg
+     * @param rateM Returns the exchange rate
+     * @param maxTime Max time to wait for async processing to complete
+     @ return A conversion of best price into British pounds
+     */
+    private Mono<Double> combineAndConvertAsyncResults(Mono<Double> priceM,
+                                                       Mono<Double> rateM,
+                                                       Duration maxTime) {
+        return Mono
+            // Call the this::convert method reference to convert the
+            // price in dollars to the price in pounds when both
+            // previous Monos complete their async processing.
+            .zip(priceM, rateM, this::convert)
+
+            // If the total async processing takes more than maxTime a
+            // TimeoutException will be thrown.
+            .timeout(maxTime);
     }
 
     /**

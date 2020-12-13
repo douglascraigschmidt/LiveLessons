@@ -1,16 +1,17 @@
-package flightPrice.controller;
+package microservices.exchangeRate.controller;
 
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Random;
 
+import static utils.ReactorUtils.randomDelay;
+
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP GET, POST, and DELETE requests via asynchronous
- * reactive programming.  These requests are mapped to methods that
- * return (1) costs of flight routes in US dollars and (2) convert
- * between US dollars and other currencies.
+ * reactive programming.  These requests are mapped to a method that
+ * converts between US dollars and other currencies.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -26,50 +27,8 @@ import java.util.Random;
  * command-line utility (e.g., Curl or Postman).
  */
 @RestController
-@RequestMapping("/flightPrice")
-public class FlightPriceController {
-    /**
-     * The random number generator.
-     */
-    private static final Random sRandom = new Random();
-
-    /**
-     * Simulate a random delay between 0.5 and 4.5 seconds.
-     */
-    private static void randomDelay() {
-        int delay = 500 + sRandom.nextInt(4000);
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * This method simulates a microservice that finds the best price
-     * in US dollars for a given flight leg.
-     *
-     * WebFlux maps HTTP GET requests sent to the
-     * /{rootDir}/_bestPrice endpoint to this method.
-     *
-     * @param flightLeg A String containing the flight leg.
-     * @return The best price in US dollars for this price leg.
-     */
-    @GetMapping("/_bestPrice")
-    private Mono<Double> findBestPrice(@RequestParam String flightLeg) {
-        // Delay for a random amount of time.
-        randomDelay();
-        
-        /*
-        // Debugging print.
-        print("Flight leg is "
-              + flightLeg);
-        */
-
-        // Simply return a constant.
-        return Mono.just(888.00);
-    }
-
+@RequestMapping("/microservices/exchangeRate")
+public class ExchangeRateController {
     /**
      * This method simulates a microservice that finds the exchange
      * rate between a source and destination currency format.
@@ -78,9 +37,9 @@ public class FlightPriceController {
      * /{rootDir}/_exchangeRate endpoint to this method.
      *
      * @param sourceAndDestination A String containing source and destination currencies.
-     * @return The current exchange rate.
+     * @return A Mono that emits the current exchange rate.
      */
-    @GetMapping("_exchangeRate")
+    @GetMapping("_exchangeRateM")
     private Mono<Double> queryExchangeRateFor(String sourceAndDestination) {
         String[] sAndD = sourceAndDestination.split(":");
 

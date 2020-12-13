@@ -1,4 +1,4 @@
-package flightPrice;
+package microservices.flightPrice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,7 @@ import utils.Options;
  * version of the FlightPrice microservice.
  */
 @SpringBootApplication
-public class FlightPriceApplication {
+public class FlightPriceMicroservice {
     /**
      * A static main() entry point is needed to run the
      * FlightApplication app.
@@ -20,6 +20,6 @@ public class FlightPriceApplication {
 
         SpringApplication
             // Launch the FlightApplication within Spring WebFlux.
-            .run(FlightPriceApplication.class, argv);
+            .run(FlightPriceMicroservice.class, argv);
     }
 }

@@ -1,4 +1,4 @@
-package exchangeRate;
+package microservices.exchangeRate;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,7 @@ import utils.Options;
  * version of the ExchangeRate microservice.
  */
 @SpringBootApplication
-public class ExchangeRateApplication {
+public class ExchangeRateMicroservice {
     /**
      * A static main() entry point is needed to run the ExchangeRate
      * app.
@@ -21,6 +21,6 @@ public class ExchangeRateApplication {
         SpringApplication
             // Launch the ExchangeRateApplication within Spring
             // WebFlux.
-            .run(ExchangeRateApplication.class, argv);
+            .run(ExchangeRateMicroservice.class, argv);
     }
 }

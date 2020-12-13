@@ -7,6 +7,7 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
@@ -190,7 +191,6 @@ public class ReactorUtils {
                 }));
     }
 
-
     /**
      * Conditionally enable logging if {@code log} is true, otherwise,
      * don't log.
@@ -200,5 +200,22 @@ public class ReactorUtils {
             return Flux::log;
         else
             return flux -> flux;
+    }
+
+    /**
+     * The random number generator.
+     */
+    private static final Random sRandom = new Random();
+
+    /**
+     * Simulate a random delay between 0.5 and 4.5 seconds.
+     */
+    public static void randomDelay() {
+        int delay = 500 + sRandom.nextInt(4000);
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

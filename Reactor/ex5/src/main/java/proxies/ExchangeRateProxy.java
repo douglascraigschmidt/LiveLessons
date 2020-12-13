@@ -1,24 +1,27 @@
+package proxies;
+
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
+import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the ExchangeRate microservice.
  */
-class ExchangeRateProxy {
+public class ExchangeRateProxy {
     /**
      * The URI that determines the current exchange rate.
      */
-    private final String mQueryExchangeRateURI = "/exchangeRate/_exchangeRate";
+    private final String mQueryExchangeRateURIM = "/microservices/exchangeRate/_exchangeRateM";
 
     /**
-     * The WebClient provides the means to access the flight
-     * micro-service.
+     * The WebClient provides the means to access the ExchangeRate
+     * microservice.
      */
-    private final WebClient mFlight;
+    private final WebClient mExchangeRate;
 
     /**
      * Host/post where the server resides.
@@ -27,11 +30,10 @@ class ExchangeRateProxy {
         "http://localhost:8081";
 
     /**
-     * Constructor initializes the fields to initialize a flight
-     * that emits a stream of random numbers.
+     * Constructor initializes the fields.
      */
     public ExchangeRateProxy() {
-        mFlight = WebClient
+        mExchangeRate = WebClient
             // Start building.
             .builder()
 
@@ -43,24 +45,24 @@ class ExchangeRateProxy {
     }
 
     /**
-     * 
+     * Finds the exchange rate for the {@code sourceAndDestination} asynchronously.
      *
-     * @param scheduler
-     * @param sourceAndDestination
-     * @param defaultRate
-     * @return
+     * @param scheduler The Scheduler context in which to run the operation
+     * @param sourceAndDestination The source currency and the destination currency
+     * @return A Mono containing the exchane rate.
      */
-    public Mono<Double> queryExchangeRateFor(Scheduler scheduler,
-                                             String sourceAndDestination,
-                                             Mono<Double> defaultRate) {
+    public Mono<Double> queryExchangeRateForAsync(Scheduler scheduler,
+                                                  String sourceAndDestination,
+                                                  Mono<Double> defaultRate) {
         // Return a mono to the exchange rate.
-        return mFlight
+        return Mono
+            .fromCallable(() -> mExchangeRate
             // Create an HTTP GET request.
             .get()
 
             // Add the uri to the baseUrl.
             .uri(UriComponentsBuilder
-                 .fromPath(mQueryExchangeRateURI)
+                 .fromPath(mQueryExchangeRateURIM)
                  .queryParam("sourceAndDestination", sourceAndDestination)
                  .build()
                  .toString())
@@ -68,11 +70,15 @@ class ExchangeRateProxy {
             // Retrieve the response.
             .retrieve()
 
-            // Convert it to a Mono of doubles.
-            .bodyToMono(Double.class)
+            // Convert it to a Mono of Double.
+            .bodyToMono(Double.class))
             
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)
+
+            // De-nest the result so it's a Mono<Double>.
+
+            .flatMap(Function.identity())
 
             // If this computation runs for more than 2 seconds
             // return the default rate.
