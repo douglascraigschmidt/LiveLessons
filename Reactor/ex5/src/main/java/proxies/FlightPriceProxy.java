@@ -5,6 +5,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -55,21 +56,21 @@ public class FlightPriceProxy {
         // Return a Mono to the best price.
         return Mono
             .fromCallable(() -> mFlightPrice
-            // Create an HTTP GET request.
-            .get()
+                          // Create an HTTP GET request.
+                          .get()
 
-            // Add the uri to the baseUrl.
-            .uri(UriComponentsBuilder
-                 .fromPath(mFindBestPriceURIM)
-                 .queryParam("flightLeg", flightLeg)
-                 .build()
-                 .toString())
+                          // Add the uri to the baseUrl.
+                          .uri(UriComponentsBuilder
+                               .fromPath(mFindBestPriceURIM)
+                               .queryParam("flightLeg", flightLeg)
+                               .build()
+                               .toString())
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Mono of Double.
-            .bodyToMono(Double.class))
+                          // Convert it to a Mono of Double.
+                          .bodyToMono(Double.class))
             
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)
@@ -82,29 +83,35 @@ public class FlightPriceProxy {
      * Finds the best price for the {@code flightLeg} synchronously.
      *
      * @param flightLeg The flight leg to price
-     * @return A Mono containing the best price.
+     * @param maxTime Max time to wait before throwing TimeoutException
+     * @return A Mono containing the best price
      */
-    public Mono<Double> findBestPriceSync(String flightLeg) {
+    public Mono<Double> findBestPriceSync(String flightLeg,
+                                          Duration maxTime) {
         // Return a Mono to the best price.
         return Mono
             .fromCallable(() -> mFlightPrice
-            // Create an HTTP GET request.
-            .get()
+                          // Create an HTTP GET request.
+                          .get()
 
-            // Add the uri to the baseUrl.
-            .uri(UriComponentsBuilder
-                 .fromPath(mFindBestPriceURIM)
-                 .queryParam("flightLeg", flightLeg)
-                 .build()
-                 .toString())
+                          // Add the uri to the baseUrl.
+                          .uri(UriComponentsBuilder
+                               .fromPath(mFindBestPriceURIM)
+                               .queryParam("flightLeg", flightLeg)
+                               .build()
+                               .toString())
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Mono of Double.
-            .bodyToMono(Double.class))
+                          // Convert it to a Mono of Double.
+                          .bodyToMono(Double.class))
             
             // De-nest the result so it's a Mono<Double>.
-            .flatMap(Function.identity());
+            .flatMap(Function.identity())
+
+            // If the total processing takes more than maxTime a
+            // TimeoutException will be thrown.
+            .timeout(maxTime);
     }
 }

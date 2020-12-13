@@ -57,21 +57,21 @@ public class ExchangeRateProxy {
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate
-            // Create an HTTP GET request.
-            .get()
+                          // Create an HTTP GET request.
+                          .get()
 
-            // Add the uri to the baseUrl.
-            .uri(UriComponentsBuilder
-                 .fromPath(mQueryExchangeRateURIM)
-                 .queryParam("sourceAndDestination", sourceAndDestination)
-                 .build()
-                 .toString())
+                          // Add the uri to the baseUrl.
+                          .uri(UriComponentsBuilder
+                               .fromPath(mQueryExchangeRateURIM)
+                               .queryParam("sourceAndDestination", sourceAndDestination)
+                               .build()
+                               .toString())
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Mono of Double.
-            .bodyToMono(Double.class))
+                          // Convert it to a Mono of Double.
+                          .bodyToMono(Double.class))
             
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)
@@ -95,21 +95,21 @@ public class ExchangeRateProxy {
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate
-            // Create an HTTP GET request.
-            .get()
+                          // Create an HTTP GET request.
+                          .get()
 
-            // Add the uri to the baseUrl.
-            .uri(UriComponentsBuilder
-                 .fromPath(mQueryExchangeRateURIM)
-                 .queryParam("sourceAndDestination", sourceAndDestination)
-                 .build()
-                 .toString())
+                          // Add the uri to the baseUrl.
+                          .uri(UriComponentsBuilder
+                               .fromPath(mQueryExchangeRateURIM)
+                               .queryParam("sourceAndDestination", sourceAndDestination)
+                               .build()
+                               .toString())
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Mono of Double.
-            .bodyToMono(Double.class))
+                          // Convert it to a Mono of Double.
+                          .bodyToMono(Double.class))
             
             // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity())

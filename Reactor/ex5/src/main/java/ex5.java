@@ -189,7 +189,7 @@ public class ex5 {
         Mono<Double> priceM = mFlightPriceProxy
             // Synchronously find the best price in US dollars between
             // London and New York city.
-            .findBestPriceSync("LDN - NYC");
+            .findBestPriceSync("LDN - NYC", sMAX_TIME);
 
         Mono<Double> rateM = mExchangeRateProxy
             // Synchronously determine exchange rate between US

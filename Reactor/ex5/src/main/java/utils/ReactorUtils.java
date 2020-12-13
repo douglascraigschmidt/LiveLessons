@@ -211,7 +211,7 @@ public class ReactorUtils {
      * Simulate a random delay between 0.5 and 4.5 seconds.
      */
     public static void randomDelay() {
-        int delay = 500 + sRandom.nextInt(4000);
+        int delay = 1000; // + sRandom.nextInt(4000);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
