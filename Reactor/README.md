@@ -37,8 +37,8 @@ overview of what's included:
         skipWhile() operations.
 
 . ex5 - This program applies WebFlux and Project Reactor features to
-        implement a flight booking app that asynchronously
-        communicates with a FlightPrice microservice in one process
-        and an ExchangeRate microservice in another process and then
-        displays the results in this program after both microservices
-        have completed their asynchronous computations.
+        implement an airline reservations app that synchronously and
+        asynchronously communicates with various microservices that
+        find the best price for flight legs and convert from US
+        dollars into other currencies.  The best price is displayed
+        after all microservices have completed their computations.

@@ -41,7 +41,7 @@ public class AsyncTester {
      * the asynchronously-run tests complete to indicate how many
      * tests were run.
      */
-    public static Mono<Long> runTests() throws InterruptedException {
+    public static Mono<Long> runTests() {
         return Flux
             // Factory method that converts the list into a flux.
             .fromIterable(sTests)

@@ -77,7 +77,41 @@ public class ExchangeRateProxy {
             .subscribeOn(scheduler)
 
             // De-nest the result so it's a Mono<Double>.
+            .flatMap(Function.identity())
 
+            // If this computation runs for more than 2 seconds
+            // return the default rate.
+            .timeout(Duration.ofSeconds(2), defaultRate);
+    }
+
+    /**
+     * Finds the exchange rate for the {@code sourceAndDestination} synchronously.
+     *
+     * @param sourceAndDestination The source currency and the destination currency
+     * @return A Mono containing the exchane rate.
+     */
+    public Mono<Double> queryExchangeRateForSync(String sourceAndDestination,
+                                                 Mono<Double> defaultRate) {
+        // Return a mono to the exchange rate.
+        return Mono
+            .fromCallable(() -> mExchangeRate
+            // Create an HTTP GET request.
+            .get()
+
+            // Add the uri to the baseUrl.
+            .uri(UriComponentsBuilder
+                 .fromPath(mQueryExchangeRateURIM)
+                 .queryParam("sourceAndDestination", sourceAndDestination)
+                 .build()
+                 .toString())
+
+            // Retrieve the response.
+            .retrieve()
+
+            // Convert it to a Mono of Double.
+            .bodyToMono(Double.class))
+            
+            // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity())
 
             // If this computation runs for more than 2 seconds

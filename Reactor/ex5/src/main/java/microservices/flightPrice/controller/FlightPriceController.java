@@ -11,8 +11,8 @@ import static utils.ReactorUtils.randomDelay;
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP GET, POST, and DELETE requests via asynchronous
  * reactive programming.  These requests are mapped to methods that
- * return (1) costs of flight routes in US dollars and (2) convert
- * between US dollars and other currencies.
+ * return the cost of flight routes in US dollars synchronously and
+ * asynchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -23,7 +23,7 @@ import static utils.ReactorUtils.randomDelay;
  * identified by the @RestController annotation below.
  *
  * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@code FlightController}.  GET
+ * requests onto methods in the {@code FlightPriceController}.  GET
  * requests invoked from any HTTP web client (e.g., a web browser) or
  * command-line utility (e.g., Curl or Postman).
  */

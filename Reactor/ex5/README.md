@@ -1,12 +1,11 @@
 # Getting Started
 
 This example shows how to use the Spring WebFlux framework together
-with Project Reactor to implement a flight booking app that
-asynchronously communicates with a FlightPrice microservice in one
-process and an ExchangeRate microservice in another process and then
-displays the results in this program after both microservices have
-completed their asynchronous computations.  The following are the
-steps required to build and run this WebFlux project.
+with Project Reactor to implement an airline reservation app
+synchronously and asynchronously communicates with various
+microservices that find the best price for flight legs and convert
+from US dollars into other currencies.  The following are the steps
+required to build and run this WebFlux project.
 
 1. Change directory to the Reactor/ex5 folder and run the following
    command from the shell:

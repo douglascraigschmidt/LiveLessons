@@ -77,4 +77,34 @@ public class FlightPriceProxy {
             // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity());
     }
+
+    /**
+     * Finds the best price for the {@code flightLeg} synchronously.
+     *
+     * @param flightLeg The flight leg to price
+     * @return A Mono containing the best price.
+     */
+    public Mono<Double> findBestPriceSync(String flightLeg) {
+        // Return a Mono to the best price.
+        return Mono
+            .fromCallable(() -> mFlightPrice
+            // Create an HTTP GET request.
+            .get()
+
+            // Add the uri to the baseUrl.
+            .uri(UriComponentsBuilder
+                 .fromPath(mFindBestPriceURIM)
+                 .queryParam("flightLeg", flightLeg)
+                 .build()
+                 .toString())
+
+            // Retrieve the response.
+            .retrieve()
+
+            // Convert it to a Mono of Double.
+            .bodyToMono(Double.class))
+            
+            // De-nest the result so it's a Mono<Double>.
+            .flatMap(Function.identity());
+    }
 }
