@@ -23,16 +23,22 @@ overview of what's included:
         the use of slicing with the Flux takeWhile() and skipWhile()
         operations.
 
-. ex4- This program applies WebFlux and Project Reactor features to
-       implement various types of backpressure strategies (e.g.,
-       ignore, buffer, error, latest, drop, and push/pull) between a
-       publisher that runs as a micro-service in one process and
-       produces a flux stream of random integers and a subscriber that
-       runs in one or more threads in a different process and consumes
-       this stream of integers.  This program also measures the
-       performance of checking these random numbers for primality with
-       and without various types of memoizers (e.g., untimed and
-       timed) based on Java ConcurrentHashMap.  In addition, it
-       demonstrates the use of slicing with the Flux takeWhile() and
-       skipWhile() operations.
+. ex4 - This program applies WebFlux and Project Reactor features to
+        implement various types of backpressure strategies (e.g.,
+        ignore, buffer, error, latest, drop, and push/pull) between a
+        publisher that runs as a micro-service in one process and
+        produces a flux stream of random integers and a subscriber
+        that runs in one or more threads in a different process and
+        consumes this stream of integers.  This program also measures
+        the performance of checking these random numbers for primality
+        with and without various types of memoizers (e.g., untimed and
+        timed) based on Java ConcurrentHashMap.  In addition, it
+        demonstrates the use of slicing with the Flux takeWhile() and
+        skipWhile() operations.
 
+. ex5 - This program applies WebFlux and Project Reactor features to
+        implement a flight booking app that asynchronously
+        communicates with a FlightPrice microservice in one process
+        and an ExchangeRate microservice in another process and then
+        displays the results in this program after both microservices
+        have completed their asynchronous computations.

@@ -3,13 +3,15 @@ import reactor.core.scheduler.Schedulers;
 import utils.Options;
 
 import java.time.Duration;
+import java.util.function.Function;
 
 /**
  * This program applies WebFlux and Project Reactor features to
- * implement ... between a publisher that runs as a micro-service in
- * one process and produces a flux stream of random integers and a
- * subscriber that runs in one or more threads in a different process
- * and consumes this stream of integers.
+ * implement a flight booking app that asynchronously communicates
+ * with a FlightPrice microservice in one process and an ExchangeRate
+ * microservice in another process and then displays the results in
+ * this program after both microservices have completed their
+ * asynchronous computations.
  */
 public class ex5 {
     /**
@@ -22,6 +24,13 @@ public class ex5 {
      */
     private static final Mono<Double> sDEFAULT_RATE_M =
         Mono.just(1.0);
+
+    /**
+     * The maximum amount of time to wait for all the asynchronous
+     * processing to complete.
+     */
+    private static final Duration sMAX_TIME =
+        Duration.ofSeconds(3);
 
     /**
      * The number of iterations to run the test.
@@ -50,8 +59,9 @@ public class ex5 {
     }
 
     /**
-     * Run a test that demonstrates timeouts for Project Reactor
-     * concurrent Monos.
+     * Run a test that invokes calls on microservices to asynchronously
+     * determine the best price for a flight from London to New York city
+     * and the current exchange rate of US dollars to British pounds.
      */
     private void runConcurrentMonos() {
         System.out.println("begin runConcurrentMonos()");
@@ -63,6 +73,12 @@ public class ex5 {
         // Create a new proxy that's used to communicate with the
         // Exchangerate microservice.
         ExchangeRateProxy exchangeRateProxy = new ExchangeRateProxy();
+
+        // The behavior to perform if an exception occurs.
+        Function<? super Throwable,? extends Mono<? extends Double>> fallback = ex -> {
+            print("The exception thrown was " + ex.toString());
+            return Mono.just(0.0);
+        };
 
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
@@ -84,27 +100,23 @@ public class ex5 {
             Mono
                 // Call the this::convert method reference to convert
                 // the price in dollars to the price in pounds when
-                // both previous Monos complete.
+                // both previous Monos complete their async processing.
                 .zip(priceM, rateM, this::convert)
 
-                // If the total async processing takes more than 3
-                // seconds a TimeoutException will be thrown.
-                .timeout(Duration.ofSeconds(3))
+                // If the total async processing takes more than
+                // sMAX_TIME a TimeoutException will be thrown.
+                .timeout(sMAX_TIME)
 
-                // Print the price if the call completed within 3
-                // seconds.
+                // Print the price if the call completed within
+                // sMAX_TIME seconds.
                 .doOnSuccess(amount ->
-                             System.out.println("The price is: "
-                                                + amount
-                                                + " GBP"))
+                             print("The price is: "
+                                   + amount
+                                   + " GBP"))
                     
-                // Print the TimeoutException if the call took longer
-                // than 3 seconds.
-                .onErrorResume(ex -> {
-                        System.out.println("The exception thrown was "
-                                           + ex.toString());
-                        return Mono.just(0.0);
-                    })
+                // Consume and print the TimeoutException if the call
+                // took longer than sMAX_TIME.
+                .onErrorResume(fallback)
 
                 // Block until all async processing completes.
                 .block();
