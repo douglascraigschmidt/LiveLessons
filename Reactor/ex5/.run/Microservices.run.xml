@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Microservices" type="CompoundRunConfigurationType">
+    <toRun name="Rate" type="Application" />
+    <toRun name="Flight" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>
