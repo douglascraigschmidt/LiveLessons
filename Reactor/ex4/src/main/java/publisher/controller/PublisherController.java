@@ -20,9 +20,9 @@ import reactor.core.publisher.Mono;
  * identified by the @RestController annotation below.
  *
  * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@code FolderController}.  GET
- * requests invoked from any HTTP web client (e.g., a web browser)
- * or command-line utility (e.g., Curl or Postman).
+ * requests onto methods in the {@code PublisherController}.  GET
+ * requests invoked from any HTTP web client (e.g., a web browser) or
+ * command-line utility (e.g., Curl or Postman).
  */
 @RestController
 @RequestMapping("/publisher")

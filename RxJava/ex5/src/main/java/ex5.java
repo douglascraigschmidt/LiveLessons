@@ -92,8 +92,8 @@ a     * point method to run the app.
                 .compose(RxUtils.commonPoolSingle());
 
             Single
-                // Call this::convert method reference to convert the
-                // price in dollars to the price in pounds when both
+                // Call the this::convert method reference to convert
+                // the price in dollars to the price in pounds when both
                 // previous singles complete.
                 .zip(priceS, rateS, this::convert)
 
