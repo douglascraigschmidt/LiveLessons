@@ -14,7 +14,7 @@ import java.util.function.Function;
  * implement an airline reservations app that synchronously and
  * asynchronously communicates with various microservices that find
  * the best price for flight legs and convert from US dollars into
- * other currencies.  The best price is displayed after all
+ * other currencies.  The best price is displayed after the
  * microservices have completed their computations.
  */
 @SuppressWarnings("ConstantConditions")
@@ -42,12 +42,16 @@ public class ex5 {
      */
     private static final int sMAX_ITERATIONS = 5;
 
-    // Create a new proxy that's used to communicate with the
-    // FlightProxy microservice.
+    /**
+     * A proxy that's used to communicate with the FlightPrice
+     * microservice.
+     */
     FlightPriceProxy mFlightPriceProxy = new FlightPriceProxy();
 
-    // Create a new proxy that's used to communicate with the
-    // Exchangerate microservice.
+    /**
+     * A proxy that's used to communicate with the ExchangeRate
+     * microservice.
+     */
     ExchangeRateProxy mExchangeRateProxy = new ExchangeRateProxy();
 
     /**
@@ -76,13 +80,13 @@ public class ex5 {
         // British pounds.
         RunTimer.timeRun(this::runSyncMonos, "runSyncMonos");
 
+        // Print the results sorted from fastest to slowest.
         print(RunTimer.getTimingResults());
     }
 
     /**
      * This test invokes microservices to asynchronously determine the
-     * best price for a flight from London to New York city in British
-     * pounds.
+     * best price for a flight from London to NYC in British pounds.
      */
     private void runAsyncMonos() {
         System.out.println("begin runAsyncMonos()");
@@ -90,6 +94,9 @@ public class ex5 {
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
             int iteration = i + 1;
+
+            // Register the test with the AsyncTester framework so it
+            // will run asynchronously wrt the other iterations.
             AsyncTester.register(() -> getBestPriceInPoundsAsync(iteration));
         }
 
@@ -106,22 +113,22 @@ public class ex5 {
 
     /**
      * This test invokes microservices to synchronously determine the
-     * best price for a flight from London to New York city in British
-     * pounds.
+     * best price for a flight from London to NYC in British pounds.
      */
     private void runSyncMonos() {
         System.out.println("begin runSyncMonos()");
 
         // Iterate multiple times.
         for (int i = 0; i < sMAX_ITERATIONS; i++)
+            // Call the test synchronously.
             getBestPriceInPoundsSync(i + 1);
 
         System.out.println("end runSyncMonos()");
     }
 
     /**
-     * Returns the best price for a flight from London to New York
-     * city in British pounds via asynchronous computations.
+     * Returns the best price for a flight from London to NYC in
+     * British pounds via asynchronous computations.
      *
      * @param iteration Current iteration count
      * @return An empty Mono to synchronize with the AsyncTester framework.
@@ -129,7 +136,7 @@ public class ex5 {
     private Mono<Void> getBestPriceInPoundsAsync(int iteration) {
         Mono<Double> priceM = mFlightPriceProxy
             // Asynchronously find the best price in US dollars
-            // between London and New York.
+            // between London and New York city.
             .findBestPriceAsync(Schedulers.parallel(),
                                 "LDN - NYC");
 
@@ -151,8 +158,8 @@ public class ex5 {
 
         // When priceM and rateM complete convert the price in US
         // dollars to the price in British pounds.  If these async
-        // operations take more than {@code maxTime} then throw
-        // the TimeoutException.
+        // operations take more than {@code maxTime} then throw the
+        // TimeoutException.
         return combineAndConvertResults(priceM, rateM, sMAX_TIME)
             // Print the price if the call completed within
             // sMAX_TIME seconds.
@@ -173,15 +180,15 @@ public class ex5 {
     }
 
     /**
-     * Returns the best price for a flight from London to New York
-     * city in British pounds via synchronous computations.
+     * Returns the best price for a flight from London to NYC in
+     * British pounds via synchronous computations.
      *
      * @param iteration Current iteration count
      */
     private void getBestPriceInPoundsSync(int iteration) {
         Mono<Double> priceM = mFlightPriceProxy
             // Synchronously find the best price in US dollars between
-            // London and New York.
+            // London and New York city.
             .findBestPriceSync("LDN - NYC");
 
         Mono<Double> rateM = mExchangeRateProxy
@@ -200,12 +207,12 @@ public class ex5 {
         };
 
         // When priceM and rateM complete convert the price in US
-        // dollars to the price in British pounds.  If these async
-        // operations take more than {@code maxTime} then throw
-        // the TimeoutException.
+        // dollars to the price in British pounds.  If these sync
+        // operations take more than {@code maxTime} then throw the
+        // TimeoutException.
         combineAndConvertResults(priceM, rateM, sMAX_TIME)
-            // Print the price if the call completed within
-            // sMAX_TIME seconds.
+            // Print the price if the call completed within sMAX_TIME
+            // seconds.
             .doOnSuccess(amount ->
                          print("Iteration #"
                                + iteration
@@ -213,8 +220,8 @@ public class ex5 {
                                + amount
                                + " GBP"))
                     
-            // Consume and print the TimeoutException if the call
-            // took longer than sMAX_TIME.
+            // Consume and print the TimeoutException if the call took
+            // longer than sMAX_TIME.
             .onErrorResume(handleEx)
 
             // Block until the computation is done.
