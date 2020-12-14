@@ -40,7 +40,7 @@ public class ExchangeRateController {
      * @param sourceAndDestination A String containing source and destination currencies.
      * @return A Mono that emits the current exchange rate.
      */
-    @GetMapping("_exchangeRateM")
+    @GetMapping("_exchangeRateAsync")
     private Mono<Double> queryExchangeRateFor(String sourceAndDestination) {
         String[] sAndD = sourceAndDestination.split(":");
 

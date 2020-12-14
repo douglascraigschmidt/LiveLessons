@@ -40,7 +40,7 @@ public class FlightPriceController {
      * @param flightLeg A String containing the flight leg.
      * @return A Mono that emits best price in US dollars for this price leg.
      */
-    @GetMapping("/_bestPriceM")
+    @GetMapping("/_bestPriceAsync")
     private Mono<Double> findBestPrice(@RequestParam String flightLeg) {
         // Delay for a random amount of time.
         randomDelay();

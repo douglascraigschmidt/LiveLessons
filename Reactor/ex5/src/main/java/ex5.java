@@ -1,12 +1,17 @@
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleSource;
 import proxies.ExchangeRateProxy;
 import proxies.FlightPriceProxy;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
+import utils.AsyncTaskBarrierRx;
 import utils.Options;
 import utils.RunTimer;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -29,6 +34,12 @@ public class ex5 {
      */
     private static final Mono<Double> sDEFAULT_RATE_M =
         Mono.just(1.0);
+
+    /**
+     * The default exchange rate if a timeout occurs.
+     */
+    private static final Single<Double> sDEFAULT_RATE_S =
+        Single.just(1.0);
 
     /**
      * The maximum amount of time to wait for all the asynchronous
@@ -75,6 +86,11 @@ public class ex5 {
         // British pounds.
         RunTimer.timeRun(this::runAsyncMonos, "runAsyncMonos");
 
+        // This test invokes microservices to asynchronously determine
+        // the best price for a flight from London to New York city in
+        // British pounds.
+        RunTimer.timeRun(this::runAsyncSingles, "runAsyncSingles");
+
         // This test invokes microservices to synchronously determine
         // the best price for a flight from London to New York city in
         // British pounds.
@@ -95,14 +111,41 @@ public class ex5 {
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
             int iteration = i + 1;
 
-            // Register the test with the AsyncTester framework so it
+            // Register the test with the AsyncTaskBarrier framework so it
             // will run asynchronously wrt the other iterations.
-            AsyncTester.register(() -> getBestPriceInPoundsAsync(iteration));
+            AsyncTaskBarrier.register(() -> getBestPriceInPoundsAsync(iteration));
         }
 
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
+
+            // Block until all the tests are done to allow all the
+            // computations to complete running asynchronously.
+            .block();
+
+        System.out.println("end runAsyncMonos()");
+    }
+
+    /**
+     * This test invokes microservices to asynchronously determine the
+     * best price for a flight from London to NYC in British pounds.
+     */
+    private void runAsyncSingles() {
+        System.out.println("begin runAsyncSingles()");
+
+        // Iterate multiple times.
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            int iteration = i + 1;
+
+            // Register the test with the AsyncTaskBarrierRx framework so it
+            // will run asynchronously wrt the other iterations.
+            AsyncTaskBarrierRx.register(() -> getBestPriceInPoundsAsyncRx(iteration));
+        }
+
+        long testCount = AsyncTaskBarrier
+            // Run all the tests.
+            .runTasks()
 
             // Block until all the tests are done to allow all the
             // computations to complete running asynchronously.
@@ -131,7 +174,7 @@ public class ex5 {
      * British pounds via asynchronous computations.
      *
      * @param iteration Current iteration count
-     * @return An empty Mono to synchronize with the AsyncTester framework.
+     * @return An empty Mono to synchronize with the AsyncTaskBarrier framework.
      */
     private Mono<Void> getBestPriceInPoundsAsync(int iteration) {
         Mono<Double> priceM = mFlightPriceProxy
@@ -175,8 +218,55 @@ public class ex5 {
             .onErrorResume(handleEx)
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .then();
+    }
+
+    /**
+     * Returns the best price for a flight from London to NYC in
+     * British pounds via asynchronous computations.
+     *
+     * @param iteration Current iteration count
+     * @return A Completable to synchronize with the AsyncTaskBarrier framework.
+     */
+    private Completable getBestPriceInPoundsAsyncRx(int iteration) {
+        Single<Double> priceS = mFlightPriceProxy
+            // Asynchronously find the best price in US dollars
+            // between London and New York city.
+            .findBestPriceAsyncRx("LDN - NYC");
+
+        Single<Double> rateS = mExchangeRateProxy
+            // Asynchronously determine exchange rate between US
+            // dollars and British pounds.
+            .queryExchangeRateForAsyncRx("USD:GBP",
+                                         sDEFAULT_RATE_S);
+
+        // When priceM and rateM complete convert the price in US
+        // dollars to the price in British pounds.  If these async
+        // operations take more than {@code maxTime} then throw the
+        // TimeoutException.
+        return combineAndConvertResultsRx(priceS, rateS, sMAX_TIME)
+            // Print the price if the call completed within
+            // sMAX_TIME seconds.
+            .doOnSuccess(amount ->
+                         print("Iteration #"
+                               + iteration
+                               + " The price is: "
+                               + amount
+                               + " GBP"))
+                    
+            // Consume and print the TimeoutException if the call
+            // took longer than sMAX_TIME.
+            .onErrorResumeNext(ex -> {
+                print("Iteration #"
+                        + iteration
+                        + " The exception thrown was " + ex.toString());
+                return Single.just(0.0);
+            })
+
+            // Return a Completable to synchronize with the
+            // AsyncTaskBarrierRx framework.
+            .ignoreElement();
     }
 
     /**
@@ -237,7 +327,7 @@ public class ex5 {
      * @param priceM Returns the best price for a flight leg
      * @param rateM Returns the exchange rate
      * @param maxTime Max time to wait for processing to complete
-     @ return A conversion of best price into British pounds
+     * @return A conversion of best price into British pounds
      */
     private Mono<Double> combineAndConvertResults(Mono<Double> priceM,
                                                   Mono<Double> rateM,
@@ -251,6 +341,31 @@ public class ex5 {
             // If the total processing takes more than maxTime a
             // TimeoutException will be thrown.
             .timeout(maxTime);
+    }
+
+    /**
+     * When {@code priceS} and {@code rateS} complete convert the
+     * price in US dollars to the price in British pounds.  If these
+     * operations take more than {@code maxTime} then throw the
+     * TimeoutException.
+     *
+     * @param priceS Returns the best price for a flight leg
+     * @param rateS Returns the exchange rate
+     * @param maxTime Max time to wait for processing to complete
+     * @return A conversion of best price into British pounds
+     */
+    private Single<Double> combineAndConvertResultsRx(Single<Double> priceS,
+                                                  Single<Double> rateS,
+                                                  Duration maxTime) {
+        return Single
+                // Call the this::convert method reference to convert the
+                // price in dollars to the price in pounds when both
+                // previous Monos complete their processing.
+                .zip(priceS, rateS, this::convert)
+
+                // If the total processing takes more than maxTime a
+                // TimeoutException will be thrown.
+                .timeout(maxTime.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**

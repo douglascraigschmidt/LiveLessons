@@ -1,9 +1,11 @@
 package proxies;
 
+import io.reactivex.rxjava3.core.Single;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -13,9 +15,10 @@ import java.util.function.Function;
  */
 public class ExchangeRateProxy {
     /**
-     * The URI that determines the current exchange rate.
+     * The URI that denotes a remote method to determine the current exchange rate.
      */
-    private final String mQueryExchangeRateURIM = "/microservices/exchangeRate/_exchangeRateM";
+    private final String mQueryExchangeRateURIAsync =
+        "/microservices/exchangeRate/_exchangeRateAsync";
 
     /**
      * The WebClient provides the means to access the ExchangeRate
@@ -49,7 +52,7 @@ public class ExchangeRateProxy {
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param sourceAndDestination The source currency and the destination currency
-     * @return A Mono containing the exchane rate.
+     * @return A Mono containing the exchange rate.
      */
     public Mono<Double> queryExchangeRateForAsync(Scheduler scheduler,
                                                   String sourceAndDestination,
@@ -62,7 +65,7 @@ public class ExchangeRateProxy {
 
                           // Add the uri to the baseUrl.
                           .uri(UriComponentsBuilder
-                               .fromPath(mQueryExchangeRateURIM)
+                               .fromPath(mQueryExchangeRateURIAsync)
                                .queryParam("sourceAndDestination", sourceAndDestination)
                                .build()
                                .toString())
@@ -85,6 +88,47 @@ public class ExchangeRateProxy {
     }
 
     /**
+     * Finds the exchange rate for the {@code sourceAndDestination} asynchronously.
+     *
+     * @param sourceAndDestination The source currency and the destination currency
+     * @return A Single containing the exchange rate.
+     */
+    public Single<Double> queryExchangeRateForAsyncRx(String sourceAndDestination,
+                                                      Single<Double> defaultRate) {
+        // Return a Single to the exchange rate.
+        return Single
+            .fromPublisher(Mono
+                           .fromCallable(() -> mExchangeRate
+                                         // Create an HTTP GET request.
+                                         .get()
+
+                                         // Add the uri to the baseUrl.
+                                         .uri(UriComponentsBuilder
+                                              .fromPath(mQueryExchangeRateURIAsync)
+                                              .queryParam("sourceAndDestination",
+                                                          sourceAndDestination)
+                                              .build()
+                                              .toString())
+
+                                         // Retrieve the response.
+                                         .retrieve()
+
+                                         // Convert it to a Mono of Double.
+                                         .bodyToMono(Double.class))
+
+                           // Schedule this to run on the given scheduler.
+                           .subscribeOn(Schedulers.parallel())
+
+                           // De-nest the result so it's a Mono<Double>.
+                           .flatMap(Function.identity())
+
+                           // If this computation runs for more than 2 seconds
+                           // return the default rate.
+                           .timeout(Duration.ofSeconds(2),
+                                    Mono.from(defaultRate.toFlowable())));
+    }
+
+    /**
      * Finds the exchange rate for the {@code sourceAndDestination} synchronously.
      *
      * @param sourceAndDestination The source currency and the destination currency
@@ -100,7 +144,7 @@ public class ExchangeRateProxy {
 
                           // Add the uri to the baseUrl.
                           .uri(UriComponentsBuilder
-                               .fromPath(mQueryExchangeRateURIM)
+                               .fromPath(mQueryExchangeRateURIAsync)
                                .queryParam("sourceAndDestination", sourceAndDestination)
                                .build()
                                .toString())

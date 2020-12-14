@@ -1,9 +1,11 @@
 package proxies;
 
+import io.reactivex.rxjava3.core.Single;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -13,9 +15,10 @@ import java.util.function.Function;
  */
 public class FlightPriceProxy {
     /**
-     * The URI that finds the best price.
+     * The URI that denotes the remote method to find the best price for a flight leg.
      */
-    private final String mFindBestPriceURIM = "/microservices/flightPrice/_bestPriceM";
+    private final String mFindBestPriceURIAsync =
+        "/microservices/flightPrice/_bestPriceAsync";
 
     /**
      * The WebClient provides the means to access the FlightPrice
@@ -61,7 +64,7 @@ public class FlightPriceProxy {
 
                           // Add the uri to the baseUrl.
                           .uri(UriComponentsBuilder
-                               .fromPath(mFindBestPriceURIM)
+                               .fromPath(mFindBestPriceURIAsync)
                                .queryParam("flightLeg", flightLeg)
                                .build()
                                .toString())
@@ -77,6 +80,39 @@ public class FlightPriceProxy {
 
             // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity());
+    }
+
+    /**
+     * Finds the best price for the {@code flightLeg} asynchronously.
+     *
+     * @param flightLeg The flight leg to price
+     * @return A Single containing the best price.
+     */
+    public Single<Double> findBestPriceAsyncRx(String flightLeg) {
+        // Return a Single to the best price.
+        return Single.fromPublisher(Mono
+                .fromCallable(() -> mFlightPrice
+                        // Create an HTTP GET request.
+                        .get()
+
+                        // Add the uri to the baseUrl.
+                        .uri(UriComponentsBuilder
+                                .fromPath(mFindBestPriceURIAsync)
+                                .queryParam("flightLeg", flightLeg)
+                                .build()
+                                .toString())
+
+                        // Retrieve the response.
+                        .retrieve()
+
+                        // Convert it to a Mono of Double.
+                        .bodyToMono(Double.class))
+
+                // Schedule this to run on the given scheduler.
+                .subscribeOn(Schedulers.parallel())
+
+                // De-nest the result so it's a Mono<Double>.
+                .flatMap(Function.identity()));
     }
 
     /**
@@ -96,7 +132,7 @@ public class FlightPriceProxy {
 
                           // Add the uri to the baseUrl.
                           .uri(UriComponentsBuilder
-                               .fromPath(mFindBestPriceURIM)
+                               .fromPath(mFindBestPriceURIAsync)
                                .queryParam("flightLeg", flightLeg)
                                .build()
                                .toString())
