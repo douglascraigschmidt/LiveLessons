@@ -1,5 +1,6 @@
 package microservices.exchangeRate.controller;
 
+import datamodels.CurrencyConversion;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -37,13 +38,11 @@ public class ExchangeRateController {
      * WebFlux maps HTTP GET requests sent to the
      * /{rootDir}/_exchangeRate endpoint to this method.
      *
-     * @param sourceAndDestination A String containing source and destination currencies.
+     * @param currencyConversion Indicates the currency to convert from and to
      * @return A Mono that emits the current exchange rate.
      */
     @GetMapping("_exchangeRateAsync")
-    private Mono<Double> queryExchangeRateFor(String sourceAndDestination) {
-        String[] sAndD = sourceAndDestination.split(":");
-
+    private Mono<Double> queryExchangeRateFor(CurrencyConversion currencyConversion) {
         // Delay for a random amount of time.
         randomDelay();
 

@@ -1,15 +1,9 @@
 package utils;
 
-import reactor.core.publisher.FluxSink;
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
-import static java.util.stream.Collectors.toList;
+import java.time.Duration;
 
 /**
  * This class implements the Singleton pattern to handle command-line
@@ -33,6 +27,27 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
+     * The maximum amount of time to wait for all the asynchronous
+     * processing to complete.
+     */
+    private Duration mMaxTimeout = Duration.ofSeconds(3);
+
+    /**
+     * The maximum amount of time to wait for the ExchangeRate microservice to timeout.
+     */
+    private Duration mExchangeRateTimeout = Duration.ofSeconds(2);
+
+    /**
+     * The default exchange rate.
+     */
+    private double mDefaultRate = 1.0;
+
+    /**
+     * The number of iterations to run the test.
+     */
+    private int mMaxIterations = 5;
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -40,6 +55,34 @@ public class Options {
             sInstance = new Options();
 
         return sInstance;
+    }
+
+    /**
+     * @return The max time to wait for computations to complete.
+     */
+    public Duration maxTimeout() {
+        return mMaxTimeout;
+    }
+
+    /**
+     * @return The time to wait for the ExchangeRate microservice to complete.
+     */
+    public Duration exchangeRateTimeout() {
+        return mExchangeRateTimeout;
+    }
+
+    /**
+     * @return The maximum numbers of iterations to run the tests.
+     */
+    public double maxIterations() {
+        return mMaxIterations;
+    }
+
+    /**
+     * @return The default rate.
+     */
+    public double defaultRate() {
+        return mDefaultRate;
     }
 
     /**
@@ -90,7 +133,19 @@ public class Options {
                 case "-d":
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     break;
-                         default:
+                case "-e":
+                    mExchangeRateTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
+                    break;
+                case "-i":
+                    mMaxIterations = Integer.parseInt(argv[argc + 1]);
+                    break;
+                case "-m":
+                    mMaxTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
+                    break;
+                case "-r":
+                    mDefaultRate = Integer.parseInt(argv[argc + 1]);
+                    break;
+                default:
                     printUsage();
                     return;
                 }

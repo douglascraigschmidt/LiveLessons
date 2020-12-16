@@ -1,5 +1,6 @@
 package microservices.flightPrice.controller;
 
+import datamodels.Trip;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -37,11 +38,11 @@ public class FlightPriceController {
      * WebFlux maps HTTP GET requests sent to the
      * /{rootDir}/_bestPrice endpoint to this method.
      *
-     * @param flightLeg A String containing the flight leg.
+     * @param trip Information about the trip.
      * @return A Mono that emits best price in US dollars for this price leg.
      */
     @GetMapping("/_bestPriceAsync")
-    private Mono<Double> findBestPrice(@RequestParam String flightLeg) {
+    private Mono<Double> findBestPrice(Trip trip) {
         // Delay for a random amount of time.
         randomDelay();
         

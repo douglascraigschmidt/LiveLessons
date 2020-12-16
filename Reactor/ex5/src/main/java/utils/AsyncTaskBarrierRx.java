@@ -36,7 +36,7 @@ public class AsyncTaskBarrierRx {
      * @return a {@code Single<Long>} that will be triggered when all
      * the asynchronously-run tasks complete.
      */
-    public static Single<Long> runTasks() throws InterruptedException {
+    public static Single<Long> runTasks() {
         return Observable
             // Factory method that converts the list into an
             // Observable.
