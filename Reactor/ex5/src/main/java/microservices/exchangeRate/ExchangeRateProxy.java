@@ -1,4 +1,4 @@
-package proxies;
+package microservices.exchangeRate;
 
 import datamodels.CurrencyConversion;
 import io.reactivex.rxjava3.core.Single;

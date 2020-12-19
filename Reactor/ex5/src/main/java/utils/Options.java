@@ -30,7 +30,7 @@ public class Options {
      * The maximum amount of time to wait for all the asynchronous
      * processing to complete.
      */
-    private Duration mMaxTimeout = Duration.ofSeconds(3);
+    private Duration mMaxTimeout = Duration.ofSeconds(4);
 
     /**
      * The maximum amount of time to wait for the ExchangeRate microservice to timeout.

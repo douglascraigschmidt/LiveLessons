@@ -2,8 +2,8 @@ package tests;
 
 import datamodels.CurrencyConversion;
 import datamodels.Trip;
-import proxies.ExchangeRateProxy;
-import proxies.FlightPriceProxy;
+import microservices.exchangeRate.ExchangeRateProxy;
+import microservices.flightPrice.FlightPriceProxy;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.AsyncTaskBarrier;
@@ -88,7 +88,7 @@ public class ReactorTests {
     private static Mono<Void> getBestPriceInPoundsAsync(int iteration,
                                                         Trip trip,
                                                         CurrencyConversion currencyConversion) {
-        Mono<Double> priceM = sFlightPriceProxy
+        Mono<Trip> tripM = sFlightPriceProxy
             // Asynchronously find the best price in US dollars
             // between London and New York city.
             .findBestPriceAsync(Schedulers.parallel(),
@@ -110,11 +110,11 @@ public class ReactorTests {
             return Mono.just(0.0);
         };
 
-        // When priceM and rateM complete convert the price in US
+        // When tripM and rateM complete convert the price in US
         // dollars to the price in British pounds.  If these async
         // operations take more than {@code maxTime} then throw the
         // TimeoutException.
-        return combineAndConvertResults(priceM, rateM, Options.instance().maxTimeout())
+        return combineAndConvertResults(tripM, rateM, Options.instance().maxTimeout())
             // Print the price if the call completed within
             // sMAX_TIME seconds.
             .doOnSuccess(amount ->
@@ -143,7 +143,7 @@ public class ReactorTests {
     private static void getBestPriceInPoundsSync(int iteration,
                                                  Trip trip,
                                                  CurrencyConversion currencyConversion) {
-        Mono<Double> priceM = sFlightPriceProxy
+        Mono<Trip> tripM = sFlightPriceProxy
             // Synchronously find the best price in US dollars between
             // London and New York city.
             .findBestPriceSync(trip, Options.instance().maxTimeout());
@@ -163,11 +163,11 @@ public class ReactorTests {
             return Mono.just(0.0);
         };
 
-        // When priceM and rateM complete convert the price in US
+        // When tripM and rateM complete convert the price in US
         // dollars to the price in British pounds.  If these sync
         // operations take more than {@code maxTime} then throw the
         // TimeoutException.
-        combineAndConvertResults(priceM, rateM, Options.instance().maxTimeout())
+        combineAndConvertResults(tripM, rateM, Options.instance().maxTimeout())
             // Print the price if the call completed within sMAX_TIME
             // seconds.
             .doOnSuccess(amount ->
@@ -186,24 +186,24 @@ public class ReactorTests {
     }
 
     /**
-     * When {@code priceM} and {@code rateM} complete convert the
+     * When {@code tripM} and {@code rateM} complete convert the
      * price in US dollars to the price in British pounds.  If these
      * operations take more than {@code maxTime} then throw the
      * TimeoutException.
      *
-     * @param priceM Returns the best price for a flight leg
+     * @param tripM Returns the best price for a flight leg
      * @param rateM Returns the exchange rate
      * @param maxTime Max time to wait for processing to complete
      * @return A conversion of best price into British pounds
      */
-    private static Mono<Double> combineAndConvertResults(Mono<Double> priceM,
+    private static Mono<Double> combineAndConvertResults(Mono<Trip> tripM,
                                                          Mono<Double> rateM,
                                                          Duration maxTime) {
         return Mono
             // Call the this::convert method reference to convert the
             // price in dollars to the price in pounds when both
             // previous Monos complete their processing.
-            .zip(priceM, rateM, ReactorTests::convert)
+            .zip(tripM, rateM, ReactorTests::convert)
 
             // If the total processing takes more than maxTime a
             // TimeoutException will be thrown.
@@ -211,10 +211,10 @@ public class ReactorTests {
     }
 
     /**
-     * Convert a price in one currency system by multiplying it by the
-     * exchange rate.
+     * Convert the price of a Trip in one currency system by
+     * multiplying it by the exchange rate.
      */
-    private static double convert(double price, double rate) {
-        return price * rate;
+    private static double convert(Trip trip, double rate) {
+        return trip.getPrice() * rate;
     }
 }

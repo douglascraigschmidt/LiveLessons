@@ -1,12 +1,11 @@
 import datamodels.CurrencyConversion;
 import datamodels.Trip;
-import io.reactivex.rxjava3.core.Single;
 import tests.ReactorTests;
 import tests.RxJavaTests;
 import utils.Options;
 import utils.RunTimer;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * This program applies WebFlux and Project Reactor features to
@@ -25,16 +24,18 @@ public class ex5 {
     /**
      * The trip used for the tests.
      */
-    private Trip mTrip = Trip
-        .valueOf(LocalDate.parse("2025-01-01"),
-                 LocalDate.parse("2025-02-02"),
+    private final Trip mTrip = Trip
+        .valueOf(LocalDateTime.parse("2025-01-01T07:00:00"),
+                 LocalDateTime.parse("2025-01-01T10:00:00"),
+                 LocalDateTime.parse("2025-02-01T19:00:00"),
+                 LocalDateTime.parse("2025-02-02T07:00:00"),
                  "LHR",
                  "JFK");
 
     /**
      * Indicate a conversion of US dollars to British pounds.
      */
-    private CurrencyConversion mCurrencyConversion = CurrencyConversion
+    private final CurrencyConversion mCurrencyConversion = CurrencyConversion
         .valueOf("USD", "GBP");
 
     /**
@@ -61,6 +62,7 @@ public class ex5 {
                                                       mCurrencyConversion),
                      "runAsyncMonos");
 
+        /*
         RunTimer
             // This test invokes microservices to synchronously determine
             // the best price for a flight from London to New York city in
@@ -76,6 +78,8 @@ public class ex5 {
             .timeRun(()-> RxJavaTests.runAsyncSingles(mTrip,
                                                       mCurrencyConversion),
                      "runAsyncSingles");
+
+         */
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());

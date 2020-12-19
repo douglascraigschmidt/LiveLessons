@@ -35,7 +35,7 @@ public class PublisherController {
     /**
      * This method initializes the publisher.
      *
-     * WebFlux maps HTTP GET requests sent to the /_create endpoint to
+     * WebFlux maps HTTP POST requests sent to the /_create endpoint to
      * this method.
      *
      * @return An empty mono.

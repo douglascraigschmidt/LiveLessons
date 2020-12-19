@@ -1,10 +1,17 @@
 package microservices.flightPrice.controller;
 
 import datamodels.Trip;
+import microservices.AirlineDBs.AA.AAPriceProxy;
+import microservices.AirlineDBs.PriceProxy;
 import org.springframework.web.bind.annotation.*;
+import microservices.AirlineDBs.SWA.SWAPriceProxy;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static utils.ReactorUtils.randomDelay;
 
@@ -32,27 +39,79 @@ import static utils.ReactorUtils.randomDelay;
 @RequestMapping("/microservices/flightPrice")
 public class FlightPriceController {
     /**
-     * This method simulates a microservice that finds the best price
-     * in US dollars for a given flight leg.
+     * A proxy to the SWA price database.
+     */
+    private SWAPriceProxy mSWAPriceProxy;
+
+    /**
+     * A proxy to the AA price database.
+     */
+    private AAPriceProxy mAAPriceProxy;
+
+    class Tuple {
+        PriceProxy mProxy;
+        Supplier<PriceProxy> mFactory;
+
+        Tuple(Supplier<PriceProxy> proxySupplier) {
+            mProxy = null;
+            mFactory = proxySupplier;
+        }
+    }
+
+    /**
      *
-     * WebFlux maps HTTP GET requests sent to the
-     * /{rootDir}/_bestPrice endpoint to this method.
+     */
+    List<Tuple> mProxyList =
+        new ArrayList<Tuple>() { {
+            add(new Tuple(SWAPriceProxy::new));
+            add(new Tuple(AAPriceProxy::new));
+    } };
+
+    /**
+     * Default constructor.
+     */
+    public FlightPriceController() {
+    }
+
+    /**
+     * This method simulates a microservice that finds the best price
+     * in US dollars for a given {@code trip}.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_bestPriceAsync
+     * endpoint to this method.
      *
      * @param trip Information about the trip.
-     * @return A Mono that emits best price in US dollars for this price leg.
+     * @return A Mono that emits best price in US dollars for this {@code trip}.
      */
-    @GetMapping("/_bestPriceAsync")
-    private Mono<Double> findBestPrice(Trip trip) {
-        // Delay for a random amount of time.
-        randomDelay();
-        
+    @PostMapping("/_bestPriceAsync")
+    private Mono<Trip> findBestPrice(@RequestBody Trip trip) {
+        initializeProxiesIfNecessary();
+
         /*
         // Debugging print.
         print("Flight leg is "
               + flightLeg);
         */
 
-        // Simply return a constant.
-        return Mono.just(888.00);
+         return Flux
+                .fromIterable(mProxyList)
+
+                .flatMap(proxy -> Flux
+                        .just(proxy)
+                        .subscribeOn(Schedulers.parallel())
+                        .flatMap(__ -> proxy.mProxy
+                                .findPricesAsync(Schedulers.parallel(),
+                                        trip)))
+            .sort(Comparator.comparingDouble(Trip::getPrice))
+            .next();
+    }
+
+    /**
+     *
+     */
+    private void initializeProxiesIfNecessary() {
+        for (Tuple tuple : mProxyList)
+            if (tuple.mProxy == null)
+                tuple.mProxy = tuple.mFactory.get();
     }
 }

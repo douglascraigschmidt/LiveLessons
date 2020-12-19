@@ -4,8 +4,8 @@ import datamodels.CurrencyConversion;
 import datamodels.Trip;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
-import proxies.ExchangeRateProxy;
-import proxies.FlightPriceProxy;
+import microservices.exchangeRate.ExchangeRateProxy;
+import microservices.flightPrice.FlightPriceProxy;
 import utils.AsyncTaskBarrierRx;
 import utils.Options;
 
@@ -69,7 +69,7 @@ public class RxJavaTests {
     private static Completable getBestPriceInPoundsAsync(int iteration,
                                                          Trip trip,
                                                          CurrencyConversion currencyConversion) {
-        Single<Double> priceS = sFlightPriceProxy
+        Single<Trip> tripS = sFlightPriceProxy
             // Asynchronously find the best price in US dollars
             // between London and New York city.
             .findBestPriceAsyncRx(trip);
@@ -84,7 +84,7 @@ public class RxJavaTests {
         // dollars to the price in British pounds.  If these async
         // operations take more than {@code maxTime} then throw the
         // TimeoutException.
-        return combineAndConvertResults(priceS, rateS, Options.instance().maxTimeout())
+        return combineAndConvertResults(tripS, rateS, Options.instance().maxTimeout())
             // Print the price if the call completed within
             // sMAX_TIME seconds.
             .doOnSuccess(amount ->
@@ -109,24 +109,24 @@ public class RxJavaTests {
     }
 
     /**
-     * When {@code priceS} and {@code rateS} complete convert the
+     * When {@code tripS} and {@code rateS} complete convert the
      * price in US dollars to the price in British pounds.  If these
      * operations take more than {@code maxTime} then throw the
      * TimeoutException.
      *
-     * @param priceS Returns the best price for a flight leg
+     * @param tripS Returns the best price for a flight leg
      * @param rateS Returns the exchange rate
      * @param maxTime Max time to wait for processing to complete
      * @return A conversion of best price into British pounds
      */
-    private static Single<Double> combineAndConvertResults(Single<Double> priceS,
+    private static Single<Double> combineAndConvertResults(Single<Trip> tripS,
                                                            Single<Double> rateS,
                                                            Duration maxTime) {
         return Single
                 // Call the this::convert method reference to convert the
                 // price in dollars to the price in pounds when both
                 // previous Monos complete their processing.
-                .zip(priceS, rateS, RxJavaTests::convert)
+                .zip(tripS, rateS, RxJavaTests::convert)
 
                 // If the total processing takes more than maxTime a
                 // TimeoutException will be thrown.
@@ -134,10 +134,10 @@ public class RxJavaTests {
     }
 
     /**
-     * Convert a price in one currency system by multiplying it by the
-     * exchange rate.
+     * Convert the price of a Trip in one currency system by
+     * multiplying it by the exchange rate.
      */
-    private static double convert(double price, double rate) {
-        return price * rate;
+    private static double convert(Trip trip, double rate) {
+        return trip.getPrice() * rate;
     }
 }

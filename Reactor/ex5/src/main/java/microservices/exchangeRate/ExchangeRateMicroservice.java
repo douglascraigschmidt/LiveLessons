@@ -12,7 +12,7 @@ import utils.Options;
 public class ExchangeRateMicroservice {
     /**
      * A static main() entry point is needed to run the ExchangeRate
-     * app.
+     * microservice.
      */
     public static void main(String[] argv) {
         // Parse the options.

@@ -1,4 +1,4 @@
-package microservices.flightPrice;
+package microservices.AirlineDBs.AA;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,21 +6,20 @@ import utils.Options;
 
 /**
  * This class provides the entry point into the Spring WebFlux-based
- * version of the FlightPrice microservice.
+ * version of the AA microservice.
  */
 @SpringBootApplication
-public class FlightPriceMicroservice {
+public class AAPricesMicroservice {
     /**
-     * A static main() entry point is needed to run the FlightPrice
-     * microservice.
+     * A static main() entry point is needed to run the
+     * AA microservice.
      */
     public static void main(String[] argv) {
         // Parse the options.
         Options.instance().parseArgs(argv);
 
         SpringApplication
-            // Launch the FlightPrice microservice within Spring
-            // WebFlux.
-            .run(FlightPriceMicroservice.class, argv);
+            // Launch this microservice within Spring WebFlux.
+            .run(AAPricesMicroservice.class, argv);
     }
 }
