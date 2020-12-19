@@ -12,6 +12,10 @@ import utils.Options;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A Java utility class containing tests that invoke microservices
+ * asynchronously and synchronously using RxJava.
+ */
 public class RxJavaTests {
     /**
      * A proxy that's used to communicate with the FlightPrice

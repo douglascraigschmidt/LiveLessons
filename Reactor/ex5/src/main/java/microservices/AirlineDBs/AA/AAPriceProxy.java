@@ -19,7 +19,7 @@ public class AAPriceProxy
             "/microservices/AirlineDBs/AA/_getTripPrices";
 
     /**
-     * Host/post where the server resides.
+     * Host/port where the server resides.
      */
     private final String mSERVER_BASE_URL =
             "http://localhost:8084";
@@ -52,8 +52,8 @@ public class AAPriceProxy
      * @return A Flux of {@code Trip} objects corresponding to the given {@code trip}
      */
     @Override
-    public Flux<Trip> findPricesAsync(Scheduler scheduler,
-                                      Trip trip) {
+    public Flux<Trip> findTripsAsync(Scheduler scheduler,
+                                     Trip trip) {
         // Return a Flux containing all Trip objects that map to the
         // trip param.
         return mAAPrices

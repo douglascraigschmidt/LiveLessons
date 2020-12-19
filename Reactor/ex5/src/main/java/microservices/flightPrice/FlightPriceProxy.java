@@ -19,7 +19,8 @@ import java.util.function.Function;
  */
 public class FlightPriceProxy {
     /**
-     * The URI that denotes the remote method to find the best price for a flight leg.
+     * The URI that denotes the remote method to find the best price
+     * for a trip.
      */
     private final String mFindBestPriceURIAsync =
         "/microservices/flightPrice/_bestPriceAsync";
@@ -31,7 +32,7 @@ public class FlightPriceProxy {
     private final WebClient mFlightPrice;
 
     /**
-     * Host/post where the server resides.
+     * Host/port where the server resides.
      */
     private final String mSERVER_BASE_URL =
         "http://localhost:8083";

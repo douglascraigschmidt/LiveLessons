@@ -29,7 +29,7 @@ public class ExchangeRateProxy {
     private final WebClient mExchangeRate;
 
     /**
-     * Host/post where the server resides.
+     * Host/port where the server resides.
      */
     private final String mSERVER_BASE_URL =
         "http://localhost:8081";

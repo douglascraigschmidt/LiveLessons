@@ -12,6 +12,10 @@ import utils.Options;
 import java.time.Duration;
 import java.util.function.Function;
 
+/**
+ * A Java utility class containing tests that invoke microservices
+ * asynchronously and synchronously using Project Reactor.
+ */
 public class ReactorTests {
     /**
      * A proxy that's used to communicate with the FlightPrice

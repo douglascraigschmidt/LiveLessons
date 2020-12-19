@@ -47,19 +47,22 @@ public class AAController {
     }
 
     /**
-     * This method finds all the trips on given departure/arrival
-     * dates and the flight leg for American Airlines.
+     * This method finds all the trips on given departure
+     * date and the flight leg for American Airlines.
      *
      * WebFlux maps HTTP POST requests sent to the
      * /_bestPrice endpoint to this method.
      *
      * @param trip Information about the trip, i.e., date and flight leg.
-     * @return A Flux that emits all the trips for the given date and flight leg.
+     * @return A Flux that emits all the trips for the given departure date and flight leg.
      */
     @PostMapping("/_getTripPrices")
     private Flux<Trip> getTripPrices(@RequestBody Trip trip) {
         return Flux
+            // Convert the list of trips into a Flux stream.
             .fromIterable(mTrips)
+
+            // Select only those trips that equal the trip param.
             .filter(t -> t.equals(trip));
     }
 }

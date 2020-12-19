@@ -11,6 +11,6 @@ public interface PriceProxy {
     /**
      *
      */
-    Flux<Trip> findPricesAsync(Scheduler scheduler,
-                               Trip trip);
+    Flux<Trip> findTripsAsync(Scheduler scheduler,
+                              Trip trip);
 }
