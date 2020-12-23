@@ -35,7 +35,7 @@ public class Options {
     /**
      * The maximum amount of time to wait for the ExchangeRate microservice to timeout.
      */
-    private Duration mExchangeRateTimeout = Duration.ofSeconds(2);
+    private Duration mExchangeRateTimeout = Duration.ofSeconds(4);
 
     /**
      * The default exchange rate.

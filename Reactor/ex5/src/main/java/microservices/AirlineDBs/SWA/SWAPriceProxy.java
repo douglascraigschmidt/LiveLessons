@@ -1,13 +1,19 @@
 package microservices.AirlineDBs.SWA;
 
-import datamodels.Trip;
+import datamodels.TripRequest;
+import datamodels.TripResponse;
 import microservices.AirlineDBs.PriceProxy;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.function.Function;
+
 /**
- * This class serves as a proxy to the SWAPrice microservice.
+ * This class serves as a proxy to the SWAPrice microservice, which
+ * provides prices for Southwest Airlines flights.
+
  */
 public class SWAPriceProxy 
        implements PriceProxy {
@@ -44,34 +50,40 @@ public class SWAPriceProxy
     }
 
     /**
-     * Finds the best price for the {@code trip} asynchronously.
+     * Returns a Flux that emits {@code TripResponse} objects that
+     * match the {@code trip} param.
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param trip The trip to price
-     * @return A Flux of {@code Trip} objects corresponding to the given {@code trip}
+     * @return A Flux that emits {@code TripResponse} objects that match the {@code trip} param
      */
     @Override
-    public Flux<Trip> findTripsAsync(Scheduler scheduler,
-                                     Trip trip) {
-        // Return a Flux containing all Trip objects that map to the
-        // trip param.
-        return mSWAPrices
-            // Create an HTTP POST request.
-            .post()
+    public Flux<TripResponse> findTripsAsync(Scheduler scheduler,
+                                             TripRequest trip) {
+        return Mono
+            // Return a Flux containing all TripResponse objects that
+            // map to the TripRequest param.
+            .fromCallable(() -> mSWAPrices
+                          // Create an HTTP POST request.
+                          .post()
 
-            // Add the uri to the baseUrl.
-            .uri(mFindSWAPricesURIAsync)
+                          // Add the uri to the baseUrl.
+                          .uri(mFindSWAPricesURIAsync)
 
-            // Encode the trip in the body of the request.
-            .bodyValue(trip)
+                          // Encode the trip in the body of the
+                          // request.
+                          .bodyValue(trip)
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Flux of Trips.
-            .bodyToFlux(Trip.class)
+                          // Convert it to a Flux of Trips.
+                          .bodyToFlux(TripResponse.class))
 
             // Schedule this to run on the given scheduler.
-            .subscribeOn(scheduler);
+            .subscribeOn(scheduler)
+
+            // De-nest the result so it's a Flux<TripResponse>.
+            .flatMapMany(Function.identity());
     }
 }

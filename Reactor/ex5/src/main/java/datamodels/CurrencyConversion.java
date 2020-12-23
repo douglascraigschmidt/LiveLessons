@@ -3,7 +3,8 @@ package datamodels;
 import java.time.LocalDate;
 
 /**
- * This class keeps track of currency to convert from and the currency to convert to.
+ * This class keeps track of currency to convert from and the currency
+ * to convert to.
  */
 public class CurrencyConversion {
     /**
@@ -17,6 +18,12 @@ public class CurrencyConversion {
     String to;
 
     /**
+     * The exchange rate for the "from" currency to
+     * the "to" currency.
+     */
+    Double exchangeRate;
+
+    /**
      * Default constructor needed for WebFlux.
      */
     CurrencyConversion() {
@@ -25,9 +32,12 @@ public class CurrencyConversion {
     /** 
      * This constructor initializes the fields.
      */
-    CurrencyConversion(String from, String to) {
+    CurrencyConversion(String from,
+                       String to,
+                       Double defaultExchangeRate) {
         this.from = from;
         this.to = to;
+        this.exchangeRate = defaultExchangeRate;
     }
 
     /**
@@ -59,14 +69,34 @@ public class CurrencyConversion {
     }
 
     /**
-     * A factory method that creates a {@code ConcurrencyConversion} object.
+     * Get the exchange rate for the "from" currency to
+     * the "to" currency.
+     */
+    public Double getExchangeRate() {
+        return exchangeRate;
+    }
+
+    /**
+     * Set the exchange rate for the "from" currency to
+     * the "to" currency.
+     */
+    public void setExchangeRate(Double exchangeRate) {
+        this.exchangeRate = exchangeRate;
+    }
+
+    /**
+     * A factory method that creates a {@code ConcurrencyConversion}
+     * object.
      *
      * @param from Currency to convert from
      * @param to Currency to convert to
+     * @param exchangeRate the exchange rate for the "from" currency to
+     *        the "to" currency
      * @return A new {@code CurrencyConversion} object
      */
     public static CurrencyConversion valueOf(String from,
-                                             String to) {
-        return new CurrencyConversion(from, to);
+                                             String to,
+                                             Double exchangeRate) {
+        return new CurrencyConversion(from, to, exchangeRate);
     }
 }

@@ -1,6 +1,7 @@
 package microservices.flightPrice.controller;
 
-import datamodels.Trip;
+import datamodels.TripRequest;
+import datamodels.TripResponse;
 import microservices.AirlineDBs.AA.AAPriceProxy;
 import microservices.AirlineDBs.PriceProxy;
 import org.springframework.web.bind.annotation.*;
@@ -97,7 +98,7 @@ public class FlightPriceController {
      *         {@code trip}
      */
     @PostMapping("/_bestPriceAsync")
-    private Mono<Trip> findBestPrice(@RequestBody Trip trip) {
+    private Mono<TripResponse> findBestPrice(@RequestBody TripRequest trip) {
         // Initialize the flight proxies if they haven't been
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
@@ -130,7 +131,7 @@ public class FlightPriceController {
                                               trip)))
 
             // Sort the output so the lowest price comes first.
-            .sort(Comparator.comparingDouble(Trip::getPrice))
+            .sort(Comparator.comparingDouble(TripResponse::getPrice))
 
             // Return the lowest priced trip.
             .next();

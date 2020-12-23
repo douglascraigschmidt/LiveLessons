@@ -1,6 +1,7 @@
 package microservices.AirlineDBs.SWA.controller;
 
-import datamodels.Trip;
+import datamodels.TripRequest;
+import datamodels.TripResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import utils.TestDataFactory;
@@ -33,7 +34,7 @@ public class SWAController {
     /**
      * The list of Trips and their associated prices.
      */
-    private final List<Trip> mTrips;
+    private final List<TripResponse> mTrips;
 
     /**
      * Constructor initializes the field.
@@ -54,12 +55,12 @@ public class SWAController {
      * @return A Flux that emits all the trips for the given departure date and flight leg.
      */
     @PostMapping("/_getTripPrices")
-    private Flux<Trip> getTripPrices(@RequestBody Trip trip) {
+    private Flux<TripResponse> getTripPrices(@RequestBody TripRequest trip) {
         return Flux
             // Convert the list of trips into a Flux stream.
             .fromIterable(mTrips)
 
             // Select only those trips that equal the trip param.
-            .filter(t -> t.equals(trip));
+            .filter(trip::equals);
     }
 }

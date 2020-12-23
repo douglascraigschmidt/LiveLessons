@@ -1,13 +1,18 @@
 package microservices.AirlineDBs.AA;
 
-import datamodels.Trip;
+import datamodels.TripRequest;
+import datamodels.TripResponse;
 import microservices.AirlineDBs.PriceProxy;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.function.Function;
+
 /**
- * This class serves as a proxy to the AAPrice microservice.
+ * This class serves as a proxy to the AAPrice microservice, which
+ * provides prices for American Airlines flights.
  */
 public class AAPriceProxy
        implements PriceProxy {
@@ -45,34 +50,39 @@ public class AAPriceProxy
     }
 
     /**
-     * Finds the best price for the {@code trip} asynchronously.
+     * Returns a Flux that emits {@code TripResponse} objects that
+     * match the {@code trip} param.
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param trip The trip to price
-     * @return A Flux of {@code Trip} objects corresponding to the given {@code trip}
+     * @return A Flux that emits {@code TripResponse} objects that match the {@code trip} param
      */
     @Override
-    public Flux<Trip> findTripsAsync(Scheduler scheduler,
-                                     Trip trip) {
-        // Return a Flux containing all Trip objects that map to the
-        // trip param.
-        return mAAPrices
-            // Create an HTTP POST request.
-            .post()
+    public Flux<TripResponse> findTripsAsync(Scheduler scheduler,
+                                             TripRequest trip) {
+        return Mono
+            // Return a Flux containing all Trip objects that map to the
+            // trip param.
+            .fromCallable(() -> mAAPrices
+                          // Create an HTTP POST request.
+                          .post()
 
-            // Add the uri to the baseUrl.
-            .uri(mFindAAPricesURIAsync)
+                          // Add the uri to the baseUrl.
+                          .uri(mFindAAPricesURIAsync)
 
-            // Encode the trip in the body of the request.
-            .bodyValue(trip)
+                          // Encode the trip in the body of the request.
+                          .bodyValue(trip)
 
-            // Retrieve the response.
-            .retrieve()
+                          // Retrieve the response.
+                          .retrieve()
 
-            // Convert it to a Flux of Trips.
-            .bodyToFlux(Trip.class)
+                          // Convert it to a Flux of Trips.
+                          .bodyToFlux(TripResponse.class))
 
             // Schedule this to run on the given scheduler.
-            .subscribeOn(scheduler);
+            .subscribeOn(scheduler)
+
+            // De-nest the result so it's a Flux<TripResponse>.
+            .flatMapMany(Function.identity());
     }
 }

@@ -1,74 +1,55 @@
 package datamodels;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
  * Data structure that defines a trip.
  */
-public class Trip {
+public class TripResponse {
     /**
      * Date and time of the departure.
      */
-    private LocalDateTime departureDateTime;
+    LocalDateTime departureDateTime;
 
     /**
      * Date and time of the arrival.
      */
-    private LocalDateTime arrivalDateTime;
+    LocalDateTime arrivalDateTime;
 
     /**
      * Date and time of the return departure.
      */
-    private LocalDateTime returnDepartureDateTime;
+    LocalDateTime returnDepartureDateTime;
 
     /**
      * Date and time of the return arrival.
      */
-    private LocalDateTime returnArrivalDateTime;
+    LocalDateTime returnArrivalDateTime;
 
     /**
      * Airport code for the departing airport.
      */
-    private String departureAirport;
+    String departureAirport;
 
     /**
      * Airport code for the arriving airport.
      */
-    private String arrivalAirport;
+    String arrivalAirport;
 
     /**
      * Price
      */
-    private Double price;
+    Double price;
+
+    /**
+     * Airline code, e.g., "AA", "SWA", etc.
+     */
+    String airlineCode;
 
     /**
      * Default constructor needed for WebFlux param passing.
      */
-    public Trip() {
-    }
-
-    /**
-     * Constructor initializes the fields.
-     * @param departureDateTime
-     * @param arrivalDateTime
-     * @param returnDepartureDateTime
-     * @param returnArrivalDateTime
-     * @param departureAirport
-     * @param arrivalAirport
-     */
-    public Trip(LocalDateTime departureDateTime,
-                LocalDateTime arrivalDateTime,
-                LocalDateTime returnDepartureDateTime,
-                LocalDateTime returnArrivalDateTime,
-                String departureAirport,
-                String arrivalAirport) {
-        this.departureDateTime = departureDateTime;
-        this.arrivalDateTime = arrivalDateTime;
-        this.returnDepartureDateTime = returnDepartureDateTime;
-        this.returnArrivalDateTime = returnArrivalDateTime;
-        this.departureAirport = departureAirport;
-        this.arrivalAirport = arrivalAirport;
+    public TripResponse() {
     }
 
     /**
@@ -80,14 +61,16 @@ public class Trip {
      * @param departureAirport
      * @param arrivalAirport
      * @param price
+     * @param airlineCode
      */
-    public Trip(LocalDateTime departureDateTime,
-                LocalDateTime arrivalDateTime,
-                LocalDateTime returnDepartureDateTime,
-                LocalDateTime returnArrivalDateTime,
-                String departureAirport,
-                String arrivalAirport,
-                Double price) {
+    public TripResponse(LocalDateTime departureDateTime,
+                        LocalDateTime arrivalDateTime,
+                        LocalDateTime returnDepartureDateTime,
+                        LocalDateTime returnArrivalDateTime,
+                        String departureAirport,
+                        String arrivalAirport,
+                        Double price,
+                        String airlineCode) {
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.returnDepartureDateTime = returnDepartureDateTime;
@@ -95,6 +78,7 @@ public class Trip {
         this.departureAirport = departureAirport;
         this.arrivalAirport = arrivalAirport;
         this.price = price;
+        this.airlineCode = airlineCode;
     }
 
     @Override
@@ -102,7 +86,7 @@ public class Trip {
         if (o.getClass() != this.getClass())
             return false;
 
-        Trip t = (Trip) o;
+        TripResponse t = (TripResponse) o;
         return this.departureDateTime.toLocalDate().equals(t.departureDateTime.toLocalDate())
             && this.returnDepartureDateTime.toLocalDate().equals(t.returnDepartureDateTime.toLocalDate())
             && this.departureAirport.equals(t.departureAirport)
@@ -123,7 +107,9 @@ public class Trip {
             + ", "
             + arrivalAirport
             + ", "
-            + price; 
+            + price
+            + ", "
+            + airlineCode;
     }
 
     public LocalDateTime getDepartureDateTime() {
@@ -182,6 +168,14 @@ public class Trip {
         this.price = price;
     }
 
+    public String getAirlineCode() {
+        return airlineCode;
+    }
+
+    public void setAirlineCode(String airlineCode) {
+        this.airlineCode = airlineCode;
+    }
+
     /**
      * Factory method that creates a new {@code Trip} object.
      *
@@ -191,20 +185,25 @@ public class Trip {
      * @param returnArrivalDateTime
      * @param departureAirport
      * @param arrivalAirport
+     * @param price
+     * @param airlineCode
      * @return
      */
-    public static Trip valueOf(LocalDateTime departureDateTime,
-                               LocalDateTime arrivalDateTime,
-                               LocalDateTime returnDepartureDateTime,
-                               LocalDateTime returnArrivalDateTime,
-                               String departureAirport,
-                               String arrivalAirport) {
-        return new Trip(departureDateTime,
+    public static TripResponse valueOf(LocalDateTime departureDateTime,
+                                       LocalDateTime arrivalDateTime,
+                                       LocalDateTime returnDepartureDateTime,
+                                       LocalDateTime returnArrivalDateTime,
+                                       String departureAirport,
+                                       String arrivalAirport,
+                                       Double price,
+                                       String airlineCode) {
+        return new TripResponse(departureDateTime,
                         arrivalDateTime,
                         returnDepartureDateTime,
                         returnArrivalDateTime,
                         departureAirport,
                         arrivalAirport,
-                        0.0);
+                        price,
+                        airlineCode);
     }
 }

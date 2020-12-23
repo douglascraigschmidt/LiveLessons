@@ -10,6 +10,8 @@ import reactor.core.scheduler.Schedulers;
 import utils.Options;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -35,6 +37,13 @@ public class ExchangeRateProxy {
         "http://localhost:8081";
 
     /**
+     * A cache of the latest exchange rate for a
+     * CurrencyConversion.
+     */
+    private final List<CurrencyConversion> mExchangeRateCache =
+        new ArrayList<>();
+
+    /**
      * Constructor initializes the fields.
      */
     public ExchangeRateProxy() {
@@ -57,8 +66,7 @@ public class ExchangeRateProxy {
      * @return A Mono containing the exchange rate.
      */
     public Mono<Double> queryExchangeRateForAsync(Scheduler scheduler,
-                                                  CurrencyConversion currencyConversion,
-                                                  Mono<Double> defaultRate) {
+                                                  CurrencyConversion currencyConversion) {
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate
@@ -84,9 +92,51 @@ public class ExchangeRateProxy {
             // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity())
 
-            // If this computation runs for more than 2 seconds
-            // return the default rate.
-            .timeout(Options.instance().exchangeRateTimeout(), defaultRate);
+            // Update the cache with the latest rate.
+            .flatMap(latestRate -> updateCachedRate(latestRate, currencyConversion))
+
+            // If this computation runs for more than the configured number of
+            // seconds return the last cached rate.
+            .timeout(Options.instance().exchangeRateTimeout(),
+                     getLastCachedRate(currencyConversion));
+    }
+
+    /**
+     *
+     * @param latestRate
+     * @param currencyConversion
+     * @return
+     */
+    private Mono<Double> updateCachedRate(Double latestRate,
+                                          CurrencyConversion currencyConversion) {
+        boolean updatedCacheEntry = false;
+        for (CurrencyConversion cc : mExchangeRateCache)
+            if (cc.getFrom().equals(currencyConversion.getFrom())
+                    && cc.getTo().equals(currencyConversion.getTo())) {
+                cc.setExchangeRate(latestRate);
+                updatedCacheEntry = true;
+            }
+
+        if (!updatedCacheEntry) {
+            currencyConversion.setExchangeRate(latestRate);
+            mExchangeRateCache.add(currencyConversion);
+        }
+
+        return Mono.just(latestRate);
+    }
+
+    /**
+     *
+     * @param currencyConversion
+     * @return
+     */
+    private Mono<Double> getLastCachedRate(CurrencyConversion currencyConversion) {
+        for (CurrencyConversion cc : mExchangeRateCache)
+            if (cc.getFrom().equals(currencyConversion.getFrom())
+                && cc.getTo().equals(currencyConversion.getTo()))
+                return Mono.just(cc.getExchangeRate());
+
+        return Mono.just(Options.instance().defaultRate());
     }
 
     /**
@@ -95,8 +145,7 @@ public class ExchangeRateProxy {
      * @param currencyConversion Indicates the currency to convert from and to
      * @return A Single containing the exchange rate.
      */
-    public Single<Double> queryExchangeRateForAsyncRx(CurrencyConversion currencyConversion,
-                                                      Single<Double> defaultRate) {
+    public Single<Double> queryExchangeRateForAsyncRx(CurrencyConversion currencyConversion) {
         return Single
             // Return a Single to the exchange rate.
             .fromPublisher(Mono
@@ -129,10 +178,10 @@ public class ExchangeRateProxy {
                            // Mono<Double>.
                            .flatMap(Function.identity())
 
-                           // If this computation runs for more than 2
-                           // seconds return the default rate.
+                           // If this computation runs for more than the configured number of
+                           // seconds return the last cached rate.
                            .timeout(Options.instance().exchangeRateTimeout(),
-                                    Mono.from(defaultRate.toFlowable())));
+                                    getLastCachedRate(currencyConversion)));
     }
 
     /**
@@ -141,8 +190,7 @@ public class ExchangeRateProxy {
      * @param currencyConversion The currency to convert from and to
      * @return A Mono containing the exchange rate.
      */
-    public Mono<Double> queryExchangeRateForSync(CurrencyConversion currencyConversion,
-                                                 Mono<Double> defaultRate) {
+    public Mono<Double> queryExchangeRateForSync(CurrencyConversion currencyConversion) {
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate
@@ -165,8 +213,9 @@ public class ExchangeRateProxy {
             // De-nest the result so it's a Mono<Double>.
             .flatMap(Function.identity())
 
-            // If this computation runs for more than 2 seconds
-            // return the default rate.
-            .timeout(Duration.ofSeconds(2), defaultRate);
+            // If this computation runs for more than the configured number of
+            // seconds return the last cached rate.
+            .timeout(Options.instance().exchangeRateTimeout(),
+                     getLastCachedRate(currencyConversion));
     }
 }
