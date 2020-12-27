@@ -17,9 +17,10 @@ import static utils.BigFractionUtils.sVoidM;
 
 /**
  * This class shows how to apply Project Reactor features
- * synchronously to perform basic Flux operations, including just(),
- * fromIterable(), fromArray(), doOnNext(), map(), mergeWith(),
- * repeat(), subscribeOn(), and subscribe().
+ * synchronously and asynchronously to perform basic Flux operations,
+ * including just(), fromIterable(), fromArray(), from(), doOnNext(),
+ * map(), mergeWith(), repeat(), subscribeOn(), and subscribe().  Also
+ * shows how to implement a blocking subscriber in Project Reactor.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -229,18 +230,19 @@ public class FluxEx {
     }
 
     /**
-     * Define an explicit Subscriber that handles blocking.
+     * Define a Subscriber implementation that handles blocking, which
+     * is otherwise not supported by Project Reactor.
      */
     private static class BlockingSubscriber
         implements Subscriber<BigFraction> {
         /**
-         * Barrier synchronizer that the calling thread uses to wait
+         * The calling thread uses this Barrier synchronizer to wait
          * for a subscriber to complete all its async processing.
          */
         final CountDownLatch mLatch;
 
         /**
-         * StringBuilder used to log the output.
+         * A StringBuilder used to log the output.
          */
         final StringBuilder mSb;
 
@@ -253,7 +255,7 @@ public class FluxEx {
         }
 
         /**
-         * Block until all events have been processed.
+         * Block until all events have been processed by subscribe().
          */
         void await() {
             try {

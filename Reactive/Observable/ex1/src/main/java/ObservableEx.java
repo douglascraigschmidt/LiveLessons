@@ -11,8 +11,9 @@ import java.util.Random;
 
 /**
  * This class shows how to apply RxJava features synchronously to
- * perform basic Observable operations, including fromCallable(),
- * repeat(), just(), map(), mergeWith(), and blockingSubscribe().
+ * perform basic Observable operations, including just(),
+ * fromCallable(), fromArray(), repeat(), doOnNext(), map(),
+ * mergeWith(), subscribeOn(), and blockingSubscribe().
  */
 @SuppressWarnings("ALL")
 public class ObservableEx {
@@ -31,21 +32,21 @@ public class ObservableEx {
                   BigFraction.valueOf(100, 2),
                   BigFraction.valueOf(100, 1))
 
-            // Use map() to multiply each element in the stream by a
-            // constant.
-            .map(fraction -> {
+            .doOnNext(bigFraction -> 
                     sb.append("    ["
                               + Thread.currentThread().getId()
                               + "] "
                               + BigFractionUtils.sBigReducedFraction.toMixedString()
                               + " x "
-                              + fraction.toMixedString()
-                              + "\n");
+                              + bigFraction.toMixedString()
+                              + "\n"))
 
-                    // Multiply and return result.
-                    return fraction.multiply(BigFractionUtils.sBigReducedFraction);
-                })
-
+            // Use map() to multiply each element in the stream by a
+            // constant.
+            .map(bigFraction -> 
+                 // Multiply and return result.
+                 bigFraction.multiply(BigFractionUtils.sBigReducedFraction))
+                 
             // Use blockingSubscribe() to initiate all the processing
             // and handle the results.  This call runs synchronously
             // since the publisher (just()) is synchronous, runs in
@@ -54,12 +55,12 @@ public class ObservableEx {
             // Subsequent examples show more interesting types of
             // publishers that enable asynchrony.
             .blockingSubscribe(// Handle next event.
-                               multipliedFraction ->
+                               multipliedBigFraction ->
                                // Add fraction to the string buffer.
                                sb.append("    ["
                                          + Thread.currentThread().getId()
                                          + "] result = "
-                                         + multipliedFraction.toMixedString() 
+                                         + multipliedBigFraction.toMixedString() 
                                          + "\n"),
                                
                                // Handle error result event.
@@ -225,7 +226,7 @@ public class ObservableEx {
                                // Add fraction to the string buffer.
                                sb.append("    ["
                                          + Thread.currentThread().getId()
-                                         + "] result "
+                                         + "] result = "
                                          + multipliedFraction.toMixedString() 
                                          + "\n"),
                                
