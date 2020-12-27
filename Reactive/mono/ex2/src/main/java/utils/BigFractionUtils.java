@@ -128,7 +128,7 @@ public class BigFractionUtils {
                 })
                 
             // Use then() to return an empty mono to synchronize with
-            // the AsyncTester framework.
+            // the AsyncTaskBarrier framework.
             // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }

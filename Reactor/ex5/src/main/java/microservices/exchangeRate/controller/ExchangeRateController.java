@@ -10,10 +10,9 @@ import static utils.ReactorUtils.randomDelay;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET, POST, and DELETE requests via asynchronous
- * reactive programming.  These requests are mapped to methods that
- * convert between US dollars and other currencies synchronously and
- * asynchronously.
+ * handle HTTP GET requests via asynchronous reactive programming.
+ * These requests are mapped to methods that convert between US
+ * dollars and other currencies synchronously and asynchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -35,10 +34,11 @@ public class ExchangeRateController {
      * This method simulates a microservice that finds the exchange
      * rate between a source and destination currency format.
      *
-     * WebFlux maps HTTP GET requests sent to the
-     * /{rootDir}/_exchangeRate endpoint to this method.
+     * WebFlux maps HTTP GET requests sent to the /_exchangeRateAsync
+     * endpoint to this method.
      *
-     * @param currencyConversion Indicates the currency to convert from and to
+     * @param currencyConversion Indicates the currency to convert
+     *        from and to  
      * @return A Mono that emits the current exchange rate.
      */
     @GetMapping("_exchangeRateAsync")

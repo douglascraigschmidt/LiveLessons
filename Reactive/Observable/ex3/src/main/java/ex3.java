@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This class shows how to reduce and/or multiply big fractions
@@ -17,19 +17,19 @@ public class ex3 {
     public static void main (String[] argv) {
         // Use an asynchronous Observable stream and a pool of threads
         // to showcase exception handling of BigFraction objects.
-        AsyncTester.register(ObservableEx::testFractionExceptions);
+        AsyncTaskBarrier.register(ObservableEx::testFractionExceptions);
 
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction reductions and multiplications.
-        AsyncTester.register(ObservableEx::testFractionMultiplications1);
+        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications1);
 
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction multiplications and additions.
-        AsyncTester.register(ObservableEx::testFractionMultiplications2);
+        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications2);
 
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.

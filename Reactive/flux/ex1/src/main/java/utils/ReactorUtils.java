@@ -1,17 +1,16 @@
 package utils;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
@@ -53,7 +52,7 @@ public class ReactorUtils {
     /**
      * Conditionally enable concurrent processing if {@code parallel}
      * is true, otherwise, use sequential processing.
-
+     *
      * @return {@code commonPoolFlux()} if {@code parallel} is
      * true, else {@code callingFlux()}.
      */
@@ -165,10 +164,11 @@ public class ReactorUtils {
         return Flux
             // Create a generator.
             .create(sink -> {
-                    // Run from 1 to count.
-                    for (int i = 0; i < count; ++i)
+                    LongStream
+                        // Run from 1 to count.
+                        .rangeClosed(1, count)
                         // Generate the next item and emit it.
-                        sink.next(supplier.get()));
+                        .forEach(i -> sink.next(supplier.get()));
 
                     // Indicate we're done.
                     sink.complete();
@@ -187,5 +187,17 @@ public class ReactorUtils {
                 .create(sink -> sink.onRequest(size -> {
                     sink.next(supplier.get());
                 }));
+    }
+
+
+    /**
+     * Conditionally enable logging if {@code log} is true, otherwise,
+     * don't log.
+     */
+    public static <T> Function<Flux<T>, Flux<T>> logIf(boolean log) {
+        if (log)
+            return Flux::log;
+        else
+            return flux -> flux;
     }
 }

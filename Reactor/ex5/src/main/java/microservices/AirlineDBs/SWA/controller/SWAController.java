@@ -10,10 +10,10 @@ import java.util.List;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET, POST, and DELETE requests via asynchronous
- * reactive programming.  These requests are mapped to methods that
- * return the flights available on Southwest airlines for certain dates
- * and certain cities.
+ * handle HTTP POST DELETE requests via asynchronous reactive
+ * programming.  These requests are mapped to methods that return the
+ * flights available on Southwest airlines for certain dates and
+ * certain cities.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -23,8 +23,8 @@ import java.util.List;
  * PUT, and DELETE calls, respectively.  These components are
  * identified by the @RestController annotation below.
  *
- * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@code FlightPriceController}.  GET
+ * WebFlux uses the {@code @PostMapping} annotation to map HTTP POST
+ * requests onto methods in the {@code FlightPriceController}.  POST
  * requests invoked from any HTTP web client (e.g., a web browser) or
  * command-line utility (e.g., Curl or Postman).
  */
@@ -32,7 +32,7 @@ import java.util.List;
 @RequestMapping("/microservices/AirlineDBs/SWA")
 public class SWAController {
     /**
-     * The list of Trips and their associated prices.
+     * The list of TripResponse objects and their associated prices.
      */
     private final List<TripResponse> mTrips;
 
@@ -41,26 +41,32 @@ public class SWAController {
      */
     SWAController() {
         mTrips = TestDataFactory
+            // Initialize the list of TripResponse objects and their
+            // associated prices from the SWA.txt file.
             .getTripList("SWA.txt");
     }
 
     /**
-     * This method finds all the trips on given departure
-     * date and the flight leg for Southwest Airlines.
+     * This method finds all the trips on given departure date and the
+     * flight leg for Southwest Airlines.
      *
-     * WebFlux maps HTTP POST requests sent to the
-     * /_bestPrice endpoint to this method.
+     * WebFlux maps HTTP POST requests sent to the /_bestPrice
+     * endpoint to this method.
      *
-     * @param trip Information about the trip, i.e., date and flight leg.
-     * @return A Flux that emits all the trips for the given departure date and flight leg.
+     * @param tripRequest Information about the trip, i.e., date and
+     *         flight leg  
+     * @return A Flux that emits all the trips for the given departure
+     *         date and flight leg
      */
     @PostMapping("/_getTripPrices")
-    private Flux<TripResponse> getTripPrices(@RequestBody TripRequest trip) {
+    private Flux<TripResponse> getTripPrices(@RequestBody TripRequest tripRequest) {
         return Flux
-            // Convert the list of trips into a Flux stream.
+            // Convert the list of TripResponse objects into a Flux
+            // stream.
             .fromIterable(mTrips)
 
-            // Select only those trips that equal the trip param.
-            .filter(trip::equals);
+            // Select only those TripResponse objects that equal the
+            // tripRequest param.
+            .filter(tripRequest::equals);
     }
 }

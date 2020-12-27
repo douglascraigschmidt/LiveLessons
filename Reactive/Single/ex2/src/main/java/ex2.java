@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to reduce, multiply, and display BigFractions
@@ -15,24 +15,24 @@ public class ex2 {
     public static void main (String[] argv) throws InterruptedException {
         // Test asynchronous BigFraction reduction using a Single and a
         // pipeline of operations that run off the calling thread.
-        AsyncTester.register(SingleEx::testFractionReductionAsync);
+        AsyncTaskBarrier.register(SingleEx::testFractionReductionAsync);
 
         // Test hybrid asynchronous BigFraction multiplication using a
         // Single and a callable, where the processing is performed in a
         // background thread and the result is printed in a blocking
         // manner by the main thread.
-        AsyncTester.register(SingleEx::testFractionMultiplicationCallable1);
+        AsyncTaskBarrier.register(SingleEx::testFractionMultiplicationCallable1);
 
         // Test asynchronous BigFraction multiplication using a Single
         // and a callable, where the processing and the printing of
         // the result is handled in a non-blocking manner by a
         // background thread.
-        AsyncTester.register(SingleEx::testFractionMultiplicationCallable2);
+        AsyncTaskBarrier.register(SingleEx::testFractionMultiplicationCallable2);
 
         @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.

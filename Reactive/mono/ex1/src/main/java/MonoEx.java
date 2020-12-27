@@ -50,7 +50,7 @@ public class MonoEx {
                 })
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .then();
     }
 
@@ -116,7 +116,7 @@ public class MonoEx {
             .doOnSuccess(printResult)
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .then();
     }
 }

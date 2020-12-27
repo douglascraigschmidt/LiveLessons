@@ -1,23 +1,32 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to apply Project Reactor features
  * synchronously to perform basic Flux operations, including just(),
- * map(), and subscribe().
+ * fromIterable(), fromArray(), doOnNext(), map(), mergeWith(),
+ * repeat(), subscribeOn(), and subscribe().
  */
+@SuppressWarnings("ConstantConditions")
 public class ex1 {
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws InterruptedException {
+    public static void main (String[] argv) {
         // Test BigFraction multiplication using a synchronous Flux
         // stream.
-        AsyncTester.register(FluxEx::testFractionMultiplication);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync1);
 
-        @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+        // Another test of BigFraction multiplication using a
+        // synchronous Flux stream and several local variables.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
+
+        // A test of BigFraction multiplication using an asynchronous
+        // Flux stream and a Subscriber implementation.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationAsync);
+
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running.

@@ -54,7 +54,7 @@ public class MonoEx {
             .doOnSuccess(mixedFractionPrinter)
 
             // Return an empty mono to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
            .then();
     }
 

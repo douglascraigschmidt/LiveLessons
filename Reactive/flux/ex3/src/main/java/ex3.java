@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
@@ -17,22 +17,22 @@ public class ex3 {
     public static void main (String[] argv) throws InterruptedException {
         // Test BigFraction exception handling using a synchronous
         // Flux stream.
-        AsyncTester.register(FluxEx::testFractionExceptions);
+        AsyncTaskBarrier.register(FluxEx::testFractionExceptions);
 
         // Test BigFraction multiplications using a stream of monos
         // and a pipeline of operations, including create(), take(),
         // flatMap(), collectList(), and first().
-        AsyncTester.register(FluxEx::testFractionMultiplications1);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications1);
 
         // Test BigFraction multiplications by combining the Java
         // streams framework with the Reactor framework and the common
         // fork-join pool.
-        AsyncTester.register(FluxEx::testFractionMultiplications2);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications2);
 
         @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.

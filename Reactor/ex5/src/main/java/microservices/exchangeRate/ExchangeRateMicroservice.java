@@ -6,7 +6,8 @@ import utils.Options;
 
 /**
  * This class provides the entry point into the Spring WebFlux-based
- * version of the ExchangeRate microservice.
+ * version of the ExchangeRate microservice, which returns the current
+ * exchange that converts one currency to another.
  */
 @SpringBootApplication
 public class ExchangeRateMicroservice {

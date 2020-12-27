@@ -11,11 +11,13 @@ import reactor.core.scheduler.Scheduler;
  */
 public interface PriceProxy {
     /**
-     * Returns a Flux that emits {@code TripResponse} objects that match the {@code trip} param.
+     * Returns a Flux that emits {@code TripResponse} objects that
+     * match the {@code trip} param.
      *
      * @param scheduler Thread pool used to perform the computations
      * @param trip The trip to search for price information
-     * @return A Flux that emits {@code TripResponse} objects that match the {@code trip} param
+     * @return A Flux that emits {@code TripResponse} objects that
+     *         match the {@code trip} param
      */
     Flux<TripResponse> findTripsAsync(Scheduler scheduler,
                                       TripRequest trip);

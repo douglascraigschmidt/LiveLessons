@@ -50,8 +50,8 @@ public class TripRequest {
     }
 
     /**
-     * @return Returns true if there's a match between this
-     * TripRequest and the {@code tripRequest} param
+     * @return Returns true if there's a match between this {@code
+     * TripRequest} and the {@code tripRequest} param
      */
     @Override
     public boolean equals(Object tripRequest) {
@@ -85,7 +85,7 @@ public class TripRequest {
     }
 
     /**
-     * @return A String representation of this {@code TripRequest} object.
+     * @return A String representation of this {@code TripRequest}
      */
     @Override
     public String toString() {

@@ -6,13 +6,13 @@ import utils.Options;
 
 /**
  * This class provides the entry point into the Spring WebFlux-based
- * version of the SWA microservice.
+ * version of the Southwest Airlines (SWA) microservice.
  */
 @SpringBootApplication
 public class SWAPricesMicroservice {
     /**
-     * A static main() entry point is needed to run the
-     * SWA microservice.
+     * A static main() entry point is needed to run the SWA
+     * microservice.
      */
     public static void main(String[] argv) {
         // Parse the options.

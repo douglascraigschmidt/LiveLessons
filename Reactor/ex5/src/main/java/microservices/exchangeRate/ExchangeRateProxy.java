@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * This class serves as a proxy to the ExchangeRate microservice.
+ * This class serves as a proxy to the ExchangeRate microservice,
+ * which returns the current exchange that converts one currency to
+ * another.
  */
 public class ExchangeRateProxy {
     /**
-     * The URI that denotes a remote method to determine the current exchange rate.
+     * The URI that denotes a remote method to determine the current
+     * exchange rate.
      */
     private final String mQueryExchangeRateURIAsync =
         "/microservices/exchangeRate/_exchangeRateAsync";
@@ -37,8 +40,9 @@ public class ExchangeRateProxy {
         "http://localhost:8081";
 
     /**
-     * A cache of the latest exchange rate for a
-     * CurrencyConversion.
+     * A cache of the latest exchange rate for a CurrencyConversion,
+     * which is used if the ExchangeRate microservice fails to respond
+     * before the designated timeout elapses.
      */
     private final List<CurrencyConversion> mExchangeRateCache =
         new ArrayList<>();
@@ -59,9 +63,11 @@ public class ExchangeRateProxy {
     }
 
     /**
-     * Finds the exchange rate for the {@code sourceAndDestination} asynchronously.
+     * Finds the exchange rate for the {@code sourceAndDestination}
+     * asynchronously.
      *
-     * @param scheduler The Scheduler context in which to run the operation
+     * @param scheduler The Scheduler context in which to run the
+     *                  operation
      * @param currencyConversion The currency to convert from and to
      * @return A Mono containing the exchange rate.
      */
@@ -73,10 +79,13 @@ public class ExchangeRateProxy {
                           // Create an HTTP GET request.
                           .get()
 
-                          // Add the uri to the baseUrl.
+                          // Update the uri and add it to the baseUrl.
                           .uri(UriComponentsBuilder
                                .fromPath(mQueryExchangeRateURIAsync)
-                               .queryParam("currencyConversion", currencyConversion)
+                               // Insert the currencyConversion into
+                               // the URL.
+                               .queryParam("currencyConversion", 
+                                           currencyConversion)
                                .build()
                                .toString())
 
@@ -95,8 +104,8 @@ public class ExchangeRateProxy {
             // Update the cache with the latest rate.
             .flatMap(latestRate -> updateCachedRate(latestRate, currencyConversion))
 
-            // If this computation runs for more than the configured number of
-            // seconds return the last cached rate.
+            // If this computation runs for more than the configured
+            // number of seconds return the last cached rate.
             .timeout(Options.instance().exchangeRateTimeout(),
                      getLastCachedRate(currencyConversion));
     }

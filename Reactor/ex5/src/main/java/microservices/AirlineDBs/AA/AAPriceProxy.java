@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the AAPrice microservice, which
- * provides prices for American Airlines flights.
+ * provides prices for American Airlines flight legs.
  */
 public class AAPriceProxy
        implements PriceProxy {
@@ -55,7 +55,8 @@ public class AAPriceProxy
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param trip The trip to price
-     * @return A Flux that emits {@code TripResponse} objects that match the {@code trip} param
+     * @return A Flux that emits {@code TripResponse} objects that
+     *         match the {@code trip} param
      */
     @Override
     public Flux<TripResponse> findTripsAsync(Scheduler scheduler,

@@ -12,13 +12,14 @@ import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the SWAPrice microservice, which
- * provides prices for Southwest Airlines flights.
+ * provides prices for Southwest Airlines (SWA) flights.
 
  */
 public class SWAPriceProxy 
        implements PriceProxy {
     /**
-     * The URI that denotes the remote method to query the SWA price database.
+     * The URI that denotes the remote method to query the SWA price
+     * database.
      */
     private final String mFindSWAPricesURIAsync =
             "/microservices/AirlineDBs/SWA/_getTripPrices";
@@ -55,11 +56,12 @@ public class SWAPriceProxy
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param trip The trip to price
-     * @return A Flux that emits {@code TripResponse} objects that match the {@code trip} param
+     * @return A Flux that emits {@code TripResponse} objects that
+     *         match the {@code trip} param
      */
     @Override
     public Flux<TripResponse> findTripsAsync(Scheduler scheduler,
-                                             TripRequest trip) {
+                                             TripRequest tripRequest) {
         return Mono
             // Return a Flux containing all TripResponse objects that
             // map to the TripRequest param.
@@ -70,17 +72,19 @@ public class SWAPriceProxy
                           // Add the uri to the baseUrl.
                           .uri(mFindSWAPricesURIAsync)
 
-                          // Encode the trip in the body of the
+                          // Encode the tripRequest in the body of the
                           // request.
-                          .bodyValue(trip)
+                          .bodyValue(tripRequest)
 
                           // Retrieve the response.
                           .retrieve()
 
-                          // Convert it to a Flux of Trips.
+                          // Convert it to a Flux of TripResponse
+                          // objects.
                           .bodyToFlux(TripResponse.class))
 
-            // Schedule this to run on the given scheduler.
+            // Schedule this computation to run on the given
+            // scheduler.
             .subscribeOn(scheduler)
 
             // De-nest the result so it's a Flux<TripResponse>.

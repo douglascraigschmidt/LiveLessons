@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to apply RxJava features asynchronously and
@@ -14,12 +14,12 @@ public class ex3 {
     public static void main (String[] argv) throws InterruptedException {
         // Test asynchronous BigFraction multiplication and addition
         // using zipWith().
-        AsyncTester.register(SingleEx::testFractionCombine);
+        AsyncTaskBarrier.register(SingleEx::testFractionCombine);
 
         @SuppressWarnings("ConstantConditions")
-            long testCount = AsyncTester
+            long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.

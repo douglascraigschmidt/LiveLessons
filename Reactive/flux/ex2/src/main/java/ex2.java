@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to apply Project Reactor features
@@ -15,16 +15,16 @@ public class ex2 {
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous time-driven Flux
         // stream.
-        AsyncTester.register(FluxEx::testIsPrimeTimed);
+        AsyncTaskBarrier.register(FluxEx::testIsPrimeTimed);
 
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous Flux stream.
-        AsyncTester.register(FluxEx::testIsPrimeAsync);
+        AsyncTaskBarrier.register(FluxEx::testIsPrimeAsync);
 
         @SuppressWarnings("ConstantConditions")
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.

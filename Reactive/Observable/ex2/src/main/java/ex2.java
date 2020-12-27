@@ -1,4 +1,4 @@
-import utils.AsyncTester;
+import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to apply RxJava features asynchronously to
@@ -16,15 +16,15 @@ public class ex2 {
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous time-driven Observable
         // stream.
-        AsyncTester.register(ObservableEx::testIsPrimeTimed);
+        AsyncTaskBarrier.register(ObservableEx::testIsPrimeTimed);
 
         // Test a stream of random BigIntegers to determine which
         // values are prime using an asynchronous Observable stream.
-        AsyncTester.register(ObservableEx::testIsPrimeAsync);
+        AsyncTaskBarrier.register(ObservableEx::testIsPrimeAsync);
 
-        long testCount = AsyncTester
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
-            .runTests()
+            .runTasks()
 
             // Block until all the tests are done to allow future
             // computations to complete running asynchronously.
