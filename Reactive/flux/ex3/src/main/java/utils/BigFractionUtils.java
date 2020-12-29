@@ -71,7 +71,7 @@ public class BigFractionUtils {
      * parameter.
      */
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
-                                              StringBuilder sb) {
+                                              StringBuffer sb) {
         // Quick sort the list asynchronously.
         Mono<List<BigFraction>> quickSortM = Mono
             // Use the fromCallable() factory method to obtain the

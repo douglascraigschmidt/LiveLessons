@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sMAX_FRACTIONS;
 import static utils.MonosCollector.toMono;
@@ -20,12 +21,14 @@ import static utils.MonosCollector.toMono;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
- * fromIterable(), create(), map(), flatMap(), collectList(), take(),
- * filter(), and various types of thread pools.  It also shows various
- * Mono operations, such as first(), when(), flatMap(), subscribeOn(),
- * and the parallel thread pool.  It also demonstrates how to combine
- * the Java streams framework with the Project Reactor framework.
+ * fromIterable(), create(), map(), flatMap(), collectList(),
+ * collect(), take(), filter(), and various types of thread pools.  It
+ * also shows various Mono operations, such as first(), when(),
+ * flatMap(), subscribeOn(), and the parallel thread pool.  It also
+ * demonstrates how to combine the Java streams framework with the
+ * Project Reactor framework.
  */
+@SuppressWarnings("ALL")
 public class FluxEx {
     /**
      * Create a random number generator.
@@ -37,8 +40,8 @@ public class FluxEx {
      * stream and a pool of threads.
      */
     public static Mono<Void> testFractionExceptions() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionExceptions1()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionExceptions1()\n");
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
@@ -103,7 +106,7 @@ public class FluxEx {
             .collectList()
 
             // Process the collected list and return a mono used
-            // to synchronize with the AsyncTester framework.
+            // to synchronize with the AsyncTaskBarrier framework.
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -116,8 +119,8 @@ public class FluxEx {
      * collectList(), and first().
      */
     public static Mono<Void> testFractionMultiplications1() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications1()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications1()\n");
 
         sb.append("     Printing sorted results:");
 
@@ -142,12 +145,12 @@ public class FluxEx {
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.parallel()))
 
-            // Collect the results into a list.
-            .collectList()
+            // Collect the results into a Mono<List>.
+            .collect(toList())
 
             // Process the results of the collected list and return a
-            // mono that's used to synchronize with the AsyncTester
-            // framework.
+            // mono that's used to synchronize with the
+            // AsyncTaskBarrier framework.
             .flatMap(list ->
                      // Sort and print the results after all async
                      // fraction reductions complete.
@@ -155,13 +158,83 @@ public class FluxEx {
     }
 
     /**
+     * Use an asynchronous Observable stream and a pool of threads to
+     * perform BigFraction multiplications and additions.
+     */
+    public static Mono<Void> testFractionMultiplications2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications2()\n");
+
+        // Create a list of BigFraction objects.
+        List<BigFraction> bigFractions = List.of(BigFraction.valueOf(1000, 30),
+                                                 BigFraction.valueOf(1000, 40),
+                                                 BigFraction.valueOf(1000, 20),
+                                                 BigFraction.valueOf(1000, 10));
+
+        // Create a Function that multiplies big fractions.
+        Function<BigFraction, BigFraction> multiplyBigFractions = bf -> {
+            // Multiply bf by a constant.
+            BigFraction result = bf.multiply(sBigReducedFraction);
+
+            sb.append("     "
+                      + bf.toMixedString()
+                      + " x "
+                      + sBigReducedFraction.toMixedString()
+                      + " = "
+                      + result.toMixedString()
+                      + "\n");
+            return result;
+        };
+
+        // Display the results.
+        Consumer<? super BigFraction> displayResults = result -> {
+            sb.append("    sum of BigFractions = "
+                    + result
+                    + "\n");
+            BigFractionUtils.display(sb.toString());
+        };
+
+        return Flux
+            // Emit a stream of big fractions.
+            .fromIterable(bigFractions)
+
+            // Iterate thru the elements using Project Reactor's
+            // flatMap() concurrency idiom to multiply these big
+            // fractions asynchronously in a thread pool.
+            .flatMap(bf -> Flux
+                     // Create/process each BigFraction asynchronously
+                     // via an "inner publisher".  However, just()
+                     // emits the BigFraction in the "assembly thread"
+                     // and *not* a background thread.
+                     .just(bf)
+                     
+                     // Perform the processing asynchronously in a
+                     // background thread from the given scheduler.
+                     .subscribeOn(Schedulers.parallel())
+
+                     // Perform the multiplication in a background
+                     // thread.
+                     .map(multiplyBigFractions))
+
+            // Reduce the results into one Mono<BigFraction>.
+            .reduce(BigFraction::add)
+
+            // Display the results if all goes well.
+            .doOnSuccess(displayResults)
+
+            // Return a Mono<Void> to synchronize with the
+            // AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
      * Test BigFraction multiplications by combining the Java streams
      * framework with the Project Reactor framework and the Java
      * common fork-join framework.
      */
-    public static Mono<Void> testFractionMultiplications2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications2()\n");
+    public static Mono<Void> testFractionMultiplications3() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications3()\n");
 
         sb.append("     Printing sorted results:");
 

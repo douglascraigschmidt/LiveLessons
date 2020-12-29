@@ -24,10 +24,14 @@ public class ex3 {
         // flatMap(), collectList(), and first().
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplications1);
 
+        // Use an asynchronous Flux stream and a pool of threads to
+        // perform BigFraction multiplications and additions.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications2);
+
         // Test BigFraction multiplications by combining the Java
         // streams framework with the Reactor framework and the common
         // fork-join pool.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications2);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications3);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

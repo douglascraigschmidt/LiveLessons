@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.stream.Collectors.toList;
 import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sMAX_FRACTIONS;
 
@@ -105,7 +106,7 @@ public class ObservableEx {
             .collectInto(new ArrayList<BigFraction>(), List::add)
 
             // Process the ArrayList and return a Completable that
-            // synchronizes with the AsyncTester framework.
+            // synchronizes with the AsyncTaskBarrier framework.
             .flatMapCompletable(list ->
                                 // Sort/print results after all async
                                 // fraction operations complete.
@@ -143,10 +144,10 @@ public class ObservableEx {
                                                Schedulers.computation()))
 
             // Collect the results into an ArrayList.
-            .collect(ArrayList<BigFraction>::new, List::add)
+            .collect(toList())
 
             // Process the ArrayList and return a Completable that
-            // synchronizes with the AsyncTester framework.
+            // synchronizes with the AsyncTaskBarrier framework.
             .flatMapCompletable(list ->
                                 // Sort/print results after all async
                                 // fraction operations complete.
@@ -219,7 +220,7 @@ public class ObservableEx {
             .doOnSuccess(displayResults)
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
