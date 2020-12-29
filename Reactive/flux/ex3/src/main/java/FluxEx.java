@@ -22,11 +22,11 @@ import static utils.MonosCollector.toMono;
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
  * fromIterable(), create(), map(), flatMap(), collectList(),
- * collect(), take(), filter(), and various types of thread pools.  It
- * also shows various Mono operations, such as first(), when(),
- * flatMap(), subscribeOn(), and the parallel thread pool.  It also
- * demonstrates how to combine the Java streams framework with the
- * Project Reactor framework.
+ * collect(), reduce(), take(), filter(), and various types of thread
+ * pools.  It also shows various Mono operations, such as first(),
+ * when(), materialize(), flatMap(), subscribeOn(), and the parallel
+ * thread pool.  It also demonstrates how to combine the Java streams
+ * framework with the Project Reactor framework.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -293,6 +293,5 @@ public class FluxEx {
                      // Perform all processing asynchronously in a
                      // pool of background threads.
                      .subscribeOn(scheduler));
-
     }
 }

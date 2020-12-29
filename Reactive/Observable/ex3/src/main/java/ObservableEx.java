@@ -225,23 +225,6 @@ public class ObservableEx {
     }
 
     /**
-     * Emit a stream of random unreduced big fractions.
-     */
-    private static void bigFractionEmitter(ObservableEmitter<BigFraction> emitter) {
-        Observable
-            // Generate sMAX_FRACTIONS.
-            .range(1, sMAX_FRACTIONS)
-
-            // Emit random numbers until the range is complete.
-            .subscribe(__ -> emitter
-                       // Generate a random unreduced big fraction.
-                       .onNext(BigFractionUtils.makeBigFraction(sRANDOM,
-                                                                false)),
-                       t -> emitter.onComplete(),
-                       emitter::onComplete);
-    }
-
-    /**
      * This factory method returns an Observable that's signaled after the
      * {@code unreducedFraction} is reduced/multiplied asynchronously
      * in background threads from the given {@code scheduler}.
