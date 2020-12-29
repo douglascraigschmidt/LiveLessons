@@ -59,6 +59,19 @@ public class ObservableEx {
         Duration.ofMillis(500);
 
     /**
+     * Define a predicate that only matches odd numbers.
+     */
+    private static Predicate<BigInteger> sOnlyOdd = bigInteger ->
+        !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO);
+
+    /**
+     * Generate a random BigInteger.
+     */
+    private static Function<Long, BigInteger> sGenerateRandomBigInteger = __ ->
+        BigInteger.valueOf(sLOWER_BOUND +
+                           sRANDOM.nextInt(sMAX_ITERATIONS));
+
+    /**
      * Use an asynchronous time-driven Observable stream that
      * processes random BigIntegers to determine which ones are prime.
      */
@@ -98,7 +111,7 @@ public class ObservableEx {
             .count()
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
@@ -108,28 +121,20 @@ public class ObservableEx {
      * integers at a periodic interval in a background thread.
      */
     private static void emitInterval(ObservableEmitter<BigInteger> emitter) {
-        // Define a predicate that only matches odd numbers.
-        Predicate<BigInteger> onlyOdd = bigInteger ->
-                !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO);
-
-        // Generate a random BigInteger.
-        Function<Long, BigInteger> generateRandomBigInteger = __ ->
-                BigInteger.valueOf(sLOWER_BOUND +
-                        sRANDOM.nextInt(sMAX_ITERATIONS));
-
         Observable
-            // Generate a big integer stream periodically in
-            // a background thread (by default on the Schedulers.computation()
-            // thread pool).
+            // Generate a big integer stream periodically in a
+            // background thread (by default on the
+            // Schedulers.computation() thread pool).
             .interval(sSLEEP_DURATION.toMillis(),
                       TimeUnit.MILLISECONDS)
 
-            // Generate random numbers between min and max
-            // values to ensure some duplicates.
-            .map(generateRandomBigInteger)
+            // Generate random numbers between min and max values to
+            // ensure some duplicates.
+            .map(sGenerateRandomBigInteger)
 
-            // Eliminate even numbers from consideration since they aren't prime!
-            .filter(onlyOdd)
+            // Eliminate even numbers from consideration since they
+            // aren't prime!
+            .filter(sOnlyOdd)
 
             // Only take sMAX_ITERATIONS of odd big integers.
             .take(sMAX_ITERATIONS)
@@ -151,13 +156,17 @@ public class ObservableEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeAsync()\n");
 
+        // Callback that writes the BigInteger to the StringBuffer.
+        Consumer<BigInteger> logBigInteger =
+            s -> ObservableEx.print(s, sb);
+
         return Observable
             // Factory method creates a stream of random big integers
             // that are generated in a background thread.
             .create(ObservableEx::emitAsync)
 
             // Print the big integer as a debugging aid.
-            .doOnNext(s -> ObservableEx.print(s, sb))
+            .doOnNext(logBigInteger)
 
             // Arrange to perform the prime-checking computations in the
             // "subscriber" thread.
@@ -178,7 +187,7 @@ public class ObservableEx {
             .doFinally(() -> BigFractionUtils.display(sb.toString()))
                 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElements();
     }
 
@@ -190,7 +199,7 @@ public class ObservableEx {
     private static void emitAsync(ObservableEmitter<BigInteger> emitter) {
         Observable
             // Emit sMAX_ITERATIONS integers starting at 1.
-            .range(1, sMAX_ITERATIONS)
+            .rangeLong(1, sMAX_ITERATIONS)
 
             // Arrange to emit the random big integers in the
             // "publisher" thread.
@@ -198,13 +207,11 @@ public class ObservableEx {
 
             // Generate random numbers between min and max values to
             // ensure some duplicates.
-            .map(__ ->
-                 BigInteger.valueOf(sLOWER_BOUND +
-                                    sRANDOM.nextInt(sMAX_ITERATIONS)))
+            .map(sGenerateRandomBigInteger)
 
-            // Eliminate even numbers from consideration since they aren't prime!
-            .filter(bigInteger ->
-                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
+            // Eliminate even numbers from consideration since they
+            // aren't prime!
+            .filter(sOnlyOdd)
 
             // Start the processing and emit each random number until
             // complete or an error occurs.

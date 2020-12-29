@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This class shows how to apply Project Reactor features
@@ -54,12 +56,29 @@ public class FluxEx {
         Duration.ofMillis(500);
 
     /**
+     * Define a predicate that only matches odd numbers.
+     */
+    private static Predicate<BigInteger> sOnlyOdd = bigInteger ->
+        !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO);
+
+    /**
+     * Generate a random BigInteger.
+     */
+    private static Function<Long, BigInteger> sGenerateRandomBigInteger = __ ->
+        BigInteger.valueOf(sLOWER_BOUND +
+                           sRANDOM.nextInt(sMAX_ITERATIONS));
+
+    /**
      * Test a stream of random BigIntegers to determine which values
      * are prime using an asynchronous time-driven Flux stream.
      */
     public static Mono<Void> testIsPrimeTimed() {
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeTimed()\n");
+
+        // Callback that writes the BigInteger to the StringBuffer.
+        Consumer<BigInteger> logBigInteger =
+            s -> FluxEx.print(s, sb);
 
         return Flux
             // Factory method creates a flow of random big integers
@@ -68,7 +87,7 @@ public class FluxEx {
             .create(makeTimedFluxSink())
 
             // Print the big integer as a debugging aid.
-            .doOnNext(s -> FluxEx.print(s, sb))
+            .doOnNext(logBigInteger)
 
             // Use a memoizer to check if each random big integer is
             // prime or not on the background thread.
@@ -82,7 +101,7 @@ public class FluxEx {
 
             // Display results after all elements in flux stream are
             // processed and return an empty mono to synchronize with
-            // AsyncTester.
+            // AsyncTaskBarrier.
             .then(Mono.fromRunnable(() ->
                                     BigFractionUtils.display(sb.toString())));
     }
@@ -96,19 +115,17 @@ public class FluxEx {
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
-            // Generate a big integer stream periodically in
-            // a background thread.
+            // Generate a big integer stream periodically in a
+            // background thread.
             .interval(sSLEEP_DURATION)
 
-            // Generate random numbers between min and max
-            // values to ensure some duplicates.
-            .map(__ ->
-                 BigInteger.valueOf(sLOWER_BOUND +
-                                    sRANDOM.nextInt(sMAX_ITERATIONS)))
+            // Generate random numbers between min and max values to
+            // ensure some duplicates.
+            .map(sGenerateRandomBigInteger)
 
-            // Eliminate even numbers from consideration since they aren't prime!
-            .filter(bigInteger ->
-                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
+            // Eliminate even numbers from consideration since they
+            // aren't prime!
+            .filter(sOnlyOdd)
 
             // Only take sMAX_ITERATIONS of big integers.
             .take(sMAX_ITERATIONS)
@@ -130,16 +147,20 @@ public class FluxEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeAsync()\n");
 
+        // Callback that writes the BigInteger to the StringBuffer.
+        Consumer<BigInteger> logBigInteger =
+            s -> FluxEx.print(s, sb);
+
         return Flux
             // Factory method creates a stream of random big integers
             // that are generated in a background thread.
             .create(makeAsyncFluxSink())
 
             // Print the big integer as a debugging aid.
-            .doOnNext(s -> FluxEx.print(s, sb))
+            .doOnNext(logBigInteger)
 
-            // Arrange to perform the prime-checking computations in the
-            // "subscriber" thread.
+            // Arrange to perform the prime-checking computations in
+            // the "subscriber" thread.
             .publishOn(Schedulers.newParallel("subscriber", 1))
 
             // Use a memoizer to check if each random big integer is
@@ -154,7 +175,7 @@ public class FluxEx {
 
             // Display results after all elements in the flux stream are
             // processed and return an empty mono to synchronize with
-            // AsyncTester.
+            // AsyncTaskBarrier.
             .then(Mono.fromRunnable(() ->
                                     BigFractionUtils.display(sb.toString())));
     }
@@ -171,19 +192,20 @@ public class FluxEx {
             // Emit sMAX_ITERATIONS integers starting at 1.
             .range(1, sMAX_ITERATIONS)
 
+            // Convert to Long since Flux lacks a rangeLong() method.
+            .map(Integer::toUnsignedLong)
+
             // Arrange to emit the random big integers in the
             // "publisher" thread.
             .subscribeOn(Schedulers.newParallel("publisher", 1))
 
             // Generate random numbers between min and max values
             // to ensure some duplicates.
-            .map(__ ->
-                 BigInteger.valueOf(sLOWER_BOUND +
-                                    sRANDOM.nextInt(sMAX_ITERATIONS)))
+            .map(sGenerateRandomBigInteger)
 
-            // Eliminate even numbers from consideration since they aren't prime!
-            .filter(bigInteger ->
-                    !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO))
+            // Eliminate even numbers from consideration since they
+            // aren't prime!
+            .filter(sOnlyOdd)
 
             // Start the processing and emit each random number until
             // complete or an error occurs.
