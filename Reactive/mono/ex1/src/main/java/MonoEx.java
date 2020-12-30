@@ -23,7 +23,7 @@ public class MonoEx {
     private static final BigFraction sUnreducedFraction = BigFraction
         .valueOf(new BigInteger(sBI1),
                  new BigInteger(sBI2),
-                false);
+                 false);
 
     /**
      * Test synchronous BigFraction reduction using a mono and a
@@ -41,11 +41,11 @@ public class MonoEx {
             // Use doOnSuccess() to print the BigFraction. If
             // something goes wrong doOnSuccess() will be skipped.
             .doOnSuccess(bigFraction -> sb
-                .append("     unreducedFraction "
-                        + sUnreducedFraction.toString()
-                        + "\n     reduced improper fraction = "
-                        + bigFraction.toString()
-                        + "\n     calling BigFraction::toMixedString\n"))
+                         .append("     unreducedFraction "
+                                 + sUnreducedFraction.toString()
+                                 + "\n     reduced improper fraction = "
+                                 + bigFraction.toString()
+                                 + "\n     calling BigFraction::toMixedString\n"))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
@@ -77,10 +77,10 @@ public class MonoEx {
 
         // A Consumer that logs the current value of the unreduced BigFraction.
         Consumer<BigFraction> logBigFraction = bigFraction -> sb
-                .append("     unreducedFraction "
-                        + sUnreducedFraction.toString()
-                        + "\n     reduced improper fraction = "
-                        + bigFraction.toString());
+            .append("     unreducedFraction "
+                    + sUnreducedFraction.toString()
+                    + "\n     reduced improper fraction = "
+                    + bigFraction.toString());
 
         // Create a callable lambda expression that
         // reduces an unreduced big fraction.
