@@ -4,8 +4,8 @@ import utils.AsyncTaskBarrier;
  * This example shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
- * thread pool.
+ * just(), subscribeOn(), zipWith(), doOnSuccess(), then(), and the
+ * parallel thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {

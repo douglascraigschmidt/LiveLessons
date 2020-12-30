@@ -11,11 +11,20 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply Project Reactor features
- * synchronously to reduce and display BigFractions via
- * basic Mono operations, including fromCallable(), map(),
- * doOnSuccess(), and then().
+ * synchronously to reduce and display BigFractions via basic Mono
+ * operations, including just(), fromCallable(), map(), doOnSuccess(),
+ * and then().
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
+    /**
+     * Create a new unreduced big fraction.
+     */
+    private static final BigFraction sUnreducedFraction = BigFraction
+        .valueOf(new BigInteger(sBI1),
+                 new BigInteger(sBI2),
+                false);
+
     /**
      * Test synchronous BigFraction reduction using a mono and a
      * pipeline of operations that run on the calling thread.
@@ -24,16 +33,19 @@ public class MonoEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReductionSync1()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = BigFraction
-            .valueOf(new BigInteger(sBI1),
-                     new BigInteger(sBI2),
-                     false);
-
         return Mono
-            // Use fromCallable() to begin synchronously reducing a
-            // big fraction in the calling thread.
-            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
+            // Use just() to begin synchronously reducing a big
+            // fraction in the calling thread.
+            .just(BigFraction.reduce(sUnreducedFraction))
+
+            // Use doOnSuccess() to print the BigFraction. If
+            // something goes wrong doOnSuccess() will be skipped.
+            .doOnSuccess(bigFraction -> sb
+                .append("     unreducedFraction "
+                        + sUnreducedFraction.toString()
+                        + "\n     reduced improper fraction = "
+                        + bigFraction.toString()
+                        + "\n     calling BigFraction::toMixedString\n"))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
@@ -63,27 +75,18 @@ public class MonoEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReductionSync2()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = BigFraction
-            .valueOf(new BigInteger(sBI1),
-                     new BigInteger(sBI2),
-                     false);
+        // A Consumer that logs the current value of the unreduced BigFraction.
+        Consumer<BigFraction> logBigFraction = bigFraction -> sb
+                .append("     unreducedFraction "
+                        + sUnreducedFraction.toString()
+                        + "\n     reduced improper fraction = "
+                        + bigFraction.toString());
 
         // Create a callable lambda expression that
         // reduces an unreduced big fraction.
-        Callable<BigFraction> reduceFraction = () -> {
+        Callable<BigFraction> reduceFraction = () -> BigFraction
             // Reduce the big fraction.
-            BigFraction reducedFraction = BigFraction
-                .reduce(unreducedFraction);
-
-            sb.append("     unreducedFraction "
-                      + unreducedFraction.toString()
-                      + "\n     reduced improper fraction = "
-                      + reducedFraction.toString());
-
-            // Return the reduced big fraction.
-            return reducedFraction;
-        };
+            .reduce(sUnreducedFraction);
 
         // Create a lambda function that converts a reduced improper
         // big fraction to a mixed big fraction.
@@ -104,6 +107,10 @@ public class MonoEx {
             // Use fromCallable() to begin synchronously reducing a
             // big fraction in the calling thread.
             .fromCallable(reduceFraction)
+
+            // Use doOnSuccess() to print the BigFraction. If
+            // something goes wrong doOnSuccess() will be skipped.
+            .doOnSuccess(logBigFraction)
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced

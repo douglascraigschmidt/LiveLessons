@@ -12,8 +12,8 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
- * thread pool.
+ * just(), subscribeOn(), zipWith(), doOnSuccess(), then(), and the
+ * parallel thread pool.
  */
 public class MonoEx {
     /**

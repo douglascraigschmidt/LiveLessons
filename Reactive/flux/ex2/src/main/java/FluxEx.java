@@ -15,10 +15,11 @@ import java.util.function.Predicate;
 
 /**
  * This class shows how to apply Project Reactor features
- * asynchronously to perform various Flux operations, including
+ * asynchronously to perform various Flux operators, including
  * create(), interval(), map(), filter(), doOnNext(), take(),
  * subscribe(), then(), range(), subscribeOn(), publishOn(), and
- * various thread pools.
+ * various thread pools.  The Mono fromRunnable() operator is also
+ * shown.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {

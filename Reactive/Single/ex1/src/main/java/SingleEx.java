@@ -11,9 +11,10 @@ import java.util.concurrent.Callable;
 import static utils.BigFractionUtils.*;
 
 /**
- * This class shows how to apply RxJava features synchronously to reduce,
- * multiply, and display BigFractions via basic Single operations, including
- * fromCallable(), map(), doOnSuccess(), and ignoreElement().
+ * This class shows how to apply RxJava features synchronously to
+ * reduce, multiply, and display BigFractions via basic Single
+ * operations, including just(), fromCallable(), map(), doOnSuccess(),
+ * and ignoreElement().
  */
 public class SingleEx {
     /**
@@ -31,9 +32,9 @@ public class SingleEx {
                      false);
 
         return Single
-            // Use fromCallable() to begin synchronously reducing a
-            // big fraction in the calling thread.
-            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
+            // Use just() to begin synchronously reducing a big
+            // fraction in the calling thread.
+            .just(BigFraction.reduce(unreducedFraction))
 
             // After big fraction is reduced return a Single and use
             // map() to call a function that converts the reduced
