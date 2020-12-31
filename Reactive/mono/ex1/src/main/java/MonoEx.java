@@ -75,7 +75,8 @@ public class MonoEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReductionSync2()\n");
 
-        // A Consumer that logs the current value of the unreduced BigFraction.
+        // A Consumer that logs the current value of the unreduced
+        // BigFraction.
         Consumer<BigFraction> logBigFraction = bigFraction -> sb
             .append("     unreducedFraction "
                     + sUnreducedFraction.toString()

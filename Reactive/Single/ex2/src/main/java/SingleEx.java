@@ -1,5 +1,6 @@
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
@@ -17,6 +18,7 @@ import static utils.BigFractionUtils.*;
  * blockingGet(), ignoreElement(), and the Scheduler.single() thread
  * "pool".
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class SingleEx {
     /**
      * Test asynchronous BigFraction reduction using a Single and a
@@ -34,19 +36,17 @@ public class SingleEx {
                      false);
 
         // Create a callable lambda that reduces a big fraction.
-        Callable<BigFraction> reduceFraction = () -> {
+        Callable<BigFraction> reduceFraction = () -> 
             // Reduce the big fraction.
-            BigFraction reducedFraction = BigFraction
-                .reduce(unreducedFraction);
+            BigFraction.reduce(unreducedFraction);
 
-            sb.append("     unreducedFraction "
-                      + unreducedFraction.toString()
-                      + "\n     reduced improper fraction = "
-                      + reducedFraction.toString());
-
-            // Return the reduction.
-            return reducedFraction;
-        };
+        // A Consumer that logs the current value of the unreduced
+        // BigFraction.
+        Consumer<BigFraction> logBigFraction = bigFraction -> sb
+            .append("     unreducedFraction "
+                    + unreducedFraction.toString()
+                    + "\n     reduced improper fraction = "
+                    + bigFraction.toString());
 
         // Create a function lambda that converts an improper big
         // fraction into a mixed big fraction.
@@ -54,6 +54,13 @@ public class SingleEx {
             sb.append("\n     calling BigFraction::toMixedString\n");
 
             return result.toMixedString();
+        };
+
+        // Create a consumer to print the mixed big fraction result.
+        Consumer<String> printResult = result -> {
+            sb.append("     mixed reduced fraction = " + result + "\n");
+            // Display the result.
+            BigFractionUtils.display(sb.toString());
         };
 
         return Single
@@ -64,6 +71,10 @@ public class SingleEx {
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
+            // Use doOnSuccess() to print the BigFraction. If
+            // something goes wrong doOnSuccess() will be skipped.
+            .doOnSuccess(logBigFraction)
+
             // After big fraction is reduced return a single and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
@@ -72,7 +83,7 @@ public class SingleEx {
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(result -> SingleEx.printResult(result, sb))
+            .doOnSuccess(printResult)
 
             // Return a Completable to synchronize with the
             // AsyncTester framework.
@@ -141,6 +152,13 @@ public class SingleEx {
             return bf1.multiply(bf2);
         };
 
+        // Create a consumer to print the mixed big fraction result.
+        Consumer<BigFraction> printResult = result -> {
+            sb.append("     mixed reduced fraction = " + result + "\n");
+            // Display the result.
+            BigFractionUtils.display(sb.toString());
+        };
+
         // Submit the call to a thread pool and process the result it
         // returns asynchronously.
         return Single
@@ -154,33 +172,10 @@ public class SingleEx {
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If an
             // exception is thrown doOnSuccess() will be skipped.
-            .doOnSuccess(bigFraction ->
-                         SingleEx.printResult(bigFraction, sb))
+            .doOnSuccess(printResult)
                          
             // Return a Completable to synchronize with the
             // AsyncTester framework.
             .ignoreElement();
-    }
-
-    /**
-     * Print the BigFraction {@code bf} after first reducing it.
-     */
-    private static void printResult(BigFraction bf,
-                                    StringBuilder sb) {
-        sb.append("     mixed reduced fraction = "
-                  + bf.toMixedString()
-                  + "\n");
-        BigFractionUtils.display(sb.toString());
-    }
-
-    /**
-     * Print the {@code mixedString}.
-     */
-    private static void printResult(String mixedString,
-                                    StringBuilder sb) {
-        sb.append("     mixed reduced fraction = "
-                  + mixedString
-                  + "\n");
-        BigFractionUtils.display(sb.toString());
     }
 }
