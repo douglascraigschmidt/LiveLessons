@@ -39,8 +39,7 @@ public class SingleEx {
         
         // Create a consumer that prints the result as a mixed
         // fraction after it's added together.
-        Consumer<BigFraction> mixedFractionPrinter = bigFraction
-            -> { 
+        Consumer<BigFraction> mixedFractionPrinter = bigFraction -> {
             sb.append("     combining result = "
                       + bigFraction.toMixedString()
                       + "\n");
