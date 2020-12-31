@@ -12,9 +12,11 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 /**
  * This class shows how to apply RxJava features asynchronously and
  * concurrently reduce, multiply, and display BigFractions via various
- * Single operations, including fromCallable(), subscribeOn(), zipWith(),
- * doOnSuccess(), ignoreElement(), and Schedulers.computation().
+ * Single operations, including fromCallable(), subscribeOn(),
+ * zipWith(), doOnSuccess(), ignoreElement(), and
+ * Schedulers.computation().
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class SingleEx {
     /**
      * Test asynchronous BigFraction multiplication and addition using
@@ -66,27 +68,25 @@ public class SingleEx {
                                                        StringBuffer sb) {
         // Create a consumer that prints the result as a mixed
         // fraction after it's multiplied.
-        Consumer<BigFraction> fractionPrinter = bigFraction
-            -> {
-            sb.append("     ["
-                      + Thread.currentThread().getId()
-                      + "] bigFraction = "
-                      + bigFraction.toMixedString()
-                      + "\n");
-        };
+        Consumer<BigFraction> fractionPrinter = bigFraction -> sb
+            .append("     ["
+                    + Thread.currentThread().getId()
+                    + "] bigFraction = "
+                    + bigFraction.toMixedString()
+                    + "\n");
 
         return Single
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
-            .just(BigFractionUtils
-                  .makeBigFraction(random, 
-                                   true)
-                  .multiply(sBigReducedFraction))
-
-            // Print result after multiplying it.
-            .doOnSuccess(fractionPrinter)
+            .fromCallable(() -> BigFractionUtils
+                          .makeBigFraction(random, 
+                                           true)
+                          .multiply(sBigReducedFraction))
 
             // Run all the processing in the parallel thread pool.
-            .subscribeOn(Schedulers.computation());
+            .subscribeOn(Schedulers.computation())
+
+            // Print result after multiplying it.
+            .doOnSuccess(fractionPrinter);
     }
 }

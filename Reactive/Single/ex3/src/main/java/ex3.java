@@ -3,8 +3,9 @@ import utils.AsyncTaskBarrier;
 /**
  * This example shows how to apply RxJava features asynchronously and
  * concurrently reduce, multiply, and display BigFractions via various
- * Single operations, including fromCallable(), subscribeOn(), zipWith(),
- * doOnSuccess(), ignoreElement(), and Schedulers.computation().
+ * Single operations, including fromCallable(), subscribeOn(),
+ * zipWith(), doOnSuccess(), ignoreElement(), and
+ * Schedulers.computation().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {

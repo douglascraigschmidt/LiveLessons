@@ -12,9 +12,10 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * just(), subscribeOn(), zipWith(), doOnSuccess(), then(), and the
- * parallel thread pool.
+ * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
+ * thread pool.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
     /**
      * Test asynchronous BigFraction multiplication and addition using
@@ -37,8 +38,7 @@ public class MonoEx {
         
         // Create a consumer that prints the result as a mixed
         // fraction after it's added together.
-        Consumer<BigFraction> mixedFractionPrinter = bigFraction
-            -> { 
+        Consumer<BigFraction> mixedFractionPrinter = bigFraction -> {
             sb.append("     combining result = "
                       + bigFraction.toMixedString()
                       + "\n");
@@ -55,7 +55,7 @@ public class MonoEx {
 
             // Return an empty mono to synchronize with the
             // AsyncTaskBarrier framework.
-           .then();
+            .then();
     }
 
     /**
@@ -66,22 +66,20 @@ public class MonoEx {
                                                      StringBuffer sb) {
         // Create a consumer that prints the result as a mixed
         // fraction after it's multiplied.
-        Consumer<BigFraction> fractionPrinter = bigFraction
-                -> {
-            sb.append("     ["
-                      + Thread.currentThread().getId()
-                      + "] bigFraction = "
+        Consumer<BigFraction> fractionPrinter = bigFraction -> sb
+            .append("     ["
+                    + Thread.currentThread().getId()
+                    + "] bigFraction = "
                     + bigFraction.toMixedString()
                     + "\n");
-        };
 
         return Mono
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
-            .just(BigFractionUtils
-                  .makeBigFraction(random, 
-                                   true)
-                  .multiply(sBigReducedFraction))
+            .fromCallable(() -> BigFractionUtils
+                          .makeBigFraction(random, 
+                                           true)
+                          .multiply(sBigReducedFraction))
 
             // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.parallel())
