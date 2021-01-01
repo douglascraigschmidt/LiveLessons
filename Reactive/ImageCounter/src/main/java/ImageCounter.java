@@ -36,7 +36,6 @@ public class ImageCounter {
      * Stores a completed single with value of 0.
      */
     private static final Mono<Integer> sZero =
-        // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#just-T-
         Mono.just(0);
 
     /**
@@ -60,7 +59,6 @@ public class ImageCounter {
 
             // Block until the stream completes, encounters an
             // error, or times out.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#block-java.time.Duration-
             .blockOptional(sTIMEOUT_DURATION);
 
         // Print the final results of the traversal.
@@ -104,7 +102,6 @@ public class ImageCounter {
             // page and count their images.
             return countImagesAsync(pageUri, depth)
                 // Print this output on success.
-                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer-
                 .doOnSuccess(totalImages ->
                              print("(depth "
                                    + depth
@@ -132,11 +129,9 @@ public class ImageCounter {
             var imagesInPageMono = pageMono
                 // The getImagesInPage() method runs synchronously, so
                 // call it in the common fork-join pool (see next line).
-                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#map-java.util.function.Function-
                 .map(this::getImagesInPage)
 
                 // Run the operations in the common fork-join pool.
-                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#transformDeferred-java.util.function.Function-
                 .transformDeferred(ReactorUtils.commonPoolMono())
 
                 // Count the number of images on this page.
@@ -147,7 +142,6 @@ public class ImageCounter {
             var imagesInLinksMono = pageMono
                 // The crawlLinksInPage() methods runs synchronously, so
                 // call it in the common fork-join pool (see next line).
-                // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-
                 .flatMap(page ->
                          crawlLinksInPage(page,
                                           depth))
@@ -186,7 +180,6 @@ public class ImageCounter {
         // mono params after they both complete.
         return imagesInPageMono
             // Sum the results when both monos complete.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#zipWith-reactor.core.publisher.Mono-java.util.function.BiFunction-
             .zipWith(imagesInLinksMono,
                      Integer::sum);
     }
@@ -219,7 +212,6 @@ public class ImageCounter {
         // Return a collection IMG SRC URLs in this page.
         return page
             // Select all the image elements in the page.
-            // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#select(java.lang.String)
             .select("img");
     }
 
@@ -237,12 +229,10 @@ public class ImageCounter {
         // hyperlinks in the page.
         return Flux
             // Find all the hyperlinks on this page.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#fromIterable-java.lang.Iterable-
             .fromIterable(page.select("a[href]"))
 
             // Map each hyperlink to a mono containing a count of the
             // number of images found at that hyperlink.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#flatMap-java.util.function.Function-
             .flatMap(hyperLink -> Mono
                      // Just omit this one object.
                      .just(hyperLink)
@@ -258,11 +248,9 @@ public class ImageCounter {
                                           depth + 1)))
 
             // Sum all the counts.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#reduce-java.util.function.BiFunction-
             .reduce(Integer::sum)
 
             // Return 0 if empty.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#defaultIfEmpty-T-
             .defaultIfEmpty(0);
     }
 

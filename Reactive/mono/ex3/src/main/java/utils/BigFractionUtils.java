@@ -59,4 +59,30 @@ public class BigFractionUtils {
                            + "] "
                            + string);
     }
+
+    /**
+     * Append {@code bigFraction} to the {@code stringBuffer}.
+     */
+    public static void appendBigFraction(BigFraction bigFraction,
+                                         StringBuffer stringBuffer) {
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] BigFraction = "
+                            + bigFraction.toString()
+                            + "\n");
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it and
+     * the contents of {@code stringBuffer}.
+     */
+    public static void displayMixedBigFraction(BigFraction bigFraction,
+                                               StringBuffer stringBuffer) {
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] Mixed BigFraction result = "
+                            + bigFraction.toMixedString()
+                            + "\n");
+        BigFractionUtils.display(stringBuffer.toString());
+    }
 }

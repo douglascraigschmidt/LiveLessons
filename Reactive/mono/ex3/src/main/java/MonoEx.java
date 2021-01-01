@@ -1,3 +1,4 @@
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
@@ -5,6 +6,8 @@ import utils.BigFractionUtils;
 
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static utils.BigFractionUtils.*;
 
@@ -12,46 +15,33 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * subscribeOn(), zipWith(), doOnSuccess(), then(), and the parallel
- * thread pool.
+ * flatMap(), subscribeOn(), zip(), doOnSuccess(), then(), and the
+ * parallel thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
     /**
-     * Test asynchronous BigFraction multiplication and addition using
-     * zipWith().
+     * A random number generator.
      */
-    public static Mono<Void> testFractionCombine() {
+    private static final Random sRandom = new Random();
+
+    /**
+     * Test asynchronous BigFraction multiplication using flatMap().
+     */
+    public static Mono<Void> testFractionMultiplyAsync() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionCombine()\n");
+            new StringBuffer(">> Calling testFractionMultiplyAsync()\n");
 
-        // A random number generator.
-        Random random = new Random();
+        return 
+            // Make a random BigFraction.
+            makeBigFractionAsync(sRandom, sb)
 
-        // Create a random BigFraction and reduce/multiply it
-        // asynchronously.
-        Mono<BigFraction> m1 = makeBigFraction(random, sb);
+            // Use flatMap() to asynchronously multiply the random
+            // BigFraction by a large constant.
+            .flatMap(bf -> multiplyAsync(bf, sBigReducedFraction))
 
-        // Create another random BigFraction and reduce/multiply it
-        // asynchronously.
-        Mono<BigFraction> m2 = makeBigFraction(random, sb);
-        
-        // Create a consumer that prints the result as a mixed
-        // fraction after it's added together.
-        Consumer<BigFraction> mixedFractionPrinter = bigFraction -> {
-            sb.append("     combining result = "
-                      + bigFraction.toMixedString()
-                      + "\n");
-            BigFractionUtils.display(sb.toString());
-        };
-
-        return m1
-            // Add BigFraction results after m1 and m2 both complete.
-            .zipWith(m2,
-                     BigFraction::add)
-
-            // Print result after converting it to a mixed fraction.
-            .doOnSuccess(mixedFractionPrinter)
+            // Display result after converting it to a mixed fraction.
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return an empty mono to synchronize with the
             // AsyncTaskBarrier framework.
@@ -59,32 +49,89 @@ public class MonoEx {
     }
 
     /**
-     * A factory method that creates a random big fraction and
-     * subscribes it to be reduced and multiplied in a thread pool.
+     * Test asynchronous BigFraction multiplication and addition using
+     * zip().
      */
-    private static Mono<BigFraction> makeBigFraction(Random random,
-                                                     StringBuffer sb) {
-        // Create a consumer that prints the result as a mixed
-        // fraction after it's multiplied.
-        Consumer<BigFraction> fractionPrinter = bigFraction -> sb
-            .append("     ["
-                    + Thread.currentThread().getId()
-                    + "] bigFraction = "
-                    + bigFraction.toMixedString()
-                    + "\n");
+    public static Mono<Void> testFractionCombine()  {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionCombine()\n");
 
+        // Create a random BigFraction asynchronously.
+        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom,
+                                                    sb);
+
+        // Create another random BigFraction asynchronously.
+        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, 
+                                                    sb);
+
+        // Create another random BigFraction asynchronously.
+        Mono<BigFraction> m3 = makeBigFractionAsync(sRandom,
+                                                    sb);
+
+        // This function is used to combine results from Mono.zip().
+        Function<Object[], BigFraction> combiner = bfArray -> Stream
+            // Create a stream of Objects.
+            .of(bfArray)
+            // Convert the Objects to BigFractions.
+            .map(o -> BigFraction.valueOf((BigFraction) o))
+            // Sum the results together.
+            .reduce(BigFraction.valueOf(0), BigFraction::add);
+
+        return Mono
+            // Add results after all async multiplications complete.
+            .zip(combiner,
+                 m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
+                 m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+                 m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction)))
+
+            // Display result after converting it to a mixed fraction.
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
+
+            // Return an empty mono to synchronize with the
+            // AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Asynchronously multiply {@code bf1} and {@code bf2} and return
+     * the result as a Mono.
+     *
+     * @param bf1 The first BigFraction param
+     * @param bf2 The first BigFraction param
+     * @return A Mono that emits the result of multiplying {@code bf1} and {@code bf2}
+     */
+    private static Mono<BigFraction> multiplyAsync(BigFraction bf1,
+                                                   BigFraction bf2) {
+        return Mono
+            // Create a Mono that emits the results of multiplying bf1
+            // and bf2.
+            .fromCallable(() -> bf1.multiply(bf2))
+
+            // Run the processing in the parallel thread pool.
+            .subscribeOn(Schedulers.parallel());
+    }
+
+    /**
+     * A factory method that creates a {@code random} BigFraction
+     * asynchronously in a thread pool.
+     *
+     * @param random The random number generator
+     * @param sb The StringBuffer to log the created BigFraction
+     * @return A Mono that emits the random BigFraction
+     */
+    private static Mono<BigFraction> makeBigFractionAsync(Random random,
+                                                          StringBuffer sb) {
         return Mono
             // Factory method that makes a random big fraction and
             // multiplies it with a constant.
             .fromCallable(() -> BigFractionUtils
-                          .makeBigFraction(random, 
-                                           true)
-                          .multiply(sBigReducedFraction))
+                          .makeBigFraction(random,
+                                           true))
 
-            // Run all the processing in the parallel thread pool.
+            // Run the processing in the parallel thread pool.
             .subscribeOn(Schedulers.parallel())
 
-            // Print result after multiplying it.
-            .doOnSuccess(fractionPrinter);
+            // Print result after creating it.
+            .doOnSuccess(bf -> appendBigFraction(bf, sb));
     }
 }
