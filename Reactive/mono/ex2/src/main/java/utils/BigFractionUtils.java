@@ -39,18 +39,6 @@ public class BigFractionUtils {
     }
 
     /**
-     * Append {@code bigFraction} to the {@code stringBuffer}.
-     */
-    public static void appendBigFraction(BigFraction bigFraction,
-                                         StringBuffer stringBuffer) {
-        stringBuffer.append("     ["
-                            + Thread.currentThread().getId()
-                            + "] BigFraction = "
-                            + bigFraction.toString()
-                            + "\n");
-    }
-
-    /**
      * Convert {@code bigFraction} to a mixed string and display it and
      * the contents of {@code stringBuffer}.
      */
