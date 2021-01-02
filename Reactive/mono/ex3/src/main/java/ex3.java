@@ -4,8 +4,8 @@ import utils.AsyncTaskBarrier;
  * This example shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * flatMap(), subscribeOn(), zip(), doOnSuccess(), then(), and the
- * parallel thread pool.
+ * flatMap(), subscribeOn(), zipWith(), zip(), doOnSuccess(), then(),
+ * and the parallel thread pool.
  */
 public class ex3 {
     /**
@@ -16,8 +16,12 @@ public class ex3 {
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplyAsync);
 
         // Test asynchronous BigFraction multiplication and addition
+        // using zipWith().
+        AsyncTaskBarrier.register(MonoEx::testFractionCombine1);
+
+        // Test asynchronous BigFraction multiplication and addition
         // using zip().
-        AsyncTaskBarrier.register(MonoEx::testFractionCombine);
+        AsyncTaskBarrier.register(MonoEx::testFractionCombine2);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

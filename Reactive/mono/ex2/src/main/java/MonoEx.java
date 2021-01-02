@@ -6,8 +6,6 @@ import utils.BigFractionUtils;
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static utils.BigFractionUtils.*;
 
@@ -26,8 +24,8 @@ public class MonoEx {
      * the calling thread).
      */
     public static Mono<Void> testFractionReductionAsync() {
-        StringBuilder sb = 
-            new StringBuilder(">> Calling testFractionReductionAsync()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionReductionAsync()\n");
 
         // Create a new unreduced big fraction.
         BigFraction unreducedFraction = BigFraction
@@ -35,55 +33,30 @@ public class MonoEx {
                      new BigInteger(sBI2),
                      false);
 
-        // Create a callable lambda expression that
-        Callable<BigFraction> reduceFraction = () -> 
-            // Reduce the big fraction.
-            BigFraction.reduce(unreducedFraction);
-
-        // A Consumer that logs the current value of the unreduced
-        // BigFraction.
-        Consumer<BigFraction> logBigFraction = bigFraction -> sb
-            .append("     unreducedFraction "
-                    + unreducedFraction.toString()
-                    + "\n     reduced improper fraction = "
-                    + bigFraction.toString());
-
-        // Create a function lambda that converts an improper big
-        // fraction into a mixed big fraction.
-        Function<BigFraction, String> convertToMixedString = result -> {
-            sb.append("\n     calling BigFraction::toMixedString\n");
-
-            return result.toMixedString();
-        };
-
-        // Create a consumer to print the mixed big fraction result.
-        Consumer<String> printResult = result -> {
-            sb.append("     mixed reduced fraction = " + result + "\n");
-            // Display the result.
-            BigFractionUtils.display(sb.toString());
-        };
-
         return Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
-            .fromCallable(reduceFraction)
+            .fromCallable(() -> BigFraction
+                          // Reduce the BigFraction.
+                          .reduce(unreducedFraction))
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
             // Use doOnSuccess() to print the BigFraction. If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(logBigFraction)
+            .doOnSuccess(bf -> 
+                         logBigFraction(unreducedFraction, bf, sb))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
-            .map(convertToMixedString)
+            .map(BigFraction::toMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(printResult)
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return an empty mono to synchronize with the
             // AsyncTaskBarrier framework.
@@ -142,8 +115,8 @@ public class MonoEx {
      * is handled in a non-blocking manner by a background thread.
      */
     public static Mono<Void> testFractionMultiplicationCallable2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplicationCallable2()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationCallable2()\n");
 
         // Create a callable that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
@@ -152,13 +125,6 @@ public class MonoEx {
 
             // Return the result of multiplying the fractions.
             return bf1.multiply(bf2);
-        };
-
-        // Create a consumer to print the mixed big fraction result.
-        Consumer<BigFraction> printResult = result -> {
-            sb.append("     mixed reduced fraction = " + result + "\n");
-            // Display the result.
-            BigFractionUtils.display(sb.toString());
         };
 
         // Submit the call to a thread pool and process the result it
@@ -174,7 +140,7 @@ public class MonoEx {
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If an
             // exception is thrown doOnSuccess() will be skipped.
-            .doOnSuccess(printResult)
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return an empty mono to synchronize with the
             // AsyncTaskBarrier framework.

@@ -37,4 +37,58 @@ public class BigFractionUtils {
                            + "] "
                            + string);
     }
+
+    /**
+     * Append {@code bigFraction} to the {@code stringBuffer}.
+     */
+    public static void appendBigFraction(BigFraction bigFraction,
+                                         StringBuffer stringBuffer) {
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] BigFraction = "
+                            + bigFraction.toString()
+                            + "\n");
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it and
+     * the contents of {@code stringBuffer}.
+     */
+    public static void displayMixedBigFraction(BigFraction bigFraction,
+                                               StringBuffer stringBuffer) {
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] Mixed BigFraction result = "
+                            + bigFraction.toMixedString()
+                            + "\n");
+        BigFractionUtils.display(stringBuffer.toString());
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it
+     * and the contents of {@code stringBuffer}.
+     */
+    public static void displayMixedBigFraction(String bigFraction,
+                                               StringBuffer stringBuffer) {
+        stringBuffer.append("     ["
+                + Thread.currentThread().getId()
+                + "] Mixed BigFraction result = "
+                + bigFraction
+                + "\n");
+        BigFractionUtils.display(stringBuffer.toString());
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it
+     * and the contents of {@code stringBuffer}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuffer sb) {
+        sb.append("     unreducedFraction "
+                  + unreducedFraction.toString()
+                  + "\n     reduced improper fraction = "
+                  + reducedFraction.toString()
+                  + "\n     calling BigFraction::toMixedString\n");
+    }
 }

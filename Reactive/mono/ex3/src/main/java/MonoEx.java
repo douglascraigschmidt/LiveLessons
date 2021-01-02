@@ -1,11 +1,9 @@
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
 import java.util.Random;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -15,8 +13,8 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously and concurrently reduce, multiply, and display
  * BigFractions via various Mono operations, including fromCallable(),
- * flatMap(), subscribeOn(), zip(), doOnSuccess(), then(), and the
- * parallel thread pool.
+ * flatMap(), subscribeOn(), zipWith(), zip(), doOnSuccess(), then(),
+ * and the parallel thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
@@ -50,11 +48,40 @@ public class MonoEx {
 
     /**
      * Test asynchronous BigFraction multiplication and addition using
+     * zipWith().
+     */
+    public static Mono<Void> testFractionCombine1()  {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionCombine1()\n");
+
+        // Create a random BigFraction asynchronously.
+        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom,
+                                                    sb);
+
+        // Create another random BigFraction asynchronously.
+        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, 
+                                                    sb);
+
+        return m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction))
+            // Add results after both async multiplications complete.
+            .zipWith(m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+                     BigFraction::add)
+
+            // Display result after converting it to a mixed fraction.
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
+
+            // Return an empty mono to synchronize with the
+            // AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Test asynchronous BigFraction multiplication and addition using
      * zip().
      */
-    public static Mono<Void> testFractionCombine()  {
+    public static Mono<Void> testFractionCombine2()  {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionCombine()\n");
+            new StringBuffer(">> Calling testFractionCombine2()\n");
 
         // Create a random BigFraction asynchronously.
         Mono<BigFraction> m1 = makeBigFractionAsync(sRandom,
