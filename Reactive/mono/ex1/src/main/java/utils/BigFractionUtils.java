@@ -30,6 +30,22 @@ public class BigFractionUtils {
     }
 
     /**
+     * Convert {@code unreducedFraction} to a mixed string and {@code
+     * reducedFraction} to a mixed string and append it to the
+     * contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuilder stringBuilder) {
+        stringBuilder
+            .append("     unreducedFraction "
+                    + unreducedFraction.toString()
+                    + "\n     reduced improper fraction = "
+                    + reducedFraction.toString()
+                    + "\n     calling BigFraction::toMixedString\n");
+    }
+
+    /**
      * Convert {@code bigFraction} to a mixed string and display it
      * and the contents of {@code stringBuilder}.
      */
@@ -41,20 +57,5 @@ public class BigFractionUtils {
                              + bigFraction
                              + "\n");
         BigFractionUtils.display(stringBuilder.toString());
-    }
-
-    /**
-     * Convert {@code bigFraction} to a mixed string and display it
-     * and the contents of {@code stringBuilder}.
-     */
-    public static void logBigFraction(BigFraction unreducedFraction,
-                                      BigFraction reducedFraction,
-                                      StringBuilder stringBuilder) {
-        stringBuilder
-            .append("     unreducedFraction "
-                    + unreducedFraction.toString()
-                    + "\n     reduced improper fraction = "
-                    + reducedFraction.toString()
-                    + "\n     calling BigFraction::toMixedString\n");
     }
 }

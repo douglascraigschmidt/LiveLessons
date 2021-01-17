@@ -76,12 +76,10 @@ public class BigFractionUtils {
         Mono<List<BigFraction>> quickSortM = Mono
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#fromCallable-java.util.concurrent.Callable-
             .fromCallable(() -> quickSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#subscribeOn-reactor.core.scheduler.Scheduler-
             .subscribeOn(Schedulers.parallel());
 
         // Heap sort the list asynchronously.
@@ -105,19 +103,17 @@ public class BigFractionUtils {
         };
 
         return Mono
-            // Use first() to select the result of whichever sort
-            // finishes first and use it to print the sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#first-reactor.core.publisher.Mono...-
-            .first(quickSortM,
-                   heapSortM)
+            // Use firstWithSignal() to select the result of whichever
+            // sort finishes first and use it to print the sorted
+            // list.
+            .firstWithSignal(quickSortM,
+                             heapSortM)
 
             // Use doOnSuccess() to display the first sorted list.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#doOnSuccess-java.util.function.Consumer
             .doOnSuccess(displayList)
                 
             // Use then() to return an empty mono to synchronize with
             // the AsyncTester framework.
-            // https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#then--
             .then();
     }
 
@@ -153,5 +149,50 @@ public class BigFractionUtils {
                            + Thread.currentThread().getId()
                            + "] "
                            + string);
+    }
+
+    /**
+     * Convert {@code unreducedFraction} to a mixed string and {@code
+     * reducedFraction} to a mixed string and append it to the
+     * contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuffer sb) {
+        sb.append("     "
+                  + unreducedFraction.toMixedString()
+                  + " x "
+                  + reducedFraction.toMixedString()
+                  + "\n");
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string, {@code
+     * reducedFraction} to a mixed string, and {@code result} to a
+     * mixed string and append it to the contents of {@code
+     * stringBuilder}.
+     */
+    public static void logBigFractionResult(BigFraction bigFraction,
+                                            BigFraction reducedFraction,
+                                            BigFraction result,
+                                            StringBuffer sb) {
+        sb.append("     "
+                  + bigFraction.toMixedString()
+                  + " x "
+                  + reducedFraction.toMixedString()
+                  + " = "
+                  + result.toMixedString()
+                  + "\n");
+    }
+
+    /**
+     * Display {@code bigFraction} and the contents of {@code stringBuffer}.
+     */
+    public static void displayMixedBigFraction(BigFraction bigFraction,
+                                               StringBuffer stringBuffer) {
+        stringBuffer.append("     Mixed BigFraction result = "
+                            + bigFraction
+                            + "\n");
+        BigFractionUtils.display(stringBuffer.toString());
     }
 }

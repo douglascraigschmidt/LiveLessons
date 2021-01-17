@@ -10,6 +10,7 @@ import java.util.*;
  * A utility class containing helpful methods for manipulating various
  * BigFraction features.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class BigFractionUtils {
     /**
      * A utility class should always define a private constructor.

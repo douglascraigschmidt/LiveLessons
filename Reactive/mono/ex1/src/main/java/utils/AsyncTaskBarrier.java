@@ -67,10 +67,9 @@ public class AsyncTaskBarrier {
             .collectList()
 
             // Return a mono containing the number of tasks run when
-            // all the tasks have completed.
+            // we're done.
             .flatMap(l -> Mono
                      // Use just() to return the number of tasks run.
                      .just((long) sTasks.size()));
     }
 }
-

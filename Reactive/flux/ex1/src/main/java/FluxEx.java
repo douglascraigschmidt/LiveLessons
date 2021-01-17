@@ -9,11 +9,8 @@ import utils.BigFractionUtils;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-import static utils.BigFractionUtils.sBigReducedFraction;
-import static utils.BigFractionUtils.sVoidM;
+import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply Project Reactor features
@@ -41,12 +38,12 @@ public class FluxEx {
 
             // Log the contents of the computation.
             .doOnNext(bigFraction -> 
-                    sb.append("    ["
-                              + Thread.currentThread().getId()
-                              + "] "
-                              + bigFraction.toMixedString()
-                              + " x "
-                              + sBigReducedFraction.toMixedString()))
+                      sb.append("    ["
+                                + Thread.currentThread().getId()
+                                + "] "
+                                + bigFraction.toMixedString()
+                                + " x "
+                                + sBigReducedFraction.toMixedString()))
 
             // Use map() to multiply each element in the stream by a
             // constant.
@@ -94,34 +91,17 @@ public class FluxEx {
              BigFraction.valueOf(100, 2),
              BigFraction.valueOf(100, 1));
 
-        // Log the contents.
-        Consumer<BigFraction> logContents = bigFraction ->
-            sb.append("    ["
-                      + Thread.currentThread().getId()
-                      + "] "
-                      + bigFraction.toMixedString()
-                      + " x "
-                      + sBigReducedFraction.toMixedString());
-
-        // Define a function that multiplies a BigFraction by a large
-        // constant.
-        Function<BigFraction,
-                 BigFraction> multiplyBigFraction = fraction -> {
-            // Multiply and return result.
-            return fraction.multiply(sBigReducedFraction);
-        };
-
         Flux
             // Use fromIterable() to generate a stream of big
             // fractions.
             .fromIterable(bigFractionList)
 
             // Log the contents of the computation.
-            .doOnNext(logContents)
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
 
             // Use map() to multiply each element in the stream by a
             // constant.
-            .map(multiplyBigFraction)
+            .map(fraction -> fraction.multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since
@@ -167,22 +147,6 @@ public class FluxEx {
             BigFraction.valueOf(100, 1)
         };
 
-        // Log the contents.
-        Consumer<BigFraction> logContents = bigFraction ->
-            sb.append("    ["
-                      + Thread.currentThread().getId()
-                      + "] "
-                      + bigFraction.toMixedString()
-                      + " x "
-                      + sBigReducedFraction.toMixedString());
-
-        // Define a function that multiplies a BigFraction by a
-        // large constant.
-        Function<BigFraction,
-            BigFraction> multiplyBigFraction = bigFraction -> 
-            // Multiply and return result.
-            bigFraction.multiply(sBigReducedFraction);
-
         // Create a blocking subscriber.
         BlockingSubscriber blockingSubscriber = new BlockingSubscriber(sb);
 
@@ -211,11 +175,11 @@ public class FluxEx {
             .subscribeOn(Schedulers.single())
 
             // Log the contents of the computation.
-            .doOnNext(logContents)
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
 
             // Use map() to multiply each element in the stream by
             // a constant.
-            .map(multiplyBigFraction)
+            .map(fraction -> fraction.multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.

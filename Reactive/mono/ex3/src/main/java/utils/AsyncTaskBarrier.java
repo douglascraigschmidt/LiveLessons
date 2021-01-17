@@ -21,13 +21,31 @@ public class AsyncTaskBarrier {
         new ArrayList<>();
 
     /**
-     * Register the {@code task} task so that it can be run
-     * asynchronously.  Each task must take no parameters and return a
-     * {@code Supplier<Mono<Void>>} result.
+     * Register the {@code task} task so that it will be run
+     * asynchronously when {@code runTasks()} is called.  Each task
+     * must take no parameters and return a {@code
+     * Supplier<Mono<Void>>} result.
+     * 
+     * @param task The task to register with {@code AsyncTaskBarrier}
      */
     public static void register(Supplier<Mono<Void>> task) {
+        // Appends the task to the list.
         sTasks.add(task);
     }
+
+    /**
+     * Unregister the {@code task} task so that it is no longer run
+     * asynchronously when {@code runTasks()} is called.  Each task
+     * must take no parameters and return a {@code
+     * Supplier<Mono<Void>>} result.
+     * 
+     * @param task The task to unregister with {@code AsyncTaskBarrier}
+     * @return True if {@code task} was previously registered, else false.
+     */
+    public static boolean unregister(Supplier<Mono<Void>> task) {
+        return sTasks.remove(task);
+    }
+
 
     /**
      * Run all the register tasks.
@@ -36,7 +54,7 @@ public class AsyncTaskBarrier {
      * the asynchronously-run tasks complete to indicate how many
      * tasks were run.
      */
-    public static Mono<Long> runTasks() throws InterruptedException {
+    public static Mono<Long> runTasks() {
         return Flux
             // Factory method that converts the list into a flux.
             .fromIterable(sTasks)
@@ -55,4 +73,3 @@ public class AsyncTaskBarrier {
                      .just((long) sTasks.size()));
     }
 }
-

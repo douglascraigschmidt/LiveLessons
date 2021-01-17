@@ -9,6 +9,7 @@ import java.util.Random;
  * A utility class containing helpful methods for manipulating various
  * BigFraction features.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class BigFractionUtils {
     /**
      * A utility class should always define a private constructor.
@@ -69,5 +70,20 @@ public class BigFractionUtils {
                            + Thread.currentThread().getId()
                            + "] "
                            + string);
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it
+     * and the contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuilder stringBuilder) {
+        stringBuilder
+            .append("     unreducedFraction "
+                    + unreducedFraction.toString()
+                    + "\n     reduced improper fraction = "
+                    + reducedFraction.toString()
+                    + "\n     calling BigFraction::toMixedString\n");
     }
 }

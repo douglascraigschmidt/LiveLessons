@@ -79,8 +79,8 @@ public class MonoEx {
                           // Reduce the big fraction.
                           .reduce(sUnreducedFraction))
 
-            // Use doOnSuccess() to print the BigFraction. If
-            // something goes wrong doOnSuccess() will be skipped.
+            // Use doOnSuccess() to log the BigFraction. If something
+            // goes wrong doOnSuccess() will be skipped.
             .doOnSuccess(bf -> 
                          logBigFraction(sUnreducedFraction, bf, sb))
 

@@ -30,14 +30,20 @@ public class MonoEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplyAsync()\n");
 
-        return 
-            // Make a random BigFraction.
-            makeBigFractionAsync(sRandom, sb)
+        // Make a random BigFraction.
+        Mono<BigFraction> bfM1 = makeBigFractionAsync(sRandom, sb);
 
-            // Use flatMap() to asynchronously multiply the random
-            // BigFraction by a large constant.
-            .flatMap(bf -> multiplyAsync(bf, sBigReducedFraction))
+        // Use flatMap() to asynchronously multiply the random
+        // BigFraction by a large constant and avoid "nested" monos.
+        Mono<BigFraction> bfM2 = bfM1
+            .flatMap(bf -> multiplyAsync(bf, sBigReducedFraction));
 
+        // This is what the code would look like if flatMap() was
+        // replaced by map()!
+        // Mono<Mono<BigFraction>> bfM3 = bfM1
+        //         .map(bf -> multiplyAsync(bf, sBigReducedFraction));
+
+        return bfM2
             // Display result after converting it to a mixed fraction.
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 

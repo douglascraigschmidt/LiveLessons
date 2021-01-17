@@ -92,7 +92,7 @@ public class FluxCollector<T>
      * @return A new FuturesCollector
      */
     public static <T> Collector<T, ?, List<T>>
-                          toList() {
+        toList() {
         return new FluxCollector<T>();
     }
 }

@@ -6,10 +6,10 @@ import utils.AsyncTaskBarrier;
  * in the Project Reactor framework, including fromIterable(),
  * create(), map(), flatMap(), collectList(), collect(), reduce(),
  * take(), filter(), and various types of thread pools.  It also shows
- * various Mono operations, such as first(), when(), materialize(),
- * flatMap(), subscribeOn(), and the parallel thread pool.  It also
- * demonstrates how to combine the Java streams framework with the
- * Project Reactor framework.
+ * various Mono operations, such as firstWithSignal(), when(),
+ * materialize(), flatMap(), subscribeOn(), and the parallel thread
+ * pool.  It also demonstrates how to combine the Java streams
+ * framework with the Project Reactor framework.
  */
 public class ex3 {
     /**
