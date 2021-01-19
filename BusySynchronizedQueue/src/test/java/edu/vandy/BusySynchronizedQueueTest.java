@@ -47,9 +47,10 @@ public class BusySynchronizedQueueTest {
 
         /**
          * This method runs in a Java thread and passes strings to a
-         * consumer thread via a shared BoundedBlockingQueue.
+         * consumer thread via a shared BoundedQueue.
          */
         public void run() {
+            // Keep iterating until all integers are produced.
             for(int i = 0; i < mMaxIterations; ) {
                 // Calls the offer() method.
                 if (mQueue.offer(i)) {
@@ -80,7 +81,7 @@ public class BusySynchronizedQueueTest {
 
         /**
          * This method runs in a Java thread and receives integers
-         * from a producer thread via a shared BoundedBlockingQueue.
+         * from a producer thread via a shared BoundedQueue.
          */
         public void run() {
             Integer integer = null;
@@ -89,12 +90,14 @@ public class BusySynchronizedQueueTest {
             // Get the first item from the queue.
             Integer previous;
 
-            // Get the first non-null value.
+            // Spin until the first non-null value is available.
             while ((previous = mQueue.poll()) == null)
                 continue;
 
+            // Decrement the count since we consumed the first non-null value.
             mCount.decrementAndGet();
 
+            // Keep iterating until all integers are consumed.
             for (int i = 1; i < mMaxIterations; ) {
                 // Try to get the next integer.
                 integer = mQueue.poll();
@@ -105,13 +108,13 @@ public class BusySynchronizedQueueTest {
                     if ((i % (mMaxIterations / 10)) == 0)
                         System.out.println(integer);
 
+                    // Decrement the count since we consumed a value.
                     mCount.decrementAndGet();
                     i++;
 
                     // Make sure the entries are ordered.
                     assertEquals(previous + 1, integer.intValue());
                     previous = integer;
-
                 } else {
                     nullCount++;
                     // Thread.yield();
