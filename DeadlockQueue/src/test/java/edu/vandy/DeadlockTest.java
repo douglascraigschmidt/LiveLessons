@@ -1,11 +1,15 @@
 package edu.vandy;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.*;
+
 /**
  * This example illustrates how deadlock can occur due to "circular
  * waiting".  Moreover, deadlocks occur sporadically, which makes it
  * even harder to identify and diagnose the problem!
  */
-class DeadlockTest {
+public class DeadlockTest {
     /**
      * This helper class is passed a parameter to a Java thread.
      */
@@ -81,11 +85,11 @@ class DeadlockTest {
      * Threads are waiting to acquire the other SimpleQueue's monitor
      * lock, which causes a circular wait that doesn't terminate!
      */
-    static public void main(String[] args) {
+    @Test(timeout=10000)
+    public void testDeadlockQueue() {
         // Designated the number of iterations to run in each thread.
-        int iterations =
-            args.length > 0 ? Integer.parseInt(args[0]) : 1000000;
-        boolean deadlock = args.length == 1;
+        int iterations = 1000000;
+        boolean deadlock = true;
 
         // Create two SimpleQueue's.
         final SimpleQueue<String> aQueue = new SimpleQueue<>();
