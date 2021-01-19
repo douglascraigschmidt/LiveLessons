@@ -1,15 +1,13 @@
+package edu.vandy;
+
 /**
- * @class DeadlockTest
- *
- * @brief Illustrates how deadlock can occur due to "circular
- *        waiting".  Moreover, deadlocks occur sporatically, which
- *        makes it even harder to identify and diagnose the problem!
+ * This example illustrates how deadlock can occur due to "circular
+ * waiting".  Moreover, deadlocks occur sporadically, which makes it
+ * even harder to identify and diagnose the problem!
  */
 class DeadlockTest {
     /**
-     * @class TransferRunnable
-     * 
-     * @brief Helper class that's passed a parameter to a Thread.
+     * This helper class is passed a parameter to a Java thread.
      */
     static class TransferRunnable implements Runnable {
         /**
@@ -33,17 +31,17 @@ class DeadlockTest {
         /**
          * First instance of the SimpleQueue.
          */
-        private SimpleQueue<String> mAQueue;
+        private final SimpleQueue<String> mAQueue;
 
         /**
          * Second instance of the SimpleQueue.
          */
-        private SimpleQueue<String> mBQueue;
+        private final SimpleQueue<String> mBQueue;
 
         /**
          * Number of iterations to run the test.
          */
-        private int mIterations;
+        private final int mIterations;
 
         /**
          * Constructor stores the parameters into data members.
@@ -87,10 +85,11 @@ class DeadlockTest {
         // Designated the number of iterations to run in each thread.
         int iterations =
             args.length > 0 ? Integer.parseInt(args[0]) : 1000000;
+        boolean deadlock = args.length == 1;
 
         // Create two SimpleQueue's.
-        final SimpleQueue<String> aQueue = new SimpleQueue<String>();
-        final SimpleQueue<String> bQueue = new SimpleQueue<String>();
+        final SimpleQueue<String> aQueue = new SimpleQueue<>();
+        final SimpleQueue<String> bQueue = new SimpleQueue<>();
 
         // Create/start a Thread that transfers the contents of aQueue
         // to bQueue.
@@ -103,8 +102,8 @@ class DeadlockTest {
         // to aQueue, which is the reverse of what Thread t1 does (and
         // thus can lead to deadlock).
         Thread transfer2 = new Thread
-            (new TransferRunnable(bQueue,
-                                  aQueue,
+            (new TransferRunnable(deadlock ? bQueue : aQueue,
+                                  deadlock ? aQueue : bQueue,
                                   iterations));
         System.out.println("starting first transfer thread");
         transfer1.start();

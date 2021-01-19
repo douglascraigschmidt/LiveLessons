@@ -1,3 +1,5 @@
+package edu.vandy;
+
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.ArrayList;
@@ -7,17 +9,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /*
- * @class SimpleQueue
- *
- * @brief Defines an implementation of the BlockingQueue interface
- *        that (intentially) doesn't work properly when accessed via
- *        multiple threads since it's not synchronized properly.
+ * This class defines an implementation of the BlockingQueue interface
+ * that (intentionally) doesn't work properly when accessed via multiple
+ * threads since it's not synchronized properly.
  */
 class SimpleQueue<E> implements BlockingQueue<E> {
     /**
      * The queue consists of a List of E's.
      */
-    private List<E> mList = new ArrayList<E>();
+    private final List<E> mList = new ArrayList<E>();
 
     /**
      * True if the queue is empty.

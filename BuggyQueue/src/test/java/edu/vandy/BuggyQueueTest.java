@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.*;
 
 /**
  * Test program for the BuggyQueue that induces race conditions due to
