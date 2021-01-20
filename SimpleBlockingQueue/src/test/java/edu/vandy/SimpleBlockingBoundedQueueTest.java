@@ -92,7 +92,8 @@ public class SimpleBlockingBoundedQueueTest {
             Integer integer = null;
 
             try {
-                // Get the first item from the queue.
+                // Get the first item from the queue, blocking until it gets
+                // the first item.
                 Integer previous = mQueue.take();
                 mCount.decrementAndGet();
 
@@ -129,7 +130,7 @@ public class SimpleBlockingBoundedQueueTest {
      */
     @Test
     public void testSimpleBlockingBoundedQueue() {
-        final SimpleBlockingBoundedQueue<Integer> simpleQueue =
+        final BoundedQueue<Integer> simpleQueue =
             new SimpleBlockingBoundedQueue<>(sQUEUE_SIZE);
 
         try {

@@ -15,24 +15,6 @@ public class DeadlockTest {
      */
     static class TransferRunnable implements Runnable {
         /**
-         * Copies contents of src to dest in a synchronized manner
-         * since SimpleQueue lacks have internal synchronization.
-         */
-        public static void transfer(SimpleQueue<String> src,
-                                    SimpleQueue<String> dest)
-            throws InterruptedException {
-            // Acquire the locks for src and dest.  This causes the
-            // sporadic deadlocks when src and dest are reversed.
-            synchronized(src) {
-                synchronized(dest) {
-                    // Remove each element from src and put it into dest.
-                    while(!src.isEmpty()) 
-                        dest.put(src.take());
-                }
-            }
-        }
-
-        /**
          * First instance of the SimpleQueue.
          */
         private final SimpleQueue<String> mAQueue;
@@ -69,6 +51,24 @@ public class DeadlockTest {
                                               mBQueue);
             } catch (Exception e) {
                 System.out.println("caught exception");
+            }
+        }
+
+        /**
+         * Copies contents of src to dest in a synchronized manner
+         * since SimpleQueue lacks have internal synchronization.
+         */
+        public static void transfer(SimpleQueue<String> src,
+                                    SimpleQueue<String> dest)
+            throws InterruptedException {
+            // Acquire the locks for src and dest.  This causes the
+            // sporadic deadlocks when src and dest are reversed.
+            synchronized(src) {
+                synchronized(dest) {
+                    // Remove each element from src and put it into dest.
+                    while(!src.isEmpty()) 
+                        dest.put(src.take());
+                }
             }
         }
     }

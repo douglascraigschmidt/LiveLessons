@@ -138,7 +138,7 @@ public class BuggyQueueTest {
      */
     @Test(timeout=10000)
     public void testBuggyQueue() {
-        final BuggyQueue<Integer> buggyQueue =
+        final BoundedQueue<Integer> buggyQueue =
             new BuggyQueue<>(sQUEUE_SIZE);
 
         try {

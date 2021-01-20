@@ -52,7 +52,7 @@ public class BusySynchronizedQueueTest {
         public void run() {
             // Keep iterating until all integers are produced.
             for(int i = 0; i < mMaxIterations; ) {
-                // Calls the offer() method.
+                // Calls the offer() method, which may return false if the queue is full.
                 if (mQueue.offer(i)) {
                     i++;
                     mCount.incrementAndGet();
@@ -141,7 +141,7 @@ public class BusySynchronizedQueueTest {
      */
     @Test
     public void testBusySynchronizedQueue() {
-        final BusySynchronizedQueue<Integer> busySynchronizedQueue =
+        final BoundedQueue<Integer> busySynchronizedQueue =
             new BusySynchronizedQueue<>(sQUEUE_SIZE);
 
         try {
