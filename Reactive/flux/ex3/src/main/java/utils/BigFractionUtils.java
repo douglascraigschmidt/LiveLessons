@@ -33,6 +33,12 @@ public class BigFractionUtils {
     public static final String sBI2 = "188027234133482196";
 
     /**
+     * Represents a test that's completed running when it returns.
+     */
+    public static final Mono<Void> sVoidM =
+            Mono.empty();
+
+    /**
      * A big reduced fraction constant.
      */
     public static final BigFraction sBigReducedFraction =
@@ -164,6 +170,21 @@ public class BigFractionUtils {
                   + " x "
                   + reducedFraction.toMixedString()
                   + "\n");
+    }
+
+    /**
+     * Convert {@code unreducedFraction} to a mixed string and {@code
+     * reducedFraction} to a mixed string and append it to the
+     * contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuilder sb) {
+        sb.append("     "
+                + unreducedFraction.toMixedString()
+                + " x "
+                + reducedFraction.toMixedString()
+                + "\n");
     }
 
     /**
