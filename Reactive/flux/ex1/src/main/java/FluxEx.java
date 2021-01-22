@@ -64,7 +64,13 @@ public class FluxEx {
                                  + "\n"),
 
                        // Handle error result event.
-                       error -> sb.append(error.getMessage()),
+                       error -> {
+                           // Append the exception name.
+                           sb.append(error.getMessage());
+
+                           // Display results when processing is done.
+                           BigFractionUtils.display(sb.toString());
+                       },
 
                        // Handle final completion event.
                        () ->
@@ -116,7 +122,13 @@ public class FluxEx {
                                  + "\n"),
 
                        // Handle error result event.
-                       error -> sb.append(error.getMessage()),
+                       error -> {
+                           // Append the exception name.
+                           sb.append(error.getMessage());
+
+                           // Display results when processing is done.
+                           BigFractionUtils.display(sb.toString());
+                       },
 
                        // Handle final completion event.
                        () ->
@@ -176,7 +188,10 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(fraction -> sb.append(" = " + fraction.toMixedString() + "\n"),
+            .subscribe(// Handle next event.
+                       fraction -> 
+                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                       // Handle the error.
                        t -> {
                            // Append the error message to the
                            // StringBuilder.
