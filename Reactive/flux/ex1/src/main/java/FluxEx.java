@@ -260,6 +260,9 @@ public class FluxEx {
             // StringBuilder.
             mSb.append(t.getMessage());
 
+            // Display results when processing is done.
+            BigFractionUtils.display(mSb.toString());
+
             // Release the latch.
             mLatch.countDown();
         }

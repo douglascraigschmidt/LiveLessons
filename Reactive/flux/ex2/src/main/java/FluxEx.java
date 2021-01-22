@@ -154,7 +154,7 @@ public class FluxEx {
 
         return Flux
             // Factory method creates a stream of random big integers
-            // that are generated in a background thread.
+            // that are generated in a background "publisher" thread.
             .create(makeAsyncFluxSink())
 
             // Print the big integer as a debugging aid.
