@@ -55,7 +55,7 @@ public class TripRequest {
      */
     @Override
     public boolean equals(Object tripRequest) {
-        if (o.getClass() != this.getClass())
+        if (tripRequest.getClass() != this.getClass())
             return false;
 
         TripRequest t = (TripRequest) tripRequest;

@@ -89,7 +89,7 @@ public class TripResponse {
      */
     @Override
     public boolean equals(Object tripResponse) {
-        if (o.getClass() != this.getClass())
+        if (tripResponse.getClass() != this.getClass())
             return false;
 
         TripResponse t = (TripResponse) tripResponse;

@@ -1,6 +1,5 @@
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import datamodels.TripResponse;
 import tests.ReactorTests;
 import tests.RxJavaTests;
 import utils.Options;
