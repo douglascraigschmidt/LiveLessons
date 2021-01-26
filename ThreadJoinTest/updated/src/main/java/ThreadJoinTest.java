@@ -149,7 +149,7 @@ public class ThreadJoinTest {
                 // appears in the input data.
                 for (int offset = input.indexOf(phrase);
                      offset != -1;
-                     offset = input.indexOf(phrase, offset + 1))
+                     offset = input.indexOf(phrase, offset + phrase.length()))
 
                     // Whenever a match is found we print out the
                     // results.
