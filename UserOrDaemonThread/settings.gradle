@@ -1,2 +1,3 @@
-rootProject.name = 'UserOrDaemonThread'
+rootProject.name = 'UserOfDaemonThread' +
+        ''
 
