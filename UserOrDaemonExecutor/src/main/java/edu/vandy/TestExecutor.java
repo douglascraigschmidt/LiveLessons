@@ -1,18 +1,19 @@
+package edu.vandy;
+
+import edu.vandy.GCDRunnable;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * @class TestExecutor
- *
- * @brief This program demonstrates the difference between a Java user
- *        thread and a daemon thread in the context of thread pools
- *        created by the Java Executor framework.  If it's launched
- *        with no command-line parameters the main thread creates a
- *        user thread, which can outlive the main thread (i.e., it
- *        continues to run even after the main thread exits).  If it's
- *        launched with a command-line parameter then it creates a
- *        daemon thread, which exits when the main thread exits.
+ * This program demonstrates the difference between a Java user thread
+ * and a daemon thread in the context of thread pools created by the
+ * Java Executor framework.  If it's launched with no command-line
+ * parameters the main thread creates a user thread, which can outlive
+ * the main thread (i.e., it continues to run even after the main
+ * thread exits).  If it's launched with a command-line parameter then
+ * it creates a daemon thread, which exits when the main thread exits.
  */
 public class TestExecutor {
     /**
@@ -64,7 +65,7 @@ public class TestExecutor {
         // Sleep for 2 seconds and then exit.
         try {
             Thread.sleep(2000);
-        } catch (InterruptedException x) {}
+        } catch (InterruptedException ignored) {}
 
         System.out.println("Leaving main()");
     }

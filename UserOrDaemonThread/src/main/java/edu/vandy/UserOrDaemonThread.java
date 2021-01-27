@@ -1,3 +1,5 @@
+package edu.vandy;
+
 import java.util.Random;
 
 /**

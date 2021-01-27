@@ -1,9 +1,9 @@
+package edu.vandy;
+
 import java.util.Random;
 
 /**
- * @class GCDRunnable
- *
- * @brief Computes the greatest common divisor (GCD) of two numbers.
+ * Computes the greatest common divisor (GCD) of two numbers.
  */
 public class GCDRunnable
        extends Random // Inherits random number generation capabilities.

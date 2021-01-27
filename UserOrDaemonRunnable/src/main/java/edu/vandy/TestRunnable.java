@@ -1,13 +1,12 @@
+package edu.vandy;
+
 /**
- * @class TestRunnable
- *
- * @brief This program demonstrates the difference between a Java user
- *        thread and a daemon thread.  If it's launched with no
- *        command-line parameters the main thread creates a user
- *        thread, which can outlive the main thread (i.e., it
- *        continues to run even after the main thread exits).  If it's
- *        launched with a command-line parameter then it creates a
- *        daemon thread, which exits when the main thread exits.
+ * This program demonstrates the difference between a Java user thread
+ * and a daemon thread.  If it's launched with no command-line
+ * parameters the main thread creates a user thread, which can outlive
+ * the main thread (i.e., it continues to run even after the main
+ * thread exits).  If it's launched with a command-line parameter then
+ * it creates a daemon thread, which exits when the main thread exits.
  */
 public class TestRunnable {
     /**
@@ -24,7 +23,7 @@ public class TestRunnable {
 
         // Create a "daemon" thread if any command-line parameter is
         // passed to the program.
-        final Boolean daemonThread = args.length > 0;
+        final boolean daemonThread = args.length > 0;
 
         // Create the GCD Runnable, passing in the type of thread it
         // runs in (i.e., "user" or "daemon").
@@ -45,7 +44,7 @@ public class TestRunnable {
         // Sleep for 1 second and then exit.
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException x) {}
+        } catch (InterruptedException ignored) {}
 
         System.out.println("Leaving main()");
     }
