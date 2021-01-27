@@ -60,6 +60,7 @@ public class UserOrDaemonThread extends Thread  {
     /**
      * Hook method that runs for MAX_ITERATIONs.
      */
+    @Override
     public void run() {
         final String threadString = 
             " with " 

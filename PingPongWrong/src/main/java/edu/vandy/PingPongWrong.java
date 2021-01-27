@@ -1,3 +1,5 @@
+package edu.vandy;
+
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.CountDownLatch;
 
@@ -20,6 +22,9 @@ public class PingPongWrong {
      * the ping/pong application.
      */
     public static class PlayPingPongThread extends Thread {
+        // The string to print for each ping and pong operation.
+        private String mStringToPrint;
+
         public PlayPingPongThread (String stringToPrint) {
             this.mStringToPrint = stringToPrint;
         }
@@ -36,9 +41,6 @@ public class PingPongWrong {
 
             // Exit the thread when the loop is done.
         }
-
-        // The string to print for each ping and pong operation.
-        private String mStringToPrint;
     }
 
     /**

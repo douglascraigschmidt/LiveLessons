@@ -30,7 +30,7 @@ public class TestExecutor {
 
         // Create a "daemon" thread if any command-line parameter is
         // passed to the program.
-        final Boolean daemonThread = args.length > 0;
+        final boolean daemonThread = args.length > 0;
 
         // Create the GCD Runnable, passing in the type of thread it
         // runs in (i.e., "user" or "daemon").
@@ -42,15 +42,13 @@ public class TestExecutor {
         
         // Create a new ThreadFactory object that will spawn either
         // "user" threads or "daemon" threads.
-        final ThreadFactory threadFactory = 
-        	new ThreadFactory() {
-            public Thread newThread(Runnable runnable) {
-                Thread thr = new Thread(runnable);
-                if (daemonThread)
-                    thr.setDaemon(true);
-                return thr;
-            }
-        };
+        final ThreadFactory threadFactory =
+                runnable -> {
+                    Thread thr = new Thread(runnable);
+                    if (daemonThread)
+                        thr.setDaemon(true);
+                    return thr;
+                };
 
         // Create a pool of threads that's will concurrently execute
         // the runnableCommands.

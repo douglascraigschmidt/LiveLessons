@@ -51,6 +51,7 @@ public class GCDRunnable
                 // Check to see if the thread's been interrupted.
                 if (Thread.interrupted())
                     throw new InterruptedException();
+                
                 // Print results every 10 million iterations.
                 else if ((i % 10000000) == 0)
                     System.out.println("In run()"
