@@ -77,7 +77,8 @@ public class AAPriceProxy
                           // Retrieve the response.
                           .retrieve()
 
-                          // Convert it to a Flux of Trips.
+                          // Convert it to a Flux of TripResponse
+                          // objects.
                           .bodyToFlux(TripResponse.class))
 
             // Schedule this to run on the given scheduler.

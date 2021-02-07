@@ -8,9 +8,7 @@ import utils.AsyncTaskBarrier;
  * mergeWith(), reduce(), take(), filter(), and various types of
  * thread pools.  It also shows various Mono operations, such as
  * firstWithSignal(), when(), materialize(), flatMap(), subscribeOn(),
- * and the parallel thread pool.  It also demonstrates how to combine
- * the Java streams framework with the Project Reactor framework.
- */
+ * and the parallel thread pool. */
 public class ex3 {
     /**
      * Main entry point into the test program.
@@ -28,15 +26,6 @@ public class ex3 {
         // Use an asynchronous Flux stream and a pool of threads to
         // perform BigFraction multiplications and additions.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplications2);
-
-        // Test BigFraction multiplications by combining the Java
-        // streams framework with the Reactor framework and the common
-        // fork-join pool.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications3);
-
-        // A test of BigFraction multiplication using an asynchronous
-        // Flux stream and a Subscriber implementation.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplications4);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

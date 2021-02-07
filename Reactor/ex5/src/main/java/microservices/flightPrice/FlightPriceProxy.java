@@ -4,10 +4,9 @@ import datamodels.TripRequest;
 import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -22,6 +21,13 @@ public class FlightPriceProxy {
      */
     private final String mFindBestPriceURIAsync =
         "/microservices/flightPrice/_bestPriceAsync";
+
+    /**
+     * The URI that denotes the remote method to find all the matching
+     * flights for a trip.
+     */
+    private final String mFindFlightsURIAsync =
+        "/microservices/flightPrice/_findFlightsAsync";
 
     /**
      * The WebClient provides the means to access the FlightPrice
@@ -51,11 +57,98 @@ public class FlightPriceProxy {
     }
 
     /**
-     * Finds the best price for the {@code flightLeg} asynchronously.
+     * Finds all the flights that match the {@code tripRequest}
+     * asynchronously.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @param tripRequest The desired trip 
+     * @return A Flux that emits all the matching {@code TripResponse} objects
+     */
+    public Flux<TripResponse> findFlightsAsync(Scheduler scheduler,
+                                               TripRequest tripRequest) {
+        // Return a Flux that emits all the matching flights.
+        return Mono
+            .fromCallable(() -> mFlightPrice
+                          // Create an HTTP POST request.
+                          .post()
+
+                          // Add the uri to the baseUrl.
+                          .uri(mFindFlightsURIAsync)
+
+                          // Encode the trip in the body of the request.
+                          .bodyValue(tripRequest)
+
+                          // Retrieve the response.
+                          .retrieve()
+
+                          // Convert it to a Flux of TripResponse
+                          // objects.
+                          .bodyToFlux(TripResponse.class))
+            
+            // Schedule this to run on the given scheduler.
+            .subscribeOn(scheduler)
+
+            // De-nest the result so it's a Flux<TripResponse>.
+            .flatMapMany(Function.identity());
+    }
+
+    /**
+     * Finds all the flights that match the {@code tripRequest}
+     * asynchronously.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @param tripRequest The desired trip 
+     * @return An Observable that emits all the matching {@code TripResponse} objects
+     */
+    public Single<TripResponse> findFlightsAsyncRx(Scheduler scheduler,
+                                                   TripRequest tripRequest) {
+        return Single
+            // Return a Single to the best price.
+            .fromPublisher(findFlightsAsync(scheduler, tripRequest));
+    }
+
+    /**
+     * Finds all the flights that match the {@code tripRequest}
+     * synchronously.
+     *
+     * @param tripRequest The desired trip 
+     * @param maxTime Max time to wait before throwing TimeoutException
+     * @return A Flux that emits all the matching {@code TripResponse} objects
+     */
+    public Flux<TripResponse> findFlightsSync(TripRequest tripRequest,
+                                              Duration maxTime) {
+        // Return a Mono to the best price.
+        return Mono
+            .fromCallable(() -> mFlightPrice
+                          // Create an HTTP POST request.
+                          .post()
+
+                          // Add the uri to the baseUrl.
+                          .uri(mFindBestPriceURIAsync)
+
+                          // Encode the trip in the body of the request.
+                          .bodyValue(tripRequest)
+
+                          // Retrieve the response.
+                          .retrieve()
+
+                          // Convert it to a Mono of Trip.
+                          .bodyToMono(TripResponse.class))
+
+            // De-nest the result so it's a Flux<TripResponse>.
+            .flatMapMany(Function.identity())
+
+            // If the total processing takes more than maxTime a
+            // TimeoutException will be thrown.
+            .timeout(maxTime);
+    }
+
+    /**
+     * Finds the best price for the {@code tripRequest} asynchronously.
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param tripRequest The trip to price
-     * @return A Trip containing the best price.
+     * @return A Mono that emits the {@code TripResponse} with the best price
      */
     public Mono<TripResponse> findBestPriceAsync(Scheduler scheduler,
                                                  TripRequest tripRequest) {
@@ -85,54 +178,27 @@ public class FlightPriceProxy {
     }
 
     /**
-     * Finds the best price for the {@code trip} asynchronously.
+     * Finds the best price for the {@code tripRequest} asynchronously.
      *
      * @param scheduler The Scheduler context in which to run the operation
      * @param tripRequest The trip to price
-     * @return A Single containing the best price.
+     * @return A Single that emits the {@code TripResponse} with the best price
      */
     public Single<TripResponse> findBestPriceAsyncRx(Scheduler scheduler,
                                                      TripRequest tripRequest) {
         return Single
             // Return a Single to the best price.
-            .fromPublisher(Mono
-                           // Create a Mono from a Callable.
-                           .fromCallable(() -> mFlightPrice
-                                         // Create an HTTP post
-                                         // request.
-                                         .post()
-
-                                         // Add the uri to the
-                                         // baseUrl.
-                                         .uri(mFindBestPriceURIAsync)
-
-                                         // Encode the trip in the body of the request.
-                                         .bodyValue(tripRequest)
-
-                                         // Retrieve the response.
-                                         .retrieve()
-
-                                         // Convert it to a Mono of
-                                         // Trip.
-                                         .bodyToMono(TripResponse.class))
-
-                           // Schedule this to run on the given
-                           // scheduler.
-                           .subscribeOn(Schedulers.parallel())
-
-                           // De-nest the result so it's a
-                           // Mono<TripResponse>.
-                           .flatMap(Function.identity()));
+            .fromPublisher(findBestPriceAsync(scheduler, tripRequest));
     }
 
     /**
-     * Finds the best price for the {@code flightLeg} synchronously.
+     * Finds the best price for the {@code tripRequest} synchronously.
      *
-     * @param trip The trip to price
+     * @param tripRequest The trip to price
      * @param maxTime Max time to wait before throwing TimeoutException
      * @return A Mono containing the best price
      */
-    public Mono<TripResponse> findBestPriceSync(TripRequest trip,
+    public Mono<TripResponse> findBestPriceSync(TripRequest tripRequest,
                                                 Duration maxTime) {
         // Return a Mono to the best price.
         return Mono
@@ -144,7 +210,7 @@ public class FlightPriceProxy {
                           .uri(mFindBestPriceURIAsync)
 
                           // Encode the trip in the body of the request.
-                          .bodyValue(trip)
+                          .bodyValue(tripRequest)
 
                           // Retrieve the response.
                           .retrieve()

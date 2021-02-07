@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -22,86 +23,23 @@ import static java.util.stream.Collectors.toList;
 /**
  */
 public class ex2 {
-    public static BigFraction makeBigFraction(Random random,
-                                              boolean reduced) {
-        // Create a large random big integer.
-        BigInteger numerator =
-            new BigInteger(150000, random);
-
-        // Create a denominator that's between 1 to 10 times smaller
-        // than the numerator.
-        BigInteger denominator =
-            numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
-
-        // Return a big fraction.
-        return BigFraction.valueOf(numerator,
-                                   denominator,
-                                   reduced);
-    }
-
-    /**
+     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        List<BigFraction> l1 = new ArrayList<BigFraction>();
-        Random r = new Random();
+        Flux<Integer> o1 = Flux.just(1, 2, 3,4);
+        Mono<Integer> o2 = Mono.just(1);
 
-        for (int i = 10; i > 0; i--)
-            l1.add(makeBigFraction(r, true));
+        o2
+                .flatMapMany(v1 -> o1
+                        .flatMap(v2 -> Flux
+                                .just(v2)
+                                .map(__ -> v1 * v2)))
 
-        for(BigFraction bf : l1)
-            System.out.println(bf);
+        .subscribe(value -> System.out.println("value = " + value));
 
-        List<BigFraction> l2 = new ArrayList(l1);
-
-        Collections.sort(l1);
-
-        System.out.println("Collections.sort(l)");
-        for(BigFraction bf : l1)
-            System.out.println(bf);
-
-        HeapSort.sort(l2);
-
-        System.out.println("HeapSort.sort(l)");
-        for(BigFraction bf : l2)
-            System.out.println(bf);
-        /*
-        Flux<Object> fluxAsyncBackp = Flux.create((FluxSink<Object> emitter) -> {
-
-                // Publish 1000 numbers
-                for (int i = 0; i < 1000; i++) {
-                    System.out.println(Thread.currentThread().getName() + " | Publishing = " + i);
-                    // BackpressureStrategy.ERROR will cause MissingBackpressureException when
-                    // subscriber can't keep up. So handle exception & call error handler.
-                    emitter.next(i);
-                }
-                // When all values or emitted, call complete.
-                emitter.complete();
-
-            }, FluxSink.OverflowStrategy.ERROR);
-
-        fluxAsyncBackp.subscribeOn(Schedulers.elastic()).publishOn(Schedulers.elastic()).subscribe(i -> {
-                // Process received value.
-                System.out.println(Thread.currentThread().getName() + " | Received = " + i);
-            }, e -> {
-                // Process error
-                System.err.println(Thread.currentThread().getName() + " | Error = " + e.getClass().getSimpleName() + " "
-                                   + e.getMessage());
-            });
-
-        // Since publisher & subscriber run on different thread than main thread, keep
-        // main thread active for 100 seconds.
-        Thread.sleep(100000);
-        */
-    }
-
-    /**
-     * Display the {@code string} after prepending the thread id.
-     */
-    private static void display(String string) {
-        System.out.println("["
-                           + Thread.currentThread().getName()
-                           + "] "
-                           + string);
+        Flux
+            .combineLatest(o2, o1, (a, b) -> a * b)
+            .subscribe(value -> System.out.println("value = " + value));
     }
 }

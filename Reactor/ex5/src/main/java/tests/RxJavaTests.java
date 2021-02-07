@@ -40,9 +40,9 @@ public class RxJavaTests {
      * best price for a {@code trip} using the given {@code
      * currencyConversion}.
      */
-    public static void runAsyncSingles(TripRequest trip,
+    public static void runAsyncTestsRx(TripRequest trip,
                                        CurrencyConversion currencyConversion) {
-        System.out.println("begin runAsyncSingles()");
+        System.out.println("begin runAsyncTestsRx()");
 
         // Iterate multiple times.
         for (int i = 0; i < Options.instance().maxIterations(); i++) {
@@ -51,7 +51,7 @@ public class RxJavaTests {
             AsyncTaskBarrierRx
                 // Register the test with the AsyncTaskBarrierRx framework so it
                 // will run asynchronously wrt the other iterations.
-                .register(() -> getBestPriceInPoundsAsync(iteration,
+                .register(() -> findBestPriceAsync(iteration,
                                                           trip,
                                                           currencyConversion));
         }
@@ -64,46 +64,45 @@ public class RxJavaTests {
             // computations to complete running asynchronously.
             .blockingGet();
 
-        System.out.println("end runAsyncMonos()");
+        System.out.println("end runAsyncTestsRx()");
     }
 
     /**
-     * Returns the best price for {@code trip} using the given {@code
-     * currencyConversion} via asynchronous computations.
+     * Returns the best price for the {@code tripRequest} using the
+     * given {@code currencyConversion} via asynchronous computations.
      *
      * @param iteration Current iteration count
      * @param tripRequest The current trip being priced
      * @param currencyConversion The currency to convert from and to
      * @return A Completable to synchronize with the AsyncTaskBarrierRx framework.
      */
-    private static Completable getBestPriceInPoundsAsync(int iteration,
-                                                         TripRequest tripRequest,
-                                                         CurrencyConversion currencyConversion) {
+    private static Completable findBestPriceAsync(int iteration,
+                                                  TripRequest tripRequest,
+                                                  CurrencyConversion currencyConversion) {
         Single<TripResponse> tripS = sFlightPriceProxy
-            // Asynchronously find the best price in US dollars
-            // between London and New York city.
+            // Asynchronously find the best price for the tripRequest.
             .findBestPriceAsyncRx(Schedulers.parallel(),
                                   tripRequest);
 
         Single<Double> rateS = sExchangeRateProxy
-            // Asynchronously determine exchange rate between US
-            // dollars and British pounds.
+            // Asynchronously determine the exchange rate.
             .queryExchangeRateForAsyncRx(currencyConversion);
 
-        // When priceM and rateM complete convert the price in US
-        // dollars to the price in British pounds.  If these async
-        // operations take more than {@code maxTime} then throw the
-        // TimeoutException.
+        // When priceM and rateM complete convert the price.  If these
+        // async operations take more than {@code maxTime} then throw
+        // the TimeoutException.
         return combineAndConvertResults(tripS, rateS, Options.instance().maxTimeout())
             // Print the price if the call completed within
             // sMAX_TIME seconds.
-            .doOnSuccess(tripResponse ->
-                         Options.print("Iteration #"
-                               + iteration
-                               + " The price is: "
-                               + tripResponse.getPrice()
-                               + " GBP on "
-                               + tripResponse.getAirlineCode()))
+            .doOnSuccess(tripResponse -> Options
+                         .print("Iteration #"
+                                + iteration
+                                + " The best price is: "
+                                + tripResponse.getPrice()
+                                + " "
+                                + currencyConversion.getTo() 
+                                + " on "
+                                + tripResponse.getAirlineCode()))
                     
             // Consume and print the TimeoutException if the call
             // took longer than sMAX_TIME.

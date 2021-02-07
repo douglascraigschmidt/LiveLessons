@@ -56,25 +56,26 @@ public class ex5 {
             // This test invokes microservices to asynchronously
             // determine the best price for a flight from London to
             // New York city in British pounds.
-            .timeRun(() -> ReactorTests.runAsyncMonos(mTrip,
+            .timeRun(() -> ReactorTests.runAsyncTests(mTrip,
                                                       mCurrencyConversion),
-                     "runAsyncMonos");
+                     "runAsyncTests");
 
+        /*
         RunTimer
             // This test invokes microservices to synchronously
             // determine the best price for a flight from London to
             // New York city in British pounds.
-            .timeRun(() -> ReactorTests.runSyncMonos(mTrip,
+            .timeRun(() -> ReactorTests.runSyncTests(mTrip,
                                                      mCurrencyConversion),
-                     "runSyncMonos");
+                     "runSyncTests");
 
         RunTimer
             // This test invokes microservices to asynchronously
             // determine the best price for a flight from London to
             // New York city in British pounds.
-            .timeRun(()-> RxJavaTests.runAsyncSingles(mTrip,
+            .timeRun(()-> RxJavaTests.runAsyncTestsRx(mTrip,
                                                       mCurrencyConversion),
-                     "runAsyncSingles");
+                     "runAsyncTestsRx"); */
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());

@@ -71,8 +71,8 @@ public class ExchangeRateProxy {
      * @param currencyConversion The currency to convert from and to
      * @return A Mono containing the exchange rate.
      */
-    public Mono<Double> queryExchangeRateForAsync(Scheduler scheduler,
-                                                  CurrencyConversion currencyConversion) {
+    public Mono<Double> queryExchangeRateAsync(Scheduler scheduler,
+                                               CurrencyConversion currencyConversion) {
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate

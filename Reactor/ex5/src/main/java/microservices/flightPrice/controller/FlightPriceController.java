@@ -86,8 +86,8 @@ public class FlightPriceController {
     }
 
     /**
-     * This method simulates a microservice that finds the best price
-     * in US dollars for a given {@code trip}.
+     * This method finds the best price in US dollars for a given
+     * {@code trip} request.
      *
      * WebFlux maps HTTP POST requests sent to the /_bestPriceAsync
      * endpoint to this method.
@@ -135,6 +135,46 @@ public class FlightPriceController {
 
             // Return the lowest priced trip.
             .next();
+    }
+
+    /**
+     * This method finds all matching responses a given {@code trip}
+     * request.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_findFlightsAsync
+     * endpoint to this method.
+     *
+     * @param trip Information about the trip, e.g., departure date
+     *             and departure/arrival airports
+     * @return A Flux that emits all responses for a given
+     *         {@code trip} request.
+     */
+    @PostMapping("/_findFlightsAsync")
+    private Flux<TripResponse> findFlights(@RequestBody TripRequest trip) {
+        // Initialize the flight proxies if they haven't been
+        // initialized by an earlier call.
+        initializeProxiesIfNecessary();
+
+        return Flux
+            // Convert the list of proxies into a Flux stream.
+            .fromIterable(mProxyList)
+
+            // Apply the flatMap() concurrency idiom to find all trips
+            // that match the trip param in parallel.
+            .flatMap(proxy -> Flux
+                     // Factory that emits the current proxy.
+                     .just(proxy)
+
+                     // Run this computation in the parallel thread
+                     // pool.
+                     .subscribeOn(Schedulers.parallel())
+
+                     // Merge all the trips that match the trip param
+                     // into a Flux stream.
+                     .flatMap(__ -> proxy
+                              .mProxy
+                              .findTripsAsync(Schedulers.parallel(),
+                                              trip)));
     }
 
     /**
