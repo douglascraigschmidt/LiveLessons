@@ -3,12 +3,12 @@ import utils.AsyncTaskBarrier;
 /**
  * This example shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
- * fromArray(), map(), flatMap(), flatMapMany(), collect(), and
- * various types of thread pools.  It also shows various Mono
- * operations, such as when(), firstWithSignal(), materialize(),
- * flatMap(), subscribeOn(), and the parallel thread pool.  In
- * addition, it demonstrates how to combine the Java streams framework
- * with the Project Reactor framework.
+ * fromArray(), map(), flatMap(), collect(), and various types of
+ * thread pools.  It also shows various Mono operations, such as
+ * when(), firstWithSignal(), materialize(), flatMap(), flatMapMany(),
+ * subscribeOn(), and the parallel thread pool.  In addition, it
+ * demonstrates how to combine the Java streams framework with the
+ * Project Reactor framework.
  */
 public class ex4 {
     /**
