@@ -27,7 +27,8 @@ public class TestDataFactory {
     }
 
     /**
-     * Return a list of {@code TripResponse} objects that match the given {@code tripRequest}.
+     * Return a list of {@code TripResponse} objects that match the
+     * given {@code tripRequest}.
      */
     @SneakyThrows
     public static List<TripResponse> findFlights(TripRequest tripRequest) {
