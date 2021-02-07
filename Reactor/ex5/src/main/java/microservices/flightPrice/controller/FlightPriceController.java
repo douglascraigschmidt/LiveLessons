@@ -87,18 +87,18 @@ public class FlightPriceController {
 
     /**
      * This method finds the best price in US dollars for a given
-     * {@code trip} request.
+     * {@code tripRequest} request.
      *
      * WebFlux maps HTTP POST requests sent to the /_bestPriceAsync
      * endpoint to this method.
      *
-     * @param trip Information about the trip, e.g., departure date
+     * @param tripRequest Information about the trip, e.g., departure date
      *             and departure/arrival airports
      * @return A Mono that emits best price in US dollars for this
      *         {@code trip}
      */
     @PostMapping("/_bestPriceAsync")
-    private Mono<TripResponse> findBestPrice(@RequestBody TripRequest trip) {
+    private Mono<TripResponse> findBestPrice(@RequestBody TripRequest tripRequest) {
         // Initialize the flight proxies if they haven't been
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
@@ -128,7 +128,7 @@ public class FlightPriceController {
                      .flatMap(__ -> proxy
                               .mProxy
                               .findTripsAsync(Schedulers.parallel(),
-                                              trip)))
+                                              tripRequest)))
 
             // Sort the output so the lowest price comes first.
             .sort(Comparator.comparingDouble(TripResponse::getPrice))
@@ -138,23 +138,49 @@ public class FlightPriceController {
     }
 
     /**
-     * This method finds all matching responses a given {@code trip}
-     * request.
+     * This method finds all matching responses a given {@code
+     * tripRequest} request.
      *
      * WebFlux maps HTTP POST requests sent to the /_findFlightsAsync
      * endpoint to this method.
      *
-     * @param trip Information about the trip, e.g., departure date
-     *             and departure/arrival airports
+     * @param tripRequest Information about the trip, e.g., departure date
+     *                    and departure/arrival airports
      * @return A Flux that emits all responses for a given
-     *         {@code trip} request.
+     *         {@code tripRequest} request.
      */
     @PostMapping("/_findFlightsAsync")
-    private Flux<TripResponse> findFlights(@RequestBody TripRequest trip) {
+    private Flux<TripResponse> findFlights(@RequestBody TripRequest tripRequest) {
         // Initialize the flight proxies if they haven't been
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
 
+        return findFlightsImpl(tripRequest);
+    }
+
+    /**
+     * Initialize the flight proxies if they haven't already been
+     * initialized in an earlier call.
+     */
+    private void initializeProxiesIfNecessary() {
+        // Iterate through all the airline proxies.
+        for (Tuple tuple : mProxyList)
+            // If a proxy hasn't been initialized yet then initialize
+            // it so it will be cached for future calls.
+            if (tuple.mProxy == null)
+                tuple.mProxy = tuple.mFactory.get();
+    }
+
+    /**
+     * This method finds all matching responses a given {@code
+     * tripRequest} request.
+     *
+     * @param tripRequest Information about the trip, e.g., departure date
+     *                    and departure/arrival airports
+     * @return A Flux that emits all responses for a given
+     *         {@code tripRequest} request.
+     */
+    private Flux<TripResponse> findFlightsImpl(TripRequest tripRequest) {
         return Flux
             // Convert the list of proxies into a Flux stream.
             .fromIterable(mProxyList)
@@ -174,19 +200,6 @@ public class FlightPriceController {
                      .flatMap(__ -> proxy
                               .mProxy
                               .findTripsAsync(Schedulers.parallel(),
-                                              trip)));
-    }
-
-    /**
-     * Initialize the flight proxies if they haven't already been
-     * initialized in an earlier call.
-     */
-    private void initializeProxiesIfNecessary() {
-        // Iterate through all the airline proxies.
-        for (Tuple tuple : mProxyList)
-            // If a proxy hasn't been initialized yet then initialize
-            // it so it will be cached for future calls.
-            if (tuple.mProxy == null)
-                tuple.mProxy = tuple.mFactory.get();
+                                              tripRequest)));
     }
 }

@@ -1,12 +1,16 @@
 package utils;
 
+import datamodels.TripRequest;
 import datamodels.TripResponse;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -18,6 +22,30 @@ public class TestDataFactory {
      * A utility class should always define a private constructor.
      */
     private TestDataFactory() {
+    }
+
+    /**
+     * Return a list of {@code TripResponse} objects that match the given {@code tripRequest}.
+     */
+    public static List<TripResponse> findFlights(TripRequest tripRequest) {
+        return Stream
+            // Create a stream of all the airline databases.
+            .of("AA.txt", "SWA.txt")
+
+            // Get a list of TripResponse objects from each airline database.
+            .map(TestDataFactory::getTripList)
+
+            // Eliminate any null entries.
+            .filter(Objects::nonNull)
+
+            // Flatten the list of TripResponse objects into a stream of TripResponse objects.
+            .flatMap(List::stream)
+
+            // Only keep TripResponse objects that match the tripRequest.
+            .filter(tripRequest::equals)
+
+            // Collect the results into a list.
+            .collect(toList());
     }
 
     /**
