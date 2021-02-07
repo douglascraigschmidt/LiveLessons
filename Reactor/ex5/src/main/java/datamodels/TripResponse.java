@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
  */
 public class TripResponse {
     /**
-     * Date and time of the departure.
+     * Date and time of the initial departure.
      */
     LocalDateTime departureDateTime;
 
     /**
-     * Date and time of the arrival.
+     * Date and time of the initial arrival.
      */
     LocalDateTime arrivalDateTime;
 
@@ -39,7 +39,7 @@ public class TripResponse {
     String arrivalAirport;
 
     /**
-     * Price
+     * Price.
      */
     Double price;
 

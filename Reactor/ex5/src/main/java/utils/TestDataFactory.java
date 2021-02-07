@@ -75,22 +75,42 @@ public class TestDataFactory {
     }
 
     /**
+     * Factory method that converts a string of comma-separated values
+     * indicating the date/time of the initial departure/arrival, the
+     * date/time of the return departure/arrival, the airport code for
+     * the departing/arriving airports, the price, and the airline
+     * code into the corresponding {@code TripResponse}.
      *
-     * @param line
-     * @return
+     * @param tripString A string containing comma-separated values
+     * indicating information about the trip
+     * @return The corresponding {@code TripResponse}
      */
-    private static TripResponse makeTrip(String line) {
-        String[] result = line.split(",");
+    private static TripResponse makeTrip(String tripString) {
+        String[] result = tripString.split(",");
 
         // Create and return a TripResponse via a factory method.
         return TripResponse
-            .valueOf(LocalDateTime.parse(result[0]),
+            .valueOf(// Date/time of the initial departure.
+                     LocalDateTime.parse(result[0]),
+                     // Date/time of the initial arrival.
                      LocalDateTime.parse(result[1]),
+
+                     // Date/time of the return departure.
                      LocalDateTime.parse(result[2]),
+
+                     // Date/time of the return arrival.
                      LocalDateTime.parse(result[3]),
+
+                     // Code for the departure airport.
                      result[4],
+
+                     // Code for the arrival airport.
                      result[5],
+
+                     // Price of the flight.
                      Double.parseDouble(result[6]),
+
+                     // Code for the airline.
                      result[7]);
     }
 }
