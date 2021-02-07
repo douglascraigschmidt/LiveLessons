@@ -53,8 +53,6 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
-        TestDataFactory.findFlights(mTrip).forEach(System.out::println);
-        /*
         RunTimer
             // This test invokes microservices to asynchronously
             // determine the best price for a flight from London to
@@ -81,8 +79,6 @@ public class ex5 {
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());
-
-         */
     }
 }
     
