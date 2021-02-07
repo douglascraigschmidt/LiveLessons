@@ -2,8 +2,10 @@ package utils;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
+import lombok.SneakyThrows;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,21 +29,26 @@ public class TestDataFactory {
     /**
      * Return a list of {@code TripResponse} objects that match the given {@code tripRequest}.
      */
+    @SneakyThrows
     public static List<TripResponse> findFlights(TripRequest tripRequest) {
-        return Stream
-            // Create a stream of all the airline databases.
-            .of("AA.txt", "SWA.txt")
+        return Files
+            // Create a stream of the paths for all airline databases.
+            .list(Paths.get(ClassLoader
+                            .getSystemResource("airlineDBs")
+                            .toURI()))
 
-            // Get a list of TripResponse objects from each airline database.
-            .map(TestDataFactory::getTripList)
+            // Flatten the contents of all the airline databases into
+            // a stream of strings containing comma-separated values.
+            .flatMap(ExceptionUtils.rethrowFunction(Files::lines))
 
-            // Eliminate any null entries.
-            .filter(Objects::nonNull)
+            // Filter out any empty strings.
+            .filter(((Predicate<String>) String::isEmpty).negate())
 
-            // Flatten the list of TripResponse objects into a stream of TripResponse objects.
-            .flatMap(List::stream)
+            // Convert the strings into TripResponse objects.
+            .map(TestDataFactory::makeTrip)
 
-            // Only keep TripResponse objects that match the tripRequest.
+            // Only keep TripResponse objects that match the
+            // tripRequest.
             .filter(tripRequest::equals)
 
             // Collect the results into a list.
@@ -63,6 +70,7 @@ public class TestDataFactory {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
+                // Convert the strings into TripResponse objects.
                 .map(TestDataFactory::makeTrip)
 
                 // Trigger intermediate operations and collect the

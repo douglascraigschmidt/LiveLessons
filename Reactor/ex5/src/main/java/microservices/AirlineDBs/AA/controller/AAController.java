@@ -46,7 +46,7 @@ public class AAController {
         mTrips = TestDataFactory
             // Initialize the list of TripResponse objects and their
             // associated prices from the AA.txt file.
-            .getTripList("AA.txt");
+            .getTripList("airlineDBs/AA.txt");
     }
 
     /**

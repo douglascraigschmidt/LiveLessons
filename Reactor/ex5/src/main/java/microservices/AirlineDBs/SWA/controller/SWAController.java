@@ -43,7 +43,7 @@ public class SWAController {
         mTrips = TestDataFactory
             // Initialize the list of TripResponse objects and their
             // associated prices from the SWA.txt file.
-            .getTripList("SWA.txt");
+            .getTripList("airlineDBs/SWA.txt");
     }
 
     /**
