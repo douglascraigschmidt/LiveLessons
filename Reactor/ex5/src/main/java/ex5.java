@@ -1,5 +1,6 @@
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
+import datamodels.TripResponse;
 import lombok.SneakyThrows;
 import tests.ReactorTests;
 import tests.RxJavaTests;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -38,7 +40,8 @@ public class ex5 {
         .valueOf(LocalDateTime.parse("2025-01-01T07:00:00"),
                  LocalDateTime.parse("2025-02-01T19:00:00"),
                  "LHR",
-                 "JFK");
+                 "JFK",
+                 1);
 
     /**
      * Indicate a conversion of US dollars to British pounds.

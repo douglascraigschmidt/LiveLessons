@@ -2,13 +2,9 @@ package utils;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import lombok.SneakyThrows;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -23,24 +19,21 @@ public class TestDataFactory {
     private TestDataFactory() {
     }
 
+    private static String[] sFlightInfo = {
+            "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,777.00,AA",
+            "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,555.00,AA",
+            "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,888.00,SWA",
+            "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,666.00,SWA"
+    };
+
     /**
      * Return a list of {@code TripResponse} objects that match the
      * given {@code tripRequest}.
      */
-    @SneakyThrows
     public static List<TripResponse> findFlights(TripRequest tripRequest) {
-        Files
-            // Create a stream of the paths for all airline databases.
-            .list(Paths.get(ClassLoader
-                            .getSystemResource("airlineDBs")
-                            .toURI()))
-
-            // Flatten the contents of all the airline databases into
-            // a stream of strings containing comma-separated values.
-            .flatMap(ExceptionUtils.rethrowFunction(Files::lines))
-
-            // Filter out any empty strings.
-            .filter(((Predicate<String>) String::isEmpty).negate())
+        return Stream
+            // Convert the array into a stream.
+            .of(sFlightInfo)
 
             // Convert the strings into TripResponse objects.
             .map(TestDataFactory::makeTrip)
@@ -51,33 +44,6 @@ public class TestDataFactory {
 
             // Collect the results into a list.
             .collect(toList());
-    }
-
-    /**
-     * Return the Trip list in the {@code filename} as a list of
-     * non-empty Trip objects.
-     */
-    public static List<TripResponse> getTripList(String filename) {
-        try {
-            return Files
-                // Read all lines from filename and convert into a
-                // stream of strings.
-                .lines(Paths.get(ClassLoader.getSystemResource
-                                 (filename).toURI()))
-
-                // Filter out any empty strings.
-                .filter(((Predicate<String>) String::isEmpty).negate())
-
-                // Convert the strings into TripResponse objects.
-                .map(TestDataFactory::makeTrip)
-
-                // Trigger intermediate operations and collect the
-                // results into a list of Trip objects.
-                .collect(toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     /**
