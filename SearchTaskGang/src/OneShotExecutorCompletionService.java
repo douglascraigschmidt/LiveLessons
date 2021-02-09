@@ -32,10 +32,10 @@ public class OneShotExecutorCompletionService
         // which grow dynamically.
         setExecutor (Executors.newCachedThreadPool());
 
-        // Connect the Executor with the CompletionService
-        // to process SearchResults concurrently. 
+        // Connect the Executor with the CompletionService to process
+        // SearchResults concurrently.
         mCompletionService =
-            new ExecutorCompletionService<SearchResults>(getExecutor());
+            new ExecutorCompletionService<>(getExecutor());
     }
 
     /**
