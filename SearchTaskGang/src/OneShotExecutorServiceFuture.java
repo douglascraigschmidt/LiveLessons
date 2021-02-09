@@ -6,15 +6,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * @class OneShotExecutorServiceFuture
- * 
- * @brief Customizes the SearchTaskGangCommon framework to process a
- *        one-shot List of tasks via a variable-sized pool of Threads
- *        created by the ExecutorService. The unit of concurrency is a
- *        "task per search word". The results processing model uses
- *        the Synchronous Future model, which defers the results
- *        processing until all words to search for have been
- *        submitted.
+ * Customizes the SearchTaskGangCommon framework to process a one-shot
+ * List of tasks via a variable-sized pool of Threads created by the
+ * ExecutorService. The unit of concurrency is a "task per search
+ * word". The results processing model uses the Synchronous Future
+ * model, which defers the results processing until all words to
+ * search for have been submitted.
  */
 public class OneShotExecutorServiceFuture
        extends SearchTaskGangCommon {
@@ -69,19 +66,12 @@ public class OneShotExecutorServiceFuture
 
         // Iterate through each word.
         for (final String word : mWordsToFind) {
-
             // Submit a Callable that will search concurrently for
             // this word in the inputData & create a Future to store
             // the results.
-            final Future<SearchResults> resultFuture =
-                executorService.submit(new Callable<SearchResults>() {
-                        @Override
-                        // call() runs in a background task.
-                        public SearchResults call() throws Exception {
-                            return searchForWord(word,
-                                                 inputData);
-                        }
-                    });
+            // call() runs in a background task.
+            final Future<SearchResults> resultFuture = executorService
+                .submit(() -> searchForWord(word, inputData));
 
             // Add the Future to the List so it can be processed
             // later.

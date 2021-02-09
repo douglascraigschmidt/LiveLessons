@@ -7,12 +7,10 @@ import java.util.concurrent.TimeUnit;
 import javax.naming.directory.SearchResult;
 
 /**
- * @class SearchTaskGangCommon
- * 
- * @brief This helper class factors out the common code used by all
- *        the implementations of TaskGang below.  It customizes the
- *        TaskGang framework to concurrently search an array of
- *        Strings for an array of words to find.
+ * This helper class factors out the common code used by all the
+ * implementations of TaskGang below.  It customizes the TaskGang
+ * framework to concurrently search an array of Strings for an array
+ * of words to find.
  */
 public abstract class SearchTaskGangCommon
                 extends TaskGang<String> {
@@ -58,9 +56,8 @@ public abstract class SearchTaskGangCommon
     }
 
     /**
-     * Search for all instances of @code word in @code inputData
-     * and return a list of all the @code SearchData results (if
-     * any).
+     * Search for all instances of @code word in @code inputData and
+     * return a list of all the @code SearchData results (if any).
      */
     protected SearchResults searchForWord(String word, 
                                           String inputData) {
@@ -70,13 +67,13 @@ public abstract class SearchTaskGangCommon
                               word,
                               inputData);
 
-        // Check to see how many times (if any) the word appears
-        // in the input data.
+        // Check to see how many times (if any) the word appears in
+        // the input data.
         for (int i = inputData.indexOf(word, 0);
              i != -1;
-             i = inputData.indexOf(word, i + word.length())) {
-            // Each time a match is found it's added to the list
-            // of search results.
+             i = inputData.indexOf(word, i + 1)) {
+            // Each time a match is found it's added to the list of
+            // search results.
             results.add(i);
         }
         return results;

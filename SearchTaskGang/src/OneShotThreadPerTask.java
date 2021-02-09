@@ -3,20 +3,18 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * @class OneShotThreadPerTask
- *
- * @brief Customizes the SearchTaskGangCommon framework to process a
- *        one-shot List of tasks via an Executor that creates a Thread
- *        for each task. The Executor model is a Thread per task. The
- *        unit of concurrency is each input String. The results
- *        processing model is synchronous.
+ * Customizes the SearchTaskGangCommon framework to process a one-shot
+ * List of tasks via an Executor that creates a Thread for each
+ * task. The Executor model is a Thread per task. The unit of
+ * concurrency is each input String. The results processing model is
+ * synchronous.
  */
 public class OneShotThreadPerTask
        extends SearchTaskGangCommon {
     /**
      * The List of worker Threads that were created.
      */
-    private List<Thread> mWorkerThreads;
+    private final List<Thread> mWorkerThreads;
 
     /**
      * Constructor initializes the superclass and data members.
@@ -28,7 +26,7 @@ public class OneShotThreadPerTask
               stringsToSearch);
 
         // This List holds Threads so they can be joined.
-        mWorkerThreads = new LinkedList<Thread>();
+        mWorkerThreads = new LinkedList<>();
     }
 
     /**
@@ -39,13 +37,11 @@ public class OneShotThreadPerTask
         if (getExecutor() == null) 
             // Create an Executor that runs each worker task in a
             // separate Thread.
-            setExecutor (new Executor() {
-                    public void execute(Runnable r) {
-                        Thread thread = new Thread(r);
-                        mWorkerThreads.add (thread);
-                        thread.start();
-                    }
-                });
+            setExecutor (r -> {
+                Thread thread = new Thread(r);
+                mWorkerThreads.add (thread);
+                thread.start();
+            });
 
         // Enqueue each item in the input List for execution in a
         // separate Thread.
@@ -59,9 +55,9 @@ public class OneShotThreadPerTask
      */
     @Override
     protected boolean processInput (String inputData) {
-        // Iterate through each word we're searching for and try to
-        // find it in the inputData.
+        // Iterate through each word we're searching for.
         for (String word : mWordsToFind) {
+            // Try to find the word in the inputData.
             SearchResults results = searchForWord(word, 
                                                   inputData);
 
@@ -73,6 +69,7 @@ public class OneShotThreadPerTask
                 results.print();
             }
         }
+
         return true;
     }
 

@@ -8,16 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * @class OneShotExecutorService
- *
- * @brief Customizes the SearchTaskGangCommon framework to process a
- *        one-shot List of tasks via a fixed-size pool of Threads
- *        created by the ExecutorService, which is also used as a
- *        barrier synchronizer to wait for all the Threads in the pool
- *        to shutdown.  The unit of concurrency is invokeAll(), which
- *        creates a task for each input string.  The results
- *        processing model uses a LinkedBlockingQueue that stores
- *        results for immediate concurrent processing per cycle.
+ * Customizes the SearchTaskGangCommon framework to process a one-shot
+ * List of tasks via a fixed-size pool of Threads created by the
+ * ExecutorService, which is also used as a barrier synchronizer to
+ * wait for all the Threads in the pool to shutdown.  The unit of
+ * concurrency is invokeAll(), which creates a task for each input
+ * string.  The results processing model uses a LinkedBlockingQueue
+ * that stores results for immediate concurrent processing per cycle.
  */
 public class OneShotExecutorService
        extends SearchTaskGangCommon {
@@ -30,7 +27,7 @@ public class OneShotExecutorService
      * Queue to store SearchResults of concurrent computations.
      */
     private BlockingQueue<SearchResults> mResultsQueue = 
-        new LinkedBlockingQueue<SearchResults>();
+        new LinkedBlockingQueue<>();
 
     /**
      * Number of Threads in the pool.
@@ -78,7 +75,7 @@ public class OneShotExecutorService
         // Create a new collection that will contain all the
         // Worker Runnables.
         List<Callable<Object>> workerCollection =
-            new ArrayList<Callable<Object>>(inputSize);
+            new ArrayList<>(inputSize);
 
         // Create a Runnable for each item in the input List and add
         // it as a Callable adapter into the collection.
@@ -108,8 +105,7 @@ public class OneShotExecutorService
     protected boolean processInput (String inputData) {
         // Iterate through each word we're searching for
         // and try to find it in the inputData.
-        for (String word : mWordsToFind) 
-
+        for (String word : mWordsToFind)
             // Each time a match is found the queueResults() method is
             // called to pass the search results to a background
             // Thread for concurrent processing.
@@ -187,9 +183,7 @@ public class OneShotExecutorService
      */
     protected void processQueuedResults(final int resultCount) {
         // This runnable processes all queued results.
-        Runnable processQueuedResultsRunnable =
-            new Runnable() {
-                public void run() {
+        Runnable processQueuedResultsRunnable = () -> {
                     try {
                         for (int i = 0; i < resultCount; ++i)
                             // Extract each SearchResults from the
@@ -200,10 +194,9 @@ public class OneShotExecutorService
                     } catch (InterruptedException e) {
                         System.out.println("run() interrupted");
                     }
-                }
-            };
+                };
 
-        // Create a new Thread that will process the results
+        // Create and start a new Thread that processes results
         // concurrently in the background.
         Thread t = new Thread(processQueuedResultsRunnable);
         t.start();

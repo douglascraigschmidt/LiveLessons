@@ -29,7 +29,7 @@ public class TestDataFactory {
      */
     @SneakyThrows
     public static List<TripResponse> findFlights(TripRequest tripRequest) {
-        Files
+        return Files
             // Create a stream of the paths for all airline databases.
             .list(Paths.get(ClassLoader
                             .getSystemResource("airlineDBs")

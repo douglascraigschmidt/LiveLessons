@@ -4,14 +4,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * @class OneShotExecutorCompletionService
- *
- * @brief Customizes the SearchTaskGangCommon framework to process a
- *        one-shot List of tasks via a variable-sized pool of Threads
- *        created by the ExecutorService. The units of concurrency are
- *        a "task per search word" *and* the input Strings. The
- *        results processing model uses an Asynchronous Future model,
- *        which starts processing results immediately.
+ * Customizes the SearchTaskGangCommon framework to process a one-shot
+ * List of tasks via a variable-sized pool of Threads created by the
+ * ExecutorService. The units of concurrency are a "task per search
+ * word" *and* the input Strings. The results processing model uses an
+ * Asynchronous Future model, which starts processing results
+ * immediately.
  */
 public class OneShotExecutorCompletionService
        extends SearchTaskGangCommon {
@@ -64,7 +62,6 @@ public class OneShotExecutorCompletionService
         // Iterate through each word and submit a Callable that will
         // search concurrently for this word in the inputData.
         for (final String word : mWordsToFind) {
-
             // This submit() call stores the Future result in the
             // ExecutorCompletionService for concurrent results
             // processing.
@@ -84,15 +81,14 @@ public class OneShotExecutorCompletionService
     protected void concurrentlyProcessQueuedFutures() {
         // Need to account for all the input data and all the words
         // that were searched for.
-        final int count = 
-            getInput().size() * mWordsToFind.length;
+        int count = getInput().size() * mWordsToFind.length;
 
         // Loop for the designated number of results.
         for (int i = 0; i < count; ++i) 
             try {
                 // Take the next ready Future off the
                 // CompletionService's queue.
-                final Future<SearchResults> resultFuture =
+                Future<SearchResults> resultFuture =
                     mCompletionService.take();
 
                 // The get() call will not block since the results
