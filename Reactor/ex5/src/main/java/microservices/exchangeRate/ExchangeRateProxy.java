@@ -1,7 +1,10 @@
 package microservices.exchangeRate;
 
 import datamodels.CurrencyConversion;
+import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Single;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -12,6 +15,7 @@ import utils.Options;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -22,10 +26,17 @@ import java.util.function.Function;
 public class ExchangeRateProxy {
     /**
      * The URI that denotes a remote method to determine the current
-     * exchange rate.
+     * exchange rate asynchronously.
      */
     private final String mQueryExchangeRateURIAsync =
         "/microservices/exchangeRate/_exchangeRateAsync";
+
+    /**
+     * The URI that denotes a remote method to determine the current
+     * exchange rate synchronously.
+     */
+    private final String mQueryExchangeRateURISync =
+            "/microservices/exchangeRate/_exchangeRateSync";
 
     /**
      * The WebClient provides the means to access the ExchangeRate
@@ -197,34 +208,15 @@ public class ExchangeRateProxy {
      * Finds the exchange rate for the {@code sourceAndDestination} synchronously.
      *
      * @param currencyConversion The currency to convert from and to
-     * @return A Mono containing the exchange rate.
+     * @return A Double containing the exchange rate.
      */
-    public Mono<Double> queryExchangeRateForSync(CurrencyConversion currencyConversion) {
-        // Return a mono to the exchange rate.
-        return Mono
-            .fromCallable(() -> mExchangeRate
-                          // Create an HTTP GET request.
-                          .get()
-
-                          // Add the uri to the baseUrl.
-                          .uri(UriComponentsBuilder
-                               .fromPath(mQueryExchangeRateURIAsync)
-                               .queryParam("currencyConversion", currencyConversion)
-                               .build()
-                               .toString())
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Mono of Double.
-                          .bodyToMono(Double.class))
-            
-            // De-nest the result so it's a Mono<Double>.
-            .flatMap(Function.identity())
-
-            // If this computation runs for more than the configured number of
-            // seconds return the last cached rate.
-            .timeout(Options.instance().exchangeRateTimeout(),
-                     getLastCachedRate(currencyConversion));
+    public Double queryExchangeRateForSync(CurrencyConversion currencyConversion) {
+        // Return a Double to the exchange rate.
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Double> responseEntity = restTemplate
+                .getForEntity(mSERVER_BASE_URL + mQueryExchangeRateURISync,
+                        Double.class,
+                        currencyConversion);
+        return Objects.requireNonNull(responseEntity.getBody());
     }
 }

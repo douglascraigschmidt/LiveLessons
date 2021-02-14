@@ -11,6 +11,8 @@ import utils.TestDataFactory;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP POST requests via asynchronous reactive programming.
@@ -51,9 +53,9 @@ public class AAController {
 
     /**
      * This method finds all the trips on given departure date and the
-     * flight leg for American Airlines.
+     * flight leg for American Airlines asynchronously.
      *
-     * WebFlux maps HTTP POST requests sent to the /_bestPrice
+     * WebFlux maps HTTP POST requests sent to the /_getTripPricesAsync
      * endpoint to this method.
      *
      * @param tripRequest Information about the trip, i.e., date and
@@ -61,7 +63,7 @@ public class AAController {
      * @return A Flux that emits all the trips for the given departure
      *         date and flight leg
      */
-    @PostMapping("/_getTripPrices")
+    @PostMapping("/_getTripPricesAsync")
     private Flux<TripResponse> getTripPrices(@RequestBody TripRequest tripRequest) {
         return Flux
             // Convert the list of TripResponse objects into a Flux
@@ -71,5 +73,31 @@ public class AAController {
             // Select only those TripResponse objects that equal the
             // tripRequest param.
             .filter(tripRequest::equals);
+    }
+
+    /**
+     * This method finds all the trips on given departure date and the
+     * flight leg for American Airlines synchronously.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_getTripPricesSync
+     * endpoint to this method.
+     *
+     * @param tripRequest Information about the trip, i.e., date and
+     *        flight leg
+     * @return A List that contains all the trips for the given departure
+     *         date and flight leg
+     */
+    @PostMapping("/_getTripPricesSync")
+    private List<TripResponse> getTripPricesSync(@RequestBody TripRequest tripRequest) {
+        return mTrips
+                // Convert the list of TripResponse objects into a stream.
+                .stream()
+
+                // Select only those TripResponse objects that equal the
+                // tripRequest param.
+                .filter(tripRequest::equals)
+
+                // Collect into a list.
+                .collect(toList());
     }
 }

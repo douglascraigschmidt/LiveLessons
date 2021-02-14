@@ -8,6 +8,8 @@ import utils.TestDataFactory;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP POST DELETE requests via asynchronous reactive
@@ -48,9 +50,9 @@ public class SWAController {
 
     /**
      * This method finds all the trips on given departure date and the
-     * flight leg for Southwest Airlines.
+     * flight leg for Southwest Airlines asynchronously.
      *
-     * WebFlux maps HTTP POST requests sent to the /_bestPrice
+     * WebFlux maps HTTP POST requests sent to the /_getTripPricesAsync
      * endpoint to this method.
      *
      * @param tripRequest Information about the trip, i.e., date and
@@ -58,8 +60,8 @@ public class SWAController {
      * @return A Flux that emits all the trips for the given departure
      *         date and flight leg
      */
-    @PostMapping("/_getTripPrices")
-    private Flux<TripResponse> getTripPrices(@RequestBody TripRequest tripRequest) {
+    @PostMapping("/_getTripPricesAsync")
+    private Flux<TripResponse> getTripPricesAsync(@RequestBody TripRequest tripRequest) {
         return Flux
             // Convert the list of TripResponse objects into a Flux
             // stream.
@@ -68,5 +70,31 @@ public class SWAController {
             // Select only those TripResponse objects that equal the
             // tripRequest param.
             .filter(tripRequest::equals);
+    }
+
+    /**
+     * This method finds all the trips on given departure date and the
+     * flight leg for Southwest Airlines synchronously.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_getTripPricesSync
+     * endpoint to this method.
+     *
+     * @param tripRequest Information about the trip, i.e., date and
+     *         flight leg
+     * @return A List that contains all the trips for the given departure
+     *         date and flight leg
+     */
+    @PostMapping("/_getTripPricesSync")
+    private List<TripResponse> getTripPricesSync(@RequestBody TripRequest tripRequest) {
+        return mTrips
+                // Convert the list of TripResponse objects into a stream.
+                .stream()
+
+                // Select only those TripResponse objects that equal the
+                // tripRequest param.
+                .filter(tripRequest::equals)
+
+                // Collect into a list.
+                .collect(toList());
     }
 }

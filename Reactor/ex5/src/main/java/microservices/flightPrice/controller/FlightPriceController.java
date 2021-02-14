@@ -13,6 +13,8 @@ import reactor.core.scheduler.Schedulers;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP POST requests via asynchronous reactive programming.
@@ -94,11 +96,11 @@ public class FlightPriceController {
      *
      * @param tripRequest Information about the trip, e.g., departure date
      *             and departure/arrival airports
-     * @return A Mono that emits best price in US dollars for this
+     * @return A Mono that emits the best price in US dollars for this
      *         {@code trip}
      */
     @PostMapping("/_bestPriceAsync")
-    private Mono<TripResponse> findBestPrice(@RequestBody TripRequest tripRequest) {
+    private Mono<TripResponse> findBestPriceAsync(@RequestBody TripRequest tripRequest) {
         // Initialize the flight proxies if they haven't been
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
@@ -138,6 +140,42 @@ public class FlightPriceController {
     }
 
     /**
+     * This method finds the best price in US dollars for a given
+     * {@code tripRequest} request.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_bestPriceSync
+     * endpoint to this method.
+     *
+     * @param tripRequest Information about the trip, e.g., departure date
+     *             and departure/arrival airports
+     * @return A TripResponse that contains the best price in US dollars for this
+     *         {@code trip}
+     */
+    @PostMapping("/_bestPriceSync")
+    private TripResponse findBestPriceSync(@RequestBody TripRequest tripRequest) {
+        System.out.println("findBestPriceSync");
+
+        // Initialize the flight proxies if they haven't been
+        // initialized by an earlier call.
+        initializeProxiesIfNecessary();
+
+
+        // Convert the list of proxies into a parallel stream.
+        // Sort the output so the lowest price comes first.
+        // Return the lowest priced trip.
+        return mProxyList
+                // Convert the list of proxies into a parallel stream.
+                .parallelStream()
+
+                .map(tuple -> tuple.mProxy
+                        .findTripsSync(tripRequest))
+
+                .flatMap(List::stream)
+                .min(Comparator.comparingDouble(TripResponse::getPrice))
+                .orElse(null);
+    }
+
+    /**
      * This method finds all matching responses a given {@code
      * tripRequest} request.
      *
@@ -150,12 +188,33 @@ public class FlightPriceController {
      *         {@code tripRequest} request.
      */
     @PostMapping("/_findFlightsAsync")
-    private Flux<TripResponse> findFlights(@RequestBody TripRequest tripRequest) {
+    private Flux<TripResponse> findFlightsAsync(@RequestBody TripRequest tripRequest) {
         // Initialize the flight proxies if they haven't been
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
 
-        return findFlightsImpl(tripRequest);
+        return findFlightsAsyncImpl(tripRequest);
+    }
+
+    /**
+     * This method finds all matching responses a given {@code
+     * tripRequest} request.
+     *
+     * WebFlux maps HTTP POST requests sent to the /_findFlightsSync
+     * endpoint to this method.
+     *
+     * @param tripRequest Information about the trip, e.g., departure date
+     *                    and departure/arrival airports
+     * @return A List that contains all responses for a given
+     *         {@code tripRequest} request.
+     */
+    @PostMapping("/_findFlightsSync")
+    private List<TripResponse> findFlightsSync(@RequestBody TripRequest tripRequest) {
+        // Initialize the flight proxies if they haven't been
+        // initialized by an earlier call.
+        initializeProxiesIfNecessary();
+
+        return findFlightsSyncImpl(tripRequest);
     }
 
     /**
@@ -180,7 +239,7 @@ public class FlightPriceController {
      * @return A Flux that emits all responses for a given
      *         {@code tripRequest} request.
      */
-    private Flux<TripResponse> findFlightsImpl(TripRequest tripRequest) {
+    private Flux<TripResponse> findFlightsAsyncImpl(TripRequest tripRequest) {
         return Flux
             // Convert the list of proxies into a Flux stream.
             .fromIterable(mProxyList)
@@ -202,4 +261,27 @@ public class FlightPriceController {
                               .findTripsAsync(Schedulers.parallel(),
                                               tripRequest)));
     }
+
+    /**
+     * This method finds all matching responses a given {@code
+     * tripRequest} request.
+     *
+     * @param tripRequest Information about the trip, e.g., departure date
+     *                    and departure/arrival airports
+     * @return A List that contains all responses for a given
+     *         {@code tripRequest} request.
+     */
+    private List<TripResponse> findFlightsSyncImpl(TripRequest tripRequest) {
+        return mProxyList
+                // Convert the list of proxies into a parallel stream.
+                .parallelStream()
+
+                .map(tuple -> tuple.mProxy
+                                .findTripsSync(tripRequest))
+
+                .flatMap(List::stream)
+
+                .collect(toList());
+    }
+
 }

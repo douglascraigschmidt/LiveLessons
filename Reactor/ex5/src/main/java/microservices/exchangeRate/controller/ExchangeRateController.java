@@ -42,7 +42,7 @@ public class ExchangeRateController {
      * @return A Mono that emits the current exchange rate.
      */
     @GetMapping("_exchangeRateAsync")
-    private Mono<Double> queryExchangeRateFor(CurrencyConversion currencyConversion) {
+    private Mono<Double> queryExchangeRateForAsync(CurrencyConversion currencyConversion) {
         // Delay for a random amount of time.
         randomDelay();
 
@@ -56,5 +56,33 @@ public class ExchangeRateController {
 
         // Simply return a constant.
         return Mono.just(1.20);
+    }
+
+    /**
+     * This method simulates a microservice that finds the exchange
+     * rate between a source and destination currency format.
+     *
+     * WebFlux maps HTTP GET requests sent to the /_exchangeRateSync
+     * endpoint to this method.
+     *
+     * @param currencyConversion Indicates the currency to convert
+     *        from and to
+     * @return A Double that contains the current exchange rate.
+     */
+    @GetMapping("_exchangeRateSync")
+    private Double queryExchangeRateForSync(CurrencyConversion currencyConversion) {
+        // Delay for a random amount of time.
+        randomDelay();
+
+        // Debugging print.
+        /*
+        print("Rate comparision between "
+              + sAndD[0]
+              + " and "
+              + sAndD[1]);
+        */
+
+        // Simply return a constant.
+        return 1.20;
     }
 }

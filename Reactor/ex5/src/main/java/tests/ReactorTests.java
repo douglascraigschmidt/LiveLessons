@@ -214,31 +214,17 @@ public class ReactorTests {
     private static void findBestPriceSync(int iteration,
                                           TripRequest tripRequest,
                                           CurrencyConversion currencyConversion) {
-        Mono<TripResponse> tripM = sFlightPriceProxy
+        TripResponse trip = sFlightPriceProxy
             // Synchronously find the best price for the tripRequest.
             .findBestPriceSync(tripRequest,
                                Options.instance().maxTimeout());
 
-        Mono<Double> rateM = sExchangeRateProxy
+        Double rate = sExchangeRateProxy
             // Synchronously determine the exchange rate.
             .queryExchangeRateForSync(currencyConversion);
 
-        // The behavior to perform if an exception occurs.
-        Function<? super Throwable,
-                ? extends Mono<? extends TripResponse>> handleEx = ex -> {
-            Options.print("Iteration #"
-                  + iteration
-                  + " The exception thrown was " + ex.toString());
-            return Mono.just(new TripResponse());
-        };
-
-        // When tripM and rateM complete convert the price.  If these
-        // sync operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        combineAndConvertResults(tripM, rateM, Options.instance().maxTimeout())
-            // Print the price if the call completed within sMAX_TIME
-            // seconds.
-            .doOnSuccess(tripResponse -> Options
+        TripResponse tripResponse = convert(rate, trip);
+            Options
                          .print("Iteration #"
                                 + iteration
                                 + " The best price is: "
@@ -246,14 +232,7 @@ public class ReactorTests {
                                 + " "
                                 + currencyConversion.getTo() 
                                 + " on "
-                                + tripResponse.getAirlineCode()))
-
-            // Consume and print the TimeoutException if the call took
-            // longer than sMAX_TIME.
-            .onErrorResume(handleEx)
-
-            // Block until the computation is done.
-            .block();
+                                + tripResponse.getAirlineCode());
     }
 
     /**

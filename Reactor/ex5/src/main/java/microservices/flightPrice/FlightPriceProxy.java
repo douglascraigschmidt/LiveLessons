@@ -3,12 +3,16 @@ package microservices.flightPrice;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Single;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -17,10 +21,17 @@ import java.util.function.Function;
 public class FlightPriceProxy {
     /**
      * The URI that denotes the remote method to find the best price
-     * for a trip.
+     * for a trip asynchronously.
      */
     private final String mFindBestPriceURIAsync =
         "/microservices/flightPrice/_bestPriceAsync";
+
+    /**
+     * The URI that denotes the remote method to find the best price
+     * for a trip synchronously.
+     */
+    private final String mFindBestPriceURISync =
+            "/microservices/flightPrice/_bestPriceSync";
 
     /**
      * The URI that denotes the remote method to find all the matching
@@ -28,6 +39,13 @@ public class FlightPriceProxy {
      */
     private final String mFindFlightsURIAsync =
         "/microservices/flightPrice/_findFlightsAsync";
+
+    /**
+     * The URI that denotes the remote method to find all the matching
+     * flights for a trip.
+     */
+    private final String mFindFlightsURISync =
+            "/microservices/flightPrice/_findFlightsSync";
 
     /**
      * The WebClient provides the means to access the FlightPrice
@@ -196,33 +214,15 @@ public class FlightPriceProxy {
      *
      * @param tripRequest The trip to price
      * @param maxTime Max time to wait before throwing TimeoutException
-     * @return A Mono containing the best price
+     * @return A TripResponse containing the best price
      */
-    public Mono<TripResponse> findBestPriceSync(TripRequest tripRequest,
-                                                Duration maxTime) {
-        // Return a Mono to the best price.
-        return Mono
-            .fromCallable(() -> mFlightPrice
-                          // Create an HTTP POST request.
-                          .post()
-
-                          // Add the uri to the baseUrl.
-                          .uri(mFindBestPriceURIAsync)
-
-                          // Encode the trip in the body of the request.
-                          .bodyValue(tripRequest)
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Mono of Trip.
-                          .bodyToMono(TripResponse.class))
-            
-            // De-nest the result so it's a Mono<TripResponse>.
-            .flatMap(Function.identity())
-
-            // If the total processing takes more than maxTime a
-            // TimeoutException will be thrown.
-            .timeout(maxTime);
+    public TripResponse findBestPriceSync(TripRequest tripRequest,
+                                          Duration maxTime) {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<TripResponse> responseEntity = restTemplate
+                .postForEntity(mSERVER_BASE_URL + mFindBestPriceURISync,
+                        tripRequest,
+                        TripResponse.class);
+        return Objects.requireNonNull(responseEntity.getBody());
     }
 }

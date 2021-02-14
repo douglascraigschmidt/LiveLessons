@@ -1,23 +1,10 @@
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import datamodels.TripResponse;
-import lombok.SneakyThrows;
 import tests.ReactorTests;
-import tests.RxJavaTests;
 import utils.Options;
 import utils.RunTimer;
-import utils.TestDataFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This program applies reactive streams and reactive web programming
@@ -65,6 +52,7 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
+        /*
         RunTimer
             // This test uses Project Reactor to invoke microservices
             // that asynchronously determine the best price for a
@@ -80,6 +68,7 @@ public class ex5 {
             .timeRun(()-> RxJavaTests.runAsyncTestsRx(mTrip,
                                                       mCurrencyConversion),
                      "runAsyncTestsRx");
+         */
 
         RunTimer
             // This test uses Project Reactor to invoke microservices

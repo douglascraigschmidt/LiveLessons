@@ -45,7 +45,7 @@ public class OneShotExecutorServiceFuture
 
         // Process each String of inputData via the processInput()
         // method.  Note that input Strings aren't run concurrently,
-        // just eacd word that's being searched for.
+        // just each word that's being searched for.
         for (final String inputData : getInput())
             processInput(inputData);
 
@@ -58,7 +58,7 @@ public class OneShotExecutorServiceFuture
      * if all goes well, else false (which will stop the background
      * task from continuing to run).
      */
-    protected boolean processInput(final String inputData) {
+    protected boolean processInput(String inputData) {
         ExecutorService executorService = 
             (ExecutorService) getExecutor();
 
@@ -68,7 +68,7 @@ public class OneShotExecutorServiceFuture
             // this word in the inputData & create a Future to store
             // the results.
             // call() runs in a background task.
-            final Future<SearchResults> resultFuture = executorService
+            Future<SearchResults> resultFuture = executorService
                 .submit(() -> searchForWord(word, inputData));
 
             // Add the Future to the List so it can be processed
