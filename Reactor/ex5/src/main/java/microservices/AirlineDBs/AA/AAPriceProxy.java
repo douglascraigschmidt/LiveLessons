@@ -22,6 +22,12 @@ import java.util.function.Function;
 public class AAPriceProxy
        implements PriceProxy {
     /**
+     * A synchronous client used to perform HTTP requests via simple
+     * template method API over underlying HTTP client libraries
+     */
+    private final RestTemplate mRestTemplate = new RestTemplate();
+
+    /**
      * The URI that denotes the remote method to query the AA price
      * database.
      */
@@ -110,11 +116,15 @@ public class AAPriceProxy
      */
     @Override
     public List<TripResponse> findTripsSync(TripRequest tripRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<TripResponse[]> responseEntity = restTemplate
+        // POST the given tripRequest to the URI template and return
+        // the response as an Http ResponseEntity.
+        ResponseEntity<TripResponse[]> responseEntity = mRestTemplate
             .postForEntity(mSERVER_BASE_URL + mFindAAPricesURISync,
                           tripRequest,
                           TripResponse[].class);
+
+        // Convert the ResponseEntity to a List of TripResponses and
+        // return it.
         return Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
     }
 }

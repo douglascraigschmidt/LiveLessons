@@ -21,7 +21,8 @@ import java.util.function.Function;
  */
 public class FlightPriceProxy {
     /**
-     *
+     * A synchronous client used to perform HTTP requests via simple
+     * template method API over underlying HTTP client libraries
      */
     private final RestTemplate mRestTemplate = new RestTemplate();
 
@@ -141,10 +142,15 @@ public class FlightPriceProxy {
      */
     public List<TripResponse> findFlightsSync(TripRequest tripRequest,
                                               Duration maxTime) {
+        // POST the given tripRequest to the URI template and return
+        // the response as an Http ResponseEntity.
         ResponseEntity<TripResponse[]> responseEntity = mRestTemplate
             .postForEntity(mSERVER_BASE_URL + mFindFlightsURISync,
                            tripRequest,
                            TripResponse[].class);
+
+        // Convert the ResponseEntity to a List of TripResponses and
+        // return it.
         return Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
     }
 
@@ -205,10 +211,14 @@ public class FlightPriceProxy {
      */
     public TripResponse findBestPriceSync(TripRequest tripRequest,
                                           Duration maxTime) {
+        // POST the given tripRequest to the URI template and return
+        // the response as an Http ResponseEntity.
         ResponseEntity<TripResponse> responseEntity = mRestTemplate
             .postForEntity(mSERVER_BASE_URL + mFindBestPriceURISync,
                            tripRequest,
                            TripResponse.class);
+
+        // Convert the ResponseEntity to a TripResponse and return it.
         return Objects.requireNonNull(responseEntity.getBody());
     }
 }

@@ -25,6 +25,12 @@ import java.util.function.Function;
  */
 public class ExchangeRateProxy {
     /**
+     * A synchronous client used to perform HTTP requests via simple
+     * template method API over underlying HTTP client libraries
+     */
+    private final RestTemplate mRestTemplate = new RestTemplate();
+
+    /**
      * The URI that denotes a remote method to determine the current
      * exchange rate asynchronously.
      */
@@ -211,12 +217,14 @@ public class ExchangeRateProxy {
      * @return A Double containing the exchange rate.
      */
     public Double queryExchangeRateForSync(CurrencyConversion currencyConversion) {
-        // Return a Double to the exchange rate.
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Double> responseEntity = restTemplate
-                .getForEntity(mSERVER_BASE_URL + mQueryExchangeRateURISync,
-                        Double.class,
-                        currencyConversion);
+        // GET the given Double to the URI template and return the
+        // response as an Http ResponseEntity.
+        ResponseEntity<Double> responseEntity = mRestTemplate
+            .getForEntity(mSERVER_BASE_URL + mQueryExchangeRateURISync,
+                          Double.class,
+                          currencyConversion);
+
+        // Convert the ResponseEntity to a Double and return it.
         return Objects.requireNonNull(responseEntity.getBody());
     }
 }

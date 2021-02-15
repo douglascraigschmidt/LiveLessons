@@ -182,7 +182,7 @@ public class Options {
      * 
      * @return
      */
-    public String getSync() {
+    public String getSyncTask() {
         switch (mDefaultSync) {
             case 's':
                 return "sequential";

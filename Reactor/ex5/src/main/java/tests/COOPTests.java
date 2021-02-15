@@ -121,10 +121,20 @@ public class COOPTests {
         new ExchangeRateProxy();
 
     /**
-     *
+     * This functional interface forms the basis of the tasks that
+     * compute the best price for a given flight.
      */
     @FunctionalInterface
-    interface BestPrice {
+    interface BestFlightPrice {
+        /**
+         * Computes the converted best price for all flights matching
+         * a given {@code tripRequest} 
+         *
+         * @param tripRequest The given trip request
+         * @param currencyConversion The currency to convert to and from
+         * @return A {@code TripResponse} that has the best price for
+         *         the {@code tripRequest} 
+         */
         TripResponse compute(TripRequest tripRequest,
                              CurrencyConversion currencyConversion);
     }
@@ -132,8 +142,8 @@ public class COOPTests {
     /**
      *
      */
-    private static final Map<String, BestPrice> sBestPriceMap =
-        new HashMap<String, BestPrice>() { {
+    private static final Map<String, BestFlightPrice> sBestPriceMap =
+        new HashMap<String, BestFlightPrice>() { {
             put("sequential", makeSequentialBestPrice());
             put("threads", makeThreadsBestPrice());
             put("completionService", makeCompletionServiceBestPrice());
@@ -141,10 +151,10 @@ public class COOPTests {
         } };
 
     /**
-     *
-     * @return
+     * @return A task that computes the best flight price for a given
+     * {@code tripRequest} sequentially.
      */
-    private static BestPrice makeSequentialBestPrice() {
+    private static BestFlightPrice makeSequentialBestPrice() {
         return (tripRequest, currencyConversion) -> {
             TripResponse tripResponse = sFlightPriceProxy
                 // Synchronously find the best price for the tripRequest.
@@ -159,10 +169,10 @@ public class COOPTests {
     }
 
     /**
-     *
-     * @return
+     * @return A task that uses Java Threads to compute the best
+     * flight price for a given {@code tripRequest} sequentially.
      */
-    private static BestPrice makeThreadsBestPrice() {
+    private static BestFlightPrice makeThreadsBestPrice() {
         return (tripRequest, currencyConversion) -> {
             TripResponse[] trip = new TripResponse[1];
             Double[] rate = new Double[1];
@@ -195,10 +205,11 @@ public class COOPTests {
     }
 
     /**
-     *
-     * @return
+     * @return A task that uses the Java CompletionService to compute
+     * the best flight price for a given {@code tripRequest}
+     * sequentially.
      */
-    private static BestPrice makeCompletionServiceBestPrice() {
+    private static BestFlightPrice makeCompletionServiceBestPrice() {
         return (tripRequest, currencyConversion) -> {
             try {
                 CompletionService<Object> cs =
@@ -240,10 +251,11 @@ public class COOPTests {
     }
 
     /**
-     *
-     * @return
+     * @return A task that uses the Java ExecutorService to compute
+     * the best flight price for a given {@code tripRequest}
+     * sequentially.
      */
-    private static BestPrice makeExecutorServiceBestPrice() {
+    private static BestFlightPrice makeExecutorServiceBestPrice() {
         return (tripRequest, currencyConversion) -> {
             try {
                 // Synchronously find the best price for the tripRequest.
@@ -278,31 +290,40 @@ public class COOPTests {
     }
 
     /**
-     *
+     * This functional interface forms the basis of the tasks that
+     * compute the prices for all the flights.
      */
     @FunctionalInterface
-    interface AllPrices {
+    interface AllFlightPrices {
+        /**
+         * Computes the converted prices for all flights matching a
+         * given {@code tripRequest} 
+         * @param tripRequest The given trip request
+         * @param currencyConversion The currency to convert to and from
+         * @return A List of {@code TripResponse} objects that match
+         *         the {@code tripRequest} 
+         */
         List<TripResponse> compute(TripRequest tripRequest,
                                    CurrencyConversion currencyConversion);
     }
 
     /**
-     *
+     * Create a Map that associates the names of the tasks with
+     * implementations that finds the prices of all the flights.
      */
-    private static final Map<String, AllPrices> sAllPricesMap =
-        new HashMap<String, AllPrices>() { {
+    private static final Map<String, AllFlightPrices> sAllPricesMap =
+        new HashMap<String, AllFlightPrices>() { {
             put("sequential", makeSequentialAllPrices());
             put("threads", makeThreadsAllPrices());
             put("completionService", makeCompletionServiceAllPrices());
             put("executorService", makeExecutorServiceAllPrices());
-        }
-        };
+        } };
 
     /**
-     *
-     * @return
+     * @return A task that computes all the flight prices
+     * sequentially.
      */
-    private static AllPrices makeSequentialAllPrices() {
+    private static AllFlightPrices makeSequentialAllPrices() {
         return (tripRequest, currencyConversion) -> {
             List<TripResponse> trips = sFlightPriceProxy
                 // Synchronously find all the flights for the
@@ -313,16 +334,18 @@ public class COOPTests {
                 // Synchronously determine the exchange rate.
                 .queryExchangeRateForSync(currencyConversion);
 
+            // Convert all the trip prices using the exchange rate.
             return convertTripPrices(trips, rate);
         };
     }
 
     /**
-     *
-     * @return
+     * @return A task that uses the Java Threads to compute all the
+     * flight prices concurrently.
      */
-    private static AllPrices makeThreadsAllPrices() {
+    private static AllFlightPrices makeThreadsAllPrices() {
         return (tripRequest, currencyConversion) -> {
+            @SuppressWarnings("rawtypes")
             List[] trips = new List[1];
             Double[] rate = new Double[1];
 
@@ -348,17 +371,16 @@ public class COOPTests {
             // Wait for all the threads to complete.
             threads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
-            // When the calls to compute the trip and rate complete
-            // convert the price.
+            // Convert all the trip prices using the exchange rate.
             return convertTripPrices(trips[0], rate[0]);
         };
     }
 
     /**
-     * 
-     * @return
+     * @return A task that uses the Java CompletionService to compute
+     * all the flight prices concurrently.
      */
-    private static AllPrices makeCompletionServiceAllPrices() {
+    private static AllFlightPrices makeCompletionServiceAllPrices() {
         return (tripRequest, currencyConversion) -> {
             try {
                 CompletionService<Object> cs =
@@ -391,9 +413,7 @@ public class COOPTests {
                 assert trips != null;
                 assert rate != null;
 
-                // When the calls to compute the trip and rate complete
-                // convert the price.
-
+                // Convert all the trip prices using the exchange rate.
                 return convertTripPrices(trips, rate);
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
@@ -402,10 +422,10 @@ public class COOPTests {
     }
 
     /**
-     *
-     * @return
+     * @return A task that uses the Java ExecutorService to compute
+     * all the flight prices concurrently.
      */
-    private static AllPrices makeExecutorServiceAllPrices() {
+    private static AllFlightPrices makeExecutorServiceAllPrices() {
         return (tripRequest, currencyConversion) -> {
             try {
                 // Synchronously find all the flights for the tripRequest.
@@ -429,8 +449,7 @@ public class COOPTests {
                 List<TripResponse> trips = f1.get();
                 Double rate = f2.get();
 
-                // When the calls to compute the trip and rate complete
-                // convert the price.
+                // Convert all the trip prices using the exchange rate.
                 return convertTripPrices(trips, rate);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
@@ -440,29 +459,28 @@ public class COOPTests {
     }
 
     /**
-     *
-     * @return
+     * @return The task to use to compute the best flight price.
      */
-    private static BestPrice makeBestPrice() {
-        return sBestPriceMap.get(Options.instance().getSync());
+    private static BestFlightPrice makeBestPrice() {
+        return sBestPriceMap.get(Options.instance().getSyncTask());
     }
 
     /**
-     *
-     * @return
+     * @return The task to use to compute all the flight prices.
      */
-    private static AllPrices makeAllPrices() {
-        return sAllPricesMap.get(Options.instance().getSync());
+    private static AllFlightPrices makeAllPrices() {
+        return sAllPricesMap.get(Options.instance().getSyncTask());
     }
 
-
     /**
+     * Converts all the prices in {@code trips} using the exchange {@code rate}.
      *
-     * @param trips
-     * @param rate
-     * @return
+     * @param trips The list of trips to convert
+     * @param rate The exchange rate used for the conversion
+     * @return An updated list of trips that have been converted by the exchange rate
      */
-    private static List<TripResponse> convertTripPrices(List<TripResponse> trips, Double rate) {
+    private static List<TripResponse> convertTripPrices(List<TripResponse> trips, 
+                                                        Double rate) {
         trips.forEach(trip -> trip.convert(rate));
         return trips;
     }

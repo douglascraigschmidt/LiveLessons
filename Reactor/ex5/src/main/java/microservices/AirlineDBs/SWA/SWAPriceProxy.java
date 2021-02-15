@@ -23,6 +23,12 @@ import java.util.function.Function;
 public class SWAPriceProxy 
        implements PriceProxy {
     /**
+     * A synchronous client used to perform HTTP requests via simple
+     * template method API over underlying HTTP client libraries
+     */
+    private final RestTemplate mRestTemplate = new RestTemplate();
+
+    /**
      * The URI that denotes the remote method to query the SWA price
      * database asynchronously.
      */
@@ -113,11 +119,15 @@ public class SWAPriceProxy
      */
     @Override
     public List<TripResponse> findTripsSync(TripRequest tripRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<TripResponse[]> responseEntity = restTemplate
+        // POST the given tripRequest to the URI template and return
+        // the response as an Http ResponseEntity.
+        ResponseEntity<TripResponse[]> responseEntity = mRestTemplate
             .postForEntity(mSERVER_BASE_URL + mFindSWAPricesURISync,
-                          tripRequest,
-                          TripResponse[].class);
+                           tripRequest,
+                           TripResponse[].class);
+
+        // Convert the ResponseEntity to a List of TripResponses and
+        // return it.
         return Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
     }
 }
