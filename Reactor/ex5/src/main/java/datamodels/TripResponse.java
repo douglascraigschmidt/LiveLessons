@@ -266,4 +266,14 @@ public class TripResponse {
                                 price,
                                 airlineCode);
     }
+
+    /**
+     * Convert the price of this TripResponse in one currency system by
+     * multiplying it by the exchange {@code rate}.
+     */
+    public TripResponse convert(double rate) {
+        // Update the price to reflect the exchange rate!
+        setPrice(getPrice() * rate);
+        return this;
+    }
 }

@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -23,6 +24,11 @@ public final class ExceptionUtils {
     @FunctionalInterface
         public interface Runnable_WithExceptions {
         void run() throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface Callable_WithExceptions<T> {
+        T call() throws Exception;
     }
 
     /** .forEach(rethrowConsumer(name -> System.out.println(Class.forName(name)))); or .forEach(rethrowConsumer(ClassNameUtil::println)); */
@@ -54,6 +60,16 @@ public final class ExceptionUtils {
     {
         try { t.run(); }
         catch (Exception exception) { throwAsUnchecked(exception); }
+    }
+
+    public static <T> Callable<T> rethrowCallable(Callable_WithExceptions<T> c) {
+        return () -> {
+            try { return c.call(); }
+            catch (Exception exception) {
+                throwAsUnchecked(exception);
+                return null;
+            }
+        };
     }
 
     /** uncheck(() -> Class.forName("xxx")); */

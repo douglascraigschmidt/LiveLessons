@@ -1,5 +1,6 @@
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
+import tests.COOPTests;
 import tests.ReactorTests;
 import utils.Options;
 import utils.RunTimer;
@@ -59,7 +60,7 @@ public class ex5 {
             // flight from London to New York city in British pounds.
             .timeRun(() -> ReactorTests.runAsyncTests(mTrip,
                                                       mCurrencyConversion),
-                     "runAsyncTests");
+                     "runReactorAsyncTests");
 
         RunTimer
             // This test uses RxJava to invoke microservices that
@@ -67,16 +68,17 @@ public class ex5 {
             // from London to New York city in British pounds.
             .timeRun(()-> RxJavaTests.runAsyncTestsRx(mTrip,
                                                       mCurrencyConversion),
-                     "runAsyncTestsRx");
+                     "runRxJavaAsyncTests");
          */
 
         RunTimer
-            // This test uses Project Reactor to invoke microservices
-            // that synchronously determine the best price for a
-            // flight from London to New York city in British pounds.
-            .timeRun(() -> ReactorTests.runSyncTests(mTrip,
+            // This test uses Java concurrent object-oriented
+            // programming frameworks to invoke microservices that
+            // synchronously determine the best price for a flight
+            // from London to New York city in British pounds.
+            .timeRun(() -> COOPTests.runSyncTests(mTrip,
                                                      mCurrencyConversion),
-                     "runSyncTests");
+                     "runCOOPSyncTests");
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());

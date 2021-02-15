@@ -12,8 +12,6 @@ import utils.AsyncTaskBarrier;
 import utils.Options;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -52,11 +50,10 @@ public class ReactorTests {
 
             // Register tests with the AsyncTaskBarrier framework so
             // they will run asynchronously wrt the other iterations.
-            /*
             AsyncTaskBarrier
                 .register(() -> findBestPriceAsync(iteration,
-                                                          trip,
-                                                          currencyConversion)); */
+                          trip,
+                          currencyConversion));
             AsyncTaskBarrier
                 .register(() -> findFlightsAsync(iteration,
                                                  trip,
@@ -72,25 +69,6 @@ public class ReactorTests {
             .block();
 
         System.out.println("end runAsyncTests()");
-    }
-
-    /**
-     * This test invokes microservices to synchronously determine the
-     * best price for a {@code trip} using the given {@code
-     * currencyConversion}.
-     */
-    public static void runSyncTests(TripRequest trip,
-                                    CurrencyConversion currencyConversion) {
-        System.out.println("begin runSyncTests()");
-
-        // Iterate multiple times.
-        for (int i = 0; i < Options.instance().maxIterations(); i++)
-            // Call the test synchronously.
-            findBestPriceSync(i + 1,
-                                     trip,
-                                     currencyConversion);
-
-        System.out.println("end runSyncTests()");
     }
 
     /**
@@ -114,11 +92,11 @@ public class ReactorTests {
         Mono<Double> rateM = sExchangeRateProxy
             // Asynchronously determine the exchange rate.
             .queryExchangeRateAsync(Schedulers.parallel(),
-                                       currencyConversion);
+                                    currencyConversion);
 
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,
-                    ? extends Mono<? extends TripResponse>> handleEx = ex -> {
+            ? extends Mono<? extends TripResponse>> handleEx = ex -> {
             Options.print("Iteration #"
                           + iteration
                           + " The exception thrown was " + ex.toString());
@@ -133,11 +111,11 @@ public class ReactorTests {
             // sMAX_TIME seconds.
             .doOnSuccess(tripResponse ->
                          Options.print("Iteration #"
-                               + iteration
-                               + " The best price is: "
-                               + tripResponse.getPrice()
-                               + " GBP on "
-                               + tripResponse.getAirlineCode()))
+                                       + iteration
+                                       + " The best price is: "
+                                       + tripResponse.getPrice()
+                                       + " GBP on "
+                                       + tripResponse.getAirlineCode()))
                     
             // Consume and print the TimeoutException if the call
             // took longer than sMAX_TIME.
@@ -150,7 +128,7 @@ public class ReactorTests {
 
     /**
      * Returns all flights for {@code tripRequest} using the given
-     * {@code currencyConversion} via asynchronous computations.
+     * {@code currencyConversion} via asynchronous computations/communications.
      *
      * @param iteration Current iteration count
      * @param tripRequest The current desired trip
@@ -172,10 +150,10 @@ public class ReactorTests {
 
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,
-                    ? extends Mono<? extends TripResponse>> handleEx = ex -> {
+            ? extends Mono<? extends TripResponse>> handleEx = ex -> {
             Options.print("Iteration #"
-                  + iteration
-                  + " The exception thrown was " + ex.toString());
+                          + iteration
+                          + " The exception thrown was " + ex.toString());
             return Mono.just(new TripResponse());
         };
 
@@ -205,37 +183,6 @@ public class ReactorTests {
     }
 
     /**
-     * Returns the best price for {@code tripRequest} using the given
-     * {@code currencyConversion} via synchronous computations.
-     *
-     * @param iteration Current iteration count
-     * @param tripRequest The current trip being priced.
-     */
-    private static void findBestPriceSync(int iteration,
-                                          TripRequest tripRequest,
-                                          CurrencyConversion currencyConversion) {
-        TripResponse trip = sFlightPriceProxy
-            // Synchronously find the best price for the tripRequest.
-            .findBestPriceSync(tripRequest,
-                               Options.instance().maxTimeout());
-
-        Double rate = sExchangeRateProxy
-            // Synchronously determine the exchange rate.
-            .queryExchangeRateForSync(currencyConversion);
-
-        TripResponse tripResponse = convert(rate, trip);
-            Options
-                         .print("Iteration #"
-                                + iteration
-                                + " The best price is: "
-                                + tripResponse.getPrice()
-                                + " "
-                                + currencyConversion.getTo() 
-                                + " on "
-                                + tripResponse.getAirlineCode());
-    }
-
-    /**
      * When {@code tripF} and {@code rateM} complete convert the price
      * based on the exchange rate.  If these operations take more than
      * {@code maxTime} then the TimeoutException is thrown.
@@ -255,7 +202,7 @@ public class ReactorTests {
                          // map() is called when both the Flux and
                          // Mono complete their processing to convert
                          // the price using the exchange rate.
-                         .map(trip -> ReactorTests.convert(rate,trip)))
+                         .map(trip -> trip.convert(rate)))
 
             // If the total processing takes more than maxTime a
             // TimeoutException will be thrown.
@@ -279,20 +226,10 @@ public class ReactorTests {
             // Call the ReactorTests::convert method reference to
             // convert the price using the given exchange rate when
             // both previous Monos complete their processing.
-            .zip(rateM, tripM, ReactorTests::convert)
+            .zip(rateM, tripM, (rate, trip) -> trip.convert(rate))
 
             // If the total processing takes more than maxTime a
             // TimeoutException will be thrown.
             .timeout(maxTime);
-    }
-
-    /**
-     * Convert the price of a {@code trip} in one currency system by
-     * multiplying it by the exchange {@code rate}.
-     */
-    private static TripResponse convert(double rate, TripResponse trip) {
-        // Update the price to reflect the exchange rate!
-        trip.setPrice(trip.getPrice() * rate);
-        return trip;
     }
 }

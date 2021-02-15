@@ -12,6 +12,7 @@ import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -19,6 +20,11 @@ import java.util.function.Function;
  * This class serves as a proxy to the FlightPrice microservice.
  */
 public class FlightPriceProxy {
+    /**
+     *
+     */
+    private final RestTemplate mRestTemplate = new RestTemplate();
+
     /**
      * The URI that denotes the remote method to find the best price
      * for a trip asynchronously.
@@ -131,34 +137,15 @@ public class FlightPriceProxy {
      *
      * @param tripRequest The desired trip 
      * @param maxTime Max time to wait before throwing TimeoutException
-     * @return A Flux that emits all the matching {@code TripResponse} objects
+     * @return A List that contains all the matching {@code TripResponse} objects
      */
-    public Flux<TripResponse> findFlightsSync(TripRequest tripRequest,
+    public List<TripResponse> findFlightsSync(TripRequest tripRequest,
                                               Duration maxTime) {
-        // Return a Mono to the best price.
-        return Mono
-            .fromCallable(() -> mFlightPrice
-                          // Create an HTTP POST request.
-                          .post()
-
-                          // Add the uri to the baseUrl.
-                          .uri(mFindBestPriceURIAsync)
-
-                          // Encode the trip in the body of the request.
-                          .bodyValue(tripRequest)
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Mono of Trip.
-                          .bodyToMono(TripResponse.class))
-
-            // De-nest the result so it's a Flux<TripResponse>.
-            .flatMapMany(Function.identity())
-
-            // If the total processing takes more than maxTime a
-            // TimeoutException will be thrown.
-            .timeout(maxTime);
+        ResponseEntity<TripResponse[]> responseEntity = mRestTemplate
+            .postForEntity(mSERVER_BASE_URL + mFindFlightsURISync,
+                           tripRequest,
+                           TripResponse[].class);
+        return Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
     }
 
     /**
@@ -218,11 +205,10 @@ public class FlightPriceProxy {
      */
     public TripResponse findBestPriceSync(TripRequest tripRequest,
                                           Duration maxTime) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<TripResponse> responseEntity = restTemplate
-                .postForEntity(mSERVER_BASE_URL + mFindBestPriceURISync,
-                        tripRequest,
-                        TripResponse.class);
+        ResponseEntity<TripResponse> responseEntity = mRestTemplate
+            .postForEntity(mSERVER_BASE_URL + mFindBestPriceURISync,
+                           tripRequest,
+                           TripResponse.class);
         return Objects.requireNonNull(responseEntity.getBody());
     }
 }

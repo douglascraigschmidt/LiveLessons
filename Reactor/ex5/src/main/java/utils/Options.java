@@ -48,6 +48,11 @@ public class Options {
     private int mMaxIterations = 5;
 
     /**
+     *
+     */
+    private char mDefaultSync = 'c';
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -130,24 +135,27 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-e":
-                    mExchangeRateTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
-                    break;
-                case "-i":
-                    mMaxIterations = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-m":
-                    mMaxTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
-                    break;
-                case "-r":
-                    mDefaultRate = Integer.parseInt(argv[argc + 1]);
-                    break;
-                default:
-                    printUsage();
-                    return;
+                    case "-d":
+                        mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                        break;
+                    case "-e":
+                        mExchangeRateTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
+                        break;
+                    case "-i":
+                        mMaxIterations = Integer.parseInt(argv[argc + 1]);
+                        break;
+                    case "-m":
+                        mMaxTimeout = Duration.ofSeconds(Integer.parseInt(argv[argc + 1]));
+                        break;
+                    case "-r":
+                        mDefaultRate = Integer.parseInt(argv[argc + 1]);
+                        break;
+                    case "-s":
+                        mDefaultSync = argv[argc + 1].charAt(0);
+                        break;
+                    default:
+                        printUsage();
+                        return;
                 }
         }
     }
@@ -168,5 +176,24 @@ public class Options {
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
             LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         logger.setLevel(Level.toLevel("error"));
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public String getSync() {
+        switch (mDefaultSync) {
+            case 's':
+                return "sequential";
+            case 't':
+                return "threads";
+            case 'e':
+                return "executorService";
+            case 'c':
+                return "completionService";
+            default:
+                return "";
+        }
     }
 }
