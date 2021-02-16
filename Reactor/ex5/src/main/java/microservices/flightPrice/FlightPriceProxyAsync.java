@@ -17,69 +17,24 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * This class serves as a proxy to the FlightPrice microservice.
+ * This class serves as a proxy to the asynchronous FlightPrice
+ * microservice.
  */
-public class FlightPriceProxy {
-    /**
-     * A synchronous client used to perform HTTP requests via simple
-     * template method API over underlying HTTP client libraries
-     */
-    private final RestTemplate mRestTemplate = new RestTemplate();
-
+public class FlightPriceProxyAsync
+       extends FlightPriceProxyBase {
     /**
      * The URI that denotes the remote method to find the best price
      * for a trip asynchronously.
      */
     private final String mFindBestPriceURIAsync =
-        "/microservices/flightPrice/_bestPriceAsync";
-
-    /**
-     * The URI that denotes the remote method to find the best price
-     * for a trip synchronously.
-     */
-    private final String mFindBestPriceURISync =
-            "/microservices/flightPrice/_bestPriceSync";
+        "/microservices/flightPriceAsync/_findBestPrice";
 
     /**
      * The URI that denotes the remote method to find all the matching
      * flights for a trip.
      */
     private final String mFindFlightsURIAsync =
-        "/microservices/flightPrice/_findFlightsAsync";
-
-    /**
-     * The URI that denotes the remote method to find all the matching
-     * flights for a trip.
-     */
-    private final String mFindFlightsURISync =
-            "/microservices/flightPrice/_findFlightsSync";
-
-    /**
-     * The WebClient provides the means to access the FlightPrice
-     * microservice.
-     */
-    private final WebClient mFlightPrice;
-
-    /**
-     * Host/port where the server resides.
-     */
-    private final String mSERVER_BASE_URL =
-        "http://localhost:8083";
-
-    /**
-     * Constructor initializes the fields.
-     */
-    public FlightPriceProxy() {
-        mFlightPrice = WebClient
-            // Start building.
-            .builder()
-
-            // The URL where the server is running.
-            .baseUrl(mSERVER_BASE_URL)
-
-            // Build the webclient.
-            .build();
-    }
+        "/microservices/flightPriceAsync/_findFlights";
 
     /**
      * Finds all the flights that match the {@code tripRequest}
@@ -89,8 +44,8 @@ public class FlightPriceProxy {
      * @param tripRequest The desired trip 
      * @return A Flux that emits all the matching {@code TripResponse} objects
      */
-    public Flux<TripResponse> findFlightsAsync(Scheduler scheduler,
-                                               TripRequest tripRequest) {
+    public Flux<TripResponse> findFlights(Scheduler scheduler,
+                                          TripRequest tripRequest) {
         // Return a Flux that emits all the matching flights.
         return Mono
             .fromCallable(() -> mFlightPrice
@@ -125,33 +80,11 @@ public class FlightPriceProxy {
      * @param tripRequest The desired trip 
      * @return An Observable that emits all the matching {@code TripResponse} objects
      */
-    public Single<TripResponse> findFlightsAsyncRx(Scheduler scheduler,
-                                                   TripRequest tripRequest) {
+    public Single<TripResponse> findFlightsRx(Scheduler scheduler,
+                                              TripRequest tripRequest) {
         return Single
             // Return a Single to the best price.
-            .fromPublisher(findFlightsAsync(scheduler, tripRequest));
-    }
-
-    /**
-     * Finds all the flights that match the {@code tripRequest}
-     * synchronously.
-     *
-     * @param tripRequest The desired trip 
-     * @param maxTime Max time to wait before throwing TimeoutException
-     * @return A List that contains all the matching {@code TripResponse} objects
-     */
-    public List<TripResponse> findFlightsSync(TripRequest tripRequest,
-                                              Duration maxTime) {
-        // POST the given tripRequest to the URI template and return
-        // the response as an Http ResponseEntity.
-        ResponseEntity<TripResponse[]> responseEntity = mRestTemplate
-            .postForEntity(mSERVER_BASE_URL + mFindFlightsURISync,
-                           tripRequest,
-                           TripResponse[].class);
-
-        // Convert the ResponseEntity to a List of TripResponses and
-        // return it.
-        return Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
+            .fromPublisher(findFlights(scheduler, tripRequest));
     }
 
     /**
@@ -161,8 +94,8 @@ public class FlightPriceProxy {
      * @param tripRequest The trip to price
      * @return A Mono that emits the {@code TripResponse} with the best price
      */
-    public Mono<TripResponse> findBestPriceAsync(Scheduler scheduler,
-                                                 TripRequest tripRequest) {
+    public Mono<TripResponse> findBestPrice(Scheduler scheduler,
+                                            TripRequest tripRequest) {
         // Return a Mono to the best price.
         return Mono
             .fromCallable(() -> mFlightPrice
@@ -195,30 +128,10 @@ public class FlightPriceProxy {
      * @param tripRequest The trip to price
      * @return A Single that emits the {@code TripResponse} with the best price
      */
-    public Single<TripResponse> findBestPriceAsyncRx(Scheduler scheduler,
-                                                     TripRequest tripRequest) {
+    public Single<TripResponse> findBestPriceRx(Scheduler scheduler,
+                                                TripRequest tripRequest) {
         return Single
             // Return a Single to the best price.
-            .fromPublisher(findBestPriceAsync(scheduler, tripRequest));
-    }
-
-    /**
-     * Finds the best price for the {@code tripRequest} synchronously.
-     *
-     * @param tripRequest The trip to price
-     * @param maxTime Max time to wait before throwing TimeoutException
-     * @return A TripResponse containing the best price
-     */
-    public TripResponse findBestPriceSync(TripRequest tripRequest,
-                                          Duration maxTime) {
-        // POST the given tripRequest to the URI template and return
-        // the response as an Http ResponseEntity.
-        ResponseEntity<TripResponse> responseEntity = mRestTemplate
-            .postForEntity(mSERVER_BASE_URL + mFindBestPriceURISync,
-                           tripRequest,
-                           TripResponse.class);
-
-        // Convert the ResponseEntity to a TripResponse and return it.
-        return Objects.requireNonNull(responseEntity.getBody());
+            .fromPublisher(findBestPrice(scheduler, tripRequest));
     }
 }

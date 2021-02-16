@@ -2,15 +2,17 @@ package microservices.flightPrice.controller;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.AirlineDBs.AA.AAPriceProxy;
-import microservices.AirlineDBs.PriceProxy;
-import org.springframework.web.bind.annotation.*;
-import microservices.AirlineDBs.SWA.SWAPriceProxy;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import microservices.AirlineDBs.AA.AAPriceProxySync;
+import microservices.AirlineDBs.PriceProxySync;
+import microservices.AirlineDBs.SWA.SWAPriceProxySync;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
@@ -70,7 +72,7 @@ public class FlightPriceControllerSync {
                 .parallelStream()
 
                 .map(tuple -> tuple.mProxy
-                        .findTripsSync(tripRequest))
+                        .findTrips(tripRequest))
 
                 .flatMap(List::stream)
                 .min(Comparator.comparingDouble(TripResponse::getPrice))
@@ -109,15 +111,71 @@ public class FlightPriceControllerSync {
      */
     private List<TripResponse> findFlightsImpl(TripRequest tripRequest) {
         return mProxyList
-                // Convert the list of proxies into a parallel stream.
-                .parallelStream()
+            // Convert the list of proxies into a parallel stream.
+            .parallelStream()
 
-                .map(tuple -> tuple.mProxy
-                                .findTripsSync(tripRequest))
+            .map(tuple -> tuple.mProxy
+                 .findTrips(tripRequest))
 
-                .flatMap(List::stream)
+            .flatMap(List::stream)
 
-                .collect(toList());
+            .collect(toList());
     }
 
+    /**
+     * A sync proxy to the SWA price database.
+     */
+    private SWAPriceProxySync mSWAPriceProxySync;
+
+    /**
+     * A sync proxy to the AA price database.
+     */
+    private AAPriceProxySync mAAPriceProxySync;
+
+    /**
+     * A helper class that holds a PriceProxy and a
+     * factory for creating a PriceProxy.
+     */
+    static class Tuple {
+        /**
+         * A PricyProxy that references an airline price
+         * microservices.
+         */
+        PriceProxySync mProxy;
+
+        /**
+         * A factory that creates a new PriceProxy.
+         */
+        Supplier<PriceProxySync> mFactory;
+
+        /**
+         * The constructor initializes the fields.
+         */
+        Tuple(Supplier<PriceProxySync> proxySupplier) {
+            mProxy = null;
+            mFactory = proxySupplier;
+        }
+    }
+
+    /**
+     * A list of PriceProxy objects to airline price microservices.
+     */
+    List<Tuple> mProxyList =
+        new ArrayList<Tuple>() { {
+            add(new Tuple(SWAPriceProxySync::new));
+            add(new Tuple(AAPriceProxySync::new));
+    } };
+
+    /**
+     * Initialize the flight proxies if they haven't already been
+     * initialized in an earlier call.
+     */
+    void initializeProxiesIfNecessary() {
+        // Iterate through all the airline proxies.
+        for (Tuple tuple : mProxyList)
+            // If a proxy hasn't been initialized yet then initialize
+            // it so it will be cached for future calls.
+            if (tuple.mProxy == null)
+                tuple.mProxy = tuple.mFactory.get();
+    }
 }

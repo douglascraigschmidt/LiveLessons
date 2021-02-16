@@ -2,10 +2,10 @@ package microservices.flightPrice.controller;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.AirlineDBs.AA.AAPriceProxy;
-import microservices.AirlineDBs.PriceProxy;
+import microservices.AirlineDBs.AA.AAPriceProxyAsync;
+import microservices.AirlineDBs.PriceProxyAsync;
+import microservices.AirlineDBs.SWA.SWAPriceProxyAsync;
 import org.springframework.web.bind.annotation.*;
-import microservices.AirlineDBs.SWA.SWAPriceProxy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -36,8 +36,7 @@ import static java.util.stream.Collectors.toList;
  */
 @RestController
 @RequestMapping("/microservices/flightPriceAsync")
-public class FlightPriceControllerAsync 
-       extends FlightPriceControllerBase {
+public class FlightPriceControllerAsync {
     /**
      * Default constructor.
      */
@@ -80,8 +79,8 @@ public class FlightPriceControllerAsync
                      // into a Flux stream.
                      .flatMap(__ -> proxy
                               .mProxy
-                              .findTripsAsync(Schedulers.parallel(),
-                                              tripRequest)))
+                              .findTrips(Schedulers.parallel(),
+                                         tripRequest)))
 
             // Sort the output so the lowest price comes first.
             .sort(Comparator.comparingDouble(TripResponse::getPrice))
@@ -139,7 +138,64 @@ public class FlightPriceControllerAsync
                      // into a Flux stream.
                      .flatMap(__ -> proxy
                               .mProxy
-                              .findTripsAsync(Schedulers.parallel(),
-                                              tripRequest)));
+                              .findTrips(Schedulers.parallel(),
+                                         tripRequest)));
+    }
+
+    /**
+     * An async proxy to the SWA price database.
+     */
+    private SWAPriceProxyAsync mSWAPriceProxyAsync;
+
+    /**
+     * An async proxy to the AA price database.
+     */
+    private AAPriceProxyAsync mAAPriceProxyAsync;
+
+    /**
+     * A helper class that holds a PriceProxy and a
+     * factory for creating a PriceProxy.
+     */
+    static class Tuple {
+        /**
+         * A PricyProxy that references an airline price
+         * microservices.
+         */
+        PriceProxyAsync mProxy;
+
+        /**
+         * A factory that creates a new PriceProxy.
+         */
+        Supplier<PriceProxyAsync> mFactory;
+
+        /**
+         * The constructor initializes the fields.
+         */
+        Tuple(Supplier<PriceProxyAsync> proxySupplier) {
+            mProxy = null;
+            mFactory = proxySupplier;
+        }
+    }
+
+    /**
+     * A list of PriceProxy objects to airline price microservices.
+     */
+    List<Tuple> mProxyList =
+        new ArrayList<Tuple>() { {
+            add(new Tuple(SWAPriceProxyAsync::new));
+            add(new Tuple(AAPriceProxyAsync::new));
+    } };
+
+    /**
+     * Initialize the flight proxies if they haven't already been
+     * initialized in an earlier call.
+     */
+    void initializeProxiesIfNecessary() {
+        // Iterate through all the airline proxies.
+        for (Tuple tuple : mProxyList)
+            // If a proxy hasn't been initialized yet then initialize
+            // it so it will be cached for future calls.
+            if (tuple.mProxy == null)
+                tuple.mProxy = tuple.mFactory.get();
     }
 }

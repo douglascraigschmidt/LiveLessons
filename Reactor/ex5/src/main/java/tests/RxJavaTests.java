@@ -5,8 +5,8 @@ import datamodels.TripRequest;
 import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
-import microservices.exchangeRate.ExchangeRateProxy;
-import microservices.flightPrice.FlightPriceProxy;
+import microservices.exchangeRate.ExchangeRateProxyAsync;
+import microservices.flightPrice.FlightPriceProxyAsync;
 import reactor.core.scheduler.Schedulers;
 import utils.AsyncTaskBarrierRx;
 import utils.Options;
@@ -25,15 +25,15 @@ public class RxJavaTests {
      * A proxy that's used to communicate with the FlightPrice
      * microservice.
      */
-    private static final FlightPriceProxy sFlightPriceProxy =
-            new FlightPriceProxy();
+    private static final FlightPriceProxyAsync sFlightPriceProxyAsync =
+            new FlightPriceProxyAsync();
 
     /**
      * A proxy that's used to communicate with the ExchangeRate
      * microservice.
      */
-    private static final ExchangeRateProxy sExchangeRateProxy =
-            new ExchangeRateProxy();
+    private static final ExchangeRateProxyAsync sExchangeRateProxy =
+            new ExchangeRateProxyAsync();
 
     /**
      * This test invokes microservices to asynchronously determine the
@@ -79,14 +79,15 @@ public class RxJavaTests {
     private static Completable findBestPriceAsync(int iteration,
                                                   TripRequest tripRequest,
                                                   CurrencyConversion currencyConversion) {
-        Single<TripResponse> tripS = sFlightPriceProxy
+        Single<TripResponse> tripS = sFlightPriceProxyAsync
             // Asynchronously find the best price for the tripRequest.
-            .findBestPriceAsyncRx(Schedulers.parallel(),
-                                  tripRequest);
+            .findBestPriceRx(Schedulers.parallel(),
+                             tripRequest);
 
         Single<Double> rateS = sExchangeRateProxy
             // Asynchronously determine the exchange rate.
-            .queryExchangeRateForAsyncRx(currencyConversion);
+            .queryForExchangeRateRx(Schedulers.parallel(),
+                                    currencyConversion);
 
         // When priceM and rateM complete convert the price.  If these
         // async operations take more than {@code maxTime} then throw

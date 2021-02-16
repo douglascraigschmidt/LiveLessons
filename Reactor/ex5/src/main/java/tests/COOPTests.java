@@ -3,8 +3,8 @@ package tests;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.exchangeRate.ExchangeRateProxy;
-import microservices.flightPrice.FlightPriceProxy;
+import microservices.exchangeRate.ExchangeRateProxySync;
+import microservices.flightPrice.FlightPriceProxySync;
 import utils.ExceptionUtils;
 import utils.Options;
 
@@ -110,15 +110,15 @@ public class COOPTests {
      * A proxy that's used to communicate with the FlightPrice
      * microservice.
      */
-    private static final FlightPriceProxy sFlightPriceProxy =
-        new FlightPriceProxy();
+    private static final FlightPriceProxySync sFlightPriceProxySync =
+        new FlightPriceProxySync();
 
     /**
      * A proxy that's used to communicate with the ExchangeRate
-     * microservice.
+     * microservice synchronously.
      */
-    private static final ExchangeRateProxy sExchangeRateProxy =
-        new ExchangeRateProxy();
+    private static final ExchangeRateProxySync sExchangeRateProxySync =
+            new ExchangeRateProxySync();
 
     /**
      * This functional interface forms the basis of the tasks that
@@ -156,13 +156,13 @@ public class COOPTests {
      */
     private static BestFlightPrice makeSequentialBestPrice() {
         return (tripRequest, currencyConversion) -> {
-            TripResponse tripResponse = sFlightPriceProxy
+            TripResponse tripResponse = sFlightPriceProxySync
                 // Synchronously find the best price for the tripRequest.
-                .findBestPriceSync(tripRequest,
-                                   Options.instance().maxTimeout());
-            Double rate = sExchangeRateProxy
+                .findBestPrice(tripRequest,
+                               Options.instance().maxTimeout());
+            Double rate = sExchangeRateProxySync
                 // Synchronously determine the exchange rate.
-                .queryExchangeRateForSync(currencyConversion);
+                .queryForExchangeRate(currencyConversion);
 
             return tripResponse.convert(rate);
         };
@@ -179,16 +179,16 @@ public class COOPTests {
 
             List<Thread> threads = new ArrayList<Thread>() {
                     {
-                        trip[0] = sFlightPriceProxy
+                        trip[0] = sFlightPriceProxySync
                         // Synchronously find the best price for the tripRequest.
-                        .findBestPriceSync(tripRequest,
-                                           Options.instance().maxTimeout());
+                        .findBestPrice(tripRequest,
+                                       Options.instance().maxTimeout());
                     }
 
                     {
-                        rate[0] = sExchangeRateProxy
+                        rate[0] = sExchangeRateProxySync
                         // Synchronously determine the exchange rate.
-                        .queryExchangeRateForSync(currencyConversion);
+                        .queryForExchangeRate(currencyConversion);
                     }
                 };
 
@@ -215,14 +215,14 @@ public class COOPTests {
                 CompletionService<Object> cs =
                     new ExecutorCompletionService<>(Executors.newFixedThreadPool(2));
 
-                Callable<Object> c1 = () -> sFlightPriceProxy
+                Callable<Object> c1 = () -> sFlightPriceProxySync
                     // Synchronously find the best price for the tripRequest.
-                    .findBestPriceSync(tripRequest,
-                                       Options.instance().maxTimeout());
+                    .findBestPrice(tripRequest,
+                                   Options.instance().maxTimeout());
 
-                Callable<Object> c2 = () -> sExchangeRateProxy
+                Callable<Object> c2 = () -> sExchangeRateProxySync
                     // Synchronously determine the exchange rate.
-                    .queryExchangeRateForSync(currencyConversion);
+                    .queryForExchangeRate(currencyConversion);
 
                 cs.submit(c1);
                 cs.submit(c2);
@@ -259,13 +259,13 @@ public class COOPTests {
         return (tripRequest, currencyConversion) -> {
             try {
                 // Synchronously find the best price for the tripRequest.
-                Callable<TripResponse> c1 = () -> sFlightPriceProxy
-                    .findBestPriceSync(tripRequest,
-                                       Options.instance().maxTimeout());
+                Callable<TripResponse> c1 = () -> sFlightPriceProxySync
+                    .findBestPrice(tripRequest,
+                                   Options.instance().maxTimeout());
 
                 // Synchronously determine the exchange rate.
-                Callable<Double> c2 = () -> sExchangeRateProxy
-                    .queryExchangeRateForSync(currencyConversion);
+                Callable<Double> c2 = () -> sExchangeRateProxySync
+                    .queryForExchangeRate(currencyConversion);
 
                 // Create a new cached thread pool.
                 ExecutorService es = Executors.newCachedThreadPool();
@@ -325,14 +325,14 @@ public class COOPTests {
      */
     private static AllFlightPrices makeSequentialAllPrices() {
         return (tripRequest, currencyConversion) -> {
-            List<TripResponse> trips = sFlightPriceProxy
+            List<TripResponse> trips = sFlightPriceProxySync
                 // Synchronously find all the flights for the
                 // tripRequest.
-                .findFlightsSync(tripRequest,
-                                 Options.instance().maxTimeout());
-            Double rate = sExchangeRateProxy
+                .findFlights(tripRequest,
+                             Options.instance().maxTimeout());
+            Double rate = sExchangeRateProxySync
                 // Synchronously determine the exchange rate.
-                .queryExchangeRateForSync(currencyConversion);
+                .queryForExchangeRate(currencyConversion);
 
             // Convert all the trip prices using the exchange rate.
             return convertTripPrices(trips, rate);
@@ -351,17 +351,17 @@ public class COOPTests {
 
             List<Thread> threads = new ArrayList<Thread>() {
                     {
-                        trips[0] = sFlightPriceProxy
+                        trips[0] = sFlightPriceProxySync
                         // Synchronously find all the flights
                         // for the tripRequest.
-                        .findFlightsSync(tripRequest,
-                                         Options.instance().maxTimeout());
+                        .findFlights(tripRequest,
+                                     Options.instance().maxTimeout());
                     }
 
                     {
-                        rate[0] = sExchangeRateProxy
+                        rate[0] = sExchangeRateProxySync
                         // Synchronously determine the exchange rate.
-                        .queryExchangeRateForSync(currencyConversion);
+                        .queryForExchangeRate(currencyConversion);
                     }
                 };
 
@@ -386,15 +386,15 @@ public class COOPTests {
                 CompletionService<Object> cs =
                     new ExecutorCompletionService<>(Executors.newFixedThreadPool(2));
 
-                Callable<Object> c1 = () -> sFlightPriceProxy
+                Callable<Object> c1 = () -> sFlightPriceProxySync
                     // Synchronously find all the flights for
                     // the tripRequest.
-                    .findFlightsSync(tripRequest,
-                                     Options.instance().maxTimeout());
+                    .findFlights(tripRequest,
+                                 Options.instance().maxTimeout());
 
-                Callable<Object> c2 = () -> sExchangeRateProxy
+                Callable<Object> c2 = () -> sExchangeRateProxySync
                     // Synchronously determine the exchange rate.
-                    .queryExchangeRateForSync(currencyConversion);
+                    .queryForExchangeRate(currencyConversion);
 
                 cs.submit(c1);
                 cs.submit(c2);
@@ -429,13 +429,13 @@ public class COOPTests {
         return (tripRequest, currencyConversion) -> {
             try {
                 // Synchronously find all the flights for the tripRequest.
-                Callable<List<TripResponse>> c1 = () -> sFlightPriceProxy
-                    .findFlightsSync(tripRequest,
-                                     Options.instance().maxTimeout());
+                Callable<List<TripResponse>> c1 = () -> sFlightPriceProxySync
+                    .findFlights(tripRequest,
+                                 Options.instance().maxTimeout());
 
                 // Synchronously determine the exchange rate.
-                Callable<Double> c2 = () -> sExchangeRateProxy
-                    .queryExchangeRateForSync(currencyConversion);
+                Callable<Double> c2 = () -> sExchangeRateProxySync
+                    .queryForExchangeRate(currencyConversion);
 
                 // Create a new cached thread pool.
                 ExecutorService es = Executors.newCachedThreadPool();

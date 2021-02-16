@@ -12,10 +12,10 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP POST DELETE requests via asynchronous reactive
+ * handle HTTP POST DELETE requests via object-oriented reactive
  * programming.  These requests are mapped to methods that return the
  * flights available on Southwest airlines for certain dates and
- * certain cities.
+ * certain cities synchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -26,13 +26,13 @@ import static java.util.stream.Collectors.toList;
  * identified by the @RestController annotation below.
  *
  * WebFlux uses the {@code @PostMapping} annotation to map HTTP POST
- * requests onto methods in the {@code FlightPriceController}.  POST
- * requests invoked from any HTTP web client (e.g., a web browser) or
- * command-line utility (e.g., Curl or Postman).
+ * requests onto methods in the {@code FlightPriceControllerSync}.
+ * POST requests invoked from any HTTP web client (e.g., a web
+ * browser) or command-line utility (e.g., Curl or Postman).
  */
 @RestController
-@RequestMapping("/microservices/AirlineDBs/SWA")
-public class SWAController {
+@RequestMapping("/microservices/AirlineDBs/SWASync")
+public class SWAControllerSync {
     /**
      * The list of TripResponse objects and their associated prices.
      */
@@ -41,7 +41,7 @@ public class SWAController {
     /**
      * Constructor initializes the field.
      */
-    SWAController() {
+    SWAControllerSync() {
         mTrips = DataFactory
             // Initialize the list of TripResponse objects and their
             // associated prices from the SWA.txt file.
@@ -50,33 +50,9 @@ public class SWAController {
 
     /**
      * This method finds all the trips on given departure date and the
-     * flight leg for Southwest Airlines asynchronously.
-     *
-     * WebFlux maps HTTP POST requests sent to the /_getTripPricesAsync
-     * endpoint to this method.
-     *
-     * @param tripRequest Information about the trip, i.e., date and
-     *         flight leg  
-     * @return A Flux that emits all the trips for the given departure
-     *         date and flight leg
-     */
-    @PostMapping("/_getTripPricesAsync")
-    private Flux<TripResponse> getTripPricesAsync(@RequestBody TripRequest tripRequest) {
-        return Flux
-            // Convert the list of TripResponse objects into a Flux
-            // stream.
-            .fromIterable(mTrips)
-
-            // Select only those TripResponse objects that equal the
-            // tripRequest param.
-            .filter(tripRequest::equals);
-    }
-
-    /**
-     * This method finds all the trips on given departure date and the
      * flight leg for Southwest Airlines synchronously.
      *
-     * WebFlux maps HTTP POST requests sent to the /_getTripPricesSync
+     * WebFlux maps HTTP POST requests sent to the /_getTripPrices
      * endpoint to this method.
      *
      * @param tripRequest Information about the trip, i.e., date and
@@ -84,17 +60,17 @@ public class SWAController {
      * @return A List that contains all the trips for the given departure
      *         date and flight leg
      */
-    @PostMapping("/_getTripPricesSync")
-    private List<TripResponse> getTripPricesSync(@RequestBody TripRequest tripRequest) {
+    @PostMapping("/_getTripPrices")
+    private List<TripResponse> getTripPrices(@RequestBody TripRequest tripRequest) {
         return mTrips
-                // Convert the list of TripResponse objects into a stream.
-                .stream()
+            // Convert the list of TripResponse objects into a stream.
+            .stream()
 
-                // Select only those TripResponse objects that equal the
-                // tripRequest param.
-                .filter(tripRequest::equals)
+            // Select only those TripResponse objects that equal the
+            // tripRequest param.
+            .filter(tripRequest::equals)
 
-                // Collect into a list.
-                .collect(toList());
+            // Collect into a list.
+            .collect(toList());
     }
 }

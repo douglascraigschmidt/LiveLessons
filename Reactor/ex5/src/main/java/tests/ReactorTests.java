@@ -3,8 +3,8 @@ package tests;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.exchangeRate.ExchangeRateProxy;
-import microservices.flightPrice.FlightPriceProxy;
+import microservices.exchangeRate.ExchangeRateProxyAsync;
+import microservices.flightPrice.FlightPriceProxyAsync;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -25,15 +25,15 @@ public class ReactorTests {
      * A proxy that's used to communicate with the FlightPrice
      * microservice.
      */
-    private static final FlightPriceProxy sFlightPriceProxy =
-        new FlightPriceProxy();
+    private static final FlightPriceProxyAsync sFlightPriceProxyAsync =
+        new FlightPriceProxyAsync();
 
     /**
      * A proxy that's used to communicate with the ExchangeRate
-     * microservice.
+     * microservice asynchronously.
      */
-    private static final ExchangeRateProxy sExchangeRateProxy =
-        new ExchangeRateProxy();
+    private static final ExchangeRateProxyAsync sExchangeRateProxyAsync =
+            new ExchangeRateProxyAsync();
 
     /**
      * This test invokes microservices to asynchronously determine the
@@ -83,16 +83,16 @@ public class ReactorTests {
     private static Mono<Void> findBestPriceAsync(int iteration,
                                                  TripRequest tripRequest,
                                                  CurrencyConversion currencyConversion) {
-        Mono<TripResponse> tripM = sFlightPriceProxy
+        Mono<TripResponse> tripM = sFlightPriceProxyAsync
             // Asynchronously find the best price in US dollars for
             // the tripRequest.
-            .findBestPriceAsync(Schedulers.parallel(),
-                                tripRequest);
+            .findBestPrice(Schedulers.parallel(),
+                           tripRequest);
 
-        Mono<Double> rateM = sExchangeRateProxy
+        Mono<Double> rateM = sExchangeRateProxyAsync
             // Asynchronously determine the exchange rate.
-            .queryExchangeRateAsync(Schedulers.parallel(),
-                                    currencyConversion);
+            .queryForExchangeRate(Schedulers.parallel(),
+                                  currencyConversion);
 
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,
@@ -138,15 +138,15 @@ public class ReactorTests {
     private static Mono<Void> findFlightsAsync(int iteration,
                                                TripRequest tripRequest,
                                                CurrencyConversion currencyConversion) {
-        Flux<TripResponse> tripF = sFlightPriceProxy
+        Flux<TripResponse> tripF = sFlightPriceProxyAsync
             // Asynchronously find all the flights in the tripRequest.
-            .findFlightsAsync(Schedulers.parallel(),
-                              tripRequest);
+            .findFlights(Schedulers.parallel(),
+                         tripRequest);
 
-        Mono<Double> rateM = sExchangeRateProxy
+        Mono<Double> rateM = sExchangeRateProxyAsync
             // Asynchronously determine the exchange rate.
-            .queryExchangeRateAsync(Schedulers.parallel(),
-                                    currencyConversion);
+            .queryForExchangeRate(Schedulers.parallel(),
+                                  currencyConversion);
 
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,

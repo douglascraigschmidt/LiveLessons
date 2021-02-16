@@ -7,8 +7,6 @@ import utils.DataFactory;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP GET requests via asynchronous reactive programming.
@@ -40,7 +38,7 @@ public class AirportListControllerAsync {
     /**
      * Constructor initializes the field.
      */
-    AirportListController() {
+    AirportListControllerAsync() {
         mAirportList = DataFactory
             // Initialize the list of AirportInfo objects from the
             // AirportList.txt file.

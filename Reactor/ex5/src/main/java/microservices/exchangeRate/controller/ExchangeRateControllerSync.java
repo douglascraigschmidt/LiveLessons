@@ -29,7 +29,7 @@ import static utils.ReactorUtils.randomDelay;
  */
 @RestController
 @RequestMapping("/microservices/exchangeRateSync")
-public class ExchangeRateController {
+public class ExchangeRateControllerSync {
     /**
      * This method simulates a microservice that finds the exchange
      * rate between a source and destination currency format

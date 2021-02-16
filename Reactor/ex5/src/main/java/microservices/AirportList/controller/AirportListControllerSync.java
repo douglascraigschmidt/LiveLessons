@@ -2,12 +2,9 @@ package microservices.AirportList.controller;
 
 import datamodels.AirportInfo;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import utils.DataFactory;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
@@ -40,7 +37,7 @@ public class AirportListControllerSync {
     /**
      * Constructor initializes the field.
      */
-    AirportListController() {
+    AirportListControllerSync() {
         mAirportList = DataFactory
             // Initialize the list of AirportInfo objects from the
             // AirportList.txt file.

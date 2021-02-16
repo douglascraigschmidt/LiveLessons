@@ -4,8 +4,6 @@ import datamodels.CurrencyConversion;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.Random;
-
 import static utils.ReactorUtils.randomDelay;
 
 /**
@@ -42,7 +40,7 @@ public class ExchangeRateControllerAsync {
      *        from and to  
      * @return A Mono that emits the current exchange rate.
      */
-    @GetMapping("_exchangeRate")
+    @GetMapping("_queryForExchangeRate")
     private Mono<Double> queryForExchangeRate(CurrencyConversion currencyConversion) {
         // Delay for a random amount of time.
         randomDelay();

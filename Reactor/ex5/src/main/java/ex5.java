@@ -1,9 +1,7 @@
 import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import microservices.AirportList.AirportListProxy;
-import microservices.AirportList.controller.AirportListController;
-import microservices.flightPrice.FlightPriceProxy;
+import microservices.AirportList.AirportListProxySync;
 import tests.COOPTests;
 import tests.ReactorTests;
 import utils.Options;
@@ -58,14 +56,14 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
-        AirportListProxy airportListProxy =
-                new AirportListProxy();
+        AirportListProxySync airportListProxy =
+                new AirportListProxySync();
 
         List<AirportInfo> airportInfoList =
-                airportListProxy.findAirportInfoSync();
+                airportListProxy.findAirportInfo();
 
         airportInfoList.forEach(System.out::println);
-        /*
+
         RunTimer
             // This test uses Project Reactor to invoke microservices
             // that asynchronously determine the best price for a
@@ -74,6 +72,7 @@ public class ex5 {
                                                       mCurrencyConversion),
                      "runReactorAsyncTests");
 
+        /*
         RunTimer
             // This test uses RxJava to invoke microservices that
             // asynchronously determine the best price for a flight
@@ -83,6 +82,7 @@ public class ex5 {
                      "runRxJavaAsyncTests");
          */
 
+        /*
         RunTimer
             // This test uses Java concurrent object-oriented
             // programming frameworks to invoke microservices that
@@ -91,6 +91,7 @@ public class ex5 {
             .timeRun(() -> COOPTests.runSyncTests(mTrip,
                                                      mCurrencyConversion),
                      "runCOOPSyncTests");
+        */
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());
