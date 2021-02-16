@@ -2,7 +2,7 @@ import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import microservices.AirportList.AirportListProxySync;
-import clients.ReactorTests;
+import clients.ReactorClient;
 import utils.Options;
 import utils.RunTimer;
 
@@ -67,7 +67,7 @@ public class ex5 {
             // This test uses Project Reactor to invoke microservices
             // that asynchronously determine the best price for a
             // flight from London to New York city in British pounds.
-            .timeRun(() -> ReactorTests.runAsyncTests(mTrip,
+            .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
                                                       mCurrencyConversion),
                      "runReactorAsyncTests");
 

@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 /**
  *
  */
-public class COOPTests {
+public class COOPClient {
     /**
      * This test invokes microservices to synchronously determine the
      * best price for a {@code trip} using the given {@code
@@ -61,7 +61,7 @@ public class COOPTests {
     private static void findFlightsSync(int iteration,
                                         TripRequest tripRequest,
                                         CurrencyConversion currencyConversion) {
-        List<TripResponse> trips = COOPTests
+        List<TripResponse> trips = COOPClient
             .makeAllPrices()
             .compute(tripRequest,
                      currencyConversion);
@@ -90,7 +90,7 @@ public class COOPTests {
                                           TripRequest tripRequest,
                                           CurrencyConversion currencyConversion) {
 
-        TripResponse tripResponse = COOPTests
+        TripResponse tripResponse = COOPClient
             .makeBestPrice()
             .compute(tripRequest,
                      currencyConversion);

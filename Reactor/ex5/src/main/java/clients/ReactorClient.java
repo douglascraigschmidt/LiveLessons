@@ -20,7 +20,7 @@ import java.util.function.Function;
  * that determine the best price for flights in an airline reservation
  * system.
  */
-public class ReactorTests {
+public class ReactorClient {
     /**
      * A proxy that's used to communicate with the FlightPrice
      * microservice.

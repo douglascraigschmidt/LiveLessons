@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * determine the best price for flights in an airline reservation
  * system.
  */
-public class RxJavaTests {
+public class RxJavaClient {
     /**
      * A proxy that's used to communicate with the FlightPrice
      * microservice.
@@ -136,7 +136,7 @@ public class RxJavaTests {
             // Call the this::convert method reference to convert the
             // price using the given exchange rate when both previous
             // Monos complete their processing.
-            .zip(tripS, rateS, RxJavaTests::convert)
+            .zip(tripS, rateS, RxJavaClient::convert)
 
             // If the total processing takes more than maxTime a
             // TimeoutException will be thrown.
