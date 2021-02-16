@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import utils.TestDataFactory;
+import utils.DataFactory;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class AAController {
      * Constructor initializes the field.
      */
     AAController() {
-        mTrips = TestDataFactory
+        mTrips = DataFactory
             // Initialize the list of TripResponse objects and their
             // associated prices from the AA.txt file.
             .getTripList("airlineDBs/AA.txt");

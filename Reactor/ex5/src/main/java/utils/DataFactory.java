@@ -1,5 +1,6 @@
 package utils;
 
+import datamodels.AirportInfo;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
 import lombok.SneakyThrows;
@@ -9,18 +10,17 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 /**
  * This utility class contains methods that obtain test data.
  */
-public class TestDataFactory {
+public class DataFactory {
     /**
      * A utility class should always define a private constructor.
      */
-    private TestDataFactory() {
+    private DataFactory() {
     }
 
     /**
@@ -43,7 +43,7 @@ public class TestDataFactory {
             .filter(((Predicate<String>) String::isEmpty).negate())
 
             // Convert the strings into TripResponse objects.
-            .map(TestDataFactory::makeTrip)
+            .map(DataFactory::makeTrip)
 
             // Only keep TripResponse objects that match the
             // tripRequest.
@@ -54,8 +54,8 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the Trip list in the {@code filename} as a list of
-     * non-empty Trip objects.
+     * @return The contents in the {@code filename} as a list of
+     * non-empty {@code TripResponse} objects.
      */
     public static List<TripResponse> getTripList(String filename) {
         try {
@@ -69,10 +69,37 @@ public class TestDataFactory {
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
                 // Convert the strings into TripResponse objects.
-                .map(TestDataFactory::makeTrip)
+                .map(DataFactory::makeTrip)
 
                 // Trigger intermediate operations and collect the
-                // results into a list of Trip objects.
+                // results into a list of TripResponse objects.
+                .collect(toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * @return The contents in the {@code filename} as a list of
+     * non-empty {@code AirportInfo} objects.
+     */
+    public static List<AirportInfo> getAirportInfoList(String filename) {
+        try {
+            return Files
+                // Read all lines from filename and convert into a
+                // stream of strings.
+                .lines(Paths.get(ClassLoader.getSystemResource
+                                 (filename).toURI()))
+
+                // Filter out any empty strings.
+                .filter(((Predicate<String>) String::isEmpty).negate())
+
+                // Convert the strings into AirportInfo objects.
+                .map(DataFactory::makeAirportInfo)
+
+                // Trigger intermediate operations and collect the
+                // results into a list of AirportInfo objects.
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,12 +114,13 @@ public class TestDataFactory {
      * the departing/arriving airports, the price, and the airline
      * code into the corresponding {@code TripResponse}.
      *
-     * @param tripString A string containing comma-separated values
+     * @param tripCSV A string containing comma-separated values
      * indicating information about the trip
-     * @return The corresponding {@code TripResponse}
+     * @return The corresponding {@code TripResponse} object
      */
-    private static TripResponse makeTrip(String tripString) {
-        String[] result = tripString.split(",");
+    private static TripResponse makeTrip(String tripCSV) {
+        // Split the tripCSV string via the hyphen (',') character.
+        String[] result = tripCSV.split(",");
 
         // Create and return a TripResponse via a factory method.
         return TripResponse
@@ -118,5 +146,24 @@ public class TestDataFactory {
 
                      // Code for the airline.
                      result[7]);
+    }
+
+    /**
+     * Factory method that converts a string of hyphen-separated
+     * values into the corresponding {@code AirportInfo}.
+     *
+     * @param airportInfo A string containing comma-separated values
+     * indicating information about the trip
+     * @return The corresponding {@code AirportInfo} object
+     */
+    private static AirportInfo makeAirportInfo(String airportInfo) {
+        // Split the airportInfo string via the hyphen ('-')
+        // character.
+        String[] result = airportInfo.split("-");
+
+        // Create and return an AirportInfo via a factory method.
+        return AirportInfo
+            .valueOf(result[0],
+                     result[1]);
     }
 }

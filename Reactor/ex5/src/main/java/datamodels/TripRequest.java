@@ -22,7 +22,7 @@ public class TripRequest {
     private String departureAirport;
 
     /**
-     * Airport code for the arriving airport.
+     * The three-letter airport code for the arriving airport.
      */
     private String arrivalAirport;
 
@@ -94,6 +94,7 @@ public class TripRequest {
 
     /**
      * @return A String representation of this {@code TripRequest}
+     * object
      */
     @Override
     public String toString() {
@@ -179,7 +180,7 @@ public class TripRequest {
     }
 
     /**
-     * Factory method that creates a new {@code Trip} object.
+     * Factory method that creates a new {@code TripReqest} object.
      *
      * @param departureDateTime Departure date
      * @param returnDepartureDateTime Return date

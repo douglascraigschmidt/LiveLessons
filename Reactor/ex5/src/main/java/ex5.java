@@ -1,11 +1,16 @@
+import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
+import microservices.AirportList.AirportListProxy;
+import microservices.AirportList.controller.AirportListController;
+import microservices.flightPrice.FlightPriceProxy;
 import tests.COOPTests;
 import tests.ReactorTests;
 import utils.Options;
 import utils.RunTimer;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * This program applies reactive streams and reactive web programming
@@ -53,6 +58,13 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
+        AirportListProxy airportListProxy =
+                new AirportListProxy();
+
+        List<AirportInfo> airportInfoList =
+                airportListProxy.findAirportInfoSync();
+
+        airportInfoList.forEach(System.out::println);
         /*
         RunTimer
             // This test uses Project Reactor to invoke microservices

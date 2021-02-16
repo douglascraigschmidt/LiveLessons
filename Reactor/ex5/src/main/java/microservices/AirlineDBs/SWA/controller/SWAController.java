@@ -4,7 +4,7 @@ import datamodels.TripRequest;
 import datamodels.TripResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import utils.TestDataFactory;
+import utils.DataFactory;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class SWAController {
      * Constructor initializes the field.
      */
     SWAController() {
-        mTrips = TestDataFactory
+        mTrips = DataFactory
             // Initialize the list of TripResponse objects and their
             // associated prices from the SWA.txt file.
             .getTripList("airlineDBs/SWA.txt");

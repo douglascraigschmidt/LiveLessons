@@ -29,12 +29,12 @@ public class TripResponse {
     LocalDateTime returnArrivalDateTime;
 
     /**
-     * Airport code for the departing airport.
+     * The three-letter airport code for the departing airport.
      */
     String departureAirport;
 
     /**
-     * Airport code for the arriving airport.
+     * The three-letter airport code for the arriving airport.
      */
     String arrivalAirport;
 
@@ -238,7 +238,7 @@ public class TripResponse {
     }
 
     /**
-     * Factory method that creates a new {@code Trip} object.
+     * Factory method that creates a new {@code TripResponse} object.
      *
      * @param departureDateTime Departure date and time
      * @param arrivalDateTime Arrival date and time
