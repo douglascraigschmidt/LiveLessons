@@ -13,8 +13,8 @@ import static java.util.stream.Collectors.toList;
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP GET requests via asynchronous reactive programming.
  * These GET requests are mapped to methods that return information
- * about all the airports, e.g., the three-letter airport code and
- * airport name.
+ * about all the airports (e.g., the three-letter airport code and
+ * airport name) asynchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -30,8 +30,8 @@ import static java.util.stream.Collectors.toList;
  * command-line utility (e.g., Curl or Postman).
  */
 @RestController
-@RequestMapping("/microservices/AirportList")
-public class AirportListController {
+@RequestMapping("/microservices/AirportListAsync")
+public class AirportListControllerAsync {
     /**
      * The list of AirportInfo objects.
      */
@@ -51,32 +51,16 @@ public class AirportListController {
      * This method finds information about all the airports
      * asynchronously.
      *
-     * WebFlux maps HTTP GET requests sent to the
-     * /_getAirportListAsync endpoint to this method.
+     * WebFlux maps HTTP GET requests sent to the /_getAirportList
+     * endpoint to this method.
      *
      * @return A Flux that emits all {@code AirportInfo} objects
      */
-    @GetMapping("/_getAirportListAsync")
+    @GetMapping("/_getAirportList")
     private Flux<AirportInfo> getAirportInfoAsync() {
         return Flux
             // Convert the list of AirportInfo objects into a Flux
             // stream.
             .fromIterable(mAirportList);
-    }
-
-    /**
-     * This method finds information about all the airports
-     * synchronously.
-     *
-     * WebFlux maps HTTP GET requests sent to the
-     * /_getAirportListSync endpoint to this method.
-     *
-     * @return A List that contains all the trips for the given departure
-     *         date and flight leg
-     */
-    @GetMapping("/_getAirportListSync")
-    private List<AirportInfo> getAirportInfoSync() {
-        // Return the airport list.
-        return mAirportList;
     }
 }

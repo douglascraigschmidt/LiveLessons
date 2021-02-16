@@ -1,10 +1,6 @@
 package utils;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.StampedLock;
 
@@ -52,8 +48,15 @@ public abstract class CountDownTimer {
     /**
      * Executor service that executes runnables after a given timeout.
      */
-    private ScheduledExecutorService mScheduledExecutorService = 
-        Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService mScheduledExecutorService =
+        Executors.newScheduledThreadPool(1,
+                r -> {
+                    Thread thr = new Thread(r);
+                    // Use a daemon thread to ensure the ScheduledThreadPool
+                    // shuts down when the main thread exits.
+                    thr.setDaemon(true);
+                    return thr;
+                });
 
     /**
      * When to stop the timer.

@@ -29,14 +29,14 @@ public class AirportListProxy {
      * airport codes/names asynchronously.
      */
     private final String mFindAirportListsURIAsync =
-            "/microservices/AirportList/_getAirportListAsync";
+            "/microservices/AirportListAsync/_getAirportList";
 
     /**
      * The URI that denotes the remote method to obtain the list of
      * airport codes/names synchronously.
      */
     private final String mFindAirportListsURISync =
-            "/microservices/AirportList/_getAirportListSync";
+            "/microservices/AirportListSync/_getAirportList";
 
     /**
      * Host/port where the server resides.

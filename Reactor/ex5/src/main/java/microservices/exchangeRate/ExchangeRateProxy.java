@@ -35,14 +35,14 @@ public class ExchangeRateProxy {
      * exchange rate asynchronously.
      */
     private final String mQueryExchangeRateURIAsync =
-        "/microservices/exchangeRate/_exchangeRateAsync";
+        "/microservices/exchangeRateAsync/_queryForExchangeRate";
 
     /**
      * The URI that denotes a remote method to determine the current
      * exchange rate synchronously.
      */
     private final String mQueryExchangeRateURISync =
-            "/microservices/exchangeRate/_exchangeRateSync";
+            "/microservices/exchangeRateSync/_queryForExchangeRateSync";
 
     /**
      * The WebClient provides the means to access the ExchangeRate

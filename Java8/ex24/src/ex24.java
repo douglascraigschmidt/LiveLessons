@@ -1,4 +1,5 @@
 import utils.CountDownTimer;
+import utils.NonReentrantLock;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -29,26 +30,49 @@ public class ex24 {
     public static void main (String[] argv) 
         throws IOException, InterruptedException {
 
-        // Test the CountDownTimer that's configured with a
-        // ReentrantLock.
-        testCountDownTimer(new ReentrantLock(), 10000, 1000);
+        // Run the test using the ReentrantLock.
+        runTest(new ReentrantLock(),
+                10000,
+                1000,
+                "ReentrantLock");
 
-        // Block until the countdown timer is canceled.
-        sCdl.await();
+        // Run the test using the NonReentrantLock.
+        runTest(new NonReentrantLock(),
+                10000,
+                1000,
+                "NonReentrantLock");
+    }
 
-        // Indicate that the test finished.
-        System.out.println("ReentrantLock test finished cleanly");
-
-        // Test the CountDownTimer that's configured with a
-        // NonReentrantLock.
-        testCountDownTimer(new NonReentrantLock(), 10000, 1000);
+    /**
+     * Run the CountDownTimer test for a given type of lock.
+     * 
+     * @param lock The lock to use for the test
+     * @param millisInFuture The number of millis in the future from
+     *                       the call to {@code start()} until the
+     *                       countdown is done and {@code onFinish()}
+     *                       is called.
+     * @param countDownInterval The interval along the way to receive
+     *                          {@code onTick(long)} callbacks.
+     * @param lockName The name of the lock (e.g., ReentrantLock
+     *                vs. NonReentrantLock)
+     */
+    private static void runTest(Lock lock,
+                                long millisInFuture,
+                                long countDownInterval,
+                                String lockName) throws InterruptedException {
+        // Test the CountDownTimer that's configured with the lock.
+        testCountDownTimer(lock, millisInFuture, countDownInterval);
 
         // Blocks for 10 seconds since the countdown timer will
         // deadlock and thus never finish..
-        sCdl.await(10, TimeUnit.SECONDS);
-
-        // Indicate that the test finished.
-        System.out.println("NonReentrantLock test finished after a delay due to self-deadlock");
+        if (sCdl.await(10, TimeUnit.SECONDS))
+            // Indicate that the test finished successfully.
+            System.out.println(lockName
+                               + " test finished successfully");
+        else
+            // Indicate that the test finished unsuccessfully.
+            System.out.println(lockName
+                               + " test finished unsuccessfully due to self-deadlock");
     }
 
     /**
@@ -65,90 +89,42 @@ public class ex24 {
     private static void testCountDownTimer(Lock lock,
                                            long millisInFuture,
                                            long countDownInterval) {
-        // Initialize the countdownlatch used to wait until the test
+        // Initialize the countDownLatch used to wait until the test
         // is done.
         sCdl = new CountDownLatch(1);
 
         // Create a countdown that displays a text string.
-        new CountDownTimer(lock, 
-                           millisInFuture, 
-                           countDownInterval) {
-            /**
-             * Callback fired on regular interval.
-             * @param millisUntilFinished The amount of time until finished.
-             */
-            public void onTick(long millisUntilFinished) {
-                System.out.println("seconds remaining: " + 
-                                   millisUntilFinished / 1000);
-                // Try to cancel the timer after its about halfway
-                // done.
-                if ((millisInFuture - millisUntilFinished) > millisUntilFinished) {
-                    // This call will trigger self-deadlock if a
-                    // non-reentrant lock is used.
-                    this.cancel();
+        CountDownTimer cdt = new CountDownTimer(lock, 
+                                                millisInFuture,
+                                                countDownInterval) {
+                /**
+                 * Callback fired on regular interval.
+                 * @param millisUntilFinished The amount of time until finished.
+                 */
+                public void onTick(long millisUntilFinished) {
+                    System.out.println("seconds remaining: " + 
+                                       millisUntilFinished / 1000);
+                    // Try to cancel the timer after its about halfway
+                    // done.
+                    if ((millisInFuture - millisUntilFinished) > millisUntilFinished) {
+                        // This call will trigger self-deadlock if a
+                        // non-reentrant lock is used.
+                        this.cancel();
 
-                    // Decrement the latch to release the waiter.
-                    sCdl.countDown();
+                        // Decrement the latch to release the waiter.
+                        sCdl.countDown();
+                    }
                 }
-            }
  
-            /**
-             * Callback fired when the time is up.
-             */
-            public void onFinish() {
-                System.out.println("done");
-            }
-        }
+                /**
+                 * Callback fired when the time is up.
+                 */
+                public void onFinish() {
+                    System.out.println("done");
+                }
+            };
+
         // Start the countdown timer.
-        .start();
-    }
-
-    /**
-     * Use a StampedLock to implement a non-reentrant lock.
-     */
-    private static class NonReentrantLock 
-                   implements Lock {
-        /**
-         * StampedLock is non-reentrant.
-         */
-        private StampedLock mLock = new StampedLock();
-
-        /**
-         * Store the stamp to use for unlocking.
-         */
-        private long mStamp;
-
-        @Override
-        public void lock() {
-            mStamp = mLock.writeLock();
-        }
-
-        @Override
-        public void lockInterruptibly() throws InterruptedException {
-            mStamp = mLock.writeLock();
-        }
-
-        @Override
-        public boolean tryLock() {
-            mStamp = mLock.tryWriteLock();
-            return mStamp != 0;
-        }
-
-        @Override
-        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-            mStamp = mLock.tryWriteLock(time, unit);
-            return mStamp != 0;
-        }
-
-        @Override
-        public void unlock() {
-            mLock.unlockWrite(mStamp);
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        @Override
-        public Condition newCondition() {
-            return null;
-        }
+        cdt.start();
     }
 }
