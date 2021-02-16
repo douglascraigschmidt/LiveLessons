@@ -1,8 +1,6 @@
-package example.pingpong;
+package example.pingpong.utils;
 
-import java.io.File;
-import java.nio.*;
-import java.util.*;
+import example.pingpong.platform.PlatformStrategy;
 
 /**
  * @class Options

@@ -1,4 +1,4 @@
-package example.pingpong;
+package example.pingpong.platform;
 
 import java.util.concurrent.CountDownLatch;
 import java.io.PrintStream;

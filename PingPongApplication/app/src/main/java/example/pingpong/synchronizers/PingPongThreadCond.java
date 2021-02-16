@@ -1,17 +1,17 @@
-package example.pingpong;
+package example.pingpong.synchronizers;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import example.pingpong.threads.PingPongThread;
+
 /**
- * @class PingPongThreadCond
- * 
- * @brief This class uses Java Conditions and ConditionObjects to
- *        implement the acquire() and release() hook methods that
- *        synchronize the ping/pong algorithm. It plays the role of
- *        the "Concrete Class" in the Template Method pattern.
+ * This class uses Java Conditions and ConditionObjects to implement
+ * the acquire() and release() hook methods that synchronize the
+ * ping/pong algorithm. It plays the role of the "Concrete Class" in
+ * the Template Method pattern.
  */
-class PingPongThreadCond extends PingPongThread {
+public class PingPongThreadCond extends PingPongThread {
     /**
      * Conditions that are used to schedule the ping/pong algorithm.
      */
@@ -33,6 +33,9 @@ class PingPongThreadCond extends PingPongThread {
      */
     private static long mTurnOwner;
 
+    /**
+     * Constructor initializes the fields.
+     */
     public PingPongThreadCond(String stringToPrint,
                               ReentrantLock lock,
                               Condition mine,

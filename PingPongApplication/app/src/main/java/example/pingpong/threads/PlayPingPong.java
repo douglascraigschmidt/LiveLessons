@@ -1,21 +1,27 @@
-package example.pingpong;
+package example.pingpong.threads;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import example.pingpong.platform.PlatformStrategy;
+import example.pingpong.synchronizers.PingPongThreadBlockingQueue;
+import example.pingpong.synchronizers.PingPongThreadCond;
+import example.pingpong.synchronizers.PingPongThreadMonObj;
+import example.pingpong.synchronizers.PingPongThreadSema;
+
 /**
- * @class PlayPingPong
- *
- * @brief This class implements a Java program that creates two
- *        threads, Ping and Pong, to alternately print "Ping" and
- *        "Pong", respectively, on the display. It uses the Template
- *        Method, Strategy, and Factory Method patterns to factor out
- *        common code, enhance portability, and simplify the program
- *        design.
+ * This class implements a Java program that creates two threads, Ping
+ * and Pong, to alternately print "Ping" and "Pong", respectively, on
+ * the display. It uses the Template Method, Strategy, and Factory
+ * Method patterns to factor out common code, enhance portability, and
+ * simplify the program design.
  */
-public class PlayPingPong implements Runnable {
+public class PlayPingPong 
+       implements Runnable {
     /**
      * Number of iterations to ping/pong.
      */
@@ -61,19 +67,14 @@ public class PlayPingPong implements Runnable {
         // Let the user know we're starting. 
         PlatformStrategy.instance().print("Ready...Set...Go!");
 
-        // Create the ping and pong threads. 
-        PingPongThread pingPongThreads[] =
-            new PingPongThread[MAX_PING_PONG_THREADS];
-
-        // Create the appropriate type of threads with the designated
-        // synchronization mechanism.
-        makePingPongThreads(mSyncMechanism,
-                            pingPongThreads);
+        // Create the appropriate type of ping and pong threads with
+        // the designated synchronization mechanism.
+        List<PingPongThread> pingPongThreads =
+            makePingPongThreads(mSyncMechanism);
 
         // Start ping and pong threads, which calls their run()
         // methods.
-        for (PingPongThread thread : pingPongThreads)
-            thread.start();
+        pingPongThreads.forEach(Thread::start);
 
         // Barrier synchronization to wait for all work to be done
         // before exiting play().
@@ -88,46 +89,60 @@ public class PlayPingPong implements Runnable {
      * PingPongThread subclass based on the @code syncMechanism
      * parameter.
      */
-    private void makePingPongThreads(String syncMechanism,
-                                     PingPongThread[] pingPongThreads) {
-        if (syncMechanism.equals("SEMA")) {
+    private List<PingPongThread> makePingPongThreads(String syncMechanism) {
+        // Create an array of PingPongThreads.
+        PingPongThread[] pingPongThreads =
+            new PingPongThread[MAX_PING_PONG_THREADS];
+
+        switch (syncMechanism) {
+        case "SEMA": {
             // Create the Java Semaphores that ensure threads print
             // "ping" and "pong" in the correct alternating order.
             Semaphore pingSema =
                 new Semaphore(1); // Starts out unlocked.
-            Semaphore pongSema =
-                new Semaphore(0);
 
-            pingPongThreads[PING_THREAD] = 
+            Semaphore pongSema =
+                new Semaphore(0); // Starts out locked.
+
+            pingPongThreads[PING_THREAD] =
                 new PingPongThreadSema("ping",
                                        pingSema,
                                        pongSema,
                                        mMaxIterations);
+
             pingPongThreads[PONG_THREAD] =
                 new PingPongThreadSema("pong",
                                        pongSema,
                                        pingSema,
                                        mMaxIterations);
-        } else if (syncMechanism.equals("MONOBJ")) {
+            break;
+        }
+        case "MONOBJ": {
             // Create the BinarySemaphores (implemented as Java
             // build-in monitor objects) that ensure threads print
             // "ping" and "pong" in the correct alternating order.
             PingPongThreadMonObj.BinarySemaphore pingSema =
-                new PingPongThreadMonObj.BinarySemaphore(true); // Start out unlocked.
-            PingPongThreadMonObj.BinarySemaphore pongSema =
-                new PingPongThreadMonObj.BinarySemaphore(false);
+                new PingPongThreadMonObj
+                .BinarySemaphore(true); // Starts out unlocked.
+
+            PingPongThreadMonObj.BinarySemaphore pongSema = 
+                new PingPongThreadMonObj
+                .BinarySemaphore(false); // Starts out locked.
 
             pingPongThreads[PING_THREAD] =
                 new PingPongThreadMonObj("ping",
                                          pingSema,
                                          pongSema,
                                          mMaxIterations);
+
             pingPongThreads[PONG_THREAD] =
                 new PingPongThreadMonObj("pong",
                                          pongSema,
                                          pingSema,
                                          mMaxIterations);
-        } else if (syncMechanism.equals("COND")) {
+            break;
+        }
+        case "COND":
             // Create the ReentrantLock and Conditions that ensure
             // threads print "ping" and "pong" in the correct
             // alternating order.
@@ -142,7 +157,7 @@ public class PlayPingPong implements Runnable {
                                        pongCond,
                                        true,
                                        mMaxIterations);
-            PingPongThreadCond pongThread = 
+            PingPongThreadCond pongThread =
                 new PingPongThreadCond("pong",
                                        lock,
                                        pongCond,
@@ -156,14 +171,17 @@ public class PlayPingPong implements Runnable {
             pingPongThreads[PING_THREAD] = pingThread;
             pingPongThreads[PONG_THREAD] = pongThread;
 
-        } else if (syncMechanism.equals("QUEUE")) {
+            break;
+        case "QUEUE":
             // Create the LinkedBlockingQueues that ensure threads
             // print "ping" and "pong" in the correct alternating
             // order.
             LinkedBlockingQueue<Object> pingQueue =
                 new LinkedBlockingQueue<Object>();
+
             LinkedBlockingQueue<Object> pongQueue =
                 new LinkedBlockingQueue<Object>();
+
             Object pingPongBall = new Object();
 
             try {
@@ -179,11 +197,16 @@ public class PlayPingPong implements Runnable {
                                                 pingQueue,
                                                 pongQueue,
                                                 mMaxIterations);
-            pingPongThreads[PONG_THREAD] = 
+
+            pingPongThreads[PONG_THREAD] =
                 new PingPongThreadBlockingQueue("pong",
                                                 pongQueue,
                                                 pingQueue,
                                                 mMaxIterations);
+            break;
         }
+
+        // Return the initialized threads as a list.
+        return Arrays.asList(pingPongThreads);
     }
 }

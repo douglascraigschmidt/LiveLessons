@@ -1,4 +1,4 @@
-package example.pingpong;
+package example.pingpong.platform;
 
 import java.util.HashMap;
 

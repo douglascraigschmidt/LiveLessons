@@ -1,35 +1,36 @@
-package example.pingpong;
+package example.pingpong.synchronizers;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import example.pingpong.threads.PingPongThread;
+
 /**
- * @class PingPongThreadBlockingQueue
- * 
- * @brief This class uses blocking queues to implement the acquire()
- *        and release() hook methods that synchronize the ping/pong
- *        algorithm. It plays the role of the "Concrete Class" in the
- *        Template Method pattern.
+ * This class uses blocking queues to implement the acquire() and
+ * release() hook methods that synchronize the ping/pong algorithm. It
+ * plays the role of the "Concrete Class" in the Template Method
+ * pattern.
  */
-public class PingPongThreadBlockingQueue extends PingPongThread {
+public class PingPongThreadBlockingQueue 
+       extends PingPongThread {
     /**
-     * These queues handle synchronization between our thread and
-     * the other Thread.  We exploit the blocking features of the
-     * queues, calling take() on the other thread's empty queue to
-     * simulate conditional waiting and calling put() on our
-     * thread to simulate notifying a waiter.
+     * These queues handle synchronization between our thread and the
+     * other Thread.  We exploit the blocking features of the queues,
+     * calling take() on the other thread's empty queue to simulate
+     * conditional waiting and calling put() on our thread to simulate
+     * notifying a waiter.
      */
     private final LinkedBlockingQueue<Object> mMine;
     private final LinkedBlockingQueue<Object> mOther;
 
     /**
-     * This "ball" is used to pass control between two Threads,
-     * which avoids having to allocate memory dynamically each
-     * time control is passed.
+     * This "ball" is used to pass control between two Threads, which
+     * avoids having to allocate memory dynamically each time control
+     * is passed.
      */
     private Object mPingPongBall = null;
 
     /**
-     * Constructor initializes the various fields.
+     * Constructor initializes the fields.
      */
     public PingPongThreadBlockingQueue(String stringToPrint,
                                        LinkedBlockingQueue<Object> mine,

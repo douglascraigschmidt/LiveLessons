@@ -1,5 +1,10 @@
 package example.pingpong;
 
+import example.pingpong.platform.PlatformStrategy;
+import example.pingpong.platform.PlatformStrategyFactory;
+import example.pingpong.threads.PlayPingPong;
+import example.pingpong.utils.Options;
+
 /**
  * @class MainConsole
  *

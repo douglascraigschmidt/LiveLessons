@@ -1,20 +1,18 @@
-package example.pingpong;
+package example.pingpong.synchronizers;
+
+import example.pingpong.threads.PingPongThread;
 
 /**
- * @class PingPongThreadMonObj
- * 
- * @brief This class uses Binary Semaphores (implemented as Java
- *        built-in monitor objects) to implement the acquire() and
- *        release() hook methods that synchronize the ping/pong
- *        algorithm. It plays the role of the "Concrete Class" in the
- *        Template Method pattern.
+ * This class uses Binary Semaphores (implemented as Java built-in
+ * monitor objects) to implement the acquire() and release() hook
+ * methods that synchronize the ping/pong algorithm. It plays the role
+ * of the "Concrete Class" in the Template Method pattern.
  */
-class PingPongThreadMonObj extends PingPongThread {
+public class PingPongThreadMonObj 
+       extends PingPongThread {
     /**
-     * @class BinarySemaphore
-     * 
-     * @brief This class uses Java built-in monitor objects to
-     *        implement a simple binary semaphore.
+     * This class uses Java built-in monitor objects to implement a
+     * simple binary semaphore.
      */
     static public class BinarySemaphore {
         /**
@@ -66,6 +64,9 @@ class PingPongThreadMonObj extends PingPongThread {
     private final BinarySemaphore mMine;
     private final BinarySemaphore mOther;
 
+    /**
+     * Constructor initializes the fields.
+     */
     public PingPongThreadMonObj(String stringToPrint,
                                 BinarySemaphore mine,
                                 BinarySemaphore other,
@@ -81,7 +82,6 @@ class PingPongThreadMonObj extends PingPongThread {
     @Override
     protected void acquire() {
         // Block until we acquire the semaphore.
-
         mMine.acquire();
     }
 
@@ -91,7 +91,6 @@ class PingPongThreadMonObj extends PingPongThread {
     @Override
     protected void release() {
         // Release the other semaphore.
-
         mOther.release();
     }
 }

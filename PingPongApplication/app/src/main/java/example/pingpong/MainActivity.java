@@ -13,15 +13,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import example.pingpong.platform.PlatformStrategy;
+import example.pingpong.platform.PlatformStrategyFactory;
+import example.pingpong.threads.PlayPingPong;
+import example.pingpong.utils.Options;
+
 /**
- * @class MainActivity
- * 
- * @brief Main Activity for the Android version of the PingPong
- *        application.
+ * Main Activity for the Android version of the PingPong app.
  */
 public class MainActivity extends Activity {
     /** 
-     * A plain TextView that PingPong will be "played" upon. 
+     * A plain TextView that PingPong will be "played" upon.
      */
     private TextView mPingPongTextViewLog;
 
@@ -82,7 +84,7 @@ public class MainActivity extends Activity {
         switch(mProgramState) {
         case RUN:
             // Create and start a background thread that uses the
-            // Android HaMeR concurrency frmaework to run calls to
+            // Android HaMeR concurrency framework to run calls to
             // print() and done() on the UI Thread after a short
             // delay.
             mDelayedOutputThread = new DelayedOutputThread();
@@ -90,7 +92,7 @@ public class MainActivity extends Activity {
         	
             // Use a factory method to create the appropriate type of
             // OutputStrategy.
-            PlayPingPong pingPong = 
+            PlayPingPong pingPong =
                 new PlayPingPong(Options.instance().maxIterations(),
                                  Options.instance().syncMechanism());
 

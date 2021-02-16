@@ -1,9 +1,11 @@
-package example.pingpong;
+package example.pingpong.platform;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
 
 import android.util.Log;
+
+import example.pingpong.MainActivity;
 
 /**
  * @class PlatformStrategyAndroid

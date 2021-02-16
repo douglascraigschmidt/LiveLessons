@@ -1,14 +1,14 @@
-package example.pingpong;
+package example.pingpong.threads;
+
+import example.pingpong.platform.PlatformStrategy;
 
 /**
- * @Brief PingPongThread
- *
- * @class This class implements the core ping/pong algorithm, but
- *        defers the synchronization aspects to subclasses. It plays
- *        the role of the "Abstract Class" in the Template Method
- *        pattern.
+ * This class implements the core ping/pong algorithm, but defers the
+ * synchronization aspects to subclasses. It plays the role of the
+ * "Abstract Class" in the Template Method pattern.
  */
-abstract class PingPongThread extends Thread {
+public abstract class PingPongThread 
+       extends Thread {
     /**
      * Number of iterations to ping/pong.
      */
@@ -48,7 +48,7 @@ abstract class PingPongThread extends Thread {
             // release() hook methods that control the scheduling of
             // the threads are deferred to subclasses.
             acquire();
-            PlatformStrategy.instance().print(mStringToPrint 
+            PlatformStrategy.instance().print(mStringToPrint
                                     + "(" 
                                     + loopsDone 
                                     + ")");
