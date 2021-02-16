@@ -2,8 +2,7 @@ import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import microservices.AirportList.AirportListProxySync;
-import tests.COOPTests;
-import tests.ReactorTests;
+import clients.ReactorTests;
 import utils.Options;
 import utils.RunTimer;
 

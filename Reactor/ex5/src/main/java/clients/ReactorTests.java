@@ -1,4 +1,4 @@
-package tests;
+package clients;
 
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
