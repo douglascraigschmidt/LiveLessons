@@ -1,5 +1,6 @@
 package example.pingpong.synchronizers;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import example.pingpong.threads.PingPongThread;
@@ -19,8 +20,8 @@ public class PingPongThreadBlockingQueue
      * conditional waiting and calling put() on our thread to simulate
      * notifying a waiter.
      */
-    private final LinkedBlockingQueue<Object> mMine;
-    private final LinkedBlockingQueue<Object> mOther;
+    private final BlockingQueue<Object> mMine;
+    private final BlockingQueue<Object> mOther;
 
     /**
      * This "ball" is used to pass control between two Threads, which
@@ -33,8 +34,8 @@ public class PingPongThreadBlockingQueue
      * Constructor initializes the fields.
      */
     public PingPongThreadBlockingQueue(String stringToPrint,
-                                       LinkedBlockingQueue<Object> mine,
-                                       LinkedBlockingQueue<Object> other,
+                                       BlockingQueue<Object> mine,
+                                       BlockingQueue<Object> other,
                                        int maxIterations) {
         super(stringToPrint, maxIterations);
         mMine = mine;

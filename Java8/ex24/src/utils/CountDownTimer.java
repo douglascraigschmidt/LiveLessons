@@ -104,6 +104,7 @@ public abstract class CountDownTimer {
     public final void cancel() {
         mLock.lock();
         try {
+            // Shared mutable state.
             mCancelled = true;
 
             // Shutdown the ScheduledExecutorService immediately.

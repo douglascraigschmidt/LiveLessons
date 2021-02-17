@@ -177,10 +177,10 @@ public class PlayPingPong
             // print "ping" and "pong" in the correct alternating
             // order.
             LinkedBlockingQueue<Object> pingQueue =
-                new LinkedBlockingQueue<Object>();
+                new LinkedBlockingQueue<>();
 
             LinkedBlockingQueue<Object> pongQueue =
-                new LinkedBlockingQueue<Object>();
+                new LinkedBlockingQueue<>();
 
             Object pingPongBall = new Object();
 
