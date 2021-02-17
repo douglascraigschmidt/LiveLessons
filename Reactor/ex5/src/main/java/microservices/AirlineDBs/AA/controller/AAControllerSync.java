@@ -64,6 +64,9 @@ public class AAControllerSync {
      *         date and flight leg
      */
     @PostMapping("/_getTripPrices")
+    // @@ Monte, this is the method that I'd like to be connected to 
+    // the persistent JPA objects.  Right now, it reads from an
+    // in-memory list, but it should read from a database!
     private List<TripResponse> getTripPrices(@RequestBody TripRequest tripRequest) {
         return mTrips
             // Convert the list of TripResponse objects into a stream.

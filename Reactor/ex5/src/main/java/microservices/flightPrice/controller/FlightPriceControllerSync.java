@@ -115,6 +115,8 @@ public class FlightPriceControllerSync {
             .parallelStream()
 
             .map(tuple -> tuple.mProxy
+                 // @@ Monte, I would like this call to be implemented
+                 // by the JPA mechanism!
                  .findTrips(tripRequest))
 
             .flatMap(List::stream)
