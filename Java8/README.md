@@ -125,9 +125,13 @@ Here's an overview of what's current included in these examples:
          impede parallelism.
 
 . ex24 - This example shows the difference between a reentrant lock
-         (e.g., Java ReentrantLock) and a non-reentrant lock (e.g.,
-         StampedLock) when used in a framework that allows callbacks
-         when a lock protecting state in the framework is held.
+         (e.g., Java ReentrantLock) and a non-reentrant lock (e.g., a
+         spin-lock implemented using Java VarHandle features) when
+         applied in a framework that allows callbacks where the
+         framework holds a lock protecting internal framework state.
+         As you'll see when you run this program, the reentrant lock
+         supports this use-case nicely, whereas the non-reentrant lock
+         incurs "self-deadlock."
 
 . ex25 - This example shows various ways to implement and apply
          synchronous and asynchronous memoizers using Java

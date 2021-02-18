@@ -1,5 +1,5 @@
 import utils.CountDownTimer;
-import utils.NonReentrantLock;
+import utils.NonReentrantSpinLock;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -11,12 +11,12 @@ import java.util.concurrent.locks.StampedLock;
 
 /**
  * This example shows the difference between a reentrant lock (e.g.,
- * Java ReentrantLock) and a non-reentrant lock (e.g., Java
- * StampedLock) when applied in a framework that allows callbacks
- * where the framework holds a lock protecting internal framework state.
- * As you'll see when you run this program, the reentrant lock supports
- * this use-case nicely, whereas the non-reentrant lock incurs
- * "self-deadlock."
+ * Java ReentrantLock) and a non-reentrant lock (e.g., a spin-lock
+ * implemented using Java VarHandle features) when applied in a
+ * framework that allows callbacks where the framework holds a lock
+ * protecting internal framework state.  As you'll see when you run
+ * this program, the reentrant lock supports this use-case nicely,
+ * whereas the non-reentrant lock incurs "self-deadlock."
  */
 public class ex24 {
     /**
@@ -36,11 +36,11 @@ public class ex24 {
                 1000,
                 "ReentrantLock");
 
-        // Run the test using the NonReentrantLock.
-        runTest(new NonReentrantLock(),
+        // Run the test using the NonReentrantSpinLock.
+        runTest(new NonReentrantSpinLock(),
                 10000,
                 1000,
-                "NonReentrantLock");
+                "NonReentrantSpinLock");
     }
 
     /**
@@ -54,7 +54,7 @@ public class ex24 {
      * @param countDownInterval The interval along the way to receive
      *                          {@code onTick(long)} callbacks.
      * @param lockName The name of the lock (e.g., ReentrantLock
-     *                vs. NonReentrantLock)
+     *                vs. NonReentrantSpinLock)
      */
     private static void runTest(Lock lock,
                                 long millisInFuture,
