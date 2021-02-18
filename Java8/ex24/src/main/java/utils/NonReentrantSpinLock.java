@@ -59,15 +59,12 @@ public class NonReentrantSpinLock
         // should also check if a shutdown has been requested and if
         // so throw a cancellation exception.
 
-        for (; ;) {
-            // Only try to get the lock if its null, which improves
-            // cache performance.  See the stackoverflow article at
-            // http://15418.courses.cs.cmu.edu/spring2013/article/31
-            // and stackoverflow.com/a/4939383/13411862 for details.
-            if (value == 0 && tryLock()) 
-                // Break out of the loop if we got the lock.
-                break;
-        }
+        // Only try to get the lock if its null, which improves
+        // cache performance.  See the stackoverflow article at
+        // http://15418.courses.cs.cmu.edu/spring2013/article/31
+        // and stackoverflow.com/a/4939383/13411862 for details.
+        while (!(mOwner.get() == null && tryLock())) 
+            continue;
     }
 
     /**
