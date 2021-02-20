@@ -1,8 +1,6 @@
 package microservices.AirportList.controller;
 
 import datamodels.AirportInfo;
-import datamodels.CurrencyConversion;
-import datamodels.TripRequest;
 import org.springframework.web.bind.annotation.*;
 import utils.DataFactory;
 
@@ -57,12 +55,7 @@ public class AirportListControllerSync {
      *         date and flight leg
      */
     @GetMapping("/_getAirportList")
-    private List<AirportInfo> getAirportInfo(CurrencyConversion cc /*,
-                                             TripRequest tr */) {
-        
-        System.out.println("CurrencyConversion = " + cc.toString());
-        // System.out.println("TripRequest = " + tr.toString());
-
+    private List<AirportInfo> getAirportInfo() {
         // Return the airport list.
         return mAirportList;
     }

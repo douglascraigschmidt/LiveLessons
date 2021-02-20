@@ -1,8 +1,6 @@
 package microservices.AirportList;
 
 import datamodels.AirportInfo;
-import datamodels.CurrencyConversion;
-import datamodels.TripRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,18 +38,11 @@ public class AirportListProxySync
      * @return A List that contains {@code AirportInfo} objects
      */
     public List<AirportInfo> findAirportInfo() {
-        CurrencyConversion currencyConversion =
-            new CurrencyConversion("JFK", "BNA", 1.0);
-        TripRequest tripRequest =
-            new TripRequest();
-
         // Send a GET request to the URI template and return the
         // response as an Http ResponseEntity.
         ResponseEntity<AirportInfo[]> responseEntity = mRestTemplate
             .getForEntity(mSERVER_BASE_URL + mFindAirportListsURISync,
-                          AirportInfo[].class,
-                          currencyConversion /*,
-                          tripRequest */);
+                          AirportInfo[].class);
 
         // Convert the ResponseEntity to a List of AirportInfo objects
         // and return it.

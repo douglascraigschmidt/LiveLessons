@@ -70,8 +70,8 @@ public class ex5 {
             .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
                                                       mCurrencyConversion),
                      "runReactorAsyncTests");
-        /*
 
+        /*
         RunTimer
             // This test uses RxJava to invoke microservices that
             // asynchronously determine the best price for a flight

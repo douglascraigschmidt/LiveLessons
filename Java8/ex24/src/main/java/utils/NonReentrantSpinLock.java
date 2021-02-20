@@ -10,7 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class emulates a "compare and swap"-style spin-lock with
- * non-recursive semantics using Java VarHandle.
+ * non-recursive semantics using the Java VarHandle class.
  */
 public class NonReentrantSpinLock
        implements Lock {

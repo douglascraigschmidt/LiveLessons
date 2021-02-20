@@ -8,7 +8,7 @@ import static utils.ReactorUtils.randomDelay;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET requests via reactive programming.  These requests
+ * handle HTTP POST requests via reactive programming.  These requests
  * are mapped to method(s) that convert between US dollars and other
  * currencies asynchronously.
  *
@@ -20,10 +20,10 @@ import static utils.ReactorUtils.randomDelay;
  * PUT, and DELETE calls, respectively.  These components are
  * identified by the @RestController annotation below.
  *
- * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
+ * WebFlux uses the {@code @PostMapping} annotation to map HTTP POST
  * requests onto methods in the {@code ExchangeRateControllerAsync}.
- * GET requests invoked from any HTTP web client (e.g., a web browser)
- * or command-line utility (e.g., Curl or Postman).
+ * POST requests invoked from any HTTP web client (e.g., a web
+ * browser) or command-line utility (e.g., Curl or Postman).
  */
 @RestController
 @RequestMapping("/microservices/exchangeRateAsync")
@@ -33,25 +33,20 @@ public class ExchangeRateControllerAsync {
      * rate between a source and destination currency format
      * asynchronously.
      *
-     * WebFlux maps HTTP GET requests sent to the /_exchangeRate
+     * WebFlux maps HTTP POST requests sent to the /_exchangeRate
      * endpoint to this method.
      *
      * @param currencyConversion Indicates the currency to convert
      *        from and to  
      * @return A Mono that emits the current exchange rate.
      */
-    @GetMapping("_queryForExchangeRate")
-    private Mono<Double> queryForExchangeRate(CurrencyConversion currencyConversion) {
+    @PostMapping("_queryForExchangeRate")
+    private Mono<Double> queryForExchangeRate(@RequestBody CurrencyConversion currencyConversion) {
         // Delay for a random amount of time.
         randomDelay();
 
         // Debugging print.
-        /*
-        print("Rate comparision between " 
-              + sAndD[0]
-              + " and "
-              + sAndD[1]);
-        */
+        System.out.println(currencyConversion.toString());
 
         // Simply return a constant.
         return Mono.just(1.20);

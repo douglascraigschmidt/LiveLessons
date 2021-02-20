@@ -50,19 +50,21 @@ public class ExchangeRateProxyAsync
      */
     public Mono<Double> queryForExchangeRate(Scheduler scheduler,
                                              CurrencyConversion currencyConversion) {
-        System.out.println(currencyConversion.toString());
         // Return a mono to the exchange rate.
         return Mono
             .fromCallable(() -> mExchangeRate
-                          // Create an HTTP POST request.
-                          .post()
+                          // Create an HTTP GET request.
+                          .get()
 
-                          // Add the uri to the baseUrl.
-                          .uri(mQueryExchangeRateURIAsync)
-
-                          // Encode the currencyConversion in the body
-                          // of the request.
-                          .bodyValue(currencyConversion)
+                          // Update the uri and add it to the baseUrl.
+                          .uri(UriComponentsBuilder
+                               .fromPath(mQueryExchangeRateURIAsync)
+                               // Insert the currencyConversion into
+                               // the URL.
+                               .queryParam("currencyConversion", 
+                                           currencyConversion)
+                               .build()
+                               .toString())
 
                           // Retrieve the response.
                           .retrieve()

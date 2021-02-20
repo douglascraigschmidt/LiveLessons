@@ -32,9 +32,9 @@ public class CurrencyConversion {
     /** 
      * This constructor initializes the fields.
      */
-    public CurrencyConversion(String from,
-                              String to,
-                              Double defaultExchangeRate) {
+    CurrencyConversion(String from,
+                       String to,
+                       Double defaultExchangeRate) {
         this.from = from;
         this.to = to;
         this.exchangeRate = defaultExchangeRate;
@@ -82,14 +82,6 @@ public class CurrencyConversion {
      */
     public void setExchangeRate(Double exchangeRate) {
         this.exchangeRate = exchangeRate;
-    }
-
-    /**
-     * Return a formatted String containing the conversion info.
-     */
-    @Override
-    public String toString() {
-        return "to = " + this.to + ", from = " + this.from + ", rate = " + this.exchangeRate;
     }
 
     /**

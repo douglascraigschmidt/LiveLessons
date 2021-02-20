@@ -1,19 +1,18 @@
 package microservices.AirportList.controller;
 
 import datamodels.AirportInfo;
-import datamodels.CurrencyConversion;
-import datamodels.TripRequest;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import utils.DataFactory;
 
 import java.util.List;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET requests via object-oriented programming.  These
- * GET requests are mapped to methods that return information about
- * all the airports (e.g., the three-letter airport code and airport
- * name) synchronously.
+ * handle HTTP GET requests via asynchronous reactive programming.
+ * These GET requests are mapped to methods that return information
+ * about all the airports (e.g., the three-letter airport code and
+ * airport name) asynchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -24,13 +23,13 @@ import java.util.List;
  * identified by the @RestController annotation below.
  *
  * WebFlux uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@code FlightPriceControllerSync}.
- * GET requests invoked from any HTTP web client (e.g., a web browser)
- * or command-line utility (e.g., Curl or Postman).
+ * requests onto methods in the {@code FlightPriceController}.  GET
+ * requests invoked from any HTTP web client (e.g., a web browser) or
+ * command-line utility (e.g., Curl or Postman).
  */
 @RestController
-@RequestMapping("/microservices/AirportListSync")
-public class AirportListControllerSync {
+@RequestMapping("/microservices/AirportListAsync")
+public class AirportListControllerAsync {
     /**
      * The list of AirportInfo objects.
      */
@@ -39,7 +38,7 @@ public class AirportListControllerSync {
     /**
      * Constructor initializes the field.
      */
-    AirportListControllerSync() {
+    AirportListControllerAsync() {
         mAirportList = DataFactory
             // Initialize the list of AirportInfo objects from the
             // AirportList.txt file.
@@ -48,22 +47,18 @@ public class AirportListControllerSync {
 
     /**
      * This method finds information about all the airports
-     * synchronously.
+     * asynchronously.
      *
      * WebFlux maps HTTP GET requests sent to the /_getAirportList
      * endpoint to this method.
      *
-     * @return A List that contains all the trips for the given departure
-     *         date and flight leg
+     * @return A Flux that emits all {@code AirportInfo} objects
      */
     @GetMapping("/_getAirportList")
-    private List<AirportInfo> getAirportInfo(CurrencyConversion cc /*,
-                                             TripRequest tr */) {
-        
-        System.out.println("CurrencyConversion = " + cc.toString());
-        // System.out.println("TripRequest = " + tr.toString());
-
-        // Return the airport list.
-        return mAirportList;
+    private Flux<AirportInfo> getAirportInfoAsync() {
+        return Flux
+            // Convert the list of AirportInfo objects into a Flux
+            // stream.
+            .fromIterable(mAirportList);
     }
 }

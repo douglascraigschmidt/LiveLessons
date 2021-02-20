@@ -47,12 +47,12 @@ public class ExchangeRateProxySync
      * @return A Double containing the exchange rate.
      */
     public Double queryForExchangeRate(CurrencyConversion currencyConversion) {
-        // POST the given Double to the URI template and return the
+        // GET the given Double to the URI template and return the
         // response as an Http ResponseEntity.
         ResponseEntity<Double> responseEntity = mRestTemplate
-            .postForEntity(mSERVER_BASE_URL + mQueryExchangeRateURISync,
-                           currencyConversion,
-                           Double.class);
+            .getForEntity(mSERVER_BASE_URL + mQueryExchangeRateURISync,
+                          Double.class,
+                          currencyConversion);
 
         // Convert the ResponseEntity to a Double and return it.
         return Objects.requireNonNull(responseEntity.getBody());
