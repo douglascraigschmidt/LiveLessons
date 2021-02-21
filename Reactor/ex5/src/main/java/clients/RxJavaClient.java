@@ -37,7 +37,7 @@ public class RxJavaClient {
      */
     public static void runAsyncTestsRx(TripRequest trip,
                                        CurrencyConversion currencyConversion) {
-        System.out.println("begin runAsyncTestsRx()");
+        System.out.println("begin running the RxJava client");
 
         // Iterate multiple times.
         for (int i = 0; i < Options.instance().maxIterations(); i++) {
@@ -63,7 +63,7 @@ public class RxJavaClient {
             // computations to complete running asynchronously.
             .blockingGet();
 
-        System.out.println("end runAsyncTestsRx()");
+        System.out.println("end running the RxJava client");
     }
 
     /**

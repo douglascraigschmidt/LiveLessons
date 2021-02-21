@@ -29,7 +29,7 @@ public class COOPClient {
      */
     public static void runSyncTests(TripRequest trip,
                                     CurrencyConversion currencyConversion) {
-        System.out.println("begin runSyncTests()");
+        System.out.println("begin running the OO sync client");
 
         // Iterate multiple times.
         for (int i = 0; i < Options.instance().maxIterations(); i++) {
@@ -44,7 +44,7 @@ public class COOPClient {
                               currencyConversion);
         }
 
-        System.out.println("end runSyncTests()");
+        System.out.println("end running the OO sync client");
     }
 
     /**

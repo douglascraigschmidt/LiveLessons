@@ -29,8 +29,8 @@ public class ExchangeRateControllerRSocket {
      * rate between a source and destination currency format
      * asynchronously.
      *
-     * WebFlux maps RSocket requests sent to the
-     * /_queryForExchangeRate endpoint to this method.
+     * WebFlux maps RSocket requests sent to the _queryForExchangeRate
+     * endpoint to this method.
      *
      * @param currencyConversionM A Mono that emits the currency to
      *        convert from and to

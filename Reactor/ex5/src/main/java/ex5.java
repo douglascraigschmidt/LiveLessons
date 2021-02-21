@@ -1,4 +1,5 @@
 import clients.COOPClient;
+import clients.RSocketClient;
 import clients.ReactorClient;
 import clients.RxJavaClient;
 import datamodels.CurrencyConversion;
@@ -61,6 +62,7 @@ public class ex5 {
             .findAirportInfo()
             .forEach(System.out::println); */
 
+        /*
         RunTimer
                 // This test uses Java concurrent object-oriented
                 // programming frameworks to invoke microservices that
@@ -85,6 +87,16 @@ public class ex5 {
                 .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
                         mCurrencyConversion),
                         "runReactorAsyncTests");
+        */
+
+        RunTimer
+                // This test uses the Spring RSocket and WebFlux
+                // programming frameworks to invoke microservices that
+                // synchronously determine the best price for a flight
+                // from London to New York city in British pounds.
+                .timeRun(() -> RSocketClient.runAsyncTests(mTrip,
+                        mCurrencyConversion),
+                        "runRSocketAsyncTests");
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());

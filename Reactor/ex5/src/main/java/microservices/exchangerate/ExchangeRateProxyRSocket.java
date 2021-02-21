@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the asynchronous ExchangeRate
- * microservice that returns the current exchange that converts one
- * currency to another.
+ * microservice that uses the RSocket framework to return the current
+ * exchange rate for converting one currency to another.
  */
 public class ExchangeRateProxyRSocket {
     /**

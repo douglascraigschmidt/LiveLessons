@@ -14,8 +14,8 @@ import java.util.Objects;
 
 /**
  * This class serves as a proxy to the synchronous APIGateway
- * microservice that returns the current exchange that converts one
- * currency to another.
+ * microservice that uses Spring MVC to access all the backend
+ * microservices.
  */
 public class APIGatewayProxySync
        extends APIGatewayProxyBase {

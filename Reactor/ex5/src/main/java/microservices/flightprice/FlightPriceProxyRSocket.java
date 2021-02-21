@@ -18,7 +18,8 @@ import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the asynchronous FlightPrice
- * microservice.
+ * microservice that uses the RSocket framework to return flight price
+ * information.
  */
 public class FlightPriceProxyRSocket {
     /**

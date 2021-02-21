@@ -37,7 +37,7 @@ public class FlightPriceControllerRSocket {
      * This method finds the best price in US dollars for a given
      * {@code tripRequest} request.
      *
-     * WebFlux maps RSocket requests sent to the /_findBestPrice
+     * WebFlux maps RSocket requests sent to the _findBestPrice
      * endpoint to this method.
      *
      * @param tripRequestM A Mono that emits information about the
@@ -103,8 +103,8 @@ public class FlightPriceControllerRSocket {
      * This method finds all matching responses a given {@code
      * tripRequest} request.
      *
-     * WebFlux maps RSocket requests sent to the /_findFlight
-     * endpoint to this method.
+     * WebFlux maps RSocket requests sent to the _findFlight endpoint
+     * to this method.
      *
      * @param tripRequestM A Mono that emits information about the
      *                     trip, e.g., departure date and

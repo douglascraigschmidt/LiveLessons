@@ -3,7 +3,7 @@ package clients;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.apigateway.APIGatewayProxyAsync;
+import microservices.apigateway.APIGatewayProxyRSocket;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.AsyncTaskBarrier;
@@ -12,17 +12,18 @@ import utils.Options;
 import java.util.function.Function;
 
 /**
- * A Java utility class containing a client that uses Project Reactor
- * and WebFlux to asynchronously invoke microservices that provide
- * various flight-related services for the Airline Booking App (ABA).
+ * A Java utility class containing a client that uses Project Reactor,
+ * WebFlux, and RSocket to asynchronously invoke microservices that
+ * provide various flight-related services for the Airline Booking App
+ * (ABA).
  */
-public class ReactorClient {
+public class RSocketClient {
     /**
      * A proxy that's used to communicate with the APIGateway
      * microservice asynchronously.
      */
-    private static final APIGatewayProxyAsync sAPIGatewayProxyAsync =
-            new APIGatewayProxyAsync();
+    private static final APIGatewayProxyRSocket sAPIGatewayProxyRSocket =
+            new APIGatewayProxyRSocket();
 
     /**
      * This test invokes microservices to asynchronously determine the
@@ -31,7 +32,7 @@ public class ReactorClient {
      */
     public static void runAsyncTests(TripRequest trip,
                                      CurrencyConversion currencyConversion) {
-        System.out.println("begin running the Reactor client");
+        System.out.println("begin running the RSocket client");
 
         // Iterate multiple times.
         for (int i = 0; i < Options.instance().maxIterations(); i++) {
@@ -58,7 +59,7 @@ public class ReactorClient {
             // computations to complete running asynchronously.
             .block();
 
-        System.out.println("end running the Reactor client");
+        System.out.println("end running the RSocket client");
     }
 
     /**
@@ -82,7 +83,7 @@ public class ReactorClient {
             return Mono.just(new TripResponse());
         };
 
-        return sAPIGatewayProxyAsync
+        return sAPIGatewayProxyRSocket
             // Asynchronously find the best price for the tripRequest.
             .findBestPrice(Schedulers.parallel(),
                            tripRequest,
@@ -129,7 +130,7 @@ public class ReactorClient {
             return Mono.just(new TripResponse());
         };
 
-        return sAPIGatewayProxyAsync
+        return sAPIGatewayProxyRSocket
             // Asynchronously find all the flights in the tripRequest.
             .findFlights(Schedulers.parallel(),
                          tripRequest,

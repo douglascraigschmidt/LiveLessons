@@ -6,19 +6,25 @@ import datamodels.TripRequest;
 import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.cbor.Jackson2CborDecoder;
+import org.springframework.http.codec.cbor.Jackson2CborEncoder;
+import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
  * This class serves as a proxy to the asynchronous APIGateway
- * microservice that uses the WebFlux and Project Reactor frameworks
- * to access all the backend microservices.
+ * microservice that uses the RSocket framework to access all the
+ * backend microservices.
  */
-public class APIGatewayProxyAsync
-       extends APIGatewayProxyBase {
+public class APIGatewayProxyRSocket {
     /**
      * The URI that denotes a remote method to find information about
      * all the airports asynchronously.
@@ -27,25 +33,35 @@ public class APIGatewayProxyAsync
         "/microservices/APIGatewayAsync/_getAirportList";
 
     /**
-     * The URI that denotes a remote method to find the best flight
-     * price asynchronously.
+     * The message name that denotes a remote method to find the best
+     * flight price asynchronously.
      */
-    private final String mFindBestPriceURIAsync =
-        "/microservices/APIGatewayAsync/_findBestPrice";
+    private final String mFindBestPriceMessage =
+        "_findBestPrice";
 
     /**
-     * The URI that denotes a remote method to find all flights
-     * asynchronously.
+     * The message name that denotes a remote method to find all
+     * flights asynchronously.
      */
-    private final String mFindFlightsURIAsync =
-        "/microservices/APIGatewayAsync/_findFlights";
+    private final String mFindFlightsMessage =
+        "_findFlights";
 
     /**
-     * Constructor initializes the super class.
+     * Initialize the RSocketRequestor.
      */
-    public APIGatewayProxyAsync() {
-        super();
-    }
+    private final Mono<RSocketRequester> rSocketRequester = Mono
+        .just(RSocketRequester.builder()
+              .rsocketConnector(rSocketConnector -> rSocketConnector
+                                .reconnect(Retry.fixedDelay(2,
+                                                            Duration.ofSeconds(2))))
+              .dataMimeType(MediaType.APPLICATION_CBOR)
+              .rsocketStrategies(RSocketStrategies.builder()
+                                 .encoders(encoders ->
+                                           encoders.add(new Jackson2CborEncoder()))
+                                 .decoders(decoders ->
+                                           decoders.add(new Jackson2CborDecoder()))
+                                 .build())
+              .tcp("localhost", 8089));
 
     /**
      * Returns a Flux that emits {@code AirportInfo} objects.
@@ -54,6 +70,7 @@ public class APIGatewayProxyAsync
      * @return A Flux that emits {@code AirportInfo} objects
      */
     public Flux<AirportInfo> findAirportInfo(Scheduler scheduler) {
+        /*
         return Mono
             // Return a Flux containing the list of airport
             // information.
@@ -76,6 +93,8 @@ public class APIGatewayProxyAsync
 
             // De-nest the result so it's a Flux<AirportInfo>.
             .flatMapMany(Function.identity());
+        */
+        return null;
     }
 
     /**
@@ -111,23 +130,16 @@ public class APIGatewayProxyAsync
 
         // Return a Mono that emits the best priced TripResponse.
         return Mono
-            .fromCallable(() -> mAPIGateway
-                          // Create an HTTP POST request.
-                          .post()
+            .fromCallable(() -> rSocketRequester
+                          // Create the data to send to the server.
+                          .map(r -> r
+                               .route(mFindBestPriceMessage)
+                               .data(flightRequest))
 
-                          // Update the uri and add it to the baseUrl.
-                          .uri(mFindBestPriceURIAsync)
-
-                          // Encode the flightRequest in the body of
-                          // the request.
-                          .bodyValue(flightRequest)
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Mono of TripResponse.
-                          .bodyToMono(TripResponse.class))
-            
+                          // Get the result back from the server as a
+                          // TripResponse.
+                          .flatMap(r -> r.retrieveMono(TripResponse.class)))
+                        
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)
 
@@ -172,22 +184,15 @@ public class APIGatewayProxyAsync
 
         // Return a Flux that emits all flights matching tripRequest.
         return Mono
-            .fromCallable(() -> mAPIGateway
-                          // Create an HTTP POST request.
-                          .post()
+            .fromCallable(() -> rSocketRequester
+                          // Create the data to send to the server.
+                          .map(r -> r
+                               .route(mFindFlightsMessage)
+                               .data(flightRequest))
 
-                          // Update the uri and add it to the baseUrl.
-                          .uri(mFindFlightsURIAsync)
-
-                          // Encode the flightRequest in the body of
-                          // the request.
-                          .bodyValue(flightRequest)
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Flux of TripResponse.
-                          .bodyToFlux(TripResponse.class))
+                          // Get the result back from the server as a
+                          // Flux<TripResponse>.
+                          .flatMapMany(r -> r.retrieveFlux(TripResponse.class)))
 
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)

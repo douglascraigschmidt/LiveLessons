@@ -5,7 +5,11 @@ import datamodels.TripResponse;
 import microservices.airports.AirportListProxyAsync;
 import microservices.apigateway.FlightRequest;
 import microservices.exchangerate.ExchangeRateProxyAsync;
+import microservices.exchangerate.ExchangeRateProxyRSocket;
 import microservices.flightprice.FlightPriceProxyAsync;
+import microservices.flightprice.FlightPriceProxyRSocket;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,37 +20,32 @@ import java.time.Duration;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP POST requests via reactive programming.  These requests
+ * handle RSocket requests via reactive programming.  These requests
  * are mapped to method(s) that provide the external entry point into
  * the ABA microservices asynchronously.
  *
- * In Spring's approach to building RESTful web services, HTTP
+ * In Spring's approach to building RSocket services, message
  * requests are handled by a controller that defines the
  * endpoints/routes for each supported operation, i.e.,
- * {@code @GetMapping}, {@code @PostMapping}, {@code @PutMapping} and
- * {@code @DeleteMapping}, which correspond to the HTTP GET, POST,
- * PUT, and DELETE calls, respectively.  These components are
- * identified by the @RestController annotation below.
+ * {@code @MessageMapping}.  These components are
+ * identified by the @Controller annotation below.
  *
- * WebFlux uses the {@code @PostMapping} annotation to map HTTP POST
- * requests onto methods in the {@code APIGatewayAsync}.  POST
- * requests invoked from any HTTP web client (e.g., a web browser) or
- * command-line utility (e.g., Curl or Postman).
+ * WebFlux uses the {@code @MessageMapping} annotation to map RSocket
+ * requests onto methods in the {@code APIGatewayControllerRSocket}.
  */
-@RestController
-@RequestMapping("/microservices/APIGatewayAsync")
-public class APIGatewayControllerAsync {
+@Controller
+public class APIGatewayControllerRSocket {
     /**
-     * An async proxy to the FlightPrice microservice.
+     * An RSocket proxy to the FlightPrice microservice.
      */
-    private final FlightPriceProxyAsync mFlightPriceProxyAsync =
-        new FlightPriceProxyAsync();
+    private final FlightPriceProxyRSocket mFlightPriceProxyRSocket =
+            new FlightPriceProxyRSocket();
 
     /**
-     * An async proxy to the ExchangeRate microservice.
+     * An RSocket proxy to the ExchangeRate microservice.
      */
-    private final ExchangeRateProxyAsync mExchangeRateProxyAsync =
-        new ExchangeRateProxyAsync();
+    private final ExchangeRateProxyRSocket mExchangeRateProxyRSocket =
+        new ExchangeRateProxyRSocket();
 
     /**
      * An async proxy to the AirportList microservice
@@ -72,21 +71,21 @@ public class APIGatewayControllerAsync {
      * Returns the best price for {@code tripRequest} using the given
      * {@code currencyConversion} via asynchronous computations.
      *
-     * WebFlux maps HTTP POST requests sent to the /_findBestPrice
+     * WebFlux maps RSocket requests sent to the _findBestPrice
      * endpoint to this method.
      *
      * @param flightRequest The desired trip and currency to convert from and to
      * @return A Mono that emits the best price for the desired trip
      */
-    @PostMapping("_findBestPrice")
+    @MessageMapping("_findBestPrice")
     public Mono<TripResponse> findBestPrice(@RequestBody FlightRequest flightRequest) {
-        Mono<TripResponse> tripM = mFlightPriceProxyAsync
+        Mono<TripResponse> tripM = mFlightPriceProxyRSocket
             // Asynchronously find the best price in US dollars for
             // the tripRequest.
             .findBestPrice(Schedulers.parallel(),
                            flightRequest.tripRequest);
 
-        Mono<Double> rateM = mExchangeRateProxyAsync
+        Mono<Double> rateM = mExchangeRateProxyRSocket
             // Asynchronously determine the exchange rate.
             .queryForExchangeRate(Schedulers.parallel(),
                                   flightRequest.currencyConversion);
@@ -103,20 +102,20 @@ public class APIGatewayControllerAsync {
      * Returns all flights for {@code tripRequest} using the given
      * {@code currencyConversion} via asynchronous computations/communications.
      *
-     * WebFlux maps HTTP POST requests sent to the /_findFlights
-     * endpoint to this method.
+     * WebFlux maps RSocket requests sent to the _findFlights endpoint
+     * to this method.
      *
      * @param flightRequest The desired trip and currency to convert from and to
      * @return A Flux that emits all the matching {@code TripResponse} objects
      */
-    @PostMapping("_findFlights")
+    @MessageMapping("_findFlights")
     public Flux<TripResponse> findFlights(@RequestBody FlightRequest flightRequest) {
-        Flux<TripResponse> tripF = mFlightPriceProxyAsync
+        Flux<TripResponse> tripF = mFlightPriceProxyRSocket
             // Asynchronously find all the flights in the tripRequest.
             .findFlights(Schedulers.parallel(),
                          flightRequest.tripRequest);
 
-        Mono<Double> rateM = mExchangeRateProxyAsync
+        Mono<Double> rateM = mExchangeRateProxyRSocket
             // Asynchronously determine the exchange rate.
             .queryForExchangeRate(Schedulers.parallel(),
                                   flightRequest.currencyConversion);
