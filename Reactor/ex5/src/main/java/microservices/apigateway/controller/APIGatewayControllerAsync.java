@@ -1,10 +1,13 @@
 package microservices.apigateway.controller;
 
+import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
+import microservices.airports.AirportListProxyAsync;
 import microservices.apigateway.FlightRequest;
 import microservices.exchangerate.ExchangeRateProxyAsync;
+import microservices.exchangerate.ExchangeRateProxyRSocket;
 import microservices.flightprice.FlightPriceProxyAsync;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -49,6 +52,32 @@ public class APIGatewayControllerAsync {
         new ExchangeRateProxyAsync();
 
     /**
+     * An async proxy to the ExchangeRate microservice.
+     */
+    private final ExchangeRateProxyRSocket mExchangeRateProxyRSocket =
+        new ExchangeRateProxyRSocket();
+
+    /**
+     * An async proxy to the AirportList microservice
+     */
+    private final AirportListProxyAsync mAirportListProxy =
+        new AirportListProxyAsync();
+
+    /**
+     * This method finds information about all the airports
+     * asynchronously.
+     *
+     * WebFlux maps HTTP GET requests sent to the /_getAirportList
+     * endpoint to this method.
+     *
+     * @return A Flux that emits all {@code AirportInfo} objects
+     */
+    @GetMapping("_getAirportList")
+    public Flux<AirportInfo> getAirportInfo() {
+        return mAirportListProxy.findAirportInfo(Schedulers.parallel());
+    }
+
+    /**
      * Returns the best price for {@code tripRequest} using the given
      * {@code currencyConversion} via asynchronous computations.
      *
@@ -66,7 +95,7 @@ public class APIGatewayControllerAsync {
             .findBestPrice(Schedulers.parallel(),
                            flightRequest.tripRequest);
 
-        Mono<Double> rateM = mExchangeRateProxyAsync
+        Mono<Double> rateM = mExchangeRateProxyRSocket
             // Asynchronously determine the exchange rate.
             .queryForExchangeRate(Schedulers.parallel(),
                                   flightRequest.currencyConversion);
@@ -96,7 +125,7 @@ public class APIGatewayControllerAsync {
             .findFlights(Schedulers.parallel(),
                          flightRequest.tripRequest);
 
-        Mono<Double> rateM = mExchangeRateProxyAsync
+        Mono<Double> rateM = mExchangeRateProxyRSocket
             // Asynchronously determine the exchange rate.
             .queryForExchangeRate(Schedulers.parallel(),
                                   flightRequest.currencyConversion);

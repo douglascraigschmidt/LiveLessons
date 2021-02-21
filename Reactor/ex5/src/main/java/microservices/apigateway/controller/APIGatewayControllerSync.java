@@ -1,19 +1,22 @@
 package microservices.apigateway.controller;
 
+import datamodels.AirportInfo;
+import datamodels.CurrencyConversion;
+import datamodels.TripRequest;
 import datamodels.TripResponse;
+import microservices.airports.AirportListProxySync;
 import microservices.apigateway.FlightRequest;
 import microservices.exchangerate.ExchangeRateProxySync;
 import microservices.flightprice.FlightPriceProxySync;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import utils.ExceptionUtils;
 import utils.Options;
 
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
@@ -35,19 +38,39 @@ import static java.util.stream.Collectors.toList;
  * command-line utility (e.g., Curl or Postman).
  */
 @RestController
-@RequestMapping("/microservices/exchangeRateSync")
+@RequestMapping("/microservices/APIGatewaySync")
 public class APIGatewayControllerSync {
     /**
-     * An async proxy to the FlightPrice microservice.
+     * A sync proxy to the FlightPrice microservice.
      */
     private final FlightPriceProxySync mFlightPriceProxySync =
         new FlightPriceProxySync();
 
     /**
-     * An async proxy to the ExchangeRate microservice.
+     * A sync proxy to the ExchangeRate microservice.
      */
     private final ExchangeRateProxySync mExchangeRateProxySync =
         new ExchangeRateProxySync();
+
+    /**
+     * A sync proxy to the AirportList microservice
+     */
+    private final AirportListProxySync mAirportListProxy =
+        new AirportListProxySync();
+
+    /**
+     * This method finds information about all the airports
+     * synchronously.
+     *
+     * WebFlux maps HTTP GET requests sent to the /_getAirportList
+     * endpoint to this method.
+     *
+     * @return A List that contains all {@code AirportInfo} objects
+     */
+    @GetMapping("_getAirportList")
+    public List<AirportInfo> getAirportInfo() {
+        return mAirportListProxy.findAirportInfo();
+    }
 
     /**
      * Returns the best price for {@code tripRequest} using the given
@@ -60,23 +83,11 @@ public class APIGatewayControllerSync {
      * @return A {@code TripResponse} that contains the best price for the desired trip
      */
     @PostMapping("_findBestPrice")
-    public TripResponse findBestPrice(FlightRequest flightRequest) {
-        TripResponse trip = mFlightPriceProxySync
-            // Synchronously find the best price in US dollars for the
-            // tripRequest.
-            .findBestPrice(flightRequest.tripRequest,
-                           Options.instance().maxTimeout());
-
-        double rate = mExchangeRateProxySync
-            // Synchronously determine the exchange rate.
-            .queryForExchangeRate(flightRequest.currencyConversion);
-
-        // When trip and rate complete convert the price.  If these
-        // async operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        return combineAndConvertResults(trip,
-                                        rate,
-                                        Options.instance().maxTimeout());
+    public TripResponse findBestPrice(@RequestBody FlightRequest flightRequest) {
+        return this
+                .makeBestPrice()
+                .compute(flightRequest.tripRequest,
+                        flightRequest.currencyConversion);
     }
 
     /**
@@ -91,62 +102,378 @@ public class APIGatewayControllerSync {
      * @return A List that contains all the matching {@code TripResponse} objects
      */
     @PostMapping("_findFlights")
-    public List<TripResponse> findFlights(FlightRequest flightRequest) {
-        List<TripResponse> trip = mFlightPriceProxySync
-            // Synchronously find all the flights in the tripRequest.
-            .findFlights(flightRequest.tripRequest,
-                         Options.instance().maxTimeout());
-
-        Double rate = mExchangeRateProxySync
-            // Synchronously determine the exchange rate.
-            .queryForExchangeRate(flightRequest.currencyConversion);
-
-        // When trip and rate complete convert the price.  If these
-        // async operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        return combineAndConvertResults(trip,
-                                        rate,
-                                        Options.instance().maxTimeout());
+    public List<TripResponse> findFlights(@RequestBody FlightRequest flightRequest) {
+        return this
+            .makeAllPrices()
+            .compute(flightRequest.tripRequest,
+                     flightRequest.currencyConversion);
     }
 
     /**
-     * When {@code trip} and {@code rate} complete convert the price
-     * based on the exchange rate.  If these operations take more than
-     * {@code maxTime} then the TimeoutException is thrown.
-     *
-     * @param trips The List of TripResponse objects
-     * @param rate The exchange rate
-     * @param maxTime Max time to wait for processing to complete
-     * @return A conversion of best price
+     * This functional interface forms the basis of the tasks that
+     * compute the best price for a given flight.
      */
-    private static List<TripResponse> combineAndConvertResults(List<TripResponse> trips,
-                                                               double rate,
-                                                               Duration maxTime) {
-        return trips
-            // Convert trips to a stream.
-            .stream()
-
-            // Convert each trip using the exchange rate.
-            .map(trip -> trip.convert(rate))
-
-            // Trigger intermediate operation processing and collect
-            // the results into a List.
-            .collect(toList());
+    @FunctionalInterface
+    interface BestFlightPrice {
+        /**
+         * Computes the converted best price for all flights matching
+         * a given {@code tripRequest}
+         *
+         * @param tripRequest        The given trip request
+         * @param currencyConversion The currency to convert to and from
+         * @return A {@code TripResponse} that has the best price for
+         * the {@code tripRequest}
+         */
+        TripResponse compute(TripRequest tripRequest,
+                             CurrencyConversion currencyConversion);
     }
 
     /**
-     * When {@code trip} and {@code rate} complete convert the price
-     * based on the exchange rate.  If these operations take more than
-     * {@code maxTime} then the TimeoutException is thrown.
      *
-     * @param trip The best price for a flight leg
-     * @param rate The exchange rate
-     * @param maxTime Max time to wait for processing to complete
-     * @return A conversion of best price
      */
-    private static TripResponse combineAndConvertResults(TripResponse trip,
-                                                         double rate,
-                                                         Duration maxTime) {
-        return trip.convert(rate);
+    private final Map<String, BestFlightPrice> sBestPriceMap =
+            new HashMap<>() {
+                {
+                    put("sequential", makeSequentialBestPrice());
+                    put("threads", makeThreadsBestPrice());
+                    put("completionService", makeCompletionServiceBestPrice());
+                    put("executorService", makeExecutorServiceBestPrice());
+                }
+            };
+
+    /**
+     * @return A task that computes the best flight price for a given
+     * {@code tripRequest} sequentially.
+     */
+    private BestFlightPrice makeSequentialBestPrice() {
+        return (tripRequest, currencyConversion) -> {
+            TripResponse tripResponse = mFlightPriceProxySync
+                    // Synchronously find the best price for the tripRequest.
+                    .findBestPrice(tripRequest,
+                            Options.instance().maxTimeout());
+            Double rate = mExchangeRateProxySync
+                    // Synchronously determine the exchange rate.
+                    .queryForExchangeRate(currencyConversion);
+
+            return tripResponse.convert(rate);
+        };
+    }
+
+    /**
+     * @return A task that uses Java Threads to compute the best
+     * flight price for a given {@code tripRequest} sequentially.
+     */
+    private BestFlightPrice makeThreadsBestPrice() {
+        return (tripRequest, currencyConversion) -> {
+            TripResponse[] trip = new TripResponse[1];
+            Double[] rate = new Double[1];
+
+            List<Thread> threads = new ArrayList<>() {
+                {
+                    trip[0] = mFlightPriceProxySync
+                            // Synchronously find the best price for the tripRequest.
+                            .findBestPrice(tripRequest,
+                                    Options.instance().maxTimeout());
+                }
+
+                {
+                    rate[0] = mExchangeRateProxySync
+                            // Synchronously determine the exchange rate.
+                            .queryForExchangeRate(currencyConversion);
+                }
+            };
+
+            // Start all the threads.
+            threads.forEach(Thread::start);
+
+            // Wait for all the threads to complete.
+            threads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+
+            // When the calls to compute the trip and rate complete
+            // convert the price.
+            return trip[0].convert(rate[0]);
+        };
+    }
+
+    /**
+     * @return A task that uses the Java CompletionService to compute
+     * the best flight price for a given {@code tripRequest}
+     * sequentially.
+     */
+    private BestFlightPrice makeCompletionServiceBestPrice() {
+        return (tripRequest, currencyConversion) -> {
+            try {
+                CompletionService<Object> cs =
+                        new ExecutorCompletionService<>(Executors.newFixedThreadPool(2));
+
+                Callable<Object> c1 = () -> mFlightPriceProxySync
+                        // Synchronously find the best price for the tripRequest.
+                        .findBestPrice(tripRequest,
+                                Options.instance().maxTimeout());
+
+                Callable<Object> c2 = () -> mExchangeRateProxySync
+                        // Synchronously determine the exchange rate.
+                        .queryForExchangeRate(currencyConversion);
+
+                cs.submit(c1);
+                cs.submit(c2);
+
+                TripResponse tripResponse = null;
+                Double rate = null;
+
+                for (int i = 0; i < 2; i++) {
+                    Object o = cs.take().get();
+                    if (o instanceof TripResponse)
+                        tripResponse = (TripResponse) o;
+                    else if (o instanceof Double)
+                        rate = (Double) o;
+                }
+                assert tripResponse != null;
+                assert rate != null;
+
+                // When the calls to compute the trip and rate complete
+                // convert the price.
+
+                return tripResponse.convert(rate);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * @return A task that uses the Java ExecutorService to compute
+     * the best flight price for a given {@code tripRequest}
+     * sequentially.
+     */
+    private BestFlightPrice makeExecutorServiceBestPrice() {
+        return (tripRequest, currencyConversion) -> {
+            try {
+                // Synchronously find the best price for the tripRequest.
+                Callable<TripResponse> c1 = () -> mFlightPriceProxySync
+                        .findBestPrice(tripRequest,
+                                Options.instance().maxTimeout());
+
+                // Synchronously determine the exchange rate.
+                Callable<Double> c2 = () -> mExchangeRateProxySync
+                        .queryForExchangeRate(currencyConversion);
+
+                // Create a new cached thread pool.
+                ExecutorService es = Executors.newCachedThreadPool();
+
+                // Compute the best price and the exchange rate
+                // concurrently.
+                Future<TripResponse> f1 = es.submit(c1);
+                Future<Double> f2 = es.submit(c2);
+
+                // Block until the responses are done.
+                TripResponse tripResponse = f1.get();
+                Double rate = f2.get();
+
+                // When the calls to compute the trip and rate complete
+                // convert the price.
+                return tripResponse.convert(rate);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * This functional interface forms the basis of the tasks that
+     * compute the prices for all the flights.
+     */
+    @FunctionalInterface
+    interface AllFlightPrices {
+        /**
+         * Computes the converted prices for all flights matching a
+         * given {@code tripRequest}
+         *
+         * @param tripRequest        The given trip request
+         * @param currencyConversion The currency to convert to and from
+         * @return A List of {@code TripResponse} objects that match
+         * the {@code tripRequest}
+         */
+        List<TripResponse> compute(TripRequest tripRequest,
+                                   CurrencyConversion currencyConversion);
+    }
+
+    /**
+     * Create a Map that associates the names of the tasks with
+     * implementations that finds the prices of all the flights.
+     */
+    private final Map<String, AllFlightPrices> mAllPricesMap =
+            new HashMap<>() {
+                {
+                    put("sequential", makeSequentialAllPrices());
+                    put("threads", makeThreadsAllPrices());
+                    put("completionService", makeCompletionServiceAllPrices());
+                    put("executorService", makeExecutorServiceAllPrices());
+                }
+            };
+
+    /**
+     * @return A task that computes all the flight prices
+     * sequentially.
+     */
+    private AllFlightPrices makeSequentialAllPrices() {
+        return (tripRequest, currencyConversion) -> {
+            List<TripResponse> trips = mFlightPriceProxySync
+                    // Synchronously find all the flights for the
+                    // tripRequest.
+                    .findFlights(tripRequest,
+                            Options.instance().maxTimeout());
+            Double rate = mExchangeRateProxySync
+                    // Synchronously determine the exchange rate.
+                    .queryForExchangeRate(currencyConversion);
+
+            // Convert all the trip prices using the exchange rate.
+            return convertTripPrices(trips, rate);
+        };
+    }
+
+    /**
+     * @return A task that uses the Java Threads to compute all the
+     * flight prices concurrently.
+     */
+    private AllFlightPrices makeThreadsAllPrices() {
+        return (tripRequest, currencyConversion) -> {
+            List<TripResponse> trips = new ArrayList<>();
+            Double[] rate = new Double[1];
+
+            List<Thread> threads = new ArrayList<>() {
+                {
+                    // Synchronously find all the flights
+                    // for the tripRequest.
+                    trips.addAll(mFlightPriceProxySync
+                            .findFlights(tripRequest, Options.instance().maxTimeout()));
+                }
+
+                {
+                    rate[0] = mExchangeRateProxySync
+                            // Synchronously determine the exchange rate.
+                            .queryForExchangeRate(currencyConversion);
+                }
+            };
+
+            // Start all the threads.
+            threads.forEach(Thread::start);
+
+            // Wait for all the threads to complete.
+            threads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+
+            // Convert all the trip prices using the exchange rate.
+            return convertTripPrices(trips, rate[0]);
+        };
+    }
+
+    /**
+     * @return A task that uses the Java CompletionService to compute
+     * all the flight prices concurrently.
+     */
+    private AllFlightPrices makeCompletionServiceAllPrices() {
+        return (tripRequest, currencyConversion) -> {
+            try {
+                CompletionService<Object> cs =
+                        new ExecutorCompletionService<>(Executors.newFixedThreadPool(2));
+
+                Callable<Object> c1 = () -> mFlightPriceProxySync
+                        // Synchronously find all the flights for
+                        // the tripRequest.
+                        .findFlights(tripRequest,
+                                Options.instance().maxTimeout());
+
+                Callable<Object> c2 = () -> mExchangeRateProxySync
+                        // Synchronously determine the exchange rate.
+                        .queryForExchangeRate(currencyConversion);
+
+                cs.submit(c1);
+                cs.submit(c2);
+
+                List<TripResponse> trips = null;
+                Double rate = null;
+
+                for (int i = 0; i < 2; i++) {
+                    Object o = cs.take().get();
+                    if (o instanceof List<?>) {
+                        //noinspection unchecked
+                        trips = (List<TripResponse>) o;
+                    } else if (o instanceof Double)
+                        rate = (Double) o;
+                }
+                assert trips != null;
+                assert rate != null;
+
+                // Convert all the trip prices using the exchange rate.
+                return convertTripPrices(trips, rate);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * @return A task that uses the Java ExecutorService to compute
+     * all the flight prices concurrently.
+     */
+    private AllFlightPrices makeExecutorServiceAllPrices() {
+        return (tripRequest, currencyConversion) -> {
+            try {
+                // Synchronously find all the flights for the tripRequest.
+                Callable<List<TripResponse>> c1 = () -> mFlightPriceProxySync
+                        .findFlights(tripRequest,
+                                Options.instance().maxTimeout());
+
+                // Synchronously determine the exchange rate.
+                Callable<Double> c2 = () -> mExchangeRateProxySync
+                        .queryForExchangeRate(currencyConversion);
+
+                // Create a new cached thread pool.
+                ExecutorService es = Executors.newCachedThreadPool();
+
+                // Compute the best price and the exchange rate
+                // concurrently.
+                Future<List<TripResponse>> f1 = es.submit(c1);
+                Future<Double> f2 = es.submit(c2);
+
+                // Block until the responses are done.
+                List<TripResponse> trips = f1.get();
+                Double rate = f2.get();
+
+                // Convert all the trip prices using the exchange rate.
+                return convertTripPrices(trips, rate);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * @return The task to use to compute the best flight price.
+     */
+    private BestFlightPrice makeBestPrice() {
+        return sBestPriceMap.get(Options.instance().getSyncTask());
+    }
+
+    /**
+     * @return The task to use to compute all the flight prices.
+     */
+    private AllFlightPrices makeAllPrices() {
+        return mAllPricesMap.get(Options.instance().getSyncTask());
+    }
+
+    /**
+     * Converts all the prices in {@code trips} using the exchange {@code rate}.
+     *
+     * @param trips The list of trips to convert
+     * @param rate  The exchange rate used for the conversion
+     * @return An updated list of trips that have been converted by the exchange rate
+     */
+    private List<TripResponse> convertTripPrices(List<TripResponse> trips,
+                                                        Double rate) {
+        trips.forEach(trip -> trip.convert(rate));
+        return trips;
     }
 }

@@ -8,8 +8,8 @@ import static utils.ReactorUtils.randomDelay;
 /**
  * This Spring controller demonstrates how WebFlux can be used to
  * handle HTTP POST requests via object-oriented programming.  These
- * requests are mapped to methods that convert between US dollars and
- * other currencies synchronously.
+ * requests are mapped to methods that convert between various
+ * currencies synchronously.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -45,8 +45,7 @@ public class ExchangeRateControllerSync {
         randomDelay();
 
         // Debugging print.
-
-        System.out.println(currencyConversion.toString());
+        // System.out.println(currencyConversion.toString());
 
         // Simply return a constant.
         return 1.20;

@@ -55,7 +55,7 @@ public class AirportListControllerAsync {
      * @return A Flux that emits all {@code AirportInfo} objects
      */
     @GetMapping("/_getAirportList")
-    private Flux<AirportInfo> getAirportInfoAsync() {
+    private Flux<AirportInfo> getAirportInfo() {
         return Flux
             // Convert the list of AirportInfo objects into a Flux
             // stream.

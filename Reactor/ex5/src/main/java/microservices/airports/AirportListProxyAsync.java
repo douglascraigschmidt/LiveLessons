@@ -32,8 +32,7 @@ public class AirportListProxyAsync
      * Returns a Flux that emits {@code AirportInfo} objects.
      *
      * @param scheduler The Scheduler context in which to run the operation
-     * @return A Flux that emits {@code TripResponse} objects that
-     *         match the {@code trip} param
+     * @return A Flux that emits {@code AirportInfo} objects
      */
     public Flux<AirportInfo> findAirportInfo(Scheduler scheduler) {
         return Mono

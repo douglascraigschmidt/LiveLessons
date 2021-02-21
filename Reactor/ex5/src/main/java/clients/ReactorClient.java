@@ -12,10 +12,9 @@ import utils.Options;
 import java.util.function.Function;
 
 /**
- * A Java utility class containing tests that use Project Reactor and
- * WebFlux to asynchronously and synchronously invoke microservices
- * that determine the best price for flights in an airline reservation
- * system.
+ * A Java utility class containing a client that uses Project Reactor
+ * and WebFlux to asynchronously invoke microservices that provide
+ * various flight-related services for the Airline Booking App (ABA).
  */
 public class ReactorClient {
     /**
@@ -44,6 +43,7 @@ public class ReactorClient {
                 .register(() -> findBestPriceAsync(iteration,
                           trip,
                           currencyConversion));
+
             AsyncTaskBarrier
                 .register(() -> findFlightsAsync(iteration,
                                                  trip,

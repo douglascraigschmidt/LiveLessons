@@ -52,16 +52,10 @@ public class AirportListControllerSync {
      * WebFlux maps HTTP GET requests sent to the /_getAirportList
      * endpoint to this method.
      *
-     * @return A List that contains all the trips for the given departure
-     *         date and flight leg
+     * @return A List that contains all {@code AirportInfo} objects
      */
     @GetMapping("/_getAirportList")
-    private List<AirportInfo> getAirportInfo(CurrencyConversion cc /*,
-                                             TripRequest tr */) {
-        
-        System.out.println("CurrencyConversion = " + cc.toString());
-        // System.out.println("TripRequest = " + tr.toString());
-
+    private List<AirportInfo> getAirportInfo() {
         // Return the airport list.
         return mAirportList;
     }

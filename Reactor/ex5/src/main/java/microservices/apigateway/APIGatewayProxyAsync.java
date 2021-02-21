@@ -1,14 +1,14 @@
 package microservices.apigateway;
 
+import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
-
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import org.springframework.web.util.UriComponentsBuilder;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import utils.Options;
 
 import java.util.function.Function;
 
@@ -18,6 +18,13 @@ import java.util.function.Function;
  */
 public class APIGatewayProxyAsync
        extends APIGatewayProxyBase {
+    /**
+     * The URI that denotes a remote method to find information about
+     * all the airports asynchronously.
+     */
+    private final String mFindAirportsURIAsync =
+        "/microservices/APIGatewayAsync/_getAirportList";
+
     /**
      * The URI that denotes a remote method to find the best flight
      * price asynchronously.
@@ -37,6 +44,50 @@ public class APIGatewayProxyAsync
      */
     public APIGatewayProxyAsync() {
         super();
+    }
+
+    /**
+     * Returns a Flux that emits {@code AirportInfo} objects.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @return A Flux that emits {@code AirportInfo} objects
+     */
+    public Flux<AirportInfo> findAirportInfo(Scheduler scheduler) {
+        return Mono
+            // Return a Flux containing the list of airport
+            // information.
+            .fromCallable(() -> mAPIGateway
+                          // Create an HTTP POST request.
+                          .get()
+
+                          // Add the uri to the baseUrl.
+                          .uri(mFindAirportsURIAsync)
+
+                          // Retrieve the response.
+                          .retrieve()
+
+                          // Convert it to a Flux of AirportInfo
+                          // objects.
+                          .bodyToFlux(AirportInfo.class))
+
+            // Schedule this to run on the given scheduler.
+            .subscribeOn(scheduler)
+
+            // De-nest the result so it's a Flux<AirportInfo>.
+            .flatMapMany(Function.identity());
+    }
+
+    /**
+     * Returns an Observable that emits {@code AirportInfo} objects.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @return An Observable that emits {@code AirportInfo} objects
+     */
+    public Observable<AirportInfo> findAirportInfoRx(Scheduler scheduler) {
+        return Observable
+            // Return an Observable that emits the AirportInfo
+            // objects.
+            .fromPublisher(findAirportInfo(scheduler));
     }
 
     /**
@@ -84,6 +135,24 @@ public class APIGatewayProxyAsync
     }
 
     /**
+     * Finds the best price for the {@code tripRequest} asynchronously.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @param tripRequest The trip to price
+     * @param currencyConversion The currency to convert from and to
+     * @return A Single that emits the {@code TripResponse} with the best price
+     */
+    public Single<TripResponse> findBestPriceRx(Scheduler scheduler,
+                                                TripRequest tripRequest,
+                                                CurrencyConversion currencyConversion) {
+        return Single
+            // Return a Single to the best price.
+            .fromPublisher(findBestPrice(scheduler,
+                                         tripRequest,
+                                         currencyConversion));
+    }
+
+    /**
      * Finds all the flights that match the {@code tripRequest}
      * asynchronously.
      *
@@ -124,5 +193,25 @@ public class APIGatewayProxyAsync
 
             // De-nest the result so it's a Flux<TripResponse>.
             .flatMapMany(Function.identity());
+    }
+
+    /**
+     * Finds all the flights that match the {@code tripRequest}
+     * asynchronously.
+     *
+     * @param scheduler The Scheduler context in which to run the operation
+     * @param tripRequest The desired trip
+     * @param currencyConversion The currency to convert from and to
+     * @return An Observable that emits all the matching {@code TripResponse} objects
+     */
+    public Observable<TripResponse> findFlightsRx(Scheduler scheduler,
+                                                  TripRequest tripRequest,
+                                                  CurrencyConversion currencyConversion) {
+        return Observable
+            // Return an Observable that emits all the matching
+            // flights.
+            .fromPublisher(findFlights(scheduler,
+                                       tripRequest,
+                                       currencyConversion));
     }
 }

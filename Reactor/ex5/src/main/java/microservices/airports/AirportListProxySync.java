@@ -20,7 +20,7 @@ public class AirportListProxySync
      * The URI that denotes the remote method to obtain the list of
      * airport codes/names synchronously.
      */
-    private final String mFindAirportListsURISync =
+    private final String mFindAirportsURISync =
             "/microservices/AirportListSync/_getAirportList";
 
     /**
@@ -34,18 +34,11 @@ public class AirportListProxySync
      * @return A List that contains {@code AirportInfo} objects
      */
     public List<AirportInfo> findAirportInfo() {
-        CurrencyConversion currencyConversion =
-            new CurrencyConversion("JFK", "BNA", 1.0);
-        TripRequest tripRequest =
-            new TripRequest();
-
         // Send a GET request to the URI template and return the
         // response as an Http ResponseEntity.
         ResponseEntity<AirportInfo[]> responseEntity = mRestTemplate
-            .getForEntity(mSERVER_BASE_URL + mFindAirportListsURISync,
-                          AirportInfo[].class,
-                          currencyConversion /*,
-                          tripRequest */);
+            .getForEntity(mSERVER_BASE_URL + mFindAirportsURISync,
+                          AirportInfo[].class);
 
         // Convert the ResponseEntity to a List of AirportInfo objects
         // and return it.

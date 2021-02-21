@@ -66,21 +66,6 @@ public class FlightPriceProxyAsync
     }
 
     /**
-     * Finds all the flights that match the {@code tripRequest}
-     * asynchronously.
-     *
-     * @param scheduler The Scheduler context in which to run the operation
-     * @param tripRequest The desired trip 
-     * @return An Observable that emits all the matching {@code TripResponse} objects
-     */
-    public Single<TripResponse> findFlightsRx(Scheduler scheduler,
-                                              TripRequest tripRequest) {
-        return Single
-            // Return a Single to the best price.
-            .fromPublisher(findFlights(scheduler, tripRequest));
-    }
-
-    /**
      * Finds the best price for the {@code tripRequest} asynchronously.
      *
      * @param scheduler The Scheduler context in which to run the operation
@@ -112,19 +97,5 @@ public class FlightPriceProxyAsync
 
             // De-nest the result so it's a Mono<TripResponse>.
             .flatMap(Function.identity());
-    }
-
-    /**
-     * Finds the best price for the {@code tripRequest} asynchronously.
-     *
-     * @param scheduler The Scheduler context in which to run the operation
-     * @param tripRequest The trip to price
-     * @return A Single that emits the {@code TripResponse} with the best price
-     */
-    public Single<TripResponse> findBestPriceRx(Scheduler scheduler,
-                                                TripRequest tripRequest) {
-        return Single
-            // Return a Single to the best price.
-            .fromPublisher(findBestPrice(scheduler, tripRequest));
     }
 }

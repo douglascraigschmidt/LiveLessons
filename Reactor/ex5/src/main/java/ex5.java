@@ -1,14 +1,12 @@
-import datamodels.AirportInfo;
+import clients.COOPClient;
+import clients.ReactorClient;
+import clients.RxJavaClient;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import microservices.airports.AirportListProxySync;
-import clients.ReactorClient;
+import microservices.apigateway.APIGatewayProxySync;
 import utils.DateUtils;
 import utils.Options;
 import utils.RunTimer;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * This program applies reactive streams and reactive web programming
@@ -56,42 +54,37 @@ public class ex5 {
      * Run the test program.
      */
     private void run() {
-        AirportListProxySync airportListProxy =
-                new AirportListProxySync();
-
-        List<AirportInfo> airportInfoList =
-                airportListProxy.findAirportInfo();
-
-        airportInfoList.forEach(System.out::println);
+        /*
+         APIGatewayProxySync a = new APIGatewayProxySync();
+        
+        a
+            .findAirportInfo()
+            .forEach(System.out::println); */
 
         RunTimer
-            // This test uses Project Reactor to invoke microservices
-            // that asynchronously determine the best price for a
-            // flight from London to New York city in British pounds.
-            .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
-                                                      mCurrencyConversion),
-                     "runReactorAsyncTests");
-        /*
+                // This test uses Java concurrent object-oriented
+                // programming frameworks to invoke microservices that
+                // synchronously determine the best price for a flight
+                // from London to New York city in British pounds.
+                .timeRun(() -> COOPClient.runSyncTests(mTrip,
+                        mCurrencyConversion),
+                        "runCOOPSyncTests");
 
         RunTimer
             // This test uses RxJava to invoke microservices that
             // asynchronously determine the best price for a flight
             // from London to New York city in British pounds.
-            .timeRun(()-> RxJavaTests.runAsyncTestsRx(mTrip,
+            .timeRun(()-> RxJavaClient.runAsyncTestsRx(mTrip,
                                                       mCurrencyConversion),
                      "runRxJavaAsyncTests");
-         */
 
-        /*
         RunTimer
-            // This test uses Java concurrent object-oriented
-            // programming frameworks to invoke microservices that
-            // synchronously determine the best price for a flight
-            // from London to New York city in British pounds.
-            .timeRun(() -> COOPTests.runSyncTests(mTrip,
-                                                     mCurrencyConversion),
-                     "runCOOPSyncTests");
-        */
+                // This test uses Project Reactor to invoke microservices
+                // that asynchronously determine the best price for a
+                // flight from London to New York city in British pounds.
+                .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
+                        mCurrencyConversion),
+                        "runReactorAsyncTests");
 
         // Print the results sorted from fastest to slowest.
         Options.print(RunTimer.getTimingResults());

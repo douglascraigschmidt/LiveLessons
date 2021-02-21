@@ -4,7 +4,9 @@ import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import microservices.apigateway.APIGatewayProxyAsync;
 import microservices.exchangerate.ExchangeRateProxyAsync;
 import microservices.flightprice.FlightPriceProxyAsync;
 import reactor.core.scheduler.Schedulers;
@@ -15,25 +17,18 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A Java utility class containing tests that use RxJava and WebFlux
- * to asynchronously and synchronously invoke microservices that
- * determine the best price for flights in an airline reservation
- * system.
+ * A Java utility class containing a client that provides an RxJava
+ * binding to Proect Reactor and WebFlux capabilities to
+ * asynchronously invoke microservices that provide various
+ * flight-related services for the Airline Booking App (ABA).
  */
 public class RxJavaClient {
     /**
-     * A proxy that's used to communicate with the FlightPrice
-     * microservice.
+     * A proxy that's used to communicate with the APIGateway
+     * microservice asynchronously.
      */
-    private static final FlightPriceProxyAsync sFlightPriceProxyAsync =
-            new FlightPriceProxyAsync();
-
-    /**
-     * A proxy that's used to communicate with the ExchangeRate
-     * microservice.
-     */
-    private static final ExchangeRateProxyAsync sExchangeRateProxy =
-            new ExchangeRateProxyAsync();
+    private static final APIGatewayProxyAsync sAPIGatewayProxyAsync =
+        new APIGatewayProxyAsync();
 
     /**
      * This test invokes microservices to asynchronously determine the
@@ -48,12 +43,16 @@ public class RxJavaClient {
         for (int i = 0; i < Options.instance().maxIterations(); i++) {
             int iteration = i + 1;
 
+            // Register tests with the AsyncTaskBarrierRx framework so
+            // they run asynchronously wrt the other iterations.
             AsyncTaskBarrierRx
-                // Register the test with the AsyncTaskBarrierRx framework so it
-                // will run asynchronously wrt the other iterations.
                 .register(() -> findBestPriceAsync(iteration,
-                                                          trip,
-                                                          currencyConversion));
+                                                   trip,
+                                                   currencyConversion));
+            AsyncTaskBarrierRx
+                .register(() -> findFlightsAsync(iteration,
+                                                 trip,
+                                                 currencyConversion));
         }
 
         AsyncTaskBarrierRx
@@ -79,22 +78,12 @@ public class RxJavaClient {
     private static Completable findBestPriceAsync(int iteration,
                                                   TripRequest tripRequest,
                                                   CurrencyConversion currencyConversion) {
-        Single<TripResponse> tripS = sFlightPriceProxyAsync
+        return sAPIGatewayProxyAsync
             // Asynchronously find the best price for the tripRequest.
             .findBestPriceRx(Schedulers.parallel(),
-                             tripRequest);
+                             tripRequest,
+                             currencyConversion)
 
-        Single<Double> rateS = sExchangeRateProxy
-            // Asynchronously determine the exchange rate.
-            .queryForExchangeRateRx(Schedulers.parallel(),
-                                    currencyConversion);
-
-        // When priceM and rateM complete convert the price.  If these
-        // async operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        return combineAndConvertResults(tripS, rateS, Options.instance().maxTimeout())
-            // Print the price if the call completed within
-            // sMAX_TIME seconds.
             .doOnSuccess(tripResponse -> Options
                          .print("Iteration #"
                                 + iteration
@@ -108,11 +97,11 @@ public class RxJavaClient {
             // Consume and print the TimeoutException if the call
             // took longer than sMAX_TIME.
             .onErrorResumeNext(ex -> {
-                Options.print("Iteration #"
-                        + iteration
-                        + " The exception thrown was " + ex.toString());
-                return Single.just(new TripResponse());
-            })
+                    Options.print("Iteration #"
+                                  + iteration
+                                  + " The exception thrown was " + ex.toString());
+                    return Single.just(new TripResponse());
+                })
 
             // Return a Completable to synchronize with the
             // AsyncTaskBarrierRx framework.
@@ -120,36 +109,47 @@ public class RxJavaClient {
     }
 
     /**
-     * When {@code tripM} and {@code rateM} complete convert the price
-     * based on the exchange rate.  If these operations take more than
-     * {@code maxTime} then the TimeoutException is thrown.
+     * Returns all flights for {@code tripRequest} using the given
+     * {@code currencyConversion} via asynchronous
+     * computations/communications.
      *
-     * @param tripS Returns the best price for a flight leg
-     * @param rateS Returns the exchange rate
-     * @param maxTime Max time to wait for processing to complete
-     * @return A conversion of best price
+     * @param iteration Current iteration count
+     * @param tripRequest The current desired trip
+     * @param currencyConversion The currency to convert from and to
+     * @return A Completable to synchronize with the AsyncTaskBarrierRx framework.
      */
-    private static Single<TripResponse> combineAndConvertResults(Single<TripResponse> tripS,
-                                                                 Single<Double> rateS,
-                                                                 Duration maxTime) {
-        return Single
-            // Call the this::convert method reference to convert the
-            // price using the given exchange rate when both previous
-            // Monos complete their processing.
-            .zip(tripS, rateS, RxJavaClient::convert)
+    private static Completable findFlightsAsync(int iteration,
+                                                TripRequest tripRequest,
+                                                CurrencyConversion currencyConversion) {
+        return sAPIGatewayProxyAsync
+            // Asynchronously find all the flights in the tripRequest.
+            .findFlightsRx(Schedulers.parallel(),
+                           tripRequest,
+                           currencyConversion)
 
-            // If the total processing takes more than maxTime a
-            // TimeoutException will be thrown.
-            .timeout(maxTime.toMillis(), TimeUnit.MILLISECONDS);
-    }
+            // Print the price if the call completed within
+            // sMAX_TIME seconds.
+            .doOnNext(tripResponse -> Options
+                      .print("Iteration #"
+                             + iteration
+                             + " The price is: "
+                             + tripResponse.getPrice()
+                             + " "
+                             + currencyConversion.getTo() 
+                             + " on "
+                             + tripResponse.getAirlineCode()))
+                    
+            // Consume and print the TimeoutException if the call
+            // took longer than sMAX_TIME.
+            .onErrorResumeNext(ex -> {
+                    Options.print("Iteration #"
+                                  + iteration
+                                  + " The exception thrown was " + ex.toString());
+                    return Observable.just(new TripResponse());
+                })
 
-    /**
-     * Convert the price of a Trip in one currency system by
-     * multiplying it by the exchange rate.
-     */
-    private static TripResponse convert(TripResponse trip, double rate) {
-        // Update the price to reflect the exchange rate!
-        trip.setPrice(trip.getPrice() * rate);
-        return trip;
+            // Return a Completable to synchronize with the
+            // AsyncTaskBarrierRx framework.
+            .ignoreElements();
     }
 }
