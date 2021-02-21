@@ -3,15 +3,12 @@ package clients;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.exchangeRate.ExchangeRateProxyAsync;
-import microservices.flightPrice.FlightPriceProxyAsync;
-import reactor.core.publisher.Flux;
+import microservices.apigateway.APIGatewayProxyAsync;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.AsyncTaskBarrier;
 import utils.Options;
 
-import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -22,18 +19,11 @@ import java.util.function.Function;
  */
 public class ReactorClient {
     /**
-     * A proxy that's used to communicate with the FlightPrice
-     * microservice.
-     */
-    private static final FlightPriceProxyAsync sFlightPriceProxyAsync =
-        new FlightPriceProxyAsync();
-
-    /**
-     * A proxy that's used to communicate with the ExchangeRate
+     * A proxy that's used to communicate with the APIGateway
      * microservice asynchronously.
      */
-    private static final ExchangeRateProxyAsync sExchangeRateProxyAsync =
-            new ExchangeRateProxyAsync();
+    private static final APIGatewayProxyAsync sAPIGatewayProxyAsync =
+            new APIGatewayProxyAsync();
 
     /**
      * This test invokes microservices to asynchronously determine the
@@ -83,17 +73,6 @@ public class ReactorClient {
     private static Mono<Void> findBestPriceAsync(int iteration,
                                                  TripRequest tripRequest,
                                                  CurrencyConversion currencyConversion) {
-        Mono<TripResponse> tripM = sFlightPriceProxyAsync
-            // Asynchronously find the best price in US dollars for
-            // the tripRequest.
-            .findBestPrice(Schedulers.parallel(),
-                           tripRequest);
-
-        Mono<Double> rateM = sExchangeRateProxyAsync
-            // Asynchronously determine the exchange rate.
-            .queryForExchangeRate(Schedulers.parallel(),
-                                  currencyConversion);
-
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,
             ? extends Mono<? extends TripResponse>> handleEx = ex -> {
@@ -103,10 +82,12 @@ public class ReactorClient {
             return Mono.just(new TripResponse());
         };
 
-        // When tripM and rateM complete convert the price.  If these
-        // async operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        return combineAndConvertResults(tripM, rateM, Options.instance().maxTimeout())
+        return sAPIGatewayProxyAsync
+            // Asynchronously find the best price for the tripRequest.
+            .findBestPrice(Schedulers.parallel(),
+                           tripRequest,
+                           currencyConversion)
+
             // Print the price if the call completed within
             // sMAX_TIME seconds.
             .doOnSuccess(tripResponse ->
@@ -117,8 +98,8 @@ public class ReactorClient {
                                        + " GBP on "
                                        + tripResponse.getAirlineCode()))
                     
-            // Consume and print the TimeoutException if the call
-            // took longer than sMAX_TIME.
+            // Consume and print the TimeoutException if the call took
+            // longer than sMAX_TIME.
             .onErrorResume(handleEx)
 
             // Return an empty mono to synchronize with the
@@ -128,7 +109,8 @@ public class ReactorClient {
 
     /**
      * Returns all flights for {@code tripRequest} using the given
-     * {@code currencyConversion} via asynchronous computations/communications.
+     * {@code currencyConversion} via asynchronous
+     * computations/communications.
      *
      * @param iteration Current iteration count
      * @param tripRequest The current desired trip
@@ -138,16 +120,6 @@ public class ReactorClient {
     private static Mono<Void> findFlightsAsync(int iteration,
                                                TripRequest tripRequest,
                                                CurrencyConversion currencyConversion) {
-        Flux<TripResponse> tripF = sFlightPriceProxyAsync
-            // Asynchronously find all the flights in the tripRequest.
-            .findFlights(Schedulers.parallel(),
-                         tripRequest);
-
-        Mono<Double> rateM = sExchangeRateProxyAsync
-            // Asynchronously determine the exchange rate.
-            .queryForExchangeRate(Schedulers.parallel(),
-                                  currencyConversion);
-
         // The behavior to perform if an exception occurs.
         Function<? super Throwable,
             ? extends Mono<? extends TripResponse>> handleEx = ex -> {
@@ -157,10 +129,12 @@ public class ReactorClient {
             return Mono.just(new TripResponse());
         };
 
-        // When tripF and rateM complete convert the price.  If these
-        // async operations take more than {@code maxTime} then throw
-        // the TimeoutException.
-        return combineAndConvertResults(tripF, rateM, Options.instance().maxTimeout())
+        return sAPIGatewayProxyAsync
+            // Asynchronously find all the flights in the tripRequest.
+            .findFlights(Schedulers.parallel(),
+                         tripRequest,
+                         currencyConversion)
+
             // Print the price if the call completed within
             // sMAX_TIME seconds.
             .doOnNext(tripResponse -> Options
@@ -180,56 +154,5 @@ public class ReactorClient {
             // Return an empty mono to synchronize with the
             // AsyncTaskBarrier framework.
             .then();
-    }
-
-    /**
-     * When {@code tripF} and {@code rateM} complete convert the price
-     * based on the exchange rate.  If these operations take more than
-     * {@code maxTime} then the TimeoutException is thrown.
-     *
-     * @param tripF Emits the TripResponse objects
-     * @param rateM Emits the exchange rate
-     * @param maxTime Max time to wait for processing to complete
-     * @return A conversion of best price
-     */
-    private static Flux<TripResponse> combineAndConvertResults(Flux<TripResponse> tripF,
-                                                               Mono<Double> rateM,
-                                                               Duration maxTime) {
-        return rateM
-            // When rateM emits use the resulting exchange rate to update
-            // all trip responses accordingly.
-            .flatMapMany(rate -> tripF
-                         // map() is called when both the Flux and
-                         // Mono complete their processing to convert
-                         // the price using the exchange rate.
-                         .map(trip -> trip.convert(rate)))
-
-            // If the total processing takes more than maxTime a
-            // TimeoutException will be thrown.
-            .timeout(maxTime);
-    }
-
-    /**
-     * When {@code tripM} and {@code rateM} complete convert the price
-     * based on the exchange rate.  If these operations take more than
-     * {@code maxTime} then the TimeoutException is thrown.
-     *
-     * @param tripM Emits the best price for a flight leg
-     * @param rateM Emits the exchange rate
-     * @param maxTime Max time to wait for processing to complete
-     * @return A conversion of best price
-     */
-    private static Mono<TripResponse> combineAndConvertResults(Mono<TripResponse> tripM,
-                                                               Mono<Double> rateM,
-                                                               Duration maxTime) {
-        return Mono
-            // Call the ReactorTests::convert method reference to
-            // convert the price using the given exchange rate when
-            // both previous Monos complete their processing.
-            .zip(rateM, tripM, (rate, trip) -> trip.convert(rate))
-
-            // If the total processing takes more than maxTime a
-            // TimeoutException will be thrown.
-            .timeout(maxTime);
     }
 }

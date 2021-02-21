@@ -1,4 +1,4 @@
-package microservices.exchangeRate.controller;
+package microservices.exchangerate.controller;
 
 import datamodels.CurrencyConversion;
 import org.springframework.web.bind.annotation.*;

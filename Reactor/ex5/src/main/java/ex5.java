@@ -1,8 +1,9 @@
 import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import microservices.AirportList.AirportListProxySync;
+import microservices.airports.AirportListProxySync;
 import clients.ReactorClient;
+import utils.DateUtils;
 import utils.Options;
 import utils.RunTimer;
 
@@ -27,8 +28,8 @@ public class ex5 {
      * The trip flight leg used for the tests.
      */
     private final TripRequest mTrip = TripRequest
-        .valueOf(LocalDateTime.parse("2025-01-01T07:00:00"),
-                 LocalDateTime.parse("2025-02-01T19:00:00"),
+        .valueOf(DateUtils.parse("2025-01-01T07:00:00"),
+                 DateUtils.parse("2025-02-01T19:00:00"),
                  "LHR",
                  "JFK",
                  1);

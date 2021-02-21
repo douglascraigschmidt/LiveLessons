@@ -1,4 +1,4 @@
-package microservices.AirlineDBs.SWA.controller;
+package microservices.airlines.SWA.controller;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;

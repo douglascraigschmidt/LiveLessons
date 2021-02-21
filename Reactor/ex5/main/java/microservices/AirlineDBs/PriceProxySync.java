@@ -1,4 +1,4 @@
-package microservices.AirlineDBs;
+package microservices.airlines;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;

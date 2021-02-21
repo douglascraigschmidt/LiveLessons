@@ -1,4 +1,4 @@
-package microservices.flightPrice;
+package microservices.flightprice;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;

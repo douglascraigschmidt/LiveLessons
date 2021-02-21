@@ -1,10 +1,10 @@
-package microservices.flightPrice.controller;
+package microservices.flightprice.controller;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.AirlineDBs.AA.AAPriceProxyAsync;
-import microservices.AirlineDBs.PriceProxyAsync;
-import microservices.AirlineDBs.SWA.SWAPriceProxyAsync;
+import microservices.airlines.AA.AAPriceProxyAsync;
+import microservices.airlines.PriceProxyAsync;
+import microservices.airlines.SWA.SWAPriceProxyAsync;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

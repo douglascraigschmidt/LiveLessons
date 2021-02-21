@@ -1,8 +1,8 @@
-package microservices.AirlineDBs.SWA;
+package microservices.airlines.SWA;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.AirlineDBs.PriceProxyAsync;
+import microservices.airlines.PriceProxyAsync;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;

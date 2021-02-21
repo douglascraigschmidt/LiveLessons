@@ -1,10 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Microservices" type="CompoundRunConfigurationType">
+    <toRun name="APIGateway" type="Application" />
+    <toRun name="AirportList" type="Application" />
     <toRun name="SWA" type="Application" />
-    <toRun name="AA" type="Application" />
     <toRun name="Rate" type="Application" />
     <toRun name="Flight" type="Application" />
-    <toRun name="AirportList" type="Application" />
+    <toRun name="AA" type="Application" />
     <method v="2" />
   </configuration>
 </component>

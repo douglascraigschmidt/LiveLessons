@@ -3,8 +3,8 @@ package clients;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.exchangeRate.ExchangeRateProxySync;
-import microservices.flightPrice.FlightPriceProxySync;
+import microservices.exchangerate.ExchangeRateProxySync;
+import microservices.flightprice.FlightPriceProxySync;
 import utils.ExceptionUtils;
 import utils.Options;
 
@@ -71,11 +71,11 @@ public class COOPClient {
                      .print("Iteration #"
                             + iteration
                             + " The price is: "
-                            + tripResponse.getPrice()
+                            + tripResponse.price
                             + " "
                             + currencyConversion.getTo()
                             + " on "
-                            + tripResponse.getAirlineCode()));
+                            + tripResponse.airlineCode));
     }
 
     /**

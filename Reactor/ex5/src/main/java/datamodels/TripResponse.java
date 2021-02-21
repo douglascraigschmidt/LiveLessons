@@ -1,74 +1,81 @@
 package datamodels;
 
-import java.time.LocalDateTime;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * Data structure that defines a response for a trip, which is
  * returned by various microservices to indicate which flight legs
  * match a {@code TripRequest}.
  */
+@Data
 public class TripResponse {
-    /**
-     * Date and time of the initial departure.
+   /**
+     * Date and time of the departure.
      */
-    LocalDateTime departureDateTime;
+    public Date departureDateTime;
 
     /**
-     * Date and time of the initial arrival.
+     * Date and time of the arrival.
      */
-    LocalDateTime arrivalDateTime;
+    public Date arrivalDateTime;
 
     /**
      * Date and time of the return departure.
      */
-    LocalDateTime returnDepartureDateTime;
+    public Date returnDepartureDateTime;
 
     /**
      * Date and time of the return arrival.
      */
-    LocalDateTime returnArrivalDateTime;
+    public Date returnArrivalDateTime;
 
     /**
-     * The three-letter airport code for the departing airport.
+     * Airport code for the departing airport.
      */
-    String departureAirport;
+    public String departureAirport;
 
     /**
-     * The three-letter airport code for the arriving airport.
+     * Airport code for the arriving airport.
      */
-    String arrivalAirport;
+    public String arrivalAirport;
 
     /**
-     * Price.
+     * Price
      */
-    Double price;
+    public Double price;
 
     /**
      * Airline code, e.g., "AA", "SWA", etc.
      */
-    String airlineCode;
+    public String airlineCode;
 
     /**
      * Default constructor needed for WebFlux param passing.
      */
+    @SuppressWarnings("unused") // Used in serialization by both WebFlux and Spring
     public TripResponse() {
     }
 
     /**
      * Constructor initializes the fields.
-     * @param departureDateTime Departure date and time
-     * @param arrivalDateTime Arrival date and time
+     *
+     * @param departureDateTime       Departure date and time
+     * @param arrivalDateTime         Arrival date and time
      * @param returnDepartureDateTime Return departure date and time
-     * @param returnArrivalDateTime Return arrival date and time
-     * @param departureAirport Departure airport
-     * @param arrivalAirport Arrival airport
-     * @param price Price of the flight leg
-     * @param airlineCode Airline code (e.g., "SWA", "AA", etc.)
+     * @param returnArrivalDateTime   Return arrival date and time
+     * @param departureAirport        Departure airport
+     * @param arrivalAirport          Arrival airport
+     * @param price                   Price of the flight leg
+     * @param airlineCode             Airline code (e.g., "SWA", "AA", etc.)
      */
-    public TripResponse(LocalDateTime departureDateTime,
-                        LocalDateTime arrivalDateTime,
-                        LocalDateTime returnDepartureDateTime,
-                        LocalDateTime returnArrivalDateTime,
+    public TripResponse(Date departureDateTime,
+                        Date arrivalDateTime,
+                        Date returnDepartureDateTime,
+                        Date returnArrivalDateTime,
                         String departureAirport,
                         String arrivalAirport,
                         Double price,
@@ -84,196 +91,95 @@ public class TripResponse {
     }
 
     /**
-     * @return Returns true if there's a match between this {@code
-     * TripResponse} and the {@code tripResponse} param
-     */
-    @Override
-    public boolean equals(Object tripResponse) {
-        if (tripResponse.getClass() != this.getClass())
-            return false;
-
-        TripResponse t = (TripResponse) tripResponse;
-        return this.departureDateTime.toLocalDate()
-            .equals(t.departureDateTime.toLocalDate())
-            && this.returnDepartureDateTime.toLocalDate()
-            .equals(t.returnDepartureDateTime.toLocalDate())
-            && this.departureAirport
-            .equals(t.departureAirport)
-            && this.arrivalAirport
-            .equals(t.arrivalAirport);
-    }
-
-    /**
-     * @return A String representation of this {@code TripResponse}
-     */
-    @Override
-    public String toString() {
-        return departureDateTime
-            + ", "
-            + arrivalDateTime
-            + ", "
-            + returnDepartureDateTime
-            + ", "
-            + returnArrivalDateTime
-            + ", "
-            + departureAirport
-            + ", "
-            + arrivalAirport
-            + ", "
-            + price
-            + ", "
-            + airlineCode;
-    }
-
-    /**
-     * Get the departure date and time.
-     */
-    public LocalDateTime getDepartureDateTime() {
-        return departureDateTime;
-    }
-
-    /**
-     * Set the departure date and time.
-     */
-    public void setDepartureDateTime(LocalDateTime departureDate) {
-        this.departureDateTime = departureDate;
-    }
-
-    /**
-     * Get the arrival date and time.
-     */
-    public LocalDateTime getArrivalDateTime() {
-        return arrivalDateTime;
-    }
-
-    /**
-     * Set the arrival date and time.
-     */
-    public void setArrivalDateTime(LocalDateTime arrivalDateTime) {
-        this.arrivalDateTime = arrivalDateTime;
-    }
-
-    /**
-     * Get the return departure date and time.
-     */
-    public LocalDateTime getReturnDepartureDateTime() {
-        return returnDepartureDateTime;
-    }
-
-    /**
-     * Set the return departure date and time.
-     */
-    public void setReturnDateTime(LocalDateTime returnDepartureDateTime) {
-        this.returnDepartureDateTime = returnDepartureDateTime;
-    }
-
-    /**
-     * Get the return arrival date and time.
-     */
-    public LocalDateTime getReturnArrivalDateTime() {
-        return returnArrivalDateTime;
-    }
-
-    /**
-     * Set the return arrival date and time.
-     */
-    public void setReturnArrivalDateTime(LocalDateTime returnArrivalDateTime) {
-        this.returnArrivalDateTime = returnArrivalDateTime;
-    }
-
-    /**
-     * Get the departure airport code.
-     */
-    public String getDepartureAirport() {
-        return departureAirport;
-    }
-
-    /**
-     * Set the departure airport code.
-     */
-    public void setDepartureAirport(String departureAirport) {
-        this.departureAirport = departureAirport;
-    }
-
-    /**
-     * Get the arrival airport code.
-     */
-    public String getArrivalAirport() {
-        return arrivalAirport;
-    }
-
-    /**
-     * Set the arrival airport code.
-     */
-    public void setArrivalAirport(String arrivalAirport) {
-        this.arrivalAirport = arrivalAirport;
-    }
-
-    /**
-     * Get the price for the flight leg.
-     */
-    public Double getPrice() {
-        return price;
-    }
-
-    /**
-     * Set the price for the flight leg.
-     */
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    /**
-     * Get the airpline code.
-     */
-    public String getAirlineCode() {
-        return airlineCode;
-    }
-
-    /**
-     * Set the airpline code.
-     */
-    public void setAirlineCode(String airlineCode) {
-        this.airlineCode = airlineCode;
-    }
-
-    /**
      * Factory method that creates a new {@code TripResponse} object.
      *
-     * @param departureDateTime Departure date and time
-     * @param arrivalDateTime Arrival date and time
+     * @param departureDateTime       Departure date and time
+     * @param arrivalDateTime         Arrival date and time
      * @param returnDepartureDateTime Return departure date and time
-     * @param returnArrivalDateTime Return arrival date and time
-     * @param departureAirport Departure airport
-     * @param arrivalAirport Arrival airport
-     * @param price Price of the flight leg
-     * @param airlineCode Airline code (e.g., "SWA", "AA", etc.)
+     * @param returnArrivalDateTime   Return arrival date and time
+     * @param departureAirport        Departure airport
+     * @param arrivalAirport          Arrival airport
+     * @param price                   Price of the flight leg
+     * @param airlineCode             Airline code (e.g., "SWA", "AA", etc.)
      */
-    public static TripResponse valueOf(LocalDateTime departureDateTime,
-                                       LocalDateTime arrivalDateTime,
-                                       LocalDateTime returnDepartureDateTime,
-                                       LocalDateTime returnArrivalDateTime,
+    public static TripResponse valueOf(Date departureDateTime,
+                                       Date arrivalDateTime,
+                                       Date returnDepartureDateTime,
+                                       Date returnArrivalDateTime,
                                        String departureAirport,
                                        String arrivalAirport,
                                        Double price,
                                        String airlineCode) {
         return new TripResponse(departureDateTime,
-                                arrivalDateTime,
-                                returnDepartureDateTime,
-                                returnArrivalDateTime,
-                                departureAirport,
-                                arrivalAirport,
-                                price,
-                                airlineCode);
+                arrivalDateTime,
+                returnDepartureDateTime,
+                returnArrivalDateTime,
+                departureAirport,
+                arrivalAirport,
+                price,
+                airlineCode);
     }
 
     /**
-     * Convert the price of this TripResponse in one currency system by
-     * multiplying it by the exchange {@code rate}.
+     * Create a new TripResponse with its price converted to another
+     * currency by multiplying by the specified exchange {@code rate}.
      */
     public TripResponse convert(double rate) {
         // Update the price to reflect the exchange rate!
-        setPrice(getPrice() * rate);
-        return this;
+        return valueOf(
+                departureDateTime,
+                arrivalDateTime,
+                returnDepartureDateTime,
+                returnArrivalDateTime,
+                departureAirport,
+                arrivalAirport,
+                price * rate,
+                airlineCode);
+    }
+
+    /**
+     * Note that the id primary key member is not used
+     * in either equality or hash comparisons.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TripResponse)) return false;
+        TripResponse that = (TripResponse) o;
+        return Objects.equals(departureDateTime, that.departureDateTime)
+                && Objects.equals(arrivalDateTime, that.arrivalDateTime)
+                && Objects.equals(returnDepartureDateTime, that.returnDepartureDateTime)
+                && Objects.equals(returnArrivalDateTime, that.returnArrivalDateTime)
+                && Objects.equals(departureAirport, that.departureAirport)
+                && Objects.equals(arrivalAirport, that.arrivalAirport)
+                && Objects.equals(price, that.price)
+                && Objects.equals(airlineCode, that.airlineCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                departureDateTime,
+                arrivalDateTime,
+                returnDepartureDateTime,
+                returnArrivalDateTime,
+                departureAirport,
+                arrivalAirport,
+                price,
+                airlineCode
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "TripResponse{" + "departureDateTime=" + departureDateTime +
+                ", arrivalDateTime=" + arrivalDateTime +
+                ", returnDepartureDateTime=" + returnDepartureDateTime +
+                ", returnArrivalDateTime=" + returnArrivalDateTime +
+                ", departureAirport='" + departureAirport + '\'' +
+                ", arrivalAirport='" + arrivalAirport + '\'' +
+                ", price=" + price +
+                ", airlineCode='" + airlineCode + '\'' +
+                '}';
     }
 }

@@ -1,4 +1,4 @@
-package microservices.AirportList.controller;
+package microservices.airports.controller;
 
 import datamodels.AirportInfo;
 import org.springframework.web.bind.annotation.*;

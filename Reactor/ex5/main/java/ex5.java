@@ -1,7 +1,7 @@
 import datamodels.AirportInfo;
 import datamodels.CurrencyConversion;
 import datamodels.TripRequest;
-import microservices.AirportList.AirportListProxySync;
+import microservices.airports.AirportListProxySync;
 import clients.ReactorClient;
 import utils.Options;
 import utils.RunTimer;

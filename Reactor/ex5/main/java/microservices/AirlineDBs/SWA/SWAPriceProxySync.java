@@ -1,8 +1,8 @@
-package microservices.AirlineDBs.SWA;
+package microservices.airlines.SWA;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
-import microservices.AirlineDBs.PriceProxySync;
+import microservices.airlines.PriceProxySync;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;

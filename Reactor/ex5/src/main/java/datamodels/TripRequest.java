@@ -1,6 +1,6 @@
 package datamodels;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Data structure that defines a request for a trip.
@@ -9,12 +9,12 @@ public class TripRequest {
     /**
      * Date and time of the departure.
      */
-    private LocalDateTime departureDateTime;
+    private Date departureDateTime;
 
     /**
      * Date and time of the return departure.
      */
-    private LocalDateTime returnDepartureDateTime;
+    private Date returnDepartureDateTime;
 
     /**
      * Airport code for the departing airport.
@@ -45,8 +45,8 @@ public class TripRequest {
      * @param arrivalAirport Arrival airport
      * @param passengers Number of passengers
      */
-    public TripRequest(LocalDateTime departureDateTime,
-                       LocalDateTime returnDepartureDateTime,
+    public TripRequest(Date departureDateTime,
+                       Date returnDepartureDateTime,
                        String departureAirport,
                        String arrivalAirport,
                        int passengers) {
@@ -67,10 +67,10 @@ public class TripRequest {
             return false;
 
         TripRequest t = (TripRequest) tripRequest;
-        return this.departureDateTime.toLocalDate()
-            .equals(t.departureDateTime.toLocalDate())
-            && this.returnDepartureDateTime.toLocalDate()
-            .equals(t.returnDepartureDateTime.toLocalDate())
+        return this.departureDateTime
+            .equals(t.departureDateTime)
+            && this.returnDepartureDateTime
+            .equals(t.returnDepartureDateTime)
             && this.departureAirport
             .equals(t.departureAirport)
             && this.arrivalAirport
@@ -82,10 +82,10 @@ public class TripRequest {
      * TripRequest and the {@code tripResponse} param
      */
     public boolean equals(TripResponse tripResponse) {
-        return this.departureDateTime.toLocalDate()
-            .equals(tripResponse.departureDateTime.toLocalDate())
-            && this.returnDepartureDateTime.toLocalDate()
-            .equals(tripResponse.returnDepartureDateTime.toLocalDate())
+        return this.departureDateTime
+            .equals(tripResponse.departureDateTime)
+            && this.returnDepartureDateTime
+            .equals(tripResponse.returnDepartureDateTime)
             && this.departureAirport
             .equals(tripResponse.departureAirport)
             && this.arrivalAirport
@@ -112,28 +112,28 @@ public class TripRequest {
     /**
      * Gets the departure date and time.
      */
-    public LocalDateTime getDepartureDateTime() {
+    public Date getDepartureDateTime() {
         return departureDateTime;
     }
 
     /**
      * Sets the departure date and time.
      */
-    public void setDepartureDateTime(LocalDateTime departureDate) {
+    public void setDepartureDateTime(Date departureDate) {
         this.departureDateTime = departureDate;
     }
 
     /**
      * Gets the return departure date and time.
      */
-    public LocalDateTime getReturnDepartureDateTime() {
+    public Date getReturnDepartureDateTime() {
         return returnDepartureDateTime;
     }
 
     /**
      * Sets the return departure date and time.
      */
-    public void setReturnDateTime(LocalDateTime returnDepartureDateTime) {
+    public void setReturnDateTime(Date returnDepartureDateTime) {
         this.returnDepartureDateTime = returnDepartureDateTime;
     }
 
@@ -189,8 +189,8 @@ public class TripRequest {
      * @param passengers Number of passengers
      * @return An initialized {@code TripRequest}
      */
-    public static TripRequest valueOf(LocalDateTime departureDateTime,
-                                      LocalDateTime returnDepartureDateTime,
+    public static TripRequest valueOf(Date departureDateTime,
+                                      Date returnDepartureDateTime,
                                       String departureAirport,
                                       String arrivalAirport,
                                       int passengers) {

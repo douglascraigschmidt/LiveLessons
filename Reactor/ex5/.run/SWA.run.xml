@@ -5,7 +5,7 @@
     <envs>
       <env name="server.port" value="8082" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="microservices.AirlineDBs.SWA.SWAPricesMicroservice" />
+    <option name="MAIN_CLASS_NAME" value="microservices.airlines.SWA.SWAPricesMicroservice" />
     <module name="ex5.main" />
     <method v="2">
       <option name="Make" enabled="true" />

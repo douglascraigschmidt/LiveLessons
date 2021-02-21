@@ -1,4 +1,4 @@
-package microservices.AirportList;
+package microservices.airports;
 
 import datamodels.AirportInfo;
 import org.springframework.http.ResponseEntity;

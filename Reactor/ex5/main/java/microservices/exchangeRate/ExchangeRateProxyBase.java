@@ -1,4 +1,4 @@
-package microservices.exchangeRate;
+package microservices.exchangerate;
 
 import datamodels.CurrencyConversion;
 import datamodels.TripResponse;

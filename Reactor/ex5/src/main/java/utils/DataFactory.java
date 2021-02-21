@@ -125,15 +125,15 @@ public class DataFactory {
         // Create and return a TripResponse via a factory method.
         return TripResponse
             .valueOf(// Date/time of the initial departure.
-                     LocalDateTime.parse(result[0]),
+                     DateUtils.parse(result[0]),
                      // Date/time of the initial arrival.
-                     LocalDateTime.parse(result[1]),
+                     DateUtils.parse(result[1]),
 
                      // Date/time of the return departure.
-                     LocalDateTime.parse(result[2]),
+                     DateUtils.parse(result[2]),
 
                      // Date/time of the return arrival.
-                     LocalDateTime.parse(result[3]),
+                     DateUtils.parse(result[3]),
 
                      // Code for the departure airport.
                      result[4],

@@ -5,7 +5,7 @@
     <envs>
       <env name="server.port" value="8081" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="microservices.exchangeRate.ExchangeRateMicroservice" />
+    <option name="MAIN_CLASS_NAME" value="microservices.exchangerate.ExchangeRateMicroservice" />
     <module name="ex5.main" />
     <method v="2">
       <option name="Make" enabled="true" />
