@@ -62,7 +62,6 @@ public class ex5 {
             .findAirportInfo()
             .forEach(System.out::println); */
 
-        /*
         RunTimer
                 // This test uses Java concurrent object-oriented
                 // programming frameworks to invoke microservices that
@@ -87,7 +86,6 @@ public class ex5 {
                 .timeRun(() -> ReactorClient.runAsyncTests(mTrip,
                         mCurrencyConversion),
                         "runReactorAsyncTests");
-        */
 
         RunTimer
                 // This test uses the Spring RSocket and WebFlux
