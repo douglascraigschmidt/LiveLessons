@@ -4,6 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
       <env name="server.port" value="8083" />
+      <env name=" spring.rsocket.server.port" value="8088" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="microservices.flightprice.FlightPriceMicroservice" />
     <module name="ex5.main" />

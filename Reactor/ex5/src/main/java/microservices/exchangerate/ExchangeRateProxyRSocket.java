@@ -1,8 +1,6 @@
 package microservices.exchangerate;
 
-import ch.qos.logback.classic.Level;
 import datamodels.CurrencyConversion;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.cbor.Jackson2CborDecoder;
 import org.springframework.http.codec.cbor.Jackson2CborEncoder;
@@ -22,12 +20,15 @@ import java.util.function.Function;
  */
 public class ExchangeRateProxyRSocket {
     /**
-     * The URI that denotes a remote method to determine the current
-     * exchange rate asynchronously.
+     * The message name that denotes a remote method to determine the
+     * current exchange rate asynchronously.
      */
     private final String mQueryExchangeRateMessage =
         "_queryForExchangeRate";
 
+    /**
+     * Initialize the RSocketRequestor.
+     */
     private final Mono<RSocketRequester> rSocketRequester = Mono
         .just(RSocketRequester.builder()
               .rsocketConnector(rSocketConnector -> rSocketConnector
@@ -43,12 +44,6 @@ public class ExchangeRateProxyRSocket {
               .tcp("localhost", 8087));
 
     /**
-     * Constructor initializes the super class.
-     */
-    public ExchangeRateProxyRSocket() {
-    }
-
-    /**
      * Finds the exchange rate for the {@code sourceAndDestination}
      * asynchronously.
      *
@@ -61,9 +56,13 @@ public class ExchangeRateProxyRSocket {
                                              CurrencyConversion currencyConversion) {
         return Mono
             .fromCallable(() -> rSocketRequester
+                          // Create the data to send to the server.
                           .map(r -> r
                                .route(mQueryExchangeRateMessage)
                                .data(currencyConversion))
+
+                          // Get the result back from the server as a
+                          // Double.
                           .flatMap(r -> r.retrieveMono(Double.class)))
             
             // Schedule this to run on the given scheduler.

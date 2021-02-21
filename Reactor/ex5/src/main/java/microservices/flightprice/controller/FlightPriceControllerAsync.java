@@ -59,6 +59,20 @@ public class FlightPriceControllerAsync {
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
 
+        // Forward to the implementation method.
+        return findBestPriceImpl(tripRequest);
+    }
+
+    /**
+     * This method finds the best price in US dollars for a given
+     * {@code tripRequest} request.
+     *
+     * @param tripRequest Information about the trip, e.g., departure date
+     *             and departure/arrival airports
+     * @return A Mono that emits the best price in US dollars for this
+     *         {@code trip}
+     */
+    private Mono<TripResponse> findBestPriceImpl(TripRequest tripRequest) {
         return Flux
             // Convert the list of proxies into a Flux stream.
             .fromIterable(mProxyList)
@@ -105,6 +119,7 @@ public class FlightPriceControllerAsync {
         // initialized by an earlier call.
         initializeProxiesIfNecessary();
 
+        // Forward to the implementation method.
         return findFlightsImpl(tripRequest);
     }
 

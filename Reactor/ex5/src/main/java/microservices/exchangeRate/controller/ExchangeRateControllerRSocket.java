@@ -1,8 +1,6 @@
 package microservices.exchangerate.controller;
 
-import ch.qos.logback.classic.Level;
 import datamodels.CurrencyConversion;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;

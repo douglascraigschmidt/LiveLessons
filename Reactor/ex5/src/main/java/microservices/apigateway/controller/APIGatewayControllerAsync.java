@@ -1,14 +1,13 @@
 package microservices.apigateway.controller;
 
 import datamodels.AirportInfo;
-import datamodels.CurrencyConversion;
-import datamodels.TripRequest;
 import datamodels.TripResponse;
 import microservices.airports.AirportListProxyAsync;
 import microservices.apigateway.FlightRequest;
 import microservices.exchangerate.ExchangeRateProxyAsync;
 import microservices.exchangerate.ExchangeRateProxyRSocket;
 import microservices.flightprice.FlightPriceProxyAsync;
+import microservices.flightprice.FlightPriceProxyRSocket;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,7 +51,13 @@ public class APIGatewayControllerAsync {
         new ExchangeRateProxyAsync();
 
     /**
-     * An async proxy to the ExchangeRate microservice.
+     * An RSocket proxy to the FlightPrice microservice.
+     */
+    private final FlightPriceProxyRSocket mFlightPriceProxyRSocket =
+            new FlightPriceProxyRSocket();
+
+    /**
+     * An RSocket proxy to the ExchangeRate microservice.
      */
     private final ExchangeRateProxyRSocket mExchangeRateProxyRSocket =
         new ExchangeRateProxyRSocket();
@@ -89,7 +94,7 @@ public class APIGatewayControllerAsync {
      */
     @PostMapping("_findBestPrice")
     public Mono<TripResponse> findBestPrice(@RequestBody FlightRequest flightRequest) {
-        Mono<TripResponse> tripM = mFlightPriceProxyAsync
+        Mono<TripResponse> tripM = mFlightPriceProxyRSocket
             // Asynchronously find the best price in US dollars for
             // the tripRequest.
             .findBestPrice(Schedulers.parallel(),
@@ -120,7 +125,7 @@ public class APIGatewayControllerAsync {
      */
     @PostMapping("_findFlights")
     public Flux<TripResponse> findFlights(@RequestBody FlightRequest flightRequest) {
-        Flux<TripResponse> tripF = mFlightPriceProxyAsync
+        Flux<TripResponse> tripF = mFlightPriceProxyRSocket
             // Asynchronously find all the flights in the tripRequest.
             .findFlights(Schedulers.parallel(),
                          flightRequest.tripRequest);
