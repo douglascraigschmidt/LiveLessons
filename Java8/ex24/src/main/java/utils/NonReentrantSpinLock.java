@@ -6,8 +6,6 @@ import java.util.concurrent.locks.Lock;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * This class emulates a "compare and swap"-style spin-lock with
  * non-recursive semantics using the Java VarHandle class.
@@ -63,7 +61,7 @@ public class NonReentrantSpinLock
         // cache performance.  See the stackoverflow article at
         // http://15418.courses.cs.cmu.edu/spring2013/article/31
         // and stackoverflow.com/a/4939383/13411862 for details.
-        while (!(mOwner.get() == null && tryLock())) 
+        while (!(value == 0 && tryLock()))
             continue;
     }
 
@@ -81,7 +79,7 @@ public class NonReentrantSpinLock
                 break;
             else if (Thread.interrupted())
                 // Break out of the loop if we were interrupted.
-                break;
+                throw new InterruptedException();
         }
     }
 
@@ -99,13 +97,12 @@ public class NonReentrantSpinLock
     }
 
     @Override
-    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        throw new NotImplementedException();
+    public boolean tryLock(long time, TimeUnit unit) {
+        throw new UnsupportedOperationException("Timed tryLock() method not implemented");
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public Condition newCondition() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("newCondition() method not implemented");
     }
 }

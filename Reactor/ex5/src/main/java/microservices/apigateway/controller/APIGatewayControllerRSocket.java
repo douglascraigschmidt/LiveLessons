@@ -3,6 +3,7 @@ package microservices.apigateway.controller;
 import datamodels.AirportInfo;
 import datamodels.TripResponse;
 import microservices.airports.AirportListProxyAsync;
+import microservices.airports.AirportListProxyRSocket;
 import microservices.apigateway.FlightRequest;
 import microservices.exchangerate.ExchangeRateProxyAsync;
 import microservices.exchangerate.ExchangeRateProxyRSocket;
@@ -50,8 +51,8 @@ public class APIGatewayControllerRSocket {
     /**
      * An async proxy to the AirportList microservice
      */
-    private final AirportListProxyAsync mAirportListProxy =
-        new AirportListProxyAsync();
+    private final AirportListProxyRSocket mAirportListRSocket =
+        new AirportListProxyRSocket();
 
     /**
      * This method finds information about all the airports
@@ -64,7 +65,7 @@ public class APIGatewayControllerRSocket {
      */
     @GetMapping("_getAirportList")
     public Flux<AirportInfo> getAirportInfo() {
-        return mAirportListProxy.findAirportInfo(Schedulers.parallel());
+        return mAirportListRSocket.findAirportInfo(Schedulers.parallel());
     }
 
     /**

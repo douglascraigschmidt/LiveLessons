@@ -26,11 +26,11 @@ import java.util.function.Function;
  */
 public class APIGatewayProxyRSocket {
     /**
-     * The URI that denotes a remote method to find information about
+     * The message name that denotes a remote method to find information about
      * all the airports asynchronously.
      */
-    private final String mFindAirportsURIAsync =
-        "/microservices/APIGatewayAsync/_getAirportList";
+    private final String mFindAirportsMessage =
+        "_getAirportList";
 
     /**
      * The message name that denotes a remote method to find the best
@@ -70,31 +70,23 @@ public class APIGatewayProxyRSocket {
      * @return A Flux that emits {@code AirportInfo} objects
      */
     public Flux<AirportInfo> findAirportInfo(Scheduler scheduler) {
-        /*
         return Mono
             // Return a Flux containing the list of airport
             // information.
-            .fromCallable(() -> mAPIGateway
-                          // Create an HTTP POST request.
-                          .get()
+            .fromCallable(() -> rSocketRequester
+                    // Create the data to send to the server.
+                    .map(r -> r
+                            .route(mFindAirportsMessage))
 
-                          // Add the uri to the baseUrl.
-                          .uri(mFindAirportsURIAsync)
-
-                          // Retrieve the response.
-                          .retrieve()
-
-                          // Convert it to a Flux of AirportInfo
-                          // objects.
-                          .bodyToFlux(AirportInfo.class))
+                    // Get the result back from the server as a
+                    // Flux<TripResponse>.
+                    .flatMapMany(r -> r.retrieveFlux(AirportInfo.class)))
 
             // Schedule this to run on the given scheduler.
             .subscribeOn(scheduler)
 
             // De-nest the result so it's a Flux<AirportInfo>.
             .flatMapMany(Function.identity());
-        */
-        return null;
     }
 
     /**

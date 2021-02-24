@@ -48,11 +48,8 @@ public class ex9 {
      * Main entry point into the test program.
      */
     static public void main(String[] argv) {
-        // Create an instance to test.
-        ex9 test = new ex9(argv);
-
-        // Run the tests.
-        test.run();
+        // Create and run the tests.
+        new ex9(argv).run();
     }
 
     /**
@@ -68,6 +65,14 @@ public class ex9 {
         // Parse the command-line arguments.
         Options.instance().parseArgs(argv);
 
+        // Generate random data for use by the various hashmaps.
+        mRandomIntegers = generateRandomData();
+    }
+
+    /**
+     * Generate random data for use by the various hashmaps.
+     */
+    private List<Integer> generateRandomData() {
         // Get how many integers we should generate.
         int count = Options.instance().count();
 
@@ -75,18 +80,18 @@ public class ex9 {
         int maxValue = Options.instance().maxValue();
 
         // Generate a list of random large integers.
-        mRandomIntegers = new Random()
-            // Generate "count" random large ints
-            .ints(count,
-                  // Try to generate duplicates.
-                  maxValue - count, 
-                  maxValue)
+        return new Random()
+                // Generate "count" random large ints
+                .ints(count,
+                        // Try to generate duplicates.
+                        maxValue - count,
+                        maxValue)
 
-            // Convert each primitive int to Integer.
-            .boxed()    
-                   
-            // Trigger intermediate operations and collect into list.
-            .collect(toList());
+                // Convert each primitive int to Integer.
+                .boxed()
+
+                // Trigger intermediate operations and collect into list.
+                .collect(toList());
     }
 
     /**
