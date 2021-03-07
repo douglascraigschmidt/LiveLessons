@@ -71,7 +71,7 @@ public class NonReentrantSpinLock
      */
     @Override
     public void lockInterruptibly() throws InterruptedException {
-        for (; ;) {
+        for (;;) {
             // Only try to get the lock if its null, which improves
             // cache performance.
             if (value == 0 && tryLock())
@@ -92,7 +92,7 @@ public class NonReentrantSpinLock
         // Atomically release the lock that's currently held by the
         // owner. If the lock is not held by the owner, then throw an
         // IllegalMonitorStateException.
-        if ((int)VALUE.getAndSet(this, 0) != 1)
+        if ((int) VALUE.getAndSet(this, 0) != 1)
             throw new IllegalMonitorStateException("Unlock called when not locked");
     }
 
