@@ -1,3 +1,7 @@
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.functions.BiFunction;
+
 import java.math.BigInteger;
 import java.util.function.Function;
 import java.util.stream.LongStream;
@@ -6,9 +10,8 @@ import java.util.stream.LongStream;
  * This program implements various ways of computing factorials for
  * BigIntegers to demonstrate the performance of alternative parallel
  * and sequential algorithms, as well as the dangers of sharing
- * unsynchronized state between threads.  A conventional Java 8
- * parallel streams solution would look like this for 'n' of type
- * long:
+ * unsynchronized state between threads.  A conventional Java parallel
+ * streams solution would look like this for 'n' of type long:
  *
  * LongStream
  *   // Generate long values from 1 to n
@@ -29,7 +32,7 @@ public class ex16 {
     /**
      * Max number of times to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 10000;
+    private static final int sMAX_ITERATIONS = 50000;
 
     /**
      * Default factorial number.  
@@ -53,8 +56,8 @@ public class ex16 {
             BigInteger mTotal = BigInteger.ONE;
 
             /**
-             * Multiply the running total by @a n.  This method is not
-             * synchronized, so it may incur race conditions.
+             * Multiply the running total by {@code n}.  This method
+             * is not synchronized, so it may incur race conditions.
              */
             void multiply(BigInteger n) {
                 mTotal = mTotal.multiply(n);
@@ -62,9 +65,9 @@ public class ex16 {
         }  
 
         /**
-         * Attempts to return the factorial for the given @a n.  There
-         * are race conditions wrt accessing shared state, however, so
-         * the result may not always be correct.
+         * Attempts to return the factorial for the given {@code n}.
+         * There are race conditions wrt accessing shared state,
+         * however, so the result may not always be correct.
          */
         static BigInteger factorial(BigInteger n) {
             Total t = new Total();
@@ -106,8 +109,8 @@ public class ex16 {
             BigInteger mTotal = BigInteger.ONE;
 
             /**
-             * Multiply the running total by @a n.  This method is
-             * synchronized to avoid race conditions.
+             * Multiply the running total by {@code n}.  This method
+             * is synchronized to avoid race conditions.
              */
             void multiply(BigInteger n) {
                 synchronized (this) {
@@ -126,8 +129,8 @@ public class ex16 {
         }
 
         /**
-         * Return the factorial for the given @a n using a parallel
-         * stream and the forEach() terminal operation.
+         * Return the factorial for the given {@code n} using a
+         * parallel stream and the forEach() terminal operation.
          */
         static BigInteger factorial(BigInteger n) {
             Total t = new Total();
@@ -157,8 +160,8 @@ public class ex16 {
      */
     private static class ParallelStreamFactorial {
         /**
-         * Return the factorial for the given @a n using a parallel
-         * stream and the reduce() terminal operation.
+         * Return the factorial for the given {@code n} using a
+         * parallel stream and the reduce() terminal operation.
          */
         static BigInteger factorial(BigInteger n) {
             return LongStream
@@ -185,8 +188,8 @@ public class ex16 {
      */
     private static class ParallelStreamFactorialEx {
         /**
-         * Return the factorial for the given @a n using a parallel
-         * stream and the reduce() terminal operation.
+         * Return the factorial for the given {@code n} using a
+         * parallel stream and the reduce() terminal operation.
          */
         static BigInteger factorial(BigInteger n) {
             return LongStream
@@ -210,13 +213,43 @@ public class ex16 {
     }
 
     /**
-     * This class demonstrates a baseline sequential factorial
-     * implementation.
+     * This class demonstrates how to apply the RxJava
+     * ParallelFlowable feature to compute factorials in parallel.
+     */
+    private static class RxJavaParallelFlowableFactorial {
+        /**
+         * Return the factorial for the given {@code n} using the
+         * RxJava ParallelFlowable and its reduce() operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return Flowable
+                // Create a stream of longs from 1 to n.
+                .rangeLong(1, n.longValue())
+
+                // Convert the Flowable into a ParallelFlowable.
+                .parallel()
+
+                // Create a BigInteger from the long value.
+                .map(BigInteger::valueOf)
+
+                // Use reduce() to perform a reduction on the elements
+                // of this stream to compute the factorial.
+                .reduce(BigInteger::multiply)
+
+                // Block until all the results are finished.  If n was
+                // 0 then return 1.
+                .blockingSingle(BigInteger.ONE);
+        }
+    }
+
+    /**
+     * This class demonstrates a baseline factorial implementation
+     * using a sequential Java Stream.
      */
     private static class SequentialStreamFactorial {
         /**
-         * Return the factorial for the given @a n using a sequential
-         * stream and the reduce() terminal operation.
+         * Return the factorial for the given {@code n} using a
+         * sequential stream and the reduce() terminal operation.
          */
         static BigInteger factorial(BigInteger n) {
             return LongStream
@@ -233,7 +266,34 @@ public class ex16 {
     }
 
     /**
-     * Run the given @a factorial test and print the result.
+     * This class demonstrates a baseline factorial implementation
+     * using a sequential RxJava Observable.
+     */
+    private static class SequentialRxJavaObservableFactorial {
+        /**
+         * Return the factorial for the given {@code n} using a
+         * sequential RxJava Observable and its reduce() operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return Observable
+                // Create a stream of longs from 1 to n.
+                .rangeLong(1, n.longValue())
+
+                // Create a BigInteger from the long value.
+                .map(BigInteger::valueOf)
+
+                // Use reduce() to perform a reduction on the elements
+                // of this stream to compute the factorial.
+                .reduce(BigInteger::multiply)
+
+                // Block until all the results are finished.  If n was
+                // 0 then return 1.
+                .blockingGet(BigInteger.ONE);
+        }
+    }
+
+    /**
+     * Run the given {@code factorialTest} and print the result.
      */
     private <T> void runTest(String factorialTest,
                              Function<T, T> factorial,
@@ -301,6 +361,10 @@ public class ex16 {
                      SequentialStreamFactorial::factorial,
                      n);
 
+        test.runTest("SequentialRxJavaObservableFactorial",
+                     SequentialRxJavaObservableFactorial::factorial,
+                     n);
+
         test.runTest("BuggyFactorial",
                      BuggyFactorial::factorial,
                      n);
@@ -311,6 +375,10 @@ public class ex16 {
 
         test.runTest("ParallelStreamFactorialEx",
                      ParallelStreamFactorialEx::factorial,
+                     n);
+
+        test.runTest("RxJavaParallelFlowableFactorial",
+                     RxJavaParallelFlowableFactorial::factorial,
                      n);
 
         System.out.println("Ending Factorial Tests");

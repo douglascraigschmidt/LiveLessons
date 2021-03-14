@@ -84,8 +84,11 @@ Here's an overview of what's current included in these examples:
          limit()) in the context of parallel streams.
 
 . ex16 - This program implements various ways of computing factorials
-         to demonstrate the performance of alternative techniques and
-         the dangers of sharing unsynchronized state between threads.
+         for BigIntegers to demonstrate the performance of alternative
+         parallel and sequential algorithms, as well as the dangers of
+         sharing unsynchronized state between threads.  It illustrates
+         both Java sequential/parallel Streams and RxJava
+         sequential/parallel reactive streams.
 
 . ex17 - This example shows various issues associated with using the
          Java streams reduce() terminal operation, including the need
