@@ -102,17 +102,20 @@ public class StampedLockHashMap<K, V>
             // Get the current value (if any).
             V value = mMap.get(key);
 
-            // If value is null then this is the first time in.
-            if (value == null) 
+            // This is the slow path, i.e., the key does not have a value
+            // associated with it in the map.
+            if (value == null) {
+                // Apply the mapping function.
                 value = mappingFunction.apply(key);
-        
-            // If mapping function worked then add value to map.
-            if (value != null) {
-                // Put the key in the map on success.
-                mMap.put(key, value);
+
+                // If mapping function worked then add value to map.
+                if (value != null) {
+                    // Put the key in the map on success.
+                    mMap.put(key, value);
+                }
             }
 
-            // Return the value (either new or old).
+            // Return the value (either old or new).
             return value;
         } finally {
             // Unlock the write stamp.
@@ -138,9 +141,9 @@ public class StampedLockHashMap<K, V>
                 // No need for a write lock!
                 return value;
             else {
-                // Use a loop to avoid redundant code.
+                // Use a for-ever loop to avoid redundant code.
                 for(;;) {
-                    // Try converting to writelock (non-blocking).
+                    // Try upgrade to writelock (non-blocking).
                     long ws = mStampedLock.tryConvertToWriteLock(stamp);
 
                     // ws is non-zero on success.
@@ -220,7 +223,7 @@ public class StampedLockHashMap<K, V>
         else if (value == null) {
             // This is the first time in for that key.
 
-            // Try converting to writelock (non-blocking).
+            // Try upgrade the optimistic readlock to a writelock (non-blocking).
             stamp = mStampedLock.tryConvertToWriteLock(stamp);
 
             if (stamp == 0L) 
