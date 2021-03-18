@@ -13,6 +13,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+/**
+ * This example demonstrates various algorithms for finding the
+ * cheapest flight(s) from a Flux of TripResponses.
+ */
 public class ex2 {
     /**
      * The trip flight leg used for the tests.

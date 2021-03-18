@@ -8,9 +8,8 @@ overview of what's included:
         framework, including flatMap(), collectList(), zipWith(),
         first(), when(), and onErrorResume().
   
-. ex2 - This example is currently just a placeholder for random things
-        I'm playing around with for Project Reactor.  It's likely to
-        change radically from time to time.
+. ex2 - This example demonstrates various algorithms for finding the
+        cheapest flight(s) from a Flux of TripResponses.
 
 . ex3 - This program applies Project Reactor features to implement
         various types of backpressure strategies (e.g., ignore,
