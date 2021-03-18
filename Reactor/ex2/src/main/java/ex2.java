@@ -29,8 +29,11 @@ public class ex2 {
 
         // Find the cheapest flights.
         Flux<TripResponse> lowestPrices = MathFlux
+            // Find the cheapest flight.
             .min(flights, Comparator.comparing(TripResponse::getPrice))
+            // Create a Flux that contains the cheapest flights.
             .flatMapMany(min -> flights
+                        // Only allow flights that match the cheapest.
                         .filter(tr -> tr.getPrice().equals(min.getPrice())));
 
         // Print the cheapest flights.
