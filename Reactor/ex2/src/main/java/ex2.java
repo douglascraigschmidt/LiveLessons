@@ -27,17 +27,40 @@ public class ex2 {
         // Get all the flights.
         final Flux<TripResponse> flights = TestDataFactory.findFlights(sTrip);
 
+        // findCheapestFlightsMin(flights);
+        findCheapestFlightsSorted(flights);
+    }
+
+    private static void findCheapestFlightsMin(Flux<TripResponse> flights) {
         // Find the cheapest flights.
         Flux<TripResponse> lowestPrices = MathFlux
-            // Find the cheapest flight.
-            .min(flights, Comparator.comparing(TripResponse::getPrice))
-            // Create a Flux that contains the cheapest flights.
-            .flatMapMany(min -> flights
+                // Find the cheapest flight.
+                .min(flights, Comparator.comparing(TripResponse::getPrice))
+                // Create a Flux that contains the cheapest flights.
+                .flatMapMany(min -> flights
                         // Only allow flights that match the cheapest.
                         .filter(tr -> tr.getPrice().equals(min.getPrice())));
 
         // Print the cheapest flights.
         lowestPrices
-           .subscribe(System.out::println);
+                .subscribe(System.out::println);
+    }
+
+    private static void findCheapestFlightsSorted(Flux<TripResponse> flights) {
+        // Sort the flights from lowest to highest price.
+        Flux<TripResponse> sortedFlights = flights
+            .sort(Comparator.comparing(TripResponse::getPrice));
+
+        // Create a flux containing the cheapest prices.
+        Flux<TripResponse> lowestPrices = sortedFlights
+            // Get the cheapest price.
+            .elementAt(0)
+            // Take all the elements that match the cheapest price.
+            .flatMapMany(min ->
+                sortedFlights.takeWhile(tr -> tr.getPrice().equals(min.getPrice())));
+
+        // Print the cheapest flights.
+        lowestPrices
+                .subscribe(System.out::println);
     }
 }
