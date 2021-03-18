@@ -1,8 +1,12 @@
 import datamodels.TripRequest;
 import datamodels.TripResponse;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.math.MathFlux;
 import utils.TestDataFactory;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 public class ex2 {
@@ -20,8 +24,17 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        final List<TripResponse> flights = TestDataFactory.findFlights(sTrip);
+        // Get all the flights.
+        final Flux<TripResponse> flights = TestDataFactory.findFlights(sTrip);
 
-        flights.forEach(System.out::println);
+        // Find the cheapest flights.
+        Flux<TripResponse> lowestPrices = MathFlux
+            .min(flights, Comparator.comparing(TripResponse::getPrice))
+            .flatMapMany(min -> flights
+                        .filter(tr -> tr.getPrice().equals(min.getPrice())));
+
+        // Print the cheapest flights.
+        lowestPrices
+           .subscribe(System.out::println);
     }
 }

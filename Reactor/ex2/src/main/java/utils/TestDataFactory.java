@@ -2,6 +2,7 @@ package utils;
 
 import datamodels.TripRequest;
 import datamodels.TripResponse;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,28 +24,28 @@ public class TestDataFactory {
             // Feel free to add more rows to this array to generate more test data!
             "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,777.00,AA",
             "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,555.00,AA",
+            "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,888.00,AA",
             "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,888.00,SWA",
-            "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,666.00,SWA"
+            "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,666.00,SWA",
+            "2025-02-01T19:00:00,2025-01-02T10:00:00,2025-02-01T07:00:00,2025-02-01T10:00:00,JFK,LHR,555.00,SWA",
+            "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,777.00,SWA"
     };
 
     /**
-     * Return a list of {@code TripResponse} objects that match the
-     * given {@code tripRequest}.
+     * Return a Flux that emits {@code TripResponse} objects that
+     * match the given {@code tripRequest}.
      */
-    public static List<TripResponse> findFlights(TripRequest tripRequest) {
-        return Stream
+    public static Flux<TripResponse> findFlights(TripRequest tripRequest) {
+        return Flux
             // Convert the array into a stream.
-            .of(sFlightInfo)
+            .fromArray(sFlightInfo)
 
             // Convert the strings into TripResponse objects.
             .map(TestDataFactory::makeTrip)
 
             // Only keep TripResponse objects that match the
             // tripRequest.
-            .filter(tripRequest::equals)
-
-            // Collect the results into a list.
-            .collect(toList());
+            .filter(tripRequest::equals);
     }
 
     /**
