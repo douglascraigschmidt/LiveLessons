@@ -31,7 +31,7 @@ public class ex2 {
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws InterruptedException {
+    public static void main (String[] argv) {
         // Get all the flights.
         final Flux<TripResponse> flights = TestDataFactory.findFlights(sTrip);
 
