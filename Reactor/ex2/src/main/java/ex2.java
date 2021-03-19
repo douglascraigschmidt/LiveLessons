@@ -1,21 +1,21 @@
 import datamodels.TripRequest;
 import datamodels.TripResponse;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
+import utils.CheapestPriceCollector;
 import utils.TestDataFactory;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
+import java.util.Comparator;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 
 /**
- * This example demonstrates various algorithms for finding the
- * cheapest flight(s) from a Flux of TripResponses.
+ * This example demonstrates various reactive algorithms for finding
+ * all the minimium values in an unordered list, which is surprisingly
+ * not well documented in the literature.  The three algorithms below
+ * return a Flux that emits the cheapest flight(s) from a Flux of
+ * available flights, which is part of an Airline Booking App that
+ * we're creating for an upcoming MOOC on Reactive Microservices.
  */
 public class ex2 {
     /**
@@ -35,8 +35,17 @@ public class ex2 {
         // Get all the flights.
         final Flux<TripResponse> flights = TestDataFactory.findFlights(sTrip);
 
+        // Print the cheapest flights via a two pass algorithm that
+        // uses min() and filter().
         printCheapestFlightsMin(flights);
+
+        // Print the cheapest flights via a two-pass algorithm that
+        // first calls sort() to order the trips by price and then
+        // uses takeWhile() to return the cheapest flight(s).
         printCheapestFlightsSorted(flights);
+
+        // Print the cheapest flights via a one-pass algorithm and a
+        // custom Collector.
         printCheapestFlightsOnepass(flights);
     }
 
@@ -45,6 +54,8 @@ public class ex2 {
      * min() and filter().
      */
     private static void printCheapestFlightsMin(Flux<TripResponse> flights) {
+        System.out.println("printCheapestFlightsMin():");
+
         // Find the cheapest flights.
         Flux<TripResponse> lowestPrices = MathFlux
             // Find the cheapest flight.
@@ -65,6 +76,8 @@ public class ex2 {
      * takeWhile() to return the cheapest flight(s).
      */
     private static void printCheapestFlightsSorted(Flux<TripResponse> flights) {
+        System.out.println("printCheapestFlightsSorted():");
+
         // Sort the flights from lowest to highest price.
         Flux<TripResponse> sortedFlights = flights
             .sort(Comparator.comparing(TripResponse::getPrice));
@@ -84,62 +97,16 @@ public class ex2 {
     }
 
     /**
-     * Define a collector that converts a stream of TripResponses into
-     * a Flux that emits the cheapest priced trips(s).
-     */
-    private static class CheapestPriceCollector
-                   implements Collector<TripResponse, List<TripResponse>, Flux<TripResponse>> {
-        /**
-         * The minimum value seen by the collector.
-         */
-        Double mMin = Double.MAX_VALUE;
-
-        @Override
-        public Supplier<List<TripResponse>> supplier() {
-            return ArrayList::new;
-        }
-
-        @Override
-        public BiConsumer<List<TripResponse>, TripResponse> accumulator() {
-            return (lowestPrices, tripResponse) -> {
-                if (tripResponse.getPrice() < mMin) {
-                    lowestPrices.clear();
-                    lowestPrices.add(tripResponse);
-                    mMin = tripResponse.getPrice();
-                } else if (tripResponse.getPrice().equals(mMin)) {
-                    lowestPrices.add(tripResponse);
-                }
-            };
-        }
-
-        @Override
-        public BinaryOperator<List<TripResponse>> combiner() {
-            return (one, another) -> {
-                one.addAll(another);
-                return one;
-            };
-        }
-
-        @Override
-        public Function<List<TripResponse>, Flux<TripResponse>> finisher() {
-            return Flux::fromIterable;
-        }
-
-        @Override
-        public Set<Characteristics> characteristics() {
-            return Collections.emptySet();
-        }
-    }
-
-    /**
      * Print the cheapest flights via a one-pass algorithm and a
      * custom Collector.
      */
     private static void printCheapestFlightsOnepass(Flux<TripResponse> flights) {
+        System.out.println("printCheapestFlightsOnepass():");
+
         Flux<TripResponse> lowestPrices = flights
             // Converts a stream of TripResponses into a Flux that
             // emits the cheapest priced trips(s).
-            .collect(new CheapestPriceCollector())
+            .collect(CheapestPriceCollector.toFlux())
 
             // Convert the Mono into a Flux that emits the cheapest
             // priced trip(s).
