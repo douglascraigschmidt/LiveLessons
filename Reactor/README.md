@@ -9,7 +9,7 @@ overview of what's included:
         first(), when(), and onErrorResume().
   
 . ex2 - This example demonstrates various reactive algorithms for
-        finding all the minimium values in an unordered list, which is
+        finding all the minimum values in an unordered list, which is
         surprisingly not well documented in the literature.  These
         three algorithms return a Flux that emits the cheapest
         flight(s) from a Flux of available flights, which is part of

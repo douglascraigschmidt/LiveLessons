@@ -11,8 +11,8 @@ import java.util.function.Function;
 
 /**
  * This example demonstrates various reactive algorithms for finding
- * all the minimium values in an unordered list, which is surprisingly
- * not well documented in the literature.  The three algorithms below
+ * all the minimum values in an unordered list, which is surprisingly
+ * not well documented in the literature.  These three algorithms
  * return a Flux that emits the cheapest flight(s) from a Flux of
  * available flights, which is part of an Airline Booking App that
  * we're creating for an upcoming MOOC on Reactive Microservices.
