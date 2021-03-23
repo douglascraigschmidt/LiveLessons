@@ -4,21 +4,26 @@ import utils.AsyncTaskBarrier;
  * This example shows how to apply RxJava features asynchronously and
  * concurrently reduce, multiply, and display BigFractions via various
  * Single operations, including fromCallable(), subscribeOn(),
- * zipWith(), doOnSuccess(), ignoreElement(), and
+ * zipArray(), zipWith(), doOnSuccess(), ignoreElement(), and
  * Schedulers.computation().
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex3 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
+        // Test asynchronous BigFraction multiplication using flatMap().
+        AsyncTaskBarrier.register(SingleEx::testFractionMultiplyAsync);
+
         // Test asynchronous BigFraction multiplication and addition
         // using zipWith().
-        AsyncTaskBarrier.register(SingleEx::testFractionCombine);
+        AsyncTaskBarrier.register(SingleEx::testFractionCombine1);
 
-        @SuppressWarnings("ConstantConditions")
-            long testCount = AsyncTaskBarrier
+        // Test asynchronous BigFraction multiplication and addition
+        // using zip().
+        AsyncTaskBarrier.register(SingleEx::testFractionCombine2);
+
+        long testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
 

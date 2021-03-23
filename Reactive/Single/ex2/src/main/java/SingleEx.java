@@ -26,8 +26,8 @@ public class SingleEx {
      * the calling thread).
      */
     public static Completable testFractionReductionAsync() {
-        StringBuilder sb = 
-            new StringBuilder(">> Calling testFractionReductionAsync()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionReductionAsync()\n");
 
         // Create a new unreduced big fraction.
         BigFraction unreducedFraction = BigFraction
@@ -35,55 +35,30 @@ public class SingleEx {
                      new BigInteger(sBI2),
                      false);
 
-        // Create a callable lambda that reduces a big fraction.
-        Callable<BigFraction> reduceFraction = () -> 
-            // Reduce the big fraction.
-            BigFraction.reduce(unreducedFraction);
-
-        // A Consumer that logs the current value of the unreduced
-        // BigFraction.
-        Consumer<BigFraction> logBigFraction = bigFraction -> sb
-            .append("     unreducedFraction "
-                    + unreducedFraction.toString()
-                    + "\n     reduced improper fraction = "
-                    + bigFraction.toString());
-
-        // Create a function lambda that converts an improper big
-        // fraction into a mixed big fraction.
-        Function<BigFraction, String> convertToMixedString = result -> {
-            sb.append("\n     calling BigFraction::toMixedString\n");
-
-            return result.toMixedString();
-        };
-
-        // Create a consumer to print the mixed big fraction result.
-        Consumer<String> printResult = result -> {
-            sb.append("     mixed reduced fraction = " + result + "\n");
-            // Display the result.
-            BigFractionUtils.display(sb.toString());
-        };
-
         return Single
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
-            .fromCallable(reduceFraction)
+            .fromCallable(() -> BigFraction
+                          // Reduce the BigFraction.
+                          .reduce(unreducedFraction))
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
             // Use doOnSuccess() to print the BigFraction. If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(logBigFraction)
+            .doOnSuccess(bf -> 
+                         logBigFraction(unreducedFraction, bf, sb))
 
-            // After big fraction is reduced return a single and use
+            // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
             // fraction to a mixed fraction string.
-            .map(convertToMixedString)
+            .map(BigFraction::toMixedString)
 
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
-            .doOnSuccess(printResult)
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
             // AsyncTester framework.
@@ -97,8 +72,8 @@ public class SingleEx {
      * manner by the main thread.
      */
     public static Completable testFractionMultiplicationCallable1() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplicationCallable1()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationCallable1()\n");
 
         // Create a callable that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
@@ -109,19 +84,19 @@ public class SingleEx {
             return bf1.multiply(bf2);
         };
 
-        // Submit the call to a thread pool and store the single future
-        // it returns.
-        Single<BigFraction> single = Single
+        // Submit the call to a thread pool and store the single
+        // future it returns.
+        BigFraction result = Single
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
-            .subscribeOn(Schedulers.single());
+            .subscribeOn(Schedulers.single())
 
-        // Block the calling thread until the result is available via
-        // the single future.
-        BigFraction result = single.blockingGet();
+            // Block the calling thread until the result is available
+            // via the single future.
+            .blockingGet();
 
         sb.append("     Callable.call() = "
                   + result.toMixedString()
@@ -140,8 +115,8 @@ public class SingleEx {
      * is handled in a non-blocking manner by a background thread.
      */
     public static Completable testFractionMultiplicationCallable2() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplicationCallable2()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationCallable2()\n");
 
         // Create a callable that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
@@ -150,13 +125,6 @@ public class SingleEx {
 
             // Return the result of multiplying the fractions.
             return bf1.multiply(bf2);
-        };
-
-        // Create a consumer to print the mixed big fraction result.
-        Consumer<BigFraction> printResult = result -> {
-            sb.append("     mixed reduced fraction = " + result + "\n");
-            // Display the result.
-            BigFractionUtils.display(sb.toString());
         };
 
         // Submit the call to a thread pool and process the result it
@@ -172,7 +140,7 @@ public class SingleEx {
             // Use doOnSuccess() to print the result after it's been
             // successfully converted to a mixed fraction.  If an
             // exception is thrown doOnSuccess() will be skipped.
-            .doOnSuccess(printResult)
+            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return a Completable to synchronize with the
             // AsyncTester framework.

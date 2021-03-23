@@ -1,12 +1,5 @@
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
-import utils.BlockingSubscriber;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -17,14 +10,12 @@ import static utils.BigFractionUtils.*;
 import static utils.MonosCollector.toMono;
 
 /**
- * This class shows how to apply Project Reactor features
- * asynchronously to perform a range of Flux operations, including
- * fromArray(), map(), flatMap(), collect(), subscribeOn(), and
- * various types of thread pools.  It also shows various Mono
- * operations, such as when(), firstWithSignal(), materialize(),
- * flatMap(), flatMapMany(), subscribeOn(), and the parallel thread
- * pool.  In addition, it demonstrates how to combine the Java streams
- * framework with the Project Reactor framework.
+ * This class shows how to apply RxJava features asynchronously to
+ * perform a range of Observable operations, including fromArray(),
+ * map(), flatMap(), collect(), subscribeOn(), and various types of
+ * thread pools.  It also shows various Single operations, such as
+ * when(), firstWithSignal(), materialize(), flatMap(), flatMapMany(),
+ * subscribeOn(), and the parallel thread pool.  
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -34,48 +25,8 @@ public class FluxEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * Test BigFraction multiplications by combining the Java streams
-     * framework with the Project Reactor framework and the Java
-     * common fork-join framework.
-     */
-    public static Mono<Void> testFractionMultiplicationsStreams() {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplicationsStreams()\n");
-
-        sb.append("     Printing sorted results:");
-
-        // Process the function in a sequential stream.
-        return Stream
-            // Generate a stream of random, large, and unreduced big
-            // fractions.
-            .generate(() ->
-                      BigFractionUtils.makeBigFraction(new Random(),
-                                                       false))
-
-            // Stop after generating sMAX_FRACTIONS big fractions.
-            .limit(sMAX_FRACTIONS)
-
-            // Reduce and multiply these fractions asynchronously.
-            .map(unreducedBigFraction ->
-                 reduceAndMultiplyFraction(unreducedBigFraction,
-                                           Schedulers
-                                           .fromExecutor(ForkJoinPool
-                                                         .commonPool())))
-
-            // Trigger intermediate operation processing and return a
-            // mono to a list of big fractions that are being reduced
-            // and multiplied asynchronously.
-            .collect(toMono())
-
-            // After all the asynchronous fraction reductions have
-            // completed sort and print the results.
-            .flatMap(list ->
-                     BigFractionUtils.sortAndPrintList(list, sb));
-    }
-
-    /**
-     * A test of BigFraction multiplication using an asynchronous Flux
-     * stream and a blocking Subscriber implementation.
+     * A test of BigFraction multiplication using an asynchronous
+     * Observable stream and a blocking Subscriber implementation.
      */
     public static Mono<Void> testFractionMultiplicationsBlockingSubscriber() {
         StringBuilder sb =
@@ -141,6 +92,93 @@ public class FluxEx {
         // Return empty mono to indicate to the AsyncTaskBarrier
         // that all the processing is done.
         return sVoidM;
+    }
+
+    /**
+     * Define a Subscriber implementation that handles blocking, which
+     * is otherwise not supported by Project Reactor.
+     */
+    private static class BlockingSubscriber
+        implements Subscriber<BigFraction> {
+        /**
+         * The calling thread uses this Barrier synchronizer to wait
+         * for a subscriber to complete all its async processing.
+         */
+        final CountDownLatch mLatch;
+
+        /**
+         * A StringBuilder used to log the output.
+         */
+        final StringBuilder mSb;
+
+        /**
+         * Constructor initializes the fields.
+         */
+        BlockingSubscriber(StringBuilder stringBuilder) {
+            mLatch = new CountDownLatch(1);
+            mSb = stringBuilder;
+        }
+
+        /**
+         * Block until all events have been processed by subscribe().
+         */
+        void await() {
+            try {
+                mLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * Hook method invoked after calling subscribe(subscriber)
+         * below.  No data starts flowing until s.request(long) is
+         * invoked.
+         */
+        @Override
+        public void onSubscribe(Subscription s) {
+            // Disable backpressure.
+            s.request(Integer.MAX_VALUE);
+        }
+
+        /**
+         * Process the next element in the stream.
+         * @param bigFraction The next BigFraction in the stream
+         */
+        @Override
+        public void onNext(BigFraction bigFraction) {
+            // Add fraction to the string buffer.
+            mSb.append(" = " + bigFraction.toMixedString() + "\n");
+        }
+
+        /**
+         * Handle an error event.
+         * @param t The exception that occurred
+         */
+        @Override
+        public void onError(Throwable t) {
+            // Append the error message to the
+            // StringBuilder.
+            mSb.append(t.getMessage());
+
+            // Display results when processing is done.
+            BigFractionUtils.display(mSb.toString());
+
+            // Release the latch.
+            mLatch.countDown();
+        }
+
+        /**
+         * Handle final completion event.
+         */
+        @Override
+        public void onComplete() {
+            // Display results when processing is done.
+            BigFractionUtils.display(mSb.toString());
+
+            // Release the latch.
+            mLatch.countDown();
+        }
     }
 
     /**

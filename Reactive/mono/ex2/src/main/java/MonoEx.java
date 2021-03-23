@@ -82,19 +82,18 @@ public class MonoEx {
             return bf1.multiply(bf2);
         };
 
-        // Submit the call to a thread pool and store the mono future
+        // Submit the call to a thread pool and store an Optional that
         // it returns.
-        Mono<BigFraction> mono = Mono
+        Optional<BigFraction> result = Mono
             // Use fromCallable() to begin the process of
             // asynchronously reducing a big fraction.
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
-            .subscribeOn(Schedulers.single());
+            .subscribeOn(Schedulers.single())
 
-        // Block the calling thread until the result is available via
-        // the mono future, handling any errors via an optional.
-        Optional<BigFraction> result = mono
+            // Block the calling thread until the result is available
+            // via the mono, handling any errors via an optional.
             .blockOptional();
 
         sb.append("     Callable.call() = "
