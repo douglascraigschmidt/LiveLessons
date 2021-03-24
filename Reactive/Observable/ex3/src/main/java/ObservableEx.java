@@ -40,7 +40,7 @@ public class ObservableEx {
 
         // Create a function to handle an ArithmeticException.
         Function<Throwable,
-                 ? extends BigFraction> errorHandler = t -> {
+            ? extends BigFraction> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -186,8 +186,8 @@ public class ObservableEx {
         // Display the results.
         Consumer<? super BigFraction> displayResults = result -> {
             sb.append("    sum of BigFractions = "
-                    + result
-                    + "\n");
+                      + result
+                      + "\n");
             BigFractionUtils.display(sb.toString());
         };
 

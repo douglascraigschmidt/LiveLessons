@@ -1,11 +1,14 @@
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleSource;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -105,15 +108,15 @@ public class SingleEx {
             new StringBuffer(">> Calling testFractionCombine2()\n");
 
         // Create a random BigFraction asynchronously.
-        Single<BigFraction> m1 = makeBigFractionAsync(sRandom,
+        final Single<BigFraction> m1 = makeBigFractionAsync(sRandom,
                                                       sb);
 
         // Create another random BigFraction asynchronously.
-        Single<BigFraction> m2 = makeBigFractionAsync(sRandom, 
+        final Single<BigFraction> m2 = makeBigFractionAsync(sRandom,
                                                       sb);
 
         // Create another random BigFraction asynchronously.
-        Single<BigFraction> m3 = makeBigFractionAsync(sRandom,
+        final Single<BigFraction> m3 = makeBigFractionAsync(sRandom,
                                                       sb);
 
         // This function is used to combine results from Mono.zip().
@@ -125,15 +128,27 @@ public class SingleEx {
             // Sum the results together.
             .reduce(BigFraction.valueOf(0), BigFraction::add);
 
-        return Single
-            // Add results after all async multiplications complete.
-            .zipArray(combiner,
-                      m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
-                      m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
-                      m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction)))
+        List<Single<BigFraction>> asyncMultiplications = Arrays
+            .asList(m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
+                    m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+                    m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction)));
 
-            // Display result after converting it to a mixed fraction.
-            .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
+        /*
+        // This array holds the results of multiple asynchronous multiplications.
+        SingleSource<BigFraction>[] asyncMultiplications = new SingleSource[] {
+                m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
+                m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+                m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction))
+        };
+         */
+
+        Single<BigFraction> bigFractionSingle = Single
+                // Add results after all async multiplications complete.
+                .zipArray(combiner,
+                        asyncMultiplications.toArray(new Single[0]));
+
+        // Display result after converting it to a mixed fraction.
+        return bigFractionSingle.doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
             // AsyncTester framework.

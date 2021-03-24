@@ -1,35 +1,34 @@
 package utils;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
- * This class asynchronously runs tasks that use the Project Reactor
- * framework and ensures that the calling method doesn't exit until
- * all asynchronous task processing is completed.
+ * This class asynchronously runs tasks that use the RxJava framework
+ * and ensures that the calling method doesn't exit until all
+ * asynchronous task processing is completed.
  * 
  */
 public class AsyncTaskBarrier {
     /**
      * Keeps track of all the registered tasks to run.
      */
-    private static final List<Supplier<Mono<Void>>> sTasks =
+    private static final List<Supplier<Completable>> sTasks =
         new ArrayList<>();
 
     /**
-     * Register the {@code task} task so that it will be run
-     * asynchronously when {@code runTasks()} is called.  Each task
-     * must take no parameters and return a {@code
-     * Supplier<Mono<Void>>} result.
-     * 
-     * @param task The task to register with {@code AsyncTaskBarrier}
+     * Register the {@code task} task so that it can be run
+     * asynchronously.  Each task must take no parameters and return a
+     * {@code Supplier<Completable>} result.
+     *
+     * @param task The task to register with the {@code AsyncTasker} framework.
      */
-    public static void register(Supplier<Mono<Void>> task) {
-        // Appends the task to the list.
+    public static void register(Supplier<Completable> task) {
         sTasks.add(task);
     }
 
@@ -37,40 +36,38 @@ public class AsyncTaskBarrier {
      * Unregister the {@code task} task so that it is no longer run
      * asynchronously when {@code runTasks()} is called.  Each task
      * must take no parameters and return a {@code
-     * Supplier<Mono<Void>>} result.
+     * Supplier<Completable>} result.
      * 
      * @param task The task to unregister with {@code AsyncTaskBarrier}
      * @return True if {@code task} was previously registered, else false.
      */
-    public static boolean unregister(Supplier<Mono<Void>> task) {
+    public static boolean unregister(Supplier<Completable> task) {
         return sTasks.remove(task);
     }
-
 
     /**
      * Run all the register tasks.
      *
-     * @return a {@code Mono<Long>} that will be triggered when all
-     * the asynchronously-run tasks complete to indicate how many
-     * tasks were run.
+     * @return a {@code Single<Long>} that will be triggered when all
+     * the asynchronously-run tasks complete.
      */
-    public static Mono<Long> runTasks() {
-        return Flux
-            // Factory method that converts the list into a flux.
+    public static Single<Long> runTasks() {
+        return Observable
+            // Factory method that converts the list into an
+            // Observable.
             .fromIterable(sTasks)
 
             // Run each task, which can execute asynchronously.
-            .flatMap(Supplier::get)
+            .map(Supplier::get)
 
-            // Collect into an empty list that triggers when all
-            // the tasks finish running asynchronously.
-            .collectList()
+            // Map each element of the Observable into
+            // CompletableSources, subscribes to them, and waits until
+            // the upstream and all CompletableSources complete.
+            .flatMapCompletable(c -> c)
 
-            // Return a mono containing the number of tasks run when
-            // we're done.
-            .flatMap(l -> Mono
-                     // Use just() to return the number of tasks run.
-                     .just((long) sTasks.size()));
+            // Convert the returned Completable into a Single that
+            // returns the number of tasks when it completes.
+            .toSingleDefault((long) sTasks.size());
     }
 }
 

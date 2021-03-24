@@ -1,7 +1,6 @@
 package utils;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import io.reactivex.rxjava3.core.Single;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -9,37 +8,38 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 /**
- * Implements a custom collector that converts a stream of Reactor
- * Mono objects into a single Mono object that is triggered when all
- * the monos in the stream complete.
+ * Implements a custom collector that converts a stream of RxJava
+ * Single objects into a single Single object that is triggered when
+ * all the Single objects in the stream complete.
  */
-public class FluxCollector<T>
-      implements Collector<T,
-                           List<T>,
-                           List<T>> {
+public class SinglesCollector<T>
+      implements Collector<Single<T>,
+                           List<Single<T>>,
+                           Single<List<T>>> {
     /**
      * A function that creates and returns a new mutable result
-     * container that will hold all the monos in the stream.
+     * container that will hold all the singles in the stream.
      *
      * @return a function which returns a new, mutable result
      * container
      */
     @Override
-    public Supplier<List<T>> supplier() {
+    public Supplier<List<Single<T>>> supplier() {
         return ArrayList::new;
     }
 
     /**
-     * A function that folds a mono into the mutable result container.
+     * A function that folds a single into the mutable result container.
      *
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<List<T>, T> accumulator() {
+    public BiConsumer<List<Single<T>>, Single<T>> accumulator() {
         return Collection::add;
     }
 
@@ -52,9 +52,9 @@ public class FluxCollector<T>
      * result
      */
     @Override
-    public BinaryOperator<List<T>> combiner() {
-        return (List<T> one,
-                List<T> another) -> {
+    public BinaryOperator<List<Single<T>>> combiner() {
+        return (List<Single<T>> one,
+                List<Single<T>> another) -> {
             one.addAll(another);
             return one;
         };
@@ -68,9 +68,25 @@ public class FluxCollector<T>
      * the final result
      */
     @Override
-    public Function<List<T>, List<T>> finisher() {
-        // Return a mono to a list of completed elements of type T.
-        return Function.identity();
+    public Function<List<Single<T>>, Single<List<T>>> finisher() {
+        // This function is used to combine results from
+        // Single.zipArray().
+        io.reactivex.rxjava3.functions.Function<Object[], List<T>> combiner =
+            bfArray -> Stream
+            // Create a stream of Objects.
+            .of(bfArray)
+
+            // Convert the Objects to T.
+            .map((Object o) -> (T) o)
+
+            // Collect the results together.
+            .collect(toList());
+
+        // Return a new single that completes when all singles in the
+        // list complete.
+        return singles -> Single
+            .zipArray(combiner,
+                      singles.toArray(new Single[0]));
     }
 
     /**
@@ -87,12 +103,12 @@ public class FluxCollector<T>
     }
 
     /**
-     * This static factory method creates a new MonoCollector.
+     * This static factory method creates a new SinglesCollector.
      *
-     * @return A new FuturesCollector
+     * @return A new SinglesCollector
      */
-    public static <T> Collector<T, ?, List<T>>
-        toList() {
-        return new FluxCollector<T>();
+    public static <T> Collector<Single<T>, ?, Single<List<T>>>
+        toSingle() {
+        return new SinglesCollector<T>();
     }
 }

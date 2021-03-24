@@ -1,11 +1,12 @@
 package utils;
 
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -35,8 +36,8 @@ public class BigFractionUtils {
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Mono<Void> sVoidM =
-            Mono.empty();
+    public static final Completable sVoidC =
+            Completable.complete();
 
     /**
      * A big reduced fraction constant.
@@ -76,27 +77,27 @@ public class BigFractionUtils {
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
-    public static Mono<Void> sortAndPrintList(List<BigFraction> list,
-                                              StringBuffer sb) {
+    public static Single<List<BigFraction>> sortAndPrintList(List<BigFraction> list,
+                                               StringBuffer sb) {
         // Quick sort the list asynchronously.
-        Mono<List<BigFraction>> quickSortM = Mono
+        Single<List<BigFraction>> quickSortM = Single
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
             .fromCallable(() -> quickSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            .subscribeOn(Schedulers.parallel());
+            .subscribeOn(Schedulers.computation());
 
         // Heap sort the list asynchronously.
-        Mono<List<BigFraction>> heapSortM =  Mono
+        Single<List<BigFraction>> heapSortM =  Single
             // Use the fromCallable() factory method to obtain the
             // results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
 
             // Use subscribeOn() to run all the processing in the
             // parallel thread pool.
-            .subscribeOn(Schedulers.parallel());
+            .subscribeOn(Schedulers.computation());
 
         // Display the results as mixed fractions.
         Consumer<List<BigFraction>> displayList = sortedList -> {
@@ -108,19 +109,15 @@ public class BigFractionUtils {
             display(sb.toString());
         };
 
-        return Mono
+        return Single
             // Use firstWithSignal() to select the result of whichever
             // sort finishes first and use it to print the sorted
             // list.
-            .firstWithSignal(quickSortM,
-                             heapSortM)
+            .ambArray(quickSortM,
+                      heapSortM)
 
             // Use doOnSuccess() to display the first sorted list.
-            .doOnSuccess(displayList)
-                
-            // Use then() to return an empty mono to synchronize with
-            // the AsyncTester framework.
-            .then();
+            .doOnSuccess(displayList);
     }
 
     /**

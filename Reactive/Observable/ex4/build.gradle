@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile 'io.projectreactor:reactor-core:3.4.2'
+    compile 'io.reactivex.rxjava3:rxjava:3.0.9'
 }
