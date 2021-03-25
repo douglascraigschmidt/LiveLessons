@@ -16,9 +16,9 @@ import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowRunnable;
 
 /**
- * This example shows examples of applying the
- * ForkJoinPool.ManagedBlocker interface, which are based on the code
- * fragments shown in the Java documentation at
+ * This example shows how to apply the ForkJoinPool.ManagedBlocker
+ * interface, which complete the code fragments shown in the Java
+ * documentation at
  * https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.ManagedBlocker.html
  */
 public class ex33 {
