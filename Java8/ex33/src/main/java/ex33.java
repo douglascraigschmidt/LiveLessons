@@ -112,13 +112,13 @@ public class ex33 {
     /**
      * A {@link ReentrantLock} used for the tests.
      */
-    static ReentrantLock mLock = new ReentrantLock();
+    static ReentrantLock sLock = new ReentrantLock();
 
     /**
      * A {@link BlockingQueue} used for the tests that's implemented
      * via an {@link ArrayBlockingQueue}.
      */
-    static BlockingQueue<String> mQueue = new ArrayBlockingQueue<>(10);
+    static BlockingQueue<String> sQueue = new ArrayBlockingQueue<>(10);
 
     /**
      * Main entry point into the test program.
@@ -135,11 +135,11 @@ public class ex33 {
      * Test the ManagedLocker implementation.
      */
     private static void testManagedLocker() throws InterruptedException {
-        // Create a ManagedLocker that's associated with mLock.
-        ManagedLocker managedLocker = new ManagedLocker(mLock);
+        // Create a ManagedLocker that's associated with sLock.
+        ManagedLocker managedLocker = new ManagedLocker(sLock);
 
         // Acquire the lock.
-        mLock.lock();
+        sLock.lock();
 
         System.out.println("Waiting to acquire the lock at time "
                            + System.currentTimeMillis() / 1000);
@@ -165,8 +165,8 @@ public class ex33 {
      * Test the QueueTaker implementation.
      */
     private static void testQueueTaker() throws InterruptedException {
-        // Create a QueueTaker that's associated with mQueue.
-        QueueTaker<String> queueTaker = new QueueTaker<>(mQueue);
+        // Create a QueueTaker that's associated with sQueue.
+        QueueTaker<String> queueTaker = new QueueTaker<>(sQueue);
 
         System.out.println("Waiting to take an item at time "
                 + System.currentTimeMillis() / 1000);
@@ -176,7 +176,7 @@ public class ex33 {
                 .commonPool()
 
                 // Initiate a managedBlock() operation that will block until
-                // there's an item in mQueue.
+                // there's an item in sQueue.
                 .execute(() ->
                          rethrowRunnable(() ->
                                          ForkJoinPool.managedBlock(queueTaker)));
@@ -185,7 +185,7 @@ public class ex33 {
         Thread.sleep(1000);
 
         // Put an item into the queue.
-        mQueue.put("hello");
+        sQueue.put("hello");
 
         System.out.println("Actually took an item at time "
                 + System.currentTimeMillis() / 1000);
