@@ -41,7 +41,7 @@ public class ex33 {
         /**
          * Constructor initializes the field.
          */
-        ManagedLocker(ReentrantLock lock) { 
+        ManagedLocker(ReentrantLock lock) {
             mLock = lock; 
         }
 
@@ -118,7 +118,8 @@ public class ex33 {
      * A {@link BlockingQueue} used for the tests that's implemented
      * via an {@link ArrayBlockingQueue}.
      */
-    static BlockingQueue<String> sQueue = new ArrayBlockingQueue<>(10);
+    static BlockingQueue<String> sQueue =
+        new ArrayBlockingQueue<>(10);
 
     /**
      * Main entry point into the test program.
@@ -148,17 +149,22 @@ public class ex33 {
             // Use the common fork-join pool.
             .commonPool()
 
-            // Initiate a managedBlock() operation that will block until
-            // the lock is available.
-            .execute(() ->
-                     rethrowRunnable(() ->
-                                     ForkJoinPool.managedBlock(managedLocker)));
+            // Initiate a managedBlock() operation that will block
+            // until the lock is available.
+            .execute(() -> {
+                     rethrowRunnable(() -> 
+                                     ForkJoinPool.managedBlock(managedLocker));
+
+                     System.out.println("Actually acquired the lock at time "
+                                        + System.currentTimeMillis() / 1000);
+                });
+                         
 
         // Sleep for one second.
         Thread.sleep(1000);
 
-        System.out.println("Actually acquired the lock at time "
-                + System.currentTimeMillis() / 1000);
+        // Release the lock.
+        sLock.unlock();
     }
 
     /**
@@ -169,29 +175,33 @@ public class ex33 {
         QueueTaker<String> queueTaker = new QueueTaker<>(sQueue);
 
         System.out.println("Waiting to take an item at time "
-                + System.currentTimeMillis() / 1000);
+                           + System.currentTimeMillis() / 1000);
 
         ForkJoinPool
-                // Use the common fork-join pool.
-                .commonPool()
+            // Use the common fork-join pool.
+            .commonPool()
 
-                // Initiate a managedBlock() operation that will block until
-                // there's an item in sQueue.
-                .execute(() ->
-                         rethrowRunnable(() ->
-                                         ForkJoinPool.managedBlock(queueTaker)));
+            // Initiate a managedBlock() operation that will block
+            // until there's an item in sQueue.
+            .execute(() -> {
+                     rethrowRunnable(() ->
+                                     ForkJoinPool.managedBlock(queueTaker));
+                     
+                     // Get the item obtained by the queueTaker.
+                     String s = queueTaker.getItem();
+
+                     System.out.println("Actually took an item at time "
+                                        + System.currentTimeMillis() / 1000);
+
+                     // Print the item obtained by the queueTaker.
+                     System.out.println("Took item " + s);
+                });
 
         // Sleep for one second.
         Thread.sleep(1000);
 
         // Put an item into the queue.
         sQueue.put("hello");
-
-        System.out.println("Actually took an item at time "
-                + System.currentTimeMillis() / 1000);
-
-        // Get the item obtained by the queueTaker and print it.
-        System.out.println("Took item " + queueTaker.getItem());
     }
 }
 
