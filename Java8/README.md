@@ -167,3 +167,8 @@ Here's an overview of what's current included in these examples:
 . ex32 - This example shows several techniques for concatenating a
          list of strings together multiple times via Java Streams and
          RxJava.
+
+. 3x33 - This example shows examples of applying the ForkJoinPool
+         .ManagedBlocker interface, which are based on the code
+         fragments shown in the Java documentation at
+         https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.ManagedBlocker.html
