@@ -12,12 +12,12 @@ public class ex26 {
     /**
      * Number of iterations.
      */
-    private static int sITERATIONS = 10;
+    private static final int sITERATIONS = 10;
 
     /**
      * Number of tasks.
      */
-    private static int sNUMBER_OF_TASKS = 10;
+    private static final int sNUMBER_OF_TASKS = 10;
 
     /**
      * A simple class that tracks and print out the task number and
@@ -65,43 +65,63 @@ public class ex26 {
     };
 
     /**
-     * A test showcasing a one-shot Phaser that starts running a group
-     * of tasks simultaneously.
+     * A test showcasing a one-shot Phaser that runs a group of {@code
+     * tasks} simultaneously.
      */
-    private static void runTasks(List<MyTask> tasks) {
-        // Create a new phaser with a value of 1 to register itself.
-        Phaser phaser = new Phaser(1);
+    private static void runOneShotTasks(List<MyTask> tasks) {
+        System.out.println("Entering runOneShotTasks()");
+
+        // Create a phaser that plays the role of an entry barrier
+        // and is initialized with a value of 1 to register itself.
+        Phaser entryPhaser = new Phaser(1);
+
+        // Create a phaser that plays the role of an exit barrier
+        // and is initialized with the number of tasks to complete.
+        // This usage pattern of Phaser is similar to a CountDownLatch.
+        Phaser exitPhaser = new Phaser(tasks.size());
 
         // Iterate through all the tasks.
         tasks.forEach(task -> {
                 // Register the party with the phaser.
-                phaser.register();
+                entryPhaser.register();
 
                 // Create/start a new thread to run the task when all
                 // other threads are ready.
                 new Thread(() -> {
                         // Await start of all the threads.
-                        int phaseNumber = phaser.arriveAndAwaitAdvance();
+                        int phaseNumber = entryPhaser.arriveAndAwaitAdvance();
 
                         // Set the phase number (used for diagnostics).
                         task.setPhaseNumber(phaseNumber);
 
                         // Run the task.
                         task.run();
+
+                        // Indicate that the thread has arrived at the
+                        // exit barrier and is terminating, which acts
+                        // like CountDownLatch.countDown().
+                        exitPhaser.arrive();
                 }).start();
             });
 
-        // Allow calling thread to continue & deregister self so
+        // Allow calling thread to continue and deregister self so
         // threads can run.
-        phaser.arriveAndDeregister();
+        entryPhaser.arriveAndDeregister();
+
+        // Block on the exit barrier until all the threads exit.
+        exitPhaser.awaitAdvance(0);
+        System.out.println("Leaving runOneShotTasks()");
     }
 
     /**
      * A test that showcases a cyclic Phaser that repeatedly performs
-     * actions for a given number of iterations.
+     * actions on the List of {@code tasks} for a given number of
+     * {@code iterations}.
      */
-    private static void startTasks(List<MyTask> tasks, int iterations) {
-        // Create a new phaser that iterates a given number of times.
+    private static void runCyclicTasks(List<MyTask> tasks, int iterations) {
+        System.out.println("Entering runCyclicTasks()");
+
+        // Create a phaser that iterates 'iterations' number of times.
         Phaser phaser = new Phaser() {
                 /**
                  * Hook method that decides whether to terminate the
@@ -110,20 +130,19 @@ public class ex26 {
                 @Override
                 protected boolean onAdvance(int phase, int regParties) {
                     // Terminate phaser when we've reached the number of
-                    // iterators or there are no more parties registered.
-                    return phase >= iterations || regParties == 0; 
+                    // iterations or there are no more parties registered.
+                    return (phase + 1) == iterations || regParties == 0;
                 }
             };
 
-        // Register to defer worker threads advancing to next phase
-        // until the end of this method.
-        phaser.register();
+        // Register the calling thread (to defer worker threads
+        // advancing to next phase until the end of this method) and
+        // all of the tasks (so we don't need to do this within the
+        // forEach() loop below).
+        phaser.bulkRegister(1 + tasks.size());
 
         // Iterate through all the tasks.
         tasks.forEach(task -> {
-                // Register party with the phaser.
-                phaser.register();
-
                 // Create/start a new thread to run the task.
                 new Thread(() -> { 
                         do {
@@ -137,15 +156,19 @@ public class ex26 {
                             // Set phase number (used for
                             // diagnostics).
                             task.setPhaseNumber(phaseNumber);
-
                         } while (!phaser.isTerminated());
-                        // Loop until phaser's terminated by onAdvance().
+                        // Loop until the phaser's terminated by
+                        // onAdvance().
                 }).start();
             });
 
-        // Deregister self (allowing tasks to advance to next phase)
-        // and don't wait.
-        phaser.arriveAndDeregister();
+        // Loop until the phaser's terminated by onAdvance().
+        while (!phaser.isTerminated())
+            // Await phase completion of all other
+            // tasks/threads.
+            phaser.arriveAndAwaitAdvance();
+
+        System.out.println("Leaving runCyclicTasks()");
     }
 
 
@@ -153,29 +176,33 @@ public class ex26 {
      * Main entry point into the test program.
      */
     public static void main(String[] argv) {
-        System.out.println("Starting ex25 test");
-
-        // Create a list of tasks.
-        List<MyTask> tasks = IntStream
-            // Create a stream from 1 to sNUMBER_OF_TASKS.
-            .rangeClosed(1, sNUMBER_OF_TASKS)
-
-            // Create a new MyTask object for each number in the
-            // stream.
-            .mapToObj(MyTask::new)
-
-            // Convert the stream into a list.
-            .collect(toList());
+        System.out.println("Starting ex26 test");
 
         // Run the test showcasing a one-shot Phaser that starts
         // running a group of tasks simultaneously.
-        runTasks(tasks);
+        runOneShotTasks(makeTasks());
 
         // Run the test that showcases a cyclic Phaser that repeatedly
         // performs actions for a given number of iterations.
-        startTasks(tasks, sITERATIONS);
+        runCyclicTasks(makeTasks(), sITERATIONS);
 
         System.out.println("Finishing ex26 test");
+    }
+    /**
+     * @return A List of MyTask objects
+     */
+    private static List<MyTask> makeTasks() {
+        // Create and return a list of tasks.
+        return IntStream
+                // Create a stream from 1 to sNUMBER_OF_TASKS.
+                .rangeClosed(1, sNUMBER_OF_TASKS)
+
+                // Create a new MyTask object for each number in the
+                // stream.
+                .mapToObj(MyTask::new)
+
+                // Convert the stream into a list.
+                .collect(toList());
     }
 
 }
