@@ -20,49 +20,38 @@ public class ex26 {
     private static final int sNUMBER_OF_TASKS = 10;
 
     /**
-     * A simple class that tracks and print out the task number and
-     * phase number.
+     * Main entry point into the test program.
      */
-    static class MyTask 
-        implements Runnable {
-        /**
-         * Current phase number.
-         */
-        int mPhaseNumber;
+    public static void main(String[] argv) {
+        System.out.println("Starting ex26 test");
 
-        /**
-         * The task number.
-         */
-        int mTaskNumber;
+        // Run the test showcasing a one-shot Phaser that starts
+        // running a group of tasks simultaneously.
+        runOneShotTasks(makeTasks());
 
-        /**
-         * Constructor initalizes the field.
-         */
-        MyTask(int taskNumber) {
-            mTaskNumber = taskNumber;
-        }
+        // Run the test that showcases a cyclic Phaser that repeatedly
+        // performs actions for a given number of iterations.
+        runCyclicTasks(makeTasks(), sITERATIONS);
 
-        /**
-         * Set the phase number.
-         */
-        void setPhaseNumber(int number) {
-            mPhaseNumber = number;
-        }
+        System.out.println("Finishing ex26 test");
+    }
 
-        /**
-         * Hook method that runs the task.
-         */
-        @Override
-        public void run() {
-            // Print out some diagnostic information.
-            System.out.println("Task #" 
-                               + mTaskNumber
-                               + " has phase #" 
-                               + mPhaseNumber 
-                               + " at " 
-                               + System.currentTimeMillis());
-        }
-    };
+    /**
+     * @return A List of MyTask objects
+     */
+    private static List<MyTask> makeTasks() {
+        // Create and return a list of tasks.
+        return IntStream
+            // Create a stream from 1 to sNUMBER_OF_TASKS.
+            .rangeClosed(1, sNUMBER_OF_TASKS)
+
+            // Create a new MyTask object for each number in the
+            // stream.
+            .mapToObj(MyTask::new)
+
+            // Convert the stream into a list.
+            .collect(toList());
+    }
 
     /**
      * A test showcasing a one-shot Phaser that runs a group of {@code
@@ -170,39 +159,4 @@ public class ex26 {
 
         System.out.println("Leaving runCyclicTasks()");
     }
-
-
-    /**
-     * Main entry point into the test program.
-     */
-    public static void main(String[] argv) {
-        System.out.println("Starting ex26 test");
-
-        // Run the test showcasing a one-shot Phaser that starts
-        // running a group of tasks simultaneously.
-        runOneShotTasks(makeTasks());
-
-        // Run the test that showcases a cyclic Phaser that repeatedly
-        // performs actions for a given number of iterations.
-        runCyclicTasks(makeTasks(), sITERATIONS);
-
-        System.out.println("Finishing ex26 test");
-    }
-    /**
-     * @return A List of MyTask objects
-     */
-    private static List<MyTask> makeTasks() {
-        // Create and return a list of tasks.
-        return IntStream
-                // Create a stream from 1 to sNUMBER_OF_TASKS.
-                .rangeClosed(1, sNUMBER_OF_TASKS)
-
-                // Create a new MyTask object for each number in the
-                // stream.
-                .mapToObj(MyTask::new)
-
-                // Convert the stream into a list.
-                .collect(toList());
-    }
-
 }
