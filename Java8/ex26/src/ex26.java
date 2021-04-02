@@ -99,6 +99,7 @@ public class ex26 {
 
         // Block on the exit barrier until all the threads exit.
         exitPhaser.awaitAdvance(0);
+
         System.out.println("Leaving runOneShotTasks()");
     }
 
