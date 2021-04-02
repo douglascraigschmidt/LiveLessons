@@ -40,7 +40,7 @@ public class MonoEx {
 
         // This is what the code would look like if flatMap() was
         // replaced by map()!
-        // Mono<Mono<BigFraction>> bfM3 = bfM1
+        // Mono<Mono<BigFraction>> bfM2 = bfM1
         //         .map(bf -> multiplyAsync(bf, sBigReducedFraction));
 
         return bfM2
@@ -61,16 +61,21 @@ public class MonoEx {
             new StringBuffer(">> Calling testFractionCombine1()\n");
 
         // Create a random BigFraction asynchronously.
-        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom,
-                                                    sb);
+        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction asynchronously.
-        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, 
-                                                    sb);
+        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, sb);
 
-        return m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction))
+        return m1
+            // Multiply two BigFractions after the random BigFraction
+            // completes its initialization.
+            .flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction))
+            
             // Add results after both async multiplications complete.
-            .zipWith(m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+            .zipWith(m2
+                     // Multiply two BigFractions after the random
+                     // BigFraction completes its initialization.
+                     .flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
                      BigFraction::add)
 
             // Display result after converting it to a mixed fraction.
@@ -90,37 +95,45 @@ public class MonoEx {
             new StringBuffer(">> Calling testFractionCombine2()\n");
 
         // Create a random BigFraction asynchronously.
-        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom,
-                                                    sb);
+        Mono<BigFraction> m1 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction asynchronously.
-        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, 
-                                                    sb);
+        Mono<BigFraction> m2 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction asynchronously.
-        Mono<BigFraction> m3 = makeBigFractionAsync(sRandom,
-                                                    sb);
+        Mono<BigFraction> m3 = makeBigFractionAsync(sRandom, sb);
 
-        // This function is used to combine results from Mono.zip().
+        // This function combines results from Mono.zip().
         Function<Object[], BigFraction> combiner = bfArray -> Stream
             // Create a stream of Objects.
             .of(bfArray)
+
             // Convert the Objects to BigFractions.
             .map(o -> BigFraction.valueOf((BigFraction) o))
+
             // Sum the results together.
             .reduce(BigFraction.valueOf(0), BigFraction::add);
 
-        return Mono
-            // Add results after all async multiplications complete.
-            .zip(combiner,
-                 m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
-                 m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
-                 m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction)))
+        // This array holds results of multiple async multiplications.
+        @SuppressWarnings("unchecked")
+        Mono<BigFraction>[] asyncMultiplications = new Mono[] {
+            // Multiply BigFractions after the random BigFractions
+            // completes its initialization.
+            m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
+            m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+            m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction))
+        };
 
-            // Display result after converting it to a mixed fraction.
+        return Mono
+            // The combiner adds results after all
+            // asyncMultiplications complete.
+            .zip(combiner, asyncMultiplications)
+
+            // Display reduced result after converting it to a mixed
+            // fraction.
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
-            // Return an empty mono to synchronize with the
+            // Return an empty Mono to synchronize with the
             // AsyncTaskBarrier framework.
             .then();
     }
