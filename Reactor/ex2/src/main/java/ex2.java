@@ -2,7 +2,9 @@ import datamodels.TripRequest;
 import datamodels.Flight;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.math.MathFlux;
+import utils.AsyncTaskBarrier;
 import utils.CheapestPriceCollector;
 import utils.ExchangeRate;
 import utils.TestDataFactory;
@@ -49,27 +51,56 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        // Call various algorithms to print the cheapest flights.
-        printCheapestFlights(convertFlightPrices(sTrip.getCurrency()));
+        // Print the cheapest flights via a two pass algorithm that
+        // uses min() and filter().
+        AsyncTaskBarrier.register(ex2::printCheapestFlightsMin);
+
+        // Print the cheapest flights via a two-pass algorithm that
+        // first calls sort() to order the trips by price and then
+        // uses takeWhile() to return the cheapest flight(s).
+        AsyncTaskBarrier.register(ex2::printCheapestFlightsSorted);
+
+        // Print the cheapest flights via a one-pass algorithm and a
+        // custom Collector.
+        AsyncTaskBarrier.register(ex2::printCheapestFlightsOnepass);
+
+        @SuppressWarnings("ConstantConditions")
+        long testCount = AsyncTaskBarrier
+            // Run all the tests.
+            .runTasks()
+
+            // Block until all the tests are done to allow future
+            // computations to complete running.
+            .block();
+
+        // Print the results.
+        System.out.println("Completed " + testCount + " tests");
     }
 
     /**
      * ...
      */
-    private static Flux<Flight> convertFlightPrices(String toCurrency) {
-        // @@ Monte, this will run asynchronously.
-        // Update the rate cache with the latest rates.
-        sExchangeRateCache.replaceAll((fromCurrency, rate) ->
-                                      sExchangeRates.queryForExchangeRate(fromCurrency, toCurrency));
+    private static Flux<Flight> convertFlightPrices() {
+        String toCurrency = sTrip.getCurrency();
+        Mono<Boolean> computeExchangeRates = Mono
+            .fromCallable(() -> {
+                sExchangeRateCache
+                    // Update the rate cache with the latest rates.
+                    .replaceAll((fromCurrency, rate) ->
+                                    sExchangeRates.queryForExchangeRate(fromCurrency,
+                                                                        toCurrency));
+                return true;
+            })
+            .subscribeOn(Schedulers.parallel());
 
-        // @@ Monte, this will also run asynchronously.
-        // Get all the flights.
-        final Flux<Flight> flights = TestDataFactory.findFlights(sTrip);
+        Flux<Flight> flights = TestDataFactory
+            // Get all the flights.
+            .findFlights(sTrip)
+            .subscribeOn(Schedulers.parallel());
 
-        // @@ Monte, when both of the async calls above complete we'll zip them
-        // together like this:
         return flights
-            .map(flight ->
+            .zipWith(computeExchangeRates,
+                     (flight, __) ->
                      convertCurrency(toCurrency, flight));
     }
 
@@ -81,42 +112,28 @@ public class ex2 {
     }
 
     /**
-     * Call various algorithms to print the cheapest flights.
-     */
-    private static void printCheapestFlights(Flux<Flight> flights) {
-        // Print the cheapest flights via a two pass algorithm that
-        // uses min() and filter().
-        printCheapestFlightsMin(flights);
-
-        // Print the cheapest flights via a two-pass algorithm that
-        // first calls sort() to order the trips by price and then
-        // uses takeWhile() to return the cheapest flight(s).
-        printCheapestFlightsSorted(flights);
-
-        // Print the cheapest flights via a one-pass algorithm and a
-        // custom Collector.
-        printCheapestFlightsOnepass(flights);
-    }
-
-    /**
      * Print the cheapest flights via a two pass algorithm that uses
      * min() and filter().
      */
-    private static void printCheapestFlightsMin(Flux<Flight> flights) {
+    private static Mono<Void> printCheapestFlightsMin() {
         System.out.println("printCheapestFlightsMin():");
+
+        Flux<Flight> flights = convertFlightPrices();
 
         // Find the cheapest flights.
         Flux<Flight> lowestPrices = MathFlux
             // Find the cheapest flight.
-            .min(flights, Comparator.comparing(Flight::getPrice))
+            .min(flights,
+                 Comparator.comparing(Flight::getPrice))
             // Create a Flux that contains the cheapest flights.
             .flatMapMany(min -> flights
                          // Only allow flights that match the cheapest.
                          .filter(tr -> tr.getPrice().equals(min.getPrice())));
 
         // Print the cheapest flights.
-        lowestPrices
-            .subscribe(flight ->  System.out.println("Cheapest flight = " + flight));
+        return lowestPrices
+            .doOnNext(flight ->  System.out.println("Cheapest flight = " + flight))
+            .then();
     }
 
     /**
@@ -124,11 +141,11 @@ public class ex2 {
      * calls sort() to order the trips by price and then uses
      * takeWhile() to return the cheapest flight(s).
      */
-    private static void printCheapestFlightsSorted(Flux<Flight> flights) {
+    private static Mono<Void> printCheapestFlightsSorted() {
         System.out.println("printCheapestFlightsSorted():");
 
         // Sort the flights from lowest to highest price.
-        Flux<Flight> sortedFlights = flights
+        Flux<Flight> sortedFlights = convertFlightPrices()
             .sort(Comparator.comparing(Flight::getPrice));
 
         // Create a flux containing the cheapest prices.
@@ -141,18 +158,19 @@ public class ex2 {
                          .takeWhile(tr -> tr.getPrice().equals(min.getPrice())));
 
         // Print the cheapest flights.
-        lowestPrices
-            .subscribe(flight ->  System.out.println("Cheapest flight = " + flight));
+        return lowestPrices
+            .doOnNext(flight ->  System.out.println("Cheapest flight = " + flight))
+            .then();
     }
 
     /**
      * Print the cheapest flights via a one-pass algorithm and a
      * custom Collector.
      */
-    private static void printCheapestFlightsOnepass(Flux<Flight> flights) {
+    private static Mono<Void> printCheapestFlightsOnepass() {
         System.out.println("printCheapestFlightsOnepass():");
 
-        Flux<Flight> lowestPrices = flights
+        Flux<Flight> lowestPrices = convertFlightPrices()
             // Converts a stream of TripResponses into a Flux that
             // emits the cheapest priced trips(s).
             .collect(CheapestPriceCollector.toFlux())
@@ -162,7 +180,8 @@ public class ex2 {
             .flatMapMany(Function.identity());
 
         // Print the cheapest flights.
-        lowestPrices
-            .subscribe(flight ->  System.out.println("Cheapest flight = " + flight));
+        return lowestPrices
+            .doOnNext(flight -> System.out.println("Cheapest flight = " + flight))
+            .then();
     }
 }
