@@ -1,6 +1,6 @@
 package utils;
 
-import datamodels.TripResponse;
+import datamodels.Flight;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import java.util.stream.Collector;
  * a Flux that emits the cheapest priced trips(s).
  */
 public class CheapestPriceCollector
-             implements Collector<TripResponse,
-                                  List<TripResponse>,
-                                  Flux<TripResponse>> {
+             implements Collector<Flight,
+                                  List<Flight>,
+                                  Flux<Flight>> {
     /**
      * The minimum value seen by the collector.
      */
@@ -33,7 +33,7 @@ public class CheapestPriceCollector
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<List<TripResponse>> supplier() {
+    public Supplier<List<Flight>> supplier() {
         return ArrayList::new;
     }
 
@@ -44,7 +44,7 @@ public class CheapestPriceCollector
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<List<TripResponse>, TripResponse> accumulator() {
+    public BiConsumer<List<Flight>, Flight> accumulator() {
         return (lowestPrices, tripResponse) -> {
             if (tripResponse.getPrice() < mMin) {
                 lowestPrices.clear();
@@ -65,7 +65,7 @@ public class CheapestPriceCollector
      * result
      */
     @Override
-    public BinaryOperator<List<TripResponse>> combiner() {
+    public BinaryOperator<List<Flight>> combiner() {
         return (one, another) -> {
             one.addAll(another);
             return one;
@@ -80,7 +80,7 @@ public class CheapestPriceCollector
      * List<TripResponse>) to the final result (a Flux<TripResponse)
      */
     @Override
-    public Function<List<TripResponse>, Flux<TripResponse>> finisher() {
+    public Function<List<Flight>, Flux<Flight>> finisher() {
         return Flux::fromIterable;
     }
 
@@ -100,7 +100,7 @@ public class CheapestPriceCollector
      *
      * @return A new CheapestFlightCollector()
      */
-    public static Collector<TripResponse, List<TripResponse>, Flux<TripResponse>>
+    public static Collector<Flight, List<Flight>, Flux<Flight>>
         toFlux() {
         return new CheapestPriceCollector();
     }

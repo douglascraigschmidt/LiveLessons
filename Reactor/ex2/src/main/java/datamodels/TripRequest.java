@@ -27,6 +27,11 @@ public class TripRequest {
     private String arrivalAirport;
 
     /**
+     * Requested currency.
+     */
+    private String currency;
+
+    /**
      * Number of passengers.
      */
     private Integer passengers;
@@ -43,17 +48,20 @@ public class TripRequest {
      * @param returnDepartureDateTime Return date
      * @param departureAirport Departure airport
      * @param arrivalAirport Arrival airport
+     * @param currency Requested currency
      * @param passengers Number of passengers
      */
     public TripRequest(LocalDateTime departureDateTime,
                        LocalDateTime returnDepartureDateTime,
                        String departureAirport,
                        String arrivalAirport,
+                       String currency,
                        int passengers) {
         this.departureDateTime = departureDateTime;
         this.returnDepartureDateTime = returnDepartureDateTime;
         this.departureAirport = departureAirport;
         this.arrivalAirport = arrivalAirport;
+        this.currency = currency;
         this.passengers = passengers;
     }
 
@@ -81,7 +89,7 @@ public class TripRequest {
      * @return Returns true if there's a match between this
      * TripRequest and the {@code tripResponse} param
      */
-    public boolean equals(TripResponse tripResponse) {
+    public boolean equals(Flight tripResponse) {
         return this.departureDateTime.toLocalDate()
             .equals(tripResponse.departureDateTime.toLocalDate())
             && this.returnDepartureDateTime.toLocalDate()
@@ -104,6 +112,8 @@ public class TripRequest {
             + departureAirport
             + ", "
             + arrivalAirport
+            + ", "
+            + currency
             + ", "
             + passengers;
     }
@@ -165,6 +175,20 @@ public class TripRequest {
     }
 
     /**
+     * Gets the requested currency.
+     */
+    public String getCurrency() {
+        return currency;
+    }
+
+    /**
+     * Sets the requested currency.
+     */
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    /**
      * Gets the number of passengers.
      */
     public int getPassengers() {
@@ -185,6 +209,7 @@ public class TripRequest {
      * @param returnDepartureDateTime Return date
      * @param departureAirport Departure airport
      * @param arrivalAirport Arrival airport
+     * @param currency Requested currency
      * @param passengers Number of passengers
      * @return An initialized {@code TripRequest}
      */
@@ -192,11 +217,13 @@ public class TripRequest {
                                       LocalDateTime returnDepartureDateTime,
                                       String departureAirport,
                                       String arrivalAirport,
+                                      String currency,
                                       int passengers) {
         return new TripRequest(departureDateTime,
                                returnDepartureDateTime,
                                departureAirport,
                                arrivalAirport,
+                               currency,
                                passengers);
     }
 }

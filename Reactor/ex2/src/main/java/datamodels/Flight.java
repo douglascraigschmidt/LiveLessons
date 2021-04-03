@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  * returned by various microservices to indicate which flight legs
  * match a {@code TripRequest}.
  */
-public class TripResponse {
+public class Flight {
     /**
      * Date and time of the initial departure.
      */
@@ -49,9 +49,14 @@ public class TripResponse {
     String airlineCode;
 
     /**
+     * Currency, e.g., "USD", "EUR", "YEN", "GBP"
+     */
+    String currency;
+
+    /**
      * Default constructor needed for WebFlux param passing.
      */
-    public TripResponse() {
+    public Flight() {
     }
 
     /**
@@ -64,15 +69,17 @@ public class TripResponse {
      * @param arrivalAirport Arrival airport
      * @param price Price of the flight leg
      * @param airlineCode Airline code (e.g., "SWA", "AA", etc.)
+     * @param currency Currency (e.g., "USD", "EUR", "YEN", "GBP")
      */
-    public TripResponse(LocalDateTime departureDateTime,
-                        LocalDateTime arrivalDateTime,
-                        LocalDateTime returnDepartureDateTime,
-                        LocalDateTime returnArrivalDateTime,
-                        String departureAirport,
-                        String arrivalAirport,
-                        Double price,
-                        String airlineCode) {
+    public Flight(LocalDateTime departureDateTime,
+                  LocalDateTime arrivalDateTime,
+                  LocalDateTime returnDepartureDateTime,
+                  LocalDateTime returnArrivalDateTime,
+                  String departureAirport,
+                  String arrivalAirport,
+                  Double price,
+                  String airlineCode,
+                  String currency) {
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.returnDepartureDateTime = returnDepartureDateTime;
@@ -81,6 +88,7 @@ public class TripResponse {
         this.arrivalAirport = arrivalAirport;
         this.price = price;
         this.airlineCode = airlineCode;
+        this.currency = currency;
     }
 
     /**
@@ -92,7 +100,7 @@ public class TripResponse {
         if (tripResponse.getClass() != this.getClass())
             return false;
 
-        TripResponse t = (TripResponse) tripResponse;
+        Flight t = (Flight) tripResponse;
         return this.departureDateTime.toLocalDate()
             .equals(t.departureDateTime.toLocalDate())
             && this.returnDepartureDateTime.toLocalDate()
@@ -122,7 +130,9 @@ public class TripResponse {
             + ", "
             + price
             + ", "
-            + airlineCode;
+            + airlineCode
+            + ", "
+            + currency;
     }
 
     /**
@@ -238,6 +248,20 @@ public class TripResponse {
     }
 
     /**
+     * Get the currency.
+     */
+    public String getCurrency() {
+        return currency;
+    }
+
+    /**
+     * Set the currency.
+     */
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    /**
      * Factory method that creates a new {@code Trip} object.
      *
      * @param departureDateTime Departure date and time
@@ -248,22 +272,25 @@ public class TripResponse {
      * @param arrivalAirport Arrival airport
      * @param price Price of the flight leg
      * @param airlineCode Airline code (e.g., "SWA", "AA", etc.)
+     * @param currency Currency (e.g., "USD", "EUR", "YEN", "GBP")
      */
-    public static TripResponse valueOf(LocalDateTime departureDateTime,
-                                       LocalDateTime arrivalDateTime,
-                                       LocalDateTime returnDepartureDateTime,
-                                       LocalDateTime returnArrivalDateTime,
-                                       String departureAirport,
-                                       String arrivalAirport,
-                                       Double price,
-                                       String airlineCode) {
-        return new TripResponse(departureDateTime,
-                                arrivalDateTime,
-                                returnDepartureDateTime,
-                                returnArrivalDateTime,
-                                departureAirport,
-                                arrivalAirport,
-                                price,
-                                airlineCode);
+    public static Flight valueOf(LocalDateTime departureDateTime,
+                                 LocalDateTime arrivalDateTime,
+                                 LocalDateTime returnDepartureDateTime,
+                                 LocalDateTime returnArrivalDateTime,
+                                 String departureAirport,
+                                 String arrivalAirport,
+                                 Double price,
+                                 String airlineCode,
+                                 String currency) {
+        return new Flight(departureDateTime,
+                          arrivalDateTime,
+                          returnDepartureDateTime,
+                          returnArrivalDateTime,
+                          departureAirport,
+                          arrivalAirport,
+                          price,
+                          airlineCode,
+                          currency);
     }
 }
