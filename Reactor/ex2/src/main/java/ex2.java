@@ -49,41 +49,35 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        // Get all the flights.
-        final Flux<Flight> flights = TestDataFactory.findFlights(sTrip);
-
         // Call various algorithms to print the cheapest flights.
-        printCheapestFlights(convertFlightPrices(sTrip.getCurrency(), flights));
+        printCheapestFlights(convertFlightPrices(sTrip.getCurrency()));
     }
 
     /**
      * ...
      */
-    private static Flux<Flight> convertFlightPrices(String toCurrency,
-                                                    Flux<Flight> flightsF) {
+    private static Flux<Flight> convertFlightPrices(String toCurrency) {
+        // @@ Monte, this will run asynchronously.
         // Update the rate cache with the latest rates.
         sExchangeRateCache.replaceAll((fromCurrency, rate) ->
-                sExchangeRates.queryForExchangeRate(fromCurrency, toCurrency));
+                                      sExchangeRates.queryForExchangeRate(fromCurrency, toCurrency));
 
-        return flightsF
-            .groupBy(Flight::getCurrency)
-            .flatMap(groupedFlux -> groupedFlux
-                .collectList()
-                .flatMapMany(flights ->
-                                 tryToConvertCurrency(Objects.requireNonNull(groupedFlux.key()),
-                                                      toCurrency,
-                                                      flights)));
+        // @@ Monte, this will also run asynchronously.
+        // Get all the flights.
+        final Flux<Flight> flights = TestDataFactory.findFlights(sTrip);
+
+        // @@ Monte, when both of the async calls above complete we'll zip them
+        // together like this:
+        return flights
+            .map(flight ->
+                     convertCurrency(toCurrency, flight));
     }
 
-    private static Flux<Flight> tryToConvertCurrency(String fromCurrency,
-                                                     String toCurrency,
-                                                     List<Flight> flights) {
-        if (!fromCurrency.equals(toCurrency)) {
-            flights.forEach(flight -> {
-                    flight.setPrice(flight.getPrice() * sExchangeRateCache.get(fromCurrency));
-                });
+    private static Flight convertCurrency(String toCurrency, Flight flight) {
+        if (!flight.getCurrency().equals(toCurrency)) {
+            flight.setPrice(flight.getPrice() * sExchangeRateCache.get(flight.getCurrency()));
         }
-        return Flux.fromIterable(flights);
+        return flight;
     }
 
     /**
