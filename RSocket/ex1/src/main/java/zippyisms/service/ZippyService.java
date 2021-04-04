@@ -81,7 +81,8 @@ public class ZippyService {
      */
     public ZippyQuote getQuote(int id){
         assert quotes != null;
-        return quotes.get(id);
+        // Subtract one since the List is 0-based.
+        return quotes.get(id - 1);
     }
 
 }

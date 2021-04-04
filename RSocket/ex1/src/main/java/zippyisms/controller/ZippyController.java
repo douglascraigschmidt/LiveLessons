@@ -55,7 +55,7 @@ public class ZippyController {
         // subscription request.
         return request
             // Set the request status to confirm the subscription.
-            .doOnNext(r -> r.setStatus(SubscriptionStatus.SUBSCRIPTION_CONFIRMED))
+            .doOnNext(r -> r.setStatus(SubscriptionStatus.CONFIRMED))
 
             // Print the subscription information.
             .doOnNext(r ->
@@ -78,7 +78,7 @@ public class ZippyController {
         request
             // Set the status of the request to indicate the
             // subscription has been cancelled.
-            .doOnNext(r -> r.setStatus(SubscriptionStatus.SUBSCRIPTION_CANCELLED))
+            .doOnNext(r -> r.setStatus(SubscriptionStatus.CANCELLED))
 
             // Print the subscription information.
             .doOnNext(r ->
@@ -104,7 +104,7 @@ public class ZippyController {
         return request
             // Check to ensure that the subscription request is valid.
             .flatMapMany(t ->
-                         t.getStatus().equals(SubscriptionStatus.SUBSCRIPTION_CONFIRMED)
+                         t.getStatus().equals(SubscriptionStatus.CONFIRMED)
                  // If the request is valid return a Flux that emits
                  // the list of quotes.
                  ? Flux.fromIterable(this.zippyService.getQuotes())

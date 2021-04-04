@@ -19,7 +19,7 @@ public class SubscriptionRequest {
     /**
      * The current status of the subscription.
      */
-    private SubscriptionStatus status = SubscriptionStatus.SUBSCRIPTION_PENDING;
+    private SubscriptionStatus status = SubscriptionStatus.PENDING;
 
     /**
      * The constructor initializes the field.
