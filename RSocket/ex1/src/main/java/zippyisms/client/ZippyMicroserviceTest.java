@@ -22,7 +22,8 @@ import java.util.UUID;
 
 /**
  * This class tests the endpoints provided by the Zippy th' Pinhead
- * microservice.
+ * microservice for each of the four interaction models provided by
+ * RSocket.
  */
 public class ZippyMicroserviceTest {
     /**
@@ -35,7 +36,8 @@ public class ZippyMicroserviceTest {
      */
     private static final int sQUOTES_DURATION = 10;
 
-    // @@ Monte, can you help me replace this with the appropriate @bean?!
+    // @@ Monte, can you help me replace this with the
+    // appropriate @bean?!
     private final Mono<RSocketRequester> zippyQuoteRequester = Mono
         // Initialize the an RSocket client requester for the Zippy th' Pinhead microservice.
         .just(RSocketRequester.builder()
@@ -84,8 +86,8 @@ public class ZippyMicroserviceTest {
     /**
      * Get/print a specified number of random Zippy th' Pinhead
      * quotes.  This method demonstrates a two-way RSocket
-     * request/response call that blocks the client until the response
-     * is received.
+     * bi-directional channel call where a Flux stream is sent to the
+     * server and the server returns a Flux in response.
      */
     public void getRandomQuotes(){
         System.out.println("Entering getRandomQuotes()");
@@ -100,6 +102,7 @@ public class ZippyMicroserviceTest {
                         .ints(sNUMBER_OF_RANDOM_QUOTES,
                               1,
                               ZippyService.quotes.size())
+                        // Convert the IntStream into a Stream.
                         .boxed());
 
         Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
@@ -113,7 +116,7 @@ public class ZippyMicroserviceTest {
             // Convert the result to a Flux<ZippyQuote>.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))
 
-            // Print the results.
+            // Print the Zippyisms emitted by the Flux<ZippyQuote>.
             .doOnNext(m ->
                       System.out.println("Quote ("
                                          + m.getQuoteId() + ") = "
@@ -154,6 +157,59 @@ public class ZippyMicroserviceTest {
     }
 
     /**
+     * Receive {@code duration} seconds-worth of Zippy th' Pinhead
+     * quotes.  This method demonstrates the RSocket request/stream
+     * model, where each request receives a stream of responses from
+     * the server.
+     *
+     * @param duration Number of seconds to receive Zippyisms.
+     */
+    public void getQuotes(Duration duration){
+        System.out.println("Entering getQuotes()");
+        
+        // Get a confirmed SubscriptionRequest from the server.
+        Mono<SubscriptionRequest> subscriptionRequest = zippyQuoteRequester
+            .map(r -> r
+                 // Send this request to the SUBSCRIBE endpoint.
+                 .route(Constants.SUBSCRIBE)
+
+                 // Create a random subscription id and pass it as the
+                 // param.
+                 .data(new SubscriptionRequest(UUID.randomUUID())))
+
+            // Send the request to the client and block until a
+            // SubscriptionRequest is received.
+            .flatMap(r -> r.retrieveMono(SubscriptionRequest.class));
+
+        // Get a Flux that emits ZippyQuote objects from the server.
+        Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
+            // Wait for both Monos to emit one element and combine
+            // these elements once into a Tuple2 object.
+            .zipWith(subscriptionRequest)
+
+            .map(tuple -> tuple
+                 // Send this request to the GET_QUOTES endpoint.
+                 .getT1().route(Constants.GET_QUOTES)
+
+                 // Pass the SubscriptionRequest as the param.
+                 .data(tuple.getT2()))
+
+            // Send the request to the client and block until a
+            // Flux<ZippyQuote> is received in response.
+            .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))
+
+            // Print each Zippyism emitted by the Flux<ZippyQuote>.
+            .doOnNext(m -> System.out.println("Quote: " + m.getZippyism()));
+
+        try {
+            // Receive Zippyisms for the given duration.
+            zippyQuotes.blockLast(duration);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    /**
      * Cancel a previous subscription.  This method demonstrates a
      * one-way RSocket fire-and-forget call that does not block the
      * client.
@@ -179,58 +235,5 @@ public class ZippyMicroserviceTest {
         Optional<Void> result = mono.blockOptional();
         if (result.isEmpty())
             System.out.println("Do not block for Void result!");
-    }
-
-    /**
-     * Receive {@code duration} seconds-worth of Zippy th' Pinhead
-     * quotes.  This method demonstrates the RSocket request/stream
-     * model, where each request receives a stream of responses from
-     * the server.
-     *
-     * @param duration Number of seconds to receive Zippyisms.
-     */
-    public void getQuotes(Duration duration){
-        System.out.println("Entering getQuotes()");
-        
-        // Get a SubscriptionRequest from the server.
-        Mono<SubscriptionRequest> subscriptionRequest = zippyQuoteRequester
-            .map(r -> r
-                 // Send this request to the SUBSCRIBE endpoint.
-                 .route(Constants.SUBSCRIBE)
-
-                 // Create a random subscription id and pass it as the
-                 // param.
-                 .data(new SubscriptionRequest(UUID.randomUUID())))
-
-            // Send the request to the client and block until a
-            // SubscriptionRequest is received.
-            .flatMap(r -> r.retrieveMono(SubscriptionRequest.class));
-
-        // Get a Flux that emits ZippyQuote objects from the server.
-        Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
-            // Wait for both Monos to emit one element and combine
-            // these elements once into a Tuple2.
-            .zipWith(subscriptionRequest)
-
-            .map(tuple -> tuple
-                 // Send this request to the GET_QUOTES endpoint.
-                 .getT1().route(Constants.GET_QUOTES)
-
-                 // Pass the SubscriptionRequest as the param.
-                 .data(tuple.getT2()))
-
-            // Send the request to the client and block until a
-            // Flux<ZippyQuote> is received.
-            .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))
-
-            // Print each Zippisms.
-            .doOnNext(m -> System.out.println("Quote: " + m.getZippyism()));
-
-        try {
-            // Receive Zippyisms for the given duration.
-            zippyQuotes.blockLast(duration);
-        } catch (RuntimeException ex) {
-            System.out.println(ex.getMessage());
-        }
     }
 }

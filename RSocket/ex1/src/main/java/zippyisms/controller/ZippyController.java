@@ -19,14 +19,15 @@ import java.time.Duration;
  * It demonstrates the following RSocket interaction models
  * 
  * . Request/Response, where each two-way request receives a single
- *   response from the server and blocks until the response is
- *   received.
+ *   response from the server.
  * 
- * . Fire-and-Forget, where each one-way request receives no response
- *   from the server and thus do not block the client.
+ * . Fire-and-Forget, where each one-way message receives no response
+ *   from the server.
  * 
  * . Request/Stream, where each request receives a stream of responses
  *   from the server.
+ * 
+ * . Channel, which sends a stream of messages in both directions.
  *
  * Spring enables the integration of RSockets into a controller via
  * the @MessageMapping annotation, as shown below.
@@ -40,9 +41,12 @@ public class ZippyController {
     private ZippyService zippyService;
 
     /**
-     * Subscribe to receive a Flux stream of Zippy quotes.
+     * Subscribe to receive a Flux stream of Zippy quotes.  This
+     * method implements a two-way RSocket request/response call that
+     * blocks the client until the response is received.
      *
-     * @param request The subscription request
+     * @param request A {@link Mono} that emits a {@link
+     *                SubscriptionRequest}
      * @return A {@link Mono} that confirms the subcription request.
      */
     @MessageMapping(Constants.SUBSCRIBE)
@@ -60,9 +64,17 @@ public class ZippyController {
                                          + r.getStatus()));
     }
 
+    /**
+     * Cancel a {@link SubscriptionRequest}.  This method implements a
+     * one-way RSocket fire-and-forget call that does not block the
+     * client.
+     *
+     * @param request A {@link Mono} that emits a {@link
+     *                SubscriptionRequest}
+     */
     @MessageMapping(Constants.CANCEL)
     public void cancelSubscription(Mono<SubscriptionRequest> request) {
-        // Cancel the subscription asynchronously
+        // Cancel the subscription asynchronously.
         request
             // Set the status of the request to indicate the
             // subscription has been cancelled.
@@ -79,16 +91,20 @@ public class ZippyController {
     }
 
     /**
-     * Get a {@link Flux} that emits Zippy quotes once a second.
+     * Get a {@link Flux} that emits Zippy quotes once a second.  This
+     * method implements the RSocket request/stream model, where each
+     * request receives a stream of responses from the server.
      *
-     * @param request A subscription request
+     * @param request A {@link Mono} that emits a {@link
+     *                SubscriptionRequest}
      * @return A {@link Flux} that emits Zippy quote every second
      */
     @MessageMapping(Constants.GET_QUOTES)
     public Flux<ZippyQuote> getQuotes(Mono<SubscriptionRequest> request) {
         return request
             // Check to ensure that the subscription request is valid.
-            .flatMapMany(t -> t.getStatus().equals(SubscriptionStatus.SUBSCRIPTION_CONFIRMED)
+            .flatMapMany(t ->
+                         t.getStatus().equals(SubscriptionStatus.SUBSCRIPTION_CONFIRMED)
                  // If the request is valid return a Flux that emits
                  // the list of quotes.
                  ? Flux.fromIterable(this.zippyService.getQuotes())
@@ -101,15 +117,19 @@ public class ZippyController {
     }
 
     /**
-     * Get a {@link Flux} that emits the requested Zippy quotes.
+     * Get a {@link Flux} that emits the requested Zippy quotes.  This
+     * method implements a two-way RSocket bi-directional channel call
+     * where a Flux stream is sent to the server and the server
+     * returns a Flux in response.
      *
-     * @param quoteIds A Flux containing the requested Zippy {@code quoteIds}
+     * @param quoteIds A {@link Flux} that emits the given Zippy
+     *                 {@code quoteIds}  
      * @return A {@link Flux} that emits the requested Zippy quotes
      */
     @MessageMapping(Constants.GET_QUOTE)
     public Flux<ZippyQuote> getQuote(Flux<Integer> quoteIds){
         return quoteIds
-            // Get the Zippy th' Pinhead quote at the designated quote id.
+            // Get the Zippy th' Pinhead quote at the given quote id.
             .map(this.zippyService::getQuote);
     }
 }

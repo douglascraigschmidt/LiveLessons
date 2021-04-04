@@ -8,16 +8,18 @@ such as HTTP that use non-binary encodings (such as XML and JSon).
 
 This program provides a simple console app developed and run using
 RSocket, Spring, Project Reactor, and Intellij.  It demonstrates the
-following RSocket interaction models
+following RSocket interaction models:
 
 . Request/Response, where each two-way request receives a single
   response from the server.
 
-. Fire-and-Forget, where each one-way request receives no response
+. Fire-and-Forget, where each one-way message receives no response
   from the server.
 
 . Request/Stream, where each request receives a stream of responses
   from the server.
+
+. Channel, which sends a stream of messages in both directions.
 
 The following are the steps required to run this Intellij project:
 
