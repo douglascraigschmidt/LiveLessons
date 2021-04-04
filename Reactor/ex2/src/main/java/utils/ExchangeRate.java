@@ -30,7 +30,27 @@ public class ExchangeRate {
 
     }
 
-    public Double queryForExchangeRate(String fromCurrency, String toCurrency) {
-        return mExchangeRate.get(fromCurrency).get(toCurrency);
+    /**
+     * This method returns a Mono that emits the exchange rate between
+     * the {@code from} and {@code to} parameters asynchronously.
+     *
+     * @param fromCurrency The 3 letter currency code to convert from.
+     * @param toCurrency   The 3 letter currency code to convert to.
+     * @return A Mono that emits the exchange rate between the {@code
+     * from} and {@code to} parameters.
+     */
+    public Mono<Double> getRate(String fromCurrency, String toCurrency) {
+        return Mono.just(mExchangeRate.get(fromCurrency).get(toCurrency));
+    }
+
+    /**
+     * This method returns a Map that contains all known exchange rates
+     * for {@code fromCurrency}.
+     *
+     * @param fromCurrency The 3 letter currency code to convert from
+     * @return A Map that contains the all known exchange rates for {@code fromCurrency}
+     */
+    public Map<String, Double> getRates(String fromCurrency) {
+        return mExchangeRate.get(fromCurrency);
     }
 }
