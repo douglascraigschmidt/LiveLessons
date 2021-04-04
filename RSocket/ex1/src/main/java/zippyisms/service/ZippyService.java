@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This service returns quotes from Zippy th' Pinhead.
+ * This service returns classic quotes from Zippy th' Pinhead.
  */
 @Service
 public class ZippyService {
@@ -27,7 +27,7 @@ public class ZippyService {
      * @return Return the file of Zippyisms as a list of ZippyQuote
      * objects.
      */
-    public static List<ZippyQuote> getInput() {
+    private static List<ZippyQuote> getInput() {
         try {
             // Although AtomicInteger is overkill we use it to
             // simplify incrementing the ID in the stream below.
@@ -84,5 +84,4 @@ public class ZippyService {
         // Subtract one since the List is 0-based.
         return quotes.get(id - 1);
     }
-
 }

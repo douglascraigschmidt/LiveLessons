@@ -6,23 +6,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import zippyisms.datamodel.Constants;
 import zippyisms.datamodel.SubscriptionRequest;
 import zippyisms.datamodel.SubscriptionStatus;
 import zippyisms.datamodel.ZippyQuote;
 import zippyisms.service.ZippyService;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import reactor.test.StepVerifier;
-
-import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.params.shadow.com.univocity.parsers.common.NormalizedString.toArray;
 
 /**
  * This class tests the endpoints provided by the Zippy th' Pinhead
