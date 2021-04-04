@@ -1,4 +1,4 @@
-package zippyisms;
+package zippyisms.utils;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
