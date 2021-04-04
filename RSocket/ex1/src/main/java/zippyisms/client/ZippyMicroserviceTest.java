@@ -1,6 +1,9 @@
 package zippyisms.client;
 
 import ch.qos.logback.classic.Level;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import zippyisms.datamodel.Constants;
 import zippyisms.datamodel.ZippyQuote;
 import zippyisms.datamodel.SubscriptionRequest;
@@ -25,6 +28,7 @@ import java.util.UUID;
  * microservice for each of the four interaction models provided by
  * RSocket.
  */
+@SpringBootTest
 public class ZippyMicroserviceTest {
     /**
      * The number of random Zippy th' Pinhead quotes to request.
@@ -36,9 +40,11 @@ public class ZippyMicroserviceTest {
      */
     private static final int sQUOTES_DURATION = 10;
 
-    // @@ Monte, can you help me replace this with the
-    // appropriate @bean?!
-    private final Mono<RSocketRequester> zippyQuoteRequester = Mono
+    // @Autowired
+    private static Mono<RSocketRequester> zippyQuoteRequester;
+
+    static {
+        zippyQuoteRequester = Mono
         // Initialize the an RSocket client requester for the Zippy th' Pinhead microservice.
         .just(RSocketRequester.builder()
               .rsocketConnector(rSocketConnector -> 
@@ -50,7 +56,6 @@ public class ZippyMicroserviceTest {
                                  .build())
               .tcp("localhost", Constants.SERVER_PORT));
 
-    static {
         /*
          *  Disable the verbose/annoying Spring "debug" logging.
          */
@@ -75,7 +80,7 @@ public class ZippyMicroserviceTest {
         test.subscribe();
 
         // Receive sQUOTES_DURATION seconds-worth of Zippy quotes.
-        test.getQuotes(Duration.ofSeconds(sQUOTES_DURATION));
+        test.getQuotes();
 
         // Cancel the subscription.
         test.cancelSubscription();
@@ -89,6 +94,7 @@ public class ZippyMicroserviceTest {
      * bi-directional channel call where a Flux stream is sent to the
      * server and the server returns a Flux in response.
      */
+    // @Test
     public void getRandomQuotes(){
         System.out.println("Entering getRandomQuotes()");
 
@@ -131,6 +137,7 @@ public class ZippyMicroserviceTest {
      * two-way RSocket request/response call that blocks the client
      * until the response is received.
      */
+    // @Test
     public void subscribe(){
         System.out.println("Entering subscribe()");
 
@@ -157,14 +164,13 @@ public class ZippyMicroserviceTest {
     }
 
     /**
-     * Receive {@code duration} seconds-worth of Zippy th' Pinhead
+     * Receive {@code Duration.ofSeconds(sQUOTE_DURATION)} seconds-worth of Zippy th' Pinhead
      * quotes.  This method demonstrates the RSocket request/stream
      * model, where each request receives a stream of responses from
      * the server.
-     *
-     * @param duration Number of seconds to receive Zippyisms.
      */
-    public void getQuotes(Duration duration){
+    // @Test
+    public void getQuotes(){
         System.out.println("Entering getQuotes()");
         
         // Get a confirmed SubscriptionRequest from the server.
@@ -203,7 +209,7 @@ public class ZippyMicroserviceTest {
 
         try {
             // Receive Zippyisms for the given duration.
-            zippyQuotes.blockLast(duration);
+            zippyQuotes.blockLast(Duration.ofSeconds(sQUOTES_DURATION));
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
         }
@@ -214,6 +220,7 @@ public class ZippyMicroserviceTest {
      * one-way RSocket fire-and-forget call that does not block the
      * client.
      */
+    // @Test
     public void cancelSubscription(){
         System.out.println("Entering cancelSubscription()");
 

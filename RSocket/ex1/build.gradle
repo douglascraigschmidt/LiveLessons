@@ -16,15 +16,17 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-rsocket'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-test:2.4.3'
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
 }
 
-group = 'cinema'
+group = 'zippyisms'
 version = '1.1.0'
-description = 'spring-rsocket'
+description = 'ex1'
 sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
