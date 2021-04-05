@@ -28,10 +28,14 @@ microservice, including
 . Channel, where a stream of async messages can be sent in both
   directions between client and server.
 
-The functionality of the server is implemented via the
-ZippyApplication, which is a reactive microservice that provides zany
-[Zippy th' Pinhead](https://en.wikipedia.org/wiki/Zippy_the_Pinhead)
-quotes to clients using all four RSocket interaction models.
+The server runs in the context of the
+[ZippyApplication](src/main/java/zippyisms/application/ZippyApplication.java)
+reactive microservice, which uses the
+[ZippyController](src/main/java/zippyisms/controller/ZippyController.java)
+and [ZippyService](src/main/java/zippyisms/service/ZippyService.java)
+to provide zany [Zippy th'
+Pinhead](https://en.wikipedia.org/wiki/Zippy_the_Pinhead) quotes to
+clients using all four RSocket interaction models.
 
 To run this program all you need to do is open the Intellij project
 and then select and run the tests in the ex1>src>main>tests
