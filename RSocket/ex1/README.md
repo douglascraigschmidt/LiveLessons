@@ -16,16 +16,16 @@ programming features.  It demonstrates all four RSocket interaction
 models that communicate between a test program and a Spring-based
 microservice, including
 
-. Request/Response, where each two-way async request receives a single
+* Request/Response, where each two-way async request receives a single
   async response from the server.
 
-. Fire-and-Forget, where each one-way message receives no response
+* Fire-and-Forget, where each one-way message receives no response
   from the server.
 
-. Request/Stream, where each async request receives a stream of
+* Request/Stream, where each async request receives a stream of
   responses from the server.
 
-. Channel, where a stream of async messages can be sent in both
+* Channel, where a stream of async messages can be sent in both
   directions between client and server.
 
 The server runs in the context of the
