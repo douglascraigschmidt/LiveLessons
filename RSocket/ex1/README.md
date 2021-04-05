@@ -1,33 +1,42 @@
 This program applies reactive programming capabilities to implement a
 client/server application that demonstrates several RSocket
-interaction models.  RSocket is a binary point-to-point communication
-protocol designed for use in networked applications that communicate
-via Project Reactor Flux and Mono reactive objects.  It provides a
-(potentially) more efficient alternative to other popular protocols,
-such as HTTP that use non-binary encodings (such as XML and JSon).
+interaction models.  RSocket is a binary point-to-point
+application-level protocol designed for use in client/server programs
+that communicate using the Flux and Mono classes defined in the
+Project Reactor reactive streams framework.  RSocket is designed to
+provide a (potentially) more efficient alternative to other popular
+application-level protocols, such as HTTP using non-binary encodings
+like XML and JSon.  More information on RSocket is available
+[here](https://rsocket.io) and
+[here](https://www.baeldung.com/rsocket).
 
-This program provides a simple console app developed and run using
-RSocket, Spring, Project Reactor, and Intellij.  It demonstrates the
-following RSocket interaction models:
+The program implemented in this Intellij project is developed and run
+using RSocket, Spring, Project Reactor, and Java functional
+programming features.  It demonstrates all four RSocket interaction
+models that communicate between a test program and a Spring-based
+microservice, including
 
-. Request/Response, where each two-way request receives a single
-  response from the server.
+. Request/Response, where each two-way async request receives a single
+  async response from the server.
 
 . Fire-and-Forget, where each one-way message receives no response
   from the server.
 
-. Request/Stream, where each request receives a stream of responses
-  from the server.
+. Request/Stream, where each async request receives a stream of
+  responses from the server.
 
-. Channel, which sends a stream of messages in both directions.
+. Channel, where a stream of async messages can be sent in both
+  directions between client and server.
 
-The following are the steps required to run this Intellij project:
+The functionality of the server is implemented via the
+ZippyApplication, which is a reactive microservice that provides zany
+Zippy th' Pinhead quotes to clients using all four RSocket interaction
+models.
 
-1. Open the Intellij project and then select and run the
-   "ZippyMicroservice" application, which launches a microservice that
-   run locally to simplify testing.
-
-2. After ZippyMicroservice is up and running then select and run the
-   "ZippyMicroserviceTest" application, which then communicates with
-   the ZippyMicroservice to demonstrate the program functionality.
+To run this program all you need to do is open the Intellij project
+and then select and run the tests in the ex1>src>main>tests
+folder. These tests automatically launch the ZippyApplication reactive
+microservice locally on the local computer and then runs all the unit
+tests in the ZippyMicroserviceTest.java file to demonstrate the
+RSocket client and server functionality.
 

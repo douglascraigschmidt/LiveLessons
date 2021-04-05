@@ -10,7 +10,9 @@ import zippyisms.service.ZippyService;
 import zippyisms.utils.RSocketConfig;
 
 /**
- * Provides access to the Zippy th' Pinhead microservice.
+ * Provides the context for running the ZippyApplication, which is a
+ * reactive microservice that provides zany Zippy th' Pinhead quotes
+ * to clients using all four RSocket interaction models.
  */
 @SpringBootApplication
 @ComponentScan("zippyisms")
