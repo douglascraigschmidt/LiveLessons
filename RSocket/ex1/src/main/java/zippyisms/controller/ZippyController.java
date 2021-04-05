@@ -1,6 +1,6 @@
 package zippyisms.controller;
 
-import zippyisms.datamodel.Constants;
+import zippyisms.utils.Constants;
 import zippyisms.datamodel.ZippyQuote;
 import zippyisms.datamodel.SubscriptionRequest;
 import zippyisms.datamodel.SubscriptionStatus;

@@ -1,4 +1,4 @@
-package zippyisms.datamodel;
+package zippyisms.utils;
 
 /**
  * Defines constants used through the program.
