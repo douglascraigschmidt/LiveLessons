@@ -39,7 +39,7 @@ folder. These tests automatically launch the ZippyApplication reactive
 microservice locally on the local computer and then run all the
 SpringBoot [@Test](https://www.baeldung.com/spring-boot-testing)
 annotations in the
-[ZippyMicroserviceTest.java](ex1/src/test/java/zippyisms/application/ZippyMicroserviceTest.java)
+[ZippyMicroserviceTest.java](src/test/java/zippyisms/application/ZippyMicroserviceTest.java)
 file to demonstrate common RSocket functionality for both client and
 server programs.
 
