@@ -42,7 +42,7 @@ clients using all four RSocket interaction models.
 To run this program you simply need to open the provided Intellij
 project and then select and run the tests in the `src>main>tests`
 folder. These tests automatically launch the ZippyApplication reactive
-microservice locally on the local computer and then run all the
+microservice locally on the local computer. They then run all the
 SpringBoot [@Test](https://www.baeldung.com/spring-boot-testing)
 annotations in the
 [ZippyMicroserviceTest.java](src/test/java/zippyisms/application/ZippyMicroserviceTest.java)
