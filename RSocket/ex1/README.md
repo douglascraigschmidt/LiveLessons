@@ -7,11 +7,10 @@ client/server programs that communicate using the
 and
 [Mono](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html)
 classes defined in the [Project Reactor](https://projectreactor.io/)
-reactive streams framework.  RSocket is designed to provide a
-(potentially) more efficient alternative to other popular
-application-level protocols, such as HTTP using non-binary encodings
-like XML and JSon.  A tutorial on RSocket is available
-[here](https://www.baeldung.com/rsocket).
+reactive streams framework.  RSocket provides a (potentially) more
+efficient alternative to other popular application-level protocols,
+such as HTTP using non-binary encodings like XML and JSon.  A tutorial
+on RSocket is available [here](https://www.baeldung.com/rsocket).
 
 The program implemented in this Intellij project is developed and run
 using RSocket, Spring, Project Reactor, and Java functional
