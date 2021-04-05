@@ -1,13 +1,16 @@
 This program applies reactive programming capabilities to implement a
-client/server application that demonstrates several RSocket
-interaction models.  RSocket is a binary point-to-point
-application-level protocol designed for use in client/server programs
-that communicate using the Flux and Mono classes defined in the
-Project Reactor reactive streams framework.  RSocket is designed to
-provide a (potentially) more efficient alternative to other popular
+client/server application that demonstrates several
+[RSocket](https://rsocket.io) interaction models.  RSocket is a binary
+point-to-point application-level protocol designed for use in
+client/server programs that communicate using the
+[Flux](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html)
+and
+[Mono](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html)
+classes defined in the [Project Reactor](https://projectreactor.io/)
+reactive streams framework.  RSocket is designed to provide a
+(potentially) more efficient alternative to other popular
 application-level protocols, such as HTTP using non-binary encodings
-like XML and JSon.  More information on RSocket is available
-[here](https://rsocket.io) and
+like XML and JSon.  A tutorial on RSocket is available
 [here](https://www.baeldung.com/rsocket).
 
 The program implemented in this Intellij project is developed and run
