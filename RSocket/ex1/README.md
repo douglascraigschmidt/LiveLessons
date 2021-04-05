@@ -24,10 +24,10 @@ microservice, including
 * **Fire-and-Forget**, where each one-way message receives no response
   from the server.
 
-* **Request/Stream*, where each async request receives a stream of
+* **Request/Stream**, where each async request receives a stream of
   responses from the server.
 
-* **Channel*, where a stream of async messages can be sent in both
+* **Channel**, where a stream of async messages can be sent in both
   directions between client and server.
 
 The server runs in the context of the
