@@ -30,13 +30,13 @@ microservice, including
 
 The functionality of the server is implemented via the
 ZippyApplication, which is a reactive microservice that provides zany
-Zippy th' Pinhead quotes to clients using all four RSocket interaction
-models.
+[Zippy th' Pinhead](https://en.wikipedia.org/wiki/Zippy_the_Pinhead)
+quotes to clients using all four RSocket interaction models.
 
 To run this program all you need to do is open the Intellij project
 and then select and run the tests in the ex1>src>main>tests
 folder. These tests automatically launch the ZippyApplication reactive
-microservice locally on the local computer and then runs all the unit
-tests in the ZippyMicroserviceTest.java file to demonstrate common
-RSocket functionality for both client and server programs.
+microservice locally on the local computer and then run all the @Test
+annotations in the ZippyMicroserviceTest.java file to demonstrate
+common RSocket functionality for both client and server programs.
 
