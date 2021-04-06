@@ -178,7 +178,8 @@ public class ZippyMicroserviceTest {
                                .equals(SubscriptionStatus.CANCELLED))
             .verifyComplete();
 
-        // Set the status to CANCELLED, which will fail.
+        // Set the requestId to a different value and the status to CANCELLED, which will fail.
+        request.setRequestId(UUID.randomUUID());
         request.setStatus(SubscriptionStatus.CANCELLED);
 
         // Cancel the subscription (should fail).

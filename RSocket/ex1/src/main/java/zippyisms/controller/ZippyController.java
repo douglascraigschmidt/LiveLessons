@@ -12,6 +12,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This controller enables RSocket clients to get random Zippy th'
@@ -49,6 +51,8 @@ public class ZippyController {
     @Autowired
     private ZippyService mZippyService;
 
+    private final Set<Subscription> mSubscriptions = new HashSet<>();
+
     /**
      * Subscribe to receive a Flux stream of Zippy quotes.  This
      * method implements a two-way async RSocket request/response call
@@ -63,8 +67,13 @@ public class ZippyController {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return request
-            // Set the request status to confirm the subscription.
-            .doOnNext(r -> r.setStatus(SubscriptionStatus.CONFIRMED))
+            .doOnNext(r -> {
+                    // Set the request status to confirm the subscription.
+                    r.setStatus(SubscriptionStatus.CONFIRMED);
+
+                    // Add this request to the set of subscriptions.
+                    mSubscriptions.add(r);
+                })
 
             // Print the subscription information as a diagnostic.
             .doOnNext(r ->
@@ -93,14 +102,22 @@ public class ZippyController {
                     System.out.print("cancelSubscription::"
                                      + r.getRequestId()
                                      + ":" + r.getStatus());
-                    if (!r.getStatus().equals(SubscriptionStatus.CONFIRMED)) {
+
+                    // Check whether there's a matching request in the
+                    // subscription set.
+                    if (mSubscriptions.contains(r)) {
+                        // Set the request status to indicate the
+                        // subscription has been cancelled
+                        // successfully.
+                        r.setStatus(SubscriptionStatus.CANCELLED);
+
+                        // Remove the request from the subscription set.
+                        mSubscriptions.remove(r);
+                        System.out.println(" cancel succeeded");
+                    } else {
+                        // Indicate that the subscription wasn't registered.
                         r.setStatus(SubscriptionStatus.ERROR);
                         System.out.println(" cancel failed");
-                    } else {
-                        // Set the request status to indicate the subscription has
-                        // been cancelled.
-                        r.setStatus(SubscriptionStatus.CANCELLED);
-                        System.out.println(" cancel succeeded");
                     }
                 })
 
@@ -130,16 +147,24 @@ public class ZippyController {
                     System.out.print("cancelSubscription::"
                                      + r.getRequestId()
                                      + ":" + r.getStatus());
-                    if (!r.getStatus().equals(SubscriptionStatus.CONFIRMED)) {
+                    // Check whether there's a matching request in the
+                    // subscription set.
+                    if (mSubscriptions.contains(r)) {
+                        // Set the request status to indicate the
+                        // subscription has been cancelled
+                        // successfully.
+                        r.setStatus(SubscriptionStatus.CANCELLED);
+
+                        // Remove the request from the subscription set.
+                        mSubscriptions.remove(r);
+                        System.out.println(" cancel succeeded");
+                    } else {
+                        // Indicate that the subscription wasn't registered.
                         r.setStatus(SubscriptionStatus.ERROR);
                         System.out.println(" cancel failed");
-                    } else {
-                        // Set the request status to indicate the subscription has
-                        // been cancelled.
-                        r.setStatus(SubscriptionStatus.CANCELLED);
-                        System.out.println(" cancel succeeded");
                     }
-                    // Return the updated subscription indicating success or failure.
+                    // Return the updated subscription indicating
+                    // success or failure.
                     return r;
                 });
     }
