@@ -4,15 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import zippyisms.datamodel.ZippyQuote;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class defines methods that return zany quotes from Zippy th'
@@ -25,13 +17,13 @@ public class ZippyService {
      * An in-memory list of all quotes from Zippy th' Pinhead.
      */
     @Autowired
-    public List<ZippyQuote> quotes;
+    public List<ZippyQuote> mQuotes;
 
     /**
      * @return The complete List of quotes from Zippy th' Pinhead.
      */
-    public List<ZippyQuote> getQuotes(){
-        return quotes;
+    public List<ZippyQuote> getmQuotes(){
+        return mQuotes;
     }
 
     /**
@@ -43,15 +35,15 @@ public class ZippyService {
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public ZippyQuote getQuote(int id){
-        assert quotes != null;
+        assert mQuotes != null;
         // Subtract one since the List is 0-based.
-        return quotes.get(id - 1);
+        return mQuotes.get(id - 1);
     }
 
     /**
      * @return The total number of Zippy th' Pinhead quotes
      */
     public int getNumberOfQuotes() {
-        return quotes.size();
+        return mQuotes.size();
     }
 }

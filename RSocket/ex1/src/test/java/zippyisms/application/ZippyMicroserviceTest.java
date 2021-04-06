@@ -12,8 +12,6 @@ import zippyisms.datamodel.SubscriptionStatus;
 import zippyisms.datamodel.ZippyQuote;
 import zippyisms.utils.Constants;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 

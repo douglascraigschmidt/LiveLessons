@@ -15,8 +15,8 @@ import java.time.Duration;
 
 /**
  * This controller enables RSocket clients to get random Zippy th'
- * Pinhead quotes, subscribe to receive a stream of these quotes, as
- * well as cancel earlier subscriptions.  It demonstrates the
+ * Pinhead quotes, subscribe to receive Flux streams of these quotes,
+ * as well as cancel earlier subscriptions.  It demonstrates the
  * following RSocket interaction models
  * 
  * . Request/Response, where each two-way async request receives a
@@ -42,15 +42,17 @@ import java.time.Duration;
 public class ZippyController {
     /**
      * The ZippyService that's associated with this controller via
-     * Spring's dependency injection facilities.
+     * Spring's dependency injection facilities, where an object
+     * receives other objects that it depends on (in this case, the
+     * ZippyService).
      */
     @Autowired
-    private ZippyService zippyService;
+    private ZippyService mZippyService;
 
     /**
      * Subscribe to receive a Flux stream of Zippy quotes.  This
-     * method implements a two-way RSocket request/response call that
-     * blocks the client until the response is received.
+     * method implements a two-way async RSocket request/response call
+     * that blocks the client until the response is received.
      *
      * @param request A {@link Mono} that emits a {@link
      *                SubscriptionRequest}
@@ -64,7 +66,7 @@ public class ZippyController {
             // Set the request status to confirm the subscription.
             .doOnNext(r -> r.setStatus(SubscriptionStatus.CONFIRMED))
 
-            // Print the subscription information.
+            // Print the subscription information as a diagnostic.
             .doOnNext(r ->
                       System.out.println("subscribe::"
                                          + r.getRequestId() + " : "
@@ -73,8 +75,8 @@ public class ZippyController {
 
     /**
      * Cancel a {@link SubscriptionRequest}.  This method implements a
-     * one-way RSocket fire-and-forget call that does not block the
-     * client.
+     * one-way async RSocket fire-and-forget call that does not block
+     * the client.
      *
      * @param request A {@link Mono} that emits a {@link
      *                SubscriptionRequest}
@@ -83,11 +85,11 @@ public class ZippyController {
     public void cancelSubscription(Mono<SubscriptionRequest> request) {
         // Cancel the subscription asynchronously.
         request
-            // Set the status of the request to indicate the
-            // subscription has been cancelled.
+            // Set the request status to indicate the subscription has
+            // been cancelled.
             .doOnNext(r -> r.setStatus(SubscriptionStatus.CANCELLED))
 
-            // Print the subscription information.
+            // Print the subscription information as a diagnostic.
             .doOnNext(r ->
                       System.out.println("cancelSubscription::"
                                          + r.getRequestId() + " : " + r.getStatus()))
@@ -99,8 +101,8 @@ public class ZippyController {
 
     /**
      * Get a {@link Flux} that emits Zippy quotes once a second.  This
-     * method implements the RSocket request/stream model, where each
-     * request receives a stream of responses from the server.
+     * method implements the async RSocket request/stream model, where
+     * each request receives a stream of responses from the server.
      *
      * @param request A {@link Mono} that emits a {@link
      *                SubscriptionRequest}
@@ -109,25 +111,27 @@ public class ZippyController {
     @MessageMapping(Constants.GET_QUOTES)
     public Flux<ZippyQuote> getQuotes(Mono<SubscriptionRequest> request) {
         return request
-            // Check to ensure that the subscription request is valid.
+            // Check to ensure the subscription request is confirmed.
             .flatMapMany(t ->
                          t.getStatus().equals(SubscriptionStatus.CONFIRMED)
-                 // If the request is valid return a Flux that emits
-                 // the list of quotes.
-                 ? Flux.fromIterable(this.zippyService.getQuotes())
+                 // If the request is confirmed return a Flux that
+                 // emits the list of quotes.
+                 ? Flux.fromIterable(mZippyService.getmQuotes())
 
-                 // if the request is invalid return an empty Flux.
+                 // If the request is not confirmed return an empty
+                 // Flux.
                  : Flux.empty())
 
-            // Delay each emission by one second.
+            // Delay each emission by one second to demonstrate the
+            // streaming capability to clients.
             .delayElements(Duration.ofSeconds(1));
     }
 
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes.  This
-     * method implements a two-way RSocket bi-directional channel call
-     * where a Flux stream is sent to the server and the server
-     * returns a Flux in response.
+     * method implements a two-way async RSocket bi-directional
+     * channel call where a Flux stream is sent to the server and the
+     * server returns a Flux in response.
      *
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}  
@@ -136,8 +140,8 @@ public class ZippyController {
     @MessageMapping(Constants.GET_QUOTE)
     public Flux<ZippyQuote> getQuote(Flux<Integer> quoteIds){
         return quoteIds
-            // Get the Zippy th' Pinhead quote at the given quote id.
-            .map(this.zippyService::getQuote);
+            // Get the Zippy th' Pinhead quote at each quote id.
+            .map(mZippyService::getQuote);
     }
 
     /**
@@ -147,6 +151,6 @@ public class ZippyController {
     public Mono<Integer> getNumberOfQuotes(){
         return Mono
             // Return the total number of Zippy th' Pinhead quotes.
-            .just(this.zippyService.getNumberOfQuotes());
+            .just(mZippyService.getNumberOfQuotes());
     }
 }

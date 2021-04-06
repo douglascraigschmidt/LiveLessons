@@ -26,7 +26,6 @@ public class SubscriptionRequest {
      *
      * @param requestId The ID that uniquely indicates the request.
      */
-    public SubscriptionRequest(UUID requestId) {
-        this.requestId = requestId;
+    public SubscriptionRequest(UUID requestId) { this.requestId = requestId;
     }
 }
