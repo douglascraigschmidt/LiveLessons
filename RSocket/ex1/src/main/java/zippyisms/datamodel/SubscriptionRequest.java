@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 /**
- * This class is used by clients to subscribe to receive Zippy th' Pinhead quotes.
+ * This class is used by clients that subscribe to receive Zippy th'
+ * Pinhead quotes.
  */
 @Data
 @NoArgsConstructor
 public class SubscriptionRequest {
     /**
-     * The unique request id.
+     * The unique subscription request id.
      */
     private UUID requestId;
 
@@ -26,6 +27,7 @@ public class SubscriptionRequest {
      *
      * @param requestId The ID that uniquely indicates the request.
      */
-    public SubscriptionRequest(UUID requestId) { this.requestId = requestId;
+    public SubscriptionRequest(UUID requestId) { 
+        this.requestId = requestId;
     }
 }

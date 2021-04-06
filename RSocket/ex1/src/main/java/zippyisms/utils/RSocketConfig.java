@@ -14,7 +14,7 @@ import java.time.Duration;
 
 /**
  * This class contains @Bean methods that initialize the
- * RSocketRequester used by the tests.
+ * RSocketRequester used by the clients (and tests).
  */
 @Configuration
 public class RSocketConfig {

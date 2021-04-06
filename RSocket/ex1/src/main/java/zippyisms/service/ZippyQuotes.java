@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
  * ZippyQuote objects retrieved from a file.
  */
 @Component
-class ZippyQuotesConfig {
+class ZippyQuotes {
     /**
      * @return Return the file of Zippyisms as a List of ZippyQuote
      * objects.

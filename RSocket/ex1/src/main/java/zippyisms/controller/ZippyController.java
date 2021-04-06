@@ -52,7 +52,7 @@ public class ZippyController {
     /**
      * Subscribe to receive a Flux stream of Zippy quotes.  This
      * method implements a two-way async RSocket request/response call
-     * that blocks the client until the response is received.
+     * that sends a response back to the client.
      *
      * @param request A {@link Mono} that emits a {@link
      *                SubscriptionRequest}
@@ -75,8 +75,8 @@ public class ZippyController {
 
     /**
      * Cancel a {@link SubscriptionRequest}.  This method implements a
-     * one-way async RSocket fire-and-forget call that does not block
-     * the client.
+     * one-way async RSocket fire-and-forget call that does not send a
+     * response back to the client.
      *
      * @param request A {@link Mono} that emits a {@link
      *                SubscriptionRequest}
