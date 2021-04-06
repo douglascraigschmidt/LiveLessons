@@ -101,7 +101,8 @@ public class ZippyController {
                     // Print the subscription information as a diagnostic.
                     System.out.print("cancelSubscription::"
                                      + r.getRequestId()
-                                     + ":" + r.getStatus());
+                                     + ":" 
+                                     + r.getStatus());
 
                     // Check whether there's a matching request in the
                     // subscription set.
@@ -147,6 +148,7 @@ public class ZippyController {
                     System.out.print("cancelSubscription::"
                                      + r.getRequestId()
                                      + ":" + r.getStatus());
+
                     // Check whether there's a matching request in the
                     // subscription set.
                     if (mSubscriptions.contains(r)) {
@@ -163,6 +165,7 @@ public class ZippyController {
                         r.setStatus(SubscriptionStatus.ERROR);
                         System.out.println(" cancel failed");
                     }
+
                     // Return the updated subscription indicating
                     // success or failure.
                     return r;
@@ -181,16 +184,18 @@ public class ZippyController {
     @MessageMapping(Constants.GET_QUOTES)
     public Flux<ZippyQuote> getQuotes(Mono<Subscription> request) {
         return request
-            // Check to ensure the subscription request is confirmed.
-            .flatMapMany(t ->
-                         t.getStatus().equals(SubscriptionStatus.CONFIRMED)
-                         // If the request is confirmed return a Flux that
-                         // emits the list of quotes.
+            // Check to ensure the subscription request is registered
+            // and confirmed.
+            .flatMapMany(r -> mSubscriptions
+                         .contains(r)
+                         // If the request is subscribed/confirmed
+                         // return a Flux that emits the list of
+                         // quotes.
                          ? Flux.fromIterable(mZippyService.getQuotes())
 
-                         // If the request is not confirmed return an empty
-                         // Flux.
-                         : Flux.empty())
+                         // If the request is not confirmed return an
+                         // error Flux.
+                         : Flux.error(new IllegalAccessException()))
 
             // Delay each emission by one second to demonstrate the
             // streaming capability to clients.

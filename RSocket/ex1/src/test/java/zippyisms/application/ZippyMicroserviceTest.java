@@ -48,11 +48,11 @@ public class ZippyMicroserviceTest {
 
         // Create an array of random indices.
         Integer[] randomIndices = zippyQuoteRequester
-            // Invoke the call.
+            // Send the message.
             .map(r -> r
-                 // Send this request to the GET_NUMBER_OF_QUOTES
-                 // endpoint.
-                 .route(Constants.GET_NUMBER_OF_QUOTES))
+                // Send this request to the GET_NUMBER_OF_QUOTES
+                // endpoint.
+                .route(Constants.GET_NUMBER_OF_QUOTES))
 
             // Convert the response to a Mono<Integer> containing the
             // number of Zippyisms.
@@ -60,19 +60,19 @@ public class ZippyMicroserviceTest {
 
             // Create an Integer array containing random indices.
             .map(numberOfZippyisms -> new Random()
-                 // Create the given number of random Zippyisms
-                 // whose IDs are between 1 and the total
-                 // number of quotes.
-                 .ints(sNUMBER_OF_QUOTES,
-                       1,
-                       numberOfZippyisms)
+                // Create the given number of random Zippyisms
+                // whose IDs are between 1 and the total
+                // number of quotes.
+                .ints(sNUMBER_OF_QUOTES,
+                      1,
+                      numberOfZippyisms)
 
-                 // Convert the IntStream into a Stream.
-                 .boxed()
+                // Convert the IntStream into a Stream.
+                .boxed()
 
-                 // Trigger intermediate operations and store
-                 // in an array.
-                 .toArray(Integer[]::new))
+                // Trigger intermediate operations and store
+                // in an array.
+                .toArray(Integer[]::new))
 
             // Block until we've computed the randomIndices (we only
             // use block() since the StepVerifier below requires the
@@ -85,14 +85,14 @@ public class ZippyMicroserviceTest {
         // Create a Flux that emits Zippy th' Pinhead quotes at the
         // random indices emitted by the randomZippyQuotes Flux.
         Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
-            // Invoke the call.
+            // Send the message.
             .map(r ->
-                 // Send this request to the GET_QUOTE endpoint.
-                 r.route(Constants.GET_QUOTE)
+                     // Send this request to the GET_QUOTE endpoint.
+                     r.route(Constants.GET_QUOTE)
 
-                 // Create a Flux that emits indices for random Zippy
-                 // th' Pinhead quotes and pass that as the param.
-                 .data(Flux.fromArray(randomIndices)))
+                      // Create a Flux that emits indices for random Zippy
+                      // th' Pinhead quotes and pass that as the param.
+                      .data(Flux.fromArray(randomIndices)))
 
             // Convert the Mono result to a Flux<ZippyQuote>
             // containing a stream of ZippyQuote objects.
@@ -100,19 +100,19 @@ public class ZippyMicroserviceTest {
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
             .doOnNext(m ->
-                      System.out.println("Quote ("
-                                         + m.getQuoteId() + ") = "
-                                         + m.getZippyism()));
+                          System.out.println("Quote ("
+                                                 + m.getQuoteId() + ") = "
+                                                 + m.getZippyism()));
 
         // Ensure the results are correct, i.e., the returned quoteIds
         // match those sent to the GET_QUOTE endpoint.
         StepVerifier.create(zippyQuotes)
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[0])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[1])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[2])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[3])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[4])
-            .verifyComplete();
+                    .expectNextMatches(m -> m.getQuoteId() == randomIndices[0])
+                    .expectNextMatches(m -> m.getQuoteId() == randomIndices[1])
+                    .expectNextMatches(m -> m.getQuoteId() == randomIndices[2])
+                    .expectNextMatches(m -> m.getQuoteId() == randomIndices[3])
+                    .expectNextMatches(m -> m.getQuoteId() == randomIndices[4])
+                    .verifyComplete();
     }
 
     /**
@@ -126,46 +126,47 @@ public class ZippyMicroserviceTest {
     public void subscribeAndCancel() {
         System.out.println("Entering subscribeAndCancel()");
 
-        // Create a random subscription id.
-        Subscription request = new Subscription(UUID.randomUUID());
-
         // Create a Mono<SubscriptionRequest>.
         Mono<Subscription> subscriptionRequest = zippyQuoteRequester
-            // Invoke the call.
+            // Send the message.
             .map(r -> r
-                 // Send this request to the SUBSCRIBE endpoint.
-                 .route(Constants.SUBSCRIBE)
+                // Send this request to the SUBSCRIBE endpoint.
+                .route(Constants.SUBSCRIBE)
 
-                 // Pass the SubscriptionRequest as the param.
-                 .data(request))
+                // Create a new Subscription with a random
+                // subscription Id and pass it to the param.
+                .data(new Subscription(UUID.randomUUID())))
 
             // Convert the response to a Mono<SubscriptionRequest>.
             .flatMap(r -> r.retrieveMono(Subscription.class))
 
             // Print the results.
             .doOnNext(r ->
-                      System.out.println(r.getRequestId()
-                                         + ":" + r.getStatus()));
+                          System.out.println(r.getRequestId()
+                                                 + ":" + r.getStatus()));
 
         // Ensure that the subscriptionRequest's status is CONFIRMED.
         StepVerifier
             .create(subscriptionRequest)
             .expectNextMatches(r -> r
-                               .getStatus()
-                               .equals(SubscriptionStatus.CONFIRMED))
+                .getStatus()
+                .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        // Set the status to CONFIRMED, which will succeed.
-        request.setStatus(SubscriptionStatus.CONFIRMED);
-
-        // Cancel the subscription (should succeed).
+        // Perform a confirmed cancellation of the subscription
+        // (should succeed).
         Mono<Subscription> mono = zippyQuoteRequester
-            .map(r -> r
-                 // Send this request to the CANCEL_CONFIRMED endpoint.
-                 .route(Constants.CANCEL_CONFIRMED)
+            // Wait for both Monos to emit one element and combine
+            // these elements once into a Tuple2 object.
+            .zipWith(subscriptionRequest)
 
-                 // Pass the SubscriptionRequest as the param.
-                 .data(request))
+            .map(tuple -> tuple
+                // Send this request to the CANCEL_CONFIRMED
+                // endpoint.
+                .getT1().route(Constants.CANCEL_CONFIRMED)
+
+                // Pass the SubscriptionRequest as the param.
+                .data(tuple.getT2()))
 
             // Convert the response to a Mono<SubscriptionRequest>.
             .flatMap(r -> r.retrieveMono(Subscription.class));
@@ -174,22 +175,20 @@ public class ZippyMicroserviceTest {
         StepVerifier
             .create(mono)
             .expectNextMatches(r -> r
-                               .getStatus()
-                               .equals(SubscriptionStatus.CANCELLED))
+                .getStatus()
+                .equals(SubscriptionStatus.CANCELLED))
             .verifyComplete();
-
-        // Set the requestId to a different value and the status to CANCELLED, which will fail.
-        request.setRequestId(UUID.randomUUID());
-        request.setStatus(SubscriptionStatus.CANCELLED);
 
         // Cancel the subscription (should fail).
         mono = zippyQuoteRequester
             .map(r -> r
-                 // Send this request to the CANCEL_CONFIRMED endpoint.
-                 .route(Constants.CANCEL_CONFIRMED)
+                // Send this request to the CANCEL_CONFIRMED endpoint.
+                .route(Constants.CANCEL_CONFIRMED)
 
-                 // Pass the SubscriptionRequest as the param.
-                 .data(request))
+                // Create a new Subscription that hasn't
+                // been subscribed and pass it as the param,
+                // which should fail.
+                .data(new Subscription(UUID.randomUUID())))
 
             // Convert the response to a Mono<SubscriptionRequest>.
             .flatMap(r -> r.retrieveMono(Subscription.class));
@@ -198,66 +197,48 @@ public class ZippyMicroserviceTest {
         StepVerifier
             .create(mono)
             .expectNextMatches(r -> r
-                               .getStatus()
-                               .equals(SubscriptionStatus.ERROR))
-            .verifyComplete();
-
-        // Cancel the subscription (should fail).
-        mono = zippyQuoteRequester
-            .map(r -> r
-                 // Send this request to the CANCEL_UNCONFIRMED
-                 // endpoint.
-                 .route(Constants.CANCEL_UNCONFIRMED)
-
-                 // Pass the SubscriptionRequest as the param.
-                 .data(request))
-
-            // Convert the response to a Mono<SubscriptionRequest>.
-            .flatMap(r -> r.retrieveMono(Subscription.class));
-
-        // Test that mono completed (which is all we can do for an
-        // unconfirmed cancel).
-        StepVerifier
-            .create(mono)
+                .getStatus()
+                .equals(SubscriptionStatus.ERROR))
             .verifyComplete();
     }
 
     /**
-     * Receive sNUMBER_OF_QUOTES of Zippy th' Pinhead quotes.  This
-     * method demonstrates the async RSocket request/stream model,
-     * where each request receives a Flux stream of responses from the
-     * server.
+     * Subscribe for and receive sNUMBER_OF_QUOTES of Zippy th'
+     * Pinhead quotes.  This method demonstrates the async RSocket
+     * request/stream model, where each request receives a Flux stream
+     * of responses from the server.
      */
     @Test
-    public void getQuotes() {
-        System.out.println("Entering getQuotes()");
+    public void validSubscribeForQuotes() {
+        System.out.println("Entering validSubscribeForQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
         Mono<Subscription> subscriptionRequest = zippyQuoteRequester
             .map(r -> r
-                 // Send this request to the SUBSCRIBE endpoint.
-                 .route(Constants.SUBSCRIBE)
+                // Send this request to the SUBSCRIBE endpoint.
+                .route(Constants.SUBSCRIBE)
 
-                 // Create a random subscription id and pass it as the
-                 // param.
-                 .data(new Subscription(UUID.randomUUID())))
+                // Create a random subscription id and pass it as the
+                // param.
+                .data(new Subscription(UUID.randomUUID())))
 
             // Convert the response to a Mono<SubscriptionRequest>.
             .flatMap(r -> r.retrieveMono(Subscription.class));
 
-        // Get a Flux that emits ZippyQuote objects from the server.
+        // Use the confirmed SubscriptionRequest to get a Flux that
+        // emits ZippyQuote objects from the server.
         Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
             // Wait for both Monos to emit one element and combine
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Invoke the call.
+            // Send the message.
             .map(tuple -> tuple
-                 // Send this request to the GET_QUOTES endpoint.
-                 .getT1().route(Constants.GET_QUOTES)
+                // Send this request to the GET_QUOTES endpoint.
+                .getT1().route(Constants.GET_QUOTES)
 
-                 // Pass the SubscriptionRequest as the param.
-                 .data(tuple.getT2()))
+                // Pass the SubscriptionRequest as the param.
+                .data(tuple.getT2()))
 
             // Conver the Mono response to a Flux<ZippyQuote>
             // containing a stream of ZippyQuote objects.
@@ -266,15 +247,26 @@ public class ZippyMicroserviceTest {
             // Print each Zippyism emitted by the Flux<ZippyQuote>.
             .doOnNext(m -> System.out.println("Quote: " + m.getZippyism()))
 
+            // Only emit sNUMBER_OF_QUOTES.
             .take(sNUMBER_OF_QUOTES);
 
         // Ensure the first five results come in the right order.
         StepVerifier.create(zippyQuotes)
-            .expectNextMatches(m -> m.getZippyism().equals("All of life is a blur of Republicans and meat!"))
-            .expectNextMatches(m -> m.getZippyism().equals("..Are we having FUN yet...?"))
-            .expectNextMatches(m -> m.getZippyism().equals("Life is a POPULARITY CONTEST!  I'm REFRESHINGLY CANDID!!"))
-            .expectNextMatches(m -> m.getZippyism().equals("You were s'posed to laugh!"))
-            .expectNextMatches(m -> m.getZippyism().equals("Fold, fold, FOLD!!  FOLDING many items!!"))
-            .verifyComplete();
+                    .expectNextMatches(m -> m
+                        .getZippyism()
+                        .equals("All of life is a blur of Republicans and meat!"))
+                    .expectNextMatches(m -> m
+                        .getZippyism()
+                        .equals("..Are we having FUN yet...?"))
+                    .expectNextMatches(m -> m
+                        .getZippyism()
+                        .equals("Life is a POPULARITY CONTEST!  I'm REFRESHINGLY CANDID!!"))
+                    .expectNextMatches(m -> m
+                        .getZippyism()
+                        .equals("You were s'posed to laugh!"))
+                    .expectNextMatches(m -> m
+                        .getZippyism()
+                        .equals("Fold, fold, FOLD!!  FOLDING many items!!"))
+                    .verifyComplete();
     }
 }
