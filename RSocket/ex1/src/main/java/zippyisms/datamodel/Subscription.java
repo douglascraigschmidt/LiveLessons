@@ -11,7 +11,7 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-public class SubscriptionRequest {
+public class Subscription {
     /**
      * The unique subscription request id.
      */
@@ -27,7 +27,7 @@ public class SubscriptionRequest {
      *
      * @param requestId The ID that uniquely indicates the request.
      */
-    public SubscriptionRequest(UUID requestId) { 
+    public Subscription(UUID requestId) {
         this.requestId = requestId;
     }
 }

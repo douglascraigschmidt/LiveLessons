@@ -1,13 +1,15 @@
 package zippyisms.application;
 
+import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import zippyisms.datamodel.SubscriptionRequest;
+import zippyisms.datamodel.Subscription;
 import zippyisms.datamodel.SubscriptionStatus;
 import zippyisms.datamodel.ZippyQuote;
 import zippyisms.utils.Constants;
@@ -114,27 +116,31 @@ public class ZippyMicroserviceTest {
     }
 
     /**
-     * Subscribe to receive Zippyisms.  This method demonstrates a
-     * two-way async RSocket request/response call that subscribes to
-     * retrieve a stream of Zippy t' Pinhead quotes.
+     * Subscribe and cancel requests to receive Zippyisms.  This
+     * method demonstrates a two-way async RSocket request/response
+     * call that subscribes to retrieve a stream of Zippy t' Pinhead
+     * quotes.  It also method demonstrates a one-way RSocket
+     * fire-and-forget call that does not return a response.
      */
     @Test
-    public void subscribe() {
-        System.out.println("Entering subscribe()");
+    public void subscribeAndCancel() {
+        System.out.println("Entering subscribeAndCancel()");
 
-        // Create a SubscriptionRequest.
-        Mono<SubscriptionRequest> subscriptionRequest = zippyQuoteRequester
+        // Create a random subscription id.
+        Subscription request = new Subscription(UUID.randomUUID());
+
+        // Create a Mono<SubscriptionRequest>.
+        Mono<Subscription> subscriptionRequest = zippyQuoteRequester
             // Invoke the call.
             .map(r -> r
                  // Send this request to the SUBSCRIBE endpoint.
                  .route(Constants.SUBSCRIBE)
 
-                 // Create a random subscription id and pass it as the
-                 // param.
-                 .data(new SubscriptionRequest(UUID.randomUUID())))
+                 // Pass the SubscriptionRequest as the param.
+                 .data(request))
 
             // Convert the response to a Mono<SubscriptionRequest>.
-            .flatMap(r -> r.retrieveMono(SubscriptionRequest.class))
+            .flatMap(r -> r.retrieveMono(Subscription.class))
 
             // Print the results.
             .doOnNext(r ->
@@ -144,36 +150,72 @@ public class ZippyMicroserviceTest {
         // Ensure that the subscriptionRequest's status is CONFIRMED.
         StepVerifier
             .create(subscriptionRequest)
-            .expectNextMatches(t -> t
+            .expectNextMatches(r -> r
                                .getStatus()
                                .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
-    }
 
-    /**
-     * Cancel a previous subscription.  This method demonstrates a
-     * one-way RSocket fire-and-forget call that does not return a
-     * response.
-     */
-    @Test
-    public void cancelSubscription() {
-        System.out.println("Entering cancelSubscription()");
+        // Set the status to CONFIRMED, which will succeed.
+        request.setStatus(SubscriptionStatus.CONFIRMED);
 
-        // Cancel the subscription.
-        Mono<Void> mono = zippyQuoteRequester
+        // Cancel the subscription (should succeed).
+        Mono<Subscription> mono = zippyQuoteRequester
             .map(r -> r
-                 // Send this request to the CANCEL endpoint.
-                 .route(Constants.CANCEL)
+                 // Send this request to the CANCEL_CONFIRMED endpoint.
+                 .route(Constants.CANCEL_CONFIRMED)
 
-                 // Create a random subscription id and pass it as the
-                 // param.
-                 .data(new SubscriptionRequest(UUID.randomUUID())))
+                 // Pass the SubscriptionRequest as the param.
+                 .data(request))
 
-            // Send the request to the client, but don't receive a
-            // response.
-            .flatMap(RSocketRequester.RetrieveSpec::send);
+            // Convert the response to a Mono<SubscriptionRequest>.
+            .flatMap(r -> r.retrieveMono(Subscription.class));
 
-        // Test that mono completed.
+        // Test that the subscription was successfully cancelled.
+        StepVerifier
+            .create(mono)
+            .expectNextMatches(r -> r
+                               .getStatus()
+                               .equals(SubscriptionStatus.CANCELLED))
+            .verifyComplete();
+
+        // Set the status to CANCELLED, which will fail.
+        request.setStatus(SubscriptionStatus.CANCELLED);
+
+        // Cancel the subscription (should fail).
+        mono = zippyQuoteRequester
+            .map(r -> r
+                 // Send this request to the CANCEL_CONFIRMED endpoint.
+                 .route(Constants.CANCEL_CONFIRMED)
+
+                 // Pass the SubscriptionRequest as the param.
+                 .data(request))
+
+            // Convert the response to a Mono<SubscriptionRequest>.
+            .flatMap(r -> r.retrieveMono(Subscription.class));
+
+        // Test that the subscription was unsuccessfully cancelled.
+        StepVerifier
+            .create(mono)
+            .expectNextMatches(r -> r
+                               .getStatus()
+                               .equals(SubscriptionStatus.ERROR))
+            .verifyComplete();
+
+        // Cancel the subscription (should fail).
+        mono = zippyQuoteRequester
+            .map(r -> r
+                 // Send this request to the CANCEL_UNCONFIRMED
+                 // endpoint.
+                 .route(Constants.CANCEL_UNCONFIRMED)
+
+                 // Pass the SubscriptionRequest as the param.
+                 .data(request))
+
+            // Convert the response to a Mono<SubscriptionRequest>.
+            .flatMap(r -> r.retrieveMono(Subscription.class));
+
+        // Test that mono completed (which is all we can do for an
+        // unconfirmed cancel).
         StepVerifier
             .create(mono)
             .verifyComplete();
@@ -190,17 +232,17 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering getQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
-        Mono<SubscriptionRequest> subscriptionRequest = zippyQuoteRequester
+        Mono<Subscription> subscriptionRequest = zippyQuoteRequester
             .map(r -> r
                  // Send this request to the SUBSCRIBE endpoint.
                  .route(Constants.SUBSCRIBE)
 
                  // Create a random subscription id and pass it as the
                  // param.
-                 .data(new SubscriptionRequest(UUID.randomUUID())))
+                 .data(new Subscription(UUID.randomUUID())))
 
             // Convert the response to a Mono<SubscriptionRequest>.
-            .flatMap(r -> r.retrieveMono(SubscriptionRequest.class));
+            .flatMap(r -> r.retrieveMono(Subscription.class));
 
         // Get a Flux that emits ZippyQuote objects from the server.
         Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester

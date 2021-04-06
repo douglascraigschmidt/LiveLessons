@@ -6,5 +6,6 @@ package zippyisms.datamodel;
 public enum SubscriptionStatus {
     PENDING,
     CONFIRMED,
-    CANCELLED;
+    CANCELLED,
+    ERROR;
 }
