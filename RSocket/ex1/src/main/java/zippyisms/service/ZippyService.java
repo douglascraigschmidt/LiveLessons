@@ -9,7 +9,8 @@ import java.util.List;
 /**
  * This class defines methods that return zany quotes from Zippy th'
  * Pinhead.  It is annotated as a Spring @Service, which enables the
- * autodetection of implementation classes via classpath scanning.
+ * autodetection of implementation classes via classpath scanning (in
+ * this case the List of ZippyQuote objects).
  */
 @Service
 public class ZippyService {
@@ -22,21 +23,21 @@ public class ZippyService {
     /**
      * @return The complete List of quotes from Zippy th' Pinhead.
      */
-    public List<ZippyQuote> getmQuotes(){
+    public List<ZippyQuote> getQuotes(){
         return mQuotes;
     }
 
     /**
-     * Returns a specific quote from Zippy th' Pinhead based on the
+     * Returns a specific quote from Zippy th' Pinhead corresponding to the
      * given {@code id}.
      *
      * @param id The requested {@code id}
      * @return The quote associated iwth the requested {@code id}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         (index < 0 || index >= size())
      */
     public ZippyQuote getQuote(int id){
-        assert mQuotes != null;
-        // Subtract one since the List is 0-based.
+        // Subtract 1 since the List is 0-based.
         return mQuotes.get(id - 1);
     }
 

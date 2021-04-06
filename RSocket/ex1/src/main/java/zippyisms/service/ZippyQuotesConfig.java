@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Create a List of ZippyQuote objects retrieved from a file.
+ * This injectable component defines a @Bean that creates a List of
+ * ZippyQuote objects retrieved from a file.
  */
 @Component
 class ZippyQuotesConfig {
@@ -39,6 +40,7 @@ class ZippyQuotesConfig {
             CharSequence bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
+            // Return a List of ZippyQuote objects.
             return Pattern
                 // Compile splitter into a regular expression (regex).
                 .compile("@")

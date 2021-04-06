@@ -116,7 +116,7 @@ public class ZippyController {
                          t.getStatus().equals(SubscriptionStatus.CONFIRMED)
                  // If the request is confirmed return a Flux that
                  // emits the list of quotes.
-                 ? Flux.fromIterable(mZippyService.getmQuotes())
+                 ? Flux.fromIterable(mZippyService.getQuotes())
 
                  // If the request is not confirmed return an empty
                  // Flux.
