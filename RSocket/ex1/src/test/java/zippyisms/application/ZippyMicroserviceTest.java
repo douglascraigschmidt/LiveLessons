@@ -4,17 +4,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.rsocket.RSocketRequester;
-import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import zippyisms.application.ZippyApplication;
-import zippyisms.utils.Constants;
 import zippyisms.datamodel.SubscriptionRequest;
 import zippyisms.datamodel.SubscriptionStatus;
 import zippyisms.datamodel.ZippyQuote;
-import zippyisms.service.ZippyService;
+import zippyisms.utils.Constants;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -47,36 +46,46 @@ public class ZippyMicroserviceTest {
     public void getRandomQuotes() {
         System.out.println("Entering getRandomQuotes()");
 
-        // Create a List of random indices.
-        Integer[] randomIndices = new Random()
-            // Create the given number of random Zippyisms
-            // whose IDs are between 1 and the total
-            // number of quotes.
-            .ints(sNUMBER_OF_QUOTES,
-                  1,
-                  ZippyService.quotes.size())
+        // Create an array of random indices.
+        Integer[] randomIndices = zippyQuoteRequester
+            .map(r -> r
+                // Send this request to the GET_NUMBER_OF_QUOTES endpoint.
+                .route(Constants.GET_NUMBER_OF_QUOTES))
 
-            // Convert the IntStream into a Stream.
-            .boxed()
+            // Block until we get back the number of Zippyisms.
+            .flatMap(r -> r.retrieveMono(Integer.class))
 
-            // Trigger intermediate operations and store
-            // in an array.
-            .toArray(Integer[]::new);
+            // Create an Integer array containing random indices.
+            .map(numberOfZippyisms -> new Random()
+                // Create the given number of random Zippyisms
+                // whose IDs are between 1 and the total
+                // number of quotes.
+                .ints(sNUMBER_OF_QUOTES,
+                      1,
+                      numberOfZippyisms)
 
-        // Create a Flux that emits indices for random Zippy th'
-        // Pinhead quotes.
-        Flux<Integer> randomZippyQuotes = Flux
-            .fromArray(randomIndices);
+                // Convert the IntStream into a Stream.
+                .boxed()
+
+                // Trigger intermediate operations and store
+                // in an array.
+                .toArray(Integer[]::new))
+
+            // Block until we've computed the randomIndices.
+            .block();
+
+        assert randomIndices != null;
 
         // Create a Flux that emits Zippy th' Pinhead quotes at
         // the random indices emitted by the randomZippyQuotes Flux.
         Flux<ZippyQuote> zippyQuotes = zippyQuoteRequester
-            .map(r -> r
+            .map(r ->
                 // Send this request to the GET_QUOTE endpoint.
-                .route(Constants.GET_QUOTE)
+                r.route(Constants.GET_QUOTE)
 
-                // Pass the Flux of random indices as the param.
-                .data(randomZippyQuotes))
+                // Create a Flux that emits indices for random Zippy th'
+                // Pinhead quotes and pass that as the param.
+                .data(Flux.fromArray(randomIndices)))
 
             // Convert the result to a Flux<ZippyQuote>.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))

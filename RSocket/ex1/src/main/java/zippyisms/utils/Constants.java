@@ -16,5 +16,6 @@ public class Constants {
     public static final String CANCEL = "subscription.cancel";
     public static final String GET_QUOTES = "zippyisms.getQuotes";
     public static final String GET_QUOTE = "zippyisms.getQuote";
+    public static final String GET_NUMBER_OF_QUOTES = "zippyisms.getNumberOfQuotes";
 }
 

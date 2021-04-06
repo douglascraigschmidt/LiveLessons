@@ -14,28 +14,35 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 
 /**
- * This controller enables RSocket clients to subscribe to receive
- * Zippy th' Pinhead quotes, as well as cancel earlier subscriptions.
- * It demonstrates the following RSocket interaction models
+ * This controller enables RSocket clients to get random Zippy th'
+ * Pinhead quotes, subscribe to receive a stream of these quotes, as
+ * well as cancel earlier subscriptions.  It demonstrates the
+ * following RSocket interaction models
  * 
- * . Request/Response, where each two-way request receives a single
- *   response from the server.
- * 
+ * . Request/Response, where each two-way async request receives a
+ *   single async response from the server.
+ *
  * . Fire-and-Forget, where each one-way message receives no response
  *   from the server.
- * 
- * . Request/Stream, where each request receives a stream of responses
- *   from the server.
- * 
- * . Channel, which sends a stream of messages in both directions.
+ *
+ * . Request/Stream, where each async request receives a stream of
+ *   responses from the server.
+ *
+ * . Channel, where a stream of async messages can be sent in both
+ *   directions between client and server.
  *
  * Spring enables the integration of RSockets into a controller via
- * the @MessageMapping annotation, as shown below.
+ * the @Controller annotation, which enables the autodetection of
+ * implementation classes via classpath scanning, and
+ * the @MessageMapping annotation, which maps a message onto a
+ * message-handling method by matching the declared patterns to a
+ * destination extracted from the message.
  */
 @Controller
 public class ZippyController {
     /**
-     * The ZippyService that's associated with this controller.
+     * The ZippyService that's associated with this controller via
+     * Spring's dependency injection facilities.
      */
     @Autowired
     private ZippyService zippyService;
@@ -131,5 +138,15 @@ public class ZippyController {
         return quoteIds
             // Get the Zippy th' Pinhead quote at the given quote id.
             .map(this.zippyService::getQuote);
+    }
+
+    /**
+     * @return The total number of Zippy th' Pinhead quotes.
+     */
+    @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
+    public Mono<Integer> getNumberOfQuotes(){
+        return Mono
+            // Return the total number of Zippy th' Pinhead quotes.
+            .just(this.zippyService.getNumberOfQuotes());
     }
 }

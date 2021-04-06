@@ -1,5 +1,6 @@
 package zippyisms.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import zippyisms.datamodel.ZippyQuote;
 import org.springframework.stereotype.Service;
 
@@ -14,55 +15,17 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This service returns classic quotes from Zippy th' Pinhead.
+ * This class defines methods that return zany quotes from Zippy th'
+ * Pinhead.  It is annotated as a Spring @Service, which enables the
+ * autodetection of implementation classes via classpath scanning.
  */
 @Service
 public class ZippyService {
     /**
      * An in-memory list of all quotes from Zippy th' Pinhead.
      */
-    public final static List<ZippyQuote> quotes = getInput();
-
-    /**
-     * @return Return the file of Zippyisms as a list of ZippyQuote
-     * objects.
-     */
-    private static List<ZippyQuote> getInput() {
-        try {
-            // Although AtomicInteger is overkill we use it to
-            // simplify incrementing the ID in the stream below.
-            AtomicInteger idCount = new AtomicInteger(0);
-
-            // Convert the filename into a pathname.
-            URI uri = ClassLoader.getSystemResource("zippyisms.txt").toURI();
-
-            // Open the file and get all the bytes.
-            CharSequence bytes =
-                new String(Files.readAllBytes(Paths.get(uri)));
-
-            return Pattern
-                // Compile splitter into a regular expression (regex).
-                .compile("@")
-
-                // Use the regex to split the file into a stream of
-                // strings.
-                .splitAsStream(bytes)
-
-                // Filter out any empty strings.
-                .filter(((Predicate<String>) String::isEmpty).negate())
-
-                // Create a new ZippyQuote.
-                .map(quote ->
-                         new ZippyQuote(idCount.incrementAndGet(),
-                                        quote.stripLeading()))
-                
-                // Collect results into a list of ZippyQuote objects.
-                .collect(toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+    @Autowired
+    public List<ZippyQuote> quotes;
 
     /**
      * @return The complete List of quotes from Zippy th' Pinhead.
@@ -83,5 +46,12 @@ public class ZippyService {
         assert quotes != null;
         // Subtract one since the List is 0-based.
         return quotes.get(id - 1);
+    }
+
+    /**
+     * @return The total number of Zippy th' Pinhead quotes
+     */
+    public int getNumberOfQuotes() {
+        return quotes.size();
     }
 }
