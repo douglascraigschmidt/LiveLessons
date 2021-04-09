@@ -51,6 +51,10 @@ public class ZippyController {
     @Autowired
     private ZippyService mZippyService;
 
+    /**
+     * Set of Subscriptions that are used to determine whether a client
+     * has subscribed already.
+     */
     private final Set<Subscription> mSubscriptions = new HashSet<>();
 
     /**
@@ -100,25 +104,28 @@ public class ZippyController {
             .doOnNext(r -> {
                     // Print the subscription information as a diagnostic.
                     System.out.print("cancelSubscription::"
-                                     + r.getRequestId()
-                                     + ":" 
-                                     + r.getStatus());
+                                     + r.getRequestId());
 
                     // Check whether there's a matching request in the
                     // subscription set.
                     if (mSubscriptions.contains(r)) {
+                        // Remove the request from the subscription set.
+                        mSubscriptions.remove(r);
+
                         // Set the request status to indicate the
                         // subscription has been cancelled
                         // successfully.
                         r.setStatus(SubscriptionStatus.CANCELLED);
 
-                        // Remove the request from the subscription set.
-                        mSubscriptions.remove(r);
-                        System.out.println(" cancel succeeded");
+                        System.out.println(":"
+                                               + r.getStatus()
+                                               + " cancel succeeded");
                     } else {
                         // Indicate that the subscription wasn't registered.
                         r.setStatus(SubscriptionStatus.ERROR);
-                        System.out.println(" cancel failed");
+                        System.out.println(":"
+                                           + r.getStatus()
+                                           + " cancel failed");
                     }
                 })
 
@@ -146,24 +153,29 @@ public class ZippyController {
             .map(r -> {
                     // Print the subscription information as a diagnostic.
                     System.out.print("cancelSubscription::"
-                                     + r.getRequestId()
-                                     + ":" + r.getStatus());
+                                     + r.getRequestId());
 
                     // Check whether there's a matching request in the
                     // subscription set.
                     if (mSubscriptions.contains(r)) {
+                        // Remove the request from the subscription
+                        // set.
+                        mSubscriptions.remove(r);
+
                         // Set the request status to indicate the
                         // subscription has been cancelled
                         // successfully.
                         r.setStatus(SubscriptionStatus.CANCELLED);
 
-                        // Remove the request from the subscription set.
-                        mSubscriptions.remove(r);
-                        System.out.println(" cancel succeeded");
+                        System.out.println(":"
+                                           + r.getStatus()
+                                           + " cancel succeeded");
                     } else {
                         // Indicate that the subscription wasn't registered.
                         r.setStatus(SubscriptionStatus.ERROR);
-                        System.out.println(" cancel failed");
+                        System.out.println(":"
+                                           + r.getStatus()
+                                           + " cancel failed");
                     }
 
                     // Return the updated subscription indicating
@@ -181,21 +193,27 @@ public class ZippyController {
      *                Subscription}
      * @return A {@link Flux} that emits Zippy quote every second
      */
-    @MessageMapping(Constants.GET_QUOTES)
-    public Flux<ZippyQuote> getQuotes(Mono<Subscription> request) {
+    @MessageMapping(Constants.GET_ALL_QUOTES)
+    public Flux<ZippyQuote> getAllQuotes(Mono<Subscription> request) {
         return request
+            .doOnNext(r ->
+                          System.out.println("getAllQuotes::"
+                                                 + r.getRequestId()
+                                                 + ":"
+                                                 + r.getStatus()))
+
             // Check to ensure the subscription request is registered
             // and confirmed.
             .flatMapMany(r -> mSubscriptions
-                         .contains(r)
-                         // If the request is subscribed/confirmed
-                         // return a Flux that emits the list of
-                         // quotes.
-                         ? Flux.fromIterable(mZippyService.getQuotes())
+                .contains(r)
+                // If the request is subscribed/confirmed
+                // return a Flux that emits the list of
+                // quotes.
+                ? Flux.fromIterable(mZippyService.getQuotes())
 
-                         // If the request is not confirmed return an
-                         // error Flux.
-                         : Flux.error(new IllegalAccessException()))
+                // If the request is not confirmed return an
+                // empty Flux.
+                : Flux.empty())
 
             // Delay each emission by one second to demonstrate the
             // streaming capability to clients.
@@ -212,11 +230,15 @@ public class ZippyController {
      *                 {@code quoteIds}
      * @return A {@link Flux} that emits the requested Zippy quotes
      */
-    @MessageMapping(Constants.GET_QUOTE)
-    public Flux<ZippyQuote> getQuote(Flux<Integer> quoteIds) {
+    @MessageMapping(Constants.GET_RANDOM_QUOTES)
+    public Flux<ZippyQuote> getRandomQuotes(Flux<Integer> quoteIds) {
         return quoteIds
             // Get the Zippy th' Pinhead quote at each quote id.
-            .map(mZippyService::getQuote);
+            .map(mZippyService::getQuote)
+
+            // Delay each emission by one second to demonstrate the
+            // streaming capability to clients.
+            .delayElements(Duration.ofSeconds(1));
     }
 
     /**

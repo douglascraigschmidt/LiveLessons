@@ -7,7 +7,10 @@ import java.util.UUID;
 
 /**
  * This class is used by clients that subscribe to receive Zippy th'
- * Pinhead quotes.
+ * Pinhead quotes.  The @Data annotation generates all the boilerplate
+ * that is normally associated with simple Plain Old Java Objects
+ * (POJOs) and beans, including getters for all fields and setters for
+ * all non-final fields.
  */
 @Data
 @NoArgsConstructor

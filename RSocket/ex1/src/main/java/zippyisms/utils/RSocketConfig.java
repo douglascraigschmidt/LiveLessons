@@ -14,7 +14,10 @@ import java.time.Duration;
 
 /**
  * This class contains @Bean methods that initialize the
- * RSocketRequester used by the clients (and tests).
+ * RSocketRequester used by the clients and tests.  The @Configuration
+ * annotation indicates that this class declares one or more @Bean
+ * methods that are processed by the Spring container to generate bean
+ * definitions and service requests for those beans at runtime.
  */
 @Configuration
 public class RSocketConfig {

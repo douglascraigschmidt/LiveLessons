@@ -18,7 +18,11 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This injectable component defines a @Bean that creates a List of
- * ZippyQuote objects retrieved from a file.
+ * ZippyQuote objects retrieved from a file.  The @Component
+ * annotation enables Spring to automatically detect custom beans,
+ * i.e., without having to write any explicit code Spring will scan an
+ * application for classes annotated with @Component, instantiate
+ * them, and inject any specified dependencies into them.
  */
 @Component
 class ZippyQuotes {

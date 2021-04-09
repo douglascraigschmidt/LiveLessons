@@ -13,6 +13,13 @@ import zippyisms.utils.RSocketConfig;
  * Provides the context for running the ZippyApplication, which is a
  * reactive microservice that provides zany Zippy th' Pinhead quotes
  * to clients using all four RSocket interaction models.
+ * The @SpringBootApplication annotation enables apps to use
+ * auto-configuration, component scan, and to define extra
+ * configuration on their "application" class.  The @ComponentScan
+ * annotation enables auto-detection of beans by a Spring container.
+ * Java classes that are decorated with stereotypes such
+ * as @Component, @Configuration, @Service are auto-detected by
+ * Spring.
  */
 @SpringBootApplication
 @ComponentScan("zippyisms")
