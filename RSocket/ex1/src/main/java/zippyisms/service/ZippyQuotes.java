@@ -1,8 +1,6 @@
 package zippyisms.service;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import zippyisms.datamodel.ZippyQuote;
 

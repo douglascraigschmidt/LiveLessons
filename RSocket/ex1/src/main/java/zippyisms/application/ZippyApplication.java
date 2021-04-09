@@ -1,13 +1,10 @@
 package zippyisms.application;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import zippyisms.controller.ZippyController;
-import zippyisms.service.ZippyService;
-import zippyisms.utils.RSocketConfig;
 
 /**
  * Provides the context for running the ZippyApplication, which is a

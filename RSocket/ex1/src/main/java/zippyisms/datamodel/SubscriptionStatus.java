@@ -7,5 +7,5 @@ public enum SubscriptionStatus {
     PENDING,
     CONFIRMED,
     CANCELLED,
-    ERROR;
+    ERROR
 }

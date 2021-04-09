@@ -131,7 +131,8 @@ public class ZippyMicroserviceTest {
             .verifyComplete();
 
         mono = zippyClient
-            // Try to cancel the subscription (will intentionally fail).
+            // Try to cancel the subscription (which intentionally fails
+            // since there was no registered subscription with this ID).
             .cancelConfirmed(UUID.randomUUID());
 
         // Test that the subscription was unsuccessfully cancelled.
