@@ -3,17 +3,17 @@ package zippyisms.application;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import zippyisms.client.ZippyMicroserviceClient;
 import zippyisms.datamodel.Subscription;
 import zippyisms.datamodel.SubscriptionStatus;
 import zippyisms.datamodel.ZippyQuote;
 
 import java.util.UUID;
-
-import static zippyisms.application.ZippyMicroserviceClient.*;
 
 /**
  * This class tests the endpoints provided by the ZippyApplication
@@ -23,6 +23,7 @@ import static zippyisms.application.ZippyMicroserviceClient.*;
  * and use that to start a Spring application context.
  */
 @SpringBootTest
+@ComponentScan(basePackageClasses = ZippyMicroserviceClient.class)
 public class ZippyMicroserviceTest {
     /**
      * The number of Zippy th' Pinhead quotes to process.
@@ -30,16 +31,14 @@ public class ZippyMicroserviceTest {
     private static final int sNUMBER_OF_INDICES = 5;
 
     /**
-     * This object connects to the Spring controller running the
-     * RSocket server and its associated endpoints.  The
-     *
+     * This object connects to the ZippyMicroserviceClient.  The
      * @Autowired annotation marks this field to be initialized via
      * Spring's dependency injection facilities, where an object
      * receives other objects that it depends on (in this case, by
-     * creating a connected RSocketRequester).
+     * creating a ZippyMicroserviceClient).
      */
     @Autowired
-    private Mono<RSocketRequester> zippyQuoteRequester;
+    private ZippyMicroserviceClient zippyClient;
 
     /**
      * Get/print/test that specified number of random Zippy th'
@@ -53,13 +52,13 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering testGetRandomQuotes()");
 
         // Make random indices needed for the test.
-        Integer[] randomIndices = makeRandomIndices(zippyQuoteRequester,
-                                                    sNUMBER_OF_INDICES);
+        Integer[] randomIndices = zippyClient
+            .makeRandomIndices(sNUMBER_OF_INDICES);
 
         // Create a Flux that emits Zippy th' Pinhead quotes at the
         // random indices emitted by the randomZippyQuotes Flux.
-        Flux<ZippyQuote> zippyQuotes = getRandomQuotes(zippyQuoteRequester,
-                                                       randomIndices)
+        Flux<ZippyQuote> zippyQuotes = zippyClient
+            .getRandomQuotes(randomIndices)
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
             .doOnNext(m -> System.out.println("Quote ("
@@ -89,10 +88,9 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering testSubscribeAndCancel()");
 
         // Create a Mono<SubscriptionRequest>.
-        Mono<Subscription> subscriptionRequest =
+        Mono<Subscription> subscriptionRequest = zippyClient
             // Subscribe using a random ID.
-            subscribe(zippyQuoteRequester,
-                      UUID.randomUUID())
+            .subscribe(UUID.randomUUID())
 
             // Print the results as a diagnostic.
             .doOnNext(r ->
@@ -109,8 +107,8 @@ public class ZippyMicroserviceTest {
 
         // Perform a confirmed cancellation of the subscription
         // (should succeed).
-        Mono<Subscription> mono = cancelConfirmed(zippyQuoteRequester,
-                                                  subscriptionRequest);
+        Mono<Subscription> mono = zippyClient
+            .cancelConfirmed(subscriptionRequest);
 
         // Test that the subscription was successfully cancelled.
         StepVerifier
@@ -121,8 +119,8 @@ public class ZippyMicroserviceTest {
             .verifyComplete();
 
         // Try to cancel the subscription (will intentionally fail).
-        mono = cancelConfirmed(zippyQuoteRequester,
-                               UUID.randomUUID());
+        mono = zippyClient
+            .cancelConfirmed(UUID.randomUUID());
 
         // Test that the subscription was unsuccessfully cancelled.
         StepVerifier
@@ -144,13 +142,13 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering testValidSubscribeForQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
-        Mono<Subscription> subscriptionRequest = subscribe(zippyQuoteRequester,
-                                                           UUID.randomUUID());
+        Mono<Subscription> subscriptionRequest = zippyClient
+            .subscribe(UUID.randomUUID());
 
         // Use the confirmed SubscriptionRequest to get a Flux that
         // emits ZippyQuote objects from the server.
-        Flux<ZippyQuote> zippyQuotes = getAllQuotes(zippyQuoteRequester,
-                                                    subscriptionRequest)
+        Flux<ZippyQuote> zippyQuotes = zippyClient
+            .getAllQuotes(subscriptionRequest)
 
             // Print each Zippyism emitted by the Flux<ZippyQuote>.
             .doOnNext(m -> System.out.println("Quote: " + m.getZippyism()))
@@ -188,10 +186,9 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering testInvalidSubscribeForQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
-        Mono<Subscription> subscriptionRequest =
+        Mono<Subscription> subscriptionRequest = zippyClient
             // Subscribe using a random ID.
-            subscribe(zippyQuoteRequester,
-                      UUID.randomUUID())
+            .subscribe(UUID.randomUUID())
 
             // Print the results as a diagnostic.
             .doOnNext(r ->
@@ -208,8 +205,8 @@ public class ZippyMicroserviceTest {
             .verifyComplete();
 
         // Perform an unconfirmed cancellation of subscriptionRequest.
-        Mono<Void> mono = cancelUnconfirmed(zippyQuoteRequester,
-                                            subscriptionRequest);
+        Mono<Void> mono = zippyClient
+            .cancelUnconfirmed(subscriptionRequest);
 
         // Test that the mono completes, which is the best we can do
         // since there's no useful return value.
@@ -219,8 +216,8 @@ public class ZippyMicroserviceTest {
 
         // Attempt to get all the Zippy th' Pinhead quotes, which will
         // fail since the the subscriptionRequest was cancelled.
-        Flux<ZippyQuote> zippyQuotes = getAllQuotes(zippyQuoteRequester,
-                                                    subscriptionRequest);
+        Flux<ZippyQuote> zippyQuotes = zippyClient
+            .getAllQuotes(subscriptionRequest);
 
         // Ensure the Flux completes with an error since we passed a
         // cancelled Subscription.
