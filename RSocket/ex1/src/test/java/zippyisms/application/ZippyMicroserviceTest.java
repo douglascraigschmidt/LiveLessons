@@ -20,7 +20,11 @@ import java.util.UUID;
  * microservice for each of the four interaction models supported by
  * RSocket.  The @SpringBootTest annotation tells Spring to look for a
  * main configuration class (e.g., one with @SpringBootApplication)
- * and use that to start a Spring application context.
+ * and use that to start a Spring application context.  The 
+ * @ComponentScan annotation enables auto-detection of beans by a
+ * Spring container.  Java classes that are decorated with stereotypes
+ * such as @Component, @Configuration, @Service are auto-detected by
+ * Spring.
  */
 @SpringBootTest
 @ComponentScan(basePackageClasses = ZippyMicroserviceClient.class)
@@ -89,8 +93,7 @@ public class ZippyMicroserviceTest {
      * Subscribe and cancel requests to receive Zippyisms.  This
      * method demonstrates a two-way async RSocket request/response
      * call that subscribes to retrieve a stream of Zippy t' Pinhead
-     * quotes.  It also method demonstrates a one-way RSocket
-     * fire-and-forget call that does not return a response.
+     * quotes.
      */
     @Test
     public void testSubscribeAndCancel() {
@@ -160,7 +163,8 @@ public class ZippyMicroserviceTest {
             .getAllQuotes(subscriptionRequest)
 
             // Print each Zippyism emitted by the Flux<ZippyQuote>.
-            .doOnNext(m -> System.out.println("Quote: " + m.getZippyism()))
+            .doOnNext(m ->
+                      System.out.println("Quote: " + m.getZippyism()))
 
             // Only emit sNUMBER_OF_QUOTES.
             .take(sNUMBER_OF_INDICES);
@@ -187,8 +191,9 @@ public class ZippyMicroserviceTest {
 
     /**
      * Try to subscribe for and receive sNUMBER_OF_QUOTES of Zippy th'
-     * Pinhead quotes, which should fail because the
-     * SubscriptionRequest has been cancelled.
+     * Pinhead quotes, which fails because the {@link Subscription}
+     * has been cancelled.  It also demonstrates a one-way RSocket
+     * fire-and-forget call that does not return a response.
      */
     @Test
     public void testInvalidSubscribeForQuotes() {
@@ -214,22 +219,23 @@ public class ZippyMicroserviceTest {
             .verifyComplete();
 
         Mono<Void> mono = zippyClient
-            // Perform an unconfirmed cancellation of subscriptionRequest.
+            // Perform a one-way unconfirmed cancellation of
+            // subscriptionRequest.
             .cancelUnconfirmed(subscriptionRequest);
 
         // Test that the mono completes, which is the best we can do
-        // since there's no useful return value.
+        // since s no useful value is returned from a one-way message.
         StepVerifier
             .create(mono)
             .verifyComplete();
 
         Flux<ZippyQuote> zippyQuotes = zippyClient
-            // Attempt to get all the Zippy th' Pinhead quotes, which will
-            // fail since the the subscriptionRequest was cancelled.
+            // Attempt to get all the Zippy th' Pinhead quotes, which
+            // fails since the subscriptionRequest was cancelled.
             .getAllQuotes(subscriptionRequest);
 
-        // Ensure the Flux completes with an error since we passed a
-        // cancelled Subscription.
+        // Ensure the Flux completes with an error exception since we
+        // passed a cancelled Subscription.
         StepVerifier.create(zippyQuotes)
             .expectError(IllegalAccessException.class)
             .verify();
