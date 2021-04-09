@@ -51,13 +51,17 @@ public class ZippyMicroserviceTest {
     public void testGetRandomQuotes() {
         System.out.println("Entering testGetRandomQuotes()");
 
-        // Make random indices needed for the test.
-        Integer[] randomIndices = zippyClient
-            .makeRandomIndices(sNUMBER_OF_INDICES);
+        Mono<Integer[]> randomIndices = zippyClient
+            // Make random indices needed for the test.
+            .makeRandomIndices(sNUMBER_OF_INDICES)
 
-        // Create a Flux that emits Zippy th' Pinhead quotes at the
-        // random indices emitted by the randomZippyQuotes Flux.
+            // Turn this Mono into a hot source and cache last emitted
+            // signals for further subscribers.
+            .cache();
+
         Flux<ZippyQuote> zippyQuotes = zippyClient
+            // Create a Flux that emits Zippy th' Pinhead quotes at the
+            // random indices emitted by the randomZippyQuotes Flux.
             .getRandomQuotes(randomIndices)
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
@@ -65,14 +69,19 @@ public class ZippyMicroserviceTest {
                                               + m.getQuoteId() + ") = "
                                               + m.getZippyism()));
 
+        // Make a copy of the array so the test below will work properly.
+        Integer[] ri = randomIndices.block();
+
+        assert ri != null;
+
         // Ensure the results are correct, i.e., the returned quoteIds
         // match those sent to the GET_QUOTE endpoint.
         StepVerifier.create(zippyQuotes)
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[0])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[1])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[2])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[3])
-            .expectNextMatches(m -> m.getQuoteId() == randomIndices[4])
+            .expectNextMatches(m -> m.getQuoteId() == ri[0])
+            .expectNextMatches(m -> m.getQuoteId() == ri[1])
+            .expectNextMatches(m -> m.getQuoteId() == ri[2])
+            .expectNextMatches(m -> m.getQuoteId() == ri[3])
+            .expectNextMatches(m -> m.getQuoteId() == ri[4])
             .verifyComplete();
     }
 
@@ -105,9 +114,9 @@ public class ZippyMicroserviceTest {
                                .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        // Perform a confirmed cancellation of the subscription
-        // (should succeed).
         Mono<Subscription> mono = zippyClient
+            // Perform a confirmed cancellation of the subscription
+            // (should succeed).
             .cancelConfirmed(subscriptionRequest);
 
         // Test that the subscription was successfully cancelled.
@@ -118,8 +127,8 @@ public class ZippyMicroserviceTest {
                                .equals(SubscriptionStatus.CANCELLED))
             .verifyComplete();
 
-        // Try to cancel the subscription (will intentionally fail).
         mono = zippyClient
+            // Try to cancel the subscription (will intentionally fail).
             .cancelConfirmed(UUID.randomUUID());
 
         // Test that the subscription was unsuccessfully cancelled.
@@ -141,13 +150,13 @@ public class ZippyMicroserviceTest {
     public void testValidSubscribeForQuotes() {
         System.out.println("Entering testValidSubscribeForQuotes()");
 
-        // Get a confirmed SubscriptionRequest from the server.
         Mono<Subscription> subscriptionRequest = zippyClient
+            // Get a confirmed SubscriptionRequest from the server.
             .subscribe(UUID.randomUUID());
 
-        // Use the confirmed SubscriptionRequest to get a Flux that
-        // emits ZippyQuote objects from the server.
         Flux<ZippyQuote> zippyQuotes = zippyClient
+            // Use the confirmed SubscriptionRequest to get a Flux that
+            // emits ZippyQuote objects from the server.
             .getAllQuotes(subscriptionRequest)
 
             // Print each Zippyism emitted by the Flux<ZippyQuote>.
@@ -204,8 +213,8 @@ public class ZippyMicroserviceTest {
                                .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        // Perform an unconfirmed cancellation of subscriptionRequest.
         Mono<Void> mono = zippyClient
+            // Perform an unconfirmed cancellation of subscriptionRequest.
             .cancelUnconfirmed(subscriptionRequest);
 
         // Test that the mono completes, which is the best we can do
@@ -214,9 +223,9 @@ public class ZippyMicroserviceTest {
             .create(mono)
             .verifyComplete();
 
-        // Attempt to get all the Zippy th' Pinhead quotes, which will
-        // fail since the the subscriptionRequest was cancelled.
         Flux<ZippyQuote> zippyQuotes = zippyClient
+            // Attempt to get all the Zippy th' Pinhead quotes, which will
+            // fail since the the subscriptionRequest was cancelled.
             .getAllQuotes(subscriptionRequest);
 
         // Ensure the Flux completes with an error since we passed a

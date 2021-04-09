@@ -7,6 +7,7 @@ import org.springframework.http.codec.cbor.Jackson2CborDecoder;
 import org.springframework.http.codec.cbor.Jackson2CborEncoder;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -14,12 +15,13 @@ import java.time.Duration;
 
 /**
  * This class contains @Bean methods that initialize the
- * RSocketRequester used by the clients and tests.  The @Configuration
- * annotation indicates that this class declares one or more @Bean
- * methods that are processed by the Spring container to generate bean
- * definitions and service requests for those beans at runtime.
+ * RSocketRequester used by the RSocket clients.  The
+ * @Component annotation allows Spring to automatically detect custom
+ * beans, i.e., without having to write any explicit code, Spring will
+ * scan the application for classes annotated with @Component,
+ * instantiate them, and inject any specified dependencies into them.
  */
-@Configuration
+@Component
 public class RSocketConfig {
     /**
      * This factory method returns a {@link Mono} that emits a
