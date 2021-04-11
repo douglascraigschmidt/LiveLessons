@@ -22,7 +22,7 @@ public class ex1 {
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
 
         // A test of BigFraction multiplication using an asynchronous
-        // Flux stream and a Subscriber implementation.
+        // Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync3);
 
         long testCount = AsyncTaskBarrier

@@ -65,4 +65,19 @@ public class BigFractionUtils {
                            + "] "
                            + string);
     }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string and display it
+     * and the contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuilder stringBuilder) {
+        stringBuilder
+            .append("     unreducedFraction "
+                    + unreducedFraction.toString()
+                    + "\n     reduced improper fraction = "
+                    + reducedFraction.toString()
+                    + "\n     calling BigFraction::toMixedString\n");
+    }
 }

@@ -2,8 +2,9 @@ import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to apply RxJava features synchronously to
- * perform various Observable operations, including fromCallable(),
- * repeat(), just(), map(), mergeWith(), and blockingSubscribe().
+ * perform basic Observable operations, including just(),
+ * fromCallable(), fromArray(), repeat(), doOnNext(), map(),
+ * mergeWith(), repeat(), and blockingSubscribe().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {
@@ -19,9 +20,9 @@ public class ex1 {
         // Observable stream.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationSync2);
 
-        // Another BigFraction multiplication test using a couple of
-        // synchronous Observable streams that are merged together.
-        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationAsync);
+        // A test of BigFraction multiplication using an synchronous
+        // Observable stream that merges results together.
+        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationSync3);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.
