@@ -296,7 +296,8 @@ public class ObservableEx {
         /**
          * Constructor initializes the fields.
          */
-        public PrimeResult(BigInteger primeCandidate, BigInteger smallestFactor) {
+        public PrimeResult(BigInteger primeCandidate,
+                           BigInteger smallestFactor) {
             mPrimeCandidate = primeCandidate;
             mSmallestFactor = smallestFactor;
         }

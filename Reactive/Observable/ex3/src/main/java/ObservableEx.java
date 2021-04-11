@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.util.stream.Collectors.toList;
-import static utils.BigFractionUtils.sBigReducedFraction;
-import static utils.BigFractionUtils.sMAX_FRACTIONS;
+import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to reduce and/or multiply big fractions
@@ -50,21 +49,6 @@ public class ObservableEx {
             return BigFraction.ZERO;
         };
 
-        // Create a Function that multiplies big fractions.
-        Function<BigFraction, BigFraction> multiplyBigFractions = bf -> {
-            // Multiply bf by a constant.
-            BigFraction result = bf.multiply(sBigReducedFraction);
-
-            sb.append("     "
-                      + bf.toMixedString()
-                      + " x "
-                      + sBigReducedFraction.toMixedString()
-                      + " = "
-                      + result.toMixedString()
-                      + "\n");
-            return result;
-        };
-
         // Create a list of denominators, including 0 that will
         // trigger an ArithmeticException.
         List<Integer> denominators = List.of(3, 4, 2, 0, 1);
@@ -96,8 +80,15 @@ public class ObservableEx {
                      // Convert ArithmeticException to 0.
                      .onErrorReturn(errorHandler)
 
+                     // Log the BigFractions.
+                     .doOnNext(bf ->
+                               logBigFraction(bf,
+                                              sBigReducedFraction,
+                                              sb))
+
                      // Perform a multiplication.
-                     .map(multiplyBigFractions))
+                     .map(bf ->
+                          bf.multiply(sBigReducedFraction)))
 
             // Remove any big fractions that are <= 0.
             .filter(fraction -> fraction.compareTo(0) > 0)
@@ -114,8 +105,10 @@ public class ObservableEx {
     }
 
     /**
-     * Use an asynchronous Observable stream and a pool of threads to
-     * perform BigFraction reductions and multiplications.
+     * Test an asynchronous Obserable stream consisting of generate(),
+     * take(), flatMap(), collect(), flatMapCompletable(), and a pool
+     * of threads to perform BigFraction reductions and
+     * multiplications.
      */
     public static Completable testFractionMultiplications1() {
         StringBuffer sb =
@@ -155,8 +148,9 @@ public class ObservableEx {
     }
 
     /**
-     * Use an asynchronous Observable stream and a pool of threads to
-     * perform BigFraction multiplications and additions.
+     * Test an asynchronous Flux stream consisting of fromIterable(),
+     * flatMap(), reduce(), and a pool of threads to perform
+     * BigFraction reductions and multiplications.
      */
     public static Completable testFractionMultiplications2() {
         StringBuffer sb =
@@ -225,9 +219,10 @@ public class ObservableEx {
     }
 
     /**
-     * This factory method returns an Observable that's signaled after the
-     * {@code unreducedFraction} is reduced/multiplied asynchronously
-     * in background threads from the given {@code scheduler}.
+     * This factory method returns an Observable that's signaled after
+     * the {@code unreducedFraction} is reduced/multiplied
+     * asynchronously in background threads from the given {@code
+     * scheduler}.
      */
     private static Observable<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,

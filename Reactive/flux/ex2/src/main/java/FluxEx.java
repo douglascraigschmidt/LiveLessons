@@ -74,6 +74,7 @@ public class FluxEx {
      * are prime using an asynchronous time-driven Flux stream.
      */
     public static Mono<Void> testIsPrimeTimed() {
+        // We use a StringBuffer because it is thread-safe!
         StringBuffer sb =
             new StringBuffer(">> Calling testIsPrimeTimed()\n");
 
@@ -291,7 +292,8 @@ public class FluxEx {
         /**
          * Constructor initializes the fields.
          */
-        public PrimeResult(BigInteger primeCandidate, BigInteger smallestFactor) {
+        public PrimeResult(BigInteger primeCandidate,
+                           BigInteger smallestFactor) {
             mPrimeCandidate = primeCandidate;
             mSmallestFactor = smallestFactor;
         }

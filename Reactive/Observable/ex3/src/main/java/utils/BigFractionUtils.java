@@ -162,4 +162,64 @@ public class BigFractionUtils {
                            + "] "
                            + string);
     }
+
+    /**
+     * Convert {@code unreducedFraction} to a mixed string and {@code
+     * reducedFraction} to a mixed string and append it to the
+     * contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuffer sb) {
+        sb.append("     "
+                  + unreducedFraction.toMixedString()
+                  + " x "
+                  + reducedFraction.toMixedString()
+                  + "\n");
+    }
+
+    /**
+     * Convert {@code unreducedFraction} to a mixed string and {@code
+     * reducedFraction} to a mixed string and append it to the
+     * contents of {@code stringBuilder}.
+     */
+    public static void logBigFraction(BigFraction unreducedFraction,
+                                      BigFraction reducedFraction,
+                                      StringBuilder sb) {
+        sb.append("     "
+                + unreducedFraction.toMixedString()
+                + " x "
+                + reducedFraction.toMixedString()
+                + "\n");
+    }
+
+    /**
+     * Convert {@code bigFraction} to a mixed string, {@code
+     * reducedFraction} to a mixed string, and {@code result} to a
+     * mixed string and append it to the contents of {@code
+     * stringBuilder}.
+     */
+    public static void logBigFractionResult(BigFraction bigFraction,
+                                            BigFraction reducedFraction,
+                                            BigFraction result,
+                                            StringBuffer sb) {
+        sb.append("     "
+                  + bigFraction.toMixedString()
+                  + " x "
+                  + reducedFraction.toMixedString()
+                  + " = "
+                  + result.toMixedString()
+                  + "\n");
+    }
+
+    /**
+     * Display {@code bigFraction} and the contents of {@code stringBuffer}.
+     */
+    public static void displayMixedBigFraction(BigFraction bigFraction,
+                                               StringBuffer stringBuffer) {
+        stringBuffer.append("     Mixed BigFraction result = "
+                            + bigFraction
+                            + "\n");
+        BigFractionUtils.display(stringBuffer.toString());
+    }
 }
