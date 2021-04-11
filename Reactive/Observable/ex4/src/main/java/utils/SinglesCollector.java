@@ -71,6 +71,7 @@ public class SinglesCollector<T>
     public Function<List<Single<T>>, Single<List<T>>> finisher() {
         // This function is used to combine results from
         // Single.zipArray().
+        @SuppressWarnings("unchecked")
         io.reactivex.rxjava3.functions.Function<Object[], List<T>> combiner =
             bfArray -> Stream
             // Create a stream of Objects.
@@ -98,7 +99,7 @@ public class SinglesCollector<T>
      * this case is simply UNORDERED
      */
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 

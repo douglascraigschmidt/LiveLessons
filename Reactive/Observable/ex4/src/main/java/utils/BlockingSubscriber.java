@@ -6,8 +6,7 @@ import org.reactivestreams.Subscription;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Define a Subscriber implementation that handles blocking, which is
- * otherwise not well supported by Project Reactor.
+ * Define a Subscriber implementation that handles blocking.
  */
 public class BlockingSubscriber
        implements Subscriber<BigFraction> {

@@ -102,7 +102,7 @@ public class MonosCollector<T>
      * this case is simply UNORDERED
      */
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 
