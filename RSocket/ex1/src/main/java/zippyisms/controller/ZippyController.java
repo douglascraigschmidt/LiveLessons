@@ -20,25 +20,33 @@ import java.util.Set;
  * Pinhead quotes, subscribe to receive Flux streams of these quotes,
  * as well as cancel earlier subscriptions.  It demonstrates the
  * following RSocket interaction models
- * <p>
+ *
  * . Request/Response, where each two-way async request receives a
  * single async response from the server.
- * <p>
+ *
  * . Fire-and-Forget, where each one-way message receives no response
  * from the server.
- * <p>
+ *
  * . Request/Stream, where each async request receives a stream of
  * responses from the server.
- * <p>
+ *
  * . Channel, where a stream of async messages can be sent in both
  * directions between client and server.
- * <p>
+ *
  * Spring enables the integration of RSockets into a controller via
  * the @Controller annotation, which enables the autodetection of
  * implementation classes via classpath scanning, and
  * the @MessageMapping annotation, which maps a message onto a
  * message-handling method by matching the declared patterns to a
- * destination extracted from the message.
+ * destination extracted from the message.  
+ *
+ * Combining the @Controller annotation with the @MessageMapping
+ * annotation enables this class to declare service endpoints, which
+ * in this case map to RSocket endpoints that each take one {@link
+ * Mono} or {@link Flux} parameter and can return a {@link Mono} or
+ * {@link Flux} result.  The use of {@link Mono} and {@link Flux}
+ * types enables client and server code to run reactively across a
+ * communication channel.
  */
 @Controller
 public class ZippyController {
