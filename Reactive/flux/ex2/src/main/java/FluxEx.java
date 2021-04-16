@@ -276,30 +276,6 @@ public class FluxEx {
     }
 
     /**
-     * The result returned from checkIfPrime.
-     */
-    private static class PrimeResult {
-        /**
-         * Value that was evaluated for primality.
-         */
-        BigInteger mPrimeCandidate;
-
-        /**
-         * Result of the isPrime() method.
-         */
-        BigInteger mSmallestFactor;
-
-        /**
-         * Constructor initializes the fields.
-         */
-        public PrimeResult(BigInteger primeCandidate,
-                           BigInteger smallestFactor) {
-            mPrimeCandidate = primeCandidate;
-            mSmallestFactor = smallestFactor;
-        }
-    }
-
-    /**
      * Print string {@code s} with the thread name appended.
      */
     private static void print(String s, StringBuffer sb) {
