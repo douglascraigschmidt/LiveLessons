@@ -3,8 +3,8 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-java.targetCompatibility = JavaVersion.VERSION_15
-java.sourceCompatibility = JavaVersion.VERSION_15
+java.targetCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_16
 
 repositories {
     mavenCentral()

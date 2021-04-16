@@ -264,14 +264,14 @@ public class FluxEx {
      */
     private static void processResult(PrimeResult primeTuple,
                                       StringBuffer sb) {
-        if (!primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
+        if (!primeTuple.smallestFactor().equals(BigInteger.ZERO)) {
             print("found a non-prime number with smallest factor "
-                  + primeTuple.mSmallestFactor
+                  + primeTuple.smallestFactor()
                   + " for "
-                  + primeTuple.mPrimeCandidate, sb);
+                  + primeTuple.primeCandidate(), sb);
         } else {
             print("found a prime number "
-                  + primeTuple.mPrimeCandidate, sb);
+                  + primeTuple.primeCandidate(), sb);
         }
     }
 

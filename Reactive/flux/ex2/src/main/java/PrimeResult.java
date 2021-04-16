@@ -1,16 +1,17 @@
 import java.math.BigInteger;
 
 /**
- * The result returned from checkIfPrime.
+ * Define a Java record that holds the data in a
+ * result returned from checkIfPrime().
  */
 public record PrimeResult(
     /*
      * Value that was evaluated for primality.
      */
-    BigInteger mPrimeCandidate,
+    BigInteger primeCandidate,
 
     /*
      * Result of the isPrime() method.
      */
-    BigInteger mSmallestFactor) { }
+    BigInteger smallestFactor) {}
 
