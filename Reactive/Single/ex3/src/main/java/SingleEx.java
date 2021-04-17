@@ -116,7 +116,7 @@ public class SingleEx {
         final Single<BigFraction> m3 = makeBigFractionAsync(sRandom, sb);
 
         // This function combines results from Single.zipArray().
-        Function<Object[], BigFraction> combiner = bfArray -> Stream
+        Function<Object[], BigFraction> zipper = bfArray -> Stream
             // Create a stream of Objects.
             .of(bfArray)
 
@@ -137,9 +137,9 @@ public class SingleEx {
         };
 
         return Single
-            // The combiner adds results after all
-            // asyncMultiplications complete.
-            .zipArray(combiner, asyncMultiplications)
+            // The zipper adds results after all asyncMultiplications
+            // complete.
+            .zipArray(zipper, asyncMultiplications)
 
             // Display reduced result after converting it to a mixed
             // fraction.
