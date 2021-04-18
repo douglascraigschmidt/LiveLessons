@@ -12,8 +12,8 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 /**
  * This class shows how to apply RxJava features synchronously to
  * perform basic Observable operations, including just(),
- * fromCallable(), fromArray(), repeat(), doOnNext(), map(),
- * mergeWith(), repeat(), and blockingSubscribe().
+ * fromCallable(), fromArray(), doOnNext(), map(), mergeWith(),
+ * repeat(), and blockingSubscribe().
  */
 @SuppressWarnings("ALL")
 public class ObservableEx {

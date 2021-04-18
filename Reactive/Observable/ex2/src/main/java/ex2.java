@@ -5,7 +5,7 @@ import utils.AsyncTaskBarrier;
  * perform various Observable operations, including create(),
  * interval(), filter(), doOnNext(), doOnComplete(), doFinally(),
  * take(), map(), subscribe(), range(), subscribeOn(), observeOn(),
- * count(), and various thread pools.
+ * and various thread pools.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {

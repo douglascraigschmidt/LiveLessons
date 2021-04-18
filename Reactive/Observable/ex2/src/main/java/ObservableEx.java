@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
  * randomly-generated BigInteger objects are prime or not.  It
  * demonstrates various Observable operations, including create(),
  * interval(), filter(), doOnNext(), doOnComplete(), doFinally(),
- * take(), map(), subscribe(), range(), subscribeOn(), observeOn(),
- * count(), and various thread pools.
+ * take(), map(), subscribe(), rangeLong(), subscribeOn(),
+ * observeOn(), and various thread pools.
  */
 @SuppressWarnings("ALL")
 public class ObservableEx {
@@ -107,12 +107,9 @@ public class ObservableEx {
             // are processed and the publisher emits onComplete().
             .doOnComplete(() -> BigFractionUtils.display(sb.toString()))
 
-            // Convert the Observable to a Single.
-            .count()
-
             // Return a Completable to synchronize with the
             // AsyncTaskBarrier framework.
-            .ignoreElement();
+            .ignoreElements();
     }
 
     /**
@@ -201,7 +198,7 @@ public class ObservableEx {
             // Emit sMAX_ITERATIONS integers starting at 1.
             .rangeLong(1, sMAX_ITERATIONS)
 
-            // Arrange to emit the random big integers in the
+            // Arrange to emit the random big integers in a new
             // "publisher" thread.
             .subscribeOn(Schedulers.newThread())
 

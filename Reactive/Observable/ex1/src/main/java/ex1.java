@@ -3,8 +3,8 @@ import utils.AsyncTaskBarrier;
 /**
  * This example shows how to apply RxJava features synchronously to
  * perform basic Observable operations, including just(),
- * fromCallable(), fromArray(), repeat(), doOnNext(), map(),
- * mergeWith(), repeat(), and blockingSubscribe().
+ * fromCallable(), fromArray(), doOnNext(), map(), mergeWith(),
+ * repeat(), and blockingSubscribe().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex1 {

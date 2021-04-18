@@ -4,7 +4,7 @@ import utils.AsyncTaskBarrier;
  * This example shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced Flux features
  * in the Project Reactor framework, including fromIterable(),
- * create(), map(), flatMap(), collectList(), collect(), repeat(),
+ * generate(), map(), flatMap(), collectList(), collect(), repeat(),
  * mergeWith(), reduce(), take(), filter(), and various types of
  * thread pools.  It also shows various Mono operations, such as
  * firstWithSignal(), when(), materialize(), flatMap(), subscribeOn(),
@@ -18,7 +18,7 @@ public class ex3 {
         // Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionExceptions);
 
-        // Test an asynchronous Flux stream consisting of create(),
+        // Test an asynchronous Flux stream consisting of generate(),
         // take(), flatMap(), collect() and a pool of threads to
         // perform BigFraction reductions and multiplications.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplications1);
