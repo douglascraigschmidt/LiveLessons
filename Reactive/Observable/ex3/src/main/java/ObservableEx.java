@@ -22,7 +22,6 @@ import static utils.BigFractionUtils.*;
  * Maybe operations, such as ambArray(), subscribeOn(), and
  * doOnSuccess().
  */
-@SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "ResultOfMethodCallIgnored"})
 public class ObservableEx {
     /**
      * Create a random number generator.
