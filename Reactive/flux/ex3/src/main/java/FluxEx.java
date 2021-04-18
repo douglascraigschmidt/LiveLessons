@@ -111,18 +111,15 @@ public class FluxEx {
 
         sb.append("     Printing sorted results:");
 
-        // A consumer that emits a stream of random big fractions.
-        Consumer<SynchronousSink<BigFraction>> bigFractionEmitter = sink -> sink
-            // Emit a random big fraction every time a
-            // request is made.
-            .next(BigFractionUtils.makeBigFraction(sRANDOM,
-                                                   false));
-
         // Process the function in a flux stream.
         return Flux
             // Generate a stream of random, large, and unreduced big
             // fractions.
-            .generate(bigFractionEmitter)
+            .generate((SynchronousSink<BigFraction> sink) -> sink
+                // Emit a random big fraction every time a
+                // request is made.
+                .next(BigFractionUtils.makeBigFraction(sRANDOM,
+                                                       false)))
 
             // Stop after generating sMAX_FRACTIONS big fractions.
             .take(sMAX_FRACTIONS)

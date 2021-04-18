@@ -15,12 +15,12 @@ import static utils.BigFractionUtils.*;
 /**
  * This class shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
- * Observable operations, including fromIterable(), map(), create(),
- * generate(), take(), flatMap(), flatMapCompletable(),
- * fromCallable(), filter(), reduce(), collectInto(), subscribeOn(),
- * onErrorReturn(), and Schedulers.computation().  It also shows
- * advanced RxJava Single and Maybe operations, such as ambArray(),
- * subscribeOn(), and doOnSuccess().
+ * Observable operations, including fromIterable(), map(), generate(),
+ * take(), flatMap(), flatMapCompletable(), fromCallable(), filter(),
+ * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
+ * Schedulers.computation().  It also shows advanced RxJava Single and
+ * Maybe operations, such as ambArray(), subscribeOn(), and
+ * doOnSuccess().
  */
 @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "ResultOfMethodCallIgnored"})
 public class ObservableEx {
@@ -116,14 +116,12 @@ public class ObservableEx {
 
         sb.append("     Printing sorted results:");
 
-        // Emit a random unreduced big fraction.
-        Consumer<Emitter<BigFraction>> emitter = emit ->
-            emit.onNext(BigFractionUtils.makeBigFraction(sRANDOM,false));
-
         // Process the function in a observable stream.
         return Observable
             // Generate a stream of random unreduced big fractions.
-            .generate(emitter)
+            .generate((Emitter<BigFraction> emit) -> emit
+                // Emit a random unreduced big fraction.
+                .onNext(BigFractionUtils.makeBigFraction(sRANDOM,false)))
 
             // Limit the number of generated random unreduced big
             // fractions.
