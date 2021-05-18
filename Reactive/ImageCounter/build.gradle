@@ -12,5 +12,5 @@ repositories {
 
 dependencies {
     implementation 'org.jsoup:jsoup:1.10.3'
-    implementation 'io.projectreactor:reactor-core:3.3.8.RELEASE'
+    implementation 'io.projectreactor:reactor-core:3.4.6'
 }
