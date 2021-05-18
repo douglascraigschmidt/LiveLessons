@@ -1,7 +1,7 @@
 import java.math.BigInteger;
 
 /**
- * Define a Java record that holds the data in a
+ * Define a Java record that holds the "plain old data" (POD) in a
  * result returned from checkIfPrime().
  */
 public record PrimeResult(

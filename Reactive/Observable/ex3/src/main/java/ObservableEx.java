@@ -120,7 +120,7 @@ public class ObservableEx {
             // Generate a stream of random unreduced big fractions.
             .generate((Emitter<BigFraction> emit) -> emit
                 // Emit a random unreduced big fraction.
-                .onNext(BigFractionUtils.makeBigFraction(sRANDOM,false)))
+                .onNext(BigFractionUtils.makeBigFraction(sRANDOM, false)))
 
             // Limit the number of generated random unreduced big
             // fractions.

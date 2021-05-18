@@ -63,7 +63,7 @@ public class FluxEx {
         !bigInteger.mod(BigInteger.TWO).equals(BigInteger.ZERO);
 
     /**
-     * Generate a random BigInteger.
+     * Generate a random BigInteger (with the goal of generating duplicates).
      */
     private static Function<Long, BigInteger> sGenerateRandomBigInteger = __ ->
         BigInteger.valueOf(sLOWER_BOUND +

@@ -4,8 +4,7 @@ import utils.AsyncTaskBarrier;
  * This example shows how to apply Project Reactor features
  * synchronously and asynchronously to perform basic Flux operations,
  * including just(), fromIterable(), fromArray(), from(), doOnNext(),
- * map(), mergeWith(), repeat(), subscribeOn(), and subscribe().  Also
- * shows how to implement a blocking subscriber in Project Reactor.
+ * map(), mergeWith(), repeat(), and subscribe().
  */
 @SuppressWarnings("ConstantConditions")
 public class ex1 {

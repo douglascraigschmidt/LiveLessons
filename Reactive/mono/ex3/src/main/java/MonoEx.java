@@ -104,7 +104,7 @@ public class MonoEx {
         Mono<BigFraction> m3 = makeBigFractionAsync(sRandom, sb);
 
         // This function combines results from Mono.zip().
-        Function<Object[], BigFraction> combiner = bfArray -> Stream
+        Function<Object[], BigFraction> combinator = bfArray -> Stream
             // Create a stream of Objects.
             .of(bfArray)
 
@@ -127,7 +127,7 @@ public class MonoEx {
         return Mono
             // The combiner adds results after all
             // asyncMultiplications complete.
-            .zip(combiner, asyncMultiplications)
+            .zip(combinator, asyncMultiplications)
 
             // Display reduced result after converting it to a mixed
             // fraction.

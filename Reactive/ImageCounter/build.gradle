@@ -3,11 +3,14 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
+java.targetCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_16
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile 'org.jsoup:jsoup:1.10.3'
-    compile 'io.projectreactor:reactor-core:3.3.8.RELEASE'
+    implementation 'org.jsoup:jsoup:1.10.3'
+    implementation 'io.projectreactor:reactor-core:3.3.8.RELEASE'
 }

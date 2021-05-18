@@ -4,8 +4,8 @@ import utils.AsyncTaskBarrier;
  * This example shows how to reduce, multiply, and display
  * BigFractions asynchronously using various Mono features in the
  * Reactor framework, including fromCallable(), subscribeOn(), map(),
- * doOnSuccess(), blockOptional(), then(), and the Scheduler.single()
- * thread "pool".
+ * doOnSuccess(), blockOptional(), onErrorResume(), then(), and the
+ * Scheduler.single() thread "pool".
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {
@@ -28,6 +28,12 @@ public class ex2 {
         // the result is handled in a non-blocking manner by a
         // background thread.
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationCallable2);
+
+        // Test asynchronous BigFraction multiplication using a mono
+        // and a callable, where the processing and the printing of
+        // the result is handled in a non-blocking manner by a
+        // background thread and exceptions are handled gracefully.
+        AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationErrorHandling);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

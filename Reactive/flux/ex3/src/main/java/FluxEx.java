@@ -42,12 +42,12 @@ public class FluxEx {
             Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
-                          + t.getMessage()
-                          + "\n");
+                      + t.getMessage()
+                      + "\n");
 
             // Convert error to 0.
             return Mono
-                .just(BigFraction.ZERO);
+            .just(BigFraction.ZERO);
         };
 
         // Create a list of denominators, including 0 that
@@ -61,30 +61,30 @@ public class FluxEx {
             // Iterate through the elements using the flatMap()
             // concurrency idiom.
             .flatMap(denominator -> Mono
-                // Create/process each denominator asynchronously via an
-                // "inner publisher".
-                .fromCallable(() ->
-                                  // Throws ArithmeticException if
-                                  // denominator is 0.
-                                  BigFraction.valueOf(Math.abs(sRANDOM.nextInt()),
-                                                      denominator))
+                     // Create/process each denominator asynchronously via an
+                     // "inner publisher".
+                     .fromCallable(() ->
+                                   // Throws ArithmeticException if
+                                   // denominator is 0.
+                                   BigFraction.valueOf(Math.abs(sRANDOM.nextInt()),
+                                                       denominator))
 
-                // Run all the processing in a pool of
-                // background threads.
-                .subscribeOn(Schedulers.parallel())
+                     // Run all the processing in a pool of
+                     // background threads.
+                     .subscribeOn(Schedulers.parallel())
 
-                // Convert ArithmeticException to 0.
-                .onErrorResume(errorHandler)
+                     // Convert ArithmeticException to 0.
+                     .onErrorResume(errorHandler)
 
-                // Log the BigFractions.
-                .doOnNext(bf ->
-                              logBigFraction(bf,
-                                             sBigReducedFraction,
-                                             sb))
+                     // Log the BigFractions.
+                     .doOnNext(bf ->
+                               logBigFraction(bf,
+                                              sBigReducedFraction,
+                                              sb))
 
-                // Perform a multiplication.
-                .map(bf ->
-                         bf.multiply(sBigReducedFraction)))
+                     // Perform a multiplication.
+                     .map(bf ->
+                          bf.multiply(sBigReducedFraction)))
 
             // Remove any big fractions that are <= 0.
             .filter(fraction -> fraction.compareTo(0) > 0)
@@ -95,9 +95,9 @@ public class FluxEx {
             // Process the collected list and return a mono used to
             // synchronize with the AsyncTaskBarrier framework.
             .flatMap(list ->
-                         // Sort and print the results after all async
-                         // fraction reductions complete.
-                         BigFractionUtils.sortAndPrintList(list, sb));
+                     // Sort and print the results after all async
+                     // fraction reductions complete.
+                     BigFractionUtils.sortAndPrintList(list, sb));
     }
 
     /**
@@ -129,7 +129,7 @@ public class FluxEx {
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.parallel()))
 
-            // Collect the results into a Mono<List>.
+            // Collect the results into a Mono<List<BigFraction>>.
             .collect(toList())
 
             // Process the results of the collected list and return a

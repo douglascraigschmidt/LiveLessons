@@ -193,7 +193,7 @@ public class ImageCounter {
     private Mono<Document> getStartPage(String pageUri) {
         return Mono
             // Factory method that creates a mono to download page.
-            .just(Options
+            .fromCallable(() -> Options
                 .instance()
                 .getJSuper()
                 .getPage(pageUri))
@@ -231,8 +231,9 @@ public class ImageCounter {
             // Find all the hyperlinks on this page.
             .fromIterable(page.select("a[href]"))
 
-            // Map each hyperlink to a mono containing a count of the
-            // number of images found at that hyperlink.
+            // Use the flapMap() concurrency idiom to process each hyperlink
+            // to a mono containing a count of the number of images found at
+            // that hyperlink.
             .flatMap(hyperLink -> Mono
                      // Just omit this one object.
                      .just(hyperLink)

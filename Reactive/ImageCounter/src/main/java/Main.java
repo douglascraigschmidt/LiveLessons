@@ -10,7 +10,7 @@ import utils.Options;
  * folder can either reside locally (filesystem-based) or remotely
  * (web-based).
  */
-public class ex5 {
+public class Main {
     /**
      * This static main() entry point runs the example.
      */

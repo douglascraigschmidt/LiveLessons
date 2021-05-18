@@ -5,7 +5,9 @@ package utils;
  * command-line option processing.
  */
 public class Options {
-    /** The singleton @a Options instance. */
+    /**
+     * The singleton @a Options instance.
+     */
     private static Options mUniqueInstance = null;
 
     /**
@@ -21,7 +23,7 @@ public class Options {
     /**
      * Starting point for local file crawling.
      */
-    private String mPathUri = "index.html";
+    private final String mPathUri = "index.html";
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -88,28 +90,19 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc++)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[++argc].equals("true");
-                    break;
-                case "-l":
-                    mLocal = true;
-                    break;
-                case "-m":
-                    mMaxDepth = Integer.valueOf(argv[++argc]);
-                    break;
-                case "-u":
-                    mRootUrl = argv[++argc];
-                    break;
-                case "-w":
-                    mLocal = false;
-                    break;
-                default:
-                    printUsage(argv[argc]);
-                    return false;
+                    case "-d" -> mDiagnosticsEnabled = argv[++argc].equals("true");
+                    case "-l" -> mLocal = true;
+                    case "-m" -> mMaxDepth = Integer.parseInt(argv[++argc]);
+                    case "-u" -> mRootUrl = argv[++argc];
+                    case "-w" -> mLocal = false;
+                    default -> {
+                        printUsage(argv[argc]);
+                        return;
+                    }
                 }
 
             // Set whether JSuper performs web-based or local
@@ -118,9 +111,7 @@ public class Options {
                 ? new JSuper(true)
                 : new JSuper(false);
 
-            return true;
-        } else
-            return false;
+        }
     }
 
     /**

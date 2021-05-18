@@ -32,6 +32,7 @@ public class ObservableEx {
                   BigFraction.valueOf(100, 2),
                   BigFraction.valueOf(100, 1))
 
+            // Log the contents of the computation.
             .doOnNext(bigFraction ->
                           sb.append("    ["
                                         + Thread.currentThread().getId()
