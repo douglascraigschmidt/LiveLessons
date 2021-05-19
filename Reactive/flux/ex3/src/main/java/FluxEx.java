@@ -55,14 +55,15 @@ public class FluxEx {
         List<Integer> denominators = List.of(3, 4, 2, 0, 1);
 
         return Flux
-            // Use a Flux to generate a stream from the denominators list.
+            // Use a Flux to generate a stream from the denominators
+            // list.
             .fromIterable(denominators)
 
             // Iterate through the elements using the flatMap()
             // concurrency idiom.
             .flatMap(denominator -> Mono
-                     // Create/process each denominator asynchronously via an
-                     // "inner publisher".
+                     // Create/process each denominator asynchronously
+                     // via an "inner publisher".
                      .fromCallable(() ->
                                    // Throws ArithmeticException if
                                    // denominator is 0.

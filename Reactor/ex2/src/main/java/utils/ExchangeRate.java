@@ -5,10 +5,20 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages exchange rates amongst various currencies.
+ */
 public class ExchangeRate {
+    /**
+     * A Map of currencies (e.g., US Dollars, Euros, etc.) to their
+     * corresponding exchange rates compared with other currencies.
+     */
     private final Map<String, Map<String, Double>> mExchangeRate =
         new HashMap<>();
 
+    /**
+     * The constructor initializes the Map.
+     */
     public ExchangeRate() {
         Map<String, Double> usdExchangeRates = new HashMap<>();
         usdExchangeRates.put("USD", 1.0);
@@ -48,7 +58,8 @@ public class ExchangeRate {
      * for {@code fromCurrency}.
      *
      * @param fromCurrency The 3 letter currency code to convert from
-     * @return A Map that contains the all known exchange rates for {@code fromCurrency}
+     * @return A Map that contains the all known exchange rates for
+     * {@code fromCurrency}
      */
     public Map<String, Double> getRates(String fromCurrency) {
         return mExchangeRate.get(fromCurrency);

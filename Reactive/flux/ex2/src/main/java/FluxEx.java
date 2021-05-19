@@ -1,6 +1,7 @@
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFractionUtils;
 
@@ -153,6 +154,10 @@ public class FluxEx {
         Consumer<BigInteger> logBigInteger =
             s -> FluxEx.print(s, sb);
 
+        // Create a Scheduler containing one "subscriber" thread.
+        Scheduler subscriber = Schedulers
+            .newParallel("subscriber", 1);
+
         return Flux
             // Factory method creates a stream of random big integers
             // that are generated in a background "publisher" thread.
@@ -163,7 +168,7 @@ public class FluxEx {
 
             // Arrange to perform the prime-checking computations in
             // the "subscriber" thread.
-            .publishOn(Schedulers.newParallel("subscriber", 1))
+            .publishOn(subscriber)
 
             // Use a memoizer to check if each random big integer is
             // prime or not in the "subscriber" thread.
@@ -174,6 +179,9 @@ public class FluxEx {
             .doOnNext(bigInteger ->
                        FluxEx.processResult(bigInteger,
                                             sb))
+
+            // Dispose of the "subscriber" thread.
+            .doFinally(___ -> subscriber.dispose())
 
             // Display results after all elements in the flux stream are
             // processed and return an empty mono to synchronize with
@@ -188,6 +196,10 @@ public class FluxEx {
      * background thread.
      */
     private static Consumer<FluxSink<BigInteger>> makeAsyncFluxSink() {
+        // Create a Scheduler containing one "publisher" thread.
+        Scheduler publisher = Schedulers
+            .newParallel("publisher", 1);
+
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
@@ -199,7 +211,7 @@ public class FluxEx {
 
             // Arrange to emit the random big integers in the
             // "publisher" thread.
-            .subscribeOn(Schedulers.newParallel("publisher", 1))
+            .subscribeOn(publisher)
 
             // Generate random numbers between min and max values
             // to ensure some duplicates.
@@ -208,6 +220,9 @@ public class FluxEx {
             // Eliminate even numbers from consideration since they
             // aren't prime!
             .filter(sOnlyOdd)
+
+            // Dispose of the "publisher" thread.
+            .doFinally(___ -> publisher.dispose())
 
             // Start the processing and emit each random number until
             // complete or an error occurs.

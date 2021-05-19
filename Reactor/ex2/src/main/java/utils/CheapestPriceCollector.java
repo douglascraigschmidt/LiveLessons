@@ -46,10 +46,16 @@ public class CheapestPriceCollector
     @Override
     public BiConsumer<List<Flight>, Flight> accumulator() {
         return (lowestPrices, tripResponse) -> {
+            // If the price of the trip is less than the current min
+            // Add it to the lowestPrices List and update the current
+            // min price.
             if (tripResponse.getPrice() < mMin) {
                 lowestPrices.clear();
                 lowestPrices.add(tripResponse);
                 mMin = tripResponse.getPrice();
+
+            // If the price of the trip is equal to the current min
+            // add it to the lowestPrices List.
             } else if (tripResponse.getPrice().equals(mMin)) {
                 lowestPrices.add(tripResponse);
             }
@@ -61,11 +67,12 @@ public class CheapestPriceCollector
      * The combiner function may fold state from one argument into the
      * other and return that, or may return a new result container.
      *
-     * @return a function which combines two partial results into a combined
-     * result
+     * @return a function which combines two partial results into a
+     * combined result
      */
     @Override
     public BinaryOperator<List<Flight>> combiner() {
+        // Merge two Lists together.
         return (one, another) -> {
             one.addAll(another);
             return one;
@@ -81,6 +88,7 @@ public class CheapestPriceCollector
      */
     @Override
     public Function<List<Flight>, Flux<Flight>> finisher() {
+        // Convert the List into a Flux stream.
         return Flux::fromIterable;
     }
 
@@ -96,7 +104,8 @@ public class CheapestPriceCollector
     }
 
     /**
-     * This static factory method creates a new CheapestFlightCollector.
+     * This static factory method creates a new
+     * CheapestFlightCollector.
      *
      * @return A new CheapestFlightCollector()
      */
