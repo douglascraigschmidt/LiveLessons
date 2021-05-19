@@ -1,5 +1,5 @@
-import datamodels.TripRequest;
 import datamodels.Flight;
+import datamodels.TripRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -11,10 +11,6 @@ import utils.TestDataFactory;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -27,8 +23,8 @@ import java.util.function.Function;
  * Reactive Microservices.
  *
  * This example also shows how to use the AsyncTaskBarrier framework
- * and the zipWith() operation that converts flight prices to the
- * given currency after two asynchronous operations complete.
+ * and the flatMapMany() operator that converts flight prices to the
+ * given currency after asynchronous operations complete.
  */
 public class ex2 {
     /**
@@ -41,12 +37,6 @@ public class ex2 {
                  "JFK",
                  "EUR",
                  1);
-
-    /**
-     * Maintains a mapping of currency conversions.
-     */
-    private static final ExchangeRate sExchangeRates =
-        new ExchangeRate();
 
     /**
      * Main entry point into the test program.
@@ -62,7 +52,7 @@ public class ex2 {
         AsyncTaskBarrier.register(ex2::printCheapestFlightsSorted);
 
         // Print the cheapest flights via a one-pass algorithm and a
-        // custom Collector.
+        // custom Java Streams Collector.
         AsyncTaskBarrier.register(ex2::printCheapestFlightsOnepass);
 
         @SuppressWarnings("ConstantConditions")
@@ -87,7 +77,7 @@ public class ex2 {
     private static Flux<Flight> convertFlightPrices(String toCurrency) {
         // Asynchronous get all the exchange rates.
         Mono<ExchangeRate> exchangeRates = Mono
-            .fromCallable(() -> sExchangeRates)
+            .fromCallable(ExchangeRate::new)
 
             // Run this computation in the parallel thread pool
             // (probably overkill ;-)).
@@ -151,11 +141,12 @@ public class ex2 {
 
         // Find the cheapest flights.
         Flux<Flight> lowestPrices = MathFlux
-            // Find the cheapest flight.
+            // Find the cheapest flight (returns a Mono).
             .min(flights,
                  Comparator.comparing(Flight::getPrice))
 
-            // Create a Flux that contains the cheapest flights.
+            // Converts the Mono into a Flux that contains the
+            // cheapest flight(s).
             .flatMapMany(min -> flights
                          // Only allow flights matching the cheapest.
                          .filter(tr -> tr.getPrice().equals(min.getPrice())));
@@ -184,11 +175,13 @@ public class ex2 {
 
         // Create a flux containing the cheapest prices.
         Flux<Flight> lowestPrices = sortedFlights
-            // Get the cheapest price.
+            // Get the cheapest price (returns a Mono).
             .elementAt(0)
 
-            // Take all the elements that match the cheapest price.
+            // Converts the Mono into a Flux that contains the
+            // cheapest flight(s).
             .flatMapMany(min -> sortedFlights
+                         // Take all elements matching the cheapest price.
                          .takeWhile(tr -> tr
                                     .getPrice()
                                     .equals(min.getPrice())));
