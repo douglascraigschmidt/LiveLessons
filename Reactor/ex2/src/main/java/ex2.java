@@ -105,32 +105,6 @@ public class ex2 {
     }
 
     /**
-     * Convert from {@code flight.getCurrency()} to {@code toCurrency}
-     * and return an updated {@code flight}.
-     *
-     * @param toCurrency Current to convert to
-     * @param flight Flight containing the price in the {@code
-     * flight.getCurrency()} format
-     * @param rates The exchange rates
-     * @return An updated flight whose price reflects the exchange
-     * rate conversion
-     */
-    private static Flight convertCurrency(String toCurrency,
-                                          Flight flight,
-                                          ExchangeRate rates) {
-        // Only convert the currency if necessary.
-        if (!flight.getCurrency().equals(toCurrency)) {
-            // Update the price by multiplying it by the currency
-            // conversion rate.
-            flight.setPrice(flight.getPrice()
-                            * rates.getRates(flight.getCurrency()).get(toCurrency));
-        }
-
-        // Return the flight (which may or may not be updated).
-        return flight;
-    }
-
-    /**
      * Print the cheapest flights via a two pass algorithm that uses
      * min() and filter().
      */
@@ -221,5 +195,32 @@ public class ex2 {
 
             // Sync with the AsyncTaskBarrier framework.
             .then();
+    }
+
+
+    /**
+     * Convert from {@code flight.getCurrency()} to {@code toCurrency}
+     * and return an updated {@code flight}.
+     *
+     * @param toCurrency Current to convert to
+     * @param flight Flight containing the price in the {@code
+     * flight.getCurrency()} format
+     * @param rates The exchange rates
+     * @return An updated flight whose price reflects the exchange
+     * rate conversion
+     */
+    private static Flight convertCurrency(String toCurrency,
+                                          Flight flight,
+                                          ExchangeRate rates) {
+        // Only convert the currency if necessary.
+        if (!flight.getCurrency().equals(toCurrency)) {
+            // Update the price by multiplying it by the currency
+            // conversion rate.
+            flight.setPrice(flight.getPrice()
+                    * rates.getRates(flight.getCurrency()).get(toCurrency));
+        }
+
+        // Return the flight (which may or may not be updated).
+        return flight;
     }
 }
