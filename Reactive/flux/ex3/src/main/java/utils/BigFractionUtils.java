@@ -72,8 +72,8 @@ public class BigFractionUtils {
     }
 
     /**
-     * Sort the {@code list} in parallel using quicksort and mergesort
-     * and then store the results in the {@code StringBuilder}
+     * Sort the {@code list} in parallel using quicksort and heapsort
+     * and then store the results in the {@link StringBuffer}
      * parameter.
      */
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,

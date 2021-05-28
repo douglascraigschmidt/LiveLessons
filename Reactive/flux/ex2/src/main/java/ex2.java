@@ -3,10 +3,10 @@ import utils.AsyncTaskBarrier;
 /**
  * This example shows how to apply Project Reactor features
  * asynchronously to perform various Flux operators, including
- * create(), interval(), map(), filter(), doOnNext(), take(),
- * subscribe(), then(), range(), subscribeOn(), publishOn(), and
- * various thread pools.  The Mono fromRunnable() operator is also
- * shown.
+ * create(), interval(), map(), filter(), doOnNext(), doFinally(),
+ * take(), subscribe(), then(), range(), subscribeOn(), publishOn(),
+ * and various thread pools.  The Mono fromRunnable() operator is
+ * also shown.
  */
 public class ex2 {
     /**

@@ -39,7 +39,7 @@ public class IteratorFactory {
      * implementations and dispatch the execute() method of the
      * requested iterator.
      */
-    private HashMap<String, IteratorFactoryCommand> mIteratorMap =
+    private Map<String, IteratorFactoryCommand> mIteratorMap =
         new HashMap<>();
 	
     /** 
@@ -101,7 +101,7 @@ public class IteratorFactory {
      * pre-order iteration algorithm.
      */
     public static class LevelOrderIterator
-           implements Iterator<ExpressionTree> {
+        implements Iterator<ExpressionTree> {
         /**
          * Queue of expression trees.
          */

@@ -2,15 +2,19 @@ package utils;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+
+import static utils.BigFractionUtils.sVoidM;
 
 /**
  * Define a Subscriber implementation that handles blocking, which is
  * otherwise not well supported by Project Reactor.
  */
-public class BlockingSubscriber
-       implements Subscriber<BigFraction> {
+public class BlockingSubscriber<T>
+       implements Subscriber<T> {
     /**
      * The calling thread uses this Barrier synchronizer to wait for a
      * subscriber to complete all its async processing.
@@ -18,48 +22,83 @@ public class BlockingSubscriber
     final CountDownLatch mLatch;
 
     /**
-     * A StringBuilder used to log the output.
+     * The consumer to invoke on each value.
      */
-    final StringBuilder mSb;
+    private final Consumer<? super T> mConsumer;
 
     /**
-     * Constructor initializes the fields.
+     * The consumer to invoke on error signal.
      */
-    public BlockingSubscriber(StringBuilder stringBuilder) {
+    private final Consumer<? super Throwable> mErrorConsumer;
+
+    /**
+     * The consumer to invoke on complete signal
+     */
+    private final Runnable mCompleteConsumer;
+
+    /**
+     * The strictly positive number of elements
+     * to requests to the upstream Publisher.
+     */
+    private final long mN;
+
+    /**
+     * Pass and store params that will respectively consume all the
+     * elements in the sequence, handle errors and react to completion.
+     *
+     * @param consumer The consumer to invoke on each value
+     * @param errorConsumer The consumer to invoke on error signal
+     * @param completeConsumer The consumer to invoke on complete signal
+     * @param n The strictly positive number of elements
+     *          to requests to the upstream Publisher
+     */
+    public BlockingSubscriber(Consumer<? super T> consumer,
+                              Consumer<? super Throwable> errorConsumer,
+                              Runnable completeConsumer,
+                              long n) {
         mLatch = new CountDownLatch(1);
-        mSb = stringBuilder;
+        mConsumer = consumer;
+        mErrorConsumer = errorConsumer;
+        mCompleteConsumer = completeConsumer;
+        mN = n;
     }
 
     /**
      * Block until all events have been processed by subscribe().
+     *
+     * @return An empty Mono to indicate to the caller that all
+     * processing is done.
      */
-    public void await() {
+    public Mono<Void> await() {
         try {
             mLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // Return empty Mono to indicate to the calle that all
+        // processing is done.
+        return sVoidM;
     }
 
     /**
-     * Hook method invoked after calling subscribe(subscriber)
-     * below.  No data starts flowing until s.request(long) is
-     * invoked.
+     * Hook method invoked after calling subscribe(subscriber) below.
+     * No data starts flowing until s.request(long) is invoked.
      */
     @Override
     public void onSubscribe(Subscription s) {
-        // Disable backpressure.
-        s.request(Integer.MAX_VALUE);
+        // Set the backpressure value.
+        s.request(mN);
     }
 
     /**
      * Process the next element in the stream.
-     * @param bigFraction The next BigFraction in the stream
+     * @param t The next element {@link T} in the stream
      */
     @Override
-    public void onNext(BigFraction bigFraction) {
-        // Add fraction to the string buffer.
-        mSb.append(" = " + bigFraction.toMixedString() + "\n");
+    public void onNext(T t) {
+        // Run the consumer's hook method.
+        mConsumer.accept(t);
     }
 
     /**
@@ -68,12 +107,8 @@ public class BlockingSubscriber
      */
     @Override
     public void onError(Throwable t) {
-        // Append the error message to the
-        // StringBuilder.
-        mSb.append(t.getMessage());
-
-        // Display results when processing is done.
-        BigFractionUtils.display(mSb.toString());
+        // Run the errorConsumer's hook method.
+        mErrorConsumer.accept(t);
 
         // Release the latch.
         mLatch.countDown();
@@ -84,8 +119,8 @@ public class BlockingSubscriber
      */
     @Override
     public void onComplete() {
-        // Display results when processing is done.
-        BigFractionUtils.display(mSb.toString());
+        // Run the completeConsumer's hook method.
+        mCompleteConsumer.run();
 
         // Release the latch.
         mLatch.countDown();

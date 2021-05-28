@@ -17,10 +17,10 @@ import java.util.function.Predicate;
 /**
  * This class shows how to apply Project Reactor features
  * asynchronously to perform various Flux operators, including
- * create(), interval(), map(), filter(), doOnNext(), take(),
- * subscribe(), then(), range(), subscribeOn(), publishOn(), and
- * various thread pools.  The Mono fromRunnable() operator is also
- * shown.
+ * create(), interval(), map(), filter(), doOnNext(), doFinally(),
+ * take(), subscribe(), then(), range(), subscribeOn(), publishOn(),
+ * and various thread pools.  The Mono fromRunnable() operator is
+ * also shown.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -40,16 +40,16 @@ public class FluxEx {
     private static final int sLOWER_BOUND = sMAX_VALUE - sMAX_ITERATIONS;
 
     /**
-     * Random number generator.
-     */
-    private static final Random sRANDOM = new Random();
-
-    /**
      * A memoizer cache that maps candidate primes to their smallest
      * factor (if they aren't prime) or 0 if they are prime.
      */ 
-    private static final Map<BigInteger, BigInteger> mPrimeCache
+    private static final Map<BigInteger, BigInteger> sPrimeCache
         = new ConcurrentHashMap<>();
+
+    /**
+     * Random number generator.
+     */
+    private static final Random sRANDOM = new Random();
 
     /**
      * 0.5 second duration for sleeping.
@@ -118,7 +118,7 @@ public class FluxEx {
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
-            // Generate a big integer stream periodically in a
+            // Generate a Long stream starting at 0 periodically in a
             // background thread.
             .interval(sSLEEP_DURATION)
 
@@ -247,7 +247,7 @@ public class FluxEx {
             (primeCandidate,
              // This atomic "check then act" method serves as
              // a "memoizer" cache.
-             mPrimeCache.computeIfAbsent(primeCandidate,
+             sPrimeCache.computeIfAbsent(primeCandidate,
                                          pc -> (FluxEx.isPrime(pc, sb))));
     }
 
@@ -258,7 +258,7 @@ public class FluxEx {
      */
     static BigInteger isPrime(BigInteger n,
                               StringBuffer sb) {
-        print("checking if " + n + " is prime",
+        print("explicitly checking if " + n + " is prime",
                 sb);
 
         // Even numbers can't be prime.
