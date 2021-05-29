@@ -26,7 +26,7 @@ public class BigFractionUtils {
      * Represents a test that's completed running when it returns.
      */
     public static final Mono<Void> sVoidM =
-            Mono.empty();
+        Mono.empty();
 
     /**
      * Display the {@code string} after prepending the thread id.
@@ -51,14 +51,14 @@ public class BigFractionUtils {
     }
 
     /**
-     * Convert {@code bigFraction} to a mixed string and display it
-     * and the contents of {@code stringBuffer}.
+     * Display {@code bigFraction} and the contents of {@code
+     * stringBuffer}.
      */
     public static void displayMixedBigFraction(String bigFraction,
                                                StringBuffer stringBuffer) {
         stringBuffer.append("     Mixed BigFraction result = "
-                + bigFraction
-                + "\n");
+                            + bigFraction
+                            + "\n");
         BigFractionUtils.display(stringBuffer.toString());
     }
 

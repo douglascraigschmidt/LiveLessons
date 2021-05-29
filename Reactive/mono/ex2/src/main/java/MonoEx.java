@@ -13,9 +13,9 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to apply Project Reactor to asynchronously
- * reduce, multiply, and display BigFractions via various Mono
- * operations, including fromCallable(), subscribeOn(), map(),
- * doOnSuccess(), blockOptional(), onErrorResume(), then(), and the
+ * reduce, multiply, and display BigFractions via Project Reactor Mono
+ * operators, including fromCallable(), just(), map(), doOnSuccess(),
+ * blockOptional(), onErrorResume(), then(), subscribeOn(), and the
  * Scheduler.single() thread "pool".
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
@@ -41,8 +41,7 @@ public class MonoEx {
                      false);
 
         return Mono
-            // Use fromCallable() to begin the process of
-            // asynchronously reducing a big fraction.
+            // Use fromCallable() to reduce the big fraction.
             .fromCallable(() -> BigFraction
                           // Reduce the BigFraction.
                           .reduce(unreducedFraction))
@@ -50,8 +49,8 @@ public class MonoEx {
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
-            // Use doOnSuccess() to print the BigFraction. If
-            // something goes wrong doOnSuccess() will be skipped.
+            // Use doOnSuccess() to print the BigFraction.  If
+            // something goes wrong doOnSuccess() is skipped.
             .doOnSuccess(bf -> 
                          logBigFraction(unreducedFraction, bf, sb))
 
@@ -87,8 +86,7 @@ public class MonoEx {
                      false);
 
         String result = Mono
-            // Use fromCallable() to begin the process of
-            // asynchronously reducing a big fraction.
+            // Use fromCallable() to reduce the big fraction.
             .fromCallable(() -> BigFraction
                 // Reduce the BigFraction.
                 .reduce(unreducedFraction))
@@ -97,7 +95,7 @@ public class MonoEx {
             .subscribeOn(Schedulers.single())
 
             // Use doOnSuccess() to print the BigFraction. If
-            // something goes wrong doOnSuccess() will be skipped.
+            // something goes wrong doOnSuccess() is skipped.
             .doOnSuccess(bf ->
                              logBigFraction(unreducedFraction, bf, sb))
 
@@ -110,6 +108,7 @@ public class MonoEx {
             // via the mono or the timeout elapses.
             .block(sBLOCK_TIME);
 
+        // Append the result.
         sb.append("     result = " + result + "\n");
 
         // Display the results.
@@ -141,8 +140,7 @@ public class MonoEx {
         // Submit the call to a thread pool and store an Optional that
         // it returns.
         Optional<BigFraction> result = Mono
-            // Use fromCallable() to begin the process of
-            // asynchronously reducing a big fraction.
+            // Use fromCallable() to reduce the big fraction.
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
@@ -186,16 +184,16 @@ public class MonoEx {
         // Submit the call to a thread pool and process the result it
         // returns asynchronously.
         return Mono
-            // Use fromCallable() to begin the process of
-            // asynchronously reducing a big fraction.
+            // Use fromCallable() to reduce the big fraction.
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
-            // Use doOnSuccess() to print the result after it's been
-            // successfully converted to a mixed fraction.  If an
-            // exception is thrown doOnSuccess() will be skipped.
+            // Use doOnSuccess() to display the result (which
+            // displayMixedBigFraction() converts to a mixed
+            // fraction). If something goes wrong doOnSuccess() is
+            // skipped.
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return an empty mono to synchronize with the
@@ -225,22 +223,22 @@ public class MonoEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-                    Mono<? extends BigFraction>> errorHandler = t -> {
+                 Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
                       + "\n");
 
-            // Convert error to 0.
             return Mono
+            // Convert error to 0.
             .just(BigFraction.ZERO);
         };
 
         // Submit the call to a thread pool and process the result it
         // returns asynchronously.
         return Mono
-            // Use fromCallable() to begin the process of
-            // asynchronously reducing a big fraction.
+            // Use fromCallable() to reduce the big fraction (which
+            // will thrown ArithmeticException).
             .fromCallable(call)
 
             // Run all the processing in a (single) background thread.
@@ -250,9 +248,9 @@ public class MonoEx {
             .onErrorResume(errorHandler)
 
             // Use doOnSuccess() to print the result after it's been
-            // successfully converted to the value 0 since the
-            // onErrorResume() method catches the exception and
-            // returns a 0 value.
+            // converted to the value 0 since the onErrorResume()
+            // method catches the exception and returns a 0 value.  If
+            // something goes wrong doOnSuccess() is skipped.
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return an empty mono to synchronize with the
