@@ -5,6 +5,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -16,17 +18,18 @@ import java.util.function.Supplier;
  * common idiom for using the {@code AsyncTaskBarrier} class.<br>
  *
  * <pre>{@code
- *   // Register asynchronous tasks under test.
+ *   // Register asynchronous tasks to test.
  *   AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsAsync1);
  *   AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsAsync2);
  *
  *   long testCount = AsyncTaskBarrier
  *     // Run all the tasks.
  *     .runTasks()
- * 
+ *
  *     // Block until all asynchronous processing is done.
  *     .block();
  *
+ *   // Print number of tests run.
  *   System.out.println("Completed " + testCount + " tests");
  * }}</pre>
  */
@@ -41,7 +44,7 @@ public class AsyncTaskBarrier {
      * Register the {@code task} so it runs (a)synchronously when
      * {@code runTasks()} is called.  Each task takes no parameters
      * and returns a {@code Supplier<Mono<Void>>} result.
-     * 
+     *
      * @param task The task to register with {@code AsyncTaskBarrier}
      */
     public static void register(Supplier<Mono<Void>> task) {
@@ -53,7 +56,7 @@ public class AsyncTaskBarrier {
      * Unregister the {@code task} task so that it is no longer run
      * when {@code runTasks()} is called.  Each task must take no
      * parameters and return a {@code Supplier<Mono<Void>>} result.
-     * 
+     *
      * @param task The task to unregister with {@code AsyncTaskBarrier}
      * @return True if {@code task} was previously registered, else false.
      */
@@ -69,6 +72,20 @@ public class AsyncTaskBarrier {
      * tasks were run.
      */
     public static Mono<Long> runTasks() {
+        // Needed to keep track of how many exceptions occurred.
+        AtomicLong exceptionCount = new AtomicLong(0);
+
+        // Log the exception and increment the exceptionCount.
+        BiConsumer<Throwable,
+                   Object> errorHandler = (t, i) -> {
+            // Record the exception message.
+            System.out.println("exception = "
+                                   + t.getMessage()
+                                   + "\n");
+            // Increment the count of exceptions.
+            exceptionCount.getAndIncrement();
+        };
+
         return Flux
             // Factory method that converts the list into a flux.
             .fromIterable(sTasks)
@@ -76,15 +93,16 @@ public class AsyncTaskBarrier {
             // Run each task, which can execute (a)synchronously.
             .flatMap(Supplier::get)
 
+            // Log the exception and continue processing.
+            .onErrorContinue(errorHandler)
+
             // Collect into an empty list that triggers when all
             // the tasks finish running (a)synchronously.
             .collectList()
 
-            // Return a mono containing the number of tasks run when
-            // they all complete.
-            .flatMap(l -> Mono
-                     // Use just() to return the number of tasks run.
-                     .just((long) sTasks.size()));
+            // Return a mono containing the number of tasks that
+            // completed successfully (i.e., without exceptions).
+            .flatMap(f -> Mono
+                     .just(sTasks.size() - exceptionCount.get()));
     }
 }
-

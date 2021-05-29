@@ -105,5 +105,4 @@ public class AsyncTaskBarrier {
             .flatMap(f -> Mono
                      .just(sTasks.size() - exceptionCount.get()));
     }
-
 }
