@@ -8,6 +8,7 @@ import utils.BigFractionUtils;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
@@ -17,10 +18,10 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
  * fromIterable(), generate(), map(), flatMap(), onErrorResume(),
- * collectList(), collect(), reduce(), take(), filter(), and various
- * types of thread pools.  It also shows various Mono operations, such
- * as flatMap(), firstWithSignal(), subscribeOn(), and the parallel
- * thread pool.
+ * onErrorContinue(), collectList(), collect(), reduce(), take(),
+ * filter(), and various types of thread pools.  It also shows various
+ * Mono operations, such as flatMap(), firstWithSignal(),
+ * subscribeOn(), and the parallel thread pool.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -30,8 +31,9 @@ public class FluxEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * Test BigFraction exception handling using a synchronous Flux
-     * stream (with asynchrony only at the end of the stream).
+     * Test Flux exception handling via onErrorResume() using a
+     * synchronous Flux stream (with asynchrony only at the end of the
+     * stream).
      */
     public static Mono<Void> testFractionException1() {
         StringBuffer sb =
@@ -39,15 +41,14 @@ public class FluxEx {
 
         // Create a list of denominators, including 0 that will
         // trigger an ArithmeticException.
-        List<Integer> denominators = List.of(3, 4, 2, 1, 0, 1);
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
                  Flux<BigFraction>> errorHandler = t -> {
             // Record the exception message.
             sb.append("     exception = "
-                      + t.getMessage()
-                      + "\n");
+                      + t.getMessage());
 
             // Return an empty Flux when an exception occurs.
             return Flux.empty();
@@ -64,7 +65,8 @@ public class FluxEx {
                  .valueOf(Math.abs(sRANDOM.nextInt()),
                           denominator))
 
-            // Catch ArithmeticException and return an empty Flux.
+            // Catch ArithmeticException and return an empty Flux,
+            // which terminates the stream at that point.
             .onErrorResume(errorHandler)
 
             // Collect the non-empty BigFractions into a list.
@@ -79,12 +81,58 @@ public class FluxEx {
     }
 
     /**
-     * Test BigFraction exception handling using an asynchronous Flux
-     * stream and a pool of threads.
+     * Test Flux exception handling via onErrorContinue() using a
+     * synchronous Flux stream (with asynchrony only at the end of the
+     * stream).
      */
     public static Mono<Void> testFractionException2() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionException2()\n");
+
+        // Create a list of denominators, including 0 that will
+        // trigger an ArithmeticException.
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
+
+        // Create a function lambda to handle an ArithmeticException.
+        BiConsumer<Throwable,
+                   Object> errorHandler = (t, o) -> {
+            // Record the exception message.
+            sb.append("     exception = "
+                          + t.getMessage());
+        };
+
+        return Flux
+            // Generate a Flux stream from the denominators list.
+            .fromIterable(denominators)
+
+            // Generate a random BigFraction.
+            .map(denominator -> BigFraction
+                // Throws ArithmeticException if
+                // denominator is 0.
+                .valueOf(Math.abs(sRANDOM.nextInt()),
+                         denominator))
+
+            // Catch ArithmeticException and continue processing.
+            .onErrorContinue(errorHandler)
+
+            // Collect the non-empty BigFractions into a list.
+            .collectList()
+
+            // Process the collected list and return a mono used to
+            // synchronize with the AsyncTaskBarrier framework.
+            .flatMap(list ->
+                         // Sort and print the results after all sync
+                         // fraction reductions complete.
+                         BigFractionUtils.sortAndPrintList(list, sb));
+    }
+
+    /**
+     * Test Mono exception handling via onErrorResume() using an
+     * asynchronous Flux stream and a pool of threads.
+     */
+    public static Mono<Void> testFractionException3() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionException3()\n");
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
@@ -101,7 +149,7 @@ public class FluxEx {
 
         // Create a list of denominators, including 0 that will
         // trigger an ArithmeticException.
-        List<Integer> denominators = List.of(3, 4, 2, 0, 1);
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
 
         return Flux
             // Generate a Flux stream from the denominators list.

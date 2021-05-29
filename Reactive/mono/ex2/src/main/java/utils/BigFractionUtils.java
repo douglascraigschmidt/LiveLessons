@@ -44,9 +44,7 @@ public class BigFractionUtils {
      */
     public static void displayMixedBigFraction(BigFraction bigFraction,
                                                StringBuffer stringBuffer) {
-        stringBuffer.append("     ["
-                            + Thread.currentThread().getId()
-                            + "] Mixed BigFraction result = "
+        stringBuffer.append("     Mixed BigFraction result = "
                             + bigFraction.toMixedString()
                             + "\n");
         BigFractionUtils.display(stringBuffer.toString());
@@ -58,9 +56,7 @@ public class BigFractionUtils {
      */
     public static void displayMixedBigFraction(String bigFraction,
                                                StringBuffer stringBuffer) {
-        stringBuffer.append("     ["
-                + Thread.currentThread().getId()
-                + "] Mixed BigFraction result = "
+        stringBuffer.append("     Mixed BigFraction result = "
                 + bigFraction
                 + "\n");
         BigFractionUtils.display(stringBuffer.toString());

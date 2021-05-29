@@ -1,4 +1,6 @@
+import reactor.core.publisher.Mono;
 import utils.AsyncTaskBarrier;
+import utils.BigFraction;
 
 /**
  * This example shows how to reduce, multiply, and display
@@ -15,7 +17,13 @@ public class ex2 {
     public static void main (String[] argv) throws InterruptedException {
         // Test asynchronous BigFraction reduction using a Mono and a
         // pipeline of operations that run off the calling thread.
-        AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync);
+        AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync1);
+
+        //Test asynchronous BigFraction reduction using a Mono and a
+        // pipeline of operations that run in the background (i.e., off
+        // the calling thread), but the result is printed in a
+        // timed-blocking manner by the main thread.
+        AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync2);
 
         // Test hybrid asynchronous BigFraction multiplication using a
         // mono and a callable, where the processing is performed in a
