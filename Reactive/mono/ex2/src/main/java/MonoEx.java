@@ -125,8 +125,8 @@ public class MonoEx {
      * manner by the main thread.
      */
     public static Mono<Void> testFractionMultiplicationCallable1() {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplicationCallable1()\n");
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationCallable1()\n");
 
         // Create a callable lambda that multiplies two large fractions.
         Callable<BigFraction> call = () -> {
