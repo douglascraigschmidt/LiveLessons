@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
  * A utility class containing helpful methods for manipulating various
  * BigFraction features.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class BigFractionUtils {
     /**
      * A utility class should always define a private constructor.
@@ -44,7 +45,9 @@ public class BigFractionUtils {
      */
     public static void displayMixedBigFraction(BigFraction bigFraction,
                                                StringBuffer stringBuffer) {
-        stringBuffer.append("     Mixed BigFraction result = "
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] Mixed BigFraction result = "
                             + bigFraction.toMixedString()
                             + "\n");
         BigFractionUtils.display(stringBuffer.toString());
@@ -56,7 +59,9 @@ public class BigFractionUtils {
      */
     public static void displayMixedBigFraction(String bigFraction,
                                                StringBuffer stringBuffer) {
-        stringBuffer.append("     Mixed BigFraction result = "
+        stringBuffer.append("     ["
+                            + Thread.currentThread().getId()
+                            + "] Mixed BigFraction result = "
                             + bigFraction
                             + "\n");
         BigFractionUtils.display(stringBuffer.toString());
@@ -69,7 +74,9 @@ public class BigFractionUtils {
     public static void logBigFraction(BigFraction unreducedFraction,
                                       BigFraction reducedFraction,
                                       StringBuffer sb) {
-        sb.append("     unreducedFraction "
+        sb.append("     ["
+                  + Thread.currentThread().getId()
+                  + "] unreducedFraction "
                   + unreducedFraction.toString()
                   + "\n     reduced improper fraction = "
                   + reducedFraction.toString()

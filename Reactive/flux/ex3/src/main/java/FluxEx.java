@@ -18,9 +18,9 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
  * fromIterable(), generate(), map(), flatMap(), onErrorResume(),
- * onErrorContinue(), collectList(), collect(), reduce(), take(),
- * filter(), and various types of thread pools.  It also shows various
- * Mono operations, such as flatMap(), firstWithSignal(),
+ * onErrorStop(), onErrorContinue(), collectList(), collect(), reduce(),
+ * take(), filter(), and various types of thread pools.  It also shows
+ * various Mono operations, such as flatMap(), firstWithSignal(),
  * subscribeOn(), and the parallel thread pool.
  */
 @SuppressWarnings("ALL")
@@ -68,6 +68,10 @@ public class FluxEx {
             // Catch ArithmeticException and return an empty Flux,
             // which terminates the stream at that point.
             .onErrorResume(errorHandler)
+
+            // Prevent an upstream onErrorContinue() from interferring
+            // with onErrorResume() above.
+            .onErrorStop()
 
             // Collect the non-empty BigFractions into a list.
             .collectList()

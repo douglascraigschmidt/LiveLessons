@@ -15,20 +15,21 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Test asynchronous BigFraction reduction using a Mono and a
-        // pipeline of operations that run off the calling thread.
+        // Test an asynchronous BigFraction reduction using a Mono and a
+        // chain of operators that run in the background (i.e., off
+        // the calling thread).
         AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync1);
 
-        //Test asynchronous BigFraction reduction using a Mono and a
-        // pipeline of operations that run in the background (i.e.,
+        // Test an asynchronous BigFraction reduction using a Mono and a
+        // chain of operators that run in the background (i.e.,
         // off the calling thread), but the result is printed in a
-        // timed-blocking manner by the main thread.
+        // timed-blocking manner by the calling thread.
         AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync2);
 
         // Test hybrid asynchronous BigFraction multiplication using a
         // mono and a callable, where the processing is performed in a
         // background thread and the result is printed in a blocking
-        // manner by the main thread.
+        // manner by the calling thread.
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationCallable1);
 
         // Test asynchronous BigFraction multiplication using a mono

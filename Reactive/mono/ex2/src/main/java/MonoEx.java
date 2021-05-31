@@ -21,30 +21,43 @@ import static utils.BigFractionUtils.*;
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
     /**
+     * Create a new unreduced big fraction.
+     */
+    private static final BigFraction sUnreducedFraction = BigFraction
+            .valueOf(new BigInteger (sBI1),
+                    new BigInteger(sBI2),
+                    false);
+
+    /**
+     * Create a callable lambda that multiplies two large fractions.
+     */
+    private static final Callable<BigFraction> sCall = () -> {
+        BigFraction bf1 = new BigFraction(sF1);
+        BigFraction bf2 = new BigFraction(sF2);
+
+        // Return the result of multiplying the fractions.
+        return bf1.multiply(bf2);
+    };
+
+    /**
      * The amount of time to wait in the Mono.block() call.
      */
     private static final Duration sBLOCK_TIME = Duration.ofMillis(500);
 
     /**
      * Test asynchronous BigFraction reduction using a Mono and a
-     * pipeline of operations that run in the background (i.e., off
+     * chain of operators that run in the background (i.e., off
      * the calling thread).
      */
     public static Mono<Void> testFractionReductionAsync1() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionReductionAsync1()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = BigFraction
-            .valueOf(new BigInteger (sBI1),
-                     new BigInteger(sBI2),
-                     false);
-
         return Mono
             // Use fromCallable() to reduce the big fraction.
             .fromCallable(() -> BigFraction
                           // Reduce the BigFraction.
-                          .reduce(unreducedFraction))
+                          .reduce(sUnreducedFraction))
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
@@ -52,7 +65,7 @@ public class MonoEx {
             // Use doOnSuccess() to print the BigFraction.  If
             // something goes wrong doOnSuccess() is skipped.
             .doOnSuccess(bf -> 
-                         logBigFraction(unreducedFraction, bf, sb))
+                         logBigFraction(sUnreducedFraction, bf, sb))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
@@ -71,7 +84,7 @@ public class MonoEx {
 
     /**
      * Test asynchronous BigFraction reduction using a Mono and a
-     * pipeline of operations that run in the background (i.e., off
+     * chain of operators that run in the background (i.e., off
      * the calling thread), but the result is printed in a
      * timed-blocking manner by the main thread.
      */
@@ -79,25 +92,18 @@ public class MonoEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionReductionAsync2()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = BigFraction
-            .valueOf(new BigInteger (sBI1),
-                     new BigInteger(sBI2),
-                     false);
-
         String result = Mono
             // Use fromCallable() to reduce the big fraction.
             .fromCallable(() -> BigFraction
                 // Reduce the BigFraction.
-                .reduce(unreducedFraction))
+                .reduce(sUnreducedFraction))
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
 
             // Use doOnSuccess() to print the BigFraction. If
             // something goes wrong doOnSuccess() is skipped.
-            .doOnSuccess(bf ->
-                             logBigFraction(unreducedFraction, bf, sb))
+            .doOnSuccess(bf -> logBigFraction(sUnreducedFraction, bf, sb))
 
             // After big fraction is reduced return a mono and use
             // map() to call a function that converts the reduced
@@ -128,20 +134,11 @@ public class MonoEx {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationCallable1()\n");
 
-        // Create a callable lambda that multiplies two large fractions.
-        Callable<BigFraction> call = () -> {
-            BigFraction bf1 = new BigFraction(sF1);
-            BigFraction bf2 = new BigFraction(sF2);
-
-            // Return the result of multiplying the fractions.
-            return bf1.multiply(bf2);
-        };
-
         // Submit the call to a thread pool and store an Optional that
         // it returns.
         Optional<BigFraction> result = Mono
             // Use fromCallable() to reduce the big fraction.
-            .fromCallable(call)
+            .fromCallable(sCall)
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
@@ -172,20 +169,11 @@ public class MonoEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplicationCallable2()\n");
 
-        // Create a callable that multiplies two large fractions.
-        Callable<BigFraction> call = () -> {
-            BigFraction bf1 = new BigFraction(sF1);
-            BigFraction bf2 = new BigFraction(sF2);
-
-            // Return the result of multiplying the fractions.
-            return bf1.multiply(bf2);
-        };
-
         // Submit the call to a thread pool and process the result it
         // returns asynchronously.
         return Mono
             // Use fromCallable() to reduce the big fraction.
-            .fromCallable(call)
+            .fromCallable(sCall)
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
@@ -211,8 +199,9 @@ public class MonoEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplicationErrorHandling()\n");
 
-        // Create a callable that multiplies two large fractions.
-        Callable<BigFraction> call = () -> {
+        // Create a callable that multiplies two large fractions,
+        // but which will throw the ArithmeticException.
+        Callable<BigFraction> badCall = () -> {
             BigFraction numerator = new BigFraction(sF1);
             // Make the denominator invalid!
             BigFraction denominator = new BigFraction("0");
@@ -239,7 +228,7 @@ public class MonoEx {
         return Mono
             // Use fromCallable() to reduce the big fraction (which
             // will thrown ArithmeticException).
-            .fromCallable(call)
+            .fromCallable(badCall)
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())

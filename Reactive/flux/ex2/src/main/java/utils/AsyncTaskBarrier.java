@@ -65,7 +65,13 @@ public class AsyncTaskBarrier {
     }
 
     /**
-     * Run all the register tasks.
+     * Run all the register tasks.  This method uses {@code
+     * onErrorContinue()} internally, so tasks registered to use this
+     * method must use {@code onErrorStop()} in conjunction with
+     * {@code onErrorResume()} to avoid problems with {@code
+     * onErrorContinue()} overriding the behavior of {@code
+     * onErrorResume()}, which is discussed further at the URL
+     * devdojo.com/ketonemaniac/reactor-onerrorcontinue-vs-onerrorresume.
      *
      * @return a {@code Mono<Long>} that will be triggered when all
      * the (a)synchronously-run tasks complete to indicate how many
@@ -93,11 +99,14 @@ public class AsyncTaskBarrier {
             // Run each task, which can execute (a)synchronously.
             .flatMap(Supplier::get)
 
-            // Log the exception and continue processing.
+            // Log the exception and continue processing.  The use of
+            // this method has implications for tasks registered with
+            // the AsyncTaskBarrier, which must use onErrorStop() in
+            // conjunction with onErrorResume().
             .onErrorContinue(errorHandler)
 
-            // Collect into an empty list that triggers when all
-            // the tasks finish running (a)synchronously.
+            // Collect into an empty list that triggers when all the
+            // tasks finish running (a)synchronously.
             .collectList()
 
             // Return a mono containing the number of tasks that
@@ -105,5 +114,4 @@ public class AsyncTaskBarrier {
             .flatMap(f -> Mono
                      .just(sTasks.size() - exceptionCount.get()));
     }
-
 }
