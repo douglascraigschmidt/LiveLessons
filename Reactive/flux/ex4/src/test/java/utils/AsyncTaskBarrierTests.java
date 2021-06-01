@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Test;import reactor.core.publisher.Mono;
+import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.function.Supplier;
@@ -17,7 +19,7 @@ public class AsyncTaskBarrierTests {
     /**
      * Intentionally trigger an exception.
      */
-    private Mono<Void> throwExceptions() {
+    private Mono<Void> throwException() {
         int numerator = 10;
         int denominator = 0;
         return Mono
@@ -27,10 +29,56 @@ public class AsyncTaskBarrierTests {
     }
 
     /**
+     * Show how onErrorResume() without onErrorStop() behaves.
+     */
+    private Mono<Void> onErrorResume1() {
+        int numerator = 10;
+        int denominator = 0;
+        return Flux
+                .just(numerator)
+                // Intentionally trigger an ArithmeticException.
+                .map(i -> i / denominator)
+                // This call to onErrorResume() isn't run since
+                // there's a call to onErrorContinue() downstream.
+                .onErrorResume(t -> {
+                    System.out.println("onErrorResume1(): "
+                            + t.getMessage()
+                            + "\n");
+                    return Flux.empty();
+                })
+                .then();
+    }
+
+    /**
+     * Show how onErrorResume() with onErrorStop() behaves.
+     */
+    private Mono<Void> onErrorResume2() {
+        int numerator = 10;
+        int denominator = 0;
+        return Flux
+                .just(numerator)
+                // Intentionally trigger an ArithmeticException.
+                .map(i -> i / denominator)
+                // This call to onErrorResume() is run since
+                // there's a call to onErrorStop() downstream.
+                .onErrorResume(t -> {
+                    System.out.println("onErrorResume2(): "
+                            + t.getMessage()
+                            + "\n");
+                    return Flux.empty();
+                })
+                // Ensures that onErrorResume() is actually run!
+                .onErrorStop()
+                .then();
+    }
+
+    /**
      * Complete successfully synchronously.
      */
     private Mono<Void> synchronouslyCompletesSuccessfully() {
-        return Mono.empty();
+        return Mono
+            .fromCallable(() -> 10 * 10)
+            .then();
     }
 
     /**
@@ -38,7 +86,7 @@ public class AsyncTaskBarrierTests {
      */
     private Mono<Void> asynchronouslyCompletesSuccessfully() {
         return Mono
-            .fromCallable(() -> 10)
+            .fromCallable(() -> 10 * 10)
             .subscribeOn(Schedulers.single())
             .then();
     }
@@ -49,13 +97,20 @@ public class AsyncTaskBarrierTests {
      */
     @Test
     public void testExceptions() {
-        Supplier<Mono<Void>> throwExceptions = this::throwExceptions;
-        AsyncTaskBarrier.register(throwExceptions);
-
+        // Create local variables so that unregister() works properly.
+        Supplier<Mono<Void>> throwExceptions = this::throwException;
         Supplier<Mono<Void>> synchronouslyCompletesSuccessfully =
             this::synchronouslyCompletesSuccessfully;
+        Supplier<Mono<Void>> onErrorResume1 = this::onErrorResume1;
+        Supplier<Mono<Void>> onErrorResume2 = this::onErrorResume2;
 
+        // Register all the local variables that contain method references.
+        AsyncTaskBarrier.register(throwExceptions);
         AsyncTaskBarrier.register(synchronouslyCompletesSuccessfully);
+        AsyncTaskBarrier.register(onErrorResume1);
+        AsyncTaskBarrier.register(onErrorResume2);
+
+        // Directly register a method reference.
         AsyncTaskBarrier.register(this::asynchronouslyCompletesSuccessfully);
 
         long testCount = AsyncTaskBarrier
@@ -66,14 +121,15 @@ public class AsyncTaskBarrierTests {
             // computations to complete running asynchronously.
             .block();
 
-        assertEquals(testCount, 2);
+        assertEquals(testCount, 3);
 
         System.out.println("Completed " + testCount + " tests\n");
 
-        // Remove several methods.
+        // Remove all but one of the methods being tested.
         assertTrue(AsyncTaskBarrier.unregister(throwExceptions));
-        assertTrue(AsyncTaskBarrier
-                       .unregister(synchronouslyCompletesSuccessfully));
+        assertTrue(AsyncTaskBarrier.unregister(onErrorResume1));
+        assertTrue(AsyncTaskBarrier.unregister(onErrorResume2));
+        assertTrue(AsyncTaskBarrier.unregister(synchronouslyCompletesSuccessfully));
 
         testCount = AsyncTaskBarrier
             // Run all the tests.

@@ -45,7 +45,7 @@ public class FluxEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-                 Flux<BigFraction>> errorHandler = t -> {
+                 Flux<BigFraction>> logExceptionAndReturnEmptyFlux = t -> {
             // Record the exception message.
             sb.append("     exception = "
                       + t.getMessage());
@@ -67,9 +67,9 @@ public class FluxEx {
 
             // Catch ArithmeticException and return an empty Flux,
             // which terminates the stream at that point.
-            .onErrorResume(errorHandler)
+            .onErrorResume(logExceptionAndReturnEmptyFlux)
 
-            // Prevent an upstream onErrorContinue() from interferring
+            // Prevent a downstream onErrorContinue() from interfering
             // with onErrorResume() above.
             .onErrorStop()
 
@@ -99,7 +99,7 @@ public class FluxEx {
 
         // Create a function lambda to handle an ArithmeticException.
         BiConsumer<Throwable,
-                   Object> errorHandler = (t, o) -> {
+                   Object> logErrorAndContinue = (t, o) -> {
             // Record the exception message.
             sb.append("     exception = "
                           + t.getMessage());
@@ -116,8 +116,8 @@ public class FluxEx {
                 .valueOf(Math.abs(sRANDOM.nextInt()),
                          denominator))
 
-            // Catch ArithmeticException and continue processing.
-            .onErrorContinue(errorHandler)
+            // Catch/log ArithmeticException and continue processing.
+            .onErrorContinue(logErrorAndContinue)
 
             // Collect the non-empty BigFractions into a list.
             .collectList()
@@ -140,7 +140,7 @@ public class FluxEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-            Mono<? extends BigFraction>> errorHandler = t -> {
+                 Mono<? extends BigFraction>> errorHandler = t -> {
             // Record the exception message.
             sb.append("     exception = "
                       + t.getMessage()

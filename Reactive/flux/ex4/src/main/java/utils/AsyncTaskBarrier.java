@@ -42,8 +42,9 @@ public class AsyncTaskBarrier {
 
     /**
      * Register the {@code task} so it runs (a)synchronously when
-     * {@code runTasks()} is called.  Each task takes no parameters
-     * and returns a {@code Supplier<Mono<Void>>} result.
+     * {@code runTasks()} is called.  Each task takes no parameters and
+     * returns a {@code Mono<Void>} result when its {@code Supplier.get()}
+     * method is called.
      *
      * @param task The task to register with {@code AsyncTaskBarrier}
      */
@@ -54,8 +55,8 @@ public class AsyncTaskBarrier {
 
     /**
      * Unregister the {@code task} task so that it is no longer run
-     * when {@code runTasks()} is called.  Each task must take no
-     * parameters and return a {@code Supplier<Mono<Void>>} result.
+     * when {@code runTasks()} is called.  This {@code task} should
+     * previously be registered via the {@code register()} method.
      *
      * @param task The task to unregister with {@code AsyncTaskBarrier}
      * @return True if {@code task} was previously registered, else false.
@@ -65,7 +66,7 @@ public class AsyncTaskBarrier {
     }
 
     /**
-     * Run all the register tasks.  This method uses {@code
+     * Run all the registered tasks.  This method uses {@code
      * onErrorContinue()} internally, so tasks registered to use this
      * method must use {@code onErrorStop()} in conjunction with
      * {@code onErrorResume()} to avoid problems with {@code
