@@ -86,9 +86,11 @@ public class AsyncTaskBarrier {
         BiConsumer<Throwable,
                    Object> errorHandler = (t, i) -> {
             // Record the exception message.
-            System.out.println("exception = "
-                                   + t.getMessage()
-                                   + "\n");
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] = "
+                               + t.getMessage()
+                               + "\n");
             // Increment the count of exceptions.
             exceptionCount.getAndIncrement();
         };

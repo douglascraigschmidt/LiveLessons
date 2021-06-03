@@ -24,7 +24,11 @@ public class AsyncTaskBarrierTests {
         int denominator = 0;
         return Mono
             // Intentionally trigger an ArithmeticException.
-            .just(numerator / denominator)
+            .just(numerator)
+            .doOnNext (value ->
+                           display("throwException",
+                                   value))
+            .map(n -> n /denominator)
             .then();
     }
 
@@ -41,9 +45,10 @@ public class AsyncTaskBarrierTests {
                 // This call to onErrorResume() isn't run since
                 // there's a call to onErrorContinue() downstream.
                 .onErrorResume(t -> {
-                    System.out.println("onErrorResume1(): "
+                    display("onErrorResume1(): "
                             + t.getMessage()
-                            + "\n");
+                            + "\n",
+                            0);
                     return Flux.empty();
                 })
                 .then();
@@ -62,9 +67,10 @@ public class AsyncTaskBarrierTests {
                 // This call to onErrorResume() is run since
                 // there's a call to onErrorStop() downstream.
                 .onErrorResume(t -> {
-                    System.out.println("onErrorResume2(): "
+                    display("onErrorResume2(): "
                             + t.getMessage()
-                            + "\n");
+                            + " ",
+                            0);
                     return Flux.empty();
                 })
                 // Ensures that onErrorResume() is actually run!
@@ -78,6 +84,9 @@ public class AsyncTaskBarrierTests {
     private Mono<Void> synchronouslyCompletesSuccessfully() {
         return Mono
             .fromCallable(() -> 10 * 10)
+            .doOnNext (value ->
+                           display("synchronouslyCompletesSuccessfully",
+                                   value))
             .then();
     }
 
@@ -88,7 +97,26 @@ public class AsyncTaskBarrierTests {
         return Mono
             .fromCallable(() -> 10 * 10)
             .subscribeOn(Schedulers.single())
+            .doOnNext (value ->
+                       display("asynchronouslyCompletesSuccessfully",
+                                value))
             .then();
+    }
+
+    /**
+     * Display the results.
+     *
+     * @param calledBy The method that calls {@code display}
+     * @param integer The value to print
+     */
+    private void display(String calledBy,
+                         Integer integer) {
+        System.out.println("["
+                           + Thread.currentThread().getId()
+                           + "] "
+                           + calledBy
+                           + " "
+                           + integer);
     }
 
     /**
@@ -113,6 +141,7 @@ public class AsyncTaskBarrierTests {
         // Directly register a method reference.
         AsyncTaskBarrier.register(this::asynchronouslyCompletesSuccessfully);
 
+        display("testExceptions", 0);
         long testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
