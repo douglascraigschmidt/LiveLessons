@@ -34,6 +34,30 @@ public class ReactorUtils {
     }
 
     /**
+     * Conditionally enable concurrent processing if {@code parallel}
+     * is true, otherwise, use sequential processing.
+     *
+     * @return Schedule the Mono to run on th common fork-join pool if
+     * {@code parallel} is true, else do nothing
+     */
+    public static <T> Function<Mono<T>, Mono<T>> commonPoolMonoIf(boolean parallel) {
+        if (parallel)
+            
+            return ReactorUtils.commonPoolMono();
+        else
+            // No-op!!
+            return mono -> mono;
+    }
+
+    /**
+     * @return Schedule a mono to run on the common fork-join pool.
+     */
+    public static <T> Function<Mono<T>, Mono<T>> commonPoolMonoIf() {
+        return mono -> mono
+            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
+    }
+
+    /**
      * @return Schedule a parallel flowable to run on the common
      * fork-join pool.
     public static <T> ParallelTransformer<T, T> commonPoolParallelFlowable() {

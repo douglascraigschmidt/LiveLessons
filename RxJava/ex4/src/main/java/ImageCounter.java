@@ -219,7 +219,7 @@ class ImageCounter {
             // hyperlink.
             .flatMap(hyperLink -> Observable
                      // Just omit this one object.
-                     .just(hyperLink)
+                     .fromCallable(() -> hyperLink)
 
                      // Run operations in the common fork-join pool.
                      .compose(RxUtils.commonPoolObservable())

@@ -14,10 +14,11 @@ import java.util.Optional;
  * This class asynchronously and concurrently counts the number of
  * images in a recursively-defined folder structure using a range of
  * Project Reactor features, including Mono features (e.g., just(),
- * block(), doOnSuccess(), map(), transformDeferred(), subscribeOn(),
- * flatMap(), zipWith(), defaultIfEmpty()), and Flux features (e.g.,
- * fromIterable(), flatMap(), and reduce()).  The root folder can
- * either reside locally (filesystem-based) or remotely (web-based).
+ * fromCallable(), blockOptional(), doOnSuccess(), map(), subscribeOn(),
+ * transformDeferred(), flatMap(), zipWith(), defaultIfEmpty()), and
+ * Flux features (e.g., fromIterable(), flatMap(), and reduce()).  The
+ * root folder can either reside locally (filesystem-based) or remotely
+ * (web-based).
  */
 public class ImageCounter {
     /**
@@ -167,19 +168,19 @@ public class ImageCounter {
      * Count of the # of images on this page plus the # of images on
      * hyperlinks accessible via this page.
      *
-     * @param imagesInPageMono An mono to a count of the # of
+     * @param imagesInPageMono An Mono to a count of the # of
      *                           images on this page
-     * @param imagesInLinksMono An mono to a count of the # of
+     * @param imagesInLinksMono An Mono to a count of the # of
      *                            images in links on this page
-     * @return A mono to the total number of images counted
+     * @return A Mono to the total number of images counted
      */
     private Mono<Integer> combineImageCounts
         (Mono<Integer> imagesInPageMono,
          Mono<Integer> imagesInLinksMono) {
-        // Return a mono to the results of adding the two
-        // mono params after they both complete.
+        // Return a Mono to the results of adding the two
+        // Mono params after they both complete.
         return imagesInPageMono
-            // Sum the results when both monos complete.
+            // Sum the results when both Monos complete.
             .zipWith(imagesInLinksMono,
                      Integer::sum);
     }
@@ -192,7 +193,7 @@ public class ImageCounter {
      */
     private Mono<Document> getStartPage(String pageUri) {
         return Mono
-            // Factory method that creates a mono to download page.
+            // Factory method that creates a mono to download an HTML page.
             .fromCallable(() -> Options
                 .instance()
                 .getJSuper()
@@ -218,7 +219,7 @@ public class ImageCounter {
     /**
      * Recursively crawl through hyperlinks that are in a {@code page}.
      *
-     * @param page TAn HTML page that may contain embedded hyperlinks
+     * @param page An HTML page that may contain embedded hyperlinks
      * @param depth The depth of the level of web page traversal
      * @return A mono to an integer that counts how many images
      * were in each hyperlink on the page
@@ -235,8 +236,8 @@ public class ImageCounter {
             // to a mono containing a count of the number of images found at
             // that hyperlink.
             .flatMap(hyperLink -> Mono
-                     // Just omit this one object.
-                     .just(hyperLink)
+                     // Emit just this one object.
+                     .fromCallable(() -> hyperLink)
 
                      // Run operations in the common fork-join pool.
                      .transformDeferred(ReactorUtils.commonPoolMono())
@@ -248,7 +249,7 @@ public class ImageCounter {
                                           .getHyperLink(url),
                                           depth + 1)))
 
-            // Sum all the counts.
+            // Sum all the counts (if any).
             .reduce(Integer::sum)
 
             // Return 0 if empty.
