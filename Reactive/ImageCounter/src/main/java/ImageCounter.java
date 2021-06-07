@@ -46,19 +46,23 @@ public class ImageCounter {
         Duration.ofSeconds(10);
 
     /**
-     * Constructor counts all the images reachable from the root URI.
+     * Default constructor.
      */
-    public ImageCounter() {
-        // Get the URI to the root of the page/folder being traversed.
-        var rootUri = Options.instance().getRootUri();
+    public ImageCounter() {}
 
+    /**
+     * Constructor counts all the images reachable from the root URI.
+     *
+     * @param rootUri The root Uri at the page/folder being traversed.
+     */
+    public ImageCounter(String rootUri) {
         Optional<Integer> totalImages =
             // Perform the image counting starting at the root Uri,
             // which is given an initial depth count of 1.
             countImages(rootUri, 1)
 
-            // Block until the stream completes, encounters an
-            // error, or times out.
+            // Block until the stream completes, encounters an error,
+            // or times out.
             .blockOptional(sTIMEOUT_DURATION);
 
         // Print the final results of the traversal.
@@ -77,8 +81,8 @@ public class ImageCounter {
      * @return A Mono that emits the number of images counted starting
      *         from {@code pageUri}
      */
-    private Mono<Integer> countImages(String pageUri,
-                                      int depth) {
+    public Mono<Integer> countImages(String pageUri,
+                                     int depth) {
         // Stop traversing if the current depth in the recursive
         // traversal exceeds the maximum depth.
         if (depth > Options.instance().maxDepth()) {

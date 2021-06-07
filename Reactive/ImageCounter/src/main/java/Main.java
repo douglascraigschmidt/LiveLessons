@@ -18,7 +18,8 @@ public class Main {
         // Initializes the Options singleton.
         Options.instance().parseArgs(args);
 
-        // Create an object that count the images.
-        new ImageCounter();
+        // Create an object that count the images rooted at the
+        // page/folder being traversed.
+        new ImageCounter(Options.instance().getRootUri());
     }
 }

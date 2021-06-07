@@ -1,7 +1,10 @@
-group 'livelessons'
-version '1.0-SNAPSHOT'
+plugins {
+    id 'org.springframework.boot' version '2.4.3'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
 
-apply plugin: 'java'
+version '1.0-SNAPSHOT'
 
 java.targetCompatibility = JavaVersion.VERSION_16
 java.sourceCompatibility = JavaVersion.VERSION_16
@@ -11,6 +14,19 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.jsoup:jsoup:1.10.3'
     implementation 'io.projectreactor:reactor-core:3.4.6'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'junit', module: 'junit'
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+    testImplementation 'io.projectreactor:reactor-test:3.2.13.RELEASE'
 }
+
+test {
+    useJUnitPlatform()
+}
+
