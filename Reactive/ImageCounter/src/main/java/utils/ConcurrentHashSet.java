@@ -7,9 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Implements a wrapper that adapts the ConcurrentHashMap
- * implementation to provide a simple ConcurrentHashSet ADT, which is
- * sadly lacking from Java.
+ * This wrapper adapts the Java ConcurrentHashMap implementation to
+ * provide a ConcurrentHashSet, which is otherwise lacking from Java.
  */
 public class ConcurrentHashSet<E>
        extends AbstractSet<E> 
