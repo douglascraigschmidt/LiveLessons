@@ -13,23 +13,35 @@ public class ex2 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Test asynchronous BigFraction reduction using a Single and a
-        // pipeline of operations that run off the calling thread.
-        AsyncTaskBarrier.register(SingleEx::testFractionReductionAsync);
+        // Test an asynchronous BigFraction reduction using a Single
+        // and a chain of operators that run in the background (i.e.,
+        // off the calling thread).
+        AsyncTaskBarrier.register(SingleEx::testFractionReductionAsync1);
+
+        // Test an asynchronous BigFraction reduction using a Single
+        // and a chain of operators that run in the background (i.e.,
+        // off the calling thread), but the result is printed in a
+        // timed-blocking manner by the calling thread.
+        AsyncTaskBarrier.register(SingleEx::testFractionReductionAsync2);
 
         // Test hybrid asynchronous BigFraction multiplication using a
-        // Single and a callable, where the processing is performed in a
-        // background thread and the result is printed in a blocking
+        // Single and a Callable, where the processing is performed in
+        // a background thread and the result is printed in a blocking
         // manner by the main thread.
         AsyncTaskBarrier.register(SingleEx::testFractionMultiplicationCallable1);
 
         // Test asynchronous BigFraction multiplication using a Single
-        // and a callable, where the processing and the printing of
+        // and a Callable, where the processing and the printing of
         // the result is handled in a non-blocking manner by a
         // background thread.
         AsyncTaskBarrier.register(SingleEx::testFractionMultiplicationCallable2);
 
-        @SuppressWarnings("ConstantConditions")
+        // Test asynchronous BigFraction multiplication using a Single
+        // and a Callable, where the processing and the printing of
+        // the result is handled in a non-blocking manner by a
+        // background thread and exceptions are handled gracefully.
+        AsyncTaskBarrier.register(SingleEx::testFractionMultiplicationErrorHandling);
+
         long testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()

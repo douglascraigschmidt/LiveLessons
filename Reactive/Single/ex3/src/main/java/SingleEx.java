@@ -67,16 +67,13 @@ public class SingleEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionCombine1()\n");
 
-        // A random number generator.
-        Random random = new Random();
-
         // Create a random BigFraction and reduce/multiply it
         // asynchronously.
-        Single<BigFraction> s1 = makeBigFractionAsync(random, sb);
+        Single<BigFraction> s1 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction and reduce/multiply it
         // asynchronously.
-        Single<BigFraction> s2 = makeBigFractionAsync(random, sb);
+        Single<BigFraction> s2 = makeBigFractionAsync(sRandom, sb);
         
         return s1
             // Multiply two BigFractions after the random BigFraction
@@ -107,13 +104,13 @@ public class SingleEx {
             new StringBuffer(">> Calling testFractionCombine2()\n");
 
         // Create a random BigFraction asynchronously.
-        final Single<BigFraction> m1 = makeBigFractionAsync(sRandom, sb);
+        Single<BigFraction> s1 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction asynchronously.
-        final Single<BigFraction> m2 = makeBigFractionAsync(sRandom, sb);
+        Single<BigFraction> s2 = makeBigFractionAsync(sRandom, sb);
 
         // Create another random BigFraction asynchronously.
-        final Single<BigFraction> m3 = makeBigFractionAsync(sRandom, sb);
+        Single<BigFraction> s3 = makeBigFractionAsync(sRandom, sb);
 
         // This function combines results from Single.zipArray().
         Function<Object[], BigFraction> zipper = bfArray -> Stream
@@ -131,9 +128,9 @@ public class SingleEx {
         SingleSource<BigFraction>[] asyncMultiplications = new SingleSource[] {
             // Multiply BigFractions after the random BigFractions
             // completes its initialization.
-            m1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
-            m2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
-            m3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction))
+            s1.flatMap(bf1 -> multiplyAsync(bf1, sBigReducedFraction)),
+            s2.flatMap(bf2 -> multiplyAsync(bf2, sBigReducedFraction)),
+            s3.flatMap(bf3 -> multiplyAsync(bf3, sBigReducedFraction))
         };
 
         return Single
@@ -179,27 +176,17 @@ public class SingleEx {
      */
     private static Single<BigFraction> makeBigFractionAsync(Random random,
                                                             StringBuffer sb) {
-        // Create a consumer that prints the result as a mixed
-        // fraction after it's multiplied.
-        Consumer<BigFraction> fractionPrinter = bigFraction -> sb
-            .append("     ["
-                    + Thread.currentThread().getId()
-                    + "] bigFraction = "
-                    + bigFraction.toMixedString()
-                    + "\n");
-
         return Single
-            // Factory method that makes a random big fraction and
-            // multiplies it with a constant.
+            // Factory method that makes a random big fraction.
             .fromCallable(() -> BigFractionUtils
-                          .makeBigFraction(random, 
-                                           true)
-                          .multiply(sBigReducedFraction))
+                          .makeBigFraction(random,
+                                           true))
 
-            // Run all the processing in the parallel thread pool.
+            // Run the processing in the computation thread pool.
             .subscribeOn(Schedulers.computation())
 
-            // Print result after multiplying it.
-            .doOnSuccess(fractionPrinter);
+            // Print result after creating it.
+            .doOnSuccess(bf -> BigFractionUtils
+                         .appendBigFraction(bf, sb));
     }
 }

@@ -10,9 +10,9 @@ import java.net.URL;
 import java.util.function.Function;
 
 /**
- * This wrapper class works around deficiencies in the Jsoup library,
- * which lacks the ability to make web-based crawling and local
- * filesystem crawling transparent to clients.
+ * This wrapper class overcomes deficiencies with the Jsoup library,
+ * which lacks the ability to perform web-based crawling and local
+ * filesystem crawling transparently to clients.
  */
 public class JSuper {
     /**
@@ -39,19 +39,18 @@ public class JSuper {
                 // This function (1) gets a system resource and (2)
                 // converts checked exceptions to runtime exceptions.
                 Function<String, URI> getUri = ExceptionUtils
-                    .rethrowFunction(uri
-                                     -> ClassLoader.getSystemResource(uri)
+                    .rethrowFunction(uri -> ClassLoader
+                                     .getSystemResource(uri)
                                      .toURI());
 
                 URI uri = getUri
-                    // Convert to a Uri.
+                    // Convert a String to a Uri.
                     .apply(pageUri);
 
                 // This function (1) parses an HTML file and gets its
-                // contents and (2) converts checked exceptions to
+                // contents and (2) converts any checked exceptions to
                 // runtime exceptions.
-                Function<File, Document> parse =
-                    ExceptionUtils
+                Function<File, Document> parse = ExceptionUtils
                     .rethrowFunction(rootFile -> Jsoup
                                      .parse(rootFile, "UTF-8"));
  
@@ -65,11 +64,11 @@ public class JSuper {
             }
         } else {
             // This function (1) connects to a URL and gets its
-            // contents and (2) converts checked exceptions to runtime
-            // exceptions.
+            // contents and (2) converts any checked exceptions to
+            // runtime exceptions.
             Function<String, Document> connect =
-                ExceptionUtils.rethrowFunction(url
-                                               -> Jsoup.connect(url).get());
+                ExceptionUtils.rethrowFunction(url -> Jsoup
+                                               .connect(url).get());
 
             return connect
                 // Return the contents of the HTML file downloaded

@@ -25,7 +25,7 @@ public class BigFractionUtils {
     /**
      * Represents a test that's completed running when it returns.
      */
-    public static final Completable sVoidM =
+    public static final Completable sVoidS =
         Completable.complete();
 
     /**
@@ -73,7 +73,9 @@ public class BigFractionUtils {
     public static void logBigFraction(BigFraction unreducedFraction,
                                       BigFraction reducedFraction,
                                       StringBuffer sb) {
-        sb.append("     unreducedFraction "
+        sb.append("     ["
+                  + Thread.currentThread().getId()
+                  + "] unreducedFraction "
                   + unreducedFraction.toString()
                   + "\n     reduced improper fraction = "
                   + reducedFraction.toString()

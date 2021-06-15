@@ -23,11 +23,12 @@ public class ReactorUtils {
     }
 
     /**
-     * @return Schedule a mono to run on the common fork-join pool.
+     * @return Schedule a mono to run on the common fork-join pool
      */
     public static <T> Function<Mono<T>, Mono<T>> commonPoolMono() {
         return mono -> mono
-            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
+            .subscribeOn(Schedulers
+                         .fromExecutor(ForkJoinPool.commonPool()));
     }
 
     /**
@@ -37,9 +38,9 @@ public class ReactorUtils {
      * @return Schedule the Mono to run on th common fork-join pool if
      * {@code parallel} is true, else do nothing
      */
-    public static <T> Function<Mono<T>, Mono<T>> commonPoolMonoIf(boolean parallel) {
+    public static <T> Function<Mono<T>, Mono<T>>
+        commonPoolMonoIf(boolean parallel) {
         if (parallel)
-            
             return ReactorUtils.commonPoolMono();
         else
             // No-op!!
@@ -47,28 +48,21 @@ public class ReactorUtils {
     }
 
     /**
-     * @return Schedule a mono to run on the common fork-join pool.
+     * @return Schedule a mono to run on the common fork-join pool
      */
     public static <T> Function<Mono<T>, Mono<T>> commonPoolMonoIf() {
         return mono -> mono
-            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
+            .subscribeOn(Schedulers
+                         .fromExecutor(ForkJoinPool.commonPool()));
     }
 
     /**
-     * @return Schedule a parallel flowable to run on the common
-     * fork-join pool.
-    public static <T> ParallelTransformer<T, T> commonPoolParallelFlowable() {
-        return observable -> observable
-            .runOn(Schedulers.from(ForkJoinPool.commonPool()));
-    }
-     */
-
-    /**
-     * @return Schedule an flux to run on the common fork-join pool.
+     * @return Schedule an flux to run on the common fork-join pool
      */
     public static <T> Function<Flux<T>, Flux<T>> commonPoolFlux() {
         return flux -> flux
-            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
+            .subscribeOn(Schedulers
+                         .fromExecutor(ForkJoinPool.commonPool()));
     }
 
     /**
@@ -78,7 +72,8 @@ public class ReactorUtils {
      * @return {@code commonPoolFlux()} if {@code parallel} is
      * true, else {@code callingFlux()}.
      */
-    public static <T> Function<Flux<T>, Flux<T>> concurrentFluxIf(boolean parallel) {
+    public static <T> Function<Flux<T>, Flux<T>>
+        concurrentFluxIf(boolean parallel) {
         if (parallel)
             return ReactorUtils.commonPoolFlux();
         else
@@ -94,33 +89,20 @@ public class ReactorUtils {
     }
 
     /**
-     * Convert {@code mono} into a "hot" mono that doesn't
-     * regenerate values seen by earlier subscribers.
-     *
-     * @param mono The mono to make "hot"
-     * @return A "hot" mono.
-    public static <T> MonoSubject<T> makeHotMono(Mono<T> mono) {
-        MonoSubject<T> subject = MonoSubject.create();
-        mono.subscribe(subject);
-        return subject;
-    }
-     */
-
-    /**
      * Use {@code Flux.just()} to emit {@code item} either
      * concurrently or sequentially based on {@code parallel} flag.
      *
      * @param item Item to emit via {@code Flux.just()}
      * @param parallel True if emit concurrently, false if emit
-     * @return An flux that will be emitted concurrenty or sequentially.
+     * @return An flux that will be emitted concurrenty or sequentially
      */
     public static <T> Flux<T> justConcurrentIf(T item, boolean parallel) {
         return Flux
-                // Just omit this one item.
-                .just(item)
+            // Just omit this one item.
+            .just(item)
 
-                // Conditionally convert to run concurrently.
-                .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));
+            // Conditionally convert to run concurrently.
+            .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));
     }
 
     /**
@@ -131,38 +113,42 @@ public class ReactorUtils {
      * @param parallel True if emit concurrently, false if emit
      * @return An flux that will be emitted concurrenty or sequentially.
      */
-    public static <T extends Iterable<? extends T>> Flux<T> fromIterableConcurrentIf(T item, boolean parallel) {
+    public static <T extends Iterable<? extends T>> Flux<T> 
+                  fromIterableConcurrentIf(T item, boolean parallel) {
         return Flux
-                // Just omit this one item.
-                .fromIterable(item)
+            // Just omit this one item.
+            .fromIterable(item)
 
-                // Conditionally convert to run concurrently.
-                .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));
+            // Conditionally convert to run concurrently.
+            .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));
     }
 
     /**
-     * Use {@code Mono.fromCallable()} to emit {@code item} concurrently.
+     * Use {@code Mono.fromCallable()} to emit {@code item}
+     * concurrently.
      *
      * @param item Item to emit via {@code Mono.fromCallable()}
      * @return A mono that will be emitted concurrenty
      */
     public static <T> Mono<T> fromCallableConcurrent(Callable<T> item) {
-          return Mono
-                  // Just omit this one item.
-                  .fromCallable(item)
+        return Mono
+            // Just omit this one item.
+            .fromCallable(item)
 
-                  // Conditionally convert to run concurrently.
-                  .transformDeferred(ReactorUtils.commonPoolMono());
-      }
+            // Conditionally convert to run concurrently.
+            .transformDeferred(ReactorUtils.commonPoolMono());
+    }
 
     /**
      * Emit {@code collection} as a parallel flux that runs in the
      * common fork-join pool.
      *
-     * @param iterable The iterable whose contents will be processed in parallel
+     * @param iterable The iterable whose contents will be processed
+     *        in parallel
      * @return A parallel flux running on the common fork-join pool
      */
-    public static <T> ParallelFlux<T> fromIterableParallel(Iterable<T> iterable) {
+    public static <T> ParallelFlux<T>
+                      fromIterableParallel(Iterable<T> iterable) {
         return Flux
             // Convert collection into a flux.
             .fromIterable(iterable)
@@ -170,13 +156,14 @@ public class ReactorUtils {
             // Create a parallel flux.
             .parallel()
 
-            // Run this flow of operations in the common fork-join pool.
+            // Run these operators in the common fork-join pool.
             .runOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()));
     }
 
     /**
      * Generate {@code count} instances of what's returned by
-     * {@code supplier.get()}
+     * {@code supplier.get()}.
+     *
      * @param supplier Generates a value
      * @param count Number of values to generate
      * @return A flux that contains the results of the generator
@@ -199,16 +186,17 @@ public class ReactorUtils {
 
     /**
      * Generate an infinite stream of instances of what's returned by
-     * {@code supplier.get()}
+     * {@code supplier.get()}.
+     *
      * @param supplier Generates a value
      * @return A flux that contains the results of the generator
      */
     public static <T> Flux<T> generate(Supplier<T> supplier) {
         return Flux
-                // Create an infinite generator.
-                .create(sink -> sink.onRequest(size -> {
-                    sink.next(supplier.get());
-                }));
+            // Create an infinite generator.
+            .create(sink -> sink.onRequest(size -> {
+                        sink.next(supplier.get());
+                    }));
     }
 
 

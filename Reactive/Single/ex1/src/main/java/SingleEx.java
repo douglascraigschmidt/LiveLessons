@@ -37,7 +37,9 @@ public class SingleEx {
         return Single
             // Use just() to begin synchronously reducing a big
             // fraction in the calling thread.
-            .just(BigFraction.reduce(sUnreducedFraction))
+            .just(BigFraction
+                  // Reduce the BigFraction.
+                  .reduce(sUnreducedFraction))
 
             // Use doOnSuccess() to print the BigFraction. If
             // something goes wrong doOnSuccess() will be skipped.
@@ -80,7 +82,7 @@ public class SingleEx {
             // Use fromCallable() to begin synchronously reducing a
             // big fraction in the calling thread.
             .fromCallable(() -> BigFraction
-                          // Reduce the big fraction.
+                          // Reduce the BigFraction.
                           .reduce(sUnreducedFraction))
 
             // Use doOnSuccess() to print the BigFraction. If

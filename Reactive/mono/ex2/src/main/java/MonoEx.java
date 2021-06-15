@@ -21,12 +21,12 @@ import static utils.BigFractionUtils.*;
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class MonoEx {
     /**
-     * Create a new unreduced big fraction.
+     * Create a new unreduced BigFraction.
      */
     private static final BigFraction sUnreducedFraction = BigFraction
-            .valueOf(new BigInteger (sBI1),
-                    new BigInteger(sBI2),
-                    false);
+        .valueOf(new BigInteger (sBI1),
+                 new BigInteger(sBI2),
+                 false);
 
     /**
      * Create a callable lambda that multiplies two large fractions.
@@ -95,8 +95,8 @@ public class MonoEx {
         String result = Mono
             // Use fromCallable() to reduce the big fraction.
             .fromCallable(() -> BigFraction
-                // Reduce the BigFraction.
-                .reduce(sUnreducedFraction))
+                          // Reduce the BigFraction.
+                          .reduce(sUnreducedFraction))
 
             // Run all the processing in a (single) background thread.
             .subscribeOn(Schedulers.single())
@@ -212,7 +212,7 @@ public class MonoEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-                 Mono<? extends BigFraction>> errorHandler = t -> {
+            Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()

@@ -168,8 +168,7 @@ public class MonoEx {
     private static Mono<BigFraction> makeBigFractionAsync(Random random,
                                                           StringBuffer sb) {
         return Mono
-            // Factory method that makes a random big fraction and
-            // multiplies it with a constant.
+            // Factory method that makes a random big fraction.
             .fromCallable(() -> BigFractionUtils
                           .makeBigFraction(random,
                                            true))
@@ -178,6 +177,7 @@ public class MonoEx {
             .subscribeOn(Schedulers.parallel())
 
             // Print result after creating it.
-            .doOnSuccess(bf -> appendBigFraction(bf, sb));
+            .doOnSuccess(bf -> BigFractionUtils
+                         .appendBigFraction(bf, sb));
     }
 }

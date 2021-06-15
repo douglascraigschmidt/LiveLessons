@@ -94,15 +94,24 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc++)
                 switch (argv[argc]) {
-                    case "-d" -> mDiagnosticsEnabled = argv[++argc].equals("true");
-                    case "-l" -> mLocal = true;
-                    case "-m" -> mMaxDepth = Integer.parseInt(argv[++argc]);
-                    case "-u" -> mRootUrl = argv[++argc];
-                    case "-w" -> mLocal = false;
-                    default -> {
+                    case "-d":
+                        mDiagnosticsEnabled = argv[++argc].equals("true");
+                        break;
+                    case "-l":
+                        mLocal = true;
+                        break;
+                    case "-m":
+                        mMaxDepth = Integer.parseInt(argv[++argc]);
+                        break;
+                    case "-u":
+                        mRootUrl = argv[++argc];
+                        break;
+                    case "-w":
+                        mLocal = false;
+                        break;
+                    default:
                         printUsage(argv[argc]);
                         return;
-                    }
                 }
 
             // Set whether JSuper performs web-based or local

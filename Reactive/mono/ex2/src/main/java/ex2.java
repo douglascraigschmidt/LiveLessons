@@ -27,19 +27,19 @@ public class ex2 {
         AsyncTaskBarrier.register(MonoEx::testFractionReductionAsync2);
 
         // Test hybrid asynchronous BigFraction multiplication using a
-        // mono and a callable, where the processing is performed in a
+        // Mono and a Callable, where the processing is performed in a
         // background thread and the result is printed in a blocking
         // manner by the calling thread.
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationCallable1);
 
-        // Test asynchronous BigFraction multiplication using a mono
-        // and a callable, where the processing and the printing of
+        // Test asynchronous BigFraction multiplication using a Mono
+        // and a Callable, where the processing and the printing of
         // the result is handled in a non-blocking manner by a
         // background thread.
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationCallable2);
 
-        // Test asynchronous BigFraction multiplication using a mono
-        // and a callable, where the processing and the printing of
+        // Test asynchronous BigFraction multiplication using a Mono
+        // and a Callable, where the processing and the printing of
         // the result is handled in a non-blocking manner by a
         // background thread and exceptions are handled gracefully.
         AsyncTaskBarrier.register(MonoEx::testFractionMultiplicationErrorHandling);

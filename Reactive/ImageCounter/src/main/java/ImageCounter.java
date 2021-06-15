@@ -28,7 +28,7 @@ public class ImageCounter {
     private final String TAG = this.getClass().getName();
 
     /**
-     * A cache of unique URIs that have already been processed.
+     * A thread-safe cache of URIs that have already been processed.
      */
     private final ConcurrentHashSet<String> mUniqueUris =
         new ConcurrentHashSet<>();
@@ -46,18 +46,18 @@ public class ImageCounter {
         Duration.ofSeconds(10);
 
     /**
-     * Default constructor.
+     * Default constructor (used for testing).
      */
     public ImageCounter() {}
 
     /**
-     * Constructor counts all the images reachable from the root URI.
+     * Count all the images reachable from the root URI.
      *
-     * @param rootUri The root Uri at the page/folder being traversed.
+     * @param rootUri The root URI at the page/folder being traversed
      */
     public ImageCounter(String rootUri) {
         Optional<Integer> totalImages =
-            // Perform the image counting starting at the root Uri,
+            // Perform the image counting starting at the root URI,
             // which is given an initial depth count of 1.
             countImages(rootUri, 1)
 
@@ -76,15 +76,15 @@ public class ImageCounter {
      * Main entry point into the logic for counting images
      * asynchronously.
      *
-     * @param pageUri The Uri being counted at this point
+     * @param pageUri The URI being counted at this point
      * @param depth The current depth of the recursive processing
      * @return A Mono that emits the number of images counted starting
      *         from {@code pageUri}
      */
     public Mono<Integer> countImages(String pageUri,
                                      int depth) {
-        // Stop traversing if the current depth in the recursive
-        // traversal exceeds the maximum depth.
+        // Stop traversing if the current depth in recursion
+        // exceeds the maximum depth.
         if (depth > Options.instance().maxDepth()) {
             print("(depth "
                   + depth
@@ -93,8 +93,8 @@ public class ImageCounter {
             return sZero;
         }
         // Atomically check to see if we've already visited pageUri
-        // and if not add pageUri to the hashset so it is not
-        // revisited again unnecessarily.
+        // and if not add it to the hashset to avoid revisiting
+        // it again unnecessarily.
         else if (!mUniqueUris.putIfAbsent(pageUri)) {
             print("(depth "
                   + depth
@@ -119,7 +119,7 @@ public class ImageCounter {
     /**
      * Helper method that performs image counting asynchronously.
      *
-     * @param pageUri The Uri being counted at this point
+     * @param pageUri The URI being counted at this point
      * @param depth The current depth of the recursive processing
      * @return A Mono that emits the number of images counted starting
      *         from {@code pageUri}
@@ -143,8 +143,8 @@ public class ImageCounter {
                 // Count the number of images on this page.
                 .map(List::size);
 
-            // Asynchronously count the # of images in link on this
-            // page and return a Mono that emits this count.
+            // Asynchronously count the # of images accessible via links
+            // on this page and return a Mono that emits this count.
             var imagesInLinksMono = pageMono
                 // crawlLinksInPage() runs synchronously, so call it
                 // in the common fork-join pool (see next operator).
