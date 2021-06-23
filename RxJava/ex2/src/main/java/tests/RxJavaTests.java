@@ -1,6 +1,8 @@
 package tests;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.functions.Function;
 import utils.FileUtils;
 import utils.Options;
 import utils.RunTimer;
@@ -10,7 +12,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This Java utility class contains static methods show how to
@@ -29,7 +31,8 @@ public final class RxJavaTests {
      * uses its flatMap() mechanism to download files in parallel.
      */
     public static void runFlatMap(Function<URL, File> downloadAndStoreImage,
-                                  String testName) {
+                                  String testName,
+                                  Scheduler scheduler) {
         // First let the system garbage collect.
         System.gc();
 
@@ -41,7 +44,8 @@ public final class RxJavaTests {
             .timeRun(() ->
                      // Run the test with the designated function.
                      testDownloadFlatMap(downloadAndStoreImage,
-                                         testName),
+                                         testName,
+                                         scheduler),
                      testName);
     }
 
@@ -76,14 +80,15 @@ public final class RxJavaTests {
      */
     public static void testDownloadFlatMap
         (Function<URL, File> downloadAndStoreImage,
-         String testName) {
+         String testName,
+         Scheduler scheduler) {
         Function<URL, Observable<File>> downloadAndStore = url -> RxUtils
             // Emit this url and run it concurrently in the common
             // fork-join pool.
-            .justConcurrentIf(url, true)
+            .fromCallableConcurrentIf(url, true)
 
             // Transform each URL to a file by downloading each image.
-            .map(downloadAndStoreImage::apply);
+            .map(downloadAndStoreImage);
 
         // Get and print a list of files to the downloaded images.
         Observable
@@ -92,11 +97,23 @@ public final class RxJavaTests {
             .fromIterable(Options.instance().getUrlList())
 
             // Apply the RxJava flatMap() concurrency idiom to process
-            // each url concurrently.
-            .flatMap(downloadAndStore::apply)
+            // each url in parallel.
+            .flatMap(url -> Observable
+                     // Emit this url.
+                     .fromCallable(() -> url)
+
+                     // Run the URL concurrently in the given
+                     // scheduler.  The placement of this operation
+                     // can move down in this pipeline without
+                     // affecting the behavior.
+                     .subscribeOn(scheduler)
+
+                     // Transform each url to a file by downloading
+                     // the image.
+                     .map(downloadAndStoreImage))
 
             // Collect the downloaded images into a list.
-            .collectInto(new ArrayList<>(), List::add)
+            .collect(Collectors.toList())
 
             // Print the statistics for this test run in a blocking
             // manner.
@@ -120,13 +137,13 @@ public final class RxJavaTests {
 
             // Transform each url to a file via downloadAndStoreImage,
             // which downloads each image.
-            .map(downloadAndStoreImage::apply)
+            .map(downloadAndStoreImage)
 
             // Merge the values back into a single flowable.
             .sequential() 
 
             // Collect the downloaded images into a list.
-            .collectInto(new ArrayList<>(), List::add)
+            .collect(Collectors.toList())
 
             // Print the statistics for this test run in a blocking
             // manner.

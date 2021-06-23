@@ -81,17 +81,17 @@ public class ReactorUtils {
      */
 
     /**
-     * Use {@code Flux.just()} to emit {@code item} either
-     * concurrently or sequentially based on {@code parallel} flag.
+     * Emit {@code item} either concurrently or sequentially based
+     * on {@code parallel} flag.
      *
-     * @param item Item to emit via {@code Flux.just()}
+     * @param item Item to emit
      * @param parallel True if emit concurrently, false if emit
-     * @return An flux that will be emitted concurrenty or sequentially.
+     * @return An flux that will be emitted concurrently or sequentially.
      */
-    public static <T> Flux<T> justConcurrentIf(T item, boolean parallel) {
+    public static <T> Flux<T> fromConcurrentIf(T item, boolean parallel) {
         return Flux
-                // Just omit this one item.
-                .just(item)
+                // Omit this one item.
+                .from(Mono.fromCallable(() -> item))
 
                 // Conditionally convert to run concurrently.
                 .transformDeferred(ReactorUtils.concurrentFluxIf(parallel));

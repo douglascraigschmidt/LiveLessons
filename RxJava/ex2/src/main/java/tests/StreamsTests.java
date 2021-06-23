@@ -25,7 +25,8 @@ public class StreamsTests {
     /**
      * Utility class constructors should be private.
      */
-    private StreamsTests() {}
+    private StreamsTests() {
+    }
 
     /**
      * Run the test named {@code testName} by appying the {@code
@@ -43,21 +44,21 @@ public class StreamsTests {
         FileUtils.deleteDownloadedImages();
 
         if (log)
-        RunTimer
-            // Record how long the test takes to run.
-            .timeRun(() ->
-                     // Run the test with the designated function.
-                     testDownloadStreamsLog(downloadAndStoreImage,
-                                                 testName),
-                     testName);
+            RunTimer
+                // Record how long the test takes to run.
+                .timeRun(() ->
+                         // Run the test with the designated function.
+                         testDownloadStreamsLog(downloadAndStoreImage,
+                                                testName),
+                         testName);
         else
             RunTimer
-                    // Record how long the test takes to run.
-                    .timeRun(() ->
-                                    // Run the test with the designated function.
-                                    testDownloadStreams(downloadAndStoreImage,
-                                            testName),
-                            testName);
+                // Record how long the test takes to run.
+                .timeRun(() ->
+                         // Run the test with the designated function.
+                         testDownloadStreams(downloadAndStoreImage,
+                                             testName),
+                         testName);
 
     }
 
@@ -66,22 +67,22 @@ public class StreamsTests {
      * using the parallel streams framework.
      */
     public static void testDownloadStreams
-    (Function<URL, File> downloadAndStoreImage,
-     String testName) {
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get a list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
-                // Convert the URLs in the input list into a stream and
-                // process them in parallel.
-                .parallelStream()
+            // Convert the URLs in the input list into a stream and
+            // process them in parallel.
+            .parallelStream()
 
-                // Transform each URL to a File by calling the
-                // downloadAndStoreImage function, which downloads each
-                // image via its URL.
-                .map(downloadAndStoreImage)
+            // Transform each URL to a File by calling the
+            // downloadAndStoreImage function, which downloads each
+            // image via its URL.
+            .map(downloadAndStoreImage)
 
-                // Terminate the stream and collect the results into list
-                // of images.
-                .collect(toList());
+            // Terminate the stream and collect the results into list
+            // of images.
+            .collect(toList());
 
         // Print the statistics for this test run.
         Options.instance().printStats(testName, imageFiles.size());
@@ -92,8 +93,8 @@ public class StreamsTests {
      * using the parallel streams framework.
      */
     public static void testDownloadStreamsLog
-    (Function<URL, File> downloadAndStoreImage,
-     String testName) {
+        (Function<URL, File> downloadAndStoreImage,
+         String testName) {
         // Get a list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
@@ -112,12 +113,16 @@ public class StreamsTests {
 
             // Terminate the stream and collect the results into list
             // of images.
-            .collect(Collector.of(ArrayList::new,
-                                  (list, item) -> {
-                                      Options.logIdentity(item, "collect()");
-                                      list.add(item);
-                                  },
-                                  (list1, list2) -> { list1.addAll(list2); return list1;}));
+            .collect(Collector
+                     .of(ArrayList::new,
+                         (list, item) -> {
+                             Options.logIdentity(item, "collect()");
+                             list.add(item);
+                         },
+                         (list1, list2) -> {
+                             list1.addAll(list2);
+                             return list1;
+                         }));
 
         // Print the statistics for this test run.
         Options.instance().printStats(testName, imageFiles.size());

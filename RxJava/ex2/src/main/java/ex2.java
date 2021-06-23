@@ -1,4 +1,3 @@
-import reactor.core.scheduler.Schedulers;
 import tests.ReactorTests;
 import tests.RxJavaTests;
 import tests.StreamsTests;
@@ -38,14 +37,14 @@ public class ex2 {
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
+        // Run all the Streams tests.
+        runStreamsTests();
+
         // Run all the Project Reactor tests.
         runReactorTests();
 
         // Run all the RxJava tests.
         runRxJavaTests();
-
-        // Run all the Streams tests.
-        runStreamsTests();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -66,13 +65,13 @@ public class ex2 {
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorflatMap[CFJP]()",
-             Schedulers.fromExecutor(ForkJoinPool.commonPool()),
+             reactor.core.scheduler.Schedulers.fromExecutor(ForkJoinPool.commonPool()),
              Options.instance().loggingEnabled());
 
         ReactorTests.runFlatMap
             (DownloadUtils::downloadAndStoreImage,
              "testDefaultDownloadBehaviorReactorflatMap[parallel]()",
-             Schedulers.parallel(),
+             reactor.core.scheduler.Schedulers.parallel(),
              Options.instance().loggingEnabled());
 
         // Run tests using Reactor's {@link ParallelFlux} mechanism
@@ -84,21 +83,21 @@ public class ex2 {
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[all cores, CFJP]()",
              Runtime.getRuntime().availableProcessors(),
-             Schedulers.fromExecutor(ForkJoinPool.commonPool()),
+             reactor.core.scheduler.Schedulers.fromExecutor(ForkJoinPool.commonPool()),
              Options.instance().loggingEnabled());
 
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImage,
              "testDefaultDownloadBehaviorReactorParallelFlux[all cores, parallel]()",
              Runtime.getRuntime().availableProcessors(),
-             Schedulers.parallel(),
+             reactor.core.scheduler.Schedulers.parallel(),
              Options.instance().loggingEnabled());
 
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[1 core, CFJP]()",
              1,
-             Schedulers.fromExecutor(ForkJoinPool.commonPool()),
+             reactor.core.scheduler.Schedulers.fromExecutor(ForkJoinPool.commonPool()),
              Options.instance().loggingEnabled());
     }
 
@@ -113,7 +112,8 @@ public class ex2 {
         // adaptively when blocking on I/O occurs.
         RxJavaTests.runFlatMap
             (DownloadUtils::downloadAndStoreImageBT,
-             "testAdaptiveBTDownloadBehaviorRxflatMap()");
+             "testAdaptiveBTDownloadBehaviorRxflatMap()",
+             io.reactivex.rxjava3.schedulers.Schedulers.io());
 
         // Run the tests using RxJava's ParallelFlowable mechanism
         // along with the {@link BlockingTask} wrapper for the Java
