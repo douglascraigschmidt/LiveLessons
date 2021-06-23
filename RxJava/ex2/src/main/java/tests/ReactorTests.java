@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 /**
  * This Java utility class contains static methods show how to
- * download many images from a remote web server via the Reactor
- * framework.
+ * download many images from a remote web server via the Project
+ * Reactor framework.
  */
 public final class ReactorTests {
     /**

@@ -10,7 +10,7 @@ overview of what's included:
 . ex2 - This example downloads multiple images from a remote web
         server via several different Java concurrency/parallelism
         frameworks, including the parallel streams, RxJava, and
-        Reactor.  It also compares the performance of the Java
+        Project Reactor.  It also compares the performance of the Java
         parallel streams framework with and without the {@code
         ForkJoinPool.ManagedBlocker} interface and the Java common
         fork-join pool.

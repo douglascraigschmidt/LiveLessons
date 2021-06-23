@@ -11,10 +11,11 @@ import java.util.concurrent.ForkJoinPool;
 /**
  * This example shows how to download many images from a remote web
  * server via several different Java concurrency/parallelism
- * frameworks, including the parallel streams, RxJava, and Reactor.
- * It also compares the performance of the Java parallel streams
- * framework with and without the {@code ForkJoinPool.ManagedBlocker}
- * interface and the Java common fork-join pool.
+ * frameworks, including the parallel streams, RxJava, and Project
+ * Reactor.  It also compares the performance of the Java parallel
+ * streams framework with and without the {@code
+ * ForkJoinPool.ManagedBlocker} interface and the Java common
+ * fork-join pool.
  */
 public class ex2 {
     /**
@@ -37,10 +38,10 @@ public class ex2 {
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
-        // Run all the Reactor tests.
+        // Run all the Project Reactor tests.
         runReactorTests();
 
-        // Run all the RxJavaTests.
+        // Run all the RxJava tests.
         runRxJavaTests();
 
         // Run all the Streams tests.
@@ -53,12 +54,12 @@ public class ex2 {
     }
 
     /**
-     * Run all the Reactor tests.
+     * Run all the Project Reactor tests.
      */
     static private void runReactorTests() {
-        // Run the tests using Reactor's flatMap() parallelism
-        // mechanism along with the {@code BlockingTask} wrapper for
-        // the Java fork-join framework's {@code ManagedBlocker}
+        // Run the tests using Project Reactor's flatMap() parallelism
+        // mechanism along with the {@link BlockingTask} wrapper for
+        // the Java fork-join framework's {@link ManagedBlocker}
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking on I/O occurs.
 
@@ -74,10 +75,11 @@ public class ex2 {
              Schedulers.parallel(),
              Options.instance().loggingEnabled());
 
-        // Run tests using Reactor's ParallelFlux mechanism along with
-        // the {@code BlockingTask} wrapper for Java fork-join's
-        // {@code ManagedBlocker} mechanism, which adds new worker
-        // threads to pool adaptively when blocking on I/O occurs.
+        // Run tests using Reactor's {@link ParallelFlux} mechanism
+        // along with the {@link BlockingTask} wrapper for Java
+        // fork-join's {@link ManagedBlocker} mechanism, which adds
+        // new worker threads to pool adaptively when blocking on I/O
+        // occurs.
         ReactorTests.runParallelFlux
             (DownloadUtils::downloadAndStoreImageBT,
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[all cores, CFJP]()",
@@ -105,8 +107,8 @@ public class ex2 {
      */
     private static void runRxJavaTests() {
         // Run the tests using RxJava's flatMap() parallelism
-        // mechanism along with the {@code BlockingTask} wrapper for
-        // the Java fork-join framework's {@code ManagedBlocker}
+        // mechanism along with the {@link BlockingTask} wrapper for
+        // the Java fork-join framework's {@link ManagedBlocker}
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking on I/O occurs.
         RxJavaTests.runFlatMap
@@ -114,8 +116,8 @@ public class ex2 {
              "testAdaptiveBTDownloadBehaviorRxflatMap()");
 
         // Run the tests using RxJava's ParallelFlowable mechanism
-        // along with the {@code BlockingTask} wrapper for the Java
-        // fork-join framework's {@code ManagedBlocker} mechanism,
+        // along with the {@link BlockingTask} wrapper for the Java
+        // fork-join framework's {@link ManagedBlocker} mechanism,
         // which adds new worker threads to the pool adaptively when
         // blocking on I/O occurs.
         RxJavaTests.runParallelFlowable
@@ -136,7 +138,7 @@ public class ex2 {
              Options.instance().loggingEnabled());
 
         // Run the tests using the using the Java fork-join
-        // framework's {@code ManagedBlocker} mechanism, which adds
+        // framework's {@link ManagedBlocker} mechanism, which adds
         // new worker threads to the pool adaptively when blocking on
         // I/O occurs.
         StreamsTests.runParallelStreams
@@ -144,8 +146,8 @@ public class ex2 {
              "testAdaptiveMBDownloadBehavior()",
              Options.instance().loggingEnabled());
 
-        // Run the tests using the using the {@code BlockingTask}
-        // wrapper for the Java fork-join framework's {@code
+        // Run the tests using the using the {@link BlockingTask}
+        // wrapper for the Java fork-join framework's {@link
         // ManagedBlocker} mechanism, which adds new worker threads to
         // the pool adaptively when blocking on I/O occurs.
         StreamsTests.runParallelStreams

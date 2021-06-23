@@ -35,7 +35,6 @@ public class ExchangeRate {
         gbpExchangeRates.put("EUR", 1.18);
         gbpExchangeRates.put("USD", 1.38);
         mExchangeRate.put("GBP", gbpExchangeRates);
-
     }
 
     /**

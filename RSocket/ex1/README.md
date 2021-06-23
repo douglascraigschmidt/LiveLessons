@@ -23,11 +23,11 @@ models](https://docs.spring.io/spring-framework/docs/current/reference/pdf/rsock
 that communicate between a client test program and a Spring-based
 microservice, including
 
-* **Request/Response**, where each two-way async request receives a single
-  async response from the server.
-
 * **Fire-and-Forget**, where each one-way message receives no response
   from the server.
+
+* **Request/Response**, where each two-way async request receives a single
+  async response from the server.
 
 * **Request/Stream**, where each async request receives a stream of
   responses from the server.
