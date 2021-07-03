@@ -75,7 +75,7 @@ public class ZippyController {
      * @return A {@link Mono} that confirms the subscription request.
      */
     @MessageMapping(Constants.SUBSCRIBE)
-    public Mono<Subscription> subscribe(Mono<Subscription> request) {
+    Mono<Subscription> subscribe(Mono<Subscription> request) {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return request
@@ -105,7 +105,7 @@ public class ZippyController {
      *                Subscription}
      */
     @MessageMapping(Constants.CANCEL_UNCONFIRMED)
-    public void cancelSubscriptionUnconfirmed(Mono<Subscription> request) {
+    void cancelSubscriptionUnconfirmed(Mono<Subscription> request) {
         // Cancel the subscription without informing the client if
         // something goes wrong.
         request
@@ -154,7 +154,7 @@ public class ZippyController {
      * succeeded or failed.
      */
     @MessageMapping(Constants.CANCEL_CONFIRMED)
-    public Mono<Subscription> cancelSubscriptionConfirmed(Mono<Subscription> request) {
+    Mono<Subscription> cancelSubscriptionConfirmed(Mono<Subscription> request) {
         // Try to cancel the subscription and indicate if the
         // cancellation succeeded.
         return request
@@ -202,7 +202,7 @@ public class ZippyController {
      * @return A {@link Flux} that emits Zippy quote every second
      */
     @MessageMapping(Constants.GET_ALL_QUOTES)
-    public Flux<ZippyQuote> getAllQuotes(Mono<Subscription> request) {
+    Flux<ZippyQuote> getAllQuotes(Mono<Subscription> request) {
         return request
             .doOnNext(r ->
                           System.out.println("getAllQuotes::"
@@ -239,7 +239,7 @@ public class ZippyController {
      * @return A {@link Flux} that emits the requested Zippy quotes
      */
     @MessageMapping(Constants.GET_RANDOM_QUOTES)
-    public Flux<ZippyQuote> getRandomQuotes(Flux<Integer> quoteIds) {
+    Flux<ZippyQuote> getRandomQuotes(Flux<Integer> quoteIds) {
         return quoteIds
             // Get the Zippy th' Pinhead quote at each quote id.
             .map(mZippyService::getQuote)
@@ -253,7 +253,7 @@ public class ZippyController {
      * @return The total number of Zippy th' Pinhead quotes.
      */
     @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
-    public Mono<Integer> getNumberOfQuotes() {
+    Mono<Integer> getNumberOfQuotes() {
         return Mono
             // Return the total number of Zippy th' Pinhead quotes.
             .just(mZippyService.getNumberOfQuotes());

@@ -122,7 +122,7 @@ public final class ReactorTests {
             // process each url in the given scheduler.
             .flatMap(url -> Mono
                      // Emit this url
-                     .from(Mono.fromCallable(() -> url))
+                     .fromCallable(() -> url)
 
                      // Run the URL concurrently in the given
                      // scheduler.  The placement of this operation

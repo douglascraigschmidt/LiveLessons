@@ -70,7 +70,9 @@ public class StreamsTests {
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
         // Get a list of files to the downloaded images.
-        List<File> imageFiles = Options.instance().getUrlList()
+        List<File> imageFiles = Options.instance()
+            .getUrlList()
+
             // Convert the URLs in the input list into a stream and
             // process them in parallel.
             .parallelStream()

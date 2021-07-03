@@ -8,8 +8,8 @@ import utils.RunTimer;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * This example shows how to download many images from a remote web
- * server via several different Java concurrency/parallelism
+ * This example shows how to download images from remote web
+ * servers via several different Java concurrency/parallelism
  * frameworks, including the parallel streams, RxJava, and Project
  * Reactor.  It also compares the performance of the Java parallel
  * streams framework with and without the {@code
@@ -40,16 +40,70 @@ public class ex2 {
         // Run all the Streams tests.
         runStreamsTests();
 
-        // Run all the Project Reactor tests.
-        runReactorTests();
-
         // Run all the RxJava tests.
         runRxJavaTests();
+
+        // Run all the Project Reactor tests.
+        runReactorTests();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Leaving the download tests program");
+    }
+
+    /**
+     * Run all the Java parallel streams tests.
+     */
+    private static void runStreamsTests() {
+        // Runs the tests using the using the Java fork-join
+        // framework's default behavior, which does not add any new
+        // worker threads to the pool when blocking on I/O occurs.
+        StreamsTests.runParallelStreams
+                (DownloadUtils::downloadAndStoreImage,
+                        "testDefaultDownloadBehavior()",
+                        Options.instance().loggingEnabled());
+
+        // Run the tests using the using the Java fork-join
+        // framework's {@link ManagedBlocker} mechanism, which adds
+        // new worker threads to the pool adaptively when blocking on
+        // I/O occurs.
+        StreamsTests.runParallelStreams
+                (DownloadUtils::downloadAndStoreImageMB,
+                        "testAdaptiveMBDownloadBehavior()",
+                        Options.instance().loggingEnabled());
+
+        // Run the tests using the using the {@link BlockingTask}
+        // wrapper for the Java fork-join framework's {@link
+        // ManagedBlocker} mechanism, which adds new worker threads to
+        // the pool adaptively when blocking on I/O occurs.
+        StreamsTests.runParallelStreams
+                (DownloadUtils::downloadAndStoreImageBT,
+                        "testAdaptiveBTDownloadBehavior()",
+                        Options.instance().loggingEnabled());
+    }
+
+    /**
+     * Run all the RxJava tests.
+     */
+    private static void runRxJavaTests() {
+        // Run the tests using RxJava's flatMap() parallelism
+        // mechanism along the RxJava Schedulers.io() scheduler that
+        // adds new worker threads to the pool adaptively when
+        // blocking on I/O occurs.
+        RxJavaTests.runFlatMap
+                (DownloadUtils::downloadAndStoreImage,
+                        "testDownloadBehaviorRxflatMap()",
+                        io.reactivex.rxjava3.schedulers.Schedulers.io());
+
+        // Run the tests using RxJava's ParallelFlowable mechanism
+        // along with the {@link BlockingTask} wrapper for the Java
+        // fork-join framework's {@link ManagedBlocker} mechanism,
+        // which adds new worker threads to the pool adaptively when
+        // blocking on I/O occurs.
+        RxJavaTests.runParallelFlowable
+                (DownloadUtils::downloadAndStoreImageBT,
+                        "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
     }
 
     /**
@@ -98,61 +152,6 @@ public class ex2 {
              "testAdaptiveBTDownloadBehaviorReactorParallelFlux[1 core, CFJP]()",
              1,
              reactor.core.scheduler.Schedulers.fromExecutor(ForkJoinPool.commonPool()),
-             Options.instance().loggingEnabled());
-    }
-
-    /**
-     * Run all the RxJava tests.
-     */
-    private static void runRxJavaTests() {
-        // Run the tests using RxJava's flatMap() parallelism
-        // mechanism along with the {@link BlockingTask} wrapper for
-        // the Java fork-join framework's {@link ManagedBlocker}
-        // mechanism, which adds new worker threads to the pool
-        // adaptively when blocking on I/O occurs.
-        RxJavaTests.runFlatMap
-            (DownloadUtils::downloadAndStoreImageBT,
-             "testAdaptiveBTDownloadBehaviorRxflatMap()",
-             io.reactivex.rxjava3.schedulers.Schedulers.io());
-
-        // Run the tests using RxJava's ParallelFlowable mechanism
-        // along with the {@link BlockingTask} wrapper for the Java
-        // fork-join framework's {@link ManagedBlocker} mechanism,
-        // which adds new worker threads to the pool adaptively when
-        // blocking on I/O occurs.
-        RxJavaTests.runParallelFlowable
-            (DownloadUtils::downloadAndStoreImageBT,
-             "testAdaptiveBTDownloadBehaviorRxParallelFlowable()");
-    }
-
-    /**
-     * Run all the Java parallel streams tests.
-     */
-    private static void runStreamsTests() {
-        // Runs the tests using the using the Java fork-join
-        // framework's default behavior, which does not add any new
-        // worker threads to the pool when blocking on I/O occurs.
-        StreamsTests.runParallelStreams
-            (DownloadUtils::downloadAndStoreImage,
-             "testDefaultDownloadBehavior()",
-             Options.instance().loggingEnabled());
-
-        // Run the tests using the using the Java fork-join
-        // framework's {@link ManagedBlocker} mechanism, which adds
-        // new worker threads to the pool adaptively when blocking on
-        // I/O occurs.
-        StreamsTests.runParallelStreams
-            (DownloadUtils::downloadAndStoreImageMB,
-             "testAdaptiveMBDownloadBehavior()",
-             Options.instance().loggingEnabled());
-
-        // Run the tests using the using the {@link BlockingTask}
-        // wrapper for the Java fork-join framework's {@link
-        // ManagedBlocker} mechanism, which adds new worker threads to
-        // the pool adaptively when blocking on I/O occurs.
-        StreamsTests.runParallelStreams
-            (DownloadUtils::downloadAndStoreImageBT,
-             "testAdaptiveBTDownloadBehavior()",
              Options.instance().loggingEnabled());
     }
 

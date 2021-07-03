@@ -72,9 +72,9 @@ public class BigFractionUtils {
     }
 
     /**
-     * Sort the {@code list} in parallel using quicksort and heapsort
-     * and then store the results in the {@link StringBuffer}
-     * parameter.
+     * Sort the {@link List} in parallel using quicksort and heapsort
+     * and then store and print the results in the {@link
+     * StringBuffer} parameter.
      */
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
                                               StringBuffer sb) {
@@ -119,7 +119,43 @@ public class BigFractionUtils {
             .doOnSuccess(displayList)
                 
             // Use then() to return an empty mono to synchronize with
-            // the AsyncTester framework.
+            // the AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Iterate through the contents of the {@link Map} param and then
+     * store and print the results in the {@link StringBuffer}
+     * parameter.
+     */
+    public static Mono<Void> printMap(Map<BigInteger, Collection<BigInteger>> map,
+                                      StringBuffer sb) {
+        // Display the results as mixed fractions.
+        Consumer<Map<BigInteger, Collection<BigInteger>>> displayMap = ___ -> {
+            // Iterate through each BigFraction in the map.
+            map.forEach((numerator, denominators) ->
+                        denominators
+                        .forEach(denominator -> sb
+                                 .append("\n     "
+                                         + BigFraction
+                                         .valueOf(numerator,
+                                                  denominator,
+                                                  true)
+                                         .toMixedString()
+                                         + " ")));
+            sb.append("\n");
+            display(sb.toString());
+        };
+
+        return Mono
+            // Create a Mono that emits the map.
+            .just(map)
+
+            // Use doOnSuccess() to display the map.
+            .doOnSuccess(displayMap)
+                
+            // Use then() to return an empty mono to synchronize with
+            // the AsyncTaskBarrier framework.
             .then();
     }
 

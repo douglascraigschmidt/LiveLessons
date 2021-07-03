@@ -6,8 +6,8 @@ import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
-import java.util.List;
-import java.util.Random;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -210,8 +210,6 @@ public class FluxEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications1()\n");
 
-        sb.append("     Printing sorted results:");
-
         // Process the function in a flux stream.
         return Flux
             // Generate a stream of random, large, and unreduced big
@@ -279,6 +277,47 @@ public class FluxEx {
             // Return a Mono<Void> to synchronize with the
             // AsyncTaskBarrier framework.
             .then();
+    }
+
+    /**
+     * Test an asynchronous Flux stream consisting of generate(),
+     * take(), flatMap(), collectMap(), and a pool of threads to perform
+     * BigFraction reductions and multiplications.
+     */
+    public static Mono<Void> testFractionMultiplications3() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications3()\n");
+
+        // Process the function in a flux stream.
+        return Flux
+            // Generate a stream of random, large, and unreduced big
+            // fractions.
+            .generate((SynchronousSink<BigFraction> sink) -> sink
+                      // Emit a random big fraction every time a
+                      // request is made.
+                      .next(BigFractionUtils.makeBigFraction(sRANDOM,
+                                                             false)))
+
+            // Stop after generating sMAX_FRACTIONS big fractions.
+            .take(sMAX_FRACTIONS)
+
+            // Reduce and multiply these big fractions asynchronously
+            // using the flatMap() concurrency idiom.
+            .flatMap(unreducedFraction ->
+                     reduceAndMultiplyFraction(unreducedFraction,
+                                               Schedulers.parallel(),
+                                               sb))
+
+            // Collect the results into a
+            // Mono<Map<BigInteger, Collection<BigInteger>>>.
+            .collectMultimap(BigFraction::getNumerator,
+                             BigFraction::getDenominator,
+                             HashMap::new)
+
+            // Process the results of the collected multimap and return a
+            // mono that's used to synchronize with the
+            // AsyncTaskBarrier framework.
+            .flatMap(map -> BigFractionUtils.printMap(map, sb));
     }
 
     /**
