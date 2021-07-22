@@ -82,11 +82,13 @@ public class Options {
 
     /**
      * Keeps track of the OverflowStrategy.
-     * 'D' - DROP
-     * 'B' - BUFFER
-     * 'E' - ERROR
-     * 'I' - IGNORE
-     * 'L' - LATEST
+     * 'D' - DROP (Drop the incoming signal if the downstream is not ready to receive it)
+     * 'B' - BUFFER (Buffer all signals if the downstream can't keep up)
+     * 'E' - ERROR (Signal an IllegalStateException when the downstream can't keep up)
+     * 'I' - IGNORE (Completely ignore downstream backpressure requests)
+     * 'L' - LATEST (Downstream will get only the latest signals from upstream)
+     *
+     *
      */
     private char mOverflowStrategy = 'I';
 

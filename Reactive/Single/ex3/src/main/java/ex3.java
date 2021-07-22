@@ -20,7 +20,7 @@ public class ex3 {
         AsyncTaskBarrier.register(SingleEx::testFractionCombine1);
 
         // Test asynchronous BigFraction multiplication and addition
-        // using zip().
+        // using zipArray().
         AsyncTaskBarrier.register(SingleEx::testFractionCombine2);
 
         long testCount = AsyncTaskBarrier

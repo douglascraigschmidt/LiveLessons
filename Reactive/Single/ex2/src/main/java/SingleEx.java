@@ -72,13 +72,12 @@ public class SingleEx {
             .map(BigFraction::toMixedString)
 
             // Use doOnSuccess() to print the result after it's been
-
             // successfully converted to a mixed fraction.  If
             // something goes wrong doOnSuccess() will be skipped.
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
@@ -191,7 +190,7 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
@@ -218,7 +217,7 @@ public class SingleEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-                         Single<? extends BigFraction>> errorHandler = t -> {
+                 Single<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -249,7 +248,7 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
                          
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 }

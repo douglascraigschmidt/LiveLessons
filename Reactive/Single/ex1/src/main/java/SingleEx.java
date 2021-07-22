@@ -65,14 +65,14 @@ public class SingleEx {
                 })
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
     /**
      * Test synchronous BigFraction reduction using a Single and a
-     * pipeline of operations that run on the calling thread.
-     * Combines Single with Java functional programming features.
+     * pipeline of operations that run on the calling thread using
+     * slightly different operators and helper methods.
      */
     public static Completable testFractionReductionSync2() {
         StringBuilder sb =
@@ -101,7 +101,7 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 }

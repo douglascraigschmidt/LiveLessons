@@ -23,7 +23,6 @@ import static utils.BigFractionUtils.sBigReducedFraction;
  * zipArray(), zipWith(), doOnSuccess(), ignoreElement(), and
  * Schedulers.computation().
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class SingleEx {
     /**
      * A random number generator.
@@ -55,7 +54,7 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
@@ -91,13 +90,13 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 
     /**
      * Test asynchronous BigFraction multiplication and addition using
-     * zip().
+     * zipArray().
      */
     public static Completable testFractionCombine2()  {
         StringBuffer sb =
@@ -143,7 +142,7 @@ public class SingleEx {
             .doOnSuccess(bf -> displayMixedBigFraction(bf, sb))
 
             // Return a Completable to synchronize with the
-            // AsyncTester framework.
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 

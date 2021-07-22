@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile 'io.projectreactor:reactor-core:3.3.5.RELEASE'
+    implementation 'io.projectreactor:reactor-core:3.4.6'
 }

@@ -7,7 +7,6 @@ import utils.AsyncTaskBarrier;
  * blockOptional(), ignoreElement(), and the Scheduler.single()
  * thread "pool".
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {
     /**
      * Main entry point into the test program.

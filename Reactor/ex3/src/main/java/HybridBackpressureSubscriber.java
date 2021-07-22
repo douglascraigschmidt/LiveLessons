@@ -3,6 +3,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import utils.ExceptionUtils;
 import utils.Options;
+import utils.PrimeUtils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A Flux subscriber that implements hybrid push/pull backpressure.
  */
 public class HybridBackpressureSubscriber
-       implements Subscriber<Result>,
+       implements Subscriber<PrimeUtils.Result>,
                   Disposable {
     /**
      * Debugging tag used by the logger.
@@ -100,7 +101,7 @@ public class HybridBackpressureSubscriber
      * results of prime # checking and updates the next request size.
      */
     @Override
-    public void onNext(Result result) {
+    public void onNext(PrimeUtils.Result result) {
         // Print the results of prime number checking
         if (result.mSmallestFactor != 0) {
             /*

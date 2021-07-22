@@ -1,6 +1,8 @@
 package utils;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -59,14 +61,34 @@ public class RunTimer {
      * Call @a runnable.run() and time how long it takes to run.
      */
     public static void timeRun(Runnable runnable,
-                                String testName) {
+                               String testName) {
         startTiming();
         runnable.run();
         stopTiming();
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
-                mExecutionTime);
+                        mExecutionTime);
+    }
+
+    /**
+     * Time {@code test} with {@code testName} using the given {@code function}.
+     *
+     * @param test The test to run
+     * @param function The function passed to the test.
+     * @param testName The name of the test.
+     */
+    public static void timeTest(BiFunction<Function<Integer, Integer>,
+                                           String,
+                                           Function<Integer, Integer>> test,
+                                Function<Integer, Integer> function,
+                                String testName) {
+        RunTimer
+            // Time how long this test takes to run.
+            .timeRun(() ->
+                     // Run the test using the given function.
+                     test.apply(function, testName),
+                     testName);
     }
 
     /**

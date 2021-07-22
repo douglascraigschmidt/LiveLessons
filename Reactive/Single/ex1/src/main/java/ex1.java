@@ -16,9 +16,8 @@ public class ex1 {
         AsyncTaskBarrier.register(SingleEx::testFractionReductionSync1);
 
         // Test synchronous BigFraction reduction using a Single and a
-        // pipeline of operations that run on the calling thread.
-        // Combines the Single with Java functional programming
-        // features.
+        // pipeline of operations that run on the calling thread using
+        // different operators and slightly different helper methods.
         AsyncTaskBarrier.register(SingleEx::testFractionReductionSync2);
 
         long testCount = AsyncTaskBarrier

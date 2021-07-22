@@ -1,17 +1,18 @@
 package utils;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 /**
@@ -200,5 +201,34 @@ public class ReactorUtils {
             return Flux::log;
         else
             return flux -> flux;
+    }
+
+    /**
+     * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
+     * @param map The map to sort
+     * @param comparator The comparator to compare map entries
+     * @return The sorted {@link Map}
+     */
+    public static Map<Integer, Integer> sortMap
+        (Map<Integer, Integer> map,
+         Comparator<Map.Entry<Integer, Integer>> comparator) {
+        // Create a map that's sorted by the value in map.
+        return Flux
+            // Convert EntrySet of the map into a flux stream.
+            .fromIterable(map.entrySet())
+
+            // Sort the elements in the stream using the comparator.
+            .sort(comparator)
+
+            // Trigger intermediate processing and collect key/value
+            // pairs in the stream into a LinkedHashMap, which
+            // preserves the sorted order.
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                                      Map.Entry::getValue,
+                                      (e1, e2) -> e2,
+                                      LinkedHashMap::new))
+
+            // Block until processing is done.
+            .block();
     }
 }
