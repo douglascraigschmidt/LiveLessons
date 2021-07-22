@@ -9,9 +9,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A Flux subscriber that implements hybrid push/pull backpressure.
+ * A Flux subscriber that implements backpressure.
  */
-public class HybridBackpressureSubscriber
+public class BackpressureSubscriber
        implements Subscriber<PrimeUtils.Result>,
                   Disposable {
     /**
@@ -53,7 +53,7 @@ public class HybridBackpressureSubscriber
     /**
      * Constructor initializes the field.
      */
-    HybridBackpressureSubscriber(AtomicInteger pendingItemCount) {
+    BackpressureSubscriber(AtomicInteger pendingItemCount) {
         // Initially false.
         mIsDisposed = false;
 
@@ -87,13 +87,12 @@ public class HybridBackpressureSubscriber
      * @return The next request size for the publisher.
      */
     int nextRequestSize() {
-        if (!Options.instance().backPressureEnabled())
-            // Disable backpressure.
-            return Integer.MAX_VALUE;
-        else {
+        if (Options.instance().backPressureEnabled())
             // Request only this many items.
             return mREQUEST_SIZE;
-        }
+        else
+            // Disable backpressure.
+            return Integer.MAX_VALUE;
     }
 
     /**

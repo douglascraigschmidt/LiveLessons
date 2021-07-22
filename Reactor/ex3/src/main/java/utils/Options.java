@@ -87,10 +87,8 @@ public class Options {
      * 'E' - ERROR (Signal an IllegalStateException when the downstream can't keep up)
      * 'I' - IGNORE (Completely ignore downstream backpressure requests)
      * 'L' - LATEST (Downstream will get only the latest signals from upstream)
-     *
-     *
      */
-    private char mOverflowStrategy = 'I';
+    private char mOverflowStrategy = 'B';
 
     /**
      * Method to return the one and only singleton uniqueInstance.
