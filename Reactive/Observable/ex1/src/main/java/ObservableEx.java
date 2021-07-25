@@ -12,8 +12,8 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 /**
  * This class shows how to apply RxJava features synchronously to
  * perform basic Observable operations, including just(),
- * fromCallable(), fromArray(), doOnNext(), map(), mergeWith(),
- * repeat(), and blockingSubscribe().
+ * fromCallable(), fromArray(), fromCallable(), doOnNext(), map(),
+ * mergeWith(), repeat(), and blockingSubscribe().
  */
 @SuppressWarnings("ALL")
 public class ObservableEx {
@@ -78,7 +78,7 @@ public class ObservableEx {
                                    // Display results when processing is done.
                                    BigFractionUtils.display(sb.toString()));
 
-        // Return a completable to indicate to the AsyncTaskBarrier
+        // Return a Completable to indicate to the AsyncTaskBarrier
         // that all the processing is done.
         return BigFractionUtils.sVoidC;
     }
@@ -140,8 +140,8 @@ public class ObservableEx {
                                    // Display results when processing is done.
                                    BigFractionUtils.display(sb.toString()));
 
-        // Return empty completable to indicate to the
-        // AsyncTaskBarrier that all the processing is done.
+        // Return a Completable to indicate to the AsyncTaskBarrier
+        // that all the processing is done.
         return BigFractionUtils.sVoidC;
     }
 
@@ -164,12 +164,12 @@ public class ObservableEx {
             BigFraction.valueOf(100, 1)
         };
 
-        Observable<BigFraction> f1 = Observable
+        Observable<BigFraction> o1 = Observable
             // Use fromArray() to generate a stream of big
             // fractions.
             .fromArray(bigFractionArray);
 
-        Observable<BigFraction> f2 = Observable
+        Observable<BigFraction> o2 = Observable
             // Use from() and Mono.fromCallable() to "lazily" generate
             // a stream of random big fractions.
             .fromCallable(() ->
@@ -179,10 +179,10 @@ public class ObservableEx {
             // Generate random big fractions 4 times.
             .repeat(4);
 
-        f1
-            // Flatten Flux f1 and f2 into a single Flux sequence,
+        o1
+            // Flatten Observable o1 and o2 into a single Flux sequence,
             // without any transformations.
-            .mergeWith(f2)
+            .mergeWith(o2)
 
             // Log the contents of the computation.
             .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
@@ -209,7 +209,7 @@ public class ObservableEx {
                                // Display results when processing is done.
                                BigFractionUtils.display(sb.toString()));
 
-        // Return empty mono to indicate to the AsyncTaskBarrier that
+        // Return a Completable to indicate to the AsyncTaskBarrier that
         // all the processing is done.
         return BigFractionUtils.sVoidC;
     }
