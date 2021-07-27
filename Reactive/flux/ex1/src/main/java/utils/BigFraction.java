@@ -33,6 +33,8 @@ public final class BigFraction
     public final static BigFraction ONE_HALF = new BigFraction(BigInteger.ONE, BIGINT_TWO, Reduced.YES);
     /** The value 1/10. */
     public final static BigFraction ONE_TENTH = new BigFraction(BigInteger.ONE, BigInteger.TEN, Reduced.YES);
+    /** The value 2/1. */
+    public final static BigFraction TWO = new BigFraction(BIGINT_TWO, BigInteger.ONE, Reduced.YES);
     /** The value 10/1. */
     public final static BigFraction TEN = new BigFraction(BigInteger.TEN, BigInteger.ONE, Reduced.YES);
   

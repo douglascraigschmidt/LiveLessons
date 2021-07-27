@@ -16,7 +16,7 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * synchronously to perform basic Flux operations, including just(),
  * fromIterable(), fromArray(), from(), doOnNext(), map(),
- * mergeWith(), repeat(), and subscribe().
+ * mapNotNull(), mergeWith(), repeat(), and subscribe().
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -140,7 +140,7 @@ public class FluxEx {
     }
 
     /**
-     * A test of BigFraction multiplication using an synchronous Flux
+     * A test of BigFraction multiplication using a synchronous Flux
      * stream that merges results together.
      */
     public static Mono<Void> testFractionMultiplicationSync3() {
@@ -176,7 +176,7 @@ public class FluxEx {
         f1
             // Flatten Flux f1 and f2 into a single Flux sequence,
             // without any transformations.
-            .487(f2)
+            .mergeWith(f2)
 
             // Log the contents of the computation.
             .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
@@ -204,6 +204,48 @@ public class FluxEx {
                        BigFractionUtils.display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTaskBarrier
+        // that all the processing is done.
+        return sVoidM;
+    }
+
+    /**
+     * A test of the Flux.mapNotNull() operator using a synchronous
+     * Flux stream.
+     */
+    public static Mono<Void> testMapNotNull() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testMapNotNull()\n");
+
+        Flux
+            // Use just() to generate a stream of big fractions.
+            .just(BigFraction.valueOf(100, 3),
+                  BigFraction.valueOf(100, 10),
+                  BigFraction.valueOf(100, 2),
+                  BigFraction.valueOf(100, 1))
+
+            // Do not emit null values.
+            .mapNotNull(bf -> bf
+                        // Return null if bf is divisible by 10.
+                        .equals(BigFraction.TEN) ? null : bf)
+
+            // Use subscribe() to initiate all the processing and
+            // handle the results synchronously.
+            .subscribe(// Handle next event.
+                       fraction -> 
+                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                       // Handle the error.
+                       t -> {
+                           // Append the error message to the
+                           // StringBuilder.
+                           sb.append(t.getMessage());
+
+                           // Display results when processing is done.
+                           BigFractionUtils.display(sb.toString());
+                       },
+                       () -> 
+                       // Display results when processing is done.
+                       BigFractionUtils.display(sb.toString()));
+
         // that all the processing is done.
         return sVoidM;
     }
