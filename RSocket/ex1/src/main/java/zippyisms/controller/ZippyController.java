@@ -34,34 +34,34 @@ import java.util.Set;
  * directions between client and server.
  *
  * Spring enables the integration of RSockets into a controller via
- * the @Controller annotation, which enables the autodetection of
- * implementation classes via classpath scanning, and
+ * the {@code @Controller} annotation, which enables the autodetection
+ * of implementation classes via classpath scanning, and
  * the @MessageMapping annotation, which maps a message onto a
  * message-handling method by matching the declared patterns to a
- * destination extracted from the message.  
+ * destination extracted from the message.
  *
- * Combining the @Controller annotation with the @MessageMapping
- * annotation enables this class to declare service endpoints, which
- * in this case map to RSocket endpoints that each take one {@link
- * Mono} or {@link Flux} parameter and can return a {@link Mono} or
- * {@link Flux} result.  The use of {@link Mono} and {@link Flux}
- * types enables client and server code to run reactively across a
- * communication channel.
+ * Combining the {@code @Controller} annotation with the
+ * {@code @MessageMapping} annotation enables this class to declare
+ * service endpoints, which in this case map to RSocket endpoints that
+ * each take one {@link Mono} or {@link Flux} parameter and can return
+ * a {@link Mono} or {@link Flux} result.  These Project Reactor
+ * reactive types enable client and server code to run reactively
+ * across a communication channel.
  */
 @Controller
 public class ZippyController {
     /**
-     * The ZippyService that's associated with this controller via
-     * Spring's dependency injection facilities, where an object
-     * receives other objects that it depends on (in this case, the
-     * ZippyService).
+     * The {@link ZippyService} that's associated with this {@link
+     * ZippyController} via Spring's dependency injection facilities,
+     * where an object receives other objects that it depends on (in
+     * this case, the {@link ZippyService}).
      */
     @Autowired
     private ZippyService mZippyService;
 
     /**
-     * Set of Subscriptions that are used to determine whether a client
-     * has subscribed already.
+     * A Java {@link Set} of {@link Subscription} objects that are
+     * used to determine whether a client has subscribed already.
      */
     private final Set<Subscription> mSubscriptions = new HashSet<>();
 
@@ -72,7 +72,7 @@ public class ZippyController {
      *
      * @param request A {@link Mono} that emits a {@link
      *                Subscription}
-     * @return A {@link Mono} that confirms the subscription request.
+     * @return A {@link Mono} that confirms the subscription request
      */
     @MessageMapping(Constants.SUBSCRIBE)
     Mono<Subscription> subscribe(Mono<Subscription> request) {
@@ -150,8 +150,8 @@ public class ZippyController {
      *
      * @param request A {@link Mono} that emits a {@link
      *                Subscription}
-     * @return A {@link Mono} that indicates if the cancel request
-     * succeeded or failed.
+     * @return A {@link Mono} that emits a {@link Subscription}
+     * indicating if the cancel request succeeded or failed
      */
     @MessageMapping(Constants.CANCEL_CONFIRMED)
     Mono<Subscription> cancelSubscriptionConfirmed(Mono<Subscription> request) {
@@ -250,7 +250,8 @@ public class ZippyController {
     }
 
     /**
-     * @return The total number of Zippy th' Pinhead quotes.
+     * @return A {@link Mono} that emits the total number of Zippy th'
+     * Pinhead quotes
      */
     @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
     Mono<Integer> getNumberOfQuotes() {

@@ -15,17 +15,18 @@ import java.util.List;
 @Service
 public class ZippyService {
     /**
-     * An in-memory list of all quotes from Zippy th' Pinhead.  The
-     * @Autowired annotation marks this field to be initialized via
-     * Spring's dependency injection facilities, where an object
-     * receives other objects that it depends on (in this case, the
-     * List of ZippyQuote objects from the ZippyQuotes class).
+     * An in-memory {@link List} of all quotes from Zippy th' Pinhead.
+     * The {@code @Autowired} annotation marks this field to be
+     * initialized via Spring's dependency injection facilities, where
+     * an object receives other objects that it depends on (in this
+     * case, the List of ZippyQuote objects from the ZippyQuotes
+     * class).
      */
     @Autowired
     public List<ZippyQuote> mQuotes;
 
     /**
-     * @return The complete List of quotes from Zippy th' Pinhead
+     * @return The complete {@link List} of quotes from Zippy th' Pinhead
      */
     public List<ZippyQuote> getQuotes(){
         return mQuotes;
@@ -36,7 +37,7 @@ public class ZippyService {
      * the given {@code quoteId}.
      *
      * @param quoteId The requested {@code quoteId}
-     * @return The quote associated iwth the requested {@code quoteId}
+     * @return The quote associated with the requested {@code quoteId}
      * @throws IndexOutOfBoundsException if {@code quoteId} is out of
      *         range (index < 0 || index >= size())
      */

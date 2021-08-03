@@ -223,9 +223,12 @@ public class FluxEx {
                   BigFraction.valueOf(100, 2),
                   BigFraction.valueOf(100, 1))
 
+            // Log the contents of the computation.
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
+
             // Do not emit null values.
             .mapNotNull(bf -> bf
-                        // Return null if bf is divisible by 10.
+                        // Return null if bf == 10.
                         .equals(BigFraction.TEN) ? null : bf)
 
             // Use subscribe() to initiate all the processing and

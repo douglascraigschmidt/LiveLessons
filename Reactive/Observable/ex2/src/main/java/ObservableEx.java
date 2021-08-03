@@ -37,8 +37,8 @@ public class ObservableEx {
     /**
      * Starting point of the randomly-generated numbers.
      */
-
-    private static final int sLOWER_BOUND = sMAX_VALUE - sMAX_ITERATIONS;
+    private static final int sLOWER_BOUND =
+        sMAX_VALUE - sMAX_ITERATIONS;
 
     /**
      * Random number generator.
@@ -67,9 +67,9 @@ public class ObservableEx {
     /**
      * Generate a random BigInteger.
      */
-    private static Function<Long, BigInteger> sGenerateRandomBigInteger = __ ->
-        BigInteger.valueOf(sLOWER_BOUND +
-                           sRANDOM.nextInt(sMAX_ITERATIONS));
+    private static Function<Long, BigInteger> sGenerateRandomBigInteger = 
+        __ -> BigInteger
+        .valueOf(sLOWER_BOUND + sRANDOM.nextInt(sMAX_ITERATIONS));
 
     /**
      * Use an asynchronous time-driven Observable stream that

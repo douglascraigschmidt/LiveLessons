@@ -13,12 +13,13 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 
 /**
- * This class contains @Bean methods that initialize the
- * RSocketRequester used by the RSocket clients.  The
- * @Component annotation allows Spring to automatically detect custom
- * beans, i.e., without having to write any explicit code, Spring will
- * scan the application for classes annotated with @Component,
- * instantiate them, and inject any specified dependencies into them.
+ * This class contains {@code @Bean} methods that initialize the
+ * {@link RSocketRequester} used by the RSocket clients.  The
+ * {@code @Component} annotation allows Spring to automatically detect
+ * custom beans, i.e., without having to write any explicit code,
+ * Spring will scan the application for classes annotated with
+ * {@code @Component}, instantiate them, and inject any specified
+ * dependencies into them.
  */
 @Component
 public class RSocketConfig {

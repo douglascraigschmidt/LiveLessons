@@ -7,7 +7,6 @@ import utils.AsyncTaskBarrier;
  * take(), map(), subscribe(), range(), subscribeOn(), observeOn(),
  * and various thread pools.
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex2 {
     /**
      * Main entry point into the test program.

@@ -16,12 +16,12 @@ import static utils.BigFractionUtils.*;
 /**
  * This class shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
- * Observable operations, including fromIterable(), map(), generate(),
+ * Observable operations, including fromArray(), map(), generate(),
  * take(), flatMap(), flatMapCompletable(), fromCallable(), filter(),
  * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
- * Schedulers.computation().  It also shows advanced RxJava Single and
- * Maybe operations, such as ambArray(), subscribeOn(), and
- * doOnSuccess().
+ * Schedulers.computation().  It also shows RxJava Single and Maybe
+ * operations, such as fromCallable(), ambArray(), subscribeOn(),
+ * ignoreElement(), and doOnSuccess().
  */
 public class ObservableEx {
     /**
@@ -45,50 +45,45 @@ public class ObservableEx {
                       + t.getMessage()
                       + "\n");
 
-            // Convert error to 0.
-            return BigFraction.ZERO;
+            if (t instanceof ArithmeticException)
+                // Convert ArithmeticException to 0.
+                return BigFraction.ZERO;
+            else
+                throw t;
         };
 
-        // Create a list of denominators, including 0 that will
+        // Create an array of denominators, including 0 that will
         // trigger an ArithmeticException.
-        List<Integer> denominators = List.of(3, 4, 2, 0, 1);
+        Integer[] denominators = new Integer[]{3, 4, 2, 0, 1};
 
         return Observable
-            // Use an Observable to generate a stream from the
-            // denominators list.
-            .fromIterable(denominators)
+            // Generate a stream from the denominators array.
+            .fromArray(denominators)
 
-            // Iterate thru the elements using RxJava's flatMap()
-            // concurrency idiom to reduce and multiply big fractions
-            // asynchronously in the computation thread pool.
+            // Use RxJava's flatMap() concurrency idiom to reduce and
+            // multiply big fractions in the computation thread pool.
             .flatMap(denominator -> Observable
-                    // Create/process each denominator asynchronously
-                    // via an "inner publisher" that runs in a
-                    // background thread from the given scheduler.
-                    .fromCallable(() ->
-                                      // Emit a random BigFraction, but
-                                      // will throw ArithmeticException
-                                      // if denominator is 0.
-                                      BigFraction.valueOf(Math.abs(sRANDOM.nextInt()),
-                                                          denominator))
+                     // Run asynchronously via an "inner publisher" in
+                     // a background thread from the given scheduler.
+                     .fromCallable(() -> BigFraction
+                                   // Emit a random BigFraction that
+                                   // throws ArithmeticException if
+                                   // denominator is 0.
+                                   .valueOf(Math.abs(sRANDOM.nextInt()),
+                                            denominator))
 
-                    // Perform processing asynchronously in a
-                    // background thread from the computation
-                    // scheduler.
-                    .subscribeOn(Schedulers.computation())
+                     // Run computations in a background thread from
+                     // the computation scheduler.
+                     .subscribeOn(Schedulers.computation())
 
-                    // Convert ArithmeticException to 0.
-                    .onErrorReturn(errorHandler)
+                     // Convert ArithmeticException to 0.
+                     .onErrorReturn(errorHandler)
 
-                    // Log the BigFractions.
-                    .doOnNext(bf ->
-                                     logBigFraction(bf,
-                                                    sBigReducedFraction,
-                                                    sb))
+                     // Log the BigFractions.
+                     .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
 
-                    // Perform a multiplication.
-                    .map(bf ->
-                             bf.multiply(sBigReducedFraction)))
+                     // Perform a multiplication.
+                     .map(bf -> bf.multiply(sBigReducedFraction)))
 
             // Remove any big fractions that are <= 0.
             .filter(fraction -> fraction.compareTo(0) > 0)
@@ -120,21 +115,19 @@ public class ObservableEx {
         return Observable
             // Generate a stream of random unreduced big fractions.
             .generate((Emitter<BigFraction> emit) -> emit
-                // Emit a random unreduced big fraction.
-                .onNext(BigFractionUtils.makeBigFraction(sRANDOM, false)))
+                      // Emit a random unreduced big fraction.
+                      .onNext(BigFractionUtils.makeBigFraction(sRANDOM, false)))
 
-            // Limit the number of generated random unreduced big
-            // fractions.
+            // Limit the # of generated random unreduced big fractions.
             .take(sMAX_FRACTIONS)
 
-            // Iterate thru the elements using RxJava's flatMap()
-            // concurrency idiom to reduce and multiply each fraction
-            // asynchronously in the computation thread pool.
+            // Use RxJava's flatMap() concurrency idiom to reduce and multiply
+            // each fraction asynchronously in the computation thread pool.
             .flatMap(unreducedFraction ->
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.computation()))
 
-            // Collect the results into an ArrayList.
+            // Collect the results into a List.
             .collect(toList())
 
             // Process the ArrayList and return a Completable that
@@ -154,26 +147,12 @@ public class ObservableEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications2()\n");
 
-        // Create a list of BigFraction objects.
-        List<BigFraction> bigFractions = List.of(BigFraction.valueOf(1000, 30),
-                                                 BigFraction.valueOf(1000, 40),
-                                                 BigFraction.valueOf(1000, 20),
-                                                 BigFraction.valueOf(1000, 10));
-
-        // Create a Function that multiplies big fractions.
-        Function<BigFraction, BigFraction> multiplyBigFractions = bf -> {
-            // Multiply bf by a constant.
-            BigFraction result = bf.multiply(sBigReducedFraction);
-
-            sb.append("     "
-                      + bf.toMixedString()
-                      + " x "
-                      + sBigReducedFraction.toMixedString()
-                      + " = "
-                      + result.toMixedString()
-                      + "\n");
-            return result;
-        };
+        // Create a list of reduced BigFraction objects.
+        List<BigFraction> bigFractions = List
+            .of(BigFraction.valueOf(1000, 30),
+                BigFraction.valueOf(1000, 40),
+                BigFraction.valueOf(1000, 20),
+                BigFraction.valueOf(1000, 10));
 
         // Display the results.
         Consumer<? super BigFraction> displayResults = result -> {
@@ -184,26 +163,15 @@ public class ObservableEx {
         };
 
         return Observable
-            // Emit a stream of big fractions.
+            // Emit a stream of reduced big fractions.
             .fromIterable(bigFractions)
 
-            // Iterate thru the elements using RxJava's flatMap()
-            // concurrency idiom to multiply these big fractions
-            // asynchronously in a thread pool.
-            .flatMap(bf -> Single
-                     // Create/process each BigFraction asynchronously
-                     // via an "inner publisher".
-                     .fromCallable(() -> bf)
-                     
-                     // Perform the processing asynchronously in a
-                     // background thread from the given scheduler.
-                     .subscribeOn(Schedulers.computation())
+            // Use RxJava's flatMap() concurrency idiom to multiply
+            // these BigFractions asynchronously in a thread pool.
+            .flatMap(bf -> multiplyFraction(bf, Schedulers.computation()))
 
-                     // Perform multiplication in a background thread.
-                     .map(multiplyBigFractions)
-
-                     // Convert to Observable to merge with flatMap().
-                     .toObservable())
+            // Log the BigFractions.
+            .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
 
             // Reduce the results into one Maybe<BigFraction>.
             .reduce(BigFraction::add)
@@ -217,10 +185,9 @@ public class ObservableEx {
     }
 
     /**
-     * This factory method returns an Observable that's signaled after
-     * the {@code unreducedFraction} is reduced/multiplied
-     * asynchronously in background threads from the given {@code
-     * scheduler}.
+     * @return An Observable that's signaled after the {@code unreducedFraction}
+     * is reduced/multiplied asynchronously in background threads from the
+     * given {@code scheduler}.
      */
     private static Observable<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
@@ -237,14 +204,30 @@ public class ObservableEx {
 
             // Return an Observable to a multiplied big fraction using
             // the RxJava flatMap() concurrency idiom.
-            .flatMap(reducedFraction -> Observable
-                     // Multiply the big fraction, which runs in a
-                     // background thread.
-                     .fromCallable(() -> reducedFraction
-                                   .multiply(sBigReducedFraction))
-                                   
-                     // Perform the processing asynchronously in a
-                     // background thread from the given scheduler.
-                     .subscribeOn(scheduler));
+            .flatMap(reducedFraction ->
+                     multiplyFraction(reducedFraction, scheduler));
+    }
+
+    /**
+     * @return An Observable that's signaled after the {@code bigFraction}
+     * is multiplied asynchronously in a background thread from the given
+     * {@code scheduler}.
+     */
+    private static Observable<BigFraction> multiplyFraction
+        (BigFraction bigFraction,
+         Scheduler scheduler) {
+        return Single
+            // Create/process each BigFraction asynchronously.
+            .fromCallable(() -> bigFraction)
+                     
+            // Perform the processing asynchronously in a background
+            // thread from the given scheduler.
+            .subscribeOn(Schedulers.computation())
+
+            // Perform multiplication in a background thread.
+            .map(bf -> bf.multiply(sBigReducedFraction))
+            
+            // Convert to Observable.
+            .toObservable();
     }
 }

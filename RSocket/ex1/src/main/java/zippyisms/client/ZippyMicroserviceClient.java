@@ -16,12 +16,13 @@ import java.util.UUID;
 /**
  * This class provides a client that send messages to the endpoints
  * provided by the ZippyApplication microservice to demonstrate each
- * of the four interaction models supported by RSocket.  The
+ * of the four interaction models supported by RSocket.
  *
- * @Component annotation allows Spring to automatically detect custom
- * beans, i.e., without having to write any explicit code, Spring will
- * scan the application for classes annotated with @Component,
- * instantiate them, and inject any specified dependencies into them.
+ * The {@code @Component} annotation allows Spring to automatically
+ * detect custom beans, i.e., without having to write any explicit
+ * code, Spring will scan the application for classes annotated with
+ * {@code @Component}, instantiate them, and inject any specified
+ * dependencies into them.
  */
 @Component
 public class ZippyMicroserviceClient {
@@ -29,10 +30,10 @@ public class ZippyMicroserviceClient {
      * This object connects to the Spring controller running the
      * RSocket server and its associated endpoints.  The
      *
-     * @Autowired annotation marks this field to be initialized via
-     * Spring's dependency injection facilities, where an object
-     * receives other objects that it depends on (in this case, by
-     * creating a connected RSocketRequester).
+     * The {@code @Autowired} annotation marks this field to be
+     * initialized via Spring's dependency injection facilities, where
+     * an object receives other objects that it depends on (in this
+     * case, by creating a connected {@link RSocketRequester}).
      */
     @Autowired
     private Mono<RSocketRequester> mZippyQuoteRequester;
@@ -42,7 +43,7 @@ public class ZippyMicroserviceClient {
      * used to generate random Zippy th' Pinhead quotes.
      *
      * @param numberOfIndices The number of random indices to generate
-     * @return An array of random indices.
+     * @return A {@link Mono} that emits an array of random indices
      */
     public Mono<Integer[]> makeRandomIndices(int numberOfIndices) {
         // Return an array of random indicates.
@@ -79,7 +80,7 @@ public class ZippyMicroserviceClient {
      *
      * @param randomIndices A {@link Mono} that emits an array of
      *        random indices used to request the associated Zippyism
-     * @return A Flux that emits random Zippyisms
+     * @return A {@link Flux} that emits random Zippyisms
      */
     public Flux<ZippyQuote> getRandomQuotes(Mono<Integer[]> randomIndices) {
         // Return a Flux that emits random Zippyisms.
@@ -110,7 +111,7 @@ public class ZippyMicroserviceClient {
      * Subscription}.
      *
      * @param uuid A unique ID to identify the subscription
-     * @return A confirmed {@link Subscription}
+     * @return A {@link Mono} that emits a confirmed {@link Subscription}
      */
     public Mono<Subscription> subscribe(UUID uuid) {
         return mZippyQuoteRequester
@@ -136,10 +137,10 @@ public class ZippyMicroserviceClient {
      *
      * @param subscriptionRequest A {@link Subscription} object that
      *                            should be valid
-     * @return A {@link Subscription} object with the status of the
-     * cancellation, which is either CANCELLED if there was a
-     * matching subscription or ERROR if there was no matching
-     * subscription.
+     * @return A {@link Mono} that emits the {@link Subscription}
+     * object with the status of the cancellation, which is either
+     * CANCELLED if there was a matching subscription or ERROR if
+     * there was no matching subscription.
      */
     public Mono<Subscription> cancelConfirmed(Mono<Subscription> subscriptionRequest) {
         return mZippyQuoteRequester
@@ -163,10 +164,11 @@ public class ZippyMicroserviceClient {
     /**
      * Perform a confirmed cancellation on a {@link Subscription}.
      *
-     * @param uuid A unique ID that should identify a previous subscription.
-     * @return A {@link Subscription} object with the status of the cancellation,
-     * which is either CANCELLED if there was a matching subscription
-     * or ERROR if there was no matching subscription.
+     * @param uuid A unique ID that should identify a previous subscription
+     * @return A {@link Mono} that emits a {@link Subscription} object
+     * with the status of the cancellation, which is either CANCELLED
+     * if there was a matching subscription or ERROR if there was no
+     * matching subscription
      */
     public Mono<Subscription> cancelConfirmed(UUID uuid) {
         return mZippyQuoteRequester
@@ -191,6 +193,7 @@ public class ZippyMicroserviceClient {
      *
      * @param subscriptionRequest A {@link Subscription} object that
      *        should be valid
+     * @return A {@link Mono} that emits a {@link Void} object
      */
     public Mono<Void> cancelUnconfirmed(Mono<Subscription> subscriptionRequest) {
         // Perform an unconfirmed cancellation the subscription
@@ -220,9 +223,8 @@ public class ZippyMicroserviceClient {
      *
      * @param subscriptionRequest A {@link Subscription} object
      * @return A {@link Flux} that emits all Zippy th' Pinhead quotes
-     * if the {@code subscriptionRequest} is valid, otherwise
-     * it returns an {@link Flux} that emits an
-     * IllegalAccessException.
+     * if the {@code subscriptionRequest} is valid, otherwise it
+     * returns an {@link Flux} that emits an IllegalAccessException
      */
     public Flux<ZippyQuote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
         return mZippyQuoteRequester

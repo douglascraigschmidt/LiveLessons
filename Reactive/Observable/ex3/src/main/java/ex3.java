@@ -3,12 +3,12 @@ import utils.AsyncTaskBarrier;
 /**
  * This class shows how to reduce and/or multiply big fractions
  * asynchronously and concurrently using many advanced RxJava
- * Observable operations, including fromIterable(), map(), generate(),
+ * Observable operations, including fromArray(), map(), generate(),
  * take(), flatMap(), flatMapCompletable(), fromCallable(), filter(),
  * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
- * Schedulers.computation().  It also shows advanced RxJava Single and
- * Maybe operations, such as ambArray(), subscribeOn(), and
- * doOnSuccess().
+ * Schedulers.computation().  It also shows RxJava Single and Maybe
+ * operations, such as fromCallable(), ambArray(), subscribeOn(),
+ * ignoreElement(), and doOnSuccess().
  */
 public class ex3 {
     /**

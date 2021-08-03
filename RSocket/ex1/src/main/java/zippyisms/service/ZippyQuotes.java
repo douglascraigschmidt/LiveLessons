@@ -25,8 +25,8 @@ import static java.util.stream.Collectors.toList;
 @Component
 class ZippyQuotes {
     /**
-     * @return Return the file of Zippyisms as a List of ZippyQuote
-     * objects.
+     * @return Return a {@link List} of {@link ZippyQuote} objects
+     * that were stored in the file of Zippyisms
      */
     @Bean
     public List<ZippyQuote> getInput() {

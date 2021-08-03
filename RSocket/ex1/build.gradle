@@ -20,16 +20,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-rsocket'
-    implementation 'org.springframework.boot:spring-boot-starter-aop'
-    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.3'
+    implementation 'org.springframework.boot:spring-boot-starter-rsocket:2.5.3'
+    implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.3'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.3'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
     // testImplementation 'org.springframework.boot:spring-boot-test:2.4.3'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.3'
+    testImplementation 'io.projectreactor:reactor-test:3.4.8'
 }
 
 group = 'zippyisms'
