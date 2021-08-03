@@ -16,16 +16,16 @@ public class ex3 {
      */
     public static void main (String[] argv) {
         // Use an asynchronous Observable stream and a pool of threads
-        // to showcase exception handling of BigFraction objects.
-        AsyncTaskBarrier.register(ObservableEx::testFractionExceptions);
-
-        // Use an asynchronous Observable stream and a pool of threads
-        // to perform BigFraction reductions and multiplications.
+        // to perform BigFraction multiplications and additions.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications1);
 
         // Use an asynchronous Observable stream and a pool of threads
-        // to perform BigFraction multiplications and additions.
+        // to perform BigFraction reductions and multiplications.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications2);
+
+        // Use an asynchronous Observable stream and a pool of threads
+        // to showcase exception handling of BigFraction objects.
+        AsyncTaskBarrier.register(ObservableEx::testFractionExceptions);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.
