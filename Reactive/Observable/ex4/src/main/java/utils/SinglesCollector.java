@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Implements a custom collector that converts a stream of RxJava
- * Single objects into a single Single object that is triggered when
- * all the Single objects in the stream complete.
+ * {@link Single} objects into one {@link Single} object that is
+ * triggered when all {@link Single} objects in the stream complete.
  */
 public class SinglesCollector<T>
       implements Collector<Single<T>,
@@ -69,22 +69,21 @@ public class SinglesCollector<T>
      */
     @Override
     public Function<List<Single<T>>, Single<List<T>>> finisher() {
-        // This function is used to combine results from
-        // Single.zipArray().
+        // This Function combines results from Single.zipArray().
         @SuppressWarnings("unchecked")
-        io.reactivex.rxjava3.functions.Function<Object[], List<T>> combiner =
+        io.reactivex.rxjava3.functions.Function<Object[], List<T>> combiner = 
             bfArray -> Stream
-            // Create a stream of Objects.
-            .of(bfArray)
+                // Create a stream of Objects.
+                .of(bfArray)
 
-            // Convert the Objects to T.
-            .map((Object o) -> (T) o)
+                // Convert the Objects to T.
+                .map((Object o) -> (T) o)
 
-            // Collect the results together.
-            .collect(toList());
+                // Collect the results together.
+                .collect(toList());
 
-        // Return a new single that completes when all singles in the
-        // list complete.
+        // Return a new Single that completes when all Single objects
+        // in the List complete.
         return singles -> Single
             .zipArray(combiner,
                       singles.toArray(new Single[0]));

@@ -5,7 +5,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,17 +14,18 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using many advanced RxJava
- * Observable operations, including fromArray(), map(), generate(),
- * take(), flatMap(), flatMapCompletable(), fromCallable(), filter(),
- * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
- * Schedulers.computation().  It also shows RxJava Single and Maybe
- * operations, such as fromCallable(), ambArray(), subscribeOn(),
+ * asynchronously and concurrently using many RxJava Observable
+ * operations, including fromArray(), map(), generate(), take(),
+ * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
+ * subscribeOn(), onErrorReturn(), and Schedulers.computation().  It
+ * also shows RxJava Single and Maybe operations, including
+ * fromCallable(), flatMapCompletable(), ambArray(), subscribeOn(),
  * ignoreElement(), and doOnSuccess().
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ObservableEx {
     /**
-     * Create a random number generator.
+     * Create a random number generator to generate BigFractions.
      */
     private static final Random sRANDOM = new Random();
 
@@ -34,16 +34,17 @@ public class ObservableEx {
      * flatMap(), reduce(), and a pool of threads to perform
      * BigFraction reductions and multiplications.
      */
-    public static Completable testFractionMultiplications1() {
+    public static Completable testFractionMultiplications() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications1()\n");
+            new StringBuffer(">> Calling testFractionMultiplications()\n");
 
-        // Create a list of reduced BigFraction objects.
-        List<BigFraction> bigFractions = List
-            .of(BigFraction.valueOf(1000, 30),
-                BigFraction.valueOf(1000, 40),
-                BigFraction.valueOf(1000, 20),
-                BigFraction.valueOf(1000, 10));
+        // Create an array of reduced BigFraction objects.
+        BigFraction[] bigFractions = {
+            BigFraction.valueOf(1000, 30),
+            BigFraction.valueOf(1000, 40),
+            BigFraction.valueOf(1000, 20),
+            BigFraction.valueOf(1000, 10)
+        };
 
         // Display the results.
         Consumer<? super BigFraction> displayResults = result -> {
@@ -55,7 +56,7 @@ public class ObservableEx {
 
         return Observable
             // Emit a stream of reduced big fractions.
-            .fromIterable(bigFractions)
+            .fromArray(bigFractions)
 
             // Use RxJava's flatMap() concurrency idiom to multiply
             // these BigFractions asynchronously in a thread pool.
@@ -76,45 +77,6 @@ public class ObservableEx {
     }
 
     /**
-     * Test an asynchronous Observable stream consisting of
-     * generate(), take(), flatMap(), collect(), flatMapCompletable(),
-     * and a pool of threads to perform BigFraction reductions and
-     * multiplications.
-     */
-    public static Completable testFractionMultiplications2() {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications2()\n");
-
-        sb.append("     Printing sorted results:");
-
-        // Process the function in a observable stream.
-        return Observable
-            // Generate a stream of random unreduced big fractions.
-            .generate((Emitter<BigFraction> emit) -> emit
-                      // Emit a random unreduced big fraction.
-                      .onNext(BigFractionUtils.makeBigFraction(sRANDOM, false)))
-
-            // Limit the # of random unreduced big fractions.
-            .take(sMAX_FRACTIONS)
-
-            // Use RxJava's flatMap() concurrency idiom to reduce and
-            // multiply each fraction in the computation thread pool.
-            .flatMap(unreducedFraction ->
-                     reduceAndMultiplyFraction(unreducedFraction,
-                                               Schedulers.computation()))
-
-            // Collect the results into a List.
-            .collect(toList())
-
-            // Process the ArrayList and return a Completable that
-            // synchronizes with the AsyncTaskBarrier framework.
-            .flatMapCompletable(list ->
-                                // Sort/print results after all async
-                                // fraction operations complete.
-                                BigFractionUtils.sortAndPrintList(list, sb));
-    }
-
-    /**
      * Use an asynchronous Observable stream and a pool of threads to
      * showcase exception handling of BigFraction objects.
      */
@@ -124,7 +86,7 @@ public class ObservableEx {
 
         // Create a function to handle an ArithmeticException.
         Function<Throwable,
-            ? extends BigFraction> errorHandler = t -> {
+                 ? extends BigFraction> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -134,6 +96,7 @@ public class ObservableEx {
                 // Convert ArithmeticException to 0.
                 return BigFraction.ZERO;
             else
+                // Rethrow exception!
                 throw t;
         };
 
@@ -175,8 +138,44 @@ public class ObservableEx {
 
             // Collect the non-0 results into an ArrayList.
             .collectInto(new ArrayList<BigFraction>(), List::add)
+            
+            // Print the List and return a Completable that
+            // synchronizes with the AsyncTaskBarrier framework.
+            .flatMapCompletable(list -> BigFractionUtils.printList(list, sb));
+    }
 
-            // Process the ArrayList and return a Completable that
+    /**
+     * Test an asynchronous Observable stream consisting of
+     * generate(), take(), flatMap(), collect(), flatMapCompletable(),
+     * and a pool of threads to perform BigFraction reductions and
+     * multiplications.
+     */
+    public static Completable testFractionReductionMultiplications() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionReductionMultiplications()\n");
+
+        sb.append("     Printing sorted results:");
+
+        // Process the function in a observable stream.
+        return Observable
+            // Generate a stream of random unreduced big fractions.
+            .generate((Emitter<BigFraction> emit) -> emit
+                      // Emit a random unreduced big fraction.
+                      .onNext(BigFractionUtils.makeBigFraction(sRANDOM, false)))
+
+            // Limit the # of random unreduced big fractions.
+            .take(sMAX_FRACTIONS)
+
+            // Use RxJava's flatMap() concurrency idiom to reduce and
+            // multiply each fraction in the computation thread pool.
+            .flatMap(unreducedFraction ->
+                     reduceAndMultiplyFraction(unreducedFraction,
+                                               Schedulers.computation()))
+
+            // Collect the results into a List.
+            .collect(toList())
+
+            // Sort and print the List and return a Completable that
             // synchronizes with the AsyncTaskBarrier framework.
             .flatMapCompletable(list ->
                                 // Sort/print results after all async
@@ -213,16 +212,15 @@ public class ObservableEx {
      * is multiplied asynchronously in a background thread from the given
      * {@code scheduler}.
      */
-    private static Observable<BigFraction> multiplyFraction
-        (BigFraction bigFraction,
-         Scheduler scheduler) {
+    private static Observable<BigFraction> multiplyFraction(BigFraction bigFraction,
+                                                            Scheduler scheduler) {
         return Single
             // Create/process each BigFraction asynchronously.
             .fromCallable(() -> bigFraction)
                      
             // Perform the processing asynchronously in a background
             // thread from the given scheduler.
-            .subscribeOn(Schedulers.computation())
+            .subscribeOn(scheduler)
 
             // Perform multiplication in a background thread.
             .map(bf -> bf.multiply(sBigReducedFraction))

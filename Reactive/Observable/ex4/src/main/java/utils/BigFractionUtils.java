@@ -77,7 +77,7 @@ public class BigFractionUtils {
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
-    public static Single<List<BigFraction>> sortAndPrintList(List<BigFraction> list,
+    public static Completable sortAndPrintList(List<BigFraction> list,
                                                StringBuffer sb) {
         // Quick sort the list asynchronously.
         Single<List<BigFraction>> quickSortM = Single
@@ -113,11 +113,14 @@ public class BigFractionUtils {
             // Use firstWithSignal() to select the result of whichever
             // sort finishes first and use it to print the sorted
             // list.
-            .ambArray(quickSortM,
-                      heapSortM)
+            .ambArray(quickSortM, heapSortM)
 
             // Use doOnSuccess() to display the first sorted list.
-            .doOnSuccess(displayList);
+            .doOnSuccess(displayList)
+
+            // Return Completable to synchronize with the
+            // AsyncTaskBarrier framework.
+            .ignoreElement();
     }
 
     /**

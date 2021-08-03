@@ -79,53 +79,62 @@ public class BigFractionUtils {
     }
 
     /**
-     * Sort the {@code list} in parallel using quicksort and mergesort
-     * and then store the results in the {@code StringBuffer}
+     * Sort the {@link List} in parallel using quicksort and mergesort
+     * and then store/print the results in the {@link StringBuffer}
      * parameter.
      */
     public static Completable sortAndPrintList(List<BigFraction> list,
                                                StringBuffer sb) {
         // Quick sort the list asynchronously.
         Single<List<BigFraction>> quickSortS = Single
-            // Use the fromCallable() factory method to obtain the
-            // results of quick sorting the list.
+            // Obtain the results of quick sorting the list.
             .fromCallable(() -> quickSort(list))
 
-            // Use subscribeOn() to run all the processing in the
-            // parallel thread pool.
+            // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.computation());
 
         // Heap sort the list asynchronously.
         Single<List<BigFraction>> heapSortS =  Single
-            // Use the just() factory method to obtain the
-            // results of heap sorting the list.
+            // Obtain the results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
 
-            // Use subscribeOn() to run all the processing in the
-            // parallel thread pool.
+            // Run all the processing in the parallel thread pool.
             .subscribeOn(Schedulers.computation());
 
+        return Single
+            // Select the result of whichever sort finishes first and
+            // use it to print the sorted list.
+            .ambArray(quickSortS, heapSortS)
+
+            // Use flatMapCompletable() to display first sorted list.
+            .flatMapCompletable(sortedList -> printList(sortedList, sb));
+    }
+
+    /**
+     * Store/print the results of the {@link List} in the {@link
+     * StringBuffer} parameter.
+     */
+    public static Completable printList(List<BigFraction> list,
+                                        StringBuffer sb) {
         // Display the results as mixed fractions.
-        Consumer<List<BigFraction>> displayList = sortedList -> {
-            // Iterate through each BigFraction in the sorted list.
-            sortedList.forEach(fraction ->
-                               sb.append("\n     "
-                                         + fraction.toMixedString()));
+        Consumer<List<BigFraction>> displayList = l -> {
+            // Iterate through each BigFraction in the list.
+            l.forEach(fraction ->
+                      sb.append("\n     "
+                                + fraction.toMixedString()));
             sb.append("\n");
             display(sb.toString());
         };
 
         return Single
-            // Use ambArray() to select the result of whichever sort
-            // finishes first and use it to print the sorted list.
-            .ambArray(quickSortS,
-                      heapSortS)
+            // Convert list into a Single.
+            .just(list)
 
-            // Use doOnSuccess() to display the first sorted list.
+            // Display the list.
             .doOnSuccess(displayList)
                 
-            // Return Completable to synchronize with the AsyncTester
-            // framework.
+            // Return Completable to synchronize with the
+            // AsyncTaskBarrier framework.
             .ignoreElement();
     }
 

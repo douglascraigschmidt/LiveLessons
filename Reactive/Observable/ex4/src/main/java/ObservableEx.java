@@ -13,19 +13,98 @@ import static utils.SinglesCollector.toSingle;
 /**
  * This class shows how to apply RxJava features asynchronously to
  * perform a range of Observable operations, including fromArray(),
- * just(), doOnNext(), map(), flatMap(), subscribeOn(), toFlowable()
- * and a parallel thread pool.  It also shows the Flowable subscribe()
- * operation.  In addition it shows various Single operations, such as
- * zipArray(), ambArray(), flatMap(), flatMapObservable(),
- * ignoreElement(), subscribeOn(), and a parallel thread pool.  In
- * addition, it demonstrates how to combine the Java Streams framework
- * with the RxJava framework.
+ * fromCallable(), doOnNext(), map(), flatMap(), subscribeOn(),
+ * flatMapCompletable(), flatMapObservable(), toFlowable(),
+ * subscribe(), and a parallel thread pool.  It also shows the
+ * Flowable subscribe() operation.  In addition it shows various
+ * Single operations, such as zipArray(), ambArray(), flatMap(),
+ * flatMapObservable(), ignoreElement(), subscribeOn(), and a parallel
+ * thread pool.  In addition, it demonstrates how to combine the Java
+ * Streams framework with the RxJava framework.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ObservableEx {
     /**
      * Create a random number generator.
      */
     private static final Random sRANDOM = new Random();
+
+    /**
+     * A test of BigFraction multiplication using an asynchronous
+     * Observable stream and a blocking Subscriber implementation.
+     */
+    public static Completable testFractionMultiplicationsBlockingSubscriber() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplicationsBlockingSubscriber()\n");
+
+        // Create an array of BigFraction objects.
+        BigFraction[] bigFractionArray = {
+            BigFraction.valueOf(100, 3),
+            BigFraction.valueOf(100, 4),
+            BigFraction.valueOf(100, 2),
+            BigFraction.valueOf(100, 1)
+        };
+
+        // Create a blocking subscriber that processes various
+        // types of signals.
+        BlockingSubscriber<BigFraction> blockingSubscriber = 
+            new BlockingSubscriber<>
+            (bf ->
+             // Add fraction to the string buffer.
+             sb.append("Result = " + bf.toMixedString() + "\n"),
+             t -> {
+                // Append the error message to the StringBuilder.
+                sb.append(t.getMessage());
+
+                // Display results when processing is done.
+                BigFractionUtils.display(sb.toString());
+             },
+             // Display results when processing is done.
+             () -> BigFractionUtils.display(sb.toString()),
+             Long.MAX_VALUE);
+
+        Single
+            // Generate a random large BigFraction.
+            .fromCallable(() -> BigFractionUtils
+                          .makeBigFraction(sRANDOM, true))
+
+            // Transform the item emitted by this Single into a
+            // Publisher and then forward its emissions into the
+            // returned Observable.
+            .flatMapObservable(bf1 -> Observable
+                               // Generate a stream of BigFractions.
+                               .fromArray(bigFractionArray)
+
+                               // Perform the Project Reactor
+                               // flatMap() concurrency idiom.
+                               .flatMap(bf2 -> Observable
+                                        // Emit bf2 to start a new
+                                        // stream.
+                                        .fromCallable(() -> bf2)
+
+                                        // Arrange to run each element
+                                        // in parallel.
+                                        .subscribeOn(Schedulers.computation())
+
+                                        // Use map() to multiply each
+                                        // element in the stream by
+                                        // the value emitted by the
+                                        // Observable.
+                                        .map(___ -> bf2.multiply(bf1))))
+
+            // Convert Observable to Flowable so subscribe() works
+            // with a Subscriber (instead of an Observer, which is all
+            // that Observable provides).
+            .toFlowable(BackpressureStrategy.LATEST)
+
+            // Use subscribe() to initiate all processing and handle
+            // results asynchronously.
+            .subscribe(blockingSubscriber);
+
+        // Wait for computations to complete and return a Completable
+        // to inform the AsyncTaskBarrier that all processing is done.
+        return blockingSubscriber.await();
+    }
 
     /**
      * Test BigFraction multiplications by combining the Java streams
@@ -41,9 +120,7 @@ public class ObservableEx {
         return Stream
             // Generate a stream of random, large, and unreduced big
             // fractions.
-            .generate(() ->
-                      makeBigFraction(new Random(),
-                                      false))
+            .generate(() -> makeBigFraction(sRANDOM, false))
 
             // Stop after generating sMAX_FRACTIONS big fractions.
             .limit(sMAX_FRACTIONS)
@@ -60,105 +137,21 @@ public class ObservableEx {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            .flatMap(list -> BigFractionUtils
-                     .sortAndPrintList(list, sb))
-
-            // Return a Completable to synchronize with the
-            // AsyncTaskBarrier framework.
-            .ignoreElement();
+            .flatMapCompletable(list -> BigFractionUtils
+                                .sortAndPrintList(list, sb));
     }
 
     /**
-     * A test of BigFraction multiplication using an asynchronous
-     * Observable stream and a blocking Subscriber implementation.
-     */
-    public static Completable testFractionMultiplicationsBlockingSubscriber() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplicationsBlockingSubscriber()\n");
-
-        // Random number generator.
-        Random random = new Random();
-
-        // Create an array of BigFraction objects.
-        BigFraction[] bigFractionArray = {
-            BigFraction.valueOf(100, 3),
-            BigFraction.valueOf(100, 4),
-            BigFraction.valueOf(100, 2),
-            BigFraction.valueOf(100, 1)
-        };
-
-        // Create a blocking subscriber.
-        BlockingSubscriber blockingSubscriber = new BlockingSubscriber(sb);
-
-        Observable<BigFraction> bfF = Observable
-            // Use fromArray() to generate a stream of big
-            // fractions.
-            .fromArray(bigFractionArray);
-
-        Single<BigFraction> bFS = Single
-            // Use Single.fromCallable() to "lazily" generate a random
-            // BigFraction.
-            .fromCallable(() -> BigFractionUtils
-                          .makeBigFraction(random,
-                                           true));
-
-        bFS
-            // Transform the item emitted by this Single into a
-            // Publisher and then forward its emissions into the
-            // returned Observable.
-            .flatMapObservable(bf1 -> bfF
-                               // Perform the Project Reactor
-                               // flatMap() concurrency idiom.
-                               .flatMap(bf2 -> Observable
-                                        // Emit bf2 to start a new
-                                        // stream.
-                                        .just(bf2)
-
-                                        // Arrange to run each element
-                                        // in this Flux stream in
-                                        // parallel.
-                                        .subscribeOn(Schedulers.computation())
-
-                                        // Log contents of the
-                                        // computation.
-                                        .doOnNext(bf ->
-                                                  logBigFraction(bf1, bf2, sb))
-
-                                        // Use map() to multiply each
-                                        // element in the stream by
-                                        // the value emitted by the
-                                        // Single.
-                                        .map(___ -> bf2.multiply(bf1))))
-
-            // Convert the Observable to a Flowable so that
-            // subscribe() works with a Subscriber (instead of an
-            // Observer, which is all Observable provides).
-            .toFlowable(BackpressureStrategy.LATEST)
-
-            // Use subscribe() to initiate all the processing and
-            // handle the results asynchronously.
-            .subscribe(blockingSubscriber);
-
-        // Wait for all the computations to complete.
-        blockingSubscriber.await();
-
-        // Return a Completable to indicate to the AsyncTaskBarrier
-        // that all the processing is done.
-        return sVoidC;
-    }
-
-    /**
-     * This factory method returns a Single that's signaled after the
+     * @return A {@link Single} that's signaled after the
      * {@code unreducedFraction} is reduced/multiplied asynchronously
-     * in background threads from the given {@code scheduler}.
+     * in background threads from the given {@link Scheduler}.
      */
     private static Single<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
          Scheduler scheduler) {
         return Single
             // Omit one item that performs the reduction.
-            .fromCallable(() ->
-                          BigFraction.reduce(unreducedFraction))
+            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
 
             // Perform all processing asynchronously in a pool of
             // background threads.

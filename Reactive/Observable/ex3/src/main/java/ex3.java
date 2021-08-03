@@ -1,13 +1,13 @@
 import utils.AsyncTaskBarrier;
 
 /**
- * This class shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using many advanced RxJava
- * Observable operations, including fromArray(), map(), generate(),
- * take(), flatMap(), flatMapCompletable(), fromCallable(), filter(),
- * reduce(), collectInto(), subscribeOn(), onErrorReturn(), and
- * Schedulers.computation().  It also shows RxJava Single and Maybe
- * operations, such as fromCallable(), ambArray(), subscribeOn(),
+ * This example shows how to reduce and/or multiply big fractions
+ * asynchronously and concurrently using many RxJava Observable
+ * operations, including fromArray(), map(), generate(), take(),
+ * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
+ * subscribeOn(), onErrorReturn(), and Schedulers.computation().  It
+ * also shows RxJava Single and Maybe operations, including
+ * fromCallable(), flatMapCompletable(), ambArray(), subscribeOn(),
  * ignoreElement(), and doOnSuccess().
  */
 public class ex3 {
@@ -17,15 +17,15 @@ public class ex3 {
     public static void main (String[] argv) {
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction multiplications and additions.
-        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications1);
-
-        // Use an asynchronous Observable stream and a pool of threads
-        // to perform BigFraction reductions and multiplications.
-        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications2);
+        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications);
 
         // Use an asynchronous Observable stream and a pool of threads
         // to showcase exception handling of BigFraction objects.
         AsyncTaskBarrier.register(ObservableEx::testFractionExceptions);
+
+        // Use an asynchronous Observable stream and a pool of threads
+        // to perform BigFraction reductions and multiplications.
+        AsyncTaskBarrier.register(ObservableEx::testFractionReductionMultiplications);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.

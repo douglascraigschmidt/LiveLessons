@@ -32,7 +32,7 @@ public class BlockingSubscriber<T>
     private final Consumer<? super Throwable> mErrorConsumer;
 
     /**
-     * The consumer to invoke on complete signal
+     * The consumer to invoke on complete signal.
      */
     private final Runnable mCompleteConsumer;
 
@@ -66,8 +66,8 @@ public class BlockingSubscriber<T>
     /**
      * Block until all events have been processed by subscribe().
      *
-     * @return An empty Mono to indicate to the caller that all
-     * processing is done.
+     * @return An empty {@link Mono} to indicate to the caller that
+     * all processing is done
      */
     public Mono<Void> await() {
         try {
@@ -76,7 +76,7 @@ public class BlockingSubscriber<T>
             e.printStackTrace();
         }
 
-        // Return empty Mono to indicate to the calle that all
+        // Return empty Mono to indicate to the caller that all
         // processing is done.
         return sVoidM;
     }

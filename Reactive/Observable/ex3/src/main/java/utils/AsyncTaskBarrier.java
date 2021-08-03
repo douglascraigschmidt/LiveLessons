@@ -61,7 +61,7 @@ public class AsyncTaskBarrier {
             .map(Supplier::get)
 
             // Map each element of the Observable into
-            // CompletableSources, subscribes to them, and waits until
+            // CompletableSources, subscribe to them, and waits until
             // the upstream and all CompletableSources complete.
             .flatMapCompletable(c -> c)
 
