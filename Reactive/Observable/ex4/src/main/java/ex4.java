@@ -1,4 +1,4 @@
-import utils.AsyncTaskBarrier;
+
 
 /**
  * This example shows how to apply RxJava features asynchronously to
@@ -16,6 +16,7 @@ public class ex4 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
+        /*
         // A test of BigFraction multiplication using an asynchronous
         // Observable stream and a Subscriber implementation.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationsBlockingSubscriber);
@@ -35,5 +36,7 @@ public class ex4 {
 
         // Print the results.
         System.out.println("Completed " + testCount + " tests");
+
+         */
     }
 }

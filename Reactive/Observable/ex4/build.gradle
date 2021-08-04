@@ -9,4 +9,5 @@ repositories {
 
 dependencies {
     compile 'io.reactivex.rxjava3:rxjava:3.0.13'
+    implementation 'junit:junit:4.12'
 }

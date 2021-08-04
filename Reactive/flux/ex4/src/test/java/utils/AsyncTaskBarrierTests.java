@@ -150,9 +150,10 @@ public class AsyncTaskBarrierTests {
             // computations to complete running asynchronously.
             .block();
 
+        // Only three tests should complete successfully.
         assertEquals(testCount, 3);
 
-        System.out.println("Completed " + testCount + " tests\n");
+        System.out.println("Completed " + testCount + " tests successfully\n");
 
         // Remove all but one of the methods being tested.
         assertTrue(AsyncTaskBarrier.unregister(throwExceptions));
@@ -168,8 +169,9 @@ public class AsyncTaskBarrierTests {
             // computations to complete running asynchronously.
             .block();
 
+        // Only one test ran (and completed successfully).
         assertEquals(testCount, 1);
 
-        System.out.println("Completed " + testCount + " tests\n");
+        System.out.println("Completed " + testCount + " test successfully\n");
     }
 }
