@@ -3,7 +3,6 @@ package utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,9 +16,9 @@ import java.util.function.Supplier;
  */
 public class AsyncTaskBarrierTests {
     /**
-     * Intentionally trigger an exception.
+     * Intentionally trigger an exception in a synchronous chain.
      */
-    private Mono<Void> throwException() {
+    private Mono<Void> syncThrowException() {
         int numerator = 10;
         int denominator = 0;
         return Mono
@@ -30,6 +29,23 @@ public class AsyncTaskBarrierTests {
                                    value))
             .map(n -> n /denominator)
             .then();
+    }
+
+    /**
+     * Intentionally trigger an exception in an asynchronous chain.
+     */
+    private Mono<Void> asyncThrowException() {
+        int numerator = 10;
+        int denominator = 0;
+        return Mono
+                // Intentionally trigger an ArithmeticException.
+                .just(numerator)
+                .subscribeOn(Schedulers.single())
+                .doOnNext (value ->
+                        display("throwException",
+                                value))
+                .map(n -> n /denominator)
+                .then();
     }
 
     /**
@@ -81,11 +97,11 @@ public class AsyncTaskBarrierTests {
     /**
      * Complete successfully synchronously.
      */
-    private Mono<Void> synchronouslyCompletesSuccessfully() {
+    private Mono<Void> syncNoThrow() {
         return Mono
             .fromCallable(() -> 10 * 10)
             .doOnNext (value ->
-                           display("synchronouslyCompletesSuccessfully",
+                           display("asyncNoThrow",
                                    value))
             .then();
     }
@@ -93,30 +109,14 @@ public class AsyncTaskBarrierTests {
     /**
      * Complete successfully asynchronously.
      */
-    private Mono<Void> asynchronouslyCompletesSuccessfully() {
+    private Mono<Void> asyncNoThrow() {
         return Mono
             .fromCallable(() -> 10 * 10)
             .subscribeOn(Schedulers.single())
             .doOnNext (value ->
-                       display("asynchronouslyCompletesSuccessfully",
+                       display("asyncNoThrow",
                                 value))
             .then();
-    }
-
-    /**
-     * Display the results.
-     *
-     * @param calledBy The method that calls {@code display}
-     * @param integer The value to print
-     */
-    private void display(String calledBy,
-                         Integer integer) {
-        System.out.println("["
-                           + Thread.currentThread().getId()
-                           + "] "
-                           + calledBy
-                           + " "
-                           + integer);
     }
 
     /**
@@ -126,22 +126,22 @@ public class AsyncTaskBarrierTests {
     @Test
     public void testExceptions() {
         // Create local variables so that unregister() works properly.
-        Supplier<Mono<Void>> throwExceptions = this::throwException;
-        Supplier<Mono<Void>> synchronouslyCompletesSuccessfully =
-            this::synchronouslyCompletesSuccessfully;
+        Supplier<Mono<Void>> syncThrowExceptions = this::syncThrowException;
+        Supplier<Mono<Void>> asyncThrowExceptions = this::asyncThrowException;
+        Supplier<Mono<Void>> syncNoThrow = this::syncNoThrow;
         Supplier<Mono<Void>> onErrorResume1 = this::onErrorResume1;
         Supplier<Mono<Void>> onErrorResume2 = this::onErrorResume2;
 
         // Register all the local variables that contain method references.
-        AsyncTaskBarrier.register(throwExceptions);
-        AsyncTaskBarrier.register(synchronouslyCompletesSuccessfully);
+        AsyncTaskBarrier.register(syncThrowExceptions);
+        AsyncTaskBarrier.register(syncNoThrow);
+        AsyncTaskBarrier.register(asyncThrowExceptions);
         AsyncTaskBarrier.register(onErrorResume1);
         AsyncTaskBarrier.register(onErrorResume2);
 
         // Directly register a method reference.
-        AsyncTaskBarrier.register(this::asynchronouslyCompletesSuccessfully);
+        AsyncTaskBarrier.register(this::asyncNoThrow);
 
-        display("testExceptions", 0);
         long testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
@@ -156,10 +156,11 @@ public class AsyncTaskBarrierTests {
         System.out.println("Completed " + testCount + " tests successfully\n");
 
         // Remove all but one of the methods being tested.
-        assertTrue(AsyncTaskBarrier.unregister(throwExceptions));
+        assertTrue(AsyncTaskBarrier.unregister(syncThrowExceptions));
         assertTrue(AsyncTaskBarrier.unregister(onErrorResume1));
         assertTrue(AsyncTaskBarrier.unregister(onErrorResume2));
-        assertTrue(AsyncTaskBarrier.unregister(synchronouslyCompletesSuccessfully));
+        assertTrue(AsyncTaskBarrier.unregister(syncNoThrow));
+        assertTrue(AsyncTaskBarrier.unregister(asyncThrowExceptions));
 
         testCount = AsyncTaskBarrier
             // Run all the tests.
@@ -173,5 +174,21 @@ public class AsyncTaskBarrierTests {
         assertEquals(testCount, 1);
 
         System.out.println("Completed " + testCount + " test successfully\n");
+    }
+    
+    /**
+     * Display the results.
+     *
+     * @param calledBy The method that calls {@code display}
+     * @param integer The value to print
+     */
+    private void display(String calledBy,
+                         Integer integer) {
+        System.out.println("["
+                + Thread.currentThread().getId()
+                + "] "
+                + calledBy
+                + " "
+                + integer);
     }
 }

@@ -15,9 +15,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class AsyncTaskBarrierTests {
     /**
-     * Intentionally trigger an exception.
+     * Intentionally trigger an exception in a synchronous chain.
      */
-    private Completable throwException() {
+    private Completable syncThrowException() {
         int numerator = 10;
         int denominator = 0;
         return Single
@@ -32,13 +32,31 @@ public class AsyncTaskBarrierTests {
     }
 
     /**
+     * Intentionally trigger an exception in an asynchronous chain.
+     */
+    private Completable asyncThrowException() {
+        int numerator = 10;
+        int denominator = 0;
+        return Single
+                // Intentionally trigger an ArithmeticException.
+                .just(numerator)
+                .subscribeOn(Schedulers.single())
+                .map(n -> n / denominator)
+                .doOnError (t ->
+                        display("throwException failed with "
+                                        + t.getMessage(),
+                                denominator))
+                .ignoreElement();
+    }
+
+    /**
      * Complete successfully synchronously.
      */
-    private Completable synchronouslyCompletesSuccessfully() {
+    private Completable syncNoException() {
         return Single
             .fromCallable(() -> 10 * 10)
             .doOnSuccess (value ->
-                          display("synchronouslyCompletesSuccessfully",
+                          display("syncNoException",
                                   value))
             .ignoreElement();
     }
@@ -46,14 +64,65 @@ public class AsyncTaskBarrierTests {
     /**
      * Complete successfully asynchronously.
      */
-    private Completable asynchronouslyCompletesSuccessfully() {
+    private Completable asyncNoException() {
         return Single
             .fromCallable(() -> 10 * 10)
             .subscribeOn(Schedulers.single())
             .doOnSuccess(value ->
-                         display("asynchronouslyCompletesSuccessfully",
+                         display("asyncNoException",
                                  value))
             .ignoreElement();
+    }
+
+    /**
+     * Ensure that the AsyncTaskBarrier methods work properly, even
+     * when exceptions occur.
+     */
+    @Test
+    public void testExceptions() {
+        // Create local variables so that unregister() works properly.
+        Supplier<Completable> syncThrowException = this::syncThrowException;
+        Supplier<Completable> asyncThrowException = this::asyncThrowException;
+        Supplier<Completable> syncNoException = this::syncNoException;
+
+        // Register all the local variables that contain method references.
+        AsyncTaskBarrier.register(syncThrowException);
+        AsyncTaskBarrier.register(asyncThrowException);
+        AsyncTaskBarrier.register(syncNoException);
+
+        // Directly register a method reference.
+        AsyncTaskBarrier.register(this::asyncNoException);
+
+        long testCount = AsyncTaskBarrier
+            // Run all the tests.
+            .runTasks()
+
+            // Block until all the tests are done to allow future
+            // computations to complete running asynchronously.
+            .blockingGet();
+
+        // Only two tests completed successfully.
+        assertEquals(testCount, 2);
+
+        System.out.println("Completed " + testCount + " tests successfully\n");
+
+        // Remove all but one of the methods being tested.
+        assertTrue(AsyncTaskBarrier.unregister(syncThrowException));
+        assertTrue(AsyncTaskBarrier.unregister(asyncThrowException));
+        assertTrue(AsyncTaskBarrier.unregister(syncNoException));
+
+        testCount = AsyncTaskBarrier
+            // Run all the tests.
+            .runTasks()
+
+            // Block until all the tests are done to allow future
+            // computations to complete running asynchronously.
+            .blockingGet();
+
+        // Only one test ran (and completed successfully).
+        assertEquals(testCount, 1);
+
+        System.out.println("Completed " + testCount + " test successfully\n");
     }
 
     /**
@@ -70,55 +139,5 @@ public class AsyncTaskBarrierTests {
                            + calledBy
                            + " "
                            + integer);
-    }
-
-    /**
-     * Ensure that the AsyncTaskBarrier methods work properly, even
-     * when exceptions occur.
-     */
-    @Test
-    public void testExceptions() {
-        // Create local variables so that unregister() works properly.
-        Supplier<Completable> throwExceptions = this::throwException;
-        Supplier<Completable> synchronouslyCompletesSuccessfully =
-            this::synchronouslyCompletesSuccessfully;
-
-        // Register all the local variables that contain method references.
-        AsyncTaskBarrier.register(throwExceptions);
-        AsyncTaskBarrier.register(synchronouslyCompletesSuccessfully);
-
-        // Directly register a method reference.
-        AsyncTaskBarrier.register(this::asynchronouslyCompletesSuccessfully);
-
-        // display("testExceptions", 0);
-        long testCount = AsyncTaskBarrier
-            // Run all the tests.
-            .runTasks()
-
-            // Block until all the tests are done to allow future
-            // computations to complete running asynchronously.
-            .blockingGet();
-
-        // Only two tests completed successfully.
-        assertEquals(testCount, 2);
-
-        System.out.println("Completed " + testCount + " tests successfully\n");
-
-        // Remove all but one of the methods being tested.
-        assertTrue(AsyncTaskBarrier.unregister(throwExceptions));
-        assertTrue(AsyncTaskBarrier.unregister(synchronouslyCompletesSuccessfully));
-
-        testCount = AsyncTaskBarrier
-            // Run all the tests.
-            .runTasks()
-
-            // Block until all the tests are done to allow future
-            // computations to complete running asynchronously.
-            .blockingGet();
-
-        // Only one test ran (and completed successfully).
-        assertEquals(testCount, 1);
-
-        System.out.println("Completed " + testCount + " test successfully\n");
     }
 }

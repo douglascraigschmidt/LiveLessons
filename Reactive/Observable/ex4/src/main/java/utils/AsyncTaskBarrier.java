@@ -59,8 +59,7 @@ public class AsyncTaskBarrier {
         AtomicLong exceptionCount = new AtomicLong(0);
 
         // Handle task exceptions by recording and swallowing them.
-        Function<Throwable,
-            ? extends Completable> errorHandler = t -> {
+        Function<Throwable, Completable> errorHandler = t -> {
             // Increment the count of exceptions.
             exceptionCount.getAndIncrement();
 
@@ -75,12 +74,13 @@ public class AsyncTaskBarrier {
             // Run each task, which can execute asynchronously or
             // synchronously.
             .map(s -> 
-                 // Swallow exceptions after first recording them.
+                 // Run the task (swallow any exception after first
+                 // recording it).
                  s.get().onErrorResumeNext(errorHandler))
 
-            // Map each Observable element into a CompletableSource,
-            // subscribe to it, wait until the upstream and all
-            // CompletableSources complete, and then return a
+            // Maps each Observable element into a CompletableSource,
+            // subscribe to them, waits until the upstream and all
+            // CompletableSources complete, and then returns a single
             // Completable.
             .flatMapCompletable(c -> c)
 

@@ -95,10 +95,6 @@ public class AsyncTaskBarrier {
             exceptionCount.getAndIncrement();
         };
 
-        // Copy into a local final variable to ensure visibility
-        // when used in Mono.just() below.
-        final int taskListSize = sTasks.size();
-
         return Flux
             // Factory method that converts the list into a flux.
             .fromIterable(sTasks)
@@ -118,7 +114,7 @@ public class AsyncTaskBarrier {
 
             // Return a mono containing the number of tasks that
             // completed successfully (i.e., without exceptions).
-            .flatMap(f -> Mono
-                    .just(taskListSize - exceptionCount.get()));
+            .flatMap(__ -> Mono
+                     .just(sTasks.size() - exceptionCount.get()));
     }
 }
