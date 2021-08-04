@@ -76,7 +76,7 @@ public class AsyncTaskBarrier {
      *
      * @return a {@code Mono<Long>} that will be triggered when all
      * the (a)synchronously-run tasks complete to indicate how many
-     * tasks completed successfully.
+     * tasks were run.
      */
     public static Mono<Long> runTasks() {
         // Needed to keep track of how many exceptions occurred.
@@ -85,21 +85,22 @@ public class AsyncTaskBarrier {
         // Log the exception and increment the exceptionCount.
         BiConsumer<Throwable,
                    Object> errorHandler = (t, i) -> {
-            // Increment the count of exceptions.
-            exceptionCount.getAndIncrement();
-
             // Record the exception message.
             System.out.println("["
                                + Thread.currentThread().getId()
                                + "] = "
-                               + exceptionCount.get()
-                               + " "
                                + t.getMessage()
                                + "\n");
+            // Increment the count of exceptions.
+            exceptionCount.getAndIncrement();
         };
 
+        // Copy into a local final variable to ensure visibility
+        // when used in Mono.just() below.
+        final int taskListSize = sTasks.size();
+
         return Flux
-            // Factory method that converts the List into a Flux.
+            // Factory method that converts the list into a flux.
             .fromIterable(sTasks)
 
             // Run each task, which can execute (a)synchronously.
@@ -118,6 +119,6 @@ public class AsyncTaskBarrier {
             // Return a mono containing the number of tasks that
             // completed successfully (i.e., without exceptions).
             .flatMap(f -> Mono
-                    .just(sTasks.size() - exceptionCount.get()));
+                    .just(taskListSize - exceptionCount.get()));
     }
 }
