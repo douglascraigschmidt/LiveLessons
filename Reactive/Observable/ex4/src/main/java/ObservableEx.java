@@ -14,13 +14,13 @@ import static utils.SinglesCollector.toSingle;
  * This class shows how to apply RxJava features asynchronously to
  * perform a range of Observable operations, including fromArray(),
  * fromCallable(), doOnNext(), map(), flatMap(), subscribeOn(),
- * flatMapCompletable(), flatMapObservable(), toFlowable(),
- * subscribe(), and a parallel thread pool.  It also shows the
- * Flowable subscribe() operation.  In addition it shows various
- * Single operations, such as zipArray(), ambArray(), flatMap(),
- * flatMapObservable(), ignoreElement(), subscribeOn(), and a parallel
- * thread pool.  In addition, it demonstrates how to combine the Java
- * Streams framework with the RxJava framework.
+ * toFlowable(), subscribe(), and a parallel thread pool.  It also
+ * shows the Flowable subscribe() operation.  In addition it shows
+ * various Single operations, such as zipArray(), ambArray(),
+ * subscribeOn(), flatMapObservable(), flatMapCompletable(),
+ * ignoreElement(), flatMap(), and a parallel thread pool.  It also
+ * shows how to combine the Java Streams framework with the RxJava
+ * framework.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ObservableEx {
@@ -36,6 +36,12 @@ public class ObservableEx {
     public static Completable testFractionMultiplicationsBlockingSubscriber() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplicationsBlockingSubscriber()\n");
+
+        // Add some useful diagnostic output.
+        sb.append("["
+                  + Thread.currentThread().getId()
+                  + "] "
+                  + " Starting async processing.\n");
 
         // Create an array of BigFraction objects.
         BigFraction[] bigFractionArray = {
@@ -59,8 +65,15 @@ public class ObservableEx {
                 // Display results when processing is done.
                 BigFractionUtils.display(sb.toString());
              },
-             // Display results when processing is done.
-             () -> BigFractionUtils.display(sb.toString()),
+             () -> {
+                 // Add some useful diagnostic output.
+                 sb.append("["
+                           + Thread.currentThread().getId()
+                           + "] "
+                           + " Async computations complete.\n");
+                 // Display results when processing is done.
+                 BigFractionUtils.display(sb.toString());
+             },
              Long.MAX_VALUE);
 
         Single
@@ -75,8 +88,8 @@ public class ObservableEx {
                                // Generate a stream of BigFractions.
                                .fromArray(bigFractionArray)
 
-                               // Perform the Project Reactor
-                               // flatMap() concurrency idiom.
+                               // Perform the RxJava flatMap()
+                               // concurrency idiom.
                                .flatMap(bf2 -> Observable
                                         // Emit bf2 to start a new
                                         // stream.
@@ -86,10 +99,8 @@ public class ObservableEx {
                                         // in parallel.
                                         .subscribeOn(Schedulers.computation())
 
-                                        // Use map() to multiply each
-                                        // element in the stream by
-                                        // the value emitted by the
-                                        // Observable.
+                                        // Multiply bf1 by each value
+                                        // emitted from Observable.
                                         .map(___ -> bf2.multiply(bf1))))
 
             // Convert Observable to Flowable so subscribe() works

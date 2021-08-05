@@ -50,7 +50,7 @@ Flux types enables client and server code to run reactively across a
 communication channel.
 
 The server runs in the context of the
-[ZippyApplication](src/main/java/zippyisms/application/ZippyApplication.java)
+[ZippyApplication](src/main/java/zippyisms/main/ZippyApplication.java)
 reactive microservice, which uses the
 [ZippyController](src/main/java/zippyisms/controller/ZippyController.java)
 and [ZippyService](src/main/java/zippyisms/service/ZippyService.java)
@@ -64,7 +64,7 @@ folder. These tests automatically launch the ZippyApplication reactive
 microservice locally on the local computer. They then run all the
 SpringBoot [@Test](https://www.baeldung.com/spring-boot-testing)
 annotations in the
-[ZippyMicroserviceTest.java](src/test/java/zippyisms/application/ZippyMicroserviceTest.java)
+[ZippyMicroserviceTest.java](src/test/java/zippyisms/main/ZippyMicroserviceTest.java)
 file to demonstrate common RSocket functionality for both client and
 server programs.
 

@@ -1,4 +1,4 @@
-package zippyisms.datamodel;
+package zippyisms.common.model;
 
 /**
  * Indicates the state of the subscriptions.

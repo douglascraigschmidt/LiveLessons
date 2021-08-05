@@ -15,14 +15,14 @@ public class ex4 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
+        // A test of BigFraction multiplication using an asynchronous
+        // Flux stream and a blocking Subscriber implementation.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber);
+
         // Test BigFraction multiplications by combining the Java
         // streams framework with the Reactor framework and the common
         // fork-join pool.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreams);
-
-        // A test of BigFraction multiplication using an asynchronous
-        // Flux stream and a blocking Subscriber implementation.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

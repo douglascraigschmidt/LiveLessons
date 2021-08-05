@@ -1,4 +1,4 @@
-package zippyisms.utils;
+package zippyisms.common;
 
 /**
  * Defines constants used through the program.

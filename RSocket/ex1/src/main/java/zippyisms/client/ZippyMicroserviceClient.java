@@ -5,9 +5,9 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import zippyisms.datamodel.Subscription;
-import zippyisms.datamodel.ZippyQuote;
-import zippyisms.utils.Constants;
+import zippyisms.common.model.Subscription;
+import zippyisms.common.model.ZippyQuote;
+import zippyisms.common.Constants;
 
 import java.time.Duration;
 import java.util.Random;
@@ -19,16 +19,16 @@ import java.util.UUID;
  * of the four interaction models supported by RSocket.
  *
  * The {@code @Component} annotation allows Spring to automatically
- * detect custom beans, i.e., without having to write any explicit
- * code, Spring will scan the application for classes annotated with
- * {@code @Component}, instantiate them, and inject any specified
- * dependencies into them.
+ * detect custom beans.  In particular, Spring will scan the
+ * application for classes annotated with {@code @Component},
+ * instantiate them, and inject any specified dependencies into them
+ * without having to write any explicit code.
  */
 @Component
 public class ZippyMicroserviceClient {
     /**
      * This object connects to the Spring controller running the
-     * RSocket server and its associated endpoints.  The
+     * RSocket server and its associated endpoints.
      *
      * The {@code @Autowired} annotation marks this field to be
      * initialized via Spring's dependency injection facilities, where
@@ -39,7 +39,7 @@ public class ZippyMicroserviceClient {
     private Mono<RSocketRequester> mZippyQuoteRequester;
 
     /**
-     * This factory method returns an array of random indicates that's
+     * This factory method returns an array of random indices that are
      * used to generate random Zippy th' Pinhead quotes.
      *
      * @param numberOfIndices The number of random indices to generate
@@ -204,14 +204,15 @@ public class ZippyMicroserviceClient {
             .zipWith(subscriptionRequest)
 
             // Send the message.
-            .map(r -> r
+            .map(r -> r.getT1()
                  // Send this request to the CANCEL_UNCONFIRMED
                  // endpoint.
-                 .getT1().route(Constants.CANCEL_UNCONFIRMED)
+                 .route(Constants.CANCEL_UNCONFIRMED)
 
                  // Perform an unconfirmed cancellation of the subscription.
                  .data(r.getT2()))
 
+            // @@ ???
             .flatMap(RSocketRequester.RetrieveSpec::send);
     }
 
@@ -233,9 +234,9 @@ public class ZippyMicroserviceClient {
             .zipWith(subscriptionRequest)
 
             // Send the message.
-            .map(tuple -> tuple
+            .map(tuple -> tuple.getT1()
                  // Send this request to the GET_QUOTES endpoint.
-                 .getT1().route(Constants.GET_ALL_QUOTES)
+                 .route(Constants.GET_ALL_QUOTES)
 
                  // Pass the SubscriptionRequest as the param.
                  .data(tuple.getT2()))

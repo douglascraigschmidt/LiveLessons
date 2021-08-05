@@ -1,4 +1,4 @@
-package zippyisms.datamodel;
+package zippyisms.common.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

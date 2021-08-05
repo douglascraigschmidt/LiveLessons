@@ -1,4 +1,4 @@
-package zippyisms.application;
+package zippyisms.main;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;

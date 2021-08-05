@@ -1,17 +1,16 @@
-package zippyisms.application;
+package zippyisms.main;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import zippyisms.client.ZippyMicroserviceClient;
-import zippyisms.datamodel.Subscription;
-import zippyisms.datamodel.SubscriptionStatus;
-import zippyisms.datamodel.ZippyQuote;
+import zippyisms.common.model.Subscription;
+import zippyisms.common.model.SubscriptionStatus;
+import zippyisms.common.model.ZippyQuote;
 
 import java.util.UUID;
 

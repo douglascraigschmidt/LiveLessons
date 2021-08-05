@@ -1,10 +1,9 @@
-package zippyisms.controller;
+package zippyisms.main;
 
-import zippyisms.utils.Constants;
-import zippyisms.datamodel.ZippyQuote;
-import zippyisms.datamodel.Subscription;
-import zippyisms.datamodel.SubscriptionStatus;
-import zippyisms.service.ZippyService;
+import zippyisms.common.Constants;
+import zippyisms.common.model.ZippyQuote;
+import zippyisms.common.model.Subscription;
+import zippyisms.common.model.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;

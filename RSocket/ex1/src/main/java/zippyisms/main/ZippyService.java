@@ -1,7 +1,7 @@
-package zippyisms.service;
+package zippyisms.main;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import zippyisms.datamodel.ZippyQuote;
+import zippyisms.common.model.ZippyQuote;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

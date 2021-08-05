@@ -32,6 +32,94 @@ public class FluxEx {
     private static final Random sRANDOM = new Random();
 
     /**
+     * A test of BigFraction multiplication using an asynchronous Flux
+     * stream and a blocking Subscriber implementation.
+     */
+    public static Mono<Void> testFractionMultiplicationsBlockingSubscriber() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationsBlockingSubscriber()\n");
+
+        // Add some useful diagnostic output.
+        sb.append("["
+                  + Thread.currentThread().getId()
+                  + "] "
+                  + " Starting async processing.\n");
+
+        // Create an array of BigFraction objects.
+        BigFraction[] bigFractionArray = {
+            BigFraction.valueOf(100, 3),
+            BigFraction.valueOf(100, 4),
+            BigFraction.valueOf(100, 2),
+            BigFraction.valueOf(100, 1)
+        };
+
+        // Create a blocking subscriber that processes various
+        // types of signals.
+        BlockingSubscriber<BigFraction> blockingSubscriber = 
+            new BlockingSubscriber<>
+            (bf ->
+             // Add fraction to the string buffer.
+             sb.append("Result = " + bf.toMixedString() + "\n"),
+             t -> {
+                // Append the error message to the StringBuilder.
+                sb.append(t.getMessage());
+
+                // Display results when processing is done.
+                BigFractionUtils.display(sb.toString());
+             },
+             () -> {
+                 // Add some useful diagnostic output.
+                 sb.append("["
+                           + Thread.currentThread().getId()
+                           + "] "
+                           + " Async computations complete.\n");
+                 // Display results when processing is done.
+                 BigFractionUtils.display(sb.toString());
+             },
+             Long.MAX_VALUE);
+
+        Mono
+            // Generate a random large BigFraction.
+            .fromCallable(() -> BigFractionUtils
+                          .makeBigFraction(sRANDOM, true))
+
+            // Transform the item emitted by this Mono into a
+            // Publisher and then forward its emissions into the
+            // returned Flux.
+            .flatMapMany(bf1 -> Flux
+                         // Generate a stream of BigFractions.
+                         .fromArray(bigFractionArray)
+                         
+                         // Perform the Project Reactor
+                         // flatMap() concurrency idiom.
+                         .flatMap(bf2 -> Mono
+                                  // Emit bf2.
+                                  .fromCallable(() -> bf2)
+
+                                  // Arrange to run each element
+                                  // in parallel.
+                                  .subscribeOn(Schedulers.parallel())
+
+                                  // Multiply bf1 by each value
+                                  // emitted from the Flux.
+                                  .map(___ -> bf2.multiply(bf1))))
+
+            // Use subscribe() to initiate all the processing and
+            // handle the results asynchronously.
+            .subscribe(blockingSubscriber);
+
+        // Add some useful diagnostic output.
+        sb.append("["
+                  + Thread.currentThread().getId()
+                  + "] "
+                  + " Waiting for async computations to complete.\n");
+
+        // Wait for all async computations to complete and return an empty mono
+        // to indicate to the AsyncTaskBarrier that all the processing is done.
+        return blockingSubscriber.await();
+    }
+
+    /**
      * Test BigFraction multiplications by combining the Java streams
      * framework with the Project Reactor framework and the Java
      * common fork-join framework.
@@ -70,75 +158,6 @@ public class FluxEx {
             // completed sort and print the results.
             .flatMap(list ->
                      BigFractionUtils.sortAndPrintList(list, sb));
-    }
-
-    /**
-     * A test of BigFraction multiplication using an asynchronous Flux
-     * stream and a blocking Subscriber implementation.
-     */
-    public static Mono<Void> testFractionMultiplicationsBlockingSubscriber() {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplicationsBlockingSubscriber()\n");
-
-        // Add some useful diagnostic output.
-        sb.append("["
-                  + Thread.currentThread().getId()
-                  + "] "
-                  + " Starting async processing.\n");
-
-        // Create a blocking subscriber that processes various
-        // types of signals.
-        BlockingSubscriber<BigFraction> blockingSubscriber = 
-            new BlockingSubscriber<>
-            (bf ->
-             // Add fraction to the string buffer.
-             sb.append(" = " + bf.toMixedString() + "\n"),
-             t -> {
-                // Append the error message to the StringBuilder.
-                sb.append(t.getMessage());
-
-                // Display results when processing is done.
-                BigFractionUtils.display(sb.toString());
-             },
-             // Display results when processing is done.
-             () -> BigFractionUtils.display(sb.toString())
-             ,
-             Long.MAX_VALUE);
-
-        Flux
-            // "Loop" for sMAX_FRACTIONS iterations.
-            .range(1, sMAX_FRACTIONS)
-
-            // Reduce and multiply random large big fractions using
-            // the flatMap() concurrency idiom.
-            .flatMap(__ -> Mono
-                     // Generate a random large BigFraction.
-                     .fromCallable(() -> BigFractionUtils
-                                   .makeBigFraction(sRANDOM, true))
-
-                     // Transform the BigFraction emitted by this Mono
-                     // into a Publisher, then forward its emissions
-                     // into the returned Flux.
-                     .flatMapMany(unreducedBigFraction ->
-                                  // Reduce and multiply the
-                                  // BigFraction asynchronously.
-                                  reduceAndMultiplyFraction(unreducedBigFraction,
-                                                            Schedulers.parallel(),
-                                                            sb)))
-
-            // Use subscribe() to initiate all the processing and
-            // handle the results asynchronously.
-            .subscribe(blockingSubscriber);
-
-        // Add some useful diagnostic output.
-        sb.append("["
-                  + Thread.currentThread().getId()
-                  + "] "
-                  + " Waiting for async computations to complete.\n");
-
-        // Wait for all async computations to complete and return an empty mono
-        // to indicate to the AsyncTaskBarrier that all the processing is done.
-        return blockingSubscriber.await();
     }
 
     /**
