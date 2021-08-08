@@ -24,10 +24,10 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This class contains {@code @Bean} methods that initialize various
- * components.  In particular, it contains a {@code Bean} that creates
- * the {@link RSocketRequester} used by the RSocket clients and a
- * {@code Bean} that creates a {@link List} of {@link ZippyQuote}
- * obtained retrieved from a file.
+ * components used by the RSocket client and server.  It contains a
+ * {@code Bean} that creates the {@link RSocketRequester} used by the
+ * RSocket clients and another {@code Bean} that creates a {@link
+ * List} of {@link ZippyQuote} obtained retrieved from a file.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., without having to write any explicit
@@ -41,11 +41,13 @@ public class Components {
      * This factory method returns a {@link Mono} that emits a
      * connected {@link RSocketRequester}.
      *
-     * @param builder The factory that creates and RSocketRequester.
-     * @return a {@link Mono} that emits a connected {@link RSocketRequester}
+     * @param builder The factory that creates and RSocketRequester
+     * @return A {@link Mono} that emits a connected {@link
+     *         RSocketRequester}
      */
     @Bean
-    public Mono<RSocketRequester> getRSocketRequester(RSocketRequester.Builder builder) {
+    public Mono<RSocketRequester> getRSocketRequester
+        (RSocketRequester.Builder builder) {
         return Mono
             // Return a Mono.
             .just(builder
@@ -54,7 +56,7 @@ public class Components {
                                     .reconnect(Retry.fixedDelay(2, 
                                                                 Duration.ofSeconds(2))))
 
-                  // Use binary encoder/decoder.
+                  // Use the binary encoder/decoder.
                   .dataMimeType(MediaType.APPLICATION_CBOR)
 
                   // Define the encoding/decoding strategies.
@@ -82,7 +84,7 @@ public class Components {
 
     /**
      * @return Return a {@link List} of {@link ZippyQuote} objects
-     * that were stored in the file of Zippyisms
+     *         that were stored in the file of Zippyisms
      */
     @Bean
     public List<ZippyQuote> getInput() {
@@ -92,7 +94,9 @@ public class Components {
             AtomicInteger idCount = new AtomicInteger(0);
 
             // Convert the filename into a pathname.
-            URI uri = ClassLoader.getSystemResource("zippyisms.txt").toURI();
+            URI uri = ClassLoader
+                .getSystemResource("zippyisms.txt")
+                .toURI();
 
             // Open the file and get all the bytes.
             CharSequence bytes =

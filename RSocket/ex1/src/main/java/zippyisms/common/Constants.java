@@ -12,11 +12,11 @@ public class Constants {
     /*
      * These constants identify RSocket endpoint names.
      */
-    public static final String SUBSCRIBE = "subscription.subscribe";
-    public static final String CANCEL_CONFIRMED = "subscription.cancelConfirmed";
-    public static final String CANCEL_UNCONFIRMED = "subscription.cancelUnconfirmed";
-    public static final String GET_ALL_QUOTES = "zippyisms.getQuotes";
-    public static final String GET_RANDOM_QUOTES = "zippyisms.getQuote";
-    public static final String GET_NUMBER_OF_QUOTES = "zippyisms.getNumberOfQuotes";
+    public static final String SUBSCRIBE = "zippycontroller.subscribe";
+    public static final String CANCEL_CONFIRMED = "zippycontroller.cancelConfirmed";
+    public static final String CANCEL_UNCONFIRMED = "zippycontroller.cancelUnconfirmed";
+    public static final String GET_ALL_QUOTES = "zippycontroller.getQuotes";
+    public static final String GET_RANDOM_QUOTES = "zippycontroller.getQuote";
+    public static final String GET_NUMBER_OF_QUOTES = "zippycontroller.getNumberOfQuotes";
 }
 

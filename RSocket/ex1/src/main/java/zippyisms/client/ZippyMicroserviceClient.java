@@ -7,22 +7,24 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.ZippyQuote;
-import zippyisms.common.Constants;
 
 import java.time.Duration;
 import java.util.Random;
 import java.util.UUID;
 
+import static zippyisms.common.Constants.*;
+
 /**
- * This class provides a client that send messages to the endpoints
- * provided by the ZippyApplication microservice to demonstrate each
- * of the four interaction models supported by RSocket.
+ * This class provides a client whose methods can be used to send
+ * messages to endpoints provided by the ZippyApplication microservice
+ * that demonstrates each of the four interaction models supported by
+ * RSocket.
  *
  * The {@code @Component} annotation allows Spring to automatically
- * detect custom beans.  In particular, Spring will scan the
- * application for classes annotated with {@code @Component},
- * instantiate them, and inject any specified dependencies into them
- * without having to write any explicit code.
+ * detect custom beans, i.e., Spring will scan the application for
+ * classes annotated with {@code @Component}, instantiate them, and
+ * inject the specified dependencies into them without having to write
+ * any explicit code.
  */
 @Component
 public class ZippyMicroserviceClient {
@@ -40,7 +42,7 @@ public class ZippyMicroserviceClient {
 
     /**
      * This factory method returns an array of random indices that are
-     * used to generate random Zippy th' Pinhead quotes.
+     * then used to generate random Zippy th' Pinhead quotes.
      *
      * @param numberOfIndices The number of random indices to generate
      * @return A {@link Mono} that emits an array of random indices
@@ -48,29 +50,30 @@ public class ZippyMicroserviceClient {
     public Mono<Integer[]> makeRandomIndices(int numberOfIndices) {
         // Return an array of random indicates.
         return mZippyQuoteRequester
-            // Send the message.
+            // Send the request to the server.
             .map(r -> r
-                 // Send this request to the GET_NUMBER_OF_QUOTES
-                 // endpoint.
-                 .route(Constants.GET_NUMBER_OF_QUOTES))
+                 // Send this request to the server's
+                 // GET_NUMBER_OF_QUOTES endpoint.
+                 .route(GET_NUMBER_OF_QUOTES))
 
             // Convert the response to a Mono<Integer> containing the
-            // number of Zippyisms.
+            // total number of Zippyisms.
             .flatMap(r -> r.retrieveMono(Integer.class))
 
             // Create an Integer array containing random indices.
-            .map(numberOfZippyisms -> new Random()
-                 // Create the given number of random Zippyisms whose
-                 // IDs are between 1 and the total number of quotes.
+            .map(numberOfZippyQuotes -> new Random()
+                 // Generate a stream containing 'numberOfIndices'
+                 // random ints whose values range from 1 and the
+                 // total number of Zippy quotes.
                  .ints(numberOfIndices,
                        1,
-                       numberOfZippyisms)
+                       numberOfZippyQuotes)
 
-                 // Convert the IntStream into a Stream.
+                 // Convert the IntStream into a Stream of Integers.
                  .boxed()
 
-                 // Trigger intermediate operations and store in an
-                 // array.
+                 // Trigger intermediate operations and store the
+                 // results in an array.
                  .toArray(Integer[]::new));
     }
 
@@ -80,7 +83,8 @@ public class ZippyMicroserviceClient {
      *
      * @param randomIndices A {@link Mono} that emits an array of
      *        random indices used to request the associated Zippyism
-     * @return A {@link Flux} that emits random Zippyisms
+     * @return A {@link Flux} that emits random Zippyisms once a
+     *         second until the stream is complete
      */
     public Flux<ZippyQuote> getRandomQuotes(Mono<Integer[]> randomIndices) {
         // Return a Flux that emits random Zippyisms.
@@ -89,20 +93,23 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(randomIndices)
 
-            // Send the message.
+            // Send the request to the server.
             .map(tuple ->
-                 // Send this request to the GET_QUOTE endpoint.
-                 tuple.getT1().route(Constants.GET_RANDOM_QUOTES)
+                 // Send this request to the server's GET_QUOTE endpoint.
+                 tuple.getT1().route(GET_RANDOM_QUOTES)
 
-                 // Create a Flux that emits indices for random Zippy
-                 // th' Pinhead quotes once a second and pass that as
-                 // the param.
+                 // Create the param to pass to the GET_QUOTE endpoint.
                  .data(Flux
+                       // Create a Flux that emits indices for random
+                       // Zippy th' Pinhead quotes.
                        .fromArray(tuple.getT2())
+
+                       // Emit the indices once every second.
                        .delayElements(Duration.ofSeconds(1))))
 
-            // Convert the Mono result to a Flux<ZippyQuote>
-            // containing a stream of ZippyQuote objects.
+            // Convert the Mono result to a Flux<ZippyQuote> that
+            // emits ZippyQuote objects once every second until the
+            // stream is complete.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class));
     }
 
@@ -115,20 +122,21 @@ public class ZippyMicroserviceClient {
      */
     public Mono<Subscription> subscribe(UUID uuid) {
         return mZippyQuoteRequester
-            // Send the message.
+            // Send the request to the server.
             .map(r -> r
-                 // Send this request to the SUBSCRIBE endpoint.
-                 .route(Constants.SUBSCRIBE)
+                 // Send this request to the server's SUBSCRIBE
+                 // endpoint.
+                 .route(SUBSCRIBE)
 
-                 // Create a new Subscription with a random
-                 // subscription Id and pass it to the param.
+                 // Create a new Subscription with the given
+                 // subscription Id and pass it as the param.
                  .data(new Subscription(uuid)))
 
-            // Convert the response to a Mono<SubscriptionRequest>.
+            // Convert the response to a Mono<Subscription>.
             .flatMap(r -> r.retrieveMono(Subscription.class))
 
-            // Turn this Mono into a hot source and cache last emitted
-            // signals for further subscribers.
+            // Convert this Mono into a hot source, which caches the
+            // emitted signals for future subscribers.
             .cache();
     }
 
@@ -138,9 +146,9 @@ public class ZippyMicroserviceClient {
      * @param subscriptionRequest A {@link Subscription} object that
      *                            should be valid
      * @return A {@link Mono} that emits the {@link Subscription}
-     * object with the status of the cancellation, which is either
-     * CANCELLED if there was a matching subscription or ERROR if
-     * there was no matching subscription.
+     *         object with the status of the cancellation, which is
+     *         either CANCELLED if there was a matching subscription
+     *         or ERROR if there was no matching subscription
      */
     public Mono<Subscription> cancelConfirmed(Mono<Subscription> subscriptionRequest) {
         return mZippyQuoteRequester
@@ -148,16 +156,16 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the message.
+            // Send the request to the server.
             .map(tuple -> tuple
-                 // Send this request to the CANCEL_CONFIRMED
+                 // Send this request to the server's CANCEL_CONFIRMED
                  // endpoint.
-                 .getT1().route(Constants.CANCEL_CONFIRMED)
+                 .getT1().route(CANCEL_CONFIRMED)
 
-                 // Pass the SubscriptionRequest as the param.
+                 // Pass the subscriptionRequest as the param.
                  .data(tuple.getT2()))
 
-            // Convert the response to a Mono<SubscriptionRequest>.
+            // Convert the response to a Mono<Subscription>.
             .flatMap(r -> r.retrieveMono(Subscription.class));
     }
 
@@ -165,23 +173,24 @@ public class ZippyMicroserviceClient {
      * Perform a confirmed cancellation on a {@link Subscription}.
      *
      * @param uuid A unique ID that should identify a previous subscription
-     * @return A {@link Mono} that emits a {@link Subscription} object
-     * with the status of the cancellation, which is either CANCELLED
-     * if there was a matching subscription or ERROR if there was no
-     * matching subscription
+     * @return A {@link Mono} that emits a {@link Subscription} with
+     *         the status of the cancellation, which is either
+     *         CANCELLED if there was a matching subscription or ERROR
+     *         if there was no matching subscription
      */
     public Mono<Subscription> cancelConfirmed(UUID uuid) {
         return mZippyQuoteRequester
+            // Send the request to the server.
             .map(r -> r
-                 // Send this request to the CANCEL_CONFIRMED endpoint.
-                 .route(Constants.CANCEL_CONFIRMED)
+                 // Send this request to the server's CANCEL_CONFIRMED
+                 // endpoint.
+                 .route(CANCEL_CONFIRMED)
 
-                 // Create a new Subscription that hasn't been
-                 // subscribed and pass it as the param, which should
-                 // fail.
+                 // Create a new Subscription and pass it as the
+                 // param.
                  .data(new Subscription(uuid)))
 
-            // Convert the response to a Mono<SubscriptionRequest>.
+            // Convert the response to a Mono<Subscription>.
             .flatMap(r -> r.retrieveMono(Subscription.class));
     }
 
@@ -196,18 +205,18 @@ public class ZippyMicroserviceClient {
      * @return A {@link Mono} that emits a {@link Void} object
      */
     public Mono<Void> cancelUnconfirmed(Mono<Subscription> subscriptionRequest) {
-        // Perform an unconfirmed cancellation the subscription
-        // (should succeed, but we don't get a confirmation).
+        // Perform an unconfirmed cancellation on the subscription,
+        // which returns no confirmation.
         return mZippyQuoteRequester
             // Wait for both Monos to emit one element and combine
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the message.
+            // Send the request to the server.
             .map(r -> r.getT1()
                  // Send this request to the CANCEL_UNCONFIRMED
                  // endpoint.
-                 .route(Constants.CANCEL_UNCONFIRMED)
+                 .route(CANCEL_UNCONFIRMED)
 
                  // Perform an unconfirmed cancellation of the subscription.
                  .data(r.getT2()))
@@ -218,14 +227,15 @@ public class ZippyMicroserviceClient {
 
     /**
      * This method returns a {@link Flux} that emits all Zippy th'
-     * Pinhead quotes if the {@code subscriptionRequest} is valid,
-     * otherwise it returns an {@link Flux} that emits an
-     * IllegalAccessException.
+     * Pinhead quotes once every second until complete if the {@code
+     * subscriptionRequest} is valid, otherwise it returns an {@link
+     * Flux} that emits an {@link IllegalAccessException}.
      *
      * @param subscriptionRequest A {@link Subscription} object
      * @return A {@link Flux} that emits all Zippy th' Pinhead quotes
-     * if the {@code subscriptionRequest} is valid, otherwise it
-     * returns an {@link Flux} that emits an IllegalAccessException
+     *         once every second until complete if the {@code
+     *         subscriptionRequest} is valid, otherwise it returns an
+     *         {@link Flux} that emits an IllegalAccessException
      */
     public Flux<ZippyQuote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
         return mZippyQuoteRequester
@@ -233,16 +243,18 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the message.
+            // Send the request to the server.
             .map(tuple -> tuple.getT1()
-                 // Send this request to the GET_QUOTES endpoint.
-                 .route(Constants.GET_ALL_QUOTES)
+                 // Send this request to the server's GET_QUOTES
+                 // endpoint.
+                 .route(GET_ALL_QUOTES)
 
-                 // Pass the SubscriptionRequest as the param.
+                 // Pass the subscriptionRequest as the param.
                  .data(tuple.getT2()))
 
-            // Conver the Mono response to a Flux<ZippyQuote>
-            // containing a stream of ZippyQuote objects.
+            // Convert the Mono response to a Flux<ZippyQuote> that
+            // emits a stream of ZippyQuote objects once a second
+            // until complete.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))
 
             // Return an error exception if the subscription was
