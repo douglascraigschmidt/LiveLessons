@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Provides the context for running the ZippyApplication, which is a
- * reactive microservice that provides zany Zippy th' Pinhead quotes
+ * reactive microservice that provides random Zippy th' Pinhead quotes
  * to clients using all four RSocket interaction models.
  *
  * The {@code @SpringBootApplication} annotation enables apps to use
@@ -29,6 +29,7 @@ public class ZippyApplication {
             LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         logger.setLevel(Level.toLevel("error"));
 
+        // Run the ZippyApplication microservice.
         SpringApplication.run(ZippyApplication.class, args);
     }
 }

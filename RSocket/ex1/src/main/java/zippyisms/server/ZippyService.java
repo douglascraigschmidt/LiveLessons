@@ -42,13 +42,14 @@ public class ZippyService {
     private final Set<Subscription> mSubscriptions = new HashSet<>();
 
     /**
-     * This method must be called before attempting to receive a Flux
-     * stream of Zippy quotes.  It implements a two-way async RSocket
-     * request/response call that sends a response back to the client.
+     * This method must be called before attempting to receive a
+     * {@link Flux} stream of Zippy quotes.  It implements a two-way
+     * async RSocket request/response call that sends a response back
+     * to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
-     * @return A {@link Mono} that emits the result of the {@link
+     * @return An update {@link Mono} that emits the result of the {@link
      *         Subscription} request
      */
     Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
@@ -141,8 +142,7 @@ public class ZippyService {
                     // Check whether there's a matching request in the
                     // subscription set.
                     if (mSubscriptions.contains(r)) {
-                        // Remove the request from the subscription
-                        // set.
+                        // Remove the request from subscription set.
                         mSubscriptions.remove(r);
 
                         // Set the request status to indicate the
@@ -206,8 +206,8 @@ public class ZippyService {
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes.  This
      * method implements a two-way async RSocket bi-directional
-     * channel call where a Flux stream is sent to the server and the
-     * server returns a Flux in response.
+     * channel call where a {@link Flux} stream is sent to the server
+     * and the server returns a {@link Flux} in response.
      *
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}

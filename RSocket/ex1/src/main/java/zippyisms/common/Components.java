@@ -46,40 +46,34 @@ public class Components {
      *         RSocketRequester}
      */
     @Bean
-    public Mono<RSocketRequester> getRSocketRequester
-        (RSocketRequester.Builder builder) {
+    public Mono<RSocketRequester> getRSocketRequester() {
         return Mono
             // Return a Mono.
-            .just(builder
-                  // Define the reconnect strategy.
-                  .rsocketConnector(rSocketConnector -> rSocketConnector
-                                    .reconnect(Retry.fixedDelay(2, 
-                                                                Duration.ofSeconds(2))))
+            .just(RSocketRequester
+                  // Create an RSocketRequester.
+                  .builder()
 
                   // Use the binary encoder/decoder.
                   .dataMimeType(MediaType.APPLICATION_CBOR)
 
+                  // Define the reconnect strategy to attempt to reconnect
+                  // twice, delaying 2 seconds between reconnection attempts.
+                  .rsocketConnector(rSocketConnector -> rSocketConnector
+                                    .reconnect(Retry.fixedDelay(2, Duration
+                                                                .ofSeconds(2))))
+
                   // Define the encoding/decoding strategies.
                   .rsocketStrategies(RSocketStrategies.builder()
-                                     // Configure the binary encoders
-                                     // and decoders.
-                                     .encoders(encoders -> 
-                                               encoders.add(new Jackson2CborEncoder()))
-                                     .decoders(decoders -> 
-                                               decoders.add(new Jackson2CborDecoder()))
-                                     .build())
+                                                      // Configure the binary encoders
+                                                      // and decoders.
+                                                      .encoders(encoders -> encoders
+                                                          .add(new Jackson2CborEncoder()))
+                                                      .decoders(decoders -> decoders
+                                                          .add(new Jackson2CborDecoder()))
+                                                      .build())
 
-                  // Establish the TCP connection to the given port.
+                  // Use TCP to connect to the given port.
                   .tcp("localhost", Constants.SERVER_PORT));
-    }
-
-    /**
-     * @return An initialized {@link RSocketRequester.Builder} object
-     */
-    @Bean
-    public RSocketRequester.Builder getBuilder() {
-        // Return an initialized builder object.
-        return RSocketRequester.builder();
     }
 
     /**

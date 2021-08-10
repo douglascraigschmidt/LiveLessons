@@ -17,22 +17,24 @@ import static zippyisms.common.Constants.*;
  * as well as cancel earlier subscriptions.  It demonstrates the
  * following RSocket interaction models
  *
- * . Request/Response, where each two-way async request receives a
- * single async response from the server.
+ * <ul>
+ * <li>Request/Response, where each two-way async request receives a
+ * single async response from the server.</li>
  *
- * . Fire-and-Forget, where each one-way message receives no response
- * from the server.
+ * <li>Fire-and-Forget, where each one-way message receives no response
+ * from the server.</li>
  *
- * . Request/Stream, where each async request receives a stream of
- * responses from the server.
+ * <li>Request/Stream, where each async request receives a stream of
+ * responses from the server.</li>
  *
- * . Channel, where a stream of async messages can be sent in both
- * directions between client and server.
+ * <li>Channel, where a stream of async messages can be sent in both
+ * directions between client and server.</li>
+ *</ul>
  *
  * Spring enables the integration of RSockets into a controller via
  * the {@code @Controller} annotation, which enables the autodetection
  * of implementation classes via classpath scanning, and
- * the @MessageMapping annotation, which maps a message onto a
+ * the {@code @MessageMapping annotation}, which maps a message onto a
  * message-handling method by matching the declared patterns to a
  * destination extracted from the message.
  *
@@ -76,7 +78,7 @@ public class ZippyController {
      * Cancel a {@link Subscription} in an unconfirmed manner, i.e.,
      * any errors are not returned to the client.  This method
      * implements a one-way async RSocket fire-and-forget call that
-     * does not send a response back to the client.
+     * sends no response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
@@ -130,7 +132,7 @@ public class ZippyController {
      * server returns a Flux in response.
      *
      * @param quoteIds A {@link Flux} that emits the given Zippy
-     *                 {@code quoteIds}
+     *                 {@code quoteIds} once every second
      * @return A {@link Flux} that emits the requested Zippy quotes
      *         once every second
      */

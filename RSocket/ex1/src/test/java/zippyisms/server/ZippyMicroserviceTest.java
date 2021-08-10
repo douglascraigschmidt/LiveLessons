@@ -48,10 +48,10 @@ public class ZippyMicroserviceTest {
     private ZippyMicroserviceClient zippyClient;
 
     /**
-     * Subscribe and cancel requests to receive Zippyisms.  This
-     * method demonstrates a two-way async RSocket request/response
-     * call that subscribes to retrieve a stream of Zippy t' Pinhead
-     * quotes.
+     * Subscribe and cancel requests to receive Zippy quotes.  This
+     * test demonstrates the RSocket two-way async request/response
+     * model, where each client request receives a confirmation
+     * response from the server.
      */
     @Test
     public void testSubscribeAndCancel() {
@@ -105,9 +105,9 @@ public class ZippyMicroserviceTest {
 
     /**
      * Subscribe for and receive a given number of Zippy th' Pinhead
-     * quotes.  This method demonstrates the async RSocket request/
-     * stream model, where each request receives a Flux stream of
-     * responses from the server.
+     * quotes.  This test demonstrates the RSocket two-way async
+     * request/stream model, where each client request receives a
+     * {@link Flux} stream of responses from the server.
      */
     @Test
     public void testValidSubscribeForQuotes() {
@@ -122,15 +122,15 @@ public class ZippyMicroserviceTest {
             // that emits ZippyQuote objects from the server.
             .getAllQuotes(subscriptionRequest)
 
-            // Print each Zippyism emitted by the Flux<ZippyQuote>.
+            // Print each Zippy quote emitted by the Flux<ZippyQuote>.
             .doOnNext(m ->
                       System.out.println("Quote: " + m.getZippyism()))
 
             // Only emit sNUMBER_OF_QUOTES (5).
             .take(sNUMBER_OF_INDICES);
 
-        // Ensure all the sNUMBER_OF_INDICES (5) results come in the
-        // right order.
+        // Ensure all the sNUMBER_OF_INDICES (5) responses appear in
+        // the right order.
         StepVerifier.create(zippyQuotes)
             .expectNextMatches(m -> m
                                .getZippyism()
@@ -153,8 +153,8 @@ public class ZippyMicroserviceTest {
     /**
      * Try to subscribe for and receive Zippy th' Pinhead quotes,
      * which intentionally fails because the {@link Subscription} has
-     * been cancelled.  It also demonstrates a one-way RSocket
-     * fire-and-forget call that does not return a response.
+     * been cancelled.  It also demonstrates the RSocket one-way async
+     * fire-and-forget model that does not return a response.
      */
     @Test
     public void testInvalidSubscribeForQuotes() {
@@ -205,9 +205,10 @@ public class ZippyMicroserviceTest {
 
     /**
      * Get/print/test that a given number of random Zippy th' Pinhead
-     * quotes are received.  This method demonstrates a two-way
-     * RSocket bi-directional channel call where a Flux stream is sent
-     * to the server and the server returns a Flux in response.
+     * quotes are received.  This method demonstrates the RSocket
+     * two-way async bi-directional channel model where a {@link Flux}
+     * stream is sent to the server and the server returns a {@link
+     * Flux} in response.
      */
     @Test
     public void testGetRandomQuotes() {
@@ -222,8 +223,9 @@ public class ZippyMicroserviceTest {
             .cache();
 
         Flux<ZippyQuote> zippyQuotes = zippyClient
-            // Create a Flux that emits Zippy th' Pinhead quotes at the
-            // random indices emitted by the randomZippyQuotes Flux.
+            // Create a Flux that emits Zippy th' Pinhead quotes at
+            // the random indices emitted by the randomZippyQuotes
+            // Flux.
             .getRandomQuotes(randomIndices)
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
@@ -238,7 +240,7 @@ public class ZippyMicroserviceTest {
         assert ri != null;
 
         // Ensure the results are correct, i.e., the returned quoteIds
-        // match those sent to the GET_QUOTE endpoint.
+        // match those sent to the GET_RANDOM_QUOTES endpoint.
         StepVerifier
             .create(zippyQuotes)
             .expectNextMatches(m -> m.getQuoteId() == ri[0])

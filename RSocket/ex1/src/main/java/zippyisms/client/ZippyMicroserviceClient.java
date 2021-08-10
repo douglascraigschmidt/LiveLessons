@@ -46,18 +46,20 @@ public class ZippyMicroserviceClient {
      *
      * @param numberOfIndices The number of random indices to generate
      * @return A {@link Mono} that emits an array of random indices
+     *         within the range of the Zippy quotes.
      */
     public Mono<Integer[]> makeRandomIndices(int numberOfIndices) {
         // Return an array of random indicates.
         return mZippyQuoteRequester
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(r -> r
-                 // Send this request to the server's
-                 // GET_NUMBER_OF_QUOTES endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's GET_NUMBER_OF_QUOTES endpoint.
                  .route(GET_NUMBER_OF_QUOTES))
 
-            // Convert the response to a Mono<Integer> containing the
-            // total number of Zippyisms.
+            // Perform a two-way call using the metadata and then
+            // convert the response to a Mono that emits the total
+            // number of Zippyisms.
             .flatMap(r -> r.retrieveMono(Integer.class))
 
             // Create an Integer array containing random indices.
@@ -69,36 +71,40 @@ public class ZippyMicroserviceClient {
                        1,
                        numberOfZippyQuotes)
 
-                 // Convert the IntStream into a Stream of Integers.
+                 // Convert the IntStream of native ints into a Stream
+                 // of Integers.
                  .boxed()
 
                  // Trigger intermediate operations and store the
-                 // results in an array.
+                 // random Integer results in an array.
                  .toArray(Integer[]::new));
     }
 
     /**
      * This method returns a Flux that emits random Zippy th' Pinhead
-     * quotes.
+     * quotes once a second until the stream is complete.
      *
      * @param randomIndices A {@link Mono} that emits an array of
-     *        random indices used to request the associated Zippyism
-     * @return A {@link Flux} that emits random Zippyisms once a
+     *        random indices used to request the associated Zippy
+     *        quote
+     * @return A {@link Flux} that emits random Zippy quotes once a
      *         second until the stream is complete
      */
     public Flux<ZippyQuote> getRandomQuotes(Mono<Integer[]> randomIndices) {
-        // Return a Flux that emits random Zippyisms.
+        // Return a Flux that emits random Zippy quotes.
         return mZippyQuoteRequester
             // Wait for both Monos to emit one element and combine
             // these elements once into a Tuple2 object.
             .zipWith(randomIndices)
 
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(tuple ->
-                 // Send this request to the server's GET_QUOTE endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's GET_QUOTE endpoint.
                  tuple.getT1().route(GET_RANDOM_QUOTES)
 
-                 // Create the param to pass to the GET_QUOTE endpoint.
+                 // Create the param to pass to the GET_QUOTE
+                 // endpoint.
                  .data(Flux
                        // Create a Flux that emits indices for random
                        // Zippy th' Pinhead quotes.
@@ -107,7 +113,8 @@ public class ZippyMicroserviceClient {
                        // Emit the indices once every second.
                        .delayElements(Duration.ofSeconds(1))))
 
-            // Convert the Mono result to a Flux<ZippyQuote> that
+            // Perform a two-way call using the metadata and then
+            // convert the Mono result to a Flux<ZippyQuote> that
             // emits ZippyQuote objects once every second until the
             // stream is complete.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class));
@@ -122,17 +129,19 @@ public class ZippyMicroserviceClient {
      */
     public Mono<Subscription> subscribe(UUID uuid) {
         return mZippyQuoteRequester
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(r -> r
-                 // Send this request to the server's SUBSCRIBE
-                 // endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's SUBSCRIBE endpoint.
                  .route(SUBSCRIBE)
 
                  // Create a new Subscription with the given
-                 // subscription Id and pass it as the param.
+                 // subscription Id and pass it as the data param.
                  .data(new Subscription(uuid)))
 
-            // Convert the response to a Mono<Subscription>.
+            // Perform a two-way call using the metadata and data and
+            // then convert the response to a Mono that emits the
+            // resulting Subscription.
             .flatMap(r -> r.retrieveMono(Subscription.class))
 
             // Convert this Mono into a hot source, which caches the
@@ -156,16 +165,18 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(tuple -> tuple
-                 // Send this request to the server's CANCEL_CONFIRMED
-                 // endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's CANCEL_CONFIRMED endpoint.
                  .getT1().route(CANCEL_CONFIRMED)
 
-                 // Pass the subscriptionRequest as the param.
+                 // Set the subscriptionRequest as the data param.
                  .data(tuple.getT2()))
 
-            // Convert the response to a Mono<Subscription>.
+            // Perform a two-way call using the metadata and data and
+            // then convert the response to a Mono that emits the
+            // resulting Subscription.
             .flatMap(r -> r.retrieveMono(Subscription.class));
     }
 
@@ -180,17 +191,19 @@ public class ZippyMicroserviceClient {
      */
     public Mono<Subscription> cancelConfirmed(UUID uuid) {
         return mZippyQuoteRequester
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(r -> r
-                 // Send this request to the server's CANCEL_CONFIRMED
-                 // endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's CANCEL_CONFIRMED endpoint.
                  .route(CANCEL_CONFIRMED)
 
-                 // Create a new Subscription and pass it as the
+                 // Create a new Subscription and pass it as the data
                  // param.
                  .data(new Subscription(uuid)))
 
-            // Convert the response to a Mono<Subscription>.
+            // Perform a two-way call using the metadata and data and
+            // then convert the response to a Mono that emits the
+            // resulting Subscription.
             .flatMap(r -> r.retrieveMono(Subscription.class));
     }
 
@@ -212,16 +225,17 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(r -> r.getT1()
-                 // Send this request to the CANCEL_UNCONFIRMED
-                 // endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's CANCEL_UNCONFIRMED endpoint.
                  .route(CANCEL_UNCONFIRMED)
 
-                 // Perform an unconfirmed cancellation of the subscription.
+                 // Set the subscriptionRequest as the data param.
                  .data(r.getT2()))
 
-            // @@ ???
+            // Perform a fire-and-forget call using the metadata and
+            // data and return a Mono<Void>.
             .flatMap(RSocketRequester.RetrieveSpec::send);
     }
 
@@ -243,18 +257,18 @@ public class ZippyMicroserviceClient {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Send the request to the server.
+            // Initialize the request that will be sent to the server.
             .map(tuple -> tuple.getT1()
-                 // Send this request to the server's GET_QUOTES
-                 // endpoint.
+                 // Set the metadata to indicate the request is for
+                 // the server's GET_QUOTE endpoint.
                  .route(GET_ALL_QUOTES)
 
-                 // Pass the subscriptionRequest as the param.
+                 // Set the subscriptionRequest as the data param.
                  .data(tuple.getT2()))
 
-            // Convert the Mono response to a Flux<ZippyQuote> that
-            // emits a stream of ZippyQuote objects once a second
-            // until complete.
+            // Perform a two-way call using the metadata and data and
+            // then convert the response to a Flux that emits a stream
+            // of ZippyQuote objects once a second until complete.
             .flatMapMany(r -> r.retrieveFlux(ZippyQuote.class))
 
             // Return an error exception if the subscription was
