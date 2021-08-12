@@ -41,7 +41,6 @@ public class Components {
      * This factory method returns a {@link Mono} that emits a
      * connected {@link RSocketRequester}.
      *
-     * @param builder The factory that creates and RSocketRequester
      * @return A {@link Mono} that emits a connected {@link
      *         RSocketRequester}
      */
