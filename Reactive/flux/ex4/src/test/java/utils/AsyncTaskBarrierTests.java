@@ -25,7 +25,7 @@ public class AsyncTaskBarrierTests {
             // Intentionally trigger an ArithmeticException.
             .just(numerator)
             .doOnNext (value ->
-                           display("throwException",
+                           display("syncThrowException",
                                    value))
             .map(n -> n /denominator)
             .then();
@@ -42,7 +42,7 @@ public class AsyncTaskBarrierTests {
                 .just(numerator)
                 .subscribeOn(Schedulers.single())
                 .doOnNext (value ->
-                        display("throwException",
+                        display("asyncThrowException",
                                 value))
                 .map(n -> n /denominator)
                 .then();
@@ -101,7 +101,7 @@ public class AsyncTaskBarrierTests {
         return Mono
             .fromCallable(() -> 10 * 10)
             .doOnNext (value ->
-                           display("asyncNoThrow",
+                           display("syncNoThrow",
                                    value))
             .then();
     }

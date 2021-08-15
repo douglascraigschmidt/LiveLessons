@@ -1,3 +1,4 @@
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
@@ -245,28 +246,30 @@ public class FluxEx {
     /**
      * Test an asynchronous Flux stream consisting of fromIterable(),
      * flatMap(), reduce(), and a pool of threads to perform
-     * BigFraction reductions and multiplications.
+     * BigFraction multiplications.
      */
     public static Mono<Void> testFractionMultiplications2() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplications2()\n");
 
-        // Create a list of BigFraction objects.
-        List<BigFraction> bigFractions = List.of(BigFraction.valueOf(1000, 30),
-                                                 BigFraction.valueOf(1000, 40),
-                                                 BigFraction.valueOf(1000, 20),
-                                                 BigFraction.valueOf(1000, 10));
+        // Create an array of reduced BigFraction objects.
+        BigFraction[] bigFractions = {
+                BigFraction.valueOf(1000, 30),
+                BigFraction.valueOf(1000, 40),
+                BigFraction.valueOf(1000, 20),
+                BigFraction.valueOf(1000, 10)
+        };
 
         return Flux
-            // Emit a stream of big fractions.
-            .fromIterable(bigFractions)
+            // Emit a stream of reduced big fractions.
+            .fromArray(bigFractions)
 
-            // Reduce and multiply these big fractions asynchronously
+            // Multiply these big fractions asynchronously
             // using the flatMap() concurrency idiom.
-            .flatMap(unreducedFraction ->
-                     reduceAndMultiplyFraction(unreducedFraction,
-                                               Schedulers.parallel(),
-                                               sb))
+            .flatMap(bigFraction ->
+                     multiplyFraction(bigFraction,
+                                      Schedulers.parallel(),
+                                      sb))
 
             // Reduce the results into one Mono<BigFraction>.
             .reduce(BigFraction::add)
@@ -350,4 +353,34 @@ public class FluxEx {
                  // Multiply the big fractions
                  .multiply(sBigReducedFraction));
     }
+
+    /**
+     * This factory method returns a mono that's signaled after the
+     * {@link bigFraction} is multiplied asynchronously in a
+     * background thread from the given {@link Scheduler}.
+     */
+    private static Mono<BigFraction> multiplyFraction(BigFraction bigFraction,
+                                                      Scheduler scheduler,
+                                                      StringBuffer sb) {
+        return Mono
+                // Emit the bigFraction.
+                .fromCallable(() -> bigFraction)
+
+                // Perform processing asynchronously in a pool of
+                // background threads.
+                .subscribeOn(scheduler)
+
+                // Log the results.
+                .doOnNext(result ->
+                        logBigFractionResult(bigFraction,
+                                             sBigReducedFraction,
+                                             result,
+                                             sb))
+
+                // Return a mono to a multiplied big fraction.
+                .map(reducedFraction -> reducedFraction
+                     // Multiply the big fractions
+                     .multiply(sBigReducedFraction));
+    }
+
 }

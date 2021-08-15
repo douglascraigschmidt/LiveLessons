@@ -120,7 +120,7 @@ public class FluxEx {
     }
 
     /**
-     * Test BigFraction multiplications by combining the Java streams
+     * Test BigFraction multiplications by combining the Java Streams
      * framework with the Project Reactor framework and the Java
      * common fork-join framework.
      */
@@ -156,8 +156,8 @@ public class FluxEx {
 
             // After all the asynchronous fraction reductions have
             // completed sort and print the results.
-            .flatMap(list ->
-                     BigFractionUtils.sortAndPrintList(list, sb));
+            .flatMap(list -> BigFractionUtils
+                     .sortAndPrintList(list, sb));
     }
 
     /**

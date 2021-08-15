@@ -36,7 +36,7 @@ public class ex3 {
 
         // Test an asynchronous Flux stream consisting of
         // fromIterable(), flatMap(), reduce(), and a pool of threads
-        // to perform BigFraction reductions and multiplications.
+        // to perform BigFraction multiplications.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplications2);
 
         // Test an asynchronous Flux stream consisting of

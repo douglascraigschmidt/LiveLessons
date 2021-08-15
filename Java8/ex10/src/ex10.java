@@ -38,8 +38,8 @@ public class ex10 {
         System.out.println(iqMap);
 
         // Create two predicate objects.
-        Predicate<ConcurrentMap.Entry<String, Integer>> lowIq = entry -> entry.getValue() <= 100;
-        Predicate<ConcurrentMap.Entry<String, Integer>> curly = entry -> entry.getKey().equals("Curly");
+        Predicate<Map.Entry<String, Integer>> lowIq = entry -> entry.getValue() <= 100;
+        Predicate<Map.Entry<String, Integer>> curly = entry -> entry.getKey().equals("Curly");
 
         // This lambda expression removes entries with IQ less than or
         // equal to 100 with the name "curly".

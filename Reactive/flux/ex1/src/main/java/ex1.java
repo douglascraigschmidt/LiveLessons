@@ -17,10 +17,10 @@ public class ex1 {
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync1);
 
         // Another test of BigFraction multiplication using a
-        // synchronous Flux stream and several local variables.
+        // synchronous Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
 
-        // A test of BigFraction multiplication using a synchronous
+        // Yet another test of BigFraction multiplication using a synchronous
         // Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync3);
 

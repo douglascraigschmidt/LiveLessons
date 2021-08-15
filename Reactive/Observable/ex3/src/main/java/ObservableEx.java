@@ -60,7 +60,7 @@ public class ObservableEx {
 
             // Use RxJava's flatMap() concurrency idiom to multiply
             // these BigFractions asynchronously in a thread pool.
-            .flatMap(bf -> multiplyFraction(bf, Schedulers.computation()))
+            .flatMap(bf -> multiplyFractions(bf, Schedulers.computation()))
 
             // Log the BigFractions.
             .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
@@ -204,7 +204,7 @@ public class ObservableEx {
             // Return an Observable to a multiplied big fraction using
             // the RxJava flatMap() concurrency idiom.
             .flatMap(reducedFraction ->
-                     multiplyFraction(reducedFraction, scheduler));
+                     multiplyFractions(reducedFraction, scheduler));
     }
 
     /**
@@ -212,8 +212,8 @@ public class ObservableEx {
      * is multiplied asynchronously in a background thread from the given
      * {@code scheduler}.
      */
-    private static Observable<BigFraction> multiplyFraction(BigFraction bigFraction,
-                                                            Scheduler scheduler) {
+    private static Observable<BigFraction> multiplyFractions(BigFraction bigFraction,
+                                                             Scheduler scheduler) {
         return Single
             // Create/process each BigFraction asynchronously.
             .fromCallable(() -> bigFraction)

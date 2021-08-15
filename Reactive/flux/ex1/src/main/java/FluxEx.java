@@ -46,9 +46,9 @@ public class FluxEx {
 
             // Use map() to multiply each element in the stream by a
             // constant.
-            .map(bigFraction -> 
+            .map(bigFraction -> bigFraction
                  // Multiply and return result.
-                 bigFraction.multiply(sBigReducedFraction))
+                 .multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since
@@ -57,11 +57,10 @@ public class FluxEx {
             // types of publishers that enable asynchrony.
             .subscribe(// Handle next event.
                        multipliedBigFraction ->
-                       // Add fraction to the string buffer.
+                       // Add fraction to the string builder.
                        sb.append(" = " 
                                  + multipliedBigFraction.toMixedString() 
                                  + "\n"),
-
                        // Handle error result event.
                        error -> {
                            // Append the exception name.
@@ -70,11 +69,10 @@ public class FluxEx {
                            // Display results when processing is done.
                            BigFractionUtils.display(sb.toString());
                        },
-
                        // Handle final completion event.
-                       () ->
+                       () -> BigFractionUtils
                        // Display results when processing is done.
-                       BigFractionUtils.display(sb.toString()));
+                       .display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTaskBarrier that
         // all the processing is done.
@@ -83,7 +81,7 @@ public class FluxEx {
 
     /**
      * Another test of BigFraction multiplication using a synchronous
-     * Flux stream and several local variables.
+     * Flux stream.
      */
     public static Mono<Void> testFractionMultiplicationSync2() {
         StringBuilder sb =
@@ -115,11 +113,10 @@ public class FluxEx {
             // interesting types of publishers that enable asynchrony.
             .subscribe(// Handle next event.
                        multipliedBigFraction ->
-                       // Add fraction to the string buffer.
+                       // Add fraction to the string builder.
                        sb.append(" = " 
                                  + multipliedBigFraction.toMixedString() 
                                  + "\n"),
-
                        // Handle error result event.
                        error -> {
                            // Append the exception name.
@@ -128,11 +125,10 @@ public class FluxEx {
                            // Display results when processing is done.
                            BigFractionUtils.display(sb.toString());
                        },
-
                        // Handle final completion event.
-                       () ->
+                       () -> BigFractionUtils
                        // Display results when processing is done.
-                       BigFractionUtils.display(sb.toString()));
+                       .display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTaskBarrier that
         // all the processing is done.
@@ -165,10 +161,10 @@ public class FluxEx {
 
         Flux<BigFraction> f2 = Flux
             // Use from() and Mono.fromCallable() to "lazily" generate a
-            // stream of random big fractions.
-            .from(Mono.fromCallable(() ->
-                                    BigFractionUtils.makeBigFraction(random,
-                                                                     true)))
+            // stream of random big fractions since Flux lacks fromCallable().
+            .from(Mono.fromCallable(() -> BigFractionUtils
+                                    .makeBigFraction(random,
+                                                     true)))
 
             // Generate random big fractions 4 times.
             .repeat(4);
@@ -199,9 +195,9 @@ public class FluxEx {
                            // Display results when processing is done.
                            BigFractionUtils.display(sb.toString());
                        },
-                       () -> 
+                       () -> BigFractionUtils
                        // Display results when processing is done.
-                       BigFractionUtils.display(sb.toString()));
+                       .display(sb.toString()));
 
         // Return empty mono to indicate to the AsyncTaskBarrier
         // that all the processing is done.
@@ -245,9 +241,9 @@ public class FluxEx {
                            // Display results when processing is done.
                            BigFractionUtils.display(sb.toString());
                        },
-                       () -> 
+                       () -> BigFractionUtils
                        // Display results when processing is done.
-                       BigFractionUtils.display(sb.toString()));
+                       .display(sb.toString()));
 
         // that all the processing is done.
         return sVoidM;
