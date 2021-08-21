@@ -10,7 +10,9 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example demonstrates various features of Project Loom,
- * including virtual threads and structured concurrency.
+ * including virtual threads and structured concurrency.  You'll
+ * need to install JDK 18 with Project Loom configured, which
+ * you can download from https://jdk.java.net/loom.
  */
 public class ex35 {
     /**
