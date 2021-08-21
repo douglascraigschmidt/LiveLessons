@@ -132,7 +132,8 @@ public class ex35 {
     }
 
     /**
-     * Check the primality of the {@code integers} param.
+     * Check the primality of the {@code integers} param.  This method
+     * also demonstrates how structured concurrency scopes can nest.
      *
      * @param integers The integers to check for primality
      * @return A {@link List} of {@link Future} objects that return
@@ -158,7 +159,8 @@ public class ex35 {
     }
 
     /**
-     * Compute the GCD of the {@code integers} param.
+     * Compute the GCD of the {@code integers} param.  This method
+     * also demonstrates how structured concurrency scopes can nest.
      *
      * @param integers The integers to compute GCD
      * @return A {@link List} of {@link Future} objects that return
@@ -182,7 +184,6 @@ public class ex35 {
                 .collect(toList());
         }
     }
-
 
     /**
      * Checks whether {@code primeCandidate} is a prime number or not.
