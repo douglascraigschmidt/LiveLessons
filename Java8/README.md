@@ -4,7 +4,8 @@ Concurrency](http://www.dre.vanderbilt.edu/~schmidt/LiveLessons/CPiJava),
 as well as some other examples from my Safari Live Training courses.
 Please note that many of these examples now use features found in
 later Java releases, so I recommend installing Java 11 (at least) to
-avoid problems.
+avoid problems.  Some versions require experimental versions of the
+JDK, such as JDK 18 and Project Loom.
 
 Here's an overview of what's current included in these examples:
 
@@ -180,3 +181,6 @@ Here's an overview of what's current included in these examples:
          flight(s) from a Stream of available flights, which is part
          of an Flight Listing App (FLApp) that we're creating for an
          upcoming online courses on Reactive Microservices.
+
+. ex35 - This example demonstrates various features of Project Loom,
+         including virtual threads and structured concurrency.
