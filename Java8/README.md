@@ -182,5 +182,3 @@ Here's an overview of what's current included in these examples:
          of an Flight Listing App (FLApp) that we're creating for an
          upcoming online courses on Reactive Microservices.
 
-. ex35 - This example demonstrates various features of Project Loom,
-         including virtual threads and structured concurrency.
