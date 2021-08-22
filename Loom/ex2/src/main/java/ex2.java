@@ -18,9 +18,12 @@ import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * This example demonstrates Project Loom structured concurrency.
- * You'll need to install JDK 18 with Project Loom configured, which
- * you can download from https://jdk.java.net/loom.
+ * This example demonstrates structured concurrency features in
+ * Project Loom, which is exploring and incubating Java VM features
+ * and APIs built on top of them for the implementation of lightweight
+ * user-mode threads (virtual threads).  You'll need to install JDK 18
+ * with Project Loom configured, which you can download from
+ * https://jdk.java.net/loom.
  */
 public class ex2 {
     /**
@@ -50,6 +53,7 @@ public class ex2 {
     private static void generateRandomNumbers() {
         // Generate a list of random integers.
         sRANDOM_INTEGERS = new Random()
+
             // Generate the given # of large random ints.
             .ints(Options.instance().numberOfElements(),
                   Integer.MAX_VALUE - Options.instance().numberOfElements(),
@@ -58,13 +62,15 @@ public class ex2 {
             // Convert each primitive int to Integer.
             .boxed()    
                    
-            // Trigger intermediate operations and collect into a
-            // List.
+            // Trigger intermediate operations and collect into a List.
             .collect(toList());
     }
 
     /**
-     * Demonstrate Project Loom structured concurrency.
+     * Demonstrate Project Loom structured concurrency by
+     * concurrently checking the primality of a {@link List}
+     * of random numbers and also computing the greatest common
+     * divisor (GCD) of pairs of these random numbers.
      */
     public static void demoStructuredConcurrency()
         throws ExecutionException, InterruptedException {
@@ -76,13 +82,16 @@ public class ex2 {
         Future<List<Future<GCDResult>>> gcdComputeFutures;
 
         // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete.
+        // exits after all tasks are complete (uses the new auto-close
+        // feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
-            // Concurrently check primalities.
-            primeCheckFutures = executor.submit(() -> checkPrimalities(sRANDOM_INTEGERS));
+            primeCheckFutures = executor
+                // Concurrently check primalities.
+                .submit(() -> checkPrimalities(sRANDOM_INTEGERS));
 
-            // Concurrently compute GCDs.
-            gcdComputeFutures = executor.submit(() -> computeGCDs(sRANDOM_INTEGERS));
+            gcdComputeFutures = executor
+                // Concurrently compute GCDs.
+                .submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
             // Scope doesn't exit until all concurrent tasks complete.
         } 
@@ -111,22 +120,24 @@ public class ex2 {
      * Check the primality of the {@code integers} param.  This method
      * also demonstrates how structured concurrency scopes can nest.
      *
-     * @param integers The integers to check for primality
+     * @param integers The {@link List} of {@link Integer} objects upon
+     *                 which to check for primality
      * @return A {@link List} of {@link Future} objects that return
      *         {@link PrimeResult} objects
      */
-    private static List<Future<PrimeResult>> checkPrimalities
-        (List<Integer> integers) {
+    private static List<Future<PrimeResult>> checkPrimalities(List<Integer> integers) {
 
         // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete.
+        // exits after all tasks are complete (uses the new auto-close
+        // feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return integers
                 // Create a stream of Integers.
                 .stream()
 
                 // Concurrently check the primality of each number.
-                .map(primeCandidate -> checkPrimality(primeCandidate, executor))
+                .map(primeCandidate ->
+                     checkPrimality(primeCandidate, executor))
 
                 // Trigger intermediate processing and collect the
                 // results into a List.
@@ -138,13 +149,15 @@ public class ex2 {
      * Compute the GCD of the {@code integers} param.  This method
      * also demonstrates how structured concurrency scopes can nest.
      *
-     * @param integers The integers to compute GCD
+     * @param integers The {@link List} of {@link Integer} objects upon
+     *                 which to compute the GCD
      * @return A {@link List} of {@link Future} objects that return
      *         {@link GCDResult} objects
      */
     private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
         // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete.
+        // exits after all tasks are complete (uses the new auto-close
+        // feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return StreamSupport
                 // Convert the List of Integer objects into a stream
@@ -165,23 +178,21 @@ public class ex2 {
      * Checks whether {@code primeCandidate} is a prime number or not.
      *
      * @param primeCandidate The number to check for primality
-     * @param executor Executor to perform the task
+     * @param executor {@link ExecutorService} to perform the task
      * @return A {@link Future} that emits a {@link PrimeResult}
      */
-    private static Future<PrimeResult> checkPrimality
-        (int primeCandidate, ExecutorService executor) {
+    private static Future<PrimeResult> checkPrimality(int primeCandidate,
+                                                      ExecutorService executor) {
         return executor
             // Submit call to executor for concurrent execution.
             .submit(() -> {
                     // Determine if primeCandidate is prime.
                     int result = isPrime(primeCandidate);
-                    display(primeCandidate
-                            + " = "
-                            + result);
+
+                    display(primeCandidate + " = " + result);
 
                     // Create a record to hold the results.
-                    return new PrimeResult(primeCandidate,
-                                           result);
+                    return new PrimeResult(primeCandidate, result);
                 });
     }
 
@@ -190,33 +201,28 @@ public class ex2 {
      *
      * @param integers A two-element array containing the numbers to
      *                 compute the GCD for
-     * @param executor Executor to perform the task
+     * @param executor {@link ExecutorService} to perform the task
      * @return A {@link Future} that emits a {@link GCDResult}
      */
-    private static Future<GCDResult> computeGCD
-        (Integer[] integers, ExecutorService executor) {
+    private static Future<GCDResult> computeGCD(Integer[] integers,
+                                                ExecutorService executor) {
         return executor
             // Submit call to executor for concurrent execution.
             .submit(() -> {
                     // Compute GCD.
                     int result = gcd(integers[0], integers[1]);
 
-                    display(integers[0]
-                            + " = "
-                            + integers[1]
-                            + " = "                            
-                            + result);
+                    display(integers[0] + " = " + integers[1] + " = " + result);
 
                     // Create a record to hold the results.
-                    return new GCDResult(integers[0],
-                                         integers[1],
-                                         result);
+                    return new GCDResult(integers[0], integers[1], result);
                 });
     }
 
     /**
      * Provides a recursive implementation of Euclid's algorithm to
-     * compute the "greatest common divisor" (GCD).
+     * compute the "greatest common divisor" (GCD) of {@code number1}
+     * and {@code number2}.
      */
     private static int gcd(int number1, int number2) {
         // Basis case.
