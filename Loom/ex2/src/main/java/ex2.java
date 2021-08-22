@@ -78,13 +78,13 @@ public class ex2 {
     public static void demoStructuredConcurrency()
         throws ExecutionException, InterruptedException {
 
-        // Create a List to hold Future<PrimeResult> objects.
+        // Future to a List holding Future<PrimeResult> objects.
         Future<List<Future<PrimeResult>>> primeCheckFutures;
 
-        // Create a List to hold Future<GCDResult> objects.
+        // Future to a List holding Future<GCDResult> objects.
         Future<List<Future<GCDResult>>> gcdComputeFutures;
 
-        // Create a new block for executing virtual tasks, which only
+        // Create a new scope for executing virtual tasks, which only
         // exits after all tasks are complete (uses the new
         // AutoClosable feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
@@ -98,13 +98,13 @@ public class ex2 {
                 // concurrently.
                 .submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
-            // Block doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent tasks complete.
         } 
 
         display("printing results");
 
-        // The future::get calls below return immediately since the
-        // block above won't exit until all tasks complete.
+        // The Future.get() calls below don't block since the scope
+        // above won't exit until all tasks complete.
 
         // Print the primality results.  
         primeCheckFutures
@@ -123,7 +123,7 @@ public class ex2 {
 
     /**
      * Check the primality of the {@code integers} param.  This method
-     * also demonstrates how structured concurrency blocks can nest.
+     * also demonstrates how structured concurrency scopes can nest.
      *
      * @param integers The {@link List} of {@link Integer} objects upon
      *                 which to check for primality
@@ -131,7 +131,7 @@ public class ex2 {
      *         {@link PrimeResult} objects
      */
     private static List<Future<PrimeResult>> checkPrimalities(List<Integer> integers) {
-        // Create a new block for executing virtual tasks, which only
+        // Create a new scope for executing virtual tasks, which only
         // exits after all tasks are complete (uses the new
         // AutoClosable feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
@@ -145,35 +145,6 @@ public class ex2 {
 
                 // Trigger intermediate processing and collect results
                 // into a List of Future<PrimeResult> objects.
-                .collect(toList());
-        }
-    }
-
-    /**
-     * Compute the GCD of the {@code integers} param.  This method
-     * also demonstrates how structured concurrency blocks can nest.
-     *
-     * @param integers The {@link List} of {@link Integer} objects upon
-     *                 which to compute the GCD
-     * @return A {@link List} of {@link Future} objects that return
-     *         {@link GCDResult} objects
-     */
-    private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
-        // Create a new block for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new
-        // AutoClosable feature of ExecutorService).
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
-            return StreamSupport
-                // Convert the List of Integer objects into a
-                // sequential stream of two-element Integer objects
-                // used to compute the GCD.
-                .stream(new ListSpliterator(integers), false)
-
-                // Compute the GCD in the context of the executor.
-                .map(param -> computeGCD(param, executor))
-
-                // Trigger intermediate processing and collect results
-                // into a List of Future<GCDResult> objects.
                 .collect(toList());
         }
     }
@@ -198,6 +169,54 @@ public class ex2 {
                     // Create a record to hold the results.
                     return new PrimeResult(primeCandidate, result);
                 });
+    }
+
+    /**
+     * This method checks if number {@code primeCandidate} is prime.
+     *
+     * @param primeCandidate The number to check for primality
+     * @return 0 if {@code primeCandidate} is prime, or the smallest
+     *         factor if it is not prime
+     */
+    public static int isPrime(int primeCandidate) {
+        if (primeCandidate > 3)
+            // Use a brute-force algorithm to burn CPU!
+            for (int factor = 2;
+                 factor <= primeCandidate / 2;
+                 ++factor)
+                if (primeCandidate / factor * factor == primeCandidate)
+                    return factor;
+
+        return 0;
+    }
+
+    /**
+     * Compute the GCD of the {@code integers} param.  This method
+     * also demonstrates how structured concurrency scopes can nest.
+     *
+     * @param integers The {@link List} of {@link Integer} objects upon
+     *                 which to compute the GCD
+     * @return A {@link List} of {@link Future} objects that return
+     *         {@link GCDResult} objects
+     */
+    private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
+        // Create a new scope for executing virtual tasks, which only
+        // exits after all tasks are complete (uses the new
+        // AutoClosable feature of ExecutorService).
+        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+            return StreamSupport
+                // Convert the List of Integer objects into a
+                // sequential stream of two-element Integer objects
+                // used to compute the GCD.
+                .stream(new ListSpliterator(integers), false)
+
+                // Compute the GCD in the context of the executor.
+                .map(param -> computeGCD(param, executor))
+
+                // Trigger intermediate processing and collect results
+                // into a List of Future<GCDResult> objects.
+                .collect(toList());
+        }
     }
 
     /**
@@ -235,25 +254,6 @@ public class ex2 {
         // Recursive call.
         return gcd(number2,
                    number1 % number2);
-    }
-
-    /**
-     * This method checks if number {@code primeCandidate} is prime.
-     *
-     * @param primeCandidate The number to check for primality
-     * @return 0 if {@code primeCandidate} is prime, or the smallest
-     *         factor if it is not prime
-     */
-    public static int isPrime(int primeCandidate) {
-        if (primeCandidate > 3)
-            // Use a brute-force algorithm to burn CPU!
-            for (int factor = 2;
-                 factor <= primeCandidate / 2;
-                 ++factor)
-                if (primeCandidate / factor * factor == primeCandidate)
-                    return factor;
-
-        return 0;
     }
 
     /**
