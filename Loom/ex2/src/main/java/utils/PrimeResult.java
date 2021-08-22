@@ -1,7 +1,8 @@
 package utils;
 
 /**
- * Define a Java record that holds the "plain old data" (POD).
+ * Define a Java record that holds the "plain old data" (POD) for the
+ * result of a primality check.
  */
 public record PrimeResult(
     /*

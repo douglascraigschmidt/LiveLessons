@@ -18,12 +18,15 @@ import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * This example demonstrates structured concurrency features in
- * Project Loom, which is exploring and incubating Java VM features
- * and APIs built on top of them for the implementation of lightweight
- * user-mode threads (virtual threads).  You'll need to install JDK 18
- * with Project Loom configured, which you can download from
- * https://jdk.java.net/loom.
+ * This example demonstrates Project Loom structured concurrency
+ * features, which enables a main task to split into several
+ * concurrent sub-tasks that run concurrently to competion before the
+ * main task can complete.  Project Loom supports structured
+ * concurrency by enhancing {@link ExecutorService} to support
+ * AutoCloseable and updating {@link Executors} to define new static
+ * factory methods that support usage in a structured manner.  You'll
+ * need to install JDK 18 with Project Loom configured, which you can
+ * download from https://jdk.java.net/loom.
  */
 public class ex2 {
     /**
@@ -67,10 +70,10 @@ public class ex2 {
     }
 
     /**
-     * Demonstrate Project Loom structured concurrency by
-     * concurrently checking the primality of a {@link List}
-     * of random numbers and also computing the greatest common
-     * divisor (GCD) of pairs of these random numbers.
+     * Demonstrate Project Loom structured concurrency by concurrently
+     * (1) checking the primality of a {@link List} of random numbers
+     * and (2) computing the greatest common divisor (GCD) of pairs of
+     * these random numbers.
      */
     public static void demoStructuredConcurrency()
         throws ExecutionException, InterruptedException {
@@ -81,25 +84,27 @@ public class ex2 {
         // Create a List to hold Future<GCDResult> objects.
         Future<List<Future<GCDResult>>> gcdComputeFutures;
 
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new auto-close
-        // feature of ExecutorService).
+        // Create a new block for executing virtual tasks, which only
+        // exits after all tasks are complete (uses the new
+        // AutoClosable feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             primeCheckFutures = executor
-                // Concurrently check primalities.
+                // Submit call to executor to check primalities
+                // concurrently.
                 .submit(() -> checkPrimalities(sRANDOM_INTEGERS));
 
             gcdComputeFutures = executor
-                // Concurrently compute GCDs.
+                // Submit call to executor to compute GCDs
+                // concurrently.
                 .submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Block doesn't exit until all concurrent tasks complete.
         } 
 
         display("printing results");
 
         // The future::get calls below return immediately since the
-        // scope above won't exit until all tasks complete.
+        // block above won't exit until all tasks complete.
 
         // Print the primality results.  
         primeCheckFutures
@@ -118,7 +123,7 @@ public class ex2 {
 
     /**
      * Check the primality of the {@code integers} param.  This method
-     * also demonstrates how structured concurrency scopes can nest.
+     * also demonstrates how structured concurrency blocks can nest.
      *
      * @param integers The {@link List} of {@link Integer} objects upon
      *                 which to check for primality
@@ -126,10 +131,9 @@ public class ex2 {
      *         {@link PrimeResult} objects
      */
     private static List<Future<PrimeResult>> checkPrimalities(List<Integer> integers) {
-
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new auto-close
-        // feature of ExecutorService).
+        // Create a new block for executing virtual tasks, which only
+        // exits after all tasks are complete (uses the new
+        // AutoClosable feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return integers
                 // Create a stream of Integers.
@@ -139,15 +143,15 @@ public class ex2 {
                 .map(primeCandidate ->
                      checkPrimality(primeCandidate, executor))
 
-                // Trigger intermediate processing and collect the
-                // results into a List.
+                // Trigger intermediate processing and collect results
+                // into a List of Future<PrimeResult> objects.
                 .collect(toList());
         }
     }
 
     /**
      * Compute the GCD of the {@code integers} param.  This method
-     * also demonstrates how structured concurrency scopes can nest.
+     * also demonstrates how structured concurrency blocks can nest.
      *
      * @param integers The {@link List} of {@link Integer} objects upon
      *                 which to compute the GCD
@@ -155,21 +159,21 @@ public class ex2 {
      *         {@link GCDResult} objects
      */
     private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new auto-close
-        // feature of ExecutorService).
+        // Create a new block for executing virtual tasks, which only
+        // exits after all tasks are complete (uses the new
+        // AutoClosable feature of ExecutorService).
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return StreamSupport
-                // Convert the List of Integer objects into a stream
-                // of two-element Integers representing the values to
-                // compute the GCD for.
+                // Convert the List of Integer objects into a
+                // sequential stream of two-element Integer objects
+                // used to compute the GCD.
                 .stream(new ListSpliterator(integers), false)
 
                 // Compute the GCD in the context of the executor.
                 .map(param -> computeGCD(param, executor))
 
-                // Trigger intermediate processing and return the
-                // results as a List.
+                // Trigger intermediate processing and collect results
+                // into a List of Future<GCDResult> objects.
                 .collect(toList());
         }
     }
@@ -184,7 +188,7 @@ public class ex2 {
     private static Future<PrimeResult> checkPrimality(int primeCandidate,
                                                       ExecutorService executor) {
         return executor
-            // Submit call to executor for concurrent execution.
+            // Submit call to executor to run concurrently.
             .submit(() -> {
                     // Determine if primeCandidate is prime.
                     int result = isPrime(primeCandidate);

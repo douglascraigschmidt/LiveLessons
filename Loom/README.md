@@ -7,4 +7,7 @@ Here's an overview of what's current included in these examples:
 . ex1 - This example demonstrates how to create, start, and use
         virtual and platform Thread objects in Project Loom.
 
-. ex2 - 
+. ex2 - This example demonstrates Project Loom structured concurrency
+        features, which enables a main task to split into several
+        concurrent sub-tasks that run concurrently to competion before
+        the main task can complete.
