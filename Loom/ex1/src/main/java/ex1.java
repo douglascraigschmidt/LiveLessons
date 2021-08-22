@@ -140,33 +140,4 @@ public class ex1 {
         return () -> isPrime(integer);
     }
 
-    /**
-     * This method checks if number {@code primeCandidate} is prime.
-     *
-     * @param primeCandidate The number to check for primality
-     * @return 0 if {@code primeCandidate} is prime, or the smallest
-     *         factor if it is not prime
-     */
-    public static int isPrime(int primeCandidate) {
-        if (primeCandidate > 3)
-            // Use a brute-force algorithm to burn CPU!
-            for (int factor = 2;
-                 factor <= primeCandidate / 2;
-                 ++factor)
-                if (primeCandidate / factor * factor == primeCandidate)
-                    return factor;
-
-        return 0;
-    }
-
-    /**
-     * Display {@code message} after printing thread id.
-     * @param message The message to display
-     */
-    private static void display(String message) {
-        System.out.println("Thread = "
-                               + Thread.currentThread().getId()
-                               + " "
-                               + message);
-    }
 }

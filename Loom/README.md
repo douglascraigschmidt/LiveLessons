@@ -4,5 +4,7 @@ can download from https://jdk.java.net/loom.
 
 Here's an overview of what's current included in these examples:
 
-. ex1 - This example demonstrates various features of Project Loom,
-        including virtual threads and structured concurrency.
+. ex1 - This example demonstrates how to create, start, and use
+        virtual and platform Thread objects in Project Loom.
+
+. ex2 - 

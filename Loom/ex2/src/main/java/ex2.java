@@ -1,7 +1,3 @@
-import utils.ArraySpliterator;
-import utils.GCDResult;
-import utils.PrimeResult;
-
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -10,87 +6,67 @@ import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.Random;
+
+import utils.ListSpliterator;
+import utils.Options;
+import utils.GCDResult;
+import utils.PrimeResult;
 
 import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * This example demonstrates various features of Project Loom,
- * including virtual threads and structured concurrency.  You'll need
- * to install JDK 18 with Project Loom configured, which you can
- * download from https://jdk.java.net/loom.
+ * This example demonstrates Project Loom structured concurrency.
+ * You'll need to install JDK 18 with Project Loom configured, which
+ * you can download from https://jdk.java.net/loom.
  */
-public class ex35 {
+public class ex2 {
     /**
-     * The number of times to recurse.
+     * A List of randomly-generated integers.
      */
-    private static final int sMAX = 500;
-
-    /**
-     * The number of virtual threads to create/start.
-     */
-    private static final int sNUMBER_OF_THREADS = 20_000;
-
-    /**
-     * Values to use for various computations.
-     */
-    private static final Integer[] sBIG_INTS = {
-        999_023_101,
-        999_032_013,
-        998_203_141,
-        999_303_242,
-        455_052_511,
-        179_424_673,
-        989_330_420,
-        989_301_301,
-        998_031_031,
-        999_999_977
-    };
-
+    private static List<Integer> sRANDOM_INTEGERS;
 
     /**
      * Main entry point into the test program.
      */
     public static void main(String[] argv)
         throws ExecutionException, InterruptedException {
-        startManyVirtualThreads();
-        structuredConcurrency();
+        // Initialize any command-line options.
+        Options.instance().parseArgs(argv);
+
+        // Generate the random numbers.
+        generateRandomNumbers();
+
+        // Demonstrate Project Loom structured concurrency.
+        demoStructuredConcurrency();
     }
 
     /**
-     * Demonstrate how to create and start many virtual threads using
-     * Project Loom.
+     * Generate a list of random Integer objects used for prime number
+     * checking.
      */
-    private static void startManyVirtualThreads() {
-        // Create a List of many virtual threads.
-        List<Thread> threads = IntStream
-            // Generate a range of ints.
-            .rangeClosed(1, sNUMBER_OF_THREADS)
+    private static void generateRandomNumbers() {
+        // Generate a list of random integers.
+        sRANDOM_INTEGERS = new Random()
+            // Generate the given # of large random ints.
+            .ints(Options.instance().numberOfElements(),
+                  Integer.MAX_VALUE - Options.instance().numberOfElements(),
+                  Integer.MAX_VALUE)
 
-            // Print out a diagnostic every 1,000 ints.
-            .peek(i -> {
-                    if (i % 1_000 == 0)
-                        System.out.println(i + " thread started");
-                })
-
-            // Make a new virtual thread for each int.
-            .mapToObj(__ -> makeThread(() -> looper(1, sMAX)))
-
-            // Collect the Thread objects into a List.
+            // Convert each primitive int to Integer.
+            .boxed()    
+                   
+            // Trigger intermediate operations and collect into a
+            // List.
             .collect(toList());
-
-        // Start all virtual threads.
-        threads.forEach(Thread::start);
-
-        // Join all virtual threads.
-        threads.forEach(rethrowConsumer(Thread::join));
     }
 
     /**
      * Demonstrate Project Loom structured concurrency.
      */
-    public static void structuredConcurrency()
+    public static void demoStructuredConcurrency()
         throws ExecutionException, InterruptedException {
 
         // Create a List to hold Future<PrimeResult> objects.
@@ -103,10 +79,10 @@ public class ex35 {
         // exits after all tasks are complete.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             // Concurrently check primalities.
-            primeCheckFutures = executor.submit(() -> checkPrimalities(sBIG_INTS));
+            primeCheckFutures = executor.submit(() -> checkPrimalities(sRANDOM_INTEGERS));
 
             // Concurrently compute GCDs.
-            gcdComputeFutures = executor.submit(() -> computeGCDs(sBIG_INTS));
+            gcdComputeFutures = executor.submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
             // Scope doesn't exit until all concurrent tasks complete.
         } 
@@ -140,14 +116,14 @@ public class ex35 {
      *         {@link PrimeResult} objects
      */
     private static List<Future<PrimeResult>> checkPrimalities
-        (Integer[] integers) {
+        (List<Integer> integers) {
 
         // Create a new scope for executing virtual tasks, which only
         // exits after all tasks are complete.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
-            return Stream
+            return integers
                 // Create a stream of Integers.
-                .of(integers)
+                .stream()
 
                 // Concurrently check the primality of each number.
                 .map(primeCandidate -> checkPrimality(primeCandidate, executor))
@@ -166,15 +142,15 @@ public class ex35 {
      * @return A {@link List} of {@link Future} objects that return
      *         {@link GCDResult} objects
      */
-    private static List<Future<GCDResult>> computeGCDs(Integer[] integers) {
+    private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
         // Create a new scope for executing virtual tasks, which only
         // exits after all tasks are complete.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return StreamSupport
-                // Convert the array of Integer objects into a stream
+                // Convert the List of Integer objects into a stream
                 // of two-element Integers representing the values to
                 // compute the GCD for.
-                .stream(new ArraySpliterator(integers), false)
+                .stream(new ListSpliterator(integers), false)
 
                 // Compute the GCD in the context of the executor.
                 .map(param -> computeGCD(param, executor))
@@ -239,17 +215,6 @@ public class ex35 {
     }
 
     /**
-     * Display {@code message} after printing thread id.
-     * @param message The message to display
-     */
-    private static void display(String message) {
-        System.out.println("Thread = "
-                           + Thread.currentThread().getId()
-                           + " "
-                           + message);
-    }
-
-    /**
      * Provides a recursive implementation of Euclid's algorithm to
      * compute the "greatest common divisor" (GCD).
      */
@@ -263,46 +228,15 @@ public class ex35 {
     }
 
     /**
-     * A factory method that makes a new unstarted virtual thread that
-     * runs the given {@code runnable}.
-     */
-    public static Thread makeThread(Runnable runnable) {
-        return Thread.ofVirtual().unstarted(runnable);
-    }
-
-    /**
-     * Burn CPU time doing a recursive "loop" until count > {@code max}.
+     * This method checks if number {@code primeCandidate} is prime.
      *
-     * @param count The current count
-     * @param max The max number of times to recurse
-     */
-    private static void looper(int count, int max) {
-        // Bail out of recursion when count > max.
-        if (count > max)
-            return;
-
-        // Sleep for a short amount of time.
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Print a diagnostic ever 100 recursions.
-        if (count % 100 == 0)
-            System.out.println("Thread id: "+ Thread.currentThread().getId() +" : "+ count);
-
-        // Call looper recursively.
-        looper(count + 1, max);
-    }
-
-    /**
-     * This method provides a brute-force determination of whether
-     * number {@code primeCandidate} is prime.  Returns 0 if it is
-     * prime, or the smallest factor if it is not prime.
+     * @param primeCandidate The number to check for primality
+     * @return 0 if {@code primeCandidate} is prime, or the smallest
+     *         factor if it is not prime
      */
     public static int isPrime(int primeCandidate) {
         if (primeCandidate > 3)
+            // Use a brute-force algorithm to burn CPU!
             for (int factor = 2;
                  factor <= primeCandidate / 2;
                  ++factor)
@@ -310,5 +244,16 @@ public class ex35 {
                     return factor;
 
         return 0;
+    }
+
+    /**
+     * Display {@code message} after printing thread id.
+     * @param message The message to display
+     */
+    private static void display(String message) {
+        System.out.println("Thread = "
+                               + Thread.currentThread().getId()
+                               + " "
+                               + message);
     }
 }

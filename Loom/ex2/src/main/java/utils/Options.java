@@ -27,9 +27,9 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
-     * Number of {@link Thread} and random {@link Integer} objects to create.
+     * Number of random Integer objects to create.
      */
-    private int mNumberOfElements = 2000;
+    private int mNumberOfElements = 20;
 
     /**
      * Create virtual threads if true, otherwise create platform
@@ -55,8 +55,7 @@ public class Options {
     }
 
     /**
-     * @return The number of {@link Thread} and random {@link Integer}
-     *         objects to create
+     * @return Number of random {@link Integer} objects to create
      */
     public int numberOfElements() {
         return mNumberOfElements;
@@ -64,7 +63,7 @@ public class Options {
 
     /**
      * @return True if virtual threads requested, otherwise platform
-     * threads
+     *         threads
      */
     public boolean virtualThreads() {
         return mVirtualThreads;

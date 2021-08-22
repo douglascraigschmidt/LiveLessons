@@ -2,16 +2,17 @@ package utils;
 
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.List;
 
 /**
  *
  */
-public class ArraySpliterator
+public class ListSpliterator
        extends Spliterators.AbstractSpliterator<Integer[]> {
     /**
      *
      */
-    private final Integer[] mInts;
+    private final List<Integer> mInts;
 
     /**
      *
@@ -21,7 +22,7 @@ public class ArraySpliterator
     /**
      * @param mInts
      */
-    public ArraySpliterator(Integer[] mInts) {
+    public ListSpliterator(List<Integer> mInts) {
         super(0, 0);
         this.mInts = mInts;
     }
@@ -31,10 +32,11 @@ public class ArraySpliterator
      */
     @Override
     public boolean tryAdvance(Consumer<? super Integer[]> action) {
-        if (mIndex >= mInts.length)
+        if (mIndex >= mInts.size())
             return false;
         else {
-            action.accept(new Integer[]{mInts[mIndex], mInts[mIndex + 1]});
+            action.accept(new Integer[]{mInts.get(mIndex),
+                                        mInts.get(mIndex + 1)});
             mIndex += 2;
             return true;
         }
