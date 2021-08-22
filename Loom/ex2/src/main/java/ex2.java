@@ -84,9 +84,10 @@ public class ex2 {
         // Future to a List holding Future<GCDResult> objects.
         Future<List<Future<GCDResult>>> gcdComputeFutures;
 
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new
-        // AutoClosable feature of ExecutorService).
+        // Create a new scope to execute virtual tasks, which exits
+        // only after all tasks complete by using the new AutoClosable
+        // feature of ExecutorService in conjunction with a
+        // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             primeCheckFutures = executor
                 // Submit call to executor to check primalities
@@ -131,9 +132,10 @@ public class ex2 {
      *         {@link PrimeResult} objects
      */
     private static List<Future<PrimeResult>> checkPrimalities(List<Integer> integers) {
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new
-        // AutoClosable feature of ExecutorService).
+        // Create a new scope to execute virtual tasks, which exits
+        // only after all tasks complete by using the new AutoClosable
+        // feature of ExecutorService in conjunction with a
+        // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return integers
                 // Create a stream of Integers.
@@ -200,9 +202,10 @@ public class ex2 {
      *         {@link GCDResult} objects
      */
     private static List<Future<GCDResult>> computeGCDs(List<Integer> integers) {
-        // Create a new scope for executing virtual tasks, which only
-        // exits after all tasks are complete (uses the new
-        // AutoClosable feature of ExecutorService).
+        // Create a new scope to execute virtual tasks, which exits
+        // only after all tasks complete by using the new AutoClosable
+        // feature of ExecutorService in conjunction with a
+        // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             return StreamSupport
                 // Convert the List of Integer objects into a
