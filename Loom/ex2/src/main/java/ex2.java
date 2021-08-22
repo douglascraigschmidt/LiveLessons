@@ -211,7 +211,7 @@ public class ex2 {
                 .stream(new ListSpliterator(integers), false)
 
                 // Compute the GCD in the context of the executor.
-                .map(param -> computeGCD(param, executor))
+                .map(params -> computeGCD(params, executor))
 
                 // Trigger intermediate processing and collect results
                 // into a List of Future<GCDResult> objects.
