@@ -27,7 +27,7 @@ public class Options {
     /**
      * Controls how many longs are generated.
      */
-    private int mCount = 100;
+    private int mCount = 50;
 
     /**
      * Controls the max value of the random numbers.

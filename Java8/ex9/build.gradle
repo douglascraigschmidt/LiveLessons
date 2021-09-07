@@ -3,10 +3,13 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
+java.targetCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_16
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+    implementation 'io.projectreactor:reactor-core:3.4.6'
 }

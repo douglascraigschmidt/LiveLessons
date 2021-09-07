@@ -1,7 +1,4 @@
-import utils.Memoizer;
-import utils.Options;
-import utils.RunTimer;
-import utils.StampedLockHashMap;
+import utils.*;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,21 +20,23 @@ import static java.util.stream.Collectors.toMap;
  * This example showcases and benchmarks the use of a Java
  * ConcurrentHashMap, a Java SynchronizedMap, and a HashMap protected
  * with a Java StampedLock are used to compute/cache/retrieve large
- * prime numbers.  This example also demonstrates several advanced
- * features of StampedLock, as well as the use of slicing with the
- * Java streams takeWhile() and dropWhile() operations.
+ * prime numbers.  This example also demonstrates the Java record data
+ * type, several advanced features of StampedLock, and the use of slicing
+ * with the Java streams takeWhile() and dropWhile() operations.
  */
 public class ex9 {
     /**
      * Count the number of calls to isPrime() as a means to determine
      * the benefits of caching.
      */
-    private final AtomicInteger mPrimeCheckCounter;
+    private final AtomicInteger mPrimeCheckCounter =
+        new AtomicInteger(0);
 
     /**
      * Count the number of pending items.
      */
-    private final AtomicInteger mPendingItemCount;
+    private final AtomicInteger mPendingItemCount =
+        new AtomicInteger(0);
 
     /**
      * A list of randomly-generated large integers.
@@ -56,12 +55,6 @@ public class ex9 {
      * Constructor initializes the fields.
      */
     ex9(String[] argv) {
-        // Initialize this count to 0.
-        mPrimeCheckCounter = new AtomicInteger(0);
-
-        // Initialize this count to 0.
-        mPendingItemCount = new AtomicInteger(0);
-
         // Parse the command-line arguments.
         Options.instance().parseArgs(argv);
 
@@ -71,6 +64,8 @@ public class ex9 {
 
     /**
      * Generate random data for use by the various hashmaps.
+     *
+     * @return A {@link List} of random {@link Integer} objects
      */
     private List<Integer> generateRandomData() {
         // Get how many integers we should generate.
@@ -128,11 +123,11 @@ public class ex9 {
     }
 
     /**
-     * Time {@code testName} using the given {@code hashMap}.
+     * Time {@code testName} using the given {@code memoizer}.
      *
-     * @param memoizer The memoizer used to cache the prime candidates.
-     * @param testName The name of the test.
-     * @return The memoizer updated during the test.
+     * @param memoizer The memoizer used to cache the prime candidates
+     * @param testName The name of the test
+     * @return The memoizer updated during the test
      */
     private Function<Integer, Integer> timeTest
         (Function<Integer, Integer> memoizer,
@@ -152,7 +147,7 @@ public class ex9 {
      * @param memoizer A cache that maps candidate primes to their
      * smallest factor (if they aren't prime) or 0 if they are prime
      * @param testName Name of the test
-     * @return The memoizer updated during the test.
+     * @return The memoizer updated during the test
      */
     private Function<Integer, Integer> runTest
         (Function<Integer, Integer> memoizer,
@@ -166,7 +161,7 @@ public class ex9 {
         mPrimeCheckCounter.set(0);
 
         this
-            // Generate random large numbers.
+            // Generate a stream of random large numbers.
             .publisher(Options.instance().parallel())
 
             // Print stats if we're debugging.
@@ -196,7 +191,7 @@ public class ex9 {
     }
 
     /**
-     * Publish a stream of random large numbers.
+     * Publish a stream of random large {@link Integer} objects.
      *
      * @param parallel True if the stream should be parallel, else false
      * @return Return a stream containing random large numbers
@@ -217,33 +212,33 @@ public class ex9 {
     /**
      * Check if {@code primeCandidate} is prime or not.
      * 
-     * @param primeCandidate The number to check if it's prime
-     * @param memoizer A cache that avoids rechecking if a # is prime
-     * @return A {@code Result} object that contains the original
+     * @param primeCandidate The number to check for primality
+     * @param memoizer A cache that avoids rechecking if a number is prime
+     * @return A {@link PrimeResult} record that contains the original
      * {@code primeCandidate} and either 0 if it's prime or its
      * smallest factor if it's not prime.
      */
-    private Result checkIfPrime(Integer primeCandidate,
-                                Function<Integer, Integer> memoizer) {
-        // Return a tuple containing the prime candidate and the
+    private PrimeResult checkIfPrime(Integer primeCandidate,
+                                     Function<Integer, Integer> memoizer) {
+        // Return a record containing the prime candidate and the
         // result of checking if it's prime.
-        return new Result(primeCandidate,
-                          memoizer.apply(primeCandidate));
+        return new PrimeResult(primeCandidate,
+                               memoizer.apply(primeCandidate));
     }
 
     /**
      * Handle the result by printing it if debugging is enabled.
      *
-     * @param result The result of checking if a number is prime.
+     * @param result The result of checking if a number is prime
      */
-    private void handleResult(Result result) {
+    private void handleResult(PrimeResult result) {
         // Print the results.
-        if (result.mSmallestFactor != 0) {
-            Options.debug(result.mPrimeCandidate
+        if (result.smallestFactor() != 0) {
+            Options.debug(result.primeCandidate()
                           + " is not prime with smallest factor "
-                          + result.mSmallestFactor);
+                          + result.smallestFactor());
         } else {
-            Options.debug(result.mPrimeCandidate
+            Options.debug(result.primeCandidate()
                           + " is prime");
         }
 
@@ -253,8 +248,9 @@ public class ex9 {
 
     /**
      * This method provides a brute-force determination of whether
-     * number {@code primeCandidate} is prime.  Returns 0 if it is
-     * prime, or the smallest factor if it is not prime.
+     * number {@code primeCandidate} is prime.
+     *
+     * @return 0 if it is prime or the smallest factor if it is not prime
      */
     private Integer isPrime(Integer primeCandidate) {
         // Increment the counter to indicate a prime candidate wasn't
@@ -280,8 +276,8 @@ public class ex9 {
 
     /**
      * Demonstrate how to slice by applying the Java streams {@code
-     * dropWhile()} and {@code takeWhile()} operations to the {@code
-     * map} parameter.
+     * dropWhile()} and {@code takeWhile()} operations to the {@link
+     * Map} parameter.
      */
     private void demonstrateSlicing(Map<Integer, Integer> map) {
         // Sort the map by its values.
@@ -298,7 +294,7 @@ public class ex9 {
     }
     
     /**
-     * Print out the prime numbers in the {@code sortedMap}.
+     * Print out the prime numbers in {@code sortedMap}.
      */
     private void printPrimes(Map<Integer, Integer> sortedMap) {
         // Create a list of prime integers.
@@ -324,7 +320,7 @@ public class ex9 {
     }
 
     /**
-     * Print out the non-prime numbers and their factors in the {@code
+     * Print out the non-prime numbers and their factors in {@code
      * sortedMap}.
      */
     private void printNonPrimes(Map<Integer, Integer> sortedMap) {
@@ -349,9 +345,10 @@ public class ex9 {
     }
 
     /**
-     * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
+     * Sort {@code map} via the {@code comparator}.
+     *
      * @param map The map to sort
-     * @param comparator The comparator to compare map entries.
+     * @param comparator The comparator to compare map entries
      * @return The sorted map
      */
     private Map<Integer, Integer> sortMap
@@ -375,29 +372,6 @@ public class ex9 {
                            Map.Entry::getValue,
                            (e1, e2) -> e2,
                            LinkedHashMap::new));
-    }
-
-    /**
-     * The result returned from {@code transform()}.
-     */
-    private static class Result {
-        /**
-         * Value that was evaluated for primality.
-         */
-        int mPrimeCandidate;
-
-        /**
-         * Result of the isPrime() method.
-         */
-        int mSmallestFactor;
-
-        /**
-         * Constructor initializes the fields.
-         */
-        public Result(int primeCandidate, int smallestFactor) {
-            mPrimeCandidate = primeCandidate;
-            mSmallestFactor = smallestFactor;
-        }
     }
 }
     

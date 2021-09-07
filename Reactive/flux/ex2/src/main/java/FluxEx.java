@@ -4,6 +4,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFractionUtils;
+import utils.PrimeResult;
 
 import java.math.BigInteger;
 import java.time.Duration;
@@ -237,7 +238,7 @@ public class FluxEx {
      * This method checks whether the {@code primeCandidate} is prime or not.
      *
      * @param primeCandidate The number to check for the prime factor.
-     * @return a PrimeResult that contains the prime candidate and
+     * @return a utils.PrimeResult that contains the prime candidate and
      *         either 0 (if the prime candidate is prime) or the
      *         smallest factor (if it's not prime)
      */
