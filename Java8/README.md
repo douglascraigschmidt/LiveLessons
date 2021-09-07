@@ -50,10 +50,11 @@ Here's an overview of what's current included in these examples:
 
 . ex9 - This example showcases and benchmarks the use of a Java
         ConcurrentHashMap, a Java SynchronizedMap, and a HashMap
-        protected with a Java StampedLock are used to
-        compute/cache/retrieve prime numbers.  This example also
-        demonstrates the use of stream slicing with the Java streams
-        takeWhile() and dropWhile() operations.
+        protected with a Java StampedLock are used to compute/
+        cache/retrieve large prime numbers.  This example also
+        demonstrates the Java record data type, several advanced
+        features of StampedLock, and the use of slicing with the Java
+        streams takeWhile() and dropWhile() operations.
 
 . ex10 - This example shows the use of predicate lambda expressions in
          the context of a Java ConcurrentHashMap removeIf() method.

@@ -7,6 +7,7 @@ import java.util.stream.StreamSupport;
  * streams to traverse each word in a list containing a quote from a
  * famous Shakespeare play.
  */
+@SuppressWarnings({"UnnecessaryContinue", "SimplifyStreamApiCallChains"})
 public class ex13 {
     /**
      * Main entry point into the program.
@@ -39,7 +40,7 @@ public class ex13 {
         // Traverse through the words in the quote and print each one.
         for (Spliterator<String> s = quote.spliterator();
              // Keep iterating until there are no more words.
-             s.tryAdvance(System.out::print) != false;
+             s.tryAdvance(System.out::print);
              )
             continue;
     }
@@ -58,11 +59,13 @@ public class ex13 {
         Spliterator<String> firstHalf = secondHalf.trySplit();
 
         System.out.println("--Traversing the first half of the spliterator");
+
         // Use the bulk forEachRemaining() method to print out the
         // first half of the spliterator.
         firstHalf.forEachRemaining(System.out::print);
 
         System.out.println("\n--Traversing the second half of the spliterator");
+
         // Use the bulk forEachRemaining() method to print out the
         // second half of the spliterator.
         secondHalf.forEachRemaining(System.out::print);
