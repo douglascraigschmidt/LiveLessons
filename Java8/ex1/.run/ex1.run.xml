@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ex1" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="ex1" />
+    <module name="Example 1" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -2,9 +2,11 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * This example shows how to use Java 8 lambda expressions and method
- * references to sort elements of a collection.  It also shows how to
- * use the Java 8 forEach() method.
+ * This example shows how to use Java lambda expressions and method
+ * references to create a closure, as well as to sort elements of a
+ * collection using a Java anonymous inner class, lambda expression,
+ * and method reference.  It also shows how to use the Java 8
+ * forEach() method for Streams and collections.
  */
 public class ex1 {
     /**
@@ -47,7 +49,7 @@ public class ex1 {
 
     static public void main(String[] argv) throws InterruptedException {
         // Run the closure example.
-         new ClosureExample();
+        new ClosureExample();
 
         // The array to sort and print.
         String[] nameArray = {
@@ -84,7 +86,7 @@ public class ex1 {
 
         // Sort using an anonymous inner class.
         Arrays.sort(nameArrayCopy, new Comparator<String>() {
-                public int compare(String s,String t) { 
+                public int compare(String s, String t) { 
                     return s.toLowerCase().compareTo(t.toLowerCase()); 
                 }
             });
@@ -126,8 +128,8 @@ public class ex1 {
         Arrays.sort(nameArrayCopy,
                     String::compareToIgnoreCase);
 
-        // Print out the sorted contents using the Java 8 forEach()
-        // method.
+        // Print out the sorted contents using the Java 8 Stream
+        // forEach() method.
         Stream.of(nameArrayCopy).forEach(System.out::print);
     }
 
@@ -145,8 +147,8 @@ public class ex1 {
         Arrays.sort(nameArrayCopy,
                     String::compareToIgnoreCase);
 
-        // Print out the sorted contents using the Java 8 forEach()
-        // method.
+        // Print out the sorted contents using the Java 8 Iterable
+        // forEach() method.
         List.of(nameArrayCopy).forEach(System.out::print);
     }
 }

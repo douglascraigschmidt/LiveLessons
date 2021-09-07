@@ -9,7 +9,8 @@ import java.util.function.Predicate;
  */
 public class ex10 {
     /**
-     * This factory method creates a ConcurrentHashMap containing the names of Stooges and their IQs.
+     * This factory method creates a ConcurrentHashMap containing the
+     * names of Stooges and their IQs.
      */
     static private Map<String, Integer> makeMap() {
        return new ConcurrentHashMap<String, Integer>()  {

@@ -2,10 +2,7 @@ package expressiontree.iterators;
 
 import expressiontree.tree.ExpressionTree;
 
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 

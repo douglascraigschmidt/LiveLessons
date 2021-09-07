@@ -90,12 +90,12 @@ public class ex2 {
         // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             primeCheckFutures = executor
-                // Submit call to executor to check primalities
-                // concurrently.
+                // submit() starts a virtual thread to check
+                // primalities concurrently.
                 .submit(() -> checkPrimalities(sRANDOM_INTEGERS));
 
             gcdComputeFutures = executor
-                // Submit call to executor to compute GCDs
+                // submit() starts a virtual thread to compute GCDs
                 // concurrently.
                 .submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
@@ -141,8 +141,9 @@ public class ex2 {
                 // Create a stream of Integers.
                 .stream()
 
-                // Concurrently check the primality of each number.
+                // Check the primality of each number concurrently.
                 .map(primeCandidate ->
+                     // Use executor to start a virtual thread.
                      checkPrimality(primeCandidate, executor))
 
                 // Trigger intermediate processing and collect results
@@ -161,7 +162,8 @@ public class ex2 {
     private static Future<PrimeResult> checkPrimality(int primeCandidate,
                                                       ExecutorService executor) {
         return executor
-            // Submit call to executor to run concurrently.
+            // submit() starts a virtual thread to check primality
+            // concurrently.
             .submit(() -> {
                     // Determine if primeCandidate is prime.
                     int result = isPrime(primeCandidate);
@@ -213,8 +215,10 @@ public class ex2 {
                 // used to compute the GCD.
                 .stream(new ListSpliterator(integers), false)
 
-                // Compute the GCD in the context of the executor.
-                .map(params -> computeGCD(params, executor))
+                // Compute all the GCDs concurrently.
+                .map(params -> 
+                     // Use executor to start a virtual thread.
+                     computeGCD(params, executor))
 
                 // Trigger intermediate processing and collect results
                 // into a List of Future<GCDResult> objects.
@@ -226,14 +230,15 @@ public class ex2 {
      * Compute whether {@code primeCandidate} is a prime number or not.
      *
      * @param integers A two-element array containing the numbers to
-     *                 compute the GCD for
+     *                 compute the GCD
      * @param executor {@link ExecutorService} to perform the task
      * @return A {@link Future} that emits a {@link GCDResult}
      */
     private static Future<GCDResult> computeGCD(Integer[] integers,
                                                 ExecutorService executor) {
         return executor
-            // Submit call to executor for concurrent execution.
+            // submit() starts a virtual thread to compute GCD
+            // concurrently.
             .submit(() -> {
                     // Compute GCD.
                     int result = gcd(integers[0], integers[1]);

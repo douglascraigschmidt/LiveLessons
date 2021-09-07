@@ -6,9 +6,9 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example two zap*() method implementations that remove strings
- * from a list of strings.  One method uses basic Java 7 features and
- * the other uses basic modern Java features.
+ * This example shows two zap*() method implementations that remove
+ * strings from a list of strings.  One method uses basic Java 7
+ * features and the other uses basic modern Java features.
  */
 public class ex0 {
     static public void main(String[] argv) {
@@ -42,8 +42,8 @@ public class ex0 {
     }        
 
     /**
-     * Remove any strings matching @a omit from the list of strings
-     * using basic Java 7 features.
+     * Remove any strings matching {@code omit} from the list of
+     * strings using basic Java 7 features.
      */
     static List<String> zap7(List<String> lines,
                              String omit) {
@@ -52,7 +52,7 @@ public class ex0 {
             new ArrayList<>(); 
 
         // Iterate through all the lines in the list and remove any
-        // that match @a omit.
+        // that match omit.
         for (String line : lines) 
             if (!omit.equals(line))
                 res.add(line);   
@@ -62,8 +62,8 @@ public class ex0 {
     }
 
     /**
-     * Remove any strings matching @a omit from the list of strings
-     * using basic modern Java features.
+     * Remove any strings matching {@code omit} from the list of
+     * strings using basic modern Java features.
      */
     static List<String> zapModern(List<String> lines,
                                   String omit) {
@@ -71,7 +71,7 @@ public class ex0 {
             // Convert the list to a stream.
             .stream()
 
-            // Remove any methods that match @a omit.
+            // Remove any strings that match omit.
             .filter(not(omit::equals))
 
             // Trigger intermediate operation processing and return

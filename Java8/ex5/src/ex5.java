@@ -1,8 +1,8 @@
 import java.util.*;
 
 /**
- * This example shows how a Java 8 Consumer interface can be used with
- * forEach() to print out the values in a list by binding the
+ * This example shows how a modern Java Consumer interface can be used
+ * with forEach() to print out the values in a list by binding the
  * System.out println() method to the forEach() Consumer parameter.
  * It also shows how to sort a list in ascending and descending order
  * using a Comparator and a Function interface.

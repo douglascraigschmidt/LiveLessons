@@ -146,7 +146,7 @@ public class ex8 {
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction = BigFraction
-                    .reduce(unreducedFraction);
+            .reduce(unreducedFraction);
 
             sb.append("     unreducedFraction "
                       + unreducedFraction.toString()

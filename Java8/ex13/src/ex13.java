@@ -15,9 +15,12 @@ public class ex13 {
         // Create a list of strings containing words from a famous
         // quote from the Shakespeare play "Hamlet."
         List<String> bardQuote =
-            List.of("This ", "above ", "all- ", "to ", "thine ", "own ", "self ", "be ", "true", ",\n",
-                    "And ", "it ", "must ", "follow ", "as ", "the ", "night ", "the ", "day", ",\n",
-                    "Thou ", "canst ", "not ", "then ", "be ", "false ", "to ", "any ", "man.");
+            List.of("This ", "above ", "all- ", 
+                    "to ", "thine ", "own ", "self ", "be ", "true", ",\n",
+                    "And ", "it ", "must ", "follow ", 
+                    "as ", "the ", "night ", "the ", "day", ",\n",
+                    "Thou ", "canst ", "not ", "then ", 
+                    "be ", "false ", "to ", "any ", "man.");
 
         // Show the various spliterator examples.
         showTryAdvance(bardQuote);
