@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ex7" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="CrDemo$CrDemoEx" />
+    <module name="Example 7" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
