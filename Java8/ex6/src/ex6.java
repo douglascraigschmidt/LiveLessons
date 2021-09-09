@@ -1,9 +1,9 @@
 import java.util.*;
 
 /**
- * This example shows how a Java 8 Supplier interface can be used to
+ * This example shows how a Java Supplier interface can be used to
  * print a default value if a key is not found in a map.  It also
- * shows how to use the Java 8 Optional class.
+ * shows how to use the Java Optional class.
  */
 public class ex6 {
     static public void main(String[] argv) {
@@ -28,7 +28,7 @@ public class ex6 {
                            // Pass a Supplier lambda expression that
                            // returns a default value if the being is
                            // not found.
-                           + disposition.orElse("unknown"));
+                           + disposition.orElseGet(() -> "unknown"));
     }
 }
 

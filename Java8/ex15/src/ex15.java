@@ -1,12 +1,7 @@
-import com.sun.istack.internal.NotNull;
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.stream.*;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-import static java.lang.Character.toLowerCase;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,7 +20,7 @@ public class ex15 {
      */
     public static void main(String[] args) {
         // Override the number of iterations if user requests it.
-        sNUMBER = args.length > 0 ? Long.valueOf(args[0]) : sNUMBER;
+        sNUMBER = args.length > 0 ? Long.parseLong(args[0]) : sNUMBER;
 
         ex15 test = new ex15();
 
@@ -38,7 +33,7 @@ public class ex15 {
         // cannot be split effectively.
         test.testStreamIterate(true, sNUMBER);
 
-        // This sequental variant will perform poorly since iterate()
+        // This sequential variant will perform poorly since iterate()
         // is relatively inefficient.
         test.testStreamIterate(false, sNUMBER);
 
@@ -53,8 +48,8 @@ public class ex15 {
 
     /**
      * Use a stream and the Stream.iterate() operation to compute the
-     * sqrt of the first @a number even numbers.  If @a parallel is
-     * true use a parallel stream, else use a sequential stream.
+     * sqrt of the first {@code number} even numbers.  If {@code parallel}
+     * is true use a parallel stream, else use a sequential stream.
      */
     private void testStreamIterate(boolean parallel,
                                    long number) {
@@ -102,8 +97,9 @@ public class ex15 {
 
     /**
      * Use a stream and the LongStream.range() operation to compute
-     * the sqrt of the first @a number even numbers.  If @a parallel
-     * is true use a parallel stream, else use a sequential stream.
+     * the sqrt of the first {@code number} even numbers.  If {@code
+     * parallel} is true use a parallel stream, else use a sequential
+     * stream.
      */
     private void testStreamRange(boolean parallel,
                                  long number) {
@@ -178,7 +174,7 @@ public class ex15 {
      * Return the sqrt of @a number.
      */
     private Double findSQRT(long number){
-        Double v = Math.sqrt(number);
+        var v = Math.sqrt(number);
         /*
           System.out.println("findSQRT:: "
           + number

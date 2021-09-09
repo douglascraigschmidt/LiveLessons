@@ -27,7 +27,7 @@ public class Options {
     /**
      * Controls how many longs are generated.
      */
-    private int mCount = 50;
+    private int mCount = 500;
 
     /**
      * Controls the max value of the random numbers.
@@ -56,7 +56,7 @@ public class Options {
      * Keeps track of whether to run the tests using a sequential or
      * parallel stream.
      */
-    private boolean mParallel;
+    private boolean mParallel = true;
 
     /**
      * Method to return the one and only singleton uniqueInstance.

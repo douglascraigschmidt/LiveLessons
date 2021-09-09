@@ -1,9 +1,9 @@
 import java.util.function.Supplier;
 
 /**
- * This example of shows how the Java 8 functional interfaces
+ * This example of shows how the Java functional interfaces
  * (including Supplier and a custom functional interface) can be used
- * in conjunction with Java 8 constructor references.
+ * in conjunction with Java constructor references.
  */
 public class CrDemo
        implements Runnable {
@@ -97,7 +97,7 @@ public class CrDemo
      * its run() method.
      */
     private static <T extends Runnable> void runDemo(Supplier<T> factory) {
-       factory.get().run();
+        factory.get().run();
     }
 
     /**
@@ -114,7 +114,7 @@ public class CrDemo
      * three-parameter constructor reference.
      */
     private static void threeParamConstructorRef() {
-        // Assign a constructor reference to a customize functional
+        // Assign a constructor reference to a customized functional
         // interface that acts as a factory to create a
         // three-parameter constructor for CrDemo.
         TriFactory<String, Integer, Long, CrDemo> factory = 

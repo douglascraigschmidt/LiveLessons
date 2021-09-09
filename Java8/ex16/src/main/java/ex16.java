@@ -36,7 +36,7 @@ public class ex16 {
     /**
      * Max number of times to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 50000;
+    private static final int sMAX_ITERATIONS = 10000;
 
     /**
      * Default factorial number.  
