@@ -34,13 +34,13 @@ Here's an overview of what's current included in these examples:
         parameter.  It also shows how to sort a list in ascending and
         descending order using a Comparator and a Function interface.
 
-. ex6 - This example shows how a Java 8 Supplier interface can be used
-        to print a default value if a key is not found in a map.  It also
-        shows how to use the Java 8 Optional class.
+. ex6 - This example shows how a Java Supplier interface can be used
+        in conjunction with the Java Optional class to print a default
+        value if a key is not found in a map.
   
-. ex7 - This example of shows how the Java 8 functional interfaces
+. ex7 - This example of shows how the Java functional interfaces
         (including Supplier and a custom functional interface) can be
-        used in conjunction with Java 8 constructor references.
+        used in conjunction with Java constructor references.
   
 . ex8 - This example shows how to reduce and/or multiply big fractions
         using a wide range of features in the Java completable futures
@@ -49,9 +49,10 @@ Here's an overview of what's current included in these examples:
         methods.
 
 . ex9 - This example showcases and benchmarks the use of a Java
-        ConcurrentHashMap, a Java SynchronizedMap, and a HashMap
-        protected with a Java StampedLock are used to compute/
-        cache/retrieve large prime numbers.  This example also
+        object-oriented and functional programming feature in the
+        context of a Java ConcurrentHashMap, a Java SynchronizedMap,
+        and a HashMap protected with a Java StampedLock used to
+        compute/cache/retrieve large prime numbers.  This example also
         demonstrates the Java record data type, several advanced
         features of StampedLock, and the use of slicing with the Java
         streams takeWhile() and dropWhile() operations.

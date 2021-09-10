@@ -1,9 +1,9 @@
 import java.util.function.Supplier;
 
 /**
- * This example of shows how the Java functional interfaces
- * (including Supplier and a custom functional interface) can be used
- * in conjunction with Java constructor references.
+ * This example of shows how the Java functional interfaces (including
+ * Supplier and a custom functional interface) can be used in
+ * conjunction with Java constructor references.
  */
 public class CrDemo
        implements Runnable {

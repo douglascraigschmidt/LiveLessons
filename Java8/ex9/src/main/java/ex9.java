@@ -18,11 +18,13 @@ import static java.util.stream.Collectors.toMap;
 
 /**
  * This example showcases and benchmarks the use of a Java
- * ConcurrentHashMap, a Java SynchronizedMap, and a HashMap protected
- * with a Java StampedLock are used to compute/cache/retrieve large
- * prime numbers.  This example also demonstrates the Java record data
- * type, several advanced features of StampedLock, and the use of slicing
- * with the Java streams takeWhile() and dropWhile() operations.
+ * object-oriented and functional programming feature in the context
+ * of a Java ConcurrentHashMap, a Java SynchronizedMap, and a HashMap
+ * protected with a Java StampedLock used to compute/cache/retrieve
+ * large prime numbers.  This example also demonstrates the Java
+ * record data type, several advanced features of StampedLock, and the
+ * use of slicing with the Java streams takeWhile() and dropWhile()
+ * operations.
  */
 public class ex9 {
     /**

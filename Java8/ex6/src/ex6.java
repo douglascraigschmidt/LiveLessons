@@ -1,9 +1,9 @@
 import java.util.*;
 
 /**
- * This example shows how a Java Supplier interface can be used to
- * print a default value if a key is not found in a map.  It also
- * shows how to use the Java Optional class.
+ * This example shows how a Java Supplier interface can be used in
+ * conjunction with the Java Optional class to print a default value
+ * if a key is not found in a map.
  */
 public class ex6 {
     static public void main(String[] argv) {
