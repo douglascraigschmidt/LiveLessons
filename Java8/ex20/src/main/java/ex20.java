@@ -91,7 +91,7 @@ public class ex20 {
      */
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
-        // Delete any the filtered images from the previous run.
+        // Delete any images from the previous run.
         deleteDownloadedImages();
 
         // Get the list of files to the downloaded images.
