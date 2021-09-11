@@ -11,3 +11,9 @@ Here's an overview of what's current included in these examples:
         features, which enables a main task to split into several
         concurrent sub-tasks that run concurrently to competion before
         the main task can complete.
+
+. ex3 - This example compares and contrasts the programming models and
+        performance results of Java parallel streams, completable
+        futures, and Project Loom structured concurrency when applied
+        to download many images from a remote web server.
+

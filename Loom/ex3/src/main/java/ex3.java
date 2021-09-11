@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 
 /**
  * This example compares and contrasts the programming models and
- * performance results of Java parallel streams and Project Loom
- * structured concurrency when applied to download many images from a
- * remote web server.
+ * performance results of Java parallel streams, completable futures,
+ * and Project Loom structured concurrency when applied to download
+ * many images from a remote web server.
  */
 public class ex3 {
     /**
@@ -115,9 +115,11 @@ public class ex3 {
     private Void testDownloadPS(Function<URL, File> downloadAndStoreImage,
                                 String testName) {
         // Get the list of files to the downloaded images.
-        List<File> imageFiles = Options.instance().getUrlList()
-            // Convert the URLs in the input list into a stream and
-            // process them in parallel.
+        List<File> imageFiles = Options.instance()
+            // Get the List of URLs.
+            .getUrlList()
+
+            // Convert List into a parallel stream.
             .parallelStream()
 
             // Transform URL to a File by downloading each image via
@@ -155,7 +157,7 @@ public class ex3 {
             // its URL.
             .map(url -> CompletableFuture
                  // Download each image and store it in a file
-                 // asychronously.
+                 // asynchronously.
                  .supplyAsync(() ->
                               downloadAndStoreImage(url)))
 
