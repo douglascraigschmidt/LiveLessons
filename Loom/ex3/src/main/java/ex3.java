@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -13,6 +14,7 @@ import utils.Options;
 import utils.Image;
 import utils.FileAndNetUtils;
 import utils.RunTimer;
+import utils.FuturesCollector;
 
 import java.io.File;
 import java.net.URL;
@@ -54,17 +56,20 @@ public class ex3 {
                            + Runtime.getRuntime().availableProcessors()
                            + " cores available");
 
-        // Runs the tests using the using the Java parallel streams
-        // framework.
+        // Runs the tests using the Java parallel streams framework.
         runTest(this::testDownloadPS,
                 this::downloadAndStoreImage,
                 "testParallelStreamDownload()");
 
-        // Runs the tests using the using Project Loom's structured
-        // concurrency model.
+        // Runs the tests using Project Loom's structured concurrency model.
         runTest(this::testDownloadSC,
                 this::downloadAndStoreImage,
                 "testStructuredConcurrencyDownload()");
+
+        // Runs the tests using the Java completable futures framework.
+        runTest(this::testDownloadCF,
+                this::downloadAndStoreImage,
+                "testCompletableFuturesDownload()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -73,7 +78,7 @@ public class ex3 {
     }
 
     /**
-     * Run the {@code test} named {@code testName} by appying the
+     * Run the {@code test} named {@code testName} by applying the
      * {@code downloadAndStoreImage} function.
      *
      * @param test A {@link BiFunction} that runs the test
@@ -84,7 +89,7 @@ public class ex3 {
     private void runTest(BiFunction<Function<URL, File>, String, Void> test,
                          Function<URL, File> downloadAndStoreImage,
                          String testName) {
-        // Let the system garbage collect to avoid purturbing results.
+        // Let the system garbage collect to avoid perturbing results.
         System.gc();
 
         // Delete any images from the previous run.
@@ -100,7 +105,7 @@ public class ex3 {
     }
 
     /**
-     * This method uses parallel streams to run the tests via the
+     * This method uses Java parallel streams to run the tests via the
      * {@code downloadAndStoreImage} function.
      *
      * @param downloadAndStoreImage A {@link Function} that downloads
@@ -125,6 +130,41 @@ public class ex3 {
 
         // Print the statistics for this test run.
         printStats(testName, imageFiles.size());
+        return null;
+    }
+
+    /**
+     * This method uses Java completable futures to run the tests via
+     * the {@code downloadAndStoreImage} function.
+     *
+     * @param downloadAndStoreImage A {@link Function} that downloads
+     *                              and stores an image
+     * @param testName The name of the test that's being run
+     */
+    private Void testDownloadCF(Function<URL, File> downloadAndStoreImage,
+                                String testName) {
+        // Get the list of files to the downloaded images.
+        CompletableFuture<List<File>> imageFilesFuture = Options.instance()
+            // Get the List of URLs.
+            .getUrlList()
+
+            // Convert the List to a stream.
+            .stream()
+
+            // Transform URL to a File by downloading each image via
+            // its URL.
+            .map(url -> CompletableFuture
+                 // Download each image and store it in a file
+                 // asychronously.
+                 .supplyAsync(() ->
+                              downloadAndStoreImage(url)))
+
+            // Terminate the stream and collect the results into list
+            // of images.
+            .collect(FuturesCollector.toFuture());
+
+        // Print the statistics for this test run.
+        printStats(testName, imageFilesFuture.join().size());
         return null;
     }
 
