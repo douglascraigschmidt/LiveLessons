@@ -7,12 +7,12 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
 /**
- * This program shows many Java Streams terminal operations, including
- * forEach*(), collect(), and several variants of reduce().  In
- * addition, it includes a non-Java 8 example as a baseline.  It also
- * shows how Java Streams can be used with "pure" functions, i.e.,
- * functions whose return values are only determined by their input
- * values, without any side effects.
+ * This program shows many modern Java Streams terminal operations,
+ * including forEach*(), collect(), and several variants of reduce().
+ * In addition, it includes a classic Java example as a baseline.  It
+ * also shows how Java Streams can be used with "pure" functions,
+ * i.e., functions whose return values are only determined by their
+ * input values, without any side effects.
  */
 public class ex12  {
     static public void main(String[] argv) {
@@ -20,7 +20,7 @@ public class ex12  {
         ex12 ex = new ex12();
 
         // Demonstrate various approaches.
-        ex.runNonJava8();
+        ex.runClassicJava();
         ex.runForEach();
         ex.runFlatMapLimit();
         ex.runForEachOfConcatenation();
@@ -35,9 +35,9 @@ public class ex12  {
     }
 
     /**
-     * Capitalize @a s by making the first letter uppercase and the
-     * rest lowercase.  Note that this is a "pure" function whose
-     * return value is only determined by its input.
+     * Capitalize {@code s} by making the first letter uppercase and
+     * the rest lowercase.  This "pure" function's return value is
+     * only determined by its input.
      */
     private String capitalize(String s) {
         if (s.length() == 0)
@@ -52,19 +52,19 @@ public class ex12  {
     }
 
     /**
-     * Run an example using only Java 7 features.  This serve as a
-     * baseline for comparing the Java 8 solutions.
+     * Run an example using only classic Java features, which serves
+     * as a baseline for comparing with modern Java solutions.
      */
-    private void runNonJava8() {
-        System.out.println("Results from runNonJava8():");
+    private void runClassicJava() {
+        System.out.println("Results from runClassicJava():");
 
         List<String> listOfCharacters = new LinkedList<>
-            (Arrays.asList("horatio",
-                           "claudius",
-                           "Gertrude",
-                           "Hamlet",
-                           "laertes",
-                           "Ophelia"));
+            (List.of("horatio",
+                     "claudius",
+                     "Gertrude",
+                     "Hamlet",
+                     "laertes",
+                     "Ophelia"));
 
         // Loop through all the characters.
         for (int i = 0; i < listOfCharacters.size();) {
@@ -155,7 +155,7 @@ public class ex12  {
             // Limit the output to the first 4 elements in the stream.
             .limit(4)
 
-            // Terminal operation that triggers aggregate operation
+            // This terminal operation triggers aggregate operation
             // processing and prints the results in "encounter order".
             .forEachOrdered(System.out::println);
     }
@@ -204,7 +204,7 @@ public class ex12  {
             // Sort the results in ascending order.
             .sorted()
 
-            // Terminal operation that triggers aggregate operation
+            // This terminal operation triggers aggregate operation
             // processing and prints the results in "encounter order".
             .forEachOrdered(System.out::println);
     }
@@ -217,13 +217,14 @@ public class ex12  {
         System.out.println("\nResults from runCollectToList():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = List.of("horatio",
-                                          "claudius",
-                                          "Gertrude",
-                                          "Hamlet",
-                                          "Hamlet", // Hamlet appears twice.
-                                          "laertes",
-                                          "Ophelia");
+        List<String> characters = List
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "Hamlet", // Hamlet appears twice.
+                "laertes",
+                "Ophelia");
 
         // Create sorted list of characters starting with 'h' or 'H'.
         List<String> results = characters
@@ -240,7 +241,7 @@ public class ex12  {
             // Sort the results in ascending order.
             .sorted()
 
-            // Terminal operation that triggers aggregate operation
+            // This terminal operation triggers aggregate operation
             // processing and collects the results into a list, which
             // contains duplicates.
             .collect(toList());
@@ -257,13 +258,14 @@ public class ex12  {
         System.out.println("\nResults from runCollectToSet():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = List.of("horatio",
-                                          "claudius",
-                                          "Gertrude",
-                                          "Hamlet",
-                                          "Hamlet", // Hamlet appears twice.
-                                          "laertes",
-                                          "Ophelia");
+        List<String> characters = List
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "Hamlet", // Hamlet appears twice.
+                "laertes",
+                "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Set<String> results = characters
@@ -277,9 +279,9 @@ public class ex12  {
             // Capitalize the first letter in the string.
             .map(this::capitalize)
 
-            // Terminal operation that triggers aggregate operation
-            // processing and collects the results into a set (which
-            // contains no duplicates).
+            // This terminal operationd that triggers aggregate
+            // operation processing and collects the results into a
+            // set (which contains no duplicates).
             .collect(toSet());
 
         // Print the results.
@@ -294,13 +296,14 @@ public class ex12  {
         System.out.println("\nResults from runCollectToMap():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = List.of("horatio",
-                                          "claudius",
-                                          "Gertrude",
-                                          "Hamlet",
-                                          "Hamlet", // Hamlet appears twice.
-                                          "laertes",
-                                          "Ophelia");
+        List<String> characters = List
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "Hamlet", // Hamlet appears twice.
+                "laertes",
+                "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Map<String, Integer> results = characters
@@ -332,13 +335,14 @@ public class ex12  {
         System.out.println("\nResults from runCollectGroupingBy():");
 
         // Create a list of key characters in Hamlet.
-        List<String> characters = List.of("horatio",
-                                          "claudius",
-                                          "Gertrude",
-                                          "Hamlet",
-                                          "Hamlet", // Hamlet appears twice.
-                                          "laertes",
-                                          "Ophelia");
+        List<String> characters = List
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "Hamlet", // Hamlet appears twice.
+                "laertes",
+                "Ophelia");
 
         // Create sorted set of characters starting with 'h' or 'H'.
         Map<String, Long> results = characters

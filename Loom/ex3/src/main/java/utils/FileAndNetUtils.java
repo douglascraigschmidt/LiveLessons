@@ -94,9 +94,9 @@ public final class FileAndNetUtils {
     /**
      * Clears the filter directories.
      */
-    public static void deleteDownloadedImages() {
+    public static void deleteDownloadedImages(String directoryPath) {
         int deletedFiles =
-            deleteSubFolders(Options.instance().getDirectoryPath());
+            deleteSubFolders(directoryPath);
 
         if (Options.instance().diagnosticsEnabled())
             System.out.println(TAG

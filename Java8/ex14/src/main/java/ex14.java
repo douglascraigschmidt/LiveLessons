@@ -40,12 +40,12 @@ public class ex14 {
 
         // Run tests that demonstrate performance differences between
         // ArrayList and LinkedList spliterators.
-        // runSpliteratorTests();
+        runSpliteratorTests();
 
         // Run tests that demonstrate performance differences between
         // concurrent and non-concurrent techniques for joining results in
         // a stream.
-        // runJoiningTests();
+        runJoiningTests();
 
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent techniques for
@@ -226,11 +226,11 @@ public class ex14 {
     private static void warmUpForkJoinPool() {
         System.out.println("\n++Warming up the fork/join pool\n");
 
-        List<CharSequence> words =
+        List<CharSequence> words = Objects.requireNonNull(
             TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                      // Split input into "words"
                                      // by ignoring whitespace.
-                                     "\\s+");
+                                     "\\s+"));
         // Create an empty list.
         List<String> list = new ArrayList<>();
 
