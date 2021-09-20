@@ -112,7 +112,7 @@ public class ex12  {
             // Sort the results in ascending order.
             .sorted()
 
-            // Terminal operation that triggers aggregate operation
+            // Terminal operation that triggers intermediate operation
             // processing and prints the results.
             .forEach(System.out::println);
     }

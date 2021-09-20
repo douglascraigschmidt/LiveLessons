@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ex15" type="Application" factoryName="Application">
+  <configuration default="false" name="ex20" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="corretto-11" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="ex15" />
-    <module name="Example 15" />
+    <option name="MAIN_CLASS_NAME" value="ex20" />
+    <module name="BlockingImageDownloader.main" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
