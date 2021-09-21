@@ -25,7 +25,10 @@ java {
 }
 
 dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-web:2.5.4'
+        implementation 'org.junit.jupiter:junit-jupiter:5.8.0'
+        implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.4'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.4'
 }
 
 test {
