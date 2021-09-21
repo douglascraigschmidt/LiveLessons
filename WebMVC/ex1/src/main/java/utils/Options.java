@@ -181,6 +181,33 @@ public class Options {
     }
 
     /**
+     * Iterate through the original List of prime candidates and
+     * display both each prime candidate and the corresponding prime
+     * result.
+     *
+     * @param primeCandidates A {@link List} of prime candidates
+     * @param results A {@link List} containing the results of the
+     *                primality checks
+     */
+    public static void displayResults(List<Integer> primeCandidates,
+                                      List<Integer> results) {
+        // Iterate through the original List of prime candidates and
+        // conditionally print each prime candidate and the
+        // corresponding prime result.
+        for (int i = 0; i < primeCandidates.size(); i++) {
+            var original = primeCandidates.get(i);
+            var result = results.get(i);
+
+            // assert original.equals(result);
+
+            Options.debug("result for "
+                         + original
+                         + " = "
+                         + result);
+        }
+    }
+
+    /**
      * Print out usage and default values.
      */
     private void printUsage() {

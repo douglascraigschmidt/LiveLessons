@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * This example shows how to combine Java parallel streams with and
  * without the ForkJoinPool.ManagedBlocker interface and the Java
- * fork-join framework to download multiple images from a remote
+ * fork-join framework to download and store multiple images from a remote
  * server.
  */
 public class ex20 {
