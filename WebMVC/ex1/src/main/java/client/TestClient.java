@@ -1,7 +1,10 @@
 package client;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import utils.Options;
 import utils.WebUtils;
@@ -15,27 +18,30 @@ import static java.util.stream.Collectors.toList;
 /**
  * This client tests calls to the server using Spring WebMVC features.
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
+@Component
 public class TestClient {
     /**
      * Location of the server.
      */
-    private static final String baseUrl = "http://localhost:8081";
+    private final String baseUrl = "http://localhost:8081";
 
     /**
      * Synchronous client to perform HTTP requests.
      */
-    private static final RestTemplate mRestTemplate = new RestTemplate();
+    @Autowired
+    private RestTemplate mRestTemplate;
 
     /**
      * Test individual HTTP GET requests to the server to check if a
-     * the {@code primeCandidiate} {@link List} of {@link Integer}
+     * the {@code primeCandidates} {@link List} of {@link Integer}
      * objects are prime or not.
      *
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
      */
-    public static Void testIndividualCalls(List<Integer> primeCandidates,
+    public Void testIndividualCalls(List<Integer> primeCandidates,
                                             Boolean parallel) {
         var stream = primeCandidates
             // Convert the List to a stream.
@@ -71,7 +77,7 @@ public class TestClient {
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
      */
-    public static Void testListCall(List<Integer> primeCandidates,
+    public Void testListCall(List<Integer> primeCandidates,
                                     Boolean parallel) {
         ResponseEntity<Integer[]> responseEntity = mRestTemplate
             // Execute the HTTP method to the given URI template,
@@ -100,7 +106,7 @@ public class TestClient {
      * @return A URL that can be passed to an HTTP GET request to
      *         determine if the {@code integer} is prime
      */
-    private static String makeCheckIfPrimeUrl(Integer integer) {
+    private String makeCheckIfPrimeUrl(Integer integer) {
         return baseUrl
             + "/checkIfPrime"
             + "?primeCandidate="
@@ -115,7 +121,7 @@ public class TestClient {
      * @return A URL that can be passed to an HTTP GET request to
      *         determine if a {@code listOfIntegers} is prime
      */
-    private static String makeCheckIfPrimeListUrl(String listOfIntegers,
+    private String makeCheckIfPrimeListUrl(String listOfIntegers,
                                                   boolean parallel) {
         return baseUrl
             + "/checkIfPrimeList"

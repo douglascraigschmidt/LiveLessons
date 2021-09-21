@@ -1,4 +1,8 @@
 import client.TestClient;
+import common.Components;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import utils.Options;
 import utils.RunTimer;
 
@@ -11,16 +15,18 @@ import static java.util.stream.Collectors.toList;
 /**
  * This program applies WebMVC ...
  */
+
+@SpringBootApplication
+@ComponentScan(basePackageClasses = {
+                Components.class})
 public class ex1 {
     /**
      * Debugging tag used by the logger.
      */
     private final String TAG = getClass().getSimpleName();
 
-    /**
-     * A List of randomly-generated integers.
-     */
-    private static List<Integer> sRANDOM_INTEGERS;
+    // @Autowired
+    TestClient testClient;
 
     /**
      * Main entry point into the test program.
@@ -46,33 +52,33 @@ public class ex1 {
      */
     private void run() {
         // Generate a list of random numbers.
-        sRANDOM_INTEGERS = generateRandomNumbers();
+        List<Integer> randomIntegers = generateRandomNumbers();
 
         // Test individual HTTP GET requests to the server to check if
         // an Integer is prime or not sequentially.
-        timeTest(TestClient::testIndividualCalls,
-                 sRANDOM_INTEGERS,
+        timeTest(testClient::testIndividualCalls,
+                 randomIntegers,
                  false,
                  "individualCallsSequential");
 
         // Test passing a List in one HTTP GET request to the server
         // to see if all the List elements are prime or not sequentially.
-        timeTest(TestClient::testListCall,
-                 sRANDOM_INTEGERS,
+        timeTest(testClient::testListCall,
+                 randomIntegers,
                  false,
                  "listCallSequential");
 
         // Test individual HTTP GET requests to the server to check if
         // an Integer is prime or not in parallel.
-        timeTest(TestClient::testIndividualCalls,
-                 sRANDOM_INTEGERS,
+        timeTest(testClient::testIndividualCalls,
+                 randomIntegers,
                  true,
                  "individualCallsParallel");
 
         // Test passing a List in one HTTP GET request to the server
         // to see if all the List elements are prime or not in parallel.
-        timeTest(TestClient::testListCall,
-                 sRANDOM_INTEGERS,
+        timeTest(testClient::testListCall,
+                 randomIntegers,
                  true,
                  "listCallParallel");
 
