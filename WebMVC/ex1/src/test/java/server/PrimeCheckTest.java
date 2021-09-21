@@ -1,15 +1,12 @@
 package server;
 
-import client.TestClient;
+import client.PrimeCheckClient;
 import common.Components;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import utils.Options;
 import utils.RunTimer;
 
@@ -20,12 +17,12 @@ import java.util.function.BiFunction;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program applies WebMVC ...
+ * This program tests the PrimeCheckClient and its ability to
+ * communicate with the PrimeCheckServerController.
  */
-
 @SpringBootTest
-@ContextConfiguration(classes = {Components.class, TestClient.class})
-public class PrimeCheckerTest {
+@ContextConfiguration(classes = {Components.class, PrimeCheckClient.class})
+public class PrimeCheckTest {
     /**
      * Debugging tag used by the logger.
      */
@@ -35,10 +32,20 @@ public class PrimeCheckerTest {
      * This object connects to the TestClient.  The {@code @Autowired}
      * annotation ensures this field is initialized via Spring
      * dependency injection, where an object receives another object
-     * it depends on (e.g., by creating a {@link TestClient}).
+     * it depends on (e.g., by creating a {@link PrimeCheckClient}).
      */
     @Autowired
-    TestClient testClient;
+    private PrimeCheckClient testClient;
+
+    /**
+     * Emulate the "command-line" arguments.
+     */
+    private String[] mArgv = new String[]{
+        "-d",
+        "false",
+        "-c",
+        "50"
+    };
 
     /**
      * Run all the tests and print the results.
@@ -47,14 +54,7 @@ public class PrimeCheckerTest {
     public void runTests() {
         System.out.println("Entering runTests()");
 
-        String[] argv = new String[]{
-            "-d",
-            "false",
-            "-c",
-            "50"
-        };
-
-        Options.instance().parseArgs(argv);
+        Options.instance().parseArgs(mArgv);
 
         // Generate a list of random numbers.
         List<Integer> randomIntegers = generateRandomNumbers();

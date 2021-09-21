@@ -1,7 +1,6 @@
 package client;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,14 +12,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static common.Constants.EndPoint.CHECK_IF_PRIME;
+import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This client tests calls to the server using Spring WebMVC features.
+ * This client performs calls to the {@link
+ * PrimeCheckServerController} using Spring WebMVC features.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
-public class TestClient {
+public class PrimeCheckClient {
     /**
      * Location of the server.
      */
@@ -108,7 +110,7 @@ public class TestClient {
      */
     private String makeCheckIfPrimeUrl(Integer integer) {
         return baseUrl
-            + "/checkIfPrime"
+            + CHECK_IF_PRIME
             + "?primeCandidate="
             + integer;
     }
@@ -124,7 +126,7 @@ public class TestClient {
     private String makeCheckIfPrimeListUrl(String listOfIntegers,
                                                   boolean parallel) {
         return baseUrl
-            + "/checkIfPrimeList"
+            + CHECK_IF_PRIME_LIST
             + "?primeCandidates="
             + listOfIntegers
             + "&parallel="

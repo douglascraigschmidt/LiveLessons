@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static common.Constants.EndPoint.CHECK_IF_PRIME;
+import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -31,7 +33,7 @@ import static java.util.stream.Collectors.toList;
  */
 @RestController
 @ResponseBody
-public class ServerController {
+public class PrimeCheckServerController {
     /**
      * This method determines
      *
@@ -42,15 +44,15 @@ public class ServerController {
      *         primeCandidate} is prime and its smallest factor if
      *         it's not prime
      */
-    @GetMapping("/checkIfPrime")
-    public Integer checkIfPrime(@RequestParam Integer primeCandidate) {
+    @GetMapping(CHECK_IF_PRIME)
+    public Integer checkIfPrime(Integer primeCandidate) {
         System.out.println("checkIfPrime()");
         return isPrime(primeCandidate);
     }
 
-    @GetMapping("/checkIfPrimeList")
-    public List<Integer> checkIfPrimeList(@RequestParam List<Integer> primeCandidates,
-                                          @RequestParam Boolean parallel) {
+    @GetMapping(CHECK_IF_PRIME_LIST)
+    public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
+                                          Boolean parallel) {
         System.out.println("checkIfPrimeList()");
 
         var stream = primeCandidates

@@ -1,6 +1,6 @@
 package common;
 
-import client.TestClient;
+import client.PrimeCheckClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -23,12 +23,12 @@ public class Components {
     }
 
     /**
-     * This factory method returns a new {@link TestClient}.
+     * This factory method returns a new {@link PrimeCheckClient}.
      * 
-     * @return A new {@link TestClient}
+     * @return A new {@link PrimeCheckClient}
      */
     @Bean
-    public TestClient getTestClient() {
-        return new TestClient();
+    public PrimeCheckClient getTestClient() {
+        return new PrimeCheckClient();
     }
 }
