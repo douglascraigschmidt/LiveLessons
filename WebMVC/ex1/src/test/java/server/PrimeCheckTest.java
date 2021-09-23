@@ -6,6 +6,7 @@ import common.Components;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import utils.Options;
 import utils.RunTimer;
@@ -21,7 +22,18 @@ import static java.util.stream.Collectors.toList;
  * communicate with the PrimeCheckServerController.
  */
 @SpringBootTest
-@ContextConfiguration(classes = {Components.class, PrimeCheckClient.class})
+@ContextConfiguration(classes = {
+    Components.class,
+    PrimeCheckClient.class,
+    PrimeCheckController.class
+})
+/*
+@ComponentScan(basePackageClasses = {
+    Components.class,
+    PrimeCheckClient.class,
+    PrimeCheckController.class
+})
+ */
 public class PrimeCheckTest {
     /**
      * Debugging tag used by the logger.
@@ -44,7 +56,7 @@ public class PrimeCheckTest {
         "-d",
         "false",
         "-c",
-        "50"
+        "100"
     };
 
     /**

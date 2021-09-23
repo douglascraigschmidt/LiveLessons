@@ -20,10 +20,10 @@ import static common.Constants.Resources.SERVER_PROPERTIES;
  */
 @SpringBootApplication
 @PropertySource(SERVER_PROPERTIES)
-public class PrimeCheckServerApplication {
+public class PrimeCheckApplication {
     /**
      * A static main() entry point is needed to run the {@link
-     * PrimeCheckServerApplication} app.
+     * PrimeCheckApplication} app.
      */
     public static void main(String[] argv) {
         // Parse the options.
@@ -31,6 +31,6 @@ public class PrimeCheckServerApplication {
 
         SpringApplication
             // Launch the ServerApplication within Spring WebMVC.
-            .run(PrimeCheckServerApplication.class, argv);
+            .run(PrimeCheckApplication.class, argv);
     }
 }

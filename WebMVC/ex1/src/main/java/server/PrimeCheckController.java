@@ -1,12 +1,12 @@
 package server;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static common.Constants.EndPoint.CHECK_IF_PRIME;
 import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This Spring controller demonstrates how WebMVC can be used to
@@ -33,13 +33,24 @@ import static java.util.stream.Collectors.toList;
  */
 @RestController
 @ResponseBody
-public class PrimeCheckServerController {
+public class PrimeCheckController {
     /**
-     * This method determines
+     * This auto-wired field connects the {@link
+     * PrimeCheckController} to the {@link
+     * PrimeCheckService}.
+     */
+    @Autowired
+    PrimeCheckService mService;
+
+    /**
+     * Checks the {@code primeCandidate} param for primality,
+     * returning 0 if it's prime or the smallest factor if it's not.
      *
-     * WebFlux maps HTTP GET requests sent to the /_start endpoint to
-     * this method.
+     * WebFlux maps HTTP GET requests sent to the {@code
+     * CHECK_IF_PRIME} endpoint to this method.
      *
+     * @param primeCandidate The {@link Integer} to check for
+     *                       primality
      * @return An {@link Integer} that is 0 if the {@code
      *         primeCandidate} is prime and its smallest factor if
      *         it's not prime
@@ -47,54 +58,35 @@ public class PrimeCheckServerController {
     @GetMapping(CHECK_IF_PRIME)
     public Integer checkIfPrime(Integer primeCandidate) {
         System.out.println("checkIfPrime()");
-        return isPrime(primeCandidate);
-    }
-
-    @GetMapping(CHECK_IF_PRIME_LIST)
-    public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
-                                          Boolean parallel) {
-        System.out.println("checkIfPrimeList()");
-
-        var stream = primeCandidates
-            .stream();
-
-        if (parallel)
-            stream.parallel();
-
-        var results = stream
-
-            .map(this::isPrime)
-
-            .collect(toList());
-
-        /*
-        results
-            .forEach(System.out::println);
-         */
-
-        return results;
+        return mService
+            // Forward to the service.
+            .checkIfPrime(primeCandidate);
     }
 
     /**
-     * This method provides a brute-force determination of whether
-     * number {@code primeCandidate} is prime.  Returns 0 if it is
-     * prime, or the smallest factor if it is not prime.
+     * Checks all the elements in the {@code primeCandidates} {@link
+     * List} param for primality and return a corresponding {@link
+     * List} whose results indicate 0 if an element is prime or the
+     * smallest factor if it's not.
+     *
+     * WebFlux maps HTTP GET requests sent to the {@code
+     * CHECK_IF_PRIME_LIST} endpoint to this method.
+     *
+     * @param primeCandidates The {@link Integer} to check for
+     *                       primality
+     * @param parallel True if primality checking should run in
+     *                 parallel, else false if it should run sequentially
+     * @return An {@link List} whose elements are 0 if the
+     *         corresponding element in {@code primeCandidate} is
+     *         prime or its smallest factor if it's not prime
      */
-    private Integer isPrime(Integer primeCandidate) {
-        int n = primeCandidate;
-
-        if (n > 3)
-            // This algorithm is intentionally inefficient to burn
-            // lots of CPU time!
-            for (int factor = 2;
-                 factor <= n / 2;
-                 ++factor)
-                if (Thread.interrupted()) {
-                    // Options.debug(" Prime checker thread interrupted");
-                    break;
-                } else if (n / factor * factor == n)
-                    return factor;
-
-        return 0;
+    @GetMapping(CHECK_IF_PRIME_LIST)
+    public List<Integer> checkIfPrimeList(@RequestParam List<Integer> primeCandidates,
+                                          Boolean parallel) {
+        System.out.println("checkIfPrimeList()");
+        return mService
+            // Forward to the service.
+            .checkIfPrimeList(primeCandidates,
+                              parallel);
     }
 }

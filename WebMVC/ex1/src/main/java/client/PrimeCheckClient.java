@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This client performs calls to the {@link
- * PrimeCheckServerController} using Spring WebMVC features.
+ * PrimeCheckController} using Spring WebMVC features.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
