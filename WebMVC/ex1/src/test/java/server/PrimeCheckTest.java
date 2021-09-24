@@ -18,8 +18,8 @@ import java.util.function.BiFunction;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program tests the PrimeCheckClient and its ability to
- * communicate with the PrimeCheckServerController.
+ * This program tests the {@link PrimeCheckClient} and its ability to
+ * communicate with the {@link PrimeCheckController}.
  */
 @SpringBootTest
 @ContextConfiguration(classes = {
@@ -27,13 +27,6 @@ import static java.util.stream.Collectors.toList;
     PrimeCheckClient.class,
     PrimeCheckController.class
 })
-/*
-@ComponentScan(basePackageClasses = {
-    Components.class,
-    PrimeCheckClient.class,
-    PrimeCheckController.class
-})
- */
 public class PrimeCheckTest {
     /**
      * Debugging tag used by the logger.
