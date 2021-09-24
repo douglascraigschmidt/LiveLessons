@@ -19,7 +19,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This program tests the {@link PrimeCheckClient} and its ability to
- * communicate with the {@link PrimeCheckController}.
+ * communicate with the {@link PrimeCheckController} via Spring WebMVC
+ * features.
  */
 @SpringBootTest
 @ContextConfiguration(classes = {
@@ -34,7 +35,7 @@ public class PrimeCheckTest {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * This object connects to the TestClient.  The {@code @Autowired}
+     * This object connects to the {@code testClient}.  The {@code @Autowired}
      * annotation ensures this field is initialized via Spring
      * dependency injection, where an object receives another object
      * it depends on (e.g., by creating a {@link PrimeCheckClient}).
@@ -45,11 +46,11 @@ public class PrimeCheckTest {
     /**
      * Emulate the "command-line" arguments.
      */
-    private String[] mArgv = new String[]{
+    private final String[] mArgv = new String[]{
         "-d",
         "true",
         "-c",
-        "10"
+        "5"
     };
 
     /**

@@ -9,7 +9,7 @@ import static common.Constants.Resources.SERVER_PROPERTIES;
 
 /**
  * This class provides the entry point into the Spring WebMVC-based
- * version of the prime check server.
+ * version of the prime check app server.
  *
  * The {@code @SpringBootApplication} annotation enables apps to use
  * auto-configuration, component scan, and to define extra

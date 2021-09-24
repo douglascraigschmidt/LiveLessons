@@ -1,8 +1,11 @@
 package utils;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +23,7 @@ public final class WebUtils {
      * and returning a result of type {@code T}.
      *
      * @param url The URL to pass to the server via a GET request
-     * @param clazz The type to return
+     * @param clazz The type {@code T} to return from GET
      * @return The result of type {@code T} from the server
      */
     public static <T> T makeGetRequest(RestTemplate restTemplate,
@@ -32,6 +35,32 @@ public final class WebUtils {
 
             // Returns the body of this entity.
             .getBody();
+    }
+
+    /**
+     * Make an HTTP GET call to the server passing in the {@code url}
+     * and returning a result of type {@code T[]}.
+     *
+     * @param url The URL to pass to the server via a GET request
+     * @param clazz The type {@code T[]} to return from GET
+     * @return The result of type {@code T[]} from the server
+     */
+    public static <T> List<T> makeGetRequestList(RestTemplate restTemplate,
+                                                 String url,
+                                                 Class<T[]> clazz) {
+        ResponseEntity<T[]> responseEntity = restTemplate
+            // Send an HTTP GET request to the given URL and return
+            // the response as ResponseEntity containing an Integer.
+            .exchange(url,
+                      // Send via an HTTP GET request.
+                      HttpMethod.GET, null,
+                      // The return type is an array of Integer objects.
+                      clazz);
+
+        // Return a List.
+        return List
+            // Convert the array in the response into a List.
+            .of(Objects.requireNonNull(responseEntity.getBody()));
     }
 
     /**

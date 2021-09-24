@@ -33,6 +33,8 @@ public class PrimeCheckService {
      *         it's not prime
      */
     public Integer checkIfPrime(Integer primeCandidate) {
+        System.out.println("checkIfPrime()");
+
         // Determine primality.
         var result = isPrime(primeCandidate);
 

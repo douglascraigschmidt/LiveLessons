@@ -4,16 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import utils.Options;
 
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import static common.Constants.EndPoint.CHECK_IF_PRIME;
 import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
- * This Spring controller demonstrates how WebMVC can be used to
- * handle HTTP GET requests via Java parallel streams programming.
- * These requests are mapped to methods that determine the primality
- * of large {@link Integer} objects.
+     * This Spring controller demonstrates how WebMVC can be used to
+     * handle HTTP GET requests via Java parallel streams programming.
+     * These requests are mapped to methods that determine the primality
+     * of large random {@link Integer} objects.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the

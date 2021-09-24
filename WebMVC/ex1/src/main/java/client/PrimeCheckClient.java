@@ -1,17 +1,13 @@
 package client;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import server.PrimeCheckController;
 import utils.Options;
 import utils.WebUtils;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static common.Constants.EndPoint.CHECK_IF_PRIME;
 import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
@@ -19,8 +15,8 @@ import static common.Constants.SERVER_BASE_URL;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This client performs calls to the {@link PrimeCheckController}
- * using Spring WebMVC features.
+ * This client uses Spring WebMVC features to perform remote method
+ * invocations on the {@link PrimeCheckController} web service.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
@@ -87,7 +83,7 @@ public class PrimeCheckClient {
      * @param parallel True if using parallel streams, else false
      */
     public Void testListCall(List<Integer> primeCandidates,
-                                    Boolean parallel) {
+                             boolean parallel) {
         // Create the encoded URL.
         var url = makeCheckIfPrimeListUrl
             (WebUtils
@@ -96,18 +92,13 @@ public class PrimeCheckClient {
              // Use parallel streams or not.
              parallel);
 
-        ResponseEntity<Integer[]> responseEntity = mRestTemplate
-            // Send an HTTP GET request to the given URL and return
-            // the response as ResponseEntity containing an Integer.
-            .exchange(url,
-                      // Send via an HTTP GET request.
-                      HttpMethod.GET, null,
-                      // The return type is an Integer.
-                      Integer[].class);
-
-        // Convert the array in the response into a List.
-        List<Integer> results = List
-            .of(Objects.requireNonNull(responseEntity.getBody()));
+        var results = WebUtils
+            // Create and send a GET request to the server to
+            // check if the Integer objects in primeCandidates
+            // are prime or not.
+            .makeGetRequestList(mRestTemplate,
+                                url,
+                                Integer[].class);
 
         // Display the results.
         Options.displayResults(primeCandidates, results);

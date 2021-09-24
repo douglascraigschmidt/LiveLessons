@@ -7,7 +7,7 @@ later Java releases, so I recommend installing Java 11 (at least) to
 avoid problems.  Some versions require experimental versions of the
 JDK, such as JDK 18 and Project Loom.
 
-Here's an overview of what's current included in these examples:
+Here's an overview of what's currently included in these examples:
 
 . ex0 - This example two zap() method implementations that removes
         strings from a list of strings.  One method uses basic Java 7
