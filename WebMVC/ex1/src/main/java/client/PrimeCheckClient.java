@@ -5,6 +5,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import server.PrimeCheckController;
 import utils.Options;
 import utils.WebUtils;
 
@@ -14,11 +15,12 @@ import java.util.Objects;
 
 import static common.Constants.EndPoint.CHECK_IF_PRIME;
 import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
+import static common.Constants.SERVER_BASE_URL;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This client performs calls to the {@link
- * PrimeCheckController} using Spring WebMVC features.
+ * This client performs calls to the {@link PrimeCheckController}
+ * using Spring WebMVC features.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
@@ -26,10 +28,12 @@ public class PrimeCheckClient {
     /**
      * Location of the server.
      */
-    private final String baseUrl = "http://localhost:8081";
+    private final String mBaseUrl = SERVER_BASE_URL;
 
     /**
-     * Synchronous client to perform HTTP requests.
+     * This auto-wired field connects the {@link
+     * PrimeCheckClient} to the {@link RestTemplate}
+     * that performs HTTP requests synchronously.
      */
     @Autowired
     private RestTemplate mRestTemplate;
@@ -44,7 +48,7 @@ public class PrimeCheckClient {
      * @param parallel True if using parallel streams, else false
      */
     public Void testIndividualCalls(List<Integer> primeCandidates,
-                                            Boolean parallel) {
+                                    Boolean parallel) {
         var stream = primeCandidates
             // Convert the List to a stream.
             .stream();
@@ -54,11 +58,14 @@ public class PrimeCheckClient {
             stream.parallel();
 
         var results = stream
-            // Create and send a GET request to the server to check if
-            // the primeCandidate is prime or not.
+            // Perform a remote call for each primeCandidate.
             .map(primeCandidate -> WebUtils
+                 // Create and send a GET request to the server to
+                 // check if the primeCandidate is prime or not.
                  .makeGetRequest(mRestTemplate,
+                                 // Create the encoded URL.
                                  makeCheckIfPrimeUrl(primeCandidate),
+                                 // The return type is an Integer.
                                  Integer.class))
 
             // Trigger the intermediate operations and collect the
@@ -81,19 +88,26 @@ public class PrimeCheckClient {
      */
     public Void testListCall(List<Integer> primeCandidates,
                                     Boolean parallel) {
+        // Create the encoded URL.
+        var url = makeCheckIfPrimeListUrl
+            (WebUtils
+             // Convert the List to a String.
+             .list2String(primeCandidates),
+             // Use parallel streams or not.
+             parallel);
+
         ResponseEntity<Integer[]> responseEntity = mRestTemplate
-            // Execute the HTTP method to the given URI template,
-            // writing the given request entity to the request,
-            // and returns the response as ResponseEntity.
-            .exchange(makeCheckIfPrimeListUrl(WebUtils
-                                                  .list2String(primeCandidates),
-                                              parallel),
+            // Send an HTTP GET request to the given URL and return
+            // the response as ResponseEntity containing an Integer.
+            .exchange(url,
+                      // Send via an HTTP GET request.
                       HttpMethod.GET, null,
+                      // The return type is an Integer.
                       Integer[].class);
 
-        // Convert the array into a List.
-        List<Integer> results = Arrays
-            .asList(Objects.requireNonNull(responseEntity.getBody()));
+        // Convert the array in the response into a List.
+        List<Integer> results = List
+            .of(Objects.requireNonNull(responseEntity.getBody()));
 
         // Display the results.
         Options.displayResults(primeCandidates, results);
@@ -102,14 +116,14 @@ public class PrimeCheckClient {
 
     /**
      * This factory method creates a URL that can be passed to an HTTP
-     * GET request to determine if an {@code integer} is prime.
-
-     * @param integer An integer to check for primality
+     * GET request to determine if an {@link Integer} is prime.
+     *
+     * @param integer An {@link Integer} to check for primality
      * @return A URL that can be passed to an HTTP GET request to
-     *         determine if the {@code integer} is prime
+     *         determine if {@code integer} is prime
      */
     private String makeCheckIfPrimeUrl(Integer integer) {
-        return baseUrl
+        return mBaseUrl
             + CHECK_IF_PRIME
             + "?primeCandidate="
             + integer;
@@ -118,14 +132,14 @@ public class PrimeCheckClient {
     /**
      * This factory method creates a URL that can be passed to an HTTP
      * GET request to determine if a {@code listOfIntegers} is prime.
-
+     *
      * @param listOfIntegers A comma-separated list of integers
      * @return A URL that can be passed to an HTTP GET request to
      *         determine if a {@code listOfIntegers} is prime
      */
     private String makeCheckIfPrimeListUrl(String listOfIntegers,
-                                                  boolean parallel) {
-        return baseUrl
+                                           boolean parallel) {
+        return mBaseUrl
             + CHECK_IF_PRIME_LIST
             + "?primeCandidates="
             + listOfIntegers

@@ -200,7 +200,7 @@ public class Options {
 
             // assert original.equals(result);
 
-            Options.debug("result for "
+            Options.debug("Result for "
                          + original
                          + " = "
                          + result);

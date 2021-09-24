@@ -23,7 +23,7 @@ import static common.Constants.Resources.SERVER_PROPERTIES;
 public class PrimeCheckApplication {
     /**
      * A static main() entry point is needed to run the {@link
-     * PrimeCheckApplication} app.
+     * PrimeCheckApplication} server app.
      */
     public static void main(String[] argv) {
         // Parse the options.

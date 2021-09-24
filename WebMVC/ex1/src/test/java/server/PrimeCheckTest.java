@@ -54,9 +54,9 @@ public class PrimeCheckTest {
      */
     private String[] mArgv = new String[]{
         "-d",
-        "false",
+        "true",
         "-c",
-        "100"
+        "10"
     };
 
     /**

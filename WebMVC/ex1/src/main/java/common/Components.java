@@ -24,19 +24,6 @@ public class Components {
     }
 
     /**
-     * This factory method returns a new {@link PrimeCheckClient}.
-     * 
-     * @return A new {@link PrimeCheckClient}
-     */
-    /*
-    @Bean
-    public PrimeCheckClient getTestClient() {
-        return new PrimeCheckClient();
-    }
-
-     */
-
-    /**
      * This factory method returns a new {@link PrimeCheckService}.
      * 
      * @return A new {@link PrimeCheckService}
