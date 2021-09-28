@@ -13,7 +13,7 @@ public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static long sNUMBER = 100000;
+    private static long sNUMBER = 1000000;
 
     /**
      * Main entry point into the program.

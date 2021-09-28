@@ -1,6 +1,7 @@
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.functions.BiFunction;
+import utils.RunTimer;
 
 import java.math.BigInteger;
 import java.util.function.Function;
@@ -36,12 +37,61 @@ public class ex16 {
     /**
      * Max number of times to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 10000;
+    private static final int sMAX_ITERATIONS = 20000;
 
     /**
      * Default factorial number.  
      */
-    private static final int sDEFAULT_N = 400;
+    private static final int sDEFAULT_N = 1000;
+
+    /**
+     * This is the entry point into the test program.
+     */
+    public static void main(String[] args) {
+        System.out.println("Starting Factorial Tests");
+
+        // Initialize to the default value or the
+        final BigInteger n = args.length > 0
+            ? BigInteger.valueOf(Long.parseLong(args[0]))
+            : BigInteger.valueOf(sDEFAULT_N);
+
+        // Warm up the fork-join pool to ensure accurate timings.
+        warmUpForkJoinThreads();
+
+        // Run the various tests.
+
+        runTest("SequentialStreamFactorial",
+                SequentialStreamFactorial::factorial,
+                n);
+
+        runTest("SequentialRxJavaObservableFactorial",
+                SequentialRxJavaObservableFactorial::factorial,
+                n);
+
+        runTest("BuggyFactorial",
+                BuggyFactorial::factorial,
+                n);
+
+        runTest("ParallelStreamFactorial",
+                ParallelStreamFactorial::factorial,
+                n);
+
+        runTest("ParallelStreamFactorialEx",
+                ParallelStreamFactorialEx::factorial,
+                n);
+
+        runTest("RxJavaParallelFlowableFactorial",
+                RxJavaParallelFlowableFactorial::factorial,
+                n);
+
+        runTest("SynchronizedParallelFactorial",
+                SynchronizedParallelFactorial::factorial,
+                n);
+
+        System.out.println(RunTimer.getTimingResults());
+
+        System.out.println("Ending Factorial Tests");
+    }
 
     /**
      * This class demonstrates how race conditions can occur when
@@ -149,7 +199,7 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Multiple the latest value in the range by the
+                // Multiply the latest value in the range by the
                 // running total (properly synchronized).
                 .forEach(t::multiply);
 
@@ -299,93 +349,34 @@ public class ex16 {
     /**
      * Run the given {@code factorialTest} and print the result.
      */
-    private <T> void runTest(String factorialTest,
-                             Function<T, T> factorial,
-                             T n) {
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++)
-            factorial.apply(n);
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("It took "
-                           + stopTime
-                           + " milliseconds for "
-                           + factorialTest
-                           + " to compute "
-                           + sMAX_ITERATIONS
-                           + " iterations of the factorial for "
-                           + n 
-                           + " = "
-                           + factorial.apply(n));
-
+    private static <T> void runTest(String factorialTest,
+                                    Function<T, T> factorial,
+                                    T n) {
         // Help out the garbage collector.
         System.gc();
+
+        RunTimer.timeRun(() -> {
+                for (int i = 0; i < sMAX_ITERATIONS; i++)
+                    factorial.apply(n);
+            },
+            factorialTest);
+
+        System.out.println(factorialTest
+                           + " computed the factorial for "
+                           + n 
+                           + " to be "
+                           + factorial.apply(n));
     }
 
     /**
      * Warm up the threads in the fork/join pool so that the timing
      * results will be more accurate.
      */
-    private void warmUpForkJoinThreads() {
+    private static void warmUpForkJoinThreads() {
         System.out.println("Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++)
             ParallelStreamFactorial.factorial(BigInteger.valueOf(sDEFAULT_N));
-    }
-
-    /**
-     * This is the entry point into the test program.
-     */
-    public static void main(String[] args) {
-        System.out.println("Starting Factorial Tests");
-
-        // Initialize to the default value.
-        BigInteger n = BigInteger.valueOf(sDEFAULT_N);
-
-        // Change the size as requested.
-        if (args.length > 0) 
-            n = BigInteger.valueOf(Long.valueOf(args[0]));
-
-        // Create a new test object.
-        ex16 test = new ex16();
-
-        // Warm up the fork-join pool to ensure accurate timings.
-        test.warmUpForkJoinThreads();
-
-        // Run the various tests.
-        test.runTest("SynchronizedParallelFactorial",
-                     SynchronizedParallelFactorial::factorial,
-                     n);
-
-        test.runTest("SequentialStreamFactorial",
-                     SequentialStreamFactorial::factorial,
-                     n);
-
-        test.runTest("SequentialRxJavaObservableFactorial",
-                     SequentialRxJavaObservableFactorial::factorial,
-                     n);
-
-        test.runTest("BuggyFactorial",
-                     BuggyFactorial::factorial,
-                     n);
-
-        test.runTest("ParallelStreamFactorial",
-                     ParallelStreamFactorial::factorial,
-                     n);
-
-        test.runTest("ParallelStreamFactorialEx",
-                     ParallelStreamFactorialEx::factorial,
-                     n);
-
-        test.runTest("RxJavaParallelFlowableFactorial",
-                     RxJavaParallelFlowableFactorial::factorial,
-                     n);
-
-        System.out.println("Ending Factorial Tests");
     }
 }
 
