@@ -1,3 +1,4 @@
+import utils.Options;
 import utils.RunTimer;
 
 import java.util.*;
@@ -15,16 +16,17 @@ import static java.util.stream.Collectors.joining;
  * order-sensitive aggregate operations, such as limit() and
  * distinct().
  */
+@SuppressWarnings("ALL")
 public class ex21 {
     /**
-     * The maximum number of elements encounter order tests.
+     * The maximum number of elements for the encounter order tests.
      */
     private final static int sEncounterMax = 100000000;
 
     /**
      * The number of output elements to print.
      */
-    private final static int sOutputLimit = 10;
+    private final static int sOutputLimit = 1000;
 
     /**
      * This is the entry point into the test program.
@@ -133,13 +135,14 @@ public class ex21 {
             // Collect into a single string separated by ' '.
             .collect(joining(" "));
 
-        // Print the results.
-        System.out.println("The first "
-                           + n
-                           + " even numbers = ["
-                           + results
-                           + "] "
-                           + testName);
+        if (Options.instance().diagnosticsEnabled())
+            // Print the results.
+            System.out.println(testName 
+                               + ": the first "
+                               + n
+                               + " even numbers = ["
+                               + results
+                               + "]");
 
         // Let the system garbage collect.
         System.gc();
@@ -169,13 +172,14 @@ public class ex21 {
             // Collect into a single string separated by ' '.
             .collect(joining(" "));
 
-        // Print the results.
-        System.out.println("The first "
-                           + sOutputLimit
-                           + " even numbers = ["
-                           + results
-                           + "] "
-                           + testName);
+        if (Options.instance().diagnosticsEnabled())
+            // Print the results.
+            System.out.println(testName
+                               + ": the first "
+                               + sOutputLimit
+                               + " even numbers = ["
+                               + results
+                               + "]");
 
         // Let the system garbage collect.
         System.gc();
@@ -298,18 +302,21 @@ public class ex21 {
     }
 
     /**
-     * Shows how the use of forEach() is faster than forEachOrdered() for
-     * a parallel stream.
+     * Shows how the use of {@code forEach()} on an unordered parallel
+     * stream can be faster than {@code forEachOrdered()} on an
+     * ordered parallel stream.
      * 
-     * @param unordered Indicates whether the stream should be unordered or ordered
+     * @param unordered Indicates whether the stream should be
+     *                  unordered or ordered
      */
     private static Integer[] forEachTest(boolean unordered,
                                          Collection<Integer> collection) {
-        // Store the results in a concurrent queue.
-        ConcurrentLinkedQueue<Integer> queue =
-            new ConcurrentLinkedQueue<>();
+        if (unordered) {
+            // Store the results in a concurrent queue since forEach()
+            // isn't synchronized.
+            ConcurrentLinkedQueue<Integer> queue =
+                new ConcurrentLinkedQueue<>();
 
-        if (unordered)
             collection
                 // Convert collection into a parallel stream.
                 .parallelStream()
@@ -326,10 +333,18 @@ public class ex21 {
                 // Limit the number of items in the output.
                 .limit(sOutputLimit)
 
-                // Add each item to the list in an unordered manner.
+                // Add each item to the list in an unordered manner,
+                // which assumes a thread-safe queue.
                 .forEach(queue::add);
-        
-        else 
+
+            return queue.toArray(new Integer[0]);
+        }
+        else {
+            // Store the results in an unsynchronized ArrayList since
+            // forEachOrdered *is* synchronized.
+            List<Integer> queue =
+                new ArrayList<>();
+
             collection
                 // Convert collection into a parallel stream.
                 .parallelStream()
@@ -349,6 +364,7 @@ public class ex21 {
                 // Add each item to the list in an ordered manner.
                 .forEachOrdered(queue::add);
 
-        return queue.toArray(new Integer[0]);
+            return queue.toArray(new Integer[0]);
+        }
     }
 }

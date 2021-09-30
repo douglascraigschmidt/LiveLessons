@@ -13,7 +13,7 @@ public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static long sNUMBER = 1000000;
+    private static long sNUMBER = 5000000;
 
     /**
      * Main entry point into the program.
@@ -68,7 +68,7 @@ public class ex15 {
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
-            // Limit the # of elements in the stream to @a number.
+            // Limit the # of elements in the stream to number.
             .limit(number)
 
             // Compute the sqrt of each even number in the stream.

@@ -28,7 +28,7 @@ import java.util.stream.LongStream;
  *   // Reduce the results of the parallel chunks.
  *   .reduce(1, (a, b) -> a * b);
  *
- * However, due to the expotential++ growth rate of factorials we use
+ * However, due to the exponential growth rate of factorials we use
  * a BigInteger result instead of a long result.  A more interesting
  * (albeit more complicated) solution that also uses BigIntegers for
  * the type of 'n' appears at https://github.com/jevad/egfactorial.
