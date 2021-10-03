@@ -1,7 +1,6 @@
 import utils.Options;
 import utils.RunTimer;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,8 +31,12 @@ public class ex35 {
         // Initializes the Options singleton.
         Options.instance().parseArgs(args);
 
-        // Runs the flatMap() and reduce()/Stream.concat() tests.
+        // Run the flatMap() test, which demonstrates the limitations of
+        // flatMap() with Java parallel streams.
         runTest(ex35::testFlatMap, "testFlatMap()");
+
+        // Run the reduce()/Stream.concat() test, which fixes the limitations
+        // with flatMap().
         runTest(ex35::testReduceConcat, "testReduceConcat()");
 
         // Print the results.
@@ -52,7 +55,8 @@ public class ex35 {
     private static void runTest(Runnable test,
                                 String testName) {
 
-        // Let the system garbage collect.
+        // Let the system garbage collect to start on an
+        // even playing field.
         System.gc();
 
         // Record how long the test takes to run.
@@ -62,11 +66,13 @@ public class ex35 {
     }
 
     /**
-     * Demonstrate how the {@code testFlatMap()}
-     * intermediate operation doesn't scale in a Java parallel stream.
+     * Demonstrate how the {@code flatMap()} intermediate
+     * operation doesn't scale in a Java parallel stream.
      */
     private static void testFlatMap() {
         var result =
+            // Generate an outer Stream that emits the designated
+            // number of Integer objects in parallel.
             generateOuterStream(Options.instance().iterations())
 
             // Apply the flatMap() intermediate operation, which
@@ -86,6 +92,8 @@ public class ex35 {
      */
     private static void testReduceConcat() {
         var result =
+            // Generate an outer Stream that emits the designated
+            // number of Integer objects in parallel.
             generateOuterStream(Options.instance().iterations())
 
             // Apply the map() intermediate operation, which works
@@ -108,54 +116,21 @@ public class ex35 {
      */
     private static Stream<Integer> generateOuterStream(int iterations) {
         return IntStream
-            // Create a stream of 4 'iterations" from 1 to 4.
+            // Create a Stream of ints from 1 to iterations.
             .rangeClosed(1, iterations)
 
-            // Convert int to Integer.
+            // Convert each int to an Integer.
             .boxed()
 
             // Convert the stream to a parallel stream.
             .parallel()
 
-            // Print the outer thread id.
-            .peek(iteration -> System.out.println("outer thread id for "
-                                                   + iteration
-                                                   + " = "
-                                                   + Thread.currentThread().getId()));
-    }
-
-    /**
-     * Compute and print how many threads are used to process an inner
-     * parallel stream.
-     *
-     * @param max       The max number of iterations
-     * @param counter   Keep track of whether the max number of
-     *                  iterations have been met
-     * @param threadMap A {@link Map} that records which threads are
-     *                  used by the inner parallel stream
-     * @param threadId  The outer thread id.
-     */
-    private static void checkInnerStreamThreadIds(int max,
-                                                  AtomicInteger counter,
-                                                  Map<Long, AtomicInteger> threadMap,
-                                                  long threadId) {
-        // Try to find the current thread id in the map.  If this is
-        // the first time in then give it an initial value of 1.
-        AtomicInteger value = threadMap
-            .putIfAbsent(Thread.currentThread().getId(),
-                         new AtomicInteger(1));
-
-        // If this isn't the first time in then simply increment by 1.
-        if (value != null)
-            value.incrementAndGet();
-
-        // When the final iteration has been encountered print the
-        // contents of the map.
-        if (counter.incrementAndGet() == max)
-            System.out.println("inner thread ids for outer thread "
-                               + threadId 
-                               + " = " 
-                               + threadMap);
+            // Print the outer thread id to aid debugging.
+            .peek(iteration ->
+                  System.out.println("outer thread id for "
+                                     + iteration
+                                     + " = "
+                                     + Thread.currentThread().getId()));
     }
 
     /**
@@ -171,9 +146,6 @@ public class ex35 {
         // Store the outer thread id.
         long threadId = Thread.currentThread().getId();
 
-        // Store the # of iterations as a 'max' value.
-        final int max = iterations;
-
         // Create an AtomicInteger to pass by reference.
         AtomicInteger counter = new AtomicInteger();
 
@@ -184,7 +156,7 @@ public class ex35 {
             // Generate ints from 1 .. iterations.
             .rangeClosed(1, iterations)
 
-            // Convert each int to Integer.
+            // Convert each int to an Integer.
             .boxed()
 
             // Run the computations in parallel.
@@ -192,9 +164,44 @@ public class ex35 {
 
             // Check whether the computations ran in parallel.
             .peek(m ->
-                  checkInnerStreamThreadIds(max,
+                  checkInnerStreamThreadIds(iterations,
                                             counter,
                                             threadMap,
                                             threadId));
+    }
+
+
+    /**
+     * Compute and print how many threads are used to process an inner
+     * parallel stream.
+     *
+     * @param maxIterations The max number of iterations
+     * @param iteration     Keep track of whether the max number of
+     *                      iterations have been met
+     * @param threadMap     A {@link Map} that records which threads are
+     *                      used by the inner parallel stream
+     * @param outerThreadId The outer stream's thread id
+     */
+    private static void checkInnerStreamThreadIds(int maxIterations,
+                                                  AtomicInteger iteration,
+                                                  Map<Long, AtomicInteger> threadMap,
+                                                  long outerThreadId) {
+        // Try to find the current thread id in the map.  If this is
+        // the first time in give it an initial value of 1.
+        AtomicInteger value = threadMap
+            .putIfAbsent(Thread.currentThread().getId(),
+                         new AtomicInteger(1));
+
+        // If this isn't the first time in simply increment by 1.
+        if (value != null)
+            value.incrementAndGet();
+
+        // When the final iteration has been reached print the
+        // contents of the map.
+        if (iteration.incrementAndGet() == maxIterations)
+            System.out.println("inner thread ids for outer thread "
+                                   + outerThreadId
+                                   + " = "
+                                   + threadMap);
     }
 }
