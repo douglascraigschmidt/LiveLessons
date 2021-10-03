@@ -23,7 +23,7 @@ public final class FileAndNetUtils {
      */
     private FileAndNetUtils() {
     }
-
+    
     /**
      * Download the contents found at the given URL and return them as
      * a raw byte array.
@@ -60,37 +60,9 @@ public final class FileAndNetUtils {
     }
 
     /**
-     * Transform a {@link URL} to an {@link Image} by downloading the
-     * contents of the {@code url}.
-     *
-     * @param url The {@link URL} of the image to download
-     * @return An {@link Image} containing the image contents
+     * Returns a filename form of the @a url.
      */
-    public static Image downloadImage(URL url) {
-        return 
-            // Perform a blocking image download.
-            new Image(url, BlockingTask
-                      // This call ensures the common fork/join thread
-                      // pool is expanded to handle the blocking image
-                      // download.
-                      .callInManagedBlock(() -> 
-                                          downloadContent(url)));
-    }
-    
-    /**
-     * This method stores the {@link Image} to the local file system.
-     *
-     * @return A {@link File} containing the stored {@link Image}
-     */
-    public static File storeImage(Image image) {
-        return image.store();
-    }
-
-    /**
-     * @ return A filename form of the {@code url}.
-     */
-    public static String getFileNameForUrl(URL url,
-                                           String transformName) {
+    public static String getFileNameForUrl(URL url) {
         // Just use the host and "filename".
         String uriName = url.getHost() + url.getFile();
 
@@ -99,8 +71,6 @@ public final class FileAndNetUtils {
 
         // Replace last underscore with a dot
         fileName = fileName.substring(0, fileName.lastIndexOf('_'))
-            + "_"
-            + transformName
             + "."
             + fileName.substring(fileName.lastIndexOf('_') + 1,
                                  fileName.length());

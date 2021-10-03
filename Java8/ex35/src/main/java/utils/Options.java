@@ -1,7 +1,5 @@
 package utils;
 
-import transforms.Transform;
-
 import java.io.File;
 import java.net.URL;
 import java.util.List;
@@ -16,29 +14,15 @@ import static java.util.stream.Collectors.toList;
  * option processing.
  */
 public class Options {
-    /**
-     * Logging tag.
-     */
-    private static final String TAG = Options.class.getName();
-
     /** 
      * The singleton {@link Options} instance.
      */
     private static Options mUniqueInstance = null;
 
     /**
-     * The {@link List} of {@link Transform} objects to apply to
-     * downloaded images.
-     */
-    private List<Transform> mTransforms = List
-        .of(Transform.Factory.newTransform(Transform.Type.GRAY_SCALE_TRANSFORM),
-            Transform.Factory.newTransform(Transform.Type.TINT_TRANSFORM),
-            Transform.Factory.newTransform(Transform.Type.SEPIA_TRANSFORM));
-
-    /**
      * The path to the image directory.
      */
-    private static final String sIMAGE_DIRECTORY_PATH =
+    private static final String IMAGE_DIRECTORY_PATH =
         "DownloadImages";
 
     /**
@@ -66,26 +50,33 @@ public class Options {
         + "7.png,"
         + "18.jpg,"
         + "8.jpg",
-        "22.jpg,"
-        + "23.png,"
-        + "24.jpg,"
-        + "25.jpg,"
-        + "26.jpg,"
-        + "27.png,"
-        + "28.jpg",
-        "29.jpg,"
-        + "30.jpg,"
-        + "31.jpg,"
-        + "32.jpg,"
-        + "33.png,"
-        + "34.png,"
-        + "35.png,"
+        "1.png,"
+        + "9.jpg,"
+        + "10.png,"
+        + "11.jpg,"
+        + "16.jpg,"
+        + "19.png,"
+        + "12.jpg",
+        "13.png,"
+        + "14.jpg,"
+        + "15.jpg,"
+        + "17.jpg,"
+        + "2.jpg,"
+        + "20.jpg,"
+        + "3.png",
+        "4.png,"
+        + "5.jpg,"
+        + "21.jpg,"
+        + "6.jpg,"
+        + "7.png,"
+        + "18.jpg,"
+        + "8.jpg"
     };
 
     /**
      * Prefix for all the URLs.
      */
-    private static final String sURL_PREFIX =
+    private static String sURL_PREFIX =
         "http://www.dre.vanderbilt.edu/~schmidt/images/";
 
     /**
@@ -108,7 +99,7 @@ public class Options {
      * Return the path for the directory where images are stored.
      */
     public String getDirectoryPath() {
-        return new File(sIMAGE_DIRECTORY_PATH).getAbsolutePath();
+        return new File(IMAGE_DIRECTORY_PATH).getAbsolutePath();
     }
 
     /**
@@ -163,7 +154,7 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public void parseArgs(String[] argv) {
+    public boolean parseArgs(String argv[]) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
@@ -172,9 +163,11 @@ public class Options {
                     break;
                 default:
                     printUsage();
-                    return;
+                    return false;
                 }
-        }
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -195,25 +188,5 @@ public class Options {
 
         // Create the image directory.
         imageDirectory.mkdirs();
-    }
-
-    /**
-     * Display statistics about the given {@code testName}.
-     */
-    public void printStats(String testName,
-                           int imageCount) {
-        System.out.println(TAG 
-                           + ": "
-                           + testName
-                           + " downloaded and stored "
-                           + imageCount
-                           + " images");
-    }
-
-    /**
-     * @return The {@link List} of {@link Transform} objects.
-     */
-    public List<Transform> transforms() {
-        return mTransforms;
     }
 }

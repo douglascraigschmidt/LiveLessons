@@ -94,6 +94,14 @@ public class ex21 {
         runTestAndPrintResult(() -> forEachTest(true, set),
                               "forEachTest(unordered)");
 
+        // Run/time tests that show the difference in performance
+        // between forEachOrdered() (which preserves order) and
+        // forEach() (which does not preserve order).
+        runTestAndPrintResult(() -> toArrayTest(false, set),
+                              "toArrayTest(ordered)");
+        runTestAndPrintResult(() -> toArrayTest(true, set),
+                              "toArrayTest(unordered)");
+
         // Print out the timing results for all the tests.
         System.out.println(RunTimer.getTimingResults());
     }
@@ -367,4 +375,59 @@ public class ex21 {
             return queue.toArray(new Integer[0]);
         }
     }
+
+    /**
+     * Shows how the use of {@code forEach()} on an unordered parallel
+     * stream can be faster than {@code forEachOrdered()} on an
+     * ordered parallel stream.
+     * 
+     * @param unordered Indicates whether the stream should be
+     *                  unordered or ordered
+     */
+    private static Integer[] toArrayTest(boolean unordered,
+                                         Collection<Integer> collection) {
+        if (unordered) {
+            return collection
+                // Convert collection into a parallel stream.
+                .parallelStream()
+
+                // Ensure the results are distinct.
+                .distinct()
+
+                // Only keep even numbers.
+                .filter(x -> x % 2 == 0)
+                           
+                // Double the integers in the list.
+                .map(x -> x * 2)
+
+                // Limit the number of items in the output.
+                .limit(sOutputLimit)
+
+                // Create an array.
+                .toArray(Integer[]::new);
+        }
+        else {
+            return collection
+                // Convert collection into a parallel stream.
+                .parallelStream()
+
+                // Ensure the results are distinct.
+                .distinct()
+
+                .unordered()
+
+                // Only keep even numbers.
+                .filter(x -> x % 2 == 0)
+                           
+                // Double the integers in the list.
+                .map(x -> x * 2)
+
+                // Limit the number of items in the output.
+                .limit(sOutputLimit)
+
+                // Create an array.
+                .toArray(Integer[]::new);
+        }
+    }
 }
+

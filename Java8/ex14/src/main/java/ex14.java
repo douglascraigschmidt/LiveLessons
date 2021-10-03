@@ -1,3 +1,4 @@
+import utils.ConcurrentHashSet;
 import utils.ConcurrentHashSetCollector;
 import utils.RunTimer;
 import utils.TestDataFactory;
@@ -9,10 +10,12 @@ import static java.util.stream.Collectors.*;
 
 /**
  * This example shows the difference in overhead for using a parallel
- * spliterator to split a Java LinkedList and an ArrayList into
- * chunks.  It also shows the difference in overhead between combining
- * and collecting results in a parallel stream vs. sequential stream
- * using concurrent and non-concurrent collectors.
+ * spliterator to split a Java {@link LinkedList} and an {@link
+ * ArrayList} into chunks.  It also shows the difference in overhead
+ * between combining and collecting results in a parallel stream
+ * vs. sequential stream using concurrent and non-concurrent
+ * collectors, as well as {@code forEach()} and {@code
+ * forEachOrdered()}.
  */
 public class ex14 {
     /**
@@ -47,6 +50,11 @@ public class ex14 {
         // a stream.
         runJoiningTests();
 
+        // Run tests that demonstrate performance differences bewteen
+        // forEach() and forEachOrdered() terminal operations to
+        // aggregate results in a stream.
+        runForEachTests();
+
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent techniques for
         // collecting results in a stream.
@@ -56,8 +64,39 @@ public class ex14 {
     }
 
     /**
+     * Warm up the threads in the fork/join pool so the timing results
+     * will be more accurate.
+     */
+    private static void warmUpForkJoinPool() {
+        System.out.println("\n++Warming up the fork/join pool\n");
+
+        List<CharSequence> words = Objects.requireNonNull(
+                                                          TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                                                   // Split input into "words"
+                                                                                   // by ignoring whitespace.
+                                                                                   "\\s+"));
+        // Create an empty list.
+        List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) 
+            // Append the new words to the end of the list.
+            list.addAll(words
+                        // Convert the list into a parallel stream
+                        // (which uses a spliterator internally).
+                        .parallelStream()
+
+                        // Uppercase each string.  A "real"
+                        // application would likely do something
+                        // interesting with the words at this point.
+                        .map(charSeq -> charSeq.toString().toUpperCase())
+
+                        // Collect the stream into a list.
+                        .collect(toList()));
+    }
+
+    /**
      * Run tests that demonstrate performance differences between
-     * ArrayList and LinkedList spliterators.
+     * {@link ArrayList} and {@link LinkedList} spliterators.
      */
     private static void runSpliteratorTests() {
         Arrays
@@ -157,6 +196,48 @@ public class ex14 {
 
     /**
      * Run tests that demonstrate the performance differences between
+     * {@code forEach()} and {@code forEachOrdered()} terminal
+     * opperations to aggregate results in a stream.
+     */
+    private static void runForEachTests() {
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1000, 10000, 100000, 1000000)
+
+            // For each input data size run the following tests.
+            .forEach (limit -> {
+                    // Create a list of strings containing all the
+                    // words in the complete works of Shakespeare.
+                    List<CharSequence> arrayWords =
+                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                 // Split input into "words" by
+                                                 // ignoring whitespace.
+                                                 "\\s+",
+                                                 limit);
+
+                    // Print a message when the test starts.
+                    System.out.println("Starting forEach* tests for "
+                                       + arrayWords.size() 
+                                       + " words..");
+
+                    // Compute the time required to aggregate results
+                    // into a ConcurrentHashSet using the forEach()
+                    // terminal operation.
+                    timeStreamForEachToSet("ArrayList", false, arrayWords);
+
+                    // Compute the time required to aggregate results
+                    // into a HashSet using the forEachOrdered()
+                    // terminal operation.
+                    timeStreamForEachToSet("ArrayList", true, arrayWords);
+
+                    // Print the results.
+                    System.out.println("..printing results\n"
+                                       + RunTimer.getTimingResults());
+                });
+    }
+
+    /**
+     * Run tests that demonstrate the performance differences between
      * concurrent and non-concurrent techniques for collecting results
      * in a stream.
      */
@@ -220,37 +301,6 @@ public class ex14 {
     }
 
     /**
-     * Warm up the threads in the fork/join pool so the timing results
-     * will be more accurate.
-     */
-    private static void warmUpForkJoinPool() {
-        System.out.println("\n++Warming up the fork/join pool\n");
-
-        List<CharSequence> words = Objects.requireNonNull(
-            TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                     // Split input into "words"
-                                     // by ignoring whitespace.
-                                     "\\s+"));
-        // Create an empty list.
-        List<String> list = new ArrayList<>();
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) 
-            // Append the new words to the end of the list.
-            list.addAll(words
-                        // Convert the list into a parallel stream
-                        // (which uses a spliterator internally).
-                        .parallelStream()
-
-                        // Uppercase each string.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toUpperCase())
-
-                        // Collect the stream into a list.
-                        .collect(toList()));
-    }
-
-    /**
      * Determines how long it takes to split and uppercase the word
      * list via a parallel spliterator for various types of lists.
      */
@@ -286,9 +336,10 @@ public class ex14 {
 
     /**
      * Determines how long it takes to combine partial results in the
-     * word list via collect() and Collectors.joining() in a stream.
-     * If {@code parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
+     * word list via {@code collect()} and {@code
+     * Collectors.joining()} in a stream.  If {@code parallel} is true
+     * then a parallel stream is used, else a sequential stream is
+     * used.
      */
     private static void timeStreamJoining(String testName,
                                           boolean parallel,
@@ -330,8 +381,9 @@ public class ex14 {
 
     /**
      * Determines how long it takes to collect partial results into a
-     * HashSet using a non-concurrent collector.  If {@code parallel} is
-     * true then a parallel stream is used, else a sequential stream is used.
+     * {@link HashSet} using a non-concurrent collector.  If {@code
+     * parallel} is true then a parallel stream is used, else a
+     * sequential stream is used.
      */
     private static void timeStreamCollectToSet(String testName,
                                                boolean parallel,
@@ -376,9 +428,73 @@ public class ex14 {
     }
 
     /**
+     * Determines how long it takes to collect results into a HashSet
+     * using the {@code forEachOrdered()} terminal operation and into
+     * a {@link ConcurrentHashSet} using the {@code forEach()}
+     * terminal operation.  If {@code ordered} is true then {@code
+     * forEachOrdered()} is used, else {@code forEach()} is used.
+     */
+    private static void timeStreamForEachToSet(String testName,
+                                               boolean ordered,
+                                               List<CharSequence> words) {
+        // Run the garbage collector before each test.
+        System.gc();
+
+        testName +=
+            (ordered ? " forEachOrdered()" : " forEach()")
+            + " timeStreamForEachToSet()";
+
+        if (ordered)
+            RunTimer.timeRun(() -> {
+                    Set<CharSequence> uniqueWords = 
+                        new HashSet<>();
+
+                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                        words
+                            // Convert the list into a stream (which
+                            // uses a spliterator internally).
+                            .parallelStream()
+
+                            // Map each string to lower case.  A
+                            // "real" application would likely do
+                            // something interesting with the words at
+                            // this point.
+                            .map(charSeq -> charSeq.toString().toLowerCase())
+
+                            // Trigger intermediate processing and
+                            // collect unique words into a HashSet.
+                            .forEachOrdered(uniqueWords::add);
+                    }},
+                testName);
+        else
+            RunTimer.timeRun(() -> {
+                    Set<CharSequence> uniqueWords = 
+                        new ConcurrentHashSet<>();
+
+                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                        words
+                            // Convert the list into a stream (which
+                            // uses a spliterator internally).
+                            .parallelStream()
+
+                            // Map each string to lower case.  A
+                            // "real" application would likely do
+                            // something interesting with the words at
+                            // this point.
+                            .map(charSeq -> charSeq.toString().toLowerCase())
+
+                            // Trigger intermediate processing and
+                            // collect unique words into a HashSet.
+                            .forEach(uniqueWords::add);
+                    }},
+                testName);
+    }
+
+    /**
      * Determines how long it takes to collect partial results into a
-     * ConcurrentHashSet using a concurrent collector.  If {@code parallel}
-     * is true then a parallel stream is used, else a sequential stream is used.
+     * {@link ConcurrentHashSet} using a concurrent collector.  If
+     * {@code parallel} is true then a parallel stream is used, else a
+     * sequential stream is used.
      */
     private static void timeStreamCollectToConcurrentSet(String testName,
                                                          boolean parallel,
@@ -389,8 +505,6 @@ public class ex14 {
         testName +=
             (parallel ? " parallel" : " sequential")
             + " timeStreamCollectToConcurrentSet()";
-
-        // System.out.println("Starting " + testName);
 
         RunTimer.timeRun(() -> {
                 Set<CharSequence> uniqueWords = null;

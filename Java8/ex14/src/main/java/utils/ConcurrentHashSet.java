@@ -28,7 +28,7 @@ public class ConcurrentHashSet<E>
     /**
      * Constructor initializes the field.
      */
-    ConcurrentHashSet(){
+    public ConcurrentHashSet(){
         mMap = new ConcurrentHashMap<E, Object>();
     }
 

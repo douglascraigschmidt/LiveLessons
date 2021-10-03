@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static utils.ExceptionUtils.rethrowSupplier;
@@ -28,8 +27,6 @@ public class Image
      * The source URL from which the result was downloaded.
      */
     private final URL mSourceUrl;
-
-    private String mTransformName = "";
 
     /**
      * Construct an Image from a byte array of {@code imageData}
@@ -49,11 +46,9 @@ public class Image
      * Constructor initialized by the {@link BufferedImage}
      */
     private Image(BufferedImage bufferedImage,
-                  URL sourceURL,
-                  String transformName) {
+                  URL sourceURL) {
         super(bufferedImage);
         mSourceUrl = sourceURL;
-        mTransformName = transformName;
     }
 
     /**
@@ -61,8 +56,7 @@ public class Image
      * constructed from.
      */
     private String getFileName() {
-        return FileAndNetUtils.getFileNameForUrl(mSourceUrl,
-                                                 mTransformName);
+        return FileAndNetUtils.getFileNameForUrl(mSourceUrl);
     }
 
     /**
@@ -83,20 +77,16 @@ public class Image
 
         int[] lastProgress = new int[1];
 
-        String transformName;
         switch (type) {
         case GRAY_SCALE_TRANSFORM:
             Transforms.grayScale(pixels, filteredImage.getColorModel().hasAlpha());
-            transformName = "grayscale";
             break;
         case TINT_TRANSFORM:
             Transforms.tint(pixels, filteredImage.getColorModel().hasAlpha(),
                             0.0f, 0.0f, 0.9f);
-            transformName = "tint";
             break;
         case SEPIA_TRANSFORM:
             Transforms.sepia(pixels, filteredImage.getColorModel().hasAlpha());
-            transformName = "sepia";
             break;
         default:
             return this;
@@ -107,8 +97,7 @@ public class Image
                     pixels, 0, filteredImage.getWidth());
 
         return new Image(filteredImage,
-                         mSourceUrl,
-                         transformName);
+                         mSourceUrl);
     }
 
     /**
