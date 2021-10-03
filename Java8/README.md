@@ -184,3 +184,7 @@ Here's an overview of what's currently included in these examples:
          of an Flight Listing App (FLApp) that we're creating for an
          upcoming online courses on Reactive Microservices.
 
+. ex35 - This example first demonstrates how the testFlatMap()
+         intermediate operation doesn't scale in a Java parallel
+         stream and then shows how a combination of reduce() and
+         Stream.concat() fixes this problem.
