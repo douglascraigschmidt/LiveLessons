@@ -380,54 +380,6 @@ public class ex14 {
     }
 
     /**
-     * Determines how long it takes to collect partial results into a
-     * {@link HashSet} using a non-concurrent collector.  If {@code
-     * parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToSet(String testName,
-                                               boolean parallel,
-                                               List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToSet()";
-
-        // System.out.println("Starting " + testName);
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A "real" application would likely do something
-                    // interesting with the words at this point.
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real" application
-                        // would likely do something interesting with the words at
-                        // this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect unique
-                        // words into a HashSet.
-                        .collect(toCollection(HashSet::new));
-                }},
-            testName);
-    }
-
-    /**
      * Determines how long it takes to collect results into a HashSet
      * using the {@code forEachOrdered()} terminal operation and into
      * a {@link ConcurrentHashSet} using the {@code forEach()}
@@ -488,6 +440,54 @@ public class ex14 {
                             .forEach(uniqueWords::add);
                     }},
                 testName);
+    }
+
+    /**
+     * Determines how long it takes to collect partial results into a
+     * {@link HashSet} using a non-concurrent collector.  If {@code
+     * parallel} is true then a parallel stream is used, else a
+     * sequential stream is used.
+     */
+    private static void timeStreamCollectToSet(String testName,
+                                               boolean parallel,
+                                               List<CharSequence> words) {
+        // Run the garbage collector before each test.
+        System.gc();
+
+        testName +=
+            (parallel ? " parallel" : " sequential")
+            + " timeStreamCollectToSet()";
+
+        // System.out.println("Starting " + testName);
+
+        RunTimer.timeRun(() -> {
+                Set<CharSequence> uniqueWords = null;
+
+                for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                    Stream<CharSequence> wordStream = words
+                        // Convert the list into a stream (which uses a
+                        // spliterator internally).
+                        .stream();
+
+                    if (parallel)
+                        // Convert to a parallel stream.
+                        wordStream.parallel();
+
+                    // A "real" application would likely do something
+                    // interesting with the words at this point.
+
+                    // A set of unique words in Shakespeare's works.
+                    uniqueWords = wordStream
+                        // Map each string to lower case.  A "real" application
+                        // would likely do something interesting with the words at
+                        // this point.
+                        .map(charSeq -> charSeq.toString().toLowerCase())
+
+                        // Trigger intermediate processing and collect unique
+                        // words into a HashSet.
+                        .collect(toCollection(HashSet::new));
+                }},
+            testName);
     }
 
     /**
