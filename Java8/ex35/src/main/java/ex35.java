@@ -1,31 +1,25 @@
-import transforms.Transform;
-import utils.*;
+import utils.Options;
+import utils.RunTimer;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * This example shows how to ..
+ * This example first demonstrates how the {@code testFlatMap()}
+ * intermediate operation doesn't scale in a Java parallel stream and
+ * then shows how a combination of {@code reduce()} and {@code
+ * Stream.concat()} fixes this problem.
  */
 public class ex35 {
     /**
      * Logging tag.
      */
     private static final String TAG = ex35.class.getName();
-
-    /**
-     * The {@link List} of {@link Transform} objects to apply to
-     * downloaded images.
-     */
-    protected static List<Transform> sTransforms = List
-        .of(Transform.Factory.newTransform(Transform.Type.GRAY_SCALE_TRANSFORM),
-            Transform.Factory.newTransform(Transform.Type.TINT_TRANSFORM),
-            Transform.Factory.newTransform(Transform.Type.SEPIA_TRANSFORM));
 
     /**
      * Main entry point into the test program.
@@ -39,10 +33,8 @@ public class ex35 {
         Options.instance().parseArgs(args);
 
         // Runs the tests.
-        runTest(ex35::downloadImage,
-                ex35::transformImage,
-                ex35::storeImage,
-                "testDefaultDownloadBehavior()");
+        runTest(ex35::testFlatMap, "testFlatMap()");
+        runTest(ex35::testReduceConcat, "testReduceConcat()");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -52,130 +44,182 @@ public class ex35 {
 
     /**
      * Run the test named {@code testName} by applying the {@code
-     * downloadImage}, {@code transformImage}, and {@code storeImage}
-     * {@link Function} objects.
+     * test} {@link Runnable} and timing its performance.
      *
-     * @param downloadImage A {@link Function} that downloads images
-     * @param transformImage A {@link Function} that transforms images
-     * @param storeImage A {@link Function} that stores images
+     * @param test The test to run
      * @param testName Name of the test
      */
-    private static void runTest(Function<URL, Image> downloadImage,
-                                Function<Image, Stream<Image>> transformImage,
-                                Function<Image, File> storeImage,
+    private static void runTest(Runnable test,
                                 String testName) {
 
         // Let the system garbage collect.
         System.gc();
 
         // Record how long the test takes to run.
-        RunTimer.timeRun(() ->
-                         // Run the test with the designated function.
-                         testDownloadBehavior(downloadImage,
-                                              transformImage,
-                                              storeImage,
-                                              testName),
+        RunTimer.timeRun(test,
                          testName);
 
-
-        // Delete any images from the previous run.
-        FileAndNetUtils
-            .deleteDownloadedImages(Options.instance().getDirectoryPath());
     }
 
     /**
-     * This method runs the tests via the {@code downloadImage}
-     * function.
-     *
-     * @param downloadImage A {@link Function} that downloads images
-     * @param transformImage A {@link Function} that transforms images
-     * @param storeImage A {@link Function} that stores images
-     * @param testName Name of the test
+     * Demonstrate how the {@code testFlatMap()}
+     * intermediate operation doesn't scale in a Java parallel stream.
      */
-    private static void testDownloadBehavior(Function<URL, Image> downloadImage,
-                                             Function<Image, Stream<Image>> transformImage,
-                                             Function<Image, File> storeImage,
-                                             String testName) {
-        List<URL> urlList = Options.instance().getUrlList();
+    private static void testFlatMap() {
+        var result = List
+            // Create a stream of 4 'iterations" from 1 to 4.
+            .of(1, 2, 3, 4)
 
-        System.out.println("downloading "
-                           + urlList.size()
-                           + " images");
+            // Convert the stream to a parallel stream.
+            .parallelStream() 
 
-        // Store the list of downloaded/tranformed images.
-        List<File> images = urlList
-            // Convert the URLs in the input list into a stream and
-            // process them in parallel.
-            .parallelStream()
+            // Print the outer thread id.
+            .peek(iterations -> System.out.println("outer thread id for "
+                                                  + iterations
+                                                  + " = "
+                                                  + Thread.currentThread().getId()))
 
-            // Transform URL to a File by downloading each image via
-            // its URL.
-            .map(downloadImage)
+            // Apply the flatMap() intermediate operation, which
+            // doesn't work scalably for parallel streams.
+            .flatMap(iterations -> {
+                    // Store the outer thread id.
+                    long threadId = Thread.currentThread().getId();
 
-            // Transform the images.
-            .flatMap(transformImage)
+                    // Store the # of iterations as a 'max' value.
+                    final int max = iterations;
 
-            // Store the images.
-            .map(storeImage)
+                    // Create an AtomicInteger to pass by reference.
+                    AtomicInteger counter = new AtomicInteger();
 
-            // Terminate the stream and collect the results into list
-            // of images.
+                    // Create a ConcurrentHashMap to store results.
+                    Map<Long, Integer> threadMap = new ConcurrentHashMap<>();
+
+                    return IntStream
+                    // Generate ints from 1 .. iterations.
+                    .rangeClosed(1, iterations)
+                    
+                    // Convert each int to Integer.
+                    .boxed()
+
+                    // (Attempt to) run the computations in parallel.
+                    .parallel()
+
+                    // Check whether the computations ran in parallel.
+                    .peek(m -> 
+                          checkInnerThreadIds(max,
+                                              counter,
+                                              threadMap,
+                                              threadId));
+                })
+
+            // Collect the results into a List of Integer objects.
             .collect(Collectors.toList());
 
-        // Print the statistics for this test run.
-        printStats(testName, images.size());
+        // Print the results.
+        System.out.println("testFlatMap() results = " + result);
     }
 
     /**
-     * This method blocks while retrieving the image associated with
-     * the {@code url} and creates an {@link Image} to encapsulate it.
-     *
-     * @param url The {@link URL} to an image to download
-     * @return The downloaded {@link Image}
+     * Demonstrate how combining {@code reduce()} and {@code Stream.concat()}
+     * scales much better than {@code flatMap()} in a Java parallel stream.
      */
-    private static Image downloadImage(URL url) {
-        return new Image(url,
-                         FileAndNetUtils.downloadContent(url));
-    }
+    private static void testReduceConcat() {
+        var result = List
+            // Create a stream of 4 'iterations" from 1 to 4.
+            .of(1, 2, 3, 4)
 
-    /**
-     * This method applies a group of {@link Transform} objects to
-     * transform the {@link Image}.
-     *
-     * @param image The {@link Image} to transform
-     * @return A {@link Stream} of transformed {@link Image} objects
-     */
-    private static Stream<Image> transformImage(Image image) {
-        return sTransforms
-            // Convert the List of transforms to a parallel stream.
+            // Convert the stream to a parallel stream.
             .parallelStream()
 
-            // Apply each transform to the original image to produce a
-            // transformed image.
-            .map(transform -> transform.transform(image));
+            // Print the outer thread id.
+            .peek(iterations -> System.out.println("outer thread id for "
+                                                   + iterations
+                                                   + " = "
+                                                   + Thread.currentThread().getId()))
+
+            // Apply the map() intermediate operation, which works
+            // scalably for parallel streams.
+            .map(iterations -> {
+                    // Store the outer thread id.
+                    long threadId = Thread.currentThread().getId();
+
+                    // Store the # of iterations as a 'max' value.
+                    final int max = iterations;
+
+                    // Create an AtomicInteger to pass by reference.
+                    AtomicInteger counter = new AtomicInteger();
+
+                    // Create a ConcurrentHashMap to store results.
+                    Map<Long, Integer> threadMap = new ConcurrentHashMap<>();
+
+                    return IntStream
+                    // Generate ints from 1 .. iterations.
+                    .rangeClosed(1, iterations)
+
+                    // Convert each int to Integer.
+                    .boxed()
+
+                    // Run the computations in parallel.
+                    .parallel()
+
+                    // Check whether the computations ran in parallel.
+                    .peek(m -> 
+                          checkInnerThreadIds(max,
+                                              counter,
+                                              threadMap,
+                                              threadId));
+                })
+
+            // Reduce the stream of streams into a single stream of
+            // Integer objects.
+            .reduce(Stream::concat).orElse(Stream.empty())
+
+            // Collect the results into a List of Integer objects.
+            .collect(Collectors.toList());
+
+        // Print the results.
+        System.out.println("testReduceConcat() results = " + result);
     }
 
     /**
-     * This method stores the {@link Image} to the local file system.
+     * Compute and print how many threads are used to process an inner
+     * parallel stream.
      *
-     * @return A {@link File} containing the stored {@link Image}
+     * @param max       The max number of iterations
+     * @param counter   Keep track of whether the max number of
+     *                  iterations have been met
+     * @param threadMap A {@link Map} that records which threads are
+     *                  used by the inner parallel stream
+     * @param threadId  The outer thread id.
      */
-    private static File storeImage(Image image) {
-        return image.store();
-    }
+    private static void checkInnerThreadIds(int max,
+                                            AtomicInteger counter,
+                                            Map<Long, Integer> threadMap,
+                                            long threadId) {
+        // Try to store 0 into the map at the current thread id.
+        var existing = threadMap
+            .put(Thread.currentThread().getId(),
+                 0);
 
-    /**
-     * Display the statistics about the test.
-     */
-    private static void printStats(String testName, 
-                                   int imageCount) {
-        System.out.println(TAG 
-                           + ": "
-                           + testName
-                           + " downloaded and stored "
-                           + imageCount
-                           + " images using "
-                           + (ForkJoinPool.commonPool().getPoolSize() + 1)
-                           + " threads in the pool");
+        // A null indicates this is the first time in, so we
+        // initialize the count for that thread id to 1.
+        if (existing == null) {
+            threadMap.put(Thread.currentThread().getId(),
+                          1);
+
+        // A non-null indicates this is not the first time in, so we
+        // increment the count for that thread id by 1.
+        } else {
+            threadMap.put(Thread.currentThread().getId(),
+                          existing + 1);
+        }
+
+        // When the final iteration has been encountered print the
+        // contents of the map.
+        if (counter.incrementAndGet() == max)
+            System.out.println("inner thread ids for outer thread "
+                               + threadId 
+                               + " = " 
+                               + threadMap);
     }
 }

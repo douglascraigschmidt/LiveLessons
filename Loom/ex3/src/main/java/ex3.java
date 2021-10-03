@@ -30,8 +30,8 @@ public class ex3 {
     public static void main(String[] argv)
         throws ExecutionException, InterruptedException {
         System.out.println("Entering the program with "
-                           + Runtime.getRuntime().availableProcessors()
-                           + " cores available");
+                               + Runtime.getRuntime().availableProcessors()
+                               + " cores available");
 
         // Initializes the Options singleton.
         Options.instance().parseArgs(argv);
@@ -51,55 +51,6 @@ public class ex3 {
                 "Parallel streams runFlatMap() test");
 
          */
-
-        List.of(1, 2, 3, 4)
-            .parallelStream() // .stream() - nothing changes
-            .peek(m -> {
-                    System.out.println("outer " + Thread.currentThread().getId());
-                })
-            .flatMap(x -> {
-                Map<Long, Integer> threadMap = new ConcurrentHashMap<>();
-                return Stream
-                    .iterate(0, i -> i + 1)
-                    .limit(x)
-                    .parallel()
-                    .peek(m -> {
-                        var existing = threadMap
-                            .put(Thread.currentThread().getId(),
-                                 0);
-                        if (existing == null) {
-                            threadMap.put(Thread.currentThread().getId(),
-                                          1);
-                            System.out.println("first time in for thread "
-                                               + Thread.currentThread().getId());
-                        } else {
-                            threadMap.put(Thread.currentThread().getId(),
-                                          existing + 1);
-                            System.out.println((existing + 1) + " time in for thread "
-                                                   + Thread.currentThread().getId());
-                        }
-                    });
-            })
-            .collect(Collectors.toSet());
-
-        /*
-        // Runs the tests using Project Loom's structured concurrency model.
-        runTest(StructuredConcurrencyTests::run,
-                "Structured concurrency test");
-                         */
-
-        /*
-        // Runs the tests using the Java completable futures framework.
-        runTest(ex3::testDownloadCF,
-        ex3::downloadImage,
-        ex3::transformImageCF,
-        ex3::storeImage);
-        */
-
-        // Print the results.
-        System.out.println(RunTimer.getTimingResults());
-
-        System.out.println("Leaving the download tests program");
     }
 
     /**
