@@ -55,7 +55,8 @@ public abstract class Filter {
     public Image filter(Image image) {
         // Call the applyFilter() hook method.
         Image filteredResult = applyFilter(image);
-        filteredResult.setFilterName(this);
+        if (filteredResult != null)
+            filteredResult.setFilterName(this);
         return filteredResult;
     }
 

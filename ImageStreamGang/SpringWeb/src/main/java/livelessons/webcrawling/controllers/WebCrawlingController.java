@@ -1,16 +1,14 @@
 package livelessons.webcrawling.controllers;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import livelessons.webcrawling.services.WebCrawlingService;
+import java.util.List;
+import java.util.Map;
 
 /**
  * In Spring’s approach to building RESTful web services, HTTP
@@ -25,49 +23,53 @@ public class WebCrawlingController {
     /**
      * The @Autowired annotation is used for automatic dependency
      * injection. It can be used directly on properties, thereby
-     * eliminating the need for getters and setters:
+     * eliminating the need for getters and setters.
      */
     @Autowired
     private WebCrawlingService webCrawlingService;
 	
     /**
-     * @RequestMapping annotation is used for mapping web requests
-     * onto methods in Controller classes.
+     * The {@code @PostMapping} annotation is used to map HTTP POST
+     * requests onto endpoint methods in Controller classes.
      * 
-     * POST requests to /run endpoint maps to method run(.  When /run
-     * is invoked from any HttpWebClient or by using Curl on command
-     * line, this method will be invoked.
+     * POST requests to /run endpoint maps to the run() endpoint
+     * method.  When /run is invoked from any HTTP web client or by
+     * using Curl on command line, this method will be invoked.
      * 
-     * ResponseEntity represents an HTTP response, including headers,
-     * body, and status.  While @ResponseBody puts the return value
-     * into the body of the response, ResponseEntity also allows us to
-     * add headers and status code.  This method returns the raw JSON
-     * response to the clients.
+     * {@link ResponseEntity} represents an HTTP response, including
+     * headers, body, and status.  It also adds headers and status
+     * code.  This method returns the raw JSON response to the
+     * clients.
      */
-    @RequestMapping(value = "/run", method = RequestMethod.POST)
+    @PostMapping("/run")
     public ResponseEntity<String> run() {
-        webCrawlingService.runTests();
+        webCrawlingService
+            // Forward to the service.
+            .runTests();
+
+        // Return an "OK" response.
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 	
     /**
-     * @RequestMapping annotation is used for mapping web requests
-     * onto methods in Controller.  GET requests to /timingresults
-     * endpoint maps to method getTimingResults(). When /timingresults
-     * is invoked from any HttpWebClient or by using Curl on command
-     * line this method will be called.
+     * The {@code @GetMapping} annotation is used for mapping web
+     * requests onto methods in Controller.  HTTP GET requests to the
+     * "/timingresults" endpoint maps to this endpoint method. When
+     * "/timingresults" is invoked from any HTTP web client or by
+     * using Curl on command line this method will be called.
      * 
-     * ResponseEntity represents an HTTP response, including headers,
-     * body, and status.  While @ResponseBody puts the return value
-     * into the body of the response, ResponseEntity also allows us to
-     * add headers and status code.  This method returns the raw JSON
-     * response to the clients.
+     * {@link ResponseEntity} represents an HTTP response, including
+     * headers, body, and status.  It also adds headers and status
+     * code.  This method returns the raw JSON response to the
+     * clients.
      */
-    @RequestMapping(value = "/timingresults", method = RequestMethod.GET)
+    @GetMapping("/timingresults")
     public ResponseEntity<Map<String, List<Long>> > getTimingResults() {
         Map<String, List<Long>> timingResults = webCrawlingService
+            // Forward to the service.
             .getTimingResults();
 
+        // Return the Map containing the timing results.
         return new ResponseEntity<Map<String, List<Long>>>(timingResults,
                                                            HttpStatus.OK);
     }
