@@ -53,9 +53,13 @@ public class ImageStreamParallel
             // pool is expanded to handle the blocking image download.
             .map(this::blockingDownload)
 
-            // Use flatMap() to create a stream containing multiple
+            // Use map() to create a stream containing multiple
             // filtered versions of each image.
-            .flatMap(this::applyFilters)
+            .map(this::applyFilters)
+
+            // Convert the stream of streams of images into a stream
+            // of images without using flatMap().
+            .reduce(Stream::concat).orElse(Stream.empty())
 
             // Terminate the stream and collect the results into list
             // of images.

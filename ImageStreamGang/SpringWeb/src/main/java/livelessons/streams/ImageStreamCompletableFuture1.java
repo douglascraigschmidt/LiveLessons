@@ -82,10 +82,10 @@ public class ImageStreamCompletableFuture1
                         // Log the results.
                         log(stream
                             // Remove any empty optionals.
-                            //.flatMap(Optional::stream),
+                            .flatMap(Optional::stream),
                             // For JDK 8 you'll need to use
-                            .filter(Optional::isPresent)
-                            .map(Optional::get),
+                            // .filter(Optional::isPresent)
+                            // .map(Optional::get),
                             urls.size()))
 
             // Wait until all the images have been downloaded,

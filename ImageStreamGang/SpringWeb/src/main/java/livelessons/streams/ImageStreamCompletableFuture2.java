@@ -89,10 +89,10 @@ public class ImageStreamCompletableFuture2
                     // filtered images.
                     Stream<CompletableFuture<Stream<Image>>> futureStream = stream
                         // Remove all cached URLs.
-                        //.flatMap(Optional::stream)
+                        .flatMap(Optional::stream)
                         // For JDK 8 you'll need to use 
-                         .filter(Optional::isPresent)
-                         .map(Optional::get)
+                        // .filter(Optional::isPresent)
+                        // .map(Optional::get)
 
                         // Use map() to call downloadImageAsync(),
                         // which transforms each URL to a completable

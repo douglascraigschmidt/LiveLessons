@@ -1,9 +1,9 @@
 package livelessons.streams;
 
-import io.reactivex.rxjava3.core.Observable;
 import livelessons.filters.Filter;
 import livelessons.utils.Image;
-import livelessons.utils.RxUtils;
+import livelessons.utils.ReactorUtils;
+import reactor.core.publisher.Flux;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -12,49 +12,48 @@ import java.util.List;
 
 /**
  * This implementation strategy customizes ImageStreamGang to use
- * RxJava's flatMap() idiom to download, process, and store images
- * concurrently.  This implementation uses Java's common fork-join
- * pool, which has as many threads as there are processors, as
- * returned by Runtime.getRuntime().availableProcessors().  The size
- * of this common fork-join pool can be changed dynamically via Java's
- * ManagedBlocker mechanism.
+ * Project Reactor's flatMap() idiom to download, process, and store
+ * images concurrently.  This implementation uses Java's common
+ * fork-join pool, which has as many threads as there are processors,
+ * as returned by Runtime.getRuntime().availableProcessors().  The
+ * size of this common fork-join pool can be changed dynamically via
+ * Java's ManagedBlocker mechanism.
  */
-public class ImageStreamRxJava1
+public class ImageStreamReactor1
        extends ImageStreamGang {
     /**
      * Constructor initializes the superclass.
      */
-    public ImageStreamRxJava1(Filter[] filters,
+    public ImageStreamReactor1(Filter[] filters,
                               Iterator<List<URL>> urlListIterator) {
         super(filters, urlListIterator);
     }
 
     /**
-     * Perform the ImageStreamGang processing, which uses RxJava's
-     * flatMap() idiom to download, process, and store images
-     * concurrently.
+     * Perform the ImageStreamGang processing, which uses Project
+     * Reactor's flatMap() idiom to download, process, and store
+     * images concurrently.
      */
     @Override
     protected void processStream() {
         // Get the list of URLs.
         List<URL> urls = getInput();
 
-        Observable
-            // Convert the URLs in the input list into an observable
-            // stream.
+        ArrayList<Image> filteredImages = Flux
+            // Convert the URLs in the input list into a flux stream.
             .fromIterable(urls)
 
-            // Use the RxJava flatMap() concurrency idiom to transform
+            // Use the Project Reactor flatMap() idiom to transform
             // the stream of urls by downloading and filtering them in
             // parallel.
             .flatMap(url ->
-                     Observable
+                     Flux
                      // Just omit this one object.
                      .just(url)
 
                      // Run this flow of operations in the common
                      // fork-join pool.
-                     .compose(RxUtils.commonPoolObservable())
+                     .transformDeferred(ReactorUtils.commonPoolFlux())
 
                      // Ignore URLs that are cached locally, i.e.,
                      // only download non-cached images.
@@ -70,41 +69,42 @@ public class ImageStreamRxJava1
                      // multiple filtered versions of each image.
                      .flatMap(this::applyFilters))
 
-            // Reduce the downloaded and filtered images by appending
-            // them into a single list.
+            // Reduce the downloaded and filtered images into a list.
             .reduceWith(ArrayList<Image>::new,
                         this::append)
 
-            // Print the statistics in a blocking manner.
-            .blockingSubscribe(filteredImages ->
-                               System.out.println(TAG
-                                                  + ": processing of "
-                                                  + filteredImages.size()
-                                                  + " image(s) from "
-                                                  + urls.size()
-                                                  + " urls is complete"));
+            // Get the statistics in a blocking manner.
+            .block();
+
+        assert filteredImages != null;
+        // Print the statistics.
+        System.out.println(TAG
+                           + ": processing of "
+                           + filteredImages.size()
+                           + " image(s) from "
+                           + urls.size()
+                           + " urls is complete");
     }
 
     /**
      * Apply all the image filters concurrently to each {@code image}
      * @return A stream of filtered images
      */
-    private Observable<Image> applyFilters(Image image) {
-        return Observable
+    private Flux<Image> applyFilters(Image image) {
+        return Flux
             // Convert the filters in the input list into a stream of
             // observables.
             .fromIterable(mFilters)
 
-            // Use the RxJava flatMap() concurrency idiom to transform
-            // an observable by applying a set of operations to each
-            // item emitted by the source.
-            .flatMap(filter -> Observable
+            // Transforms an observable by applying a set of
+            // operations to each item emitted by the source.
+            .flatMap(filter -> Flux
                      // Just omit this one object.
                      .just(filter)
 
                      // Run this flow of operations in the common
                      // fork-join pool.
-                     .compose(RxUtils.commonPoolObservable())
+                     .transformDeferred(ReactorUtils.commonPoolFlux())
 
                      // Use map() to create an OutputFilterDecorator
                      // for each image and run it to filter each image
