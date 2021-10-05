@@ -381,8 +381,10 @@ public class ex21 {
      * stream can be faster than {@code forEachOrdered()} on an
      * ordered parallel stream.
      * 
-     * @param unordered Indicates whether the stream should be
-     *                  unordered or ordered
+     * @param unordered  Indicates whether the stream should be
+     *                   processed in an unordered or ordered manner
+     * @param collection The {@link Collection} to process 
+     * @return A array.
      */
     private static Integer[] toArrayTest(boolean unordered,
                                          Collection<Integer> collection) {

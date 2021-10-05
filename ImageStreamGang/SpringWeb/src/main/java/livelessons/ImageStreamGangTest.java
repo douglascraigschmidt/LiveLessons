@@ -12,7 +12,11 @@ import livelessons.filters.NullFilter;
 
 /**
  * This class is the main entry point for the Java console version of
- * the ImageStreamGang app.
+ * the ImageStreamGang app.  It runs all the implementation strategies
+ * (including strategies implemented via Java sequential streams,
+ * parallel streams, completable futures, RxJava, and Project Reactor
+ * frameworks) and provides apples-to-apples comparisons of these
+ * strategies in terms of there performance and scalability.
  */
 public class ImageStreamGangTest {
     /**

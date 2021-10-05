@@ -12,7 +12,11 @@ import livelessons.filters.NullFilter;
 
 /**
  * This class is the main entry point for the Java console version of
- * the ImageStreamGang app.
+ * the ImageStreamGang app.  It runs all the implementation strategies
+ * (including strategies implemented via Java sequential streams,
+ * parallel streams, completable futures, RxJava, and Project Reactor
+ * frameworks) and provides apples-to-apples comparisons of these
+ * strategies in terms of there performance and scalability.
  */
 public class ImageStreamGangTest {
     /**
@@ -66,7 +70,7 @@ public class ImageStreamGangTest {
      * Iterates through all the implementation strategies to test how
      * they perform.
      */
-    private static void runTests() {
+    public static void runTests() {
         // Warm up the fork-join pool.
         warmUpForkJoinPool();
 
@@ -87,6 +91,7 @@ public class ImageStreamGangTest {
             System.gc();
 
             assert streamGang != null;
+
             // Start running the test (which initiates the timer).
             streamGang.run();
 
@@ -136,6 +141,13 @@ public class ImageStreamGangTest {
                                               urlIterator);
         }
         return null;
+    }
+
+    /**
+     * @return The timing results from all the tests.
+     */
+    public static Map<String, List<Long>>  getTimingResults(){
+        return mResultsMap;
     }
 
     /**

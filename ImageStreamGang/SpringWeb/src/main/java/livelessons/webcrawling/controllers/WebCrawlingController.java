@@ -64,13 +64,13 @@ public class WebCrawlingController {
      * clients.
      */
     @GetMapping("/timingresults")
-    public ResponseEntity<Map<String, List<Long>> > getTimingResults() {
+    public ResponseEntity<Map<String, List<Long>>> getTimingResults() {
         Map<String, List<Long>> timingResults = webCrawlingService
             // Forward to the service.
             .getTimingResults();
 
         // Return the Map containing the timing results.
-        return new ResponseEntity<Map<String, List<Long>>>(timingResults,
-                                                           HttpStatus.OK);
+        return new ResponseEntity<>(timingResults,
+                                    HttpStatus.OK);
     }
 }

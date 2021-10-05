@@ -70,6 +70,8 @@ public class ex35 {
      * operation doesn't scale in a Java parallel stream.
      */
     private static void testFlatMap() {
+        System.out.println("Entering testFlatMap()");
+
         var result =
             // Generate an outer Stream that emits the designated
             // number of Integer objects in parallel.
@@ -83,7 +85,7 @@ public class ex35 {
             .collect(Collectors.toList());
 
         // Print the results.
-        System.out.println("testFlatMap() results = " + result);
+        System.out.println("Leaving testFlatMap() with results = " + result);
     }
 
     /**
@@ -91,6 +93,8 @@ public class ex35 {
      * scales much better than {@code flatMap()} in a Java parallel stream.
      */
     private static void testReduceConcat() {
+        System.out.println("Entering testReduceConcat()");
+
         var result =
             // Generate an outer Stream that emits the designated
             // number of Integer objects in parallel.
@@ -100,24 +104,27 @@ public class ex35 {
             // scalably for parallel streams.
             .map(ex35::innerStream)
 
-            // Reduce the stream of streams into a single stream of
-            // Integer objects.
+            // Reduce the stream of streams into a  stream of Integer objects.
             .reduce(Stream::concat).orElse(Stream.empty())
 
             // Collect the results into a List of Integer objects.
             .collect(Collectors.toList());
 
         // Print the results.
-        System.out.println("testReduceConcat() results = " + result);
+        System.out.println("Leaving testReduceConcat() with results = " + result);
     }
 
     /**
-     * @return A parallel stream that emits {@code iteration } {@link Integer} objects
+     * Return an outer {@link Stream} that emits {@link Integer} objects from 1
+     * to {@code outerCount}.
+     * @param outerCount The number of iterations to perform
+     * @return An outer {@link Stream} that emits {@code outerCount} {@link Integer}
+     *         objects in parallel
      */
-    private static Stream<Integer> generateOuterStream(int iterations) {
+    private static Stream<Integer> generateOuterStream(int outerCount) {
         return IntStream
             // Create a Stream of ints from 1 to iterations.
-            .rangeClosed(1, iterations)
+            .rangeClosed(1, outerCount)
 
             // Convert each int to an Integer.
             .boxed()
@@ -135,14 +142,15 @@ public class ex35 {
 
     /**
      * Return an inner {@link Stream} that emits {@link Integer} objects from 1
-     * to {@code iterations}.  This method also check to see whether the inner
+     * to {@code innerCount}.  This method also check to see whether the inner
      * {@link Stream} ran in parallel or not.
      *
-     * @param iterations The number of iterations to emit
+     * @param innerCount The number of iterations to perform
      * @return An inner {@link Stream} that emits {@link Integer} objects from
-     *         1 to {@code iterations}.
+     *         1 to {@code innerCount}, possibly in parallel (depending on the
+     *         context in which {@code innerStream()} is called)
      */
-    private static Stream<Integer> innerStream(Integer iterations) {
+    private static Stream<Integer> innerStream(Integer innerCount) {
         // Store the outer thread id.
         long threadId = Thread.currentThread().getId();
 
@@ -153,8 +161,8 @@ public class ex35 {
         Map<Long, AtomicInteger> threadMap = new ConcurrentHashMap<>();
 
         return IntStream
-            // Generate ints from 1 .. iterations.
-            .rangeClosed(1, iterations)
+            // Generate ints from 1 to iterations.
+            .rangeClosed(1, innerCount)
 
             // Convert each int to an Integer.
             .boxed()
@@ -163,16 +171,12 @@ public class ex35 {
             .parallel()
 
             // Check whether the computations ran in parallel.
-            .peek(m ->
-                  checkInnerStreamThreadIds(iterations,
-                                            counter,
-                                            threadMap,
-                                            threadId));
+            .peek(m -> checkInnerStreamThreadIds(innerCount, counter,
+                                                 threadMap, threadId));
     }
 
-
     /**
-     * Compute and print how many threads are used to process an inner
+     * Determine and print how many threads are used to process an inner
      * parallel stream.
      *
      * @param maxIterations The max number of iterations
@@ -186,8 +190,8 @@ public class ex35 {
                                                   AtomicInteger iteration,
                                                   Map<Long, AtomicInteger> threadMap,
                                                   long outerThreadId) {
-        // Try to find the current thread id in the map.  If this is
-        // the first time in give it an initial value of 1.
+        // Try to find the AtomicInteger associated with current thread id in
+        // the map.  If this is the first time in give it an initial value of 1.
         AtomicInteger value = threadMap
             .putIfAbsent(Thread.currentThread().getId(),
                          new AtomicInteger(1));

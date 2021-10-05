@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -28,6 +29,13 @@ public class ImageStreamCompletableFuture2
      * Maximum number of threads in a fixed-size thread pool.
      */
     private final int sMAX_THREADS = 100;
+
+    private final ThreadFactory mThreadFactory =
+        runnable -> {
+            Thread thr = new Thread(runnable);
+            thr.setDaemon(true);
+            return thr;
+        };
 
     /**
      * Constructor initializes the superclass and data members.
@@ -52,7 +60,8 @@ public class ImageStreamCompletableFuture2
                                       sMAX_THREADS);
 
         // Initialize the Executor with appropriate pool of threads.
-        setExecutor(Executors.newFixedThreadPool(threadPoolSize));
+        setExecutor(Executors.newFixedThreadPool(threadPoolSize,
+                                                 mThreadFactory));
 
         // Call up to superclass to start the processing.
         super.initiateStream();
