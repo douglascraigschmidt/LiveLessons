@@ -20,6 +20,16 @@ public class Options {
     private static Options mUniqueInstance = null;
 
     /**
+     * Max number of integers to process.
+     */
+    private int mMaxIntegers = 100_000_000;
+
+    /**
+     * The number of output elements to print.
+     */
+    private int mOutputLimit = 1_000;
+
+    /**
      * Controls whether debugging output will be generated (defaults
      * to false).
      */
@@ -35,11 +45,27 @@ public class Options {
         return mUniqueInstance;
     }
 
+
     /**
-     * Returns whether debugging output is generated.
+     * @return True if debugging output should be generated, else
+     * false
      */
     public boolean diagnosticsEnabled() {
         return mDiagnosticsEnabled;
+    }
+
+    /**
+     * @return The maximum number of integers to process.
+     */
+    public int maxIntegers() {
+        return mMaxIntegers;
+    }
+
+    /**
+     * @return The limit of the numbers to output.
+     */
+    public int outputLimit() {
+        return mOutputLimit;
     }
 
     /**
@@ -51,6 +77,12 @@ public class Options {
                 switch (argv[argc]) {
                 case "-d":
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    break;
+                case "-l":
+                    mOutputLimit = Integer.parseInt(argv[argc + 1]);
+                    break;
+                case "-m":
+                    mMaxIntegers = Integer.parseInt(argv[argc + 1]);
                     break;
                 default:
                     printUsage();
@@ -67,6 +99,8 @@ public class Options {
     private void printUsage() {
         System.out.println("Usage: ");
         System.out.println("-d [true|false]");
+        System.out.println("-l [outputLimit]");
+        System.out.println("-m [maxIntegers]");
     }
 
     /**

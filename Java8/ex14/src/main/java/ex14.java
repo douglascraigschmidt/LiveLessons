@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.*;
  * collectors, as well as {@code forEach()} and {@code
  * forEachOrdered()}.
  */
+@SuppressWarnings("ALL")
 public class ex14 {
     /**
      * Number of iterations to run the timing tests.
@@ -50,9 +51,9 @@ public class ex14 {
         // a stream.
         runJoiningTests();
 
-        // Run tests that demonstrate performance differences bewteen
-        // forEach() and forEachOrdered() terminal operations to
-        // aggregate results in a stream.
+        // Run tests that demonstrate performance differences between
+        // forEach() and forEachOrdered() terminal operations when
+        // applied to accumulate results in a stream.
         runForEachTests();
 
         // Run tests that demonstrate the performance differences
@@ -70,11 +71,11 @@ public class ex14 {
     private static void warmUpForkJoinPool() {
         System.out.println("\n++Warming up the fork/join pool\n");
 
-        List<CharSequence> words = Objects.requireNonNull(
-                                                          TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                                                   // Split input into "words"
-                                                                                   // by ignoring whitespace.
-                                                                                   "\\s+"));
+        List<CharSequence> words = Objects
+            .requireNonNull(TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
+                                                     // Split input into "words"
+                                                     // by ignoring whitespace.
+                                                     "\\s+"));
         // Create an empty list.
         List<String> list = new ArrayList<>();
 
@@ -114,8 +115,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    // Create a LinkedList from the ArrayList.
-                    List<CharSequence> linkedWords = 
+                assert arrayWords != null;
+
+                // Create a LinkedList from the ArrayList.
+                List<CharSequence> linkedWords =
                         new LinkedList<>(arrayWords);
 
                     // Print a message when the test starts.
@@ -130,14 +133,16 @@ public class ex14 {
                     // split costs (just a few arithmetic operations
                     // and an object creation) and also split evenly
                     // (leading to balanced computation trees).
-                    timeParallelStreamUppercase("ArrayList", arrayWords);
+                    timeParallelStreamUppercase("ArrayList",
+                                                arrayWords);
 
                     // Compute the time required to split/uppercase a
                     // LinkedList via a parallel stream (and thus a
                     // parallel spliterator).  The performance of this
                     // test will be worse than the ArrayList test
                     // since a LinkedList splits poorly.
-                    timeParallelStreamUppercase("LinkedList", linkedWords);
+                    timeParallelStreamUppercase("LinkedList",
+                                                linkedWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -166,8 +171,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    // Print a message when the test starts.
-                    System.out.println("Starting joining tests for " 
+                assert arrayWords != null;
+
+                // Print a message when the test starts.
+                System.out.println("Starting joining tests for "
                                        + arrayWords.size() 
                                        + " words..");
 
@@ -177,7 +184,9 @@ public class ex14 {
                     // test will be better than the parallel stream
                     // version below since there's less overhead for
                     // combining/joining the various partial results.
-                    timeStreamJoining("ArrayList", false, arrayWords);
+                    timeStreamJoining("ArrayList",
+                                      false,
+                                      arrayWords);
 
                     // Compute the time required to join arrayWords
                     // via collect() and Collectors.joining() in a
@@ -186,7 +195,9 @@ public class ex14 {
                     // version above due to the overhead of
                     // combining/joining the various partial results
                     // in parallel.
-                    timeStreamJoining("ArrayList", true, arrayWords);
+                    timeStreamJoining("ArrayList",
+                                      true,
+                                      arrayWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -196,8 +207,8 @@ public class ex14 {
 
     /**
      * Run tests that demonstrate the performance differences between
-     * {@code forEach()} and {@code forEachOrdered()} terminal
-     * opperations to aggregate results in a stream.
+     * the {@code forEach()} and {@code forEachOrdered()} terminal
+     * opperations when applied to accumulate results in a stream.
      */
     private static void runForEachTests() {
         Arrays
@@ -215,20 +226,26 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    // Print a message when the test starts.
-                    System.out.println("Starting forEach* tests for "
+                assert arrayWords != null;
+
+                // Print a message when the test starts.
+                System.out.println("Starting forEach* tests for "
                                        + arrayWords.size() 
                                        + " words..");
 
                     // Compute the time required to aggregate results
                     // into a ConcurrentHashSet using the forEach()
                     // terminal operation.
-                    timeStreamForEachToSet("ArrayList", false, arrayWords);
+                    timeStreamForEachToSet("ArrayList",
+                                           false,
+                                           arrayWords);
 
                     // Compute the time required to aggregate results
                     // into a HashSet using the forEachOrdered()
                     // terminal operation.
-                    timeStreamForEachToSet("ArrayList", true, arrayWords);
+                    timeStreamForEachToSet("ArrayList",
+                                           true,
+                                           arrayWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -257,8 +274,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                    // Print a message when the test starts.
-                    System.out.println("Starting collector tests for " 
+                assert arrayWords != null;
+
+                // Print a message when the test starts.
+                System.out.println("Starting collector tests for "
                                        + arrayWords.size() 
                                        + " words..");
 
@@ -268,7 +287,9 @@ public class ex14 {
                     // than the parallel stream version below since
                     // there's less overhead collecting the various
                     // partial results into a HashSet.
-                    timeStreamCollectToSet("ArrayList", false, arrayWords);
+                    timeStreamCollectToSet("ArrayList",
+                                           false,
+                                           arrayWords);
 
                     // Compute the time required to collect partial
                     // results into a HashSet in a parallel stream.
@@ -276,14 +297,18 @@ public class ex14 {
                     // the sequential stream version above due to the
                     // overhead of collecting the various partial
                     // results into a HashSet in parallel.
-                    timeStreamCollectToSet("ArrayList", true, arrayWords);
+                    timeStreamCollectToSet("ArrayList",
+                                           true,
+                                           arrayWords);
 
                     // Compute the time required to collect partial
                     // results into a ConcurrentHashSet in a
                     // sequential stream.  The performance of this
                     // test will be similar to the sequential stream
                     // version of timeStreamCollectToSet() above.
-                    timeStreamCollectToConcurrentSet("ArrayList", false, arrayWords);
+                    timeStreamCollectToConcurrentSet("ArrayList",
+                                                     false,
+                                                     arrayWords);
 
                     // Compute the time required to collect partial
                     // results into a ConcurrentHashSet in a parallel
@@ -292,7 +317,9 @@ public class ex14 {
                     // timeStreamCollectToSet() above since there's no
                     // overhead of collecting the partial results into
                     // a HashSet in parallel.
-                    timeStreamCollectToConcurrentSet("ArrayList", true, arrayWords);
+                    timeStreamCollectToConcurrentSet("ArrayList",
+                                                     true,
+                                                     arrayWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
