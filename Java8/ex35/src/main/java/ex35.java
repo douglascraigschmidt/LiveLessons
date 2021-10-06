@@ -104,7 +104,7 @@ public class ex35 {
             // scalably for parallel streams.
             .map(ex35::innerStream)
 
-            // Reduce the stream of streams into a  stream of Integer objects.
+            // Reduce the stream of streams into a stream of Integer objects.
             .reduce(Stream::concat).orElse(Stream.empty())
 
             // Collect the results into a List of Integer objects.
@@ -123,7 +123,7 @@ public class ex35 {
      */
     private static Stream<Integer> generateOuterStream(int outerCount) {
         return IntStream
-            // Create a Stream of ints from 1 to iterations.
+            // Create a Stream of ints from 1 to outerCount.
             .rangeClosed(1, outerCount)
 
             // Convert each int to an Integer.

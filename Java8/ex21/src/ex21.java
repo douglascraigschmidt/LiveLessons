@@ -47,7 +47,7 @@ public class ex21 {
         // than the original.
         List<Integer> bigList =
             generateRandomNumbers(Options.instance().maxIntegers()
-                                  * 5);
+                                  * 2);
 
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(list);
@@ -207,13 +207,38 @@ public class ex21 {
      * @param supplier The test to run 
      * @param testName The name of the test
      */
-    private static void runTest(Supplier<Long> supplier, // Supplier<Integer[]> supplier,
+    private static void runTest(Supplier<Integer[]> supplier,
                                 String testName) {
         // Let the system garbage collect.
         System.gc();
 
-        // Run/time the supplier.
-        RunTimer.timeRun(supplier, testName);
+        // Run/time the supplier and store the results into an array
+        // of integers.
+        Integer[] array =
+            RunTimer.timeRun(supplier, testName);
+
+        // Store the results in a string.
+        String results = Arrays
+            // Convert the array into a stream.
+            .stream(array)
+
+            // Map each integer to a string.
+            .map(Object::toString)
+
+            // Limit the number of items in the output.
+            .limit(Options.instance().outputLimit())
+
+            // Collect into a single string separated by " ".
+            .collect(joining(" "));
+
+        if (Options.instance().diagnosticsEnabled())
+            // Print the results.
+            System.out.println(testName
+                               + ":\nthe first "
+                               + Options.instance().outputLimit()
+                               + " even numbers = ["
+                               + results
+                               + "]");
     }
 
     /**
@@ -224,10 +249,10 @@ public class ex21 {
      * @param unordered  Indicates whether the stream should be
      *                   processed in an unordered or ordered manner
      * @param list       The {@link List} to process 
-     * @return A count of the number of {@link Integer} objects processed
+     * @return A array containing the results
      */
-    private static Long forEachTest(boolean unordered,
-                                    List<Integer> list) {
+    private static Integer[] forEachTest(boolean unordered,
+                                         List<Integer> list) {
         if (unordered) {
             // Store the results in a concurrent queue since forEach()
             // isn't synchronized.
@@ -238,23 +263,17 @@ public class ex21 {
                 // Convert collection into a parallel stream.
                 .parallelStream()
 
-                // Ensure the results are distinct.
-                .distinct()
-
                 // Only keep even numbers.
                 .filter(x -> x % 2 == 0)
                            
                 // Double the integers in the list.
                 .map(x -> x * 2)
 
-                // Limit the number of items in the output.
-                .limit(Options.instance().outputLimit())
-
                 // Add each item to the list in an unordered manner,
                 // which assumes a thread-safe queue.
                 .forEach(queue::add);
 
-            return (long) queue.size();
+            return queue.toArray(new Integer[0]);
         }
         else {
             // Store the results in an unsynchronized ArrayList since
@@ -266,51 +285,31 @@ public class ex21 {
                 // Convert collection into a parallel stream.
                 .parallelStream()
 
-                // Ensure the results are distinct.
-                .distinct()
-
                 // Only keep even numbers.
                 .filter(x -> x % 2 == 0)
                            
                 // Double the integers in the list.
                 .map(x -> x * 2)
 
-                // Limit the number of items in the output.
-                .limit(Options.instance().outputLimit())
-
                 // Add each item to the list in an ordered manner.
                 .forEachOrdered(queue::add);
 
-            return (long) queue.size();
+            return queue.toArray(new Integer[0]);
         }
     }
 
     /**
-     * Shows how an ordereed vs. unordered parallel stream performs on
+     * Shows how an ordered vs. unordered parallel stream performs on
      * a {@link List}.
      * 
      * @param unordered  Indicates whether the stream should be
      *                   processed in an unordered or ordered manner
      * @param list       The {@link List} to process 
-     * @return A count of the number of {@link Integer} objects processed
+     * @return A {@link Integer} array containing the results
      */
-    private static Long listTest(boolean unordered,
-                                 List<Integer> list) {
+    private static Integer[] listTest(boolean unordered,
+                                      List<Integer> list) {
         if (unordered) {
-            return list
-                // Convert collection into a parallel stream.
-                .parallelStream()
-
-                // Only keep even numbers.
-                .filter(x -> x % 2 == 0)
-                           
-                // Double the integers in the list.
-                .map(x -> x * 2)
-
-                // The number of Integer objects processed.
-                .count();
-        }
-        else {
             return list
                 // Convert collection into a parallel stream.
                 .parallelStream()
@@ -324,8 +323,22 @@ public class ex21 {
                 // Double the integers in the list.
                 .map(x -> x * 2)
 
-                // The number of Integer objects processed.
-                .count();
+                // Create an array.
+                .toArray(Integer[]::new);
+        }
+        else {
+            return list
+                // Convert collection into a parallel stream.
+                .parallelStream()
+
+                // Only keep even numbers.
+                .filter(x -> x % 2 == 0)
+                           
+                // Double the integers in the list.
+                .map(x -> x * 2)
+                
+                // Create an array.
+                .toArray(Integer[]::new);
         }
     }
 
@@ -338,11 +351,11 @@ public class ex21 {
      * @param parallel  Indicates whether or not the stream should run
      *                  in parallel
      * @param collection The {@link Collection} to process
-     * @return A count of the number of {@link Integer} objects processed
+     * @return A array containing the results
      */
-    private static Long testEncounterOrder(boolean unordered,
-                                           boolean parallel,
-                                           Collection<Integer> collection) {
+    private static Integer[] testEncounterOrder(boolean unordered,
+                                                boolean parallel,
+                                                Collection<Integer> collection) {
         // Convert the collection into a stream.
         Stream<Integer> intStream = collection.stream();
 
@@ -358,7 +371,7 @@ public class ex21 {
                 .unordered()
 
                 // Ensure the results are distinct.
-                .distinct()
+                // .distinct()
 
                 // Only keep even numbers.
                 .filter(x -> x % 2 == 0)
@@ -366,14 +379,14 @@ public class ex21 {
                 // Double the integers in the list.
                 .map(x -> x * 2)
 
-                // The number of Integer objects processed.
-                .count();
+                // Convert the stream into an integer array.
+                .toArray(Integer[]::new);
         else
             // Return an array of doubled even numbers.
             return intStream
 
                 // Ensure the results are distinct.
-                .distinct()
+                // .distinct()
 
                 // Only keep even numbers.
                 .filter(x -> x % 2 == 0)
@@ -381,8 +394,8 @@ public class ex21 {
                 // Double the integers in the list.
                 .map(x -> x * 2)
 
-                // The number of Integer objects processed.
-                .count();
+                // Convert the stream into an integer array.
+                .toArray(Integer[]::new);
     }
 
     /**
@@ -396,7 +409,7 @@ public class ex21 {
      * @param list     The {@link List} to process 
      * @return A array containing the results
      */
-    private static Long limitTest(boolean unordered,
+    private static Integer[] limitTest(boolean unordered,
                                        boolean parallel,
                                        List<Integer> list) {
         // A stream of integers.
@@ -421,8 +434,8 @@ public class ex21 {
                 // Limit the number of items in the output.
                 .limit(Options.instance().maxIntegers() / 1_000)
 
-                // The number of Integer objects processed.
-                .count();
+                // Convert the stream into an integer array.
+                .toArray(Integer[]::new);
         else
             return intStream
                 // Only keep even numbers.
@@ -434,8 +447,8 @@ public class ex21 {
                 // Limit the number of items in the output.
                 .limit(Options.instance().maxIntegers() / 1_000)
 
-                // The number of Integer objects processed.
-                .count();
+                // Convert the stream into an integer array.
+                .toArray(Integer[]::new);
     }
 
     /**
@@ -448,4 +461,3 @@ public class ex21 {
         limitTest(false, true, list);
     }
 }
-;
