@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -8,9 +9,9 @@ import java.net.URL;
 import static platspec.PlatSpec.getInputStream;
 
 /**
- * Provides some general utility helper methods for network operations.
+ * Provides some general utility helper methods for file and network operations.
  */
-public final class NetUtils {
+public final class FileAndNetUtils {
     // To refer to bar.png under your package's res/drawable/ directory, use
     // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
     // "drawable-hdpi" directory as well.
@@ -19,12 +20,12 @@ public final class NetUtils {
     /**
      * Logging tag.
      */
-    private static final String TAG = NetUtils.class.getName();
+    private static final String TAG = FileAndNetUtils.class.getName();
 
     /**
      * A utility class should always define a private constructor.
      */
-    private NetUtils() {
+    private FileAndNetUtils() {
     }
     
     /**
@@ -60,6 +61,46 @@ public final class NetUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    /**
+     * Clears the filter directories.
+     */
+    public static void deleteDownloadedImages(String path) {
+        int deletedFiles =
+            deleteSubFolders(path);
+
+        if (Options.instance().diagnosticsEnabled())
+            System.out.println(TAG
+                                   + ": "
+                                   + deletedFiles
+                                   + " previously downloaded file(s) deleted");
+    }
+
+    /**
+     * Recursively delete files in a specified directory.
+     */
+    private static int deleteSubFolders(String path) {
+        int deletedFiles = 0;
+        File currentFolder = new File(path);
+        File[] files = currentFolder.listFiles();
+
+        if (files == null)
+            return 0;
+
+        // Java doesn't delete a directory with child files, so we
+        // need to write code that handles this recursively.
+        for (File f : files) {
+            if (f.isDirectory())
+                deletedFiles += deleteSubFolders(f.toString());
+            f.delete();
+            deletedFiles++;
+        }
+
+        // Don't delete the current folder.
+        // currentFolder.delete();
+        return deletedFiles;
     }
 
     /**

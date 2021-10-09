@@ -22,7 +22,7 @@ public class Options {
     /**
      * Max number of integers to process.
      */
-    private int mMaxIntegers = 100_000_000;
+    private int mMaxIntegers = 200_000_000;
 
     /**
      * The number of output elements to print.

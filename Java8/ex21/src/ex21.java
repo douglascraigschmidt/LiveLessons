@@ -43,15 +43,10 @@ public class ex21 {
         // encounter order.
         Set<Integer> set = new HashSet<>(list);
 
-        // Generate a new List of random numbers that's 5 times bigger
-        // than the original.
-        List<Integer> bigList =
-            generateRandomNumbers(Options.instance().maxIntegers()
-                                  * 2);
-
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(list);
 
+        /*
         System.out.println("\nShowing encounter order vs. non-encounter order");
 
         // Print first n items in the list in their "encounter order".
@@ -65,15 +60,15 @@ public class ex21 {
                                               Options.instance().outputLimit(),
                                               "set non-encounter order");
 
+                                              
         // Run the List tests.
         System.out.println("\n1. List tests");
 
-        // Run/time tests that show the difference in performance
-        // between forEachOrdered() (which preserves order) and
-        // forEach() (which does not preserve order).
-        runTest(() -> listTest(false, bigList),
+        // Show how an ordered vs. unordered parallel stream performs
+        // on a List.
+        runTest(() -> listTest(false, list),
                 "listTest(ordered)");
-        runTest(() -> listTest(true, bigList),
+        runTest(() -> listTest(true, list),
                 "listTest(unordered)");
 
         // Print out the timing results for the List tests.
@@ -85,9 +80,9 @@ public class ex21 {
         // Run/time tests that show the difference in performance
         // between forEachOrdered() (which preserves order) and
         // forEach() (which does not preserve order).
-        runTest(() -> forEachTest(false, bigList),
+        runTest(() -> forEachTest(false, list),
                 "forEachOrdered() test");
-        runTest(() -> forEachTest(true, bigList),
+        runTest(() -> forEachTest(true, list),
                 "forEach() test");
 
         // Print out the timing results for the forEach*() tests.
@@ -114,6 +109,7 @@ public class ex21 {
 
         // Print results for these tests.
         System.out.println(RunTimer.getTimingResults(true));
+        */
 
         // Run the limit tests.
         System.out.println("4. Ordered and unordered limit() tests");
@@ -299,8 +295,8 @@ public class ex21 {
     }
 
     /**
-     * Shows how an ordered vs. unordered parallel stream performs on
-     * a {@link List}.
+     * Show how an ordered vs. unordered parallel stream performs on a
+     * {@link List}.
      * 
      * @param unordered  Indicates whether the stream should be
      *                   processed in an unordered or ordered manner

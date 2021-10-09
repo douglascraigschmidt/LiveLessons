@@ -152,10 +152,10 @@ public class ex35 {
      */
     private static Stream<Integer> innerStream(Integer innerCount) {
         // Store the outer thread id.
-        long threadId = Thread.currentThread().getId();
+        long outerThreadId = Thread.currentThread().getId();
 
         // Create an AtomicInteger to pass by reference.
-        AtomicInteger counter = new AtomicInteger();
+        AtomicInteger innerThreadIdCounter = new AtomicInteger();
 
         // Create a ConcurrentHashMap to store results.
         Map<Long, AtomicInteger> threadMap = new ConcurrentHashMap<>();
@@ -171,8 +171,8 @@ public class ex35 {
             .parallel()
 
             // Check whether the computations ran in parallel.
-            .peek(m -> checkInnerStreamThreadIds(innerCount, counter,
-                                                 threadMap, threadId));
+            .peek(m -> checkInnerStreamThreadIds(innerCount, innerThreadIdCounter,
+                                                 threadMap, outerThreadId));
     }
 
     /**
@@ -180,19 +180,19 @@ public class ex35 {
      * parallel stream.
      *
      * @param maxIterations The max number of iterations
-     * @param iteration     Keep track of whether the max number of
+     * @param innerThreadIdCounter     Keep track of whether the max number of
      *                      iterations have been met
      * @param threadMap     A {@link Map} that records which threads are
      *                      used by the inner parallel stream
      * @param outerThreadId The outer stream's thread id
      */
     private static void checkInnerStreamThreadIds(int maxIterations,
-                                                  AtomicInteger iteration,
+                                                  AtomicInteger innerThreadIdCounter,
                                                   Map<Long, AtomicInteger> threadMap,
                                                   long outerThreadId) {
         // Try to find the AtomicInteger associated with current thread id in
         // the map.  If this is the first time in give it an initial value of 1.
-        AtomicInteger value = threadMap
+        var value = threadMap
             .putIfAbsent(Thread.currentThread().getId(),
                          new AtomicInteger(1));
 
@@ -202,7 +202,7 @@ public class ex35 {
 
         // When the final iteration has been reached print the
         // contents of the map.
-        if (iteration.incrementAndGet() == maxIterations)
+        if (innerThreadIdCounter.incrementAndGet() == maxIterations)
             System.out.println("inner thread ids for outer thread "
                                    + outerThreadId
                                    + " = "

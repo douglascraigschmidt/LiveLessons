@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.*;
 
 /**
- * This example shows the difference in overhead for using a parallel
- * spliterator to split a Java {@link LinkedList} and an {@link
+ * This example shows the difference in overhead/performance for using a
+ * parallel spliterator to split a Java {@link LinkedList} and an {@link
  * ArrayList} into chunks.  It also shows the difference in overhead
  * between combining and collecting results in a parallel stream
  * vs. sequential stream using concurrent and non-concurrent
