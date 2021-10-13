@@ -16,7 +16,8 @@ import java.util.concurrent.Future;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- *
+ * Download, transform, and store {@link Image} objects using the
+ * Java structured concurrency framework.
  */
 public class StructuredConcurrencyTests {
     /**
@@ -24,7 +25,6 @@ public class StructuredConcurrencyTests {
      * test.
      */
     public static void run() {
-        /*
         // A List of Future<Image> objects that holds futures to
         // downloading images.
         List<Future<Image>> downloadingImageFutures = new ArrayList<>();
@@ -79,10 +79,10 @@ public class StructuredConcurrencyTests {
                     .add(executor
                          // submit() starts a virtual thread to store
                          // each image.
-                         .submit(() ->
+                         .submit(() -> FileAndNetUtils
                                  // Store each transformed image in a
                                  // file.
-                                 FileAndNetUtils.storeImage(rethrowSupplier(image::get).get())));
+                                 .storeImage(rethrowSupplier(image::get).get())));
 
             // Scope doesn't exit until all concurrent tasks complete.
         } 
@@ -90,8 +90,6 @@ public class StructuredConcurrencyTests {
         // Print the statistics for this test run.
         Options.instance().printStats("Structured concurrency test",
                                       fileFutures.size());
-
-         */
     }
 
     /**

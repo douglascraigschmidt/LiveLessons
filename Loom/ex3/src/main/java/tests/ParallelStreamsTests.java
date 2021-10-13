@@ -11,41 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
+ * Download, transform, and store {@link Image} objects using the
+ * Java parallel streams framework.
  */
 public class ParallelStreamsTests {
-    /**
-     * This method uses Java parallel streams with flatMap() to run
-     * the test.
-     */
-    public static void runFlatMap() {
-        // Store the list of downloaded/tranformed images.
-        List<File> imageFiles = Options.instance()
-            // Get the List of URLs.
-            .getUrlList()
-
-            // Convert List into a parallel stream.
-            .parallelStream()
-
-            // Transform URL to an image by downloading each image via
-            // its URL.
-            .map(FileAndNetUtils::downloadImage)
-
-            // Apply transforms to all images.
-            .flatMap(ParallelStreamsTests::transformImage)
-
-            // Store the images.
-            .map(FileAndNetUtils::storeImage)
-
-            // Terminate the stream and collect the results into list
-            // of images.
-            .collect(Collectors.toList());
-
-        // Print the statistics for this test run.
-        Options.instance().printStats("Parallel streams flatMap() test",
-                                      imageFiles.size());
-    }
-
     /**
      * This method uses Java parallel streams with reduce()/concat()
      * to run the test.
@@ -95,7 +64,7 @@ public class ParallelStreamsTests {
             // Convert the List of transforms to a parallel stream.
             .parallelStream()
 
-            .peek(i -> System.out.println(Thread.currentThread().getName()))
+            // .peek(i -> System.out.println(Thread.currentThread().getName()))
 
             // Apply each transform to the original image to produce a
             // transformed image.

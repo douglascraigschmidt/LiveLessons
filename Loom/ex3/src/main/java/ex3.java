@@ -1,3 +1,4 @@
+import tests.CompletableFuturesTests;
 import tests.ParallelStreamsTests;
 import tests.StructuredConcurrencyTests;
 import transforms.Transform;
@@ -16,12 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 /**
  * This example compares and contrasts the programming models and
  * performance results of Java parallel streams, completable futures,
- * and Project Loom structured concurrency when applied to download
- * many images from a remote web server.
+ * and Project Loom structured concurrency when applied to download,
+ * transform, and store many images from a remote web server.
  */
 public class ex3 {
     /**
@@ -36,21 +36,19 @@ public class ex3 {
         // Initializes the Options singleton.
         Options.instance().parseArgs(argv);
 
-        /*
-
-        // Runs the tests using the Java parallel streams framework.
-        runTest(ParallelStreamsTests::runFlatMap,
-                "warmup");
-
         // Runs the tests using the Java parallel streams framework.
         runTest(ParallelStreamsTests::runReduceConcat,
                 "Parallel streams runReduceConcat() test");
 
-        // Runs the tests using the Java parallel streams framework.
-        runTest(ParallelStreamsTests::runFlatMap,
-                "Parallel streams runFlatMap() test");
+        // Runs the tests using the Java completable futures framework.
+        runTest(CompletableFuturesTests::run,
+                "Completable futures run() test");
 
-         */
+        // Runs the tests using the Java framework.
+        runTest(StructuredConcurrencyTests::run,
+                "Structured concurrency run() test");
+
+        System.out.println(RunTimer.getTimingResults());
     }
 
     /**

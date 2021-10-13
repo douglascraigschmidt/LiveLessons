@@ -46,7 +46,6 @@ public class ex21 {
         // Warm up the thread pool so the results are more accurate.
         warmUpThreadPool(list);
 
-        /*
         System.out.println("\nShowing encounter order vs. non-encounter order");
 
         // Print first n items in the list in their "encounter order".
@@ -109,7 +108,6 @@ public class ex21 {
 
         // Print results for these tests.
         System.out.println(RunTimer.getTimingResults(true));
-        */
 
         // Run the limit tests.
         System.out.println("4. Ordered and unordered limit() tests");

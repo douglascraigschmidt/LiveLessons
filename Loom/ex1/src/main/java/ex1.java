@@ -40,7 +40,8 @@ public class ex1 {
         // Generate the random numbers.
         generateRandomNumbers();
 
-        // Create/start the threads with the given option.
+        // Create/start the threads with the given option
+        // to either create virtual or platform threads.
         startThreads(Options.instance().virtualThreads());
     }
 
@@ -51,7 +52,7 @@ public class ex1 {
     private static void generateRandomNumbers() {
         // Generate a list of random integers.
         sRANDOM_INTEGERS = new Random()
-            // Generate the given # of large random ints.
+            // Generate a stream of the given # of large random ints.
             .ints(Options.instance().numberOfElements(),
                   Integer.MAX_VALUE - Options.instance().numberOfElements(),
                   Integer.MAX_VALUE)
@@ -80,7 +81,7 @@ public class ex1 {
 
         // Create a List of many Thread objects.
         List<Thread> threads = IntStream
-            // Generate a range of ints.
+            // Generate stream containing a range of ints.
             .rangeClosed(1, Options.instance().numberOfElements())
 
             // Print a helpful diagnostic.
@@ -140,4 +141,22 @@ public class ex1 {
         return () -> isPrime(integer);
     }
 
+    /**
+     * This method checks if number {@code primeCandidate} is prime.
+     *
+     * @param primeCandidate The number to check for primality
+     * @return 0 if {@code primeCandidate} is prime, or the smallest
+     *         factor if it is not prime
+     */
+    public static int isPrime(int primeCandidate) {
+        if (primeCandidate > 3)
+            // Use a brute-force algorithm to burn CPU!
+            for (int factor = 2;
+                 factor <= primeCandidate / 2;
+                 ++factor)
+                if (primeCandidate / factor * factor == primeCandidate)
+                    return factor;
+
+        return 0;
+    }
 }
