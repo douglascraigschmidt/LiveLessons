@@ -35,8 +35,8 @@ public class CompletableFuturesTests {
             .map(url -> CompletableFuture
                  // Download each image and store it in a file
                  // asynchronously.
-                 .supplyAsync(() ->
-                              FileAndNetUtils.downloadImage(url)))
+                 .supplyAsync(() -> FileAndNetUtils
+                              .downloadImage(url)))
 
             // Asynchronously apply transforms to each image and
             // flatten the results into a stream.
@@ -77,7 +77,7 @@ public class CompletableFuturesTests {
      * @param imageFuture A future to an {@link Image} that's being
      *                    downloaded
      * @return A stream of futures to {@link Image} objects that are
-     *         being transformed asynchronously.
+     *         being transformed asynchronously
      */
     private static Stream<CompletableFuture<Image>> applyTransforms
         (CompletableFuture<Image> imageFuture) {
