@@ -25,9 +25,38 @@ public class StructuredConcurrencyTests {
      * test.
      */
     public static void run() {
-        // A List of Future<Image> objects that holds futures to
-        // downloading images.
-        List<Future<Image>> downloadingImageFutures = new ArrayList<>();
+        // Call downloadImages() to obtain a List of Future<Image>
+        // objects that holds futures to downloaded images.
+        List<Future<Image>> downloadedImages =
+            downloadImages(Options.instance().getUrlList());
+
+        // Call transformImages() to obtain a List of Future<File>
+        // objects that holds the results of transformed images.
+        List<Future<Image>> transformedImages =
+            transformImages(downloadedImages);
+
+        // Call storeImages() to obtain a List of Future<File> objects
+        // that hold the results of stored images.
+        List<Future<File>> storedImages =
+            storeImages(transformedImages);
+
+        // Print the statistics for this test run.
+        Options.instance().printStats("Structured concurrency test",
+                                      storedImages.size());
+    }
+
+    /**
+     * Download the {@code urlList} asynchronously.
+     *
+     * @param urlList A {@link List} of {@link URL} objects to
+     *                download
+     * @return A {@link List} of {@link Future} objects to downloaded
+     *         {@link Image} objects
+     */
+    static List<Future<Image>> downloadImages(List<URL> urlList) {
+        // A List of Future<Image> objects that complete when the
+        // images have been downloaded asynchronously.
+        List<Future<Image>> downloadedImages = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks, which exits
         // only after all tasks complete by using the new AutoClosable
@@ -35,8 +64,8 @@ public class StructuredConcurrencyTests {
         // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             // Iterate through the List of image URLs.
-            for (URL url : Options.instance().getUrlList())
-                downloadingImageFutures
+            for (URL url : urlList)
+                downloadedImages
                     // Add each Future the Future<File> List.
                     .add(executor
                          // submit() starts a virtual thread to
@@ -49,15 +78,31 @@ public class StructuredConcurrencyTests {
             // Scope doesn't exit until all concurrent tasks complete.
         } 
 
-        // A List of Future<Image> objects that holds futures to
-        // transforming images.
-        List<Future<Image>> transformingImageFutures = new ArrayList<>();
+        // Return the List of downloaded images, which have finished
+        // downloading at this point.
+        return downloadedImages;
+    }
+
+    /**
+     * Transform {@code downloadedImages} asynchronously.
+     *
+     * @param downloadedImages A {@link List} of {@link Future}
+     *                         objects to images that have been
+     *                         downloaded
+     * @return A {@link List} of {@link Future} objects to transformed
+     *         {@link Image} objects
+     */
+    private static List<Future<Image>> transformImages
+        (List<Future<Image>> downloadedImages) {
+        // A List of Future<Image> objects that complete when the
+        // images have been transformed asynchronously.
+        List<Future<Image>> transformedImages = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             // Iterate through the List of imageFutures.
-            for (Future<Image> image : downloadingImageFutures) {
-                transformingImageFutures
+            for (Future<Image> image : downloadedImages) {
+                transformedImages
                     // ...
                     .addAll(transformImage(executor,
                                            rethrowSupplier(image::get).get()));
@@ -66,15 +111,25 @@ public class StructuredConcurrencyTests {
             // Scope doesn't exit until all concurrent tasks complete.
         } 
 
-        // A List of Future<File> objects that holds the results of
-        // storing images.
-        List<Future<File>> fileFutures = new ArrayList<>();
+        // Return the List of transformed images, which have finished
+        // transforming at this point.
+        return transformedImages;
+    }
+
+    /**
+     * @return
+     */
+    private static List<Future<File>> storeImages
+        (List<Future<Image>> transformedImages) {
+        // A List of Future<File> objects that complete when the
+        // images have been stored asynchronously.
+        List<Future<File>> storedFiles = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
             // Iterate through the List of transforming image futures.
-            for (Future<Image> image : transformingImageFutures)
-                fileFutures
+            for (Future<Image> image : transformedImages)
+                storedFiles
                     // Add each Future the Future<File> List.
                     .add(executor
                          // submit() starts a virtual thread to store
@@ -85,11 +140,11 @@ public class StructuredConcurrencyTests {
                                  .storeImage(rethrowSupplier(image::get).get())));
 
             // Scope doesn't exit until all concurrent tasks complete.
-        } 
+        }
 
-        // Print the statistics for this test run.
-        Options.instance().printStats("Structured concurrency test",
-                                      fileFutures.size());
+        // Return the List of stored images, which have finished
+        // storing at this point.
+        return storedFiles;
     }
 
     /**
