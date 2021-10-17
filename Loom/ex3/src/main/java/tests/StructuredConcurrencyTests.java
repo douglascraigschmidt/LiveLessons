@@ -117,7 +117,13 @@ public class StructuredConcurrencyTests {
     }
 
     /**
-     * @return
+     * Stored the {@code transformedImages} asynchronously.
+     *
+     * @param downloadedImages A {@link List} of {@link Future}
+     *                         objects to images that have been
+     *                         transformed
+     * @return A {@link List} of {@link Future} objects to stored
+     *         {@link Image} objects
      */
     private static List<Future<File>> storeImages
         (List<Future<Image>> transformedImages) {
@@ -127,7 +133,7 @@ public class StructuredConcurrencyTests {
 
         // Create a new scope to execute virtual tasks.
         try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
-            // Iterate through the List of transforming image futures.
+            // Iterate through the List of transformed image futures.
             for (Future<Image> image : transformedImages)
                 storedFiles
                     // Add each Future the Future<File> List.
@@ -148,8 +154,8 @@ public class StructuredConcurrencyTests {
     }
 
     /**
-     * This method applies a group of {@link Transform} objects to
-     * transform the {@link Image}.
+     * Apply a group of {@link Transform} objects to transform the
+     * {@link Image}.
      *
      * @param image The {@link Image} to transform
      * @return A {@link List} of {@link Future} objects to transformed
@@ -158,18 +164,24 @@ public class StructuredConcurrencyTests {
     private static List<Future<Image>> transformImage
         (ExecutorService executor,
          Image image) {
+
+        // A List of Future<Image> objects that complete when the
+        // images have been transformed asynchronously.
         List<Future<Image>> transformedImageFutures = 
             new ArrayList<>();
 
+        // Iterate through the List of Transformed objects.
         for (Transform transform : Options.instance().transforms())
             transformedImageFutures
                 .add(executor
-                     // submit() starts a virtual thread to transform each
-                     // image.
+                     // submit() starts a virtual thread to transform
+                     // each image.
                      .submit(() ->
                              // Transform each image
                              transform.transform(image)));
 
+        // Return the List of transforming images, which may still be
+        // transforming at this point.
         return transformedImageFutures;
     }
 }
