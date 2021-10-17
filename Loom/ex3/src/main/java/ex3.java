@@ -1,21 +1,9 @@
 import tests.CompletableFuturesTests;
 import tests.ParallelStreamsTests;
 import tests.StructuredConcurrencyTests;
-import transforms.Transform;
 import utils.*;
 
-import java.io.File;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This example compares and contrasts the programming models and
@@ -37,35 +25,35 @@ public class ex3 {
         Options.instance().parseArgs(argv);
 
         // Runs the tests using the Java parallel streams framework.
-        runTest(ParallelStreamsTests::runReduceConcat,
-                "Parallel streams runReduceConcat() test");
+        runTest(ParallelStreamsTests::run,
+                "Parallel streams run() test");
 
         // Runs the tests using the Java completable futures framework.
         runTest(CompletableFuturesTests::run,
-                "Completable futures run() test");
+                "Completable futures runFineGrained() test");
 
         // Runs the tests using the Java framework.
         runTest(StructuredConcurrencyTests::run,
-                "Structured concurrency run() test");
+                "Structured concurrency runFineGrained() test");
 
         System.out.println(RunTimer.getTimingResults());
     }
 
     /**
-     * Record the amount of time needed to run test.
+     * Record the amount of time needed to runFineGrained test.
      */
     private static void runTest(Runnable runTest,
                                 String testName) {
         // Let the system garbage collect.
         System.gc();
 
-        // Record how long the test takes to run.
+        // Record how long the test takes to runFineGrained.
         // Run the test with the designated
         // functions.
         RunTimer.timeRun(runTest,
                          testName);
 
-        // Delete any images from the previous run.
+        // Delete any images from the previous runFineGrained.
         FileAndNetUtils
             .deleteDownloadedImages(Options.instance().getDirectoryPath());
     }

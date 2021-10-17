@@ -16,8 +16,10 @@ import java.util.concurrent.Future;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * Download, transform, and store {@link Image} objects using the
- * Java structured concurrency framework.
+ * Download, transform, and store {@link Image} objects using the Java
+ * structured concurrency framework, which uses the {@link Executors}
+ * {@code newVirtualThreadExecutor()} factory method to create a new
+ * virtual thread for each task.
  */
 public class StructuredConcurrencyTests {
     /**
@@ -30,7 +32,7 @@ public class StructuredConcurrencyTests {
         List<Future<Image>> downloadedImages =
             downloadImages(Options.instance().getUrlList());
 
-        // Call transformImages() to obtain a List of Future<File>
+        // Call transformImages() to obtain a List of Future<Image>
         // objects that holds the results of transformed images.
         List<Future<Image>> transformedImages =
             transformImages(downloadedImages);
@@ -40,9 +42,10 @@ public class StructuredConcurrencyTests {
         List<Future<File>> storedImages =
             storeImages(transformedImages);
 
-        // Print the statistics for this test run.
-        Options.instance().printStats("Structured concurrency test",
-                                      storedImages.size());
+        Options.instance()
+            // Print the statistics for this test run.
+            .printStats("Structured concurrency test",
+                        storedImages.size());
     }
 
     /**
@@ -119,9 +122,9 @@ public class StructuredConcurrencyTests {
     /**
      * Stored the {@code transformedImages} asynchronously.
      *
-     * @param downloadedImages A {@link List} of {@link Future}
-     *                         objects to images that have been
-     *                         transformed
+     * @param transformedImages A {@link List} of {@link Future}
+     *                          objects to {@link Image} objects that
+     *                          have been transformed
      * @return A {@link List} of {@link Future} objects to stored
      *         {@link Image} objects
      */

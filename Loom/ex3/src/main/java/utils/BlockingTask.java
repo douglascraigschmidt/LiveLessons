@@ -137,7 +137,7 @@ public class BlockingTask {
         }
 
         /**
-         * Calls the blocking Runnable's run() method.
+         * Calls the blocking Runnable's runFineGrained() method.
          */
         @Override
         public boolean block() {

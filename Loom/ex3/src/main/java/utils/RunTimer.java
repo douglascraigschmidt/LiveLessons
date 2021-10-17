@@ -13,7 +13,7 @@ public class RunTimer {
     private static Map<String, Long> mResultsMap = new HashMap<>();
 
     /**
-     * Keeps track of how long the test has run.
+     * Keeps track of how long the test has runFineGrained.
      */
     private static long sStartTime;
 
@@ -23,7 +23,7 @@ public class RunTimer {
     private static long mExecutionTime;
 
     /**
-     * Start timing the test run.
+     * Start timing the test runFineGrained.
      */
     private static void startTiming() {
         // Note the start time.
@@ -31,14 +31,14 @@ public class RunTimer {
     }
 
     /**
-     * Stop timing the test run.
+     * Stop timing the test runFineGrained.
      */
     private static void stopTiming() {
         mExecutionTime = (System.nanoTime() - sStartTime) / 1_000_000;
     }
 
     /**
-     * Call @a supplier.get() and time how long it takes to run.
+     * Call @a supplier.get() and time how long it takes to runFineGrained.
      *
      * @return The result returned by @a supplier.get()
      */
@@ -56,7 +56,7 @@ public class RunTimer {
     }
 
     /**
-     * Call @a runnable.run() and time how long it takes to run.
+     * Call @a runnable.runFineGrained() and time how long it takes to runFineGrained.
      */
     public static void timeRun(Runnable runnable,
                                 String testName) {

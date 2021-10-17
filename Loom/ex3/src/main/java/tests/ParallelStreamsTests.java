@@ -19,7 +19,7 @@ public class ParallelStreamsTests {
      * This method uses Java parallel streams with reduce()/concat()
      * to run the test.
      */
-    public static void runReduceConcat() {
+    public static void run() {
         // Store the list of downloaded/tranformed images.
         List<File> imageFiles = Options.instance()
             // Get the List of URLs.
