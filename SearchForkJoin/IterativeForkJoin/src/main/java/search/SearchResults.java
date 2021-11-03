@@ -17,7 +17,7 @@ public class SearchResults {
          * The index in the search String where the phrase that was
          * found.
          */
-        private int mIndex;
+        private final int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search
@@ -66,7 +66,7 @@ public class SearchResults {
     /**
      * The List of Result objects that matched the @code mPhrase.
      */
-    private List<Result> mList;
+    private final List<Result> mList;
 
     /**
      * Create an empty SearchResults, which is used to shutdown
@@ -197,7 +197,8 @@ public class SearchResults {
 
         if (!isEmpty()) {
             output += headerToString()
-                // Create a string containing indices of all the matches.
+                // Create a string containing indices of all the
+                // matches.
                 + "["
                 + mList
                 // Convert list to a stream.
@@ -205,10 +206,18 @@ public class SearchResults {
 
                 // Create a custom collector to join all the results
                 // together.
-                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
-                                      (j, r) -> j.add(r.toString()),       // accumulator
-                                      StringJoiner::merge,                 // combiner
-                                      StringJoiner::toString))             // finisher
+                .collect(Collector
+                         .of(// supplier
+                             () -> new StringJoiner("|"),  
+
+                             // accumulator
+                             (j, r) -> j.add(r.toString()),       
+
+                             // combiner
+                             StringJoiner::merge,                 
+
+                             // finisher
+                             StringJoiner::toString))             
                 + "]";
         }
         

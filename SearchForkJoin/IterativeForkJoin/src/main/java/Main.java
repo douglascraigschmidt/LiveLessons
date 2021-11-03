@@ -2,12 +2,14 @@ import search.SearchResults;
 import search.SearchWithForkJoinTask;
 import utils.Folder;
 import utils.Options;
+import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.groupingBy;
 import static utils.StreamsUtils.PentaFunction;
@@ -44,12 +46,6 @@ public class Main {
      * The list of phrases to find.
      */
     private static List<String> mPhrasesToFind;
-        
-    /**
-     * Keep track of which implementation performed the best.
-     */
-    private static Map<Long, String> mResultsMap =
-        new HashMap<>();
 
     /**
      * This is the main entry point into the program.
@@ -92,7 +88,7 @@ public class Main {
         runTest(true, true, true, true);
 
         // Print out the search results.
-        printResults();
+        System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending SearchStream");
     }
@@ -134,18 +130,20 @@ public class Main {
     }
 
     /**
-     * Run the test and print out the timing results.  The various @a
-     * parallel* parameters indicates whether to run different parts
-     * of the solution in parallel or not.
+     * Run the test and print out the timing results.  The various
+     * {@code parallel*} parameters indicates whether to run different
+     * parts of the solution in parallel or not.
+     *
+     * @param parallelSearching
+     * @param parallelPhrases   True if phrases should be searched in parallel
+     * @param parallelDocs      True if 
+     * @param parallelWorks
      */
     private static void runTest(boolean parallelSearching,
                                 boolean parallelPhrases,
                                 boolean parallelDocs,
                                 boolean parallelWorks)
             throws IOException, URISyntaxException {
-        // Record the start time.
-        long startTime = System.nanoTime();
-
         // Record the configuration used to run this test.
         String testConfig = 
             ("SearchWithForkJoinTask(")
@@ -168,7 +166,7 @@ public class Main {
                            parallelWorks);
 
         // Create the appropriate type of object.
-        SearchWithForkJoinTask forkJoinTask =
+        final SearchWithForkJoinTask forkJoinTask =
             new SearchWithForkJoinTask(folder,
                                        mPhrasesToFind,
                                        parallelSearching,
@@ -176,70 +174,33 @@ public class Main {
                                        parallelDocs,
                                        parallelWorks);
 
-        // Use the common fork-join pool to search the input looking
-        // for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults = ForkJoinPool
-            .commonPool()
-            .invoke(forkJoinTask);
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
         // Store the results.
-        storeResults(testConfig,
-                     stopTime,
-                     listOfListOfSearchResults);
+        AtomicReference<List<List<SearchResults>>> results =
+            new AtomicReference<>();
 
-        // Help the GC.
-        //noinspection UnusedAssignment
-        forkJoinTask = null;
+        RunTimer
+            .timeRun(() -> {
+                    results.set(ForkJoinPool
+                        // Use the common fork-join pool to search the
+                        // input looking for phrases that match.
+                        .commonPool()
+                        .invoke(forkJoinTask));
+                },
+            testConfig);
 
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Print out the search results.
-     */
-    private static void printResults() {
-        // Print out the contents of the mResultsMap in sorted order.
-        mResultsMap
-            // Get the entrySet for the mResultsMap.
-            .entrySet()
-
-            // Convert the entrySet into a stream.
-            .stream()
-
-            // Sort the stream by the timing results (key).
-            .sorted(Map.Entry.comparingByKey())
-
-            // Print all the entries in the sorted stream.
-            .forEach(entry
-                     -> System.out.println(entry.getValue()));
-    }
-
-    /**
-     * Store the search results.
-     */
-    private static void storeResults(String testConfig,
-                                     long stopTime,
-                                     List<List<SearchResults>> listOfListOfSearchResults) {
-        // Print the number of times each phrase matched the input.
-        mResultsMap.put(stopTime,
-                        "The search returned = "
-                        // Count the number of matches.
-                        + listOfListOfSearchResults.stream()
-                        .mapToInt(list
-                                  -> list.stream().mapToInt(SearchResults::size).sum())
-                        .sum()
-                        + " phrase matches in "
-                        + stopTime
-                        + " milliseconds for "
-                        + testConfig);
+        System.out.println("The search returned = "
+                           + results.get().stream()
+                           .mapToInt(list
+                                     -> list.stream().mapToInt(SearchResults::size).sum())
+                           .sum()
+                           + " phrase matches");
 
         // Print the matching titles.
         if (Options.getInstance().isVerbose())
-            printTitles(listOfListOfSearchResults);
+            printTitles(results.get());
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**

@@ -18,8 +18,8 @@ import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
- * This is another asynchronous implementation strategy that
- * customizes the ImageStreamCompletableFutureBase super class to
+ * This class provides another asynchronous implementation strategy
+ * that customizes the ImageStreamCompletableFutureBase super class to
  * download, process, and store images asynchronously in the
  * designated thread pool.
  */
@@ -30,6 +30,10 @@ public class ImageStreamCompletableFuture2
      */
     private final int sMAX_THREADS = 100;
 
+    /**
+     * Define a {@link ThreadFactory} that creates a new "daemon"
+     * thread.
+     */
     private final ThreadFactory mThreadFactory =
         runnable -> {
             Thread thr = new Thread(runnable);
@@ -80,15 +84,15 @@ public class ImageStreamCompletableFuture2
         Stream<CompletableFuture<Optional<URL>>> urlStream = urls
             // Convert the URLs in the input list into a sequential
             // stream.
-            .stream()
+            .parallelStream()
 
             // Use map() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
             .map(this::checkUrlCachedAsync);
 
         StreamsUtils
-            // Create a future that is used to wait for
-            // all futures in urlStream to complete.
+            // Create a future that is used to wait for all futures in
+            // urlStream to complete.
             .joinAllStream(urlStream)
 
             // thenAccept() is called when all the futures in the
@@ -96,7 +100,7 @@ public class ImageStreamCompletableFuture2
             .thenAccept(stream -> {
                     // Create a stream of completable futures to
                     // filtered images.
-                    Stream<CompletableFuture<Stream<Image>>> futureStream = stream
+                    Stream<CompletableFuture<Image>> futureStream = stream
                         // Remove all cached URLs.
                         .flatMap(Optional::stream)
                         // For JDK 8 you'll need to use 
@@ -113,7 +117,7 @@ public class ImageStreamCompletableFuture2
                         // which creates a stream of completable
                         // futures to multiple filtered/stored
                         // versions of each image.
-                        .map(this::applyFiltersAsync);
+                        .flatMap(this::applyFiltersAsync);
 
                     StreamsUtils
                         // Create a future that is used to wait for
@@ -125,9 +129,8 @@ public class ImageStreamCompletableFuture2
                         .thenAccept(resultsStream ->
                                     // Flatten the stream of streams
                                     // and log the results.
-                                    log(resultsStream
-                                        .flatMap(Function.identity()),
-                                                 urls.size()))
+                                    log(resultsStream,
+                                        urls.size()))
                         
                         // Wait until all images have been downloaded,
                         // processed, and stored.
@@ -160,34 +163,23 @@ public class ImageStreamCompletableFuture2
      * in an output file on the local computer.
      *
      * @param imageFuture A future to an image that's being downloaded
-     @ return A completable future to a stream of images that are being filtered/stored 
+     * @return A {@link Stream} of {@link CompletableFuture<Image>}
+     *         objects that are being filtered/stored
     */
-    private CompletableFuture<Stream<Image>> applyFiltersAsync
+    private Stream<CompletableFuture<Image>> applyFiltersAsync
         (CompletableFuture<Image> imageFuture) {
-        // Return a completable future to a stream of images that are
-        // being processed.
-        return imageFuture
-            // thenCompose() is called after the image download
-            // completes.  It works like flatMap(), i.e., it returns a
-            // future to a stream of futures.
-            .thenCompose(image -> mFilters
-                         // Convert image filters to a sequential
-                         // stream.
-                         .stream()
+        return mFilters
+            // Convert the list of filters to a sequential stream.
+            .stream()
 
-                         // Use map() to asynchronously apply a filter.
-                         .map(filter -> CompletableFuture
-                              // Asynchronously apply filter action.
-                              .supplyAsync(() -> 
-                                           // Create and apply the
-                                           // filter to the image.
-                                           makeFilterDecoratorWithImage
-                                           (filter, image).run(),
-                                           // Run in designated
-                                           // executor.
-                                           getExecutor()))
-
-                         // Collect a stream of futures.
-                         .collect(toFuture()));
+            // Use map() to filter each image asynchronously.
+            .map(filter -> imageFuture
+                 // Asynchronously apply a filter action after the
+                 // previous stage completes.
+                 .thenApplyAsync(image -> // Create and apply the filter to the image.
+                                 makeFilterDecoratorWithImage(filter,
+                                                              image).run(),
+                                 // Run in the fixed-sized thread pool.
+                                 getExecutor()));
     }
 }

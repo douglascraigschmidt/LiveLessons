@@ -12,7 +12,7 @@ import static utils.ExceptionUtils.rethrowFunction;
  * A Java utility class that defines useful helper methods for
  * fork-join operations.
  */
-public class ForkJoinUtils {
+public final class ForkJoinUtils {
     private ForkJoinUtils() {}
 
     /**
@@ -30,11 +30,11 @@ public class ForkJoinUtils {
             protected List<T> compute() {
                 // Create a list to hold the forked tasks.
                 List<ForkJoinTask<T>> forks =
-                        new LinkedList<>();
+                    new LinkedList<>();
 
                 // Create a list to hold the joined results.
                 List<T> results =
-                        new LinkedList<>();
+                    new LinkedList<>();
 
                 // Iterate through list, fork all the tasks,
                 // and add them to the forks list.
@@ -48,8 +48,8 @@ public class ForkJoinUtils {
                             return op.apply(t);
                         }
                     }
-                            // Fork a new task.
-                            .fork());
+                    // Fork a new task.
+                    .fork());
 
                 // Join all the results of the forked tasks.
                 for (ForkJoinTask<T> task : forks)
@@ -264,7 +264,7 @@ public class ForkJoinUtils {
                     // the list.
                     mList = mList.subList(mid, mList.size());
 
-                    // Compute the right-hand side.
+                    // Compute the right-hand side recursively.
                     List<T> rightResult = compute();
                     
                     // Join the left-hand side results.

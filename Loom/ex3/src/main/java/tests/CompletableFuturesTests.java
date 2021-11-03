@@ -86,8 +86,7 @@ public class CompletableFuturesTests {
             .stream()
 
             // Use map() to transform each image asynchronously.
-            .map(transform -> // Create and apply the transform to the
-                 // image.
+            .map(transform -> // Apply transform to the image.
                  imageFuture
                  // Asynchronously apply a transform after the
                  // previous stage completes.

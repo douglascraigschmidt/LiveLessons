@@ -14,12 +14,13 @@ import static utils.StreamsUtils.PentaFunction;
 
 /**
  * This example implements an "embarrassingly parallel" program that
- * uses a Java 8 fork-join pool and a "divide and conquer" strategy
- * (i.e., splitting various folders, phrases, and strings in half) to
- * search for phrases in a recursive directory folder containing all
- * the works of Shakespeare.  All parallel processing in this program
- * only uses "classic" Java 7 features (i.e., no Java 8 parallel
- * streams) to demonstrate "raw" fork-join pool programming.
+ * uses a modern Java fork-join pool and a "divide and conquer"
+ * strategy (i.e., splitting various folders, phrases, and strings in
+ * half) to search for phrases in a recursive directory folder
+ * containing all the works of Shakespeare.  All parallel processing
+ * in this program only uses "classic" Java 7 features (i.e., no Java
+ * 8 parallel streams) to demonstrate "raw" fork-join pool
+ * programming.
  */
 public class Main {
     /*
@@ -48,7 +49,7 @@ public class Main {
     /**
      * Keep track of which implementation performed the best.
      */
-    private static Map<Long, String> mResultsMap =
+    private static final Map<Long, String> mResultsMap =
         new HashMap<>();
 
     /**
@@ -56,12 +57,12 @@ public class Main {
      * hierarchy of classes so we can use constructor references.
      */
     private interface SearchWithForkJoinTaskFactory
-            extends PentaFunction<List<CharSequence>,
-                                  List<String>,
-                                  Boolean,
-                                  Boolean,
-                                  Boolean,
-                                  SearchWithForkJoinTask> {}
+        extends PentaFunction<List<CharSequence>,
+                              List<String>,
+                              Boolean,
+                              Boolean,
+                              Boolean,
+                              SearchWithForkJoinTask> {}
 
     /**
      * This is the main entry point into the program.
@@ -137,41 +138,6 @@ public class Main {
     }
 
     /**
-     * Warm up the fork-join pool to account for any instruction/data
-     * caching effects.
-     */
-    private static void warmUpForkJoinPool(SearchWithForkJoinTaskFactory consRef)
-            throws IOException, URISyntaxException {
-        System.out.println("Warming up the fork-join pool");
-
-        // This object is used to search a recursive directory
-        // containing the complete works of William Shakespeare.
-        List<CharSequence> inputList = TestDataFactory
-            .getInput(sSHAKESPEARE_FOLDER, true);
-
-        // Create the appropriate type of object.
-        SearchWithForkJoinTask forkJoinTask =
-            consRef.apply(inputList,
-                          mPhrasesToFind,
-                          true,
-                          true,
-                          true);
-
-        @SuppressWarnings("unused")
-            // Search the input looking for phrases that match.
-            List<List<SearchResults>> listOfListOfSearchResults =
-            ForkJoinPool.commonPool()
-            .invoke(forkJoinTask);
-
-        // Help the GC.
-        //noinspection UnusedAssignment
-        forkJoinTask = null;
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
      * Run the test and print out the timing results.  The various @a
      * parallel* parameters indicates whether to run different parts
      * of the solution in parallel or not.
@@ -181,7 +147,7 @@ public class Main {
                                 boolean parallelWorks,
                                 boolean parallelInput,
                                 SearchWithForkJoinTaskFactory consRef)
-            throws IOException, URISyntaxException {
+        throws IOException, URISyntaxException {
         // Record the start time.
         long startTime = System.nanoTime();
 
@@ -220,7 +186,7 @@ public class Main {
         // for phrases that match.
         List<List<SearchResults>> listOfListOfSearchResults =
             ForkJoinPool.commonPool()
-                        .invoke(forkJoinTask);
+            .invoke(forkJoinTask);
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
@@ -309,5 +275,41 @@ public class Main {
                                // Print out the indicates for this key.
                                value.forEach(SearchResults::print);
                            });
+    }
+
+
+    /**
+     * Warm up the fork-join pool to account for any instruction/data
+     * caching effects.
+     */
+    private static void warmUpForkJoinPool(SearchWithForkJoinTaskFactory consRef)
+        throws IOException, URISyntaxException {
+        System.out.println("Warming up the fork-join pool");
+
+        // This object is used to search a recursive directory
+        // containing the complete works of William Shakespeare.
+        List<CharSequence> inputList = TestDataFactory
+            .getInput(sSHAKESPEARE_FOLDER, true);
+
+        // Create the appropriate type of object.
+        SearchWithForkJoinTask forkJoinTask =
+            consRef.apply(inputList,
+                          mPhrasesToFind,
+                          true,
+                          true,
+                          true);
+
+        @SuppressWarnings("unused")
+        // Search the input looking for phrases that match.
+        List<List<SearchResults>> listOfListOfSearchResults =
+            ForkJoinPool.commonPool()
+                        .invoke(forkJoinTask);
+
+        // Help the GC.
+        //noinspection UnusedAssignment
+        forkJoinTask = null;
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 }

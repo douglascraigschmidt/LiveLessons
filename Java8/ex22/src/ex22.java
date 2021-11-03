@@ -16,7 +16,7 @@ import static utils.ForkJoinUtils.*;
 
 /**
  * This example shows how to reduce and multiply big fractions using
- * different programming models provided by the Java fork-join pool
+ * different programming models provided by the Java fork-join
  * framework.
  */
 public class ex22 {
@@ -32,13 +32,6 @@ public class ex22 {
         BigFraction.valueOf(new BigInteger("846122553600669882"),
                             new BigInteger("188027234133482196"),
                             true);
-
-    /**
-     * Stores a completed future with a BigFraction value of
-     * sBigReducedFraction.
-     */
-    private static final CompletableFuture<BigFraction> sBigReducedFractionFuture =
-        CompletableFuture.completedFuture(sBigReducedFraction);
 
     /**
      * Main entry point into the test program.
