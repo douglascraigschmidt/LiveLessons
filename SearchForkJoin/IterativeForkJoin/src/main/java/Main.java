@@ -94,42 +94,6 @@ public class Main {
     }
 
     /**
-     * Warm up the fork-join pool to account for any instruction/data
-     * caching effects.
-     */
-    private static void warmUpForkJoinPool() throws IOException, URISyntaxException {
-        System.out.println("Warming up the fork-join pool");
-
-        // This object is used to search a recursive directory
-        // containing the complete works of William Shakespeare.
-        Folder folder = TestDataFactory
-            .getRootFolder(sSHAKESPEARE_FOLDER,
-                           true);
-
-        // Create the appropriate type of object.
-        SearchWithForkJoinTask forkJoinTask =
-            new SearchWithForkJoinTask(folder,
-                                       mPhrasesToFind,
-                                       true, 
-                                       true,
-                                       true,
-                                       true);
-
-        // Use the common fork-join pool to search the input looking
-        // for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults =
-            ForkJoinPool.commonPool()
-            .invoke(forkJoinTask);
-
-        // Help the GC.
-        //noinspection UnusedAssignment
-        forkJoinTask = null;
-
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
      * Run the test and print out the timing results.  The various
      * {@code parallel*} parameters indicates whether to run different
      * parts of the solution in parallel or not.
@@ -230,5 +194,41 @@ public class Main {
                                // Print out the indicates for this key.
                                value.forEach(SearchResults::print);
                            });
+    }
+
+    /**
+     * Warm up the fork-join pool to account for any instruction/data
+     * caching effects.
+     */
+    private static void warmUpForkJoinPool() throws IOException, URISyntaxException {
+        System.out.println("Warming up the fork-join pool");
+
+        // This object is used to search a recursive directory
+        // containing the complete works of William Shakespeare.
+        Folder folder = TestDataFactory
+            .getRootFolder(sSHAKESPEARE_FOLDER,
+                           true);
+
+        // Create the appropriate type of object.
+        SearchWithForkJoinTask forkJoinTask =
+            new SearchWithForkJoinTask(folder,
+                                       mPhrasesToFind,
+                                       true, 
+                                       true,
+                                       true,
+                                       true);
+
+        // Use the common fork-join pool to search the input looking
+        // for phrases that match.
+        List<List<SearchResults>> listOfListOfSearchResults =
+            ForkJoinPool.commonPool()
+            .invoke(forkJoinTask);
+
+        // Help the GC.
+        //noinspection UnusedAssignment
+        forkJoinTask = null;
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 }

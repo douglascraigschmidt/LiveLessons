@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is used in conjunction with the Java 7 fork-join pool to
+ * This class is used in conjunction with the Java fork-join pool to
  * create a list of SearchResults.Result objects that match the number
  * of times a phrase appears in an input string.  The comparison is
  * case-insensitive.

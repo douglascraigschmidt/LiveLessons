@@ -24,7 +24,7 @@ public class MonoEx {
      * Create a new unreduced BigFraction.
      */
     private static final BigFraction sUnreducedFraction = BigFraction
-        .valueOf(new BigInteger (sBI1),
+        .valueOf(new BigInteger(sBI1),
                  new BigInteger(sBI2),
                  false);
 
@@ -202,8 +202,10 @@ public class MonoEx {
         // Create a callable that multiplies two large fractions,
         // but which will throw the ArithmeticException.
         Callable<BigFraction> badCall = () -> {
+            // Create a valid numerator.
             BigFraction numerator = new BigFraction(sF1);
-            // Make the denominator invalid!
+
+            // Create an invalid denominator!
             BigFraction denominator = new BigFraction("0");
 
             // Return the result of dividing the fractions.
@@ -212,7 +214,7 @@ public class MonoEx {
 
         // Create a function lambda to handle an ArithmeticException.
         Function<Throwable,
-            Mono<? extends BigFraction>> errorHandler = t -> {
+                 Mono<? extends BigFraction>> errorHandler = t -> {
             // If exception occurred return 0.
             sb.append("     exception = "
                       + t.getMessage()
@@ -227,7 +229,7 @@ public class MonoEx {
         // returns asynchronously.
         return Mono
             // Use fromCallable() to reduce the big fraction (which
-            // will thrown ArithmeticException).
+            // will throw ArithmeticException).
             .fromCallable(badCall)
 
             // Run all the processing in a (single) background thread.
