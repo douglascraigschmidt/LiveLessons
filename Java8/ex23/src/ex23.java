@@ -132,7 +132,7 @@ public class ex23 {
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Apply action to results of the previous completion stage.
+            // Apply action to result of the previous completion stage.
             .map(intFuture -> intFuture.thenApply(mAction))
 
             // Trigger intermediate operations and return a future to

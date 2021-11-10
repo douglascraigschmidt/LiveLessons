@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
  * completable futures framework to generate and reduce random big
  * fractions.  It also demonstrates the lazy processing of streams.
  */
+@SuppressWarnings("unchecked")
 public class ex29 {
     /**
      * Logging tag.
@@ -61,7 +62,8 @@ public class ex29 {
 
         print("Point 1: after first map()");
 
-        // Convert the stream into an array of futures.
+        // Convert the stream into an array of futures by calling
+        // a terminal operation.
         CompletableFuture<BigFraction>[] futures =
                 bigFractionStream.toArray(CompletableFuture[]::new);
 

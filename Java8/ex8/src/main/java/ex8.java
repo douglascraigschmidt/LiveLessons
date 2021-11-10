@@ -18,11 +18,12 @@ import static utils.FuturesCollector.toFuture;
  * framework, including many factory methods, completion stage
  * methods, arbitrary-arity methods, and exception handling methods.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex8 {
     /**
      * Number of big fractions to process asynchronously in a stream.
      */
-    private static int sMAX_FRACTIONS = 10;
+    private static final int sMAX_FRACTIONS = 10;
 
     /**
      * These final strings are used to pass params to various lambdas
@@ -32,6 +33,14 @@ public class ex8 {
     private static final String sF2 = "609136/913704";
     private static final String sBI1 = "846122553600669882";
     private static final String sBI2 = "188027234133482196";
+
+    /**
+     * Create a new unreduced big fraction.
+     */
+    private static final BigFraction sUnreducedFraction =
+        BigFraction.valueOf(new BigInteger(sBI1),
+                            new BigInteger(sBI2),
+                            false);
 
     /**
      * Represents a test that's already completed running when it
@@ -137,21 +146,15 @@ public class ex8 {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReduction()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction =
-            BigFraction.valueOf(new BigInteger ("846122553600669882"),
-                                new BigInteger("188027234133482196"),
-                                false);
-
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction = BigFraction
-            .reduce(unreducedFraction);
+            .reduce(sUnreducedFraction);
 
             sb.append("     unreducedFraction "
-                      + unreducedFraction.toString()
+                      + sUnreducedFraction
                       + "\n     reduced improper fraction = "
-                      + reducedFraction.toString());
+                      + reducedFraction);
 
             // Return the reduction.
             return reducedFraction;
@@ -190,21 +193,15 @@ public class ex8 {
         StringBuilder sb = 
             new StringBuilder(">> Calling testFractionReductionAsync()\n");
 
-        // Create a new unreduced big fraction.
-        BigFraction unreducedFraction = 
-            BigFraction.valueOf(new BigInteger(sBI1),
-                                new BigInteger(sBI2),
-                                false);
-
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction =
-            BigFraction.reduce(unreducedFraction);
+            BigFraction.reduce(sUnreducedFraction);
 
             sb.append("     unreducedFraction "
-                      + unreducedFraction.toString()
+                      + sUnreducedFraction
                       + "\n     reduced improper fraction = "
-                      + reducedFraction.toString());
+                      + reducedFraction);
 
             // Return the reduction.
             return reducedFraction;
@@ -483,16 +480,14 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions1()\n");
 
-        return List
-            // Generate results both with and without exceptions.
+        // Generate results both with and without exceptions.
+        // Convert to a stream.
+        return Stream
             .of(true, false)
-
-            // Convert to a stream.
-            .stream()
 
             // Iterate through the elements.
             .map(throwException -> {
-                    // If boolean is true then make the demoninator 0
+                    // If boolean is true then make the denominator 0
                     // to trigger an exception.
                     int denominator = throwException ? 0 : 1;
 
@@ -539,12 +534,10 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions2()\n");
 
-        return List
-            // Generate results both with and without exceptions.
+        // Generate results both with and without exceptions.
+        // Convert to stream.
+        return Stream
             .of(true, false)
-
-            // Convert to stream.
-            .stream()
 
             // Iterate through the elements.
             .map(throwException -> {
@@ -595,12 +588,9 @@ public class ex8 {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionExceptions3()\n");
 
-        return List
+        return Stream
             // Generate results both with and without exceptions.
             .of(true, false)
-
-            // Convert to a stream.
-            .stream()
 
             // Handle both true and false elements.
             .map(throwException -> {
@@ -654,12 +644,12 @@ public class ex8 {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionMultiplications1()\n");
 
-        // Lambda asynchronously reduces/multiplies a big fraction. 
+        // Lambda asynchronously reduces/multiplies a big fraction.
         Function<BigFraction, 
                  CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
-            unreducedFraction -> CompletableFuture
+            sUnreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
-            .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
+            .supplyAsync(() -> BigFraction.reduce(sUnreducedFraction))
 
             // thenCompose() is like flatMap(), i.e., it returns a
             // completable future to a multiplied big fraction.
@@ -704,9 +694,9 @@ public class ex8 {
         // Function asynchronously reduces/multiplies a big fraction.
         Function<BigFraction,
             CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
-            unreducedFraction -> CompletableFuture
+            sUnreducedFraction -> CompletableFuture
             // Perform the reduction asynchronously.
-            .supplyAsync(() -> BigFraction.reduce(unreducedFraction))
+            .supplyAsync(() -> BigFraction.reduce(sUnreducedFraction))
 
             // thenApplyAsync() returns a completable future to a big
             // fraction that's multiplied asynchronously since it may
