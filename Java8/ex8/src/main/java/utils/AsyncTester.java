@@ -17,7 +17,7 @@ public class AsyncTester {
     /**
      * Keeps track of all the registered tests to run.
      */
-    private static List<Supplier<CompletableFuture<Void>>> sTests =
+    private static final List<Supplier<CompletableFuture<Void>>> sTests =
         new ArrayList<>();
 
     /**

@@ -190,13 +190,13 @@ public class ex8 {
      * chain of completion stage *Async() methods.
      */
     private static CompletableFuture<Void> testFractionReductionAsync() {
-        StringBuilder sb = 
-            new StringBuilder(">> Calling testFractionReductionAsync()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionReductionAsync()\n");
 
         Supplier<BigFraction> reduceFraction = () -> {
             // Reduce the big fraction.
             BigFraction reducedFraction =
-            BigFraction.reduce(sUnreducedFraction);
+                BigFraction.reduce(sUnreducedFraction);
 
             sb.append("     unreducedFraction "
                       + sUnreducedFraction
@@ -251,6 +251,7 @@ public class ex8 {
                 // Set future to a constant.
                 future.complete(mBigReducedFractionFuture.join());
         }).start();
+        // Do something interesting here...
 
         // Print the result, blocking until it's ready.
         sb.append("     Thread result = "
@@ -284,6 +285,7 @@ public class ex8 {
                 // finished.
                 future.complete(bf1.multiply(bf2));
         }).start();
+        // Do something interesting here...
 
         // Print the result, blocking until it's ready.
         sb.append("     Thread result = "
@@ -316,6 +318,7 @@ public class ex8 {
                     // finished.
                     future.complete(bf1.multiply(bf2));
                 });
+        // Do something interesting here...
 
         // Print the result, blocking until it's ready.
         sb.append("     runAsync() result = "
@@ -334,7 +337,7 @@ public class ex8 {
             new StringBuilder(">> Calling testFractionMultiplicationCallable()\n");
 
         try {
-            // Create a callable that multiplies two large fractions.
+            // Create a callable that multiplies two large Big fractions.
             Callable<BigFraction> call = () -> {
                 BigFraction bf1 = new BigFraction(sF1);
                 BigFraction bf2 = new BigFraction(sF2);
@@ -347,6 +350,8 @@ public class ex8 {
             // the future it returns.
             Future<BigFraction> future =
                 ForkJoinPool.commonPool().submit(call);
+
+            // Do something interesting here...
 
             // Block until the result is available.
             BigFraction result = future.get();
@@ -371,7 +376,7 @@ public class ex8 {
 
         // Create a future that completes when the supplier submitted
         // to the common fork-join pool completes.
-        CompletableFuture<BigFraction> future = CompletableFuture
+        var future = CompletableFuture
             // Initiate an async task whose supplier multiplies two
             // large fractions.
             .supplyAsync(() -> {
@@ -381,6 +386,7 @@ public class ex8 {
                     // Return the result of multiplying the fractions.
                     return bf1.multiply(bf2);
                 });
+        // Do something interesting here...
 
         // Print the result, blocking until it's ready.
         sb.append("     supplyAsync() result = " 

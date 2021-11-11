@@ -71,9 +71,9 @@ public class FuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
-        return futures ->
-            CompletableFuture
+    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>>
+        finisher() {
+        return futures -> CompletableFuture
             // Use CompletableFuture.allOf() to obtain a future that
             // will itself be complete when all futures complete.
             .allOf(futures.toArray(new CompletableFuture[0]))
@@ -85,7 +85,7 @@ public class FuturesCollector<T>
                        // futures.
                        .stream()
 
-                       // Use map() to join() all completablefutures
+                       // Use map() to join() all completable futures
                        // and yield objects of type T.  Note that
                        // join() should never block.
                        .map(CompletableFuture::join)
@@ -103,7 +103,7 @@ public class FuturesCollector<T>
      * this case is simply UNORDERED
      */
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 

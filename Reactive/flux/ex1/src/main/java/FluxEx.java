@@ -166,8 +166,8 @@ public class FluxEx {
                                     .makeBigFraction(random,
                                                      true)))
 
-            // Generate random big fractions 4 times.
-            .repeat(4);
+            // Generate random big fractions 3 + 1 times.
+            .repeat(3);
 
         f1
             // Flatten Flux f1 and f2 into a single Flux sequence,
