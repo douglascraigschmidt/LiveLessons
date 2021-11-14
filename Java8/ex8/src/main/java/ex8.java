@@ -758,7 +758,7 @@ public class ex8 {
     }
 
     /**
-     * Sort the {@code list} in parallel using quicksort and mergesort
+     * Sort the {@code List} in parallel using quicksort and mergesort
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
