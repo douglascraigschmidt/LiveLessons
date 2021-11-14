@@ -4,7 +4,6 @@ import utils.HeapSort;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,7 +13,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * This example shows how to combine the Java sequential streams and
  * completable futures framework to generate and reduce random big
- * fractions.  It also demonstrates the lazy processing of streams.
+ * fractions.  It also demonstrates the lazy processing of streams and
+ * completable futures.
  */
 @SuppressWarnings("unchecked")
 public class ex29 {
@@ -44,16 +44,20 @@ public class ex29 {
         // Create a list of random big fractions that are unreduced.
         List<BigFraction> bigFractions = makeBigFractions();
 
+        printList(bigFractions);
+
+        print("Point 1: after printList()");
+
         // Obtain a future to a stream of reduced big fractions.
         Stream<CompletableFuture<BigFraction>> bigFractionStream =
             makeBigFractionStream(bigFractions);
 
-        print("Point 1: after first map() in makeBigFractionStream()");
+        print("Point 2: after first map() in makeBigFractionStream()");
 
         CompletableFuture<List<BigFraction>> bigFractionsF =
             makeCompletableFutureStream(bigFractionStream);
 
-        print("Point 2: after collect() in makeCompletableFutureStream");
+        print("Point 3: after collect() in makeCompletableFutureStream");
 
         bigFractionsF
             // Sort the list in parallel and print the results.
@@ -62,7 +66,7 @@ public class ex29 {
             // Trigger all the processing and block until it's all done.
             .join();
 
-        print("Point 3: after join()");
+        print("Point 4: after join()");
     }
 
     /**
@@ -207,13 +211,18 @@ public class ex29 {
         // first and use it to print the sorted list.
         return quickSortF
             .acceptEither(heapSortF,
-                          sortedList -> {
-                              // Print the results as mixed fractions.
-                              sortedList
-                                  .forEach(fraction ->
-                                           print("     "
-                                                 + fraction.toMixedString()));
-                          });
+                          this::printList);
+    }
+
+    /**
+     *
+     */
+    private void printList(List<BigFraction> sortedList) {
+            // Print the results as mixed fractions.
+            sortedList
+                .forEach(fraction ->
+                         print("     "
+                               + fraction.toMixedString()));
     }
 
     /**
