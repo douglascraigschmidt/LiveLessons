@@ -1,8 +1,8 @@
 import utils.FuturesCollector;
+import utils.RunTimer;
 import utils.StreamsUtils;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -23,31 +23,39 @@ public class ex18 {
     private static final int sDEFAULT_N = 1000;
 
     /**
-     * This is the entry point into the test program.
+     * Create a list containing all the factorial methods.
      */
-    public static void main(String[] args) {
-        System.out.println("Starting Factorial Tests");
-
-        // Create a new test object.
-        ex18 test = new ex18();
-
-        // Create a list containing all the factorial methods.
-        List<Function<BigInteger, BigInteger>> factList =
+    private static final List<Function<BigInteger, BigInteger>> sFactList =
             List.of(SynchronizedParallelFactorial::factorial,
                     SequentialStreamFactorial::factorial,
                     ParallelStreamFactorial2::factorial,
                     ParallelStreamFactorial3::factorial);
 
+    /**
+     * This is the entry point into the test program.
+     */
+    public static void main(String[] args) {
+        System.out.println("Starting Factorial Tests");
+
         // Initialize to the default value.
         final BigInteger n = (args.length > 0)
-            ? BigInteger.valueOf(Long.valueOf(args[0]))
+            ? BigInteger.valueOf(Long.parseLong(args[0]))
             : BigInteger.valueOf(sDEFAULT_N);
 
+        // Test the FuturesCollector.
+        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n),
+                "testFuturesCollector()");
+
         // Test the StreamsUtils.joinAll() method.
-        test.testJoinAll(factList, n);
+        RunTimer.timeRun(() -> testJoinAll(sFactList, n),
+                         "testJoinAll()");
 
         // Test the FuturesCollector.
-        test.testFuturesCollector(factList, n);
+        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n),
+                "testFuturesCollector()");
+
+        // Print the results.
+        System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending Factorial Tests");
     }
@@ -105,7 +113,7 @@ public class ex18 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Multiple the latest value in the range by the
+                // Multiply the latest value in the range by the
                 // running total (properly synchronized).
                 .forEach(t::multiply);
 
@@ -115,7 +123,7 @@ public class ex18 {
     }
 
     /**
-     * This class demonstrates how the two parameter Java 8 reduce()
+     * This class demonstrates how the two parameter Java Streams reduce()
      * operation avoids sharing state between Java threads altogether.
      */
     private static class ParallelStreamFactorial2 {
@@ -143,7 +151,7 @@ public class ex18 {
     }
 
     /**
-     * This class demonstrates how the three parameter Java 8 reduce()
+     * This class demonstrates how the three parameter Java Streams reduce()
      * operation avoids sharing state between Java threads altogether.
      */
     private static class ParallelStreamFactorial3 {
@@ -198,7 +206,7 @@ public class ex18 {
     /**
      * Test the StreamsUtils.joinAll() method.
      */
-    private void testJoinAll
+    private static void testJoinAll
         (List<Function<BigInteger, BigInteger>> factList,
          BigInteger n) {
         System.out.println("Testing JoinAll");
@@ -232,7 +240,7 @@ public class ex18 {
     /**
      * Test the FuturesCollector.
      */
-    private void testFuturesCollector
+    private static void testFuturesCollector
         (List<Function<BigInteger, BigInteger>> factList,
          BigInteger n) {
         System.out.println("Testing FuturesCollector");

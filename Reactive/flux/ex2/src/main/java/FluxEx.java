@@ -53,7 +53,7 @@ public class FluxEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * 0.5 second duration for sleeping.
+     * 0.5 second duration for sleeping for the Flux.interval() operator.
      */
     private static final Duration sSLEEP_DURATION =
         Duration.ofMillis(500);
@@ -120,7 +120,7 @@ public class FluxEx {
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
             // Generate a Long stream starting at 0 periodically in a
-            // background thread.
+            // background thread from the Schedulers.parallel() thread pool.
             .interval(sSLEEP_DURATION)
 
             // Generate random numbers between min and max values to
