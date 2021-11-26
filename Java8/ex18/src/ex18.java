@@ -20,7 +20,7 @@ public class ex18 {
     /**
      * Default factorial number.  
      */
-    private static final int sDEFAULT_N = 1000;
+    private static final int sDEFAULT_N = 100000;
 
     /**
      * Create a list containing all the factorial methods.
@@ -42,16 +42,20 @@ public class ex18 {
             ? BigInteger.valueOf(Long.parseLong(args[0]))
             : BigInteger.valueOf(sDEFAULT_N);
 
+        // Test the StreamsUtils.joinAll() method.
+        RunTimer.timeRun(() -> testJoinAll(sFactList, n, false),
+                "testJoinAll()");
+
         // Test the FuturesCollector.
-        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n),
+        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n, false),
                 "testFuturesCollector()");
 
         // Test the StreamsUtils.joinAll() method.
-        RunTimer.timeRun(() -> testJoinAll(sFactList, n),
-                         "testJoinAll()");
+        RunTimer.timeRun(() -> testJoinAll(sFactList, n, false),
+                "testJoinAll()");
 
         // Test the FuturesCollector.
-        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n),
+        RunTimer.timeRun(() -> testFuturesCollector(sFactList, n, false),
                 "testFuturesCollector()");
 
         // Print the results.
@@ -208,8 +212,10 @@ public class ex18 {
      */
     private static void testJoinAll
         (List<Function<BigInteger, BigInteger>> factList,
-         BigInteger n) {
-        System.out.println("Testing JoinAll");
+         BigInteger n,
+         boolean verbose) {
+        if (verbose)
+            System.out.println("Testing JoinAll");
 
         List<CompletableFuture<BigInteger>> resultsList = factList
             // Convert the list into stream.
@@ -225,16 +231,17 @@ public class ex18 {
             // completable futures.
             .collect(toList());
 
-        StreamsUtils
-            // Create a single future that will complete when all
-            // futures in resultsList complete.
-            .joinAll(resultsList)
+        var results = StreamsUtils
+                // Create a single future that will complete when all
+                // futures in resultsList complete.
+                .joinAll(resultsList)
 
-            // Wait for the single future to complete.
-            .join()
+                // Wait for the single future to complete.
+                .join();
 
-            // Printout all the results.
-            .forEach(System.out::println);
+        // Printout all the results.
+        if (verbose)
+            results.forEach(System.out::println);
     }
 
     /**
@@ -242,8 +249,10 @@ public class ex18 {
      */
     private static void testFuturesCollector
         (List<Function<BigInteger, BigInteger>> factList,
-         BigInteger n) {
-        System.out.println("Testing FuturesCollector");
+         BigInteger n,
+         boolean verbose) {
+        if (verbose)
+            System.out.println("Testing FuturesCollector");
 
         // Create a single completable future to a list of completed
         // BigIntegers.
@@ -261,11 +270,12 @@ public class ex18 {
             // completable future.
             .collect(FuturesCollector.toFuture());
 
-        resultsFuture
-            // Wait for the single future to complete.
-            .join()
+        var results = resultsFuture
+                // Wait for the single future to complete.
+                .join();
 
+        if (verbose)
             // Printout all the results.
-            .forEach(System.out::println);
+            results.forEach(System.out::println);
     }
 }

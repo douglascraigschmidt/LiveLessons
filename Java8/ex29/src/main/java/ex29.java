@@ -13,8 +13,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * This example shows how to combine the Java sequential streams and
  * completable futures framework to generate and reduce random big
- * fractions.  It also demonstrates the lazy processing of streams and
- * completable futures.
+ * fractions.  It also demonstrates the lazy processing of Java streams
+ * and completable futures.
  */
 @SuppressWarnings("unchecked")
 public class ex29 {
@@ -41,6 +41,8 @@ public class ex29 {
      * Run the test program.
      */
     private void run() {
+        print("Point 0: starting up");
+
         // Create a list of random big fractions that are unreduced.
         List<BigFraction> bigFractions = makeBigFractions();
 
@@ -136,7 +138,7 @@ public class ex29 {
                        .map(CompletableFuture::join)
 
                        // This call triggers all the processing above.
-                       .collect(getCollectors()));
+                       .collect(getListCollector()));
     }
 
     /**
@@ -184,8 +186,8 @@ public class ex29 {
      * @ return A collector that converts elements in a stream into a
      * list of big fractions
      */
-    private Collector<BigFraction, ? , List<BigFraction>> getCollectors() {
-        print("    getCollectors()");
+    private Collector<BigFraction, ? , List<BigFraction>> getListCollector() {
+        print("    getListCollector()");
         return Collectors.toList();
     }
         
@@ -215,7 +217,9 @@ public class ex29 {
     }
 
     /**
+     * Print the contents of the {@code sortedList}.
      *
+     * @param sortedList The sorted {@link List}
      */
     private void printList(List<BigFraction> sortedList) {
             // Print the results as mixed fractions.
