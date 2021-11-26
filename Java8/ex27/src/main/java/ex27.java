@@ -63,8 +63,8 @@ public class ex27 {
                                    2,
                                    TimeUnit.SECONDS);
 
-            // Call this::convert method reference when both
-            // previous stages complete.
+            // Call this::convert method reference when both previous
+            // stages complete.
             bestPriceF
                 .thenCombine(exchangeRateF,
                              // Convert the price in dollars to the
