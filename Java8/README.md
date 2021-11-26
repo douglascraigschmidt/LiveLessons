@@ -155,9 +155,9 @@ Here's an overview of what's currently included in these examples:
          pattern via Java AtomicReference and volatile.
 
 . ex29 - This example shows how to combine the Java sequential streams
-         and completable futures framework to generate and reduce
-         random big fractions.  It also demonstrates the lazy
-         processing of streams.
+         and completable futures frameworks to generate and reduce
+         random BigFraction objects.  It also demonstrates the lazy
+         processing semantics of Java streams and completable futures.
 
 . ex30 - This example showcases and benchmarks the use of a Java
          ConcurrentHashMap and various memoizer implementations to

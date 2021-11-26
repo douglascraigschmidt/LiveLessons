@@ -12,9 +12,9 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows how to combine the Java sequential streams and
- * completable futures framework to generate and reduce random big
- * fractions.  It also demonstrates the lazy processing of Java streams
- * and completable futures.
+ * completable futures frameworks to generate and reduce random {@link
+ * BigFraction} objects.  It also demonstrates the lazy processing
+ * semantics of Java streams and completable futures.
  */
 @SuppressWarnings("unchecked")
 public class ex29 {
