@@ -363,8 +363,10 @@ public class FluxEx {
                                                       Scheduler scheduler,
                                                       StringBuffer sb) {
         return Mono
-                // Emit the bigFraction.
-                .fromCallable(() -> bigFraction)
+                // Return a Mono to a multiplied big fraction.
+                .fromCallable(() -> bigFraction
+                     // Multiply the big fractions
+                     .multiply(sBigReducedFraction))
 
                 // Perform processing asynchronously in a pool of
                 // background threads.
@@ -375,12 +377,7 @@ public class FluxEx {
                         logBigFractionResult(bigFraction,
                                              sBigReducedFraction,
                                              result,
-                                             sb))
-
-                // Return a mono to a multiplied big fraction.
-                .map(reducedFraction -> reducedFraction
-                     // Multiply the big fractions
-                     .multiply(sBigReducedFraction));
+                                             sb));
     }
 
 }

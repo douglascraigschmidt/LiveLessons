@@ -93,16 +93,13 @@ public class FluxEx {
                          // Perform the Project Reactor
                          // flatMap() concurrency idiom.
                          .flatMap(bf2 -> Mono
-                                  // Emit bf2.
-                                  .fromCallable(() -> bf2)
-
-                                  // Arrange to run each element
-                                  // in parallel.
-                                  .subscribeOn(Schedulers.parallel())
-
                                   // Multiply bf1 by each value
                                   // emitted from the Flux.
-                                  .map(___ -> bf2.multiply(bf1))))
+                                  .fromCallable(() -> bf2.multiply(bf1))
+
+                                  // Arrange to run each element in
+                                  // parallel.
+                                  .subscribeOn(Schedulers.parallel()))
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
