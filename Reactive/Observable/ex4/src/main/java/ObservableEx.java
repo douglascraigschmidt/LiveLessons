@@ -91,17 +91,12 @@ public class ObservableEx {
                                // Perform the RxJava flatMap()
                                // concurrency idiom.
                                .flatMap(bf2 -> Observable
-                                        // Emit bf2 to start a new
-                                        // stream.
-                                        .fromCallable(() -> bf2)
+                                        // Multiply bf1 by each value bf1.
+                                        .fromCallable(() -> bf2.multiply(bf1)))
 
                                         // Arrange to run each element
                                         // in parallel.
-                                        .subscribeOn(Schedulers.computation())
-
-                                        // Multiply bf1 by each value
-                                        // emitted from Observable.
-                                        .map(___ -> bf2.multiply(bf1))))
+                                        .subscribeOn(Schedulers.computation()))
 
             // Convert Observable to Flowable so subscribe() works
             // with a Subscriber (instead of an Observer, which is all
@@ -139,7 +134,8 @@ public class ObservableEx {
             // Reduce and multiply these fractions asynchronously.
             .map(unreducedBigFraction ->
                  reduceAndMultiplyFraction(unreducedBigFraction,
-                                           Schedulers.computation()))
+                                           Schedulers.computation(),
+                                           sb))
 
             // Trigger intermediate operation processing and return a
             // Single to a list of big fractions that are being
@@ -159,23 +155,40 @@ public class ObservableEx {
      */
     private static Single<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
-         Scheduler scheduler) {
+         Scheduler scheduler,
+         StringBuffer sb) {
         return Single
             // Omit one item that performs the reduction.
-            .fromCallable(() -> BigFraction.reduce(unreducedFraction))
+            .fromCallable(() -> BigFraction
+                          .reduce(unreducedFraction))
 
             // Perform all processing asynchronously in a pool of
             // background threads.
             .subscribeOn(scheduler)
 
             // Return a Single to a multiplied big fraction.
-            .flatMap(reducedFraction -> Single
-                     // Multiply the big fractions
-                     .fromCallable(() -> reducedFraction
-                                   .multiply(sBigReducedFraction))
-                                   
-                     // Perform all processing asynchronously in a
-                     // pool of background threads.
-                     .subscribeOn(scheduler));
+            .flatMap(reducedFraction ->
+                     multiplyFraction(reducedFraction,
+                                      scheduler,
+                                      sb));
+    }
+
+    /**
+     * @return A {@link Single} that's signaled after the {@link
+     * BigFraction} is multiplied asynchronously in a background
+     * thread from the given {@link Scheduler}
+     */
+    private static Single<BigFraction> multiplyFraction(BigFraction bigFraction,
+                                                        Scheduler scheduler,
+                                                        StringBuffer sb) {
+        return Single
+            // Return a Single to a multiplied big fraction.
+            .fromCallable(() -> bigFraction
+                          // Multiply the big fractions
+                          .multiply(sBigReducedFraction))
+
+            // Perform processing asynchronously in a pool of
+            // background threads.
+            .subscribeOn(scheduler);
     }
 }

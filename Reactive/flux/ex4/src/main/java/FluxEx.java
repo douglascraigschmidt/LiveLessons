@@ -92,14 +92,10 @@ public class FluxEx {
                          
                          // Perform the Project Reactor
                          // flatMap() concurrency idiom.
-                         .flatMap(bf2 -> Mono
-                                  // Multiply bf1 by each value
-                                  // emitted from the Flux.
-                                  .fromCallable(() -> bf2.multiply(bf1))
-
-                                  // Arrange to run each element in
-                                  // parallel.
-                                  .subscribeOn(Schedulers.parallel()))
+                         .flatMap(bf ->
+                                  multiplyFraction(bf,
+                                                   Schedulers.parallel(),
+                                                   sb)))
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
@@ -176,8 +172,28 @@ public class FluxEx {
             .subscribeOn(scheduler)
 
             // Return a Mono to a multiplied big fraction.
-            .map(reducedFraction -> reducedFraction
-                 // Multiply the big fractions
-                 .multiply(sBigReducedFraction));
+            .flatMap(reducedFraction ->
+                     multiplyFraction(reducedFraction,
+                                      scheduler,
+                                      sb));
+    }
+
+    /**
+     * @return A {@link Mono} that's signaled after the {@link
+     * BigFraction} is multiplied asynchronously in a background
+     * thread from the given {@link Scheduler}
+     */
+    private static Mono<BigFraction> multiplyFraction(BigFraction bigFraction,
+                                                      Scheduler scheduler,
+                                                      StringBuffer sb) {
+        return Mono
+            // Return a Mono to a multiplied big fraction.
+            .fromCallable(() -> bigFraction
+                          // Multiply the big fractions
+                          .multiply(sBigReducedFraction))
+
+            // Perform processing asynchronously in a pool of
+            // background threads.
+            .subscribeOn(scheduler);
     }
 }

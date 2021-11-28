@@ -214,18 +214,13 @@ public class ObservableEx {
      */
     private static Observable<BigFraction> multiplyFractions(BigFraction bigFraction,
                                                              Scheduler scheduler) {
-        return Single
-            // Create/process each BigFraction asynchronously.
-            .fromCallable(() -> bigFraction)
+        return Observable
+            // Perform multiplication in a background thread.
+            .fromCallable(() -> bigFraction
+                          .multiply(sBigReducedFraction))
                      
             // Perform the processing asynchronously in a background
             // thread from the given scheduler.
-            .subscribeOn(scheduler)
-
-            // Perform multiplication in a background thread.
-            .map(bf -> bf.multiply(sBigReducedFraction))
-            
-            // Convert to Observable.
-            .toObservable();
+            .subscribeOn(scheduler);
     }
 }
