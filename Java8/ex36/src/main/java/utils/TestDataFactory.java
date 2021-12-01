@@ -84,7 +84,7 @@ public class TestDataFactory {
                 // Only return up to 'limit' strings.
                 .limit(limit)
 
-                // Collect the results into a string.
+                // Collect the results into a List of CharSequence objects.
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();

@@ -9,14 +9,15 @@ import static java.util.stream.Collectors.*;
 /**
  * This example shows the difference in overhead between combining and
  * collecting results in a parallel stream vs. sequential stream using
- * concurrent and non-concurrent collectors
+ * concurrent and non-concurrent collectors for various types of Java Set
+ * implementations.
  */
 @SuppressWarnings("ALL")
 public class ex36 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 1;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
      * The complete works of William Shakespeare.
@@ -37,13 +38,15 @@ public class ex36 {
         warmUpForkJoinPool();
 
         // Run tests that demonstrate the performance differences
-        // between concurrent and non-concurrent techniques for
-        // collecting results in an stream that is unordered.
+        // between concurrent and non-concurrent collectors when
+        // collecting results in Java sequential and parallel streams
+        // that use unordered HashSets.
         runCollectorTestsUnordered();
 
         // Run tests that demonstrate the performance differences
-        // between concurrent and non-concurrent techniques for
-        // collecting results in a stream that is ordered.
+        // between concurrent and non-concurrent collectors when
+        // collecting results in Java sequential and parallel streams
+        // that use ordered TreeSets.
         runCollectorTestsOrdered();
 
         System.out.println("Exiting the test program");
@@ -82,8 +85,9 @@ public class ex36 {
 
     /**
      * Run tests that demonstrate the performance differences between
-     * concurrent and non-concurrent techniques for collecting results
-     * in a stream that is unordered.
+     * concurrent and non-concurrent collectors when collecting
+     * results in Java sequential and parallel streams that use
+     * unordered HashSets.
      */
     private static void runCollectorTestsUnordered() {
         Arrays
@@ -156,8 +160,9 @@ public class ex36 {
 
     /**
      * Run tests that demonstrate the performance differences between
-     * concurrent and non-concurrent techniques for collecting results
-     * in a stream that is ordered.
+     * concurrent and non-concurrent collectors when collecting
+     * results in Java sequential and parallel streams that use
+     * ordered TreeSets.
      */
     private static void runCollectorTestsOrdered() {
         Arrays
@@ -221,8 +226,6 @@ public class ex36 {
                     timeStreamCollectToConcurrentTreeSet("ArrayList",
                                                          true,
                                                          arrayWords);
-
-
 
                     // Print the results.
                     System.out.println("..printing results\n"

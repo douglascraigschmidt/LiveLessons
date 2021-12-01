@@ -49,7 +49,6 @@ public class ConcurrentTreeSetCollector<T>
      */
     @Override
     public BinaryOperator<ConcurrentHashSet<T>> combiner() {
-        System.out.println("combiner");
         // This method is a no-op.
         return (one, another) -> {
             one.addAll(another);
@@ -79,7 +78,7 @@ public class ConcurrentTreeSetCollector<T>
      */
     @Override
     public Set<Characteristics> characteristics() {
-        return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.CONCURRENT,
+        return Collections.unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT,
                                                       Characteristics.UNORDERED));
     }
 

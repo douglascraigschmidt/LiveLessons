@@ -29,16 +29,15 @@ public class ConcurrentHashSet<E>
      * Constructor initializes the field.
      */
     public ConcurrentHashSet(){
-        mMap = new ConcurrentHashMap<E, Object>();
+        mMap = new ConcurrentHashMap<>();
     }
 
     /**
      * Constructor initializes the field.
      */
     public ConcurrentHashSet(Set<E> set) {
-        mMap = new ConcurrentHashMap<E, Object>();
-        for (E e : set)
-            add(e);
+        mMap = new ConcurrentHashMap<>();
+        this.addAll(set);
     }
 
     /**
