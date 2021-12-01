@@ -1,28 +1,27 @@
-import utils.ConcurrentHashSet;
-import utils.ConcurrentHashSetCollector;
-import utils.RunTimer;
-import utils.TestDataFactory;
+import utils.*;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 
 /**
- * This example shows the difference in overhead/performance for using a
- * parallel spliterator to split a Java {@link LinkedList} and an {@link
- * ArrayList} into chunks.  It also shows the difference in overhead
- * between combining and collecting results in a parallel stream
- * vs. sequential stream using concurrent and non-concurrent
- * collectors, as well as {@code forEach()} and {@code
- * forEachOrdered()}.
+ * This example shows the difference in overhead/performance for using
+ * a parallel spliterator to split a Java {@link LinkedList} and an
+ * {@link ArrayList} into chunks.  It also demonstrates the
+ * performance differences between concurrent and non-concurrent
+ * techniques for joining results in a stream.  In addition, it
+ * demonstrates performance differences between {@code forEach()} and
+ * {@code forEachOrdered()} terminal operations when applied to
+ * accumulate results in a stream.
  */
 @SuppressWarnings("ALL")
 public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 10;
+    private static final int sMAX_ITERATIONS = 1;
 
     /**
      * The complete works of William Shakespeare.
@@ -47,19 +46,14 @@ public class ex14 {
         runSpliteratorTests();
 
         // Run tests that demonstrate performance differences between
-        // concurrent and non-concurrent techniques for joining results in
-        // a stream.
+        // concurrent and non-concurrent techniques for joining
+        // results in a stream.
         runJoiningTests();
 
         // Run tests that demonstrate performance differences between
         // forEach() and forEachOrdered() terminal operations when
         // applied to accumulate results in a stream.
         runForEachTests();
-
-        // Run tests that demonstrate the performance differences
-        // between concurrent and non-concurrent techniques for
-        // collecting results in a stream.
-        runCollectorTests();
 
         System.out.println("Exiting the test program");
     }
@@ -115,10 +109,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                assert arrayWords != null;
+                    assert arrayWords != null;
 
-                // Create a LinkedList from the ArrayList.
-                List<CharSequence> linkedWords =
+                    // Create a LinkedList from the ArrayList.
+                    List<CharSequence> linkedWords =
                         new LinkedList<>(arrayWords);
 
                     // Print a message when the test starts.
@@ -171,10 +165,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                assert arrayWords != null;
+                    assert arrayWords != null;
 
-                // Print a message when the test starts.
-                System.out.println("Starting joining tests for "
+                    // Print a message when the test starts.
+                    System.out.println("Starting joining tests for "
                                        + arrayWords.size() 
                                        + " words..");
 
@@ -226,10 +220,10 @@ public class ex14 {
                                                  "\\s+",
                                                  limit);
 
-                assert arrayWords != null;
+                    assert arrayWords != null;
 
-                // Print a message when the test starts.
-                System.out.println("Starting forEach* tests for "
+                    // Print a message when the test starts.
+                    System.out.println("Starting forEach* tests for "
                                        + arrayWords.size() 
                                        + " words..");
 
@@ -246,80 +240,6 @@ public class ex14 {
                     timeStreamForEachToSet("ArrayList",
                                            true,
                                            arrayWords);
-
-                    // Print the results.
-                    System.out.println("..printing results\n"
-                                       + RunTimer.getTimingResults());
-                });
-    }
-
-    /**
-     * Run tests that demonstrate the performance differences between
-     * concurrent and non-concurrent techniques for collecting results
-     * in a stream.
-     */
-    private static void runCollectorTests() {
-        Arrays
-            // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
-
-            // For each input data size run the following tests.
-            .forEach (limit -> {
-                    // Create a list of strings containing all the
-                    // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
-                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                 // Split input into "words" by
-                                                 // ignoring whitespace.
-                                                 "\\s+",
-                                                 limit);
-
-                assert arrayWords != null;
-
-                // Print a message when the test starts.
-                System.out.println("Starting collector tests for "
-                                       + arrayWords.size() 
-                                       + " words..");
-
-                    // Compute the time required to collect partial
-                    // results into a HashSet in a sequential stream.
-                    // The performance of this test will be better
-                    // than the parallel stream version below since
-                    // there's less overhead collecting the various
-                    // partial results into a HashSet.
-                    timeStreamCollectToSet("ArrayList",
-                                           false,
-                                           arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a HashSet in a parallel stream.
-                    // The performance of this test will be worse than
-                    // the sequential stream version above due to the
-                    // overhead of collecting the various partial
-                    // results into a HashSet in parallel.
-                    timeStreamCollectToSet("ArrayList",
-                                           true,
-                                           arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a
-                    // sequential stream.  The performance of this
-                    // test will be similar to the sequential stream
-                    // version of timeStreamCollectToSet() above.
-                    timeStreamCollectToConcurrentSet("ArrayList",
-                                                     false,
-                                                     arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a parallel
-                    // stream.  The performance of this test will be
-                    // better than the parallel stream version of
-                    // timeStreamCollectToSet() above since there's no
-                    // overhead of collecting the partial results into
-                    // a HashSet in parallel.
-                    timeStreamCollectToConcurrentSet("ArrayList",
-                                                     true,
-                                                     arrayWords);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -467,96 +387,5 @@ public class ex14 {
                             .forEach(uniqueWords::add);
                     }},
                 testName);
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link HashSet} using a non-concurrent collector.  If {@code
-     * parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToSet(String testName,
-                                               boolean parallel,
-                                               List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToSet()";
-
-        // System.out.println("Starting " + testName);
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A "real" application would likely do something
-                    // interesting with the words at this point.
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real" application
-                        // would likely do something interesting with the words at
-                        // this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect unique
-                        // words into a HashSet.
-                        .collect(toCollection(HashSet::new));
-                }},
-            testName);
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link ConcurrentHashSet} using a concurrent collector.  If
-     * {@code parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToConcurrentSet(String testName,
-                                                         boolean parallel,
-                                                         List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToConcurrentSet()";
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real" application
-                        // would likely do something interesting with the words at
-                        // this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect unique
-                        // words into a ConcurrentHashSet.
-                        .collect(ConcurrentHashSetCollector.toSet());
-                }},
-            testName);
     }
 }

@@ -40,7 +40,7 @@ public class MonosCollector<T>
      */
     @Override
     public BiConsumer<List<Mono<T>>, Mono<T>> accumulator() {
-        return Collection::add;
+        return List::add;
     }
 
     /**

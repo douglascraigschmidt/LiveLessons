@@ -75,12 +75,14 @@ Here's an overview of what's currently included in these examples:
          Spliterators and streams to traverse each word in a list
          containing a quote from a famous Shakespeare play.
 
-. ex14 - This example shows the difference in overhead for using a
-         parallel spliterator to split a Java LinkedList and an
-         ArrayList into chunks.  It also shows the difference in
-         overhead between combining and collecting LinkedList results
-         in a parallel stream vs. sequential stream using concurrent
-         and non-concurrent collectors.
+. ex14 - This example shows the difference in overhead/performance for
+          using a parallel spliterator to split a Java LinkedList and
+          an ArrayList into chunks.  It also demonstrates the
+          performance differences between concurrent and
+          non-concurrent techniques for joining results in a stream.
+          In addition, it demonstrates performance differences between
+          forEach() and forEachOrdered() terminal operations when
+          applied to accumulate results in a stream.
 
 . ex15 - This example shows the limitations of using inherently
          sequential Java 8 streams operations (such as iterate() and
@@ -188,3 +190,5 @@ Here's an overview of what's currently included in these examples:
          intermediate operation doesn't scale in a Java parallel
          stream and then shows how a combination of reduce() and
          Stream.concat() fixes this problem.
+
+. ex36 - 

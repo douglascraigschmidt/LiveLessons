@@ -92,8 +92,9 @@ public class FluxEx {
                          
                          // Perform the Project Reactor
                          // flatMap() concurrency idiom.
-                         .flatMap(bf ->
-                                  multiplyFraction(bf,
+                         .flatMap(bf2 ->
+                                  multiplyFraction(bf1,
+                                                   bf2,
                                                    Schedulers.parallel(),
                                                    sb)))
 
@@ -174,6 +175,7 @@ public class FluxEx {
             // Return a Mono to a multiplied big fraction.
             .flatMap(reducedFraction ->
                      multiplyFraction(reducedFraction,
+                                      sBigReducedFraction,
                                       scheduler,
                                       sb));
     }
@@ -183,14 +185,15 @@ public class FluxEx {
      * BigFraction} is multiplied asynchronously in a background
      * thread from the given {@link Scheduler}
      */
-    private static Mono<BigFraction> multiplyFraction(BigFraction bigFraction,
+    private static Mono<BigFraction> multiplyFraction(BigFraction bf1,
+                                                      BigFraction bf2,
                                                       Scheduler scheduler,
                                                       StringBuffer sb) {
         return Mono
             // Return a Mono to a multiplied big fraction.
-            .fromCallable(() -> bigFraction
+            .fromCallable(() -> bf1
                           // Multiply the big fractions
-                          .multiply(sBigReducedFraction))
+                          .multiply(bf2))
 
             // Perform processing asynchronously in a pool of
             // background threads.

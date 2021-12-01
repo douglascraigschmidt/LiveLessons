@@ -33,6 +33,15 @@ public class ConcurrentHashSet<E>
     }
 
     /**
+     * Constructor initializes the field.
+     */
+    public ConcurrentHashSet(Set<E> set) {
+        mMap = new ConcurrentHashMap<E, Object>();
+        for (E e : set)
+            add(e);
+    }
+
+    /**
      * Returns the number of elements in this set.
      *
      * @return the number of elements in this set.

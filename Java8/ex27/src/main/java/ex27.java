@@ -121,7 +121,7 @@ public class ex27 {
         randomDelay();
 
         // Debugging print.
-        print("Rate comparision between " 
+        print("Rate comparison between "
               + source
               + " and "
               + destination);

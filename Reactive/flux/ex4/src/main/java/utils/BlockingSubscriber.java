@@ -34,7 +34,7 @@ public class BlockingSubscriber<T>
     /**
      * The consumer to invoke on complete signal.
      */
-    private final Runnable mCompleteConsumer;
+    private final Runnable mCompleteRunnable;
 
     /**
      * The strictly positive number of elements
@@ -54,12 +54,12 @@ public class BlockingSubscriber<T>
      */
     public BlockingSubscriber(Consumer<? super T> consumer,
                               Consumer<? super Throwable> errorConsumer,
-                              Runnable completeConsumer,
+                              Runnable completeRunnable,
                               long n) {
         mLatch = new CountDownLatch(1);
         mConsumer = consumer;
         mErrorConsumer = errorConsumer;
-        mCompleteConsumer = completeConsumer;
+        mCompleteRunnable = completeRunnable;
         mN = n;
     }
 
@@ -120,7 +120,7 @@ public class BlockingSubscriber<T>
     @Override
     public void onComplete() {
         // Run the completeConsumer's hook method.
-        mCompleteConsumer.run();
+        mCompleteRunnable.run();
 
         // Release the latch.
         mLatch.countDown();

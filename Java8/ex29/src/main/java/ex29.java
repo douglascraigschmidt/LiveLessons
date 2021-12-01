@@ -63,7 +63,7 @@ public class ex29 {
 
         bigFractionsF
             // Sort the list in parallel and print the results.
-            .thenCompose(this::sortAndPrintList)
+            .thenCompose(this::sortAndPrintListAsync)
 
             // Trigger all the processing and block until it's all done.
             .join();
@@ -176,9 +176,9 @@ public class ex29 {
             // Run this action in a common fork-join pool thread to
             // reduce the bigFraction.
             .supplyAsync(() -> {
-                    BigFraction bf = BigFraction.reduce(bigFraction);
-                    print("    reduceBigFractionAsync() = " + bf);
-                    return bf;
+                    BigFraction rbf = BigFraction.reduce(bigFraction);
+                    print("    reduceBigFractionAsync() = " + rbf);
+                    return rbf;
                 });
     }
 
@@ -198,7 +198,7 @@ public class ex29 {
      *      * @return A {@link CompletableFuture} to a sorted {@link List}
      *      *         of {@link BigFraction} objects
      */
-    private CompletableFuture<Void> sortAndPrintList(List<BigFraction> list) {
+    private CompletableFuture<Void> sortAndPrintListAsync(List<BigFraction> list) {
         // This implementation uses quick sort to order the list.
         CompletableFuture<List<BigFraction>> quickSortF = CompletableFuture
             // Perform quick sort asynchronously.
@@ -217,13 +217,13 @@ public class ex29 {
     }
 
     /**
-     * Print the contents of the {@code sortedList}.
+     * Print the contents of the {@code list}.
      *
-     * @param sortedList The sorted {@link List}
+     * @param list The sorted {@link List}
      */
-    private void printList(List<BigFraction> sortedList) {
+    private void printList(List<BigFraction> list) {
             // Print the results as mixed fractions.
-            sortedList
+            list
                 .forEach(fraction ->
                          print("     "
                                + fraction.toMixedString()));

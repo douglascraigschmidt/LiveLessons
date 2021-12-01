@@ -11,12 +11,12 @@ import java.util.stream.Collector;
 
 /**
  * A concurrent collector that accumulates input elements of type T
- * into a ConcurrentHashSet.  
+ * into a {@link ConcurrentHashSet}.
  */
 public class ConcurrentHashSetCollector<T>
        implements Collector<T,
-        ConcurrentHashSet<T>,
-        ConcurrentHashSet<T>> {
+                            ConcurrentHashSet<T>,
+                            ConcurrentHashSet<T>> {
     /**
      * A factory method that creates and returns a new mutable result
      * container of type ConcurrentHashSet that holds all the elements
@@ -61,7 +61,12 @@ public class ConcurrentHashSetCollector<T>
      */
     @Override
     public Function<ConcurrentHashSet<T>, ConcurrentHashSet<T>> finisher() {
-        return null;
+        return c -> {
+            System.out.println("Size of set = " + c.size() + " " + c);
+            return c;
+        };
+
+        // return null;
     }
 
     /**
@@ -72,12 +77,11 @@ public class ConcurrentHashSetCollector<T>
      * @return An immutable set of collector characteristics, which in
      * this case is [UNORDERED|CONCURRENT|IDENTITY_FINISH].
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.CONCURRENT,
-                                                      Collector.Characteristics.UNORDERED,
-                                                      Collector.Characteristics.IDENTITY_FINISH));
+                                                      Collector.Characteristics.UNORDERED));
+                                               // Collector.Characteristics.IDENTITY_FINISH));
     }
 
     /**
