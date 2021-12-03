@@ -1,6 +1,7 @@
 import utils.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -9,8 +10,8 @@ import static java.util.stream.Collectors.*;
 /**
  * This example shows the difference in overhead between combining and
  * collecting results in a parallel stream vs. sequential stream using
- * concurrent and non-concurrent collectors for various types of Java Set
- * implementations.
+ * concurrent and non-concurrent collectors for various types of Java
+ * Set implementations.
  */
 @SuppressWarnings("ALL")
 public class ex36 {
@@ -367,7 +368,8 @@ public class ex36 {
 
                         // Trigger intermediate processing and collect unique
                         // words into a ConcurrentHashSet.
-                        .collect(ConcurrentHashSetCollector.toSet());
+                        .collect(ConcurrentSetCollector.toSet(Function.identity(),
+                                                              ConcurrentHashSet::new));
                 }},
             testName);
     }
@@ -410,7 +412,8 @@ public class ex36 {
 
                         // Trigger intermediate processing and collect
                         // unique words into a TreeSet.
-                        .collect(ConcurrentTreeSetCollector.toSet());
+                        .collect(ConcurrentSetCollector.toSet(Function.identity(),
+                                                              TreeSet::new));
                 }},
             testName);
     }

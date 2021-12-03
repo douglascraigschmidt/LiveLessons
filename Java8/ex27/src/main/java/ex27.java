@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * This example shows how to apply Java 9 timeouts with the Java
- * completable futures framework.
+ * This example shows how to apply timeouts with the Java completable
+ * futures framework features available in Java 9.
  */
 public class ex27 {
     /**
