@@ -1,11 +1,13 @@
-import utils.*;
+import utils.ConcurrentHashSet;
+import utils.ConcurrentSetCollector;
+import utils.RunTimer;
+import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the difference in overhead between combining and
@@ -368,8 +370,7 @@ public class ex36 {
 
                         // Trigger intermediate processing and collect unique
                         // words into a ConcurrentHashSet.
-                        .collect(ConcurrentSetCollector.toSet(Function.identity(),
-                                                              ConcurrentHashSet::new));
+                        .collect(ConcurrentSetCollector.toSet(ConcurrentHashSet::new));
                 }},
             testName);
     }
@@ -412,8 +413,7 @@ public class ex36 {
 
                         // Trigger intermediate processing and collect
                         // unique words into a TreeSet.
-                        .collect(ConcurrentSetCollector.toSet(Function.identity(),
-                                                              TreeSet::new));
+                        .collect(ConcurrentSetCollector.toSet(TreeSet::new));
                 }},
             testName);
     }

@@ -1,23 +1,13 @@
-import utils.Memoizer;
 import utils.Options;
 import utils.RunTimer;
-import utils.StampedLockHashMap;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * This example showcases and benchmarks the use of a Java
@@ -91,9 +81,8 @@ public class ex30 {
      */
     private void run() {
         // Create and time the use of a concurrent hash map.
-        Function<Integer, Integer> concurrentHashMapMemoizer =
-            timeTest(Options.makeMemoizer(this::isPrime),
-                     "concurrentHashMapMemoizer");
+        timeTest(Options.makeMemoizer(this::isPrime),
+                 "concurrentHashMapMemoizer");
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -104,16 +93,14 @@ public class ex30 {
      *
      * @param memoizer The memoizer used to cache the prime candidates.
      * @param testName The name of the test.
-     * @return The memoizer updated during the test.
      */
-    private Function<Integer, Integer> timeTest(Function<Integer, Integer> memoizer,
-                                                String testName) {
-        // Return the memoizer updated during the test.
-        return RunTimer
+    private void timeTest(Function<Integer, Integer> memoizer,
+                          String testName) {
+        RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
-                     // Run the test using the given memoizer.
-                     runTest(memoizer, testName),
+                         // Run the test using the given memoizer.
+                         runTest(memoizer, testName),
                      testName);
     }
 

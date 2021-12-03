@@ -2,6 +2,7 @@ package utils;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 /**
  * This class simplifies the computation of execution times.
@@ -10,7 +11,7 @@ public class RunTimer {
     /**
      * Keep track of which SearchStreamGang performed the best.
      */
-    private static Map<String, Long> mResultsMap = new HashMap<>();
+    private static final Map<String, Long> mResultsMap = new HashMap<>();
 
     /**
      * Keeps track of how long the test has run.
@@ -83,25 +84,25 @@ public class RunTimer {
             // Get the entrySet for the mResultsMap.
             .entrySet()
 
-            // Convert the entrySet into a stream.
-            .stream()
+            // Convert the entrySet into a parallel stream.
+            .parallelStream()
 
             // Create a SimpleImmutableEntry containing the timing
             // results (value) followed by the test name (key).
             .map(entry
-                 -> new AbstractMap.SimpleImmutableEntry<>
-                 (entry.getValue(),
-                  entry.getKey()))
+                 -> new SimpleImmutableEntry<>(entry.getValue(),
+                                               entry.getKey()))
 
-            // Sort the stream by the timing results (key).
-            .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
+            // Collect the results into a (sorted) TreeMap.
+            .collect(ConcurrentMapCollector.toMap(SimpleImmutableEntry::getKey,
+                                                  SimpleImmutableEntry::getValue,
+                                                  TreeMap::new))
 
-            // Append the entries in the sorted stream.
-            .forEach(entry -> stringBuffer
-                     .append("")
-                     .append(String.format("%6d", entry.getKey()))
+            // Append the entries in the sorted map.
+            .forEach((key, value) -> stringBuffer
+                     .append(String.format("%6d", key))
                      .append(" msecs: ")
-                     .append(entry.getValue())
+                     .append(value)
                      .append("\n"));
 
         // Clear out the results map.

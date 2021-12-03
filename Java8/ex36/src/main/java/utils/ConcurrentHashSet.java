@@ -37,6 +37,8 @@ public class ConcurrentHashSet<E>
      */
     public ConcurrentHashSet(Set<E> set) {
         mMap = new ConcurrentHashMap<>();
+
+        // Add all the elements from the set param to mMap.
         this.addAll(set);
     }
 

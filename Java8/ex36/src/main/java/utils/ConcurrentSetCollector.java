@@ -12,15 +12,10 @@ import java.util.stream.Collector;
  * {@code T} into a {@link ConcurrentHashSet} and the returns a type
  * {@link S} that extends {@link Set}.
  */
-public class ConcurrentSetCollector<T, E, S extends Set<E>>
+public class ConcurrentSetCollector<T, S extends Set<T>>
        implements Collector<T,
-                            Set<E>,
+                            Set<T>,
                             S> {
-    /**
-     * A {@link Function} that maps the key {@code E}.
-     */
-    private final Function<? super T, ? extends E> mKeyMapper;
-
     /**
      * A {@link Supplier} that returns a new, empty {@code Set} into
      * which the results will be inserted.
@@ -32,13 +27,10 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
      * {@link Set} whose keys are the result of applying the provided
      * mapping functions to the input elements.
      * 
-     * @param keyMapper a mapping function to produce keys
      * @param mapSupplier a supplier that returns a new, empty {@link
      *                    Set} into which the results will be inserted
      */
-    public ConcurrentSetCollector(Function<? super T, ? extends E> keyMapper,
-                                  Supplier<S> mapSupplier) {
-        mKeyMapper = keyMapper;
+    public ConcurrentSetCollector(Supplier<S> mapSupplier) {
         mSetSupplier = mapSupplier;
     }
 
@@ -50,7 +42,7 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<Set<E>> supplier() {
+    public Supplier<Set<T>> supplier() {
         return ConcurrentHashSet::new;
     }
 
@@ -60,10 +52,9 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
      * @return a function that folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<Set<E>, T> accumulator() {
+    public BiConsumer<Set<T>, T> accumulator() {
         // Add element to the map.
-        return (Set<E> set, T element) -> set
-            .add(mKeyMapper.apply(element));
+        return Set::add;
     }
 
     /**
@@ -72,7 +63,7 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
      * @return A {@link BinaryOperator} that merges two maps together
      */
     @Override
-    public BinaryOperator<Set<E>> combiner() {
+    public BinaryOperator<Set<T>> combiner() {
         // Merge the two sets together.
         return (first, second) -> {
             first.addAll(second);
@@ -88,7 +79,7 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
      * @return A {@link Set} containing the contents of the stream
      */
     @Override
-    public Function<Set<E>, S> finisher() {
+    public Function<Set<T>, S> finisher() {
         return set -> {
             // Create the appropriate map.
             S newSet = mSetSupplier.get();
@@ -127,25 +118,15 @@ public class ConcurrentSetCollector<T, E, S extends Set<E>>
 
     /**
      * This static factory method creates a {@link Collector} that
-     * accumulates elements into a {@link Set} whose keys and values
-     * are the result of applying the provided mapping functions to
-     * the input elements.
+     * accumulates elements into a {@link Set}.
      * 
-     * @param keyMapper a mapping function to produce keys
      * @param mapSupplier a supplier that returns a new, empty {@link
      *                    Set} into which the results will be inserted
-     * @return a {@link Collector} that collects elements into a
-     *        {@link Set} whose keys are the result of applying a key
-     *        mapping function to the input elements and whose values
-     *        are the result of applying a value mapping function to
-     *        all input elements equal to the key
+     * @return A {@link Collector} that collects elements into a {@link Set}
      */
-    public static <T, E, S extends Set<E>> Collector<T, ?, S>
-    toSet(Function<? super T, ? extends E> keyMapper,
-          Supplier<S> mapSupplier) {
-        return new ConcurrentSetCollector<>
-            (keyMapper,
-             mapSupplier);
+    public static <T, S extends Set<T>> Collector<T, ?, S>
+    toSet(Supplier<S> mapSupplier) {
+        return new ConcurrentSetCollector<>(mapSupplier);
     }
 }
 
