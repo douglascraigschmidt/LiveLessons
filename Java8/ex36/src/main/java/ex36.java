@@ -41,6 +41,12 @@ public class ex36 {
         "completeWorksOfShakespeare.txt";
 
     /**
+     * A regular expression that matches whitespace and punctuation.
+     */
+    private static final String sWHITESPACE_AND_PUNCTUATION = 
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+
+    /**
      * Main entry point into the tests program.
      */
     static public void main(String[] argv) {
@@ -109,7 +115,7 @@ public class ex36 {
                         .getInput(sSHAKESPEARE_DATA_FILE,
                                   // Split input into "words" by
                                   // ignoring whitespace.
-                                  "\\s+",
+                                  sWHITESPACE_AND_PUNCTUATION,
                                   limit);
 
                     // Print a message when the test starts.

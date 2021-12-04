@@ -30,6 +30,12 @@ public class ex14 {
         "completeWorksOfShakespeare.txt";
 
     /**
+     * A regular expression that matches whitespace and punctuation.
+     */
+    private static final String sWHITESPACE_AND_PUNCTUATION = 
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+
+    /**
      * Main entry point into the tests program.
      */
     static public void main(String[] argv) {
@@ -66,10 +72,11 @@ public class ex14 {
         System.out.println("\n++Warming up the fork/join pool\n");
 
         List<CharSequence> words = Objects
-            .requireNonNull(TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                     // Split input into "words"
-                                                     // by ignoring whitespace.
-                                                     "\\s+"));
+            .requireNonNull(TestDataFactory
+                            .getInput(sSHAKESPEARE_DATA_FILE,
+                                      // Split input into "words" by
+                                      // ignoring whitespace.
+                                      sWHITESPACE_AND_PUNCTUATION));
         // Create an empty list.
         List<String> list = new ArrayList<>();
 

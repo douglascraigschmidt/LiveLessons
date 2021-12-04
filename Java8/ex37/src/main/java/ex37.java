@@ -33,12 +33,6 @@ public class ex37 {
     }
     
     /**
-     * A regular expression that matches whitespace and punctuation.
-     */
-    private static final String sWHITESPACE_AND_PUNCTUATION = 
-        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
-
-    /**
      * Number of iterations to run the timing tests.
      */
     private static final int sMAX_ITERATIONS = 10;
@@ -48,6 +42,12 @@ public class ex37 {
      */
     private static final String sSHAKESPEARE_DATA_FILE =
         "completeWorksOfShakespeare.txt";
+
+    /**
+     * A regular expression that matches whitespace and punctuation.
+     */
+    private static final String sWHITESPACE_AND_PUNCTUATION = 
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
 
     /**
      * Main entry point into the tests program.
