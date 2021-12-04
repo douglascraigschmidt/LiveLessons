@@ -33,6 +33,12 @@ public class ex37 {
     }
     
     /**
+     * A regular expression that matches whitespace and punctuation.
+     */
+    private static final String sWHITESPACE_AND_PUNCTUATION = 
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+
+    /**
      * Number of iterations to run the timing tests.
      */
     private static final int sMAX_ITERATIONS = 10;
@@ -117,8 +123,9 @@ public class ex37 {
                     List<String> arrayWords = TestDataFactory
                         .getInput(sSHAKESPEARE_DATA_FILE,
                                   // Split input into "words" by
-                                  // ignoring whitespace and punctuation.
-                                  "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+",
+                                  // ignoring whitespace and
+                                  // punctuation.
+                                  sWHITESPACE_AND_PUNCTUATION,
                                   limit);
 
                     // Print a message when the test starts.
