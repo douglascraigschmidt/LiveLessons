@@ -8,11 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 /**
  * This example shows the difference in overhead between collecting
@@ -36,7 +36,7 @@ public class ex38 {
     private static final int sMAX_ITERATIONS = 10;
 
     /**
-     *
+     * Create a {@link List} of random {@link Integer} objects.
      */
     static List<Integer> sRandomNumbers = new Random()
         // Generate "count" random large ints
@@ -50,15 +50,33 @@ public class ex38 {
         // Trigger intermediate operations and collect into list.
         .collect(toList());
 
+    /**
+     * Create a {@link Comparator} that's used by the
+     * {@link TreeMap} to order the two-element arrays
+     * containing the parameters to the GCD method.
+     */
     static class CompareIntegers implements Comparator {
+        /**
+         * @return 0 if the arrays are equal, < 0 if the
+         * first array is less than the second, and > 0 if
+         * the first array is greater than the second
+         */
         public int compare(Object obj1, Object obj2) {
+            // Cast the params to the appropriate type.
             Integer[] t1 = (Integer[]) obj1;
             Integer[] t2 = (Integer[]) obj2;
 
+            // Subtract the second element from the
+            // first element.
             int r1 = t1[0] - t2[0];
+
+            // If the first comparison != 0 then
+            // return the result.
             if (r1 != 0)
                 return r1;
             else
+                // Continue on to compare the
+                // second elements.
                 return t1[1] - t2[1];
         }
     }
@@ -149,10 +167,11 @@ public class ex38 {
                         .apply("non-concurrent " + testType,
                                false,
                                randomNumbers,
-                               toMap(keyMapper,
-                                     valueMapper,
-                                     (o1, o2) -> o1,
-                                     mapSupplier));
+                               Collectors
+                               .toMap(keyMapper,
+                                      valueMapper,
+                                      (o1, o2) -> o1,
+                                      mapSupplier));
 
                     // Collect results into a parallel stream via a
                     // non-concurrent collector.
@@ -160,10 +179,11 @@ public class ex38 {
                         .apply("non-concurrent " + testType,
                                true,
                                randomNumbers,
-                               toMap(keyMapper,
-                                     valueMapper,
-                                     (o1, o2) -> o1,
-                                     mapSupplier));
+                               Collectors
+                               .toMap(keyMapper,
+                                      valueMapper,
+                                      (o1, o2) -> o1,
+                                      mapSupplier));
 
                     // Collect results into a sequential stream via a
                     // concurrent collector.
@@ -196,7 +216,7 @@ public class ex38 {
     /**
      * Determines how long it takes to lowercase a {@link List} of
      * {@code words} and collect the results using the given {@link
-     * Collector}.  
+     * Collector}.
      *
      * @param testType The type of test, i.e., HashMap or TreeMap
      * @param parallel If true then a parallel stream is used, else a
@@ -243,9 +263,43 @@ public class ex38 {
                             // collect GCDResults into the given
                             // collector.
                             .collect(collector);
+
+                        // printResults(resultMap, testName);
                     }},
             testName);
         return null;
+    }
+
+    /**
+     * Print the {@code result} of the {@code testName}.
+     *
+     * @param result The results of applying the test
+     * @param testName The name of the test.
+     */
+    private static void printResults(Map<Integer[], Integer> results,
+                                     String testName) {
+        // Convert the first 10 elements of the Map contents into a
+        // String.
+        var output = results
+            .entrySet()
+            .stream()
+            .limit(10)
+            .map(entry ->
+                 "["
+                 + entry.getKey()[0]
+                 + ","
+                 + entry.getKey()[1]
+                 + "]="
+                 + entry.getValue())
+            .collect(joining("|"));
+
+        // Print the results.
+        System.out.println("Results for "
+                           + testName
+                           + " of size "
+                           + results.size()
+                           + " was:\n"
+                           + output);
     }
 
     /**
@@ -255,8 +309,13 @@ public class ex38 {
      */
     private static List<Integer> getRandomData(int count) {
         return sRandomNumbers
+            // Convert the List into a Stream.
             .stream()
+
+            // Limit the size of the stream by 'count'.
             .limit(count)
+
+            // Collect the results into a List.
             .collect(toList());
     }
 
@@ -279,12 +338,15 @@ public class ex38 {
      * and {@code number2}.
      */
     private static int gcd(int number1, int number2) {
-        for (int temp = 0; number2 != 0; ) {
-            temp = number1;
-            number2 = number1 % number2;
-            number1 = temp;
+        for (;;) {
+            int remainder = number1 % number2;
+            if (remainder == 0){
+                return number2;
+            } else{
+                number1 = number2;
+                number2 = remainder;
+            }
         }
-        return number1;
     }
 
     /**
