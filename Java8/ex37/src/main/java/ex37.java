@@ -3,11 +3,11 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -97,9 +97,9 @@ public class ex37 {
      *                    non-concurrent {@link Map}
      * @param concurrentMapSupplier A {@link Supplier} that creates
      *                              the given concurrent {@link Map}
-     * @param collect A {@link Function} that performs the test using
-     *                either a non-concurrent or concurrent {@link
-     *                Collector
+     * @param collect A {@link QuadFunction} that performs the test
+     *                using either a non-concurrent or concurrent
+     *                {@link Collector}
      */
     private static void runMapCollectorTests
         (String testType,
@@ -141,6 +141,7 @@ public class ex37 {
                         .apply("non-concurrent " + testType,
                                false,
                                arrayWords,
+                               Collectors.
                                toMap(keyMapper,
                                      valueMapper,
                                      (o1, o2) -> o1 + o2,
@@ -152,10 +153,11 @@ public class ex37 {
                         .apply("non-concurrent " + testType,
                                true,
                                arrayWords,
-                               toMap(keyMapper,
-                                     valueMapper,
-                                     (o1, o2) -> o1 + o2,
-                                     mapSupplier));
+                               Collectors
+                               .toMap(keyMapper,
+                                      valueMapper,
+                                      (o1, o2) -> o1 + o2,
+                                      mapSupplier));
 
                     // Collect results into a sequential stream via a
                     // concurrent collector.
