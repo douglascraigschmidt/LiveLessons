@@ -3,6 +3,7 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -221,7 +222,7 @@ public class ex37 {
                         // works.
                         Map<String, Integer> uniqueWords = wordStream
                             // Map each string to lower case.
-                            .map(charSeq -> charSeq.toString().toLowerCase())
+                            .map(word -> word.toString().toLowerCase())
 
                             // Trigger intermediate processing and
                             // collect the unique words into the given
@@ -295,7 +296,7 @@ public class ex37 {
                         // Uppercase each string.  A "real"
                         // application would likely do something
                         // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toUpperCase())
+                        .map(word -> word.toString().toUpperCase())
 
                         // Collect the stream into a list.
                         .collect(toList()));

@@ -201,7 +201,7 @@ public class ex36 {
                         // works.
                         Set<CharSequence> uniqueWords = wordStream
                             // Map each string to lower case.
-                            .map(charSeq -> charSeq.toString().toLowerCase())
+                            .map(word -> word.toString().toLowerCase())
 
                             // Trigger intermediate processing and
                             // collect the unique words into the given
@@ -238,7 +238,7 @@ public class ex36 {
                         // Uppercase each string.  A "real"
                         // application would likely do something
                         // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toUpperCase())
+                        .map(word -> word.toString().toUpperCase())
 
                         // Collect the stream into a list.
                         .collect(toList()));
