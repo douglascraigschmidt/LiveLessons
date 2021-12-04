@@ -9,12 +9,12 @@ import java.util.stream.Collector;
 
 /**
  * A concurrent collector that accumulates input elements of type
- * {@code T} into a {@link ConcurrentHashSet} and the returns a type
+ * {@code E} into a {@link ConcurrentHashSet} and the returns a type
  * {@link S} that extends {@link Set}.
  */
-public class ConcurrentSetCollector<T, S extends Set<T>>
-       implements Collector<T,
-                            Set<T>,
+public class ConcurrentSetCollector<E, S extends Set<E>>
+       implements Collector<E,
+                            Set<E>,
                             S> {
     /**
      * A {@link Supplier} that returns a new, empty {@code Set} into
@@ -42,7 +42,7 @@ public class ConcurrentSetCollector<T, S extends Set<T>>
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<Set<T>> supplier() {
+    public Supplier<Set<E>> supplier() {
         return ConcurrentHashSet::new;
     }
 
@@ -52,7 +52,7 @@ public class ConcurrentSetCollector<T, S extends Set<T>>
      * @return a function that folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<Set<T>, T> accumulator() {
+    public BiConsumer<Set<E>, E> accumulator() {
         // Add element to the map.
         return Set::add;
     }
@@ -63,7 +63,7 @@ public class ConcurrentSetCollector<T, S extends Set<T>>
      * @return A {@link BinaryOperator} that merges two maps together
      */
     @Override
-    public BinaryOperator<Set<T>> combiner() {
+    public BinaryOperator<Set<E>> combiner() {
         // Merge the two sets together.
         return (first, second) -> {
             first.addAll(second);
@@ -79,7 +79,7 @@ public class ConcurrentSetCollector<T, S extends Set<T>>
      * @return A {@link Set} containing the contents of the stream
      */
     @Override
-    public Function<Set<T>, S> finisher() {
+    public Function<Set<E>, S> finisher() {
         return set -> {
             // Create the appropriate map.
             S newSet = mSetSupplier.get();
@@ -114,6 +114,11 @@ public class ConcurrentSetCollector<T, S extends Set<T>>
         return Collections
             .unmodifiableSet(EnumSet.of(Collector.Characteristics.CONCURRENT,
                                         Collector.Characteristics.UNORDERED));
+    }
+
+    @Override
+    public String toString() {
+        return "ConcurrentSetCollector<>";
     }
 
     /**

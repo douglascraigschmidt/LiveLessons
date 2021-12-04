@@ -228,7 +228,7 @@ public class ex2 {
     }
 
     /**
-     * Compute whether {@code primeCandidate} is a prime number or not.
+     * Compute the GCD of the two-element array {@code integers}.
      *
      * @param integers A two-element array containing the numbers to
      *                 compute the GCD

@@ -14,4 +14,3 @@ public record PrimeResult(
      * Result of the isPrime() method.
      */
     int smallestFactor) {}
-

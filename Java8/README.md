@@ -191,4 +191,18 @@ Here's an overview of what's currently included in these examples:
          stream and then shows how a combination of reduce() and
          Stream.concat() fixes this problem.
 
-. ex36 - 
+. ex36 - This program creates various Set objects containing the
+         unique words appearing in the complete work of William
+         Shapespeare.  It also shows the difference in overhead
+         between collecting results in a parallel stream vs.
+         sequential stream using concurrent and non-concurrent
+         collectors for various types of Java Set implementations,
+         including HashSet and TreeSet.
+
+. ex37 - This program creates various Map objects that associate
+         unique words in the complete works of William Shakespeare
+         with the number of times each word appears.  It also shows
+         the difference in overhead between collecting results in a
+         parallel stream vs. sequential stream using concurrent and
+         non-concurrent collectors for various types of Java Map
+         implementations, including HashMap and TreeMap.

@@ -1,13 +1,13 @@
 package utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,6 +25,7 @@ public class TestDataFactory {
      * {@code splitter} regular expression and return a list of
      * strings.
      */
+    @NotNull
     public static List<CharSequence> getInput(String filename,
                                               String splitter) {
         try {

@@ -4,19 +4,31 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example shows the difference in overhead between combining and
- * collecting results in a parallel stream vs. sequential stream using
- * concurrent and non-concurrent collectors for various types of Java
- * Set implementations.
+ * This program creates various {@link Set} objects containing the
+ * unique words appearing in the complete work of William Shapespeare.
+ * It also shows the difference in overhead between collecting results
+ * in a parallel stream vs. sequential stream using concurrent and
+ * non-concurrent collectors for various types of Java {@link Set}
+ * implementations, including {@link HashSet} and {@link TreeSet}.
  */
 @SuppressWarnings("ALL")
 public class ex36 {
+    /**
+     * This interface converts four params to a result type.
+     */
+    @FunctionalInterface
+    interface QuadFunction<P1, P2, P3, P4, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
+    }
+    
     /**
      * Number of iterations to run the timing tests.
      */
@@ -43,16 +55,161 @@ public class ex36 {
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent collectors when
         // collecting results in Java sequential and parallel streams
-        // that use unordered HashSets.
-        runCollectorTestsUnordered();
+        // that use HashSets, which are unordered.
+        runSetCollectorTests("HashSet",
+                             HashSet::new,
+                             ConcurrentHashSet::new,
+                             ex36::timeStreamCollect);
 
         // Run tests that demonstrate the performance differences
         // between concurrent and non-concurrent collectors when
         // collecting results in Java sequential and parallel streams
-        // that use ordered TreeSets.
-        runCollectorTestsOrdered();
+        // that use TreeSets, which are ordered.
+        runSetCollectorTests("TreeSet",
+                             TreeSet::new,
+                             TreeSet::new,
+                             ex36::timeStreamCollect);
 
         System.out.println("Exiting the test program");
+    }
+
+    /**
+     * Run tests that demonstrate the performance differences between
+     * concurrent and non-concurrent collectors when collecting
+     * results in Java sequential and parallel streams for various
+     * types of Java {@link Set} types.
+     * 
+     * @param testType The type of test, i.e., HashSet or TreeSet
+     * @param setSupplier A {@link Supplier} that creates the given
+     *                    non-concurrent {@link Set}
+     * @param concurrentSetSupplier A {@link Supplier} that creates
+     *                              the given concurrent {@link Set}
+     * @param collect A {@link Function} that performs the test using
+     *                either a non-concurrent or concurrent {@link
+     *                Collector
+     */
+    private static void runSetCollectorTests
+        (String testType,
+         Supplier<Set<CharSequence>> setSupplier,
+         Supplier<Set<CharSequence>> concurrentSetSupplier,
+         QuadFunction<String,
+                      Boolean,
+                      List<CharSequence>,
+                      Collector<CharSequence, ?, Set<CharSequence>>,
+                      Void> collect) {
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1000, 10000, 100000, 1000000)
+
+            // Run the tests for various input data sizes.
+            .forEach (limit -> {
+                    // Create a List of CharSequences containing
+                    // 'limit' words from the works of Shakespeare.
+                    List<CharSequence> arrayWords = TestDataFactory
+                        .getInput(sSHAKESPEARE_DATA_FILE,
+                                  // Split input into "words" by
+                                  // ignoring whitespace.
+                                  "\\s+",
+                                  limit);
+
+                    // Print a message when the test starts.
+                    System.out.println("Starting "
+                                       + testType
+                                       + " test for "
+                                       + arrayWords.size() 
+                                       + " words..");
+
+                    // Collect results into a sequential stream via a
+                    // non-concurrent collector.
+                    collect
+                        .apply("non-concurrent " + testType,
+                               false,
+                               arrayWords,
+                               toCollection(setSupplier));
+
+                    // Collect results into a parallel stream via a
+                    // non-concurrent collector.
+                    collect
+                        .apply("non-concurrent " + testType,
+                               true,
+                               arrayWords,
+                               toCollection(setSupplier));
+
+                    // Collect results into a sequential stream via a
+                    // concurrent collector.
+                    collect
+                        .apply("concurrent " + testType,
+                               false,
+                               arrayWords,
+                               ConcurrentSetCollector
+                               .toSet(concurrentSetSupplier));
+
+                    // Collect results into a parallel stream via a
+                    // concurrent collector.
+                    collect
+                        .apply("concurrent " + testType,
+                               true,
+                               arrayWords,
+                               ConcurrentSetCollector
+                               .toSet(concurrentSetSupplier));
+
+                    // Print the results.
+                    System.out.println("..printing results\n"
+                                       + RunTimer.getTimingResults());
+                });
+    }
+
+    /**
+     * Determines how long it takes to lowercase a {@link List} of
+     * {@code words} and collect the results using the given {@link
+     * Collector}.  
+     *
+     * @param testType The type of test, i.e., HashSet or TreeSet
+     * @param parallel If true then a parallel stream is used, else a
+     *                 sequential stream is used
+     * @param words A {@link List} of words to lowercase
+     * @param collector The {@link Collector} used to combine the
+     *                  results
+     */
+    private static Void timeStreamCollect
+        (String testType,
+         boolean parallel,
+         List<CharSequence> words,
+         Collector<CharSequence, ?, Set<CharSequence>> collector) {
+        // Run the garbage collector before each test.
+        System.gc();
+
+        String testName =
+            (parallel ? " parallel" : " sequential")
+            + " "
+            + testType;
+
+        RunTimer
+            // Time how long it takes to run the test.
+            .timeRun(() -> {
+                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
+                        Stream<CharSequence> wordStream = words
+                            // Convert the list into a stream (which uses a
+                            // spliterator internally).
+                            .stream();
+
+                        if (parallel)
+                            // Convert to a parallel stream.
+                            wordStream.parallel();
+
+                        // A Set of unique words in Shakespeare's
+                        // works.
+                        Set<CharSequence> uniqueWords = wordStream
+                            // Map each string to lower case.
+                            .map(charSeq -> charSeq.toString().toLowerCase())
+
+                            // Trigger intermediate processing and
+                            // collect the unique words into the given
+                            // collector.
+                            .collect(collector);
+                    }},
+            testName);
+        return null;
     }
 
     /**
@@ -62,11 +219,12 @@ public class ex36 {
     private static void warmUpForkJoinPool() {
         System.out.println("\n++Warming up the fork/join pool\n");
 
-        List<CharSequence> words = Objects
-            .requireNonNull(TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                     // Split input into "words"
-                                                     // by ignoring whitespace.
-                                                     "\\s+"));
+        List<CharSequence> words = TestDataFactory
+            .getInput(sSHAKESPEARE_DATA_FILE,
+                      // Split input into "words" by ignoring
+                      // whitespace.
+                      "\\s+");
+
         // Create an empty list.
         List<String> list = new ArrayList<>();
 
@@ -84,337 +242,5 @@ public class ex36 {
 
                         // Collect the stream into a list.
                         .collect(toList()));
-    }
-
-    /**
-     * Run tests that demonstrate the performance differences between
-     * concurrent and non-concurrent collectors when collecting
-     * results in Java sequential and parallel streams that use
-     * unordered HashSets.
-     */
-    private static void runCollectorTestsUnordered() {
-        Arrays
-            // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
-
-            // For each input data size run the following tests.
-            .forEach (limit -> {
-                    // Create a list of strings containing all the
-                    // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
-                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                 // Split input into "words" by
-                                                 // ignoring whitespace.
-                                                 "\\s+",
-                                                 limit);
-
-                    assert arrayWords != null;
-
-                    // Print a message when the test starts.
-                    System.out.println("Starting collector tests for "
-                                       + arrayWords.size() 
-                                       + " words that will be unordered..");
-
-                    // Compute the time required to collect partial
-                    // results into a HashSet in a sequential stream.
-                    // The performance of this test will be better
-                    // than the parallel stream version below since
-                    // there's less overhead collecting the various
-                    // partial results into a HashSet.
-                    timeStreamCollectToHashSet("ArrayList",
-                                               false,
-                                               arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a HashSet in a parallel stream.
-                    // The performance of this test will be worse than
-                    // the sequential stream version above due to the
-                    // overhead of collecting the various partial
-                    // results into a HashSet in parallel.
-                    timeStreamCollectToHashSet("ArrayList",
-                                               true,
-                                               arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a
-                    // sequential stream.  The performance of this
-                    // test will be similar to the sequential stream
-                    // version of timeStreamCollectToHashSet() above.
-                    timeStreamCollectToConcurrentHashSet("ArrayList",
-                                                         false,
-                                                         arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a parallel
-                    // stream.  The performance of this test will be
-                    // better than the parallel stream version of
-                    // timeStreamCollectToHashSet() above since there's no
-                    // overhead of collecting the partial results into
-                    // a HashSet in parallel.
-                    timeStreamCollectToConcurrentHashSet("ArrayList",
-                                                         true,
-                                                         arrayWords);
-
-                    // Print the results.
-                    System.out.println("..printing results\n"
-                                       + RunTimer.getTimingResults());
-                });
-    }
-
-    /**
-     * Run tests that demonstrate the performance differences between
-     * concurrent and non-concurrent collectors when collecting
-     * results in Java sequential and parallel streams that use
-     * ordered TreeSets.
-     */
-    private static void runCollectorTestsOrdered() {
-        Arrays
-            // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
-
-            // For each input data size run the following tests.
-            .forEach (limit -> {
-                    // Create a list of strings containing all the
-                    // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
-                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                 // Split input into "words" by
-                                                 // ignoring whitespace.
-                                                 "\\s+",
-                                                 limit);
-
-                    assert arrayWords != null;
-
-                    // Print a message when the test starts.
-                    System.out.println("Starting collector tests for "
-                                       + arrayWords.size()
-                                       + " words that will be ordered..");
-
-                    // Compute the time required to collect partial
-                    // results into a TreeSet in a sequential stream.
-                    // The performance of this test will be better
-                    // than the parallel stream version below since
-                    // there's less overhead collecting the various
-                    // partial results into a TreeSet.
-                    timeStreamCollectToTreeSet("ArrayList",
-                                               false,
-                                               arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a TreeSet in a parallel stream.
-                    // The performance of this test will be worse than
-                    // the sequential stream version above due to the
-                    // overhead of collecting the various partial
-                    // results into a TreeSet in parallel.
-                    timeStreamCollectToTreeSet("ArrayList",
-                                               true,
-                                               arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a
-                    // sequential stream.  The performance of this
-                    // test will be similar to the sequential stream
-                    // version of timeStreamCollectToTreeSet() above.
-                    timeStreamCollectToConcurrentTreeSet("ArrayList",
-                                                         false,
-                                                         arrayWords);
-
-                    // Compute the time required to collect partial
-                    // results into a ConcurrentHashSet in a parallel
-                    // stream.  The performance of this test will be
-                    // better than the parallel stream version of
-                    // timeStreamCollectToTreeSet() above since
-                    // there's no overhead of collecting the partial
-                    // results into a HashSet in parallel.
-                    timeStreamCollectToConcurrentTreeSet("ArrayList",
-                                                         true,
-                                                         arrayWords);
-
-                    // Print the results.
-                    System.out.println("..printing results\n"
-                                       + RunTimer.getTimingResults());
-                });
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link HashSet} using a non-concurrent collector.  If {@code
-     * parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToHashSet(String testName,
-                                                   boolean parallel,
-                                                   List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToHashSet()";
-
-        // System.out.println("Starting " + testName);
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A "real" application would likely do something
-                    // interesting with the words at this point.
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real" application
-                        // would likely do something interesting with the words at
-                        // this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect unique
-                        // words into a HashSet.
-                        .collect(toCollection(HashSet::new));
-                }},
-            testName);
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link TreeSet} using a non-concurrent collector.  If {@code
-     * parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToTreeSet(String testName,
-                                                   boolean parallel,
-                                                   List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToTreeSet()";
-
-        // System.out.println("Starting " + testName);
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A "real" application would likely do something
-                    // interesting with the words at this point.
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect
-                        // unique words into a TreeSet.
-                        .collect(toCollection(TreeSet::new));
-                }},
-            testName);
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link ConcurrentHashSet} using a concurrent collector.  If
-     * {@code parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToConcurrentHashSet(String testName,
-                                                             boolean parallel,
-                                                             List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToConcurrentHashSet()";
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real" application
-                        // would likely do something interesting with the words at
-                        // this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect unique
-                        // words into a ConcurrentHashSet.
-                        .collect(ConcurrentSetCollector.toSet(ConcurrentHashSet::new));
-                }},
-            testName);
-    }
-
-    /**
-     * Determines how long it takes to collect partial results into a
-     * {@link ConcurrentTreeSet} using a concurrent collector.  If
-     * {@code parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.
-     */
-    private static void timeStreamCollectToConcurrentTreeSet(String testName,
-                                                             boolean parallel,
-                                                             List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamCollectToConcurrentTreeSet()";
-
-        RunTimer.timeRun(() -> {
-                Set<CharSequence> uniqueWords = null;
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses
-                        // a spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A set of unique words in Shakespeare's works.
-                    uniqueWords = wordStream
-                        // Map each string to lower case.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toLowerCase())
-
-                        // Trigger intermediate processing and collect
-                        // unique words into a TreeSet.
-                        .collect(ConcurrentSetCollector.toSet(TreeSet::new));
-                }},
-            testName);
     }
 }
