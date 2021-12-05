@@ -8,7 +8,6 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'io.reactivex.rxjava3:rxjava:3.0.6'
-    compile 'io.projectreactor:reactor-core:3.3.9.RELEASE'
+    implementation 'io.projectreactor:reactor-core:3.4.12'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.3'
 }
