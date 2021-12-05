@@ -2,10 +2,7 @@ package utils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
@@ -28,6 +25,13 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     private final Function<? super T, ? extends V> mValueMapper;
 
     /**
+     * A merge function, used to resolve collisions between values
+     * associated with the same key, as supplied to {@link
+     * Map#merge(Object, Object, BiFunction)}
+     */
+    private final BinaryOperator<V> mMergeFunction;
+
+    /**
      * A {@link Supplier} that returns a new, empty {@link Map} into
      * which the results will be inserted.
      */
@@ -40,14 +44,19 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
      * 
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
+     * @param mergeFunction a merge function, used to resolve collisions between
+     *                      values associated with the same key, as supplied
+     *                      to {@link Map#merge(Object, Object, BiFunction)}
      * @param mapSupplier a supplier that returns a new, empty {@link
      *                    Map} into which the results will be inserted
      */
     public ConcurrentMapCollector(Function<? super T, ? extends K> keyMapper,
                                   Function<? super T, ? extends V> valueMapper,
+                                  BinaryOperator<V> mergeFunction,
                                   Supplier<M> mapSupplier) {
         mKeyMapper = keyMapper;
         mValueMapper = valueMapper;
+        mMergeFunction = mergeFunction;
         mMapSupplier = mapSupplier;
     }
 
@@ -70,10 +79,12 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
      */
     @Override
     public BiConsumer<Map<K, V>, T> accumulator() {
-        // Add element to the map.
         return (Map<K, V> map, T element) -> map
-            .put(mKeyMapper.apply(element),
-                 mValueMapper.apply(element));
+            // Add element to the map, handling duplicates in
+            // accordance with the mergeFunction.
+            .merge(mKeyMapper.apply(element),
+                   mValueMapper.apply(element),
+                   mMergeFunction);
     }
 
     /**
@@ -136,15 +147,27 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     }
 
     /**
-     * This static factory method creates a {@link Collector} that
-     * accumulates elements into a {@link Map} whose keys and values
-     * are the result of applying the provided mapping functions to
-     * the input elements.
+     * This static factory method creates a concurrent {@link
+     * Collector} that accumulates elements into a {@link Map} whose
+     * keys and values are the result of applying the provided mapping
+     * functions to the input elements.
      * 
+     * If the mapped keys contains duplicates (according to {@link
+     * Object#equals(Object)}), the value mapping function is applied
+     * to each equal element, and the results are merged using the
+     * provided merging function.
+     *
+     * @param <T> the type of the input elements
+     * @param <K> the output type of the key mapping function
+     * @param <V> the output type of the value mapping function
+     * @param <M> the type of the resulting {@code Map}
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @param mapSupplier a supplier that returns a new, empty {@link
      *                    Map} into which the results will be inserted
+     * @param mergeFunction a merge function, used to resolve collisions between
+     *                      values associated with the same key, as supplied
+     *                      to {@link Map#merge(Object, Object, BiFunction)}
      * @return a {@link Collector} that collects elements into a
      *        {@link Map} whose keys are the result of applying a key
      *        mapping function to the input elements and whose values
@@ -154,10 +177,12 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M>
     toMap(Function<? super T, ? extends K> keyMapper,
           Function<? super T, ? extends V> valueMapper,
+          BinaryOperator<V> mergeFunction,
           Supplier<M> mapSupplier) {
         return new ConcurrentMapCollector<>
             (keyMapper,
              valueMapper,
+             mergeFunction,
              mapSupplier);
     }
 }

@@ -206,3 +206,11 @@ Here's an overview of what's currently included in these examples:
          parallel stream vs. sequential stream using concurrent and
          non-concurrent collectors for various types of Java Map
          implementations, including HashMap and TreeMap.
+
+. ex38 - This program creates various Map objects that compute the
+         Greatest Common Divisor (GCD) for a various sized lists of
+         randomly generated integers.  It also shows the difference in
+         overhead between collecting results in a parallel stream
+         vs. sequential stream using concurrent and non-concurrent
+         collectors for various types of Java Map implementations,
+         including HashMap and TreeMap.

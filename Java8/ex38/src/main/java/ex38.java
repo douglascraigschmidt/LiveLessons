@@ -1,24 +1,24 @@
 import utils.ConcurrentMapCollector;
 import utils.GCDResult;
-import utils.ListSpliterator;
+import utils.GCDParam;
 import utils.RunTimer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.stream.*;
 
 import static java.util.stream.Collectors.*;
 
 /**
- * This example shows the difference in overhead between collecting
- * results in a parallel stream vs. sequential stream using concurrent
- * and non-concurrent collectors for various types of Java {@link Map}
- * implementations, including {@link HashMap} and {@link TreeMap}.
+ * This program creates various {@link Map} objects that compute the
+ * Greatest Common Divisor (GCD) for a various sized lists of randomly
+ * generated integers.  It also shows the difference in overhead
+ * between collecting results in a parallel stream vs. sequential
+ * stream using concurrent and non-concurrent collectors for various
+ * types of Java {@link Map} implementations, including {@link
+ * HashMap} and {@link TreeMap}.
  */
 @SuppressWarnings("ALL")
 public class ex38 {
@@ -35,51 +35,20 @@ public class ex38 {
      */
     private static final int sMAX_ITERATIONS = 10;
 
-    /**
-     * Create a {@link List} of random {@link Integer} objects.
-     */
-    static List<Integer> sRandomNumbers = new Random()
-        // Generate "count" random large ints
-        .ints(1000000,
-              1_000_000,
-              1_000_000_000)
+    private static Random sRANDOM = new Random();
 
-        // Convert each primitive int to Integer.
-        .boxed()
+    /**
+     * Create a {@link List} of random {@link GCDParam} objects.
+     */
+    static List<GCDParam> sRANDOM_PARAMS = IntStream
+        // Iterate from 1 to 1_000_000.
+        .rangeClosed(1, 1_000_000)
+
+        // Create a stream of GCDParam objects initialized to random values.
+        .mapToObj(___ -> new GCDParam(sRANDOM.nextInt(), sRANDOM.nextInt()))
 
         // Trigger intermediate operations and collect into list.
         .collect(toList());
-
-    /**
-     * Create a {@link Comparator} that's used by the
-     * {@link TreeMap} to order the two-element arrays
-     * containing the parameters to the GCD method.
-     */
-    static class CompareIntegers implements Comparator {
-        /**
-         * @return 0 if the arrays are equal, < 0 if the
-         * first array is less than the second, and > 0 if
-         * the first array is greater than the second
-         */
-        public int compare(Object obj1, Object obj2) {
-            // Cast the params to the appropriate type.
-            Integer[] t1 = (Integer[]) obj1;
-            Integer[] t2 = (Integer[]) obj2;
-
-            // Subtract the second element from the
-            // first element.
-            int r1 = t1[0] - t2[0];
-
-            // If the first comparison != 0 then
-            // return the result.
-            if (r1 != 0)
-                return r1;
-            else
-                // Continue on to compare the
-                // second elements.
-                return t1[1] - t2[1];
-        }
-    }
 
     /**
      * Main entry point into the tests program.
@@ -111,8 +80,8 @@ public class ex38 {
         runMapCollectorTests("TreeMap",
                              GCDResult::integers,
                              GCDResult::gcd,
-                             () -> new TreeMap(new CompareIntegers()),
-                             () -> new TreeMap(new CompareIntegers()),
+                             TreeMap::new,
+                             TreeMap::new,
                              ex38::timeStreamCollect);
 
         System.out.println("Exiting the test program");
@@ -135,38 +104,37 @@ public class ex38 {
      */
     private static void runMapCollectorTests
         (String testType,
-         Function<GCDResult, Integer[]> keyMapper,
+         Function<GCDResult, GCDParam> keyMapper,
          Function<GCDResult, Integer> valueMapper,
-         Supplier<Map<Integer[], Integer>> mapSupplier,
-         Supplier<Map<Integer[], Integer>> concurrentMapSupplier,
+         Supplier<Map<GCDParam, Integer>> mapSupplier,
+         Supplier<Map<GCDParam, Integer>> concurrentMapSupplier,
          QuadFunction<String,
                       Boolean,
-                      List<Integer>,
-                      Collector<GCDResult, ?, Map<Integer[], Integer>>,
+                      List<GCDParam>,
+                      Collector<GCDResult, ?, Map<GCDParam, Integer>>,
                       Void> collect) {
         Arrays
             // Create tests for different sizes of input data.
-            .asList(1_000, 10_000, 100_000, 1_000_000)
+            .asList(1_000, 10_000, 100_000, 500_000)
 
             // Run the tests for various input data sizes.
             .forEach (count -> {
-                    // Get a List of 'count' random numbers.
-                    List<Integer> randomNumbers = 
-                        getRandomData(count);
+                    // Get a List of 'count' random GCDParam objects.
+                    List<GCDParam> randomParams = getRandomData(count);
 
                     // Print a message when the test starts.
                     System.out.println("Starting "
                                        + testType
                                        + " test for "
                                        + count
-                                       + " random numbers..");
+                                       + " random GCD params..");
 
                     // Collect results into a sequential stream via a
                     // non-concurrent collector.
                     collect
                         .apply("non-concurrent " + testType,
                                false,
-                               randomNumbers,
+                               randomParams,
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
@@ -178,7 +146,7 @@ public class ex38 {
                     collect
                         .apply("non-concurrent " + testType,
                                true,
-                               randomNumbers,
+                               randomParams,
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
@@ -190,10 +158,11 @@ public class ex38 {
                     collect
                         .apply("concurrent " + testType,
                                false,
-                               randomNumbers,
+                               randomParams,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
+                                      (o1, o2) -> o1,
                                       concurrentMapSupplier));
 
                     // Collect results into a parallel stream via a
@@ -201,10 +170,11 @@ public class ex38 {
                     collect
                         .apply("concurrent " + testType,
                                true,
-                               randomNumbers,
+                               randomParams,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
+                                      (o1, o2) -> o1,
                                       concurrentMapSupplier));
 
                     // Print the results.
@@ -228,8 +198,8 @@ public class ex38 {
     private static Void timeStreamCollect
         (String testType,
          boolean parallel,
-         List<Integer> randomNumbers,
-         Collector<GCDResult, ?, Map<Integer[], Integer>> collector) {
+         List<GCDParam> randomNumbers,
+         Collector<GCDResult, ?, Map<GCDParam, Integer>> collector) {
         // Run the garbage collector before each test.
         System.gc();
 
@@ -242,20 +212,15 @@ public class ex38 {
             // Time how long it takes to run the test.
             .timeRun(() -> {
                     for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        Stream<Integer[]> intStream = StreamSupport
-                            // Convert the List of Integer objects
-                            // into a sequential stream of two-element
-                            // Integer objects used to compute the
-                            // GCD.
-                            .stream(new ListSpliterator(randomNumbers),
-                                    false);
+                        Stream<GCDParam> intStream = randomNumbers
+                            .stream();
 
                         // Conditionally convert stream to parallel
                         // stream.
                         if (parallel)
                             intStream.parallel();
 
-                        Map<Integer[], Integer> resultMap = intStream
+                        Map<GCDParam, Integer> resultMap = intStream
                             // Compute the GCD of the params.
                             .map(params -> computeGCD(params))
 
@@ -307,8 +272,8 @@ public class ex38 {
      *
      * @return A {@link List} of random {@link Integer} objects
      */
-    private static List<Integer> getRandomData(int count) {
-        return sRandomNumbers
+    private static List<GCDParam> getRandomData(int count) {
+        return sRANDOM_PARAMS
             // Convert the List into a Stream.
             .stream()
 
@@ -326,10 +291,10 @@ public class ex38 {
      *                 compute the GCD
      * @return A {@link GCDResult}
      */
-    private static GCDResult computeGCD(Integer[] integers) {
+    private static GCDResult computeGCD(GCDParam integers) {
         // Create a record to hold the GCD results.
         return new GCDResult(integers,
-                             gcd(integers[0], integers[1]));
+                             gcd(integers));
     }
 
     /**
@@ -337,7 +302,9 @@ public class ex38 {
      * compute the "greatest common divisor" (GCD) of {@code number1}
      * and {@code number2}.
      */
-    private static int gcd(int number1, int number2) {
+    private static int gcd(GCDParam integers) {
+        int number1 = integers.first();
+        int number2 = integers.second();
         for (;;) {
             int remainder = number1 % number2;
             if (remainder == 0){
@@ -357,17 +324,10 @@ public class ex38 {
         System.out.println("\n++Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<Integer[]> intStream = StreamSupport
-                // Convert the List of Integer objects
-                // into a sequential stream of two-element
-                // Integer objects used to compute the
-                // GCD.
-                .stream(new ListSpliterator(getRandomData(100_000)),
-                        false);
+            Stream<GCDParam> intStream = getRandomData(100000)
+                .parallelStream();
 
-            intStream.parallel();
-
-            Map<Integer[], Integer> resultMap = intStream
+            Map<GCDParam, Integer> resultMap = intStream
                 // Compute the GCD of the params.
                 .map(params -> computeGCD(params))
 
