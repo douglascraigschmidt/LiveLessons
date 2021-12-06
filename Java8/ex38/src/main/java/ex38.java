@@ -35,6 +35,9 @@ public class ex38 {
      */
     private static final int sMAX_ITERATIONS = 10;
 
+    /**
+     * The random number generator.
+     */
     private static Random sRANDOM = new Random();
 
     /**
@@ -191,7 +194,7 @@ public class ex38 {
      * @param testType The type of test, i.e., HashMap or TreeMap
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
-     * @param words A {@link List} of words to lowercase
+     * @param randomNumbers A {@link List} of {@link GCDParam} objects
      * @param collector The {@link Collector} used to combine the
      *                  results
      */
@@ -212,29 +215,42 @@ public class ex38 {
             // Time how long it takes to run the test.
             .timeRun(() -> {
                     for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        Stream<GCDParam> intStream = randomNumbers
-                            .stream();
-
-                        // Conditionally convert stream to parallel
-                        // stream.
-                        if (parallel)
-                            intStream.parallel();
-
-                        Map<GCDParam, Integer> resultMap = intStream
-                            // Compute the GCD of the params.
-                            .map(params -> computeGCD(params))
-
-                            // Trigger intermediate processing and
-                            // collect GCDResults into the given
-                            // collector.
-                            .collect(collector);
-
-                        // printResults(resultMap, testName);
+                        getResults(parallel, randomNumbers, collector);
                     }},
             testName);
         return null;
     }
 
+    /**
+     * Perform computations that create a Map of {@ink GCDResult} objects
+     * 
+     * @param parallel If true then a parallel stream is used, else a
+     *                 sequential stream is used
+     * @param randomNumbers A {@link List} of {@link GCDParam} objects
+     * @param collector The {@link Collector} used to combine the
+     *                  results
+     * @return A {@link Map} containing {@link GCDResult} objects
+     */
+    private static Map<GCDParam, Integer> getResults
+        (boolean parallel,
+         List<GCDParam> randomNumbers,
+         Collector<GCDResult, ?, Map<GCDParam, Integer>> collector) {
+        Stream<GCDParam> intStream = randomNumbers
+            .stream();
+        // Conditionally convert stream to parallel
+        // stream.
+        if (parallel)
+            intStream.parallel();
+
+        return intStream
+            // Compute the GCD of the params.
+            .map(params -> computeGCD(params))
+
+            // Trigger intermediate processing and
+            // collect GCDResults into the given
+            // collector.
+            .collect(collector);
+    }
     /**
      * Print the {@code result} of the {@code testName}.
      *

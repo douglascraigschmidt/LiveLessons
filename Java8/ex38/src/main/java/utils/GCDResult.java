@@ -13,5 +13,5 @@ public record GCDResult(
     /*
      * The value resulting from computing the GCD.
      */
-    Integer gcd) {}
+    int gcd) {}
 

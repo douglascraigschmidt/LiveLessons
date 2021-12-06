@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * This program creates various {@link Map} objects that associate
@@ -83,6 +82,19 @@ public class ex37 {
                              TreeMap::new,
                              ex37::timeStreamCollect);
 
+        // Print the results.
+        printResults(getResults(true,
+                                 TestDataFactory
+                                 .getInput(sSHAKESPEARE_DATA_FILE,
+                                           sWHITESPACE_AND_PUNCTUATION,
+                                           1_000_000),
+                                 ConcurrentMapCollector
+                                 .toMap(Function.identity(),
+                                        (s) -> 1,
+                                        (o1, o2) -> o1 + o2,
+                                        TreeMap::new)),
+                     "Final results");
+
         System.out.println("Exiting the test program");
     }
 
@@ -114,7 +126,7 @@ public class ex37 {
                       Void> collect) {
         Arrays
             // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
+            .asList(1_000, 10_000, 100_000, 1_000_000)
 
             // Run the tests for various input data sizes.
             .forEach (limit -> {
@@ -217,36 +229,53 @@ public class ex37 {
         RunTimer
             // Time how long it takes to run the test.
             .timeRun(() -> {
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        Stream<String> wordStream = words
-                            // Convert the list into a stream (which
-                            // uses a spliterator internally).
-                            .stream();
-
-                        if (parallel)
-                            // Convert to a parallel stream.
-                            wordStream.parallel();
-
-                        // A Map of unique words in Shakespeare's
-                        // works.
-                        Map<String, Integer> uniqueWords = wordStream
-                            // Map each string to lower case.
-                            .map(word -> word.toString().toLowerCase())
-
-                            // Trigger intermediate processing and
-                            // collect the unique words into the given
-                            // collector.
-                            .collect(collector);
-                    }},
+                    for (int i = 0; i < sMAX_ITERATIONS; i++) 
+                        getResults(parallel, words, collector);
+                },
                 testName);
         return null;
+    }
+
+    /**
+     * Perform computations that create a Map of unique words in
+     * Shakespeare's works.
+     * 
+     * @param parallel If true then a parallel stream is used, else a
+     *                 sequential stream is used
+     * @param words A {@link List} of words to lowercase
+     * @param collector The {@link Collector} used to combine the
+     *                  results
+     * @return A {@link Map} containing the unique words in
+     *         Shakespeare's works
+     */
+    private static Map<String, Integer> getResults
+        (boolean parallel,
+         List<String> words,
+         Collector<String, ?, Map<String, Integer>> collector) {
+            Stream<String> wordStream = words
+                // Convert the list into a stream (which
+                // uses a spliterator internally).
+                .stream();
+
+            if (parallel)
+                // Convert to a parallel stream.
+                wordStream.parallel();
+
+            // Return a Map of unique words in Shakespeare's works.
+            return wordStream
+                // Map each string to lower case.
+                .map(word -> word.toString().toLowerCase())
+
+                // Trigger intermediate processing and collect the
+                // unique words into the given collector.
+                .collect(collector);
     }
 
     /**
      * Print the {@code result} of the {@code testName}.
      *
      * @param result The results of applying the test
-     * @param testName The name of the test.
+     * @param testName The name of the test
      */
     private static void printResults(Map<String, Integer> results,
                                      String testName) {
@@ -255,7 +284,7 @@ public class ex37 {
         var output = results
             .entrySet()
             .stream()
-            .limit(10)
+            .limit(50)
             .map(Objects::toString)
             .collect(toList());
 
@@ -264,7 +293,7 @@ public class ex37 {
             .entrySet()
             .stream()
             .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-            .limit(10)
+            .limit(50)
             .map(Objects::toString)
             .collect(toList());
 

@@ -105,7 +105,7 @@ public class ex36 {
                       Void> collect) {
         Arrays
             // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
+            .asList(1_000, 10_000, 100_000, 1_000_000)
 
             // Run the tests for various input data sizes.
             .forEach (limit -> {
