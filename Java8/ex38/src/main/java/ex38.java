@@ -235,8 +235,10 @@ public class ex38 {
         (boolean parallel,
          List<GCDParam> randomNumbers,
          Collector<GCDResult, ?, Map<GCDParam, Integer>> collector) {
+        // Convert into a sequential stream.
         Stream<GCDParam> intStream = randomNumbers
             .stream();
+
         // Conditionally convert stream to parallel
         // stream.
         if (parallel)

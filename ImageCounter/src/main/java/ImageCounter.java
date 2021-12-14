@@ -51,7 +51,7 @@ class ImageCounter {
                           + totalImages
                           + " total image(s) are reachable from "
                           + rootUri);
-                    return 0;
+                    return totalImages;
                 })
 
             /*

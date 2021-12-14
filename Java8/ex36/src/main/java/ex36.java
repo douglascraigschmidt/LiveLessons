@@ -41,9 +41,11 @@ public class ex36 {
         "completeWorksOfShakespeare.txt";
 
     /**
-     * A regular expression that matches whitespace and punctuation.
+     * A regular expression that matches whitespace and punctuation to
+     * split the text of the complete works of Shakepeare into
+     * individual words.
      */
-    private static final String sWHITESPACE_AND_PUNCTUATION = 
+    private static final String sSPLIT_WORDS =
         "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
 
     /**
@@ -115,7 +117,7 @@ public class ex36 {
                         .getInput(sSHAKESPEARE_DATA_FILE,
                                   // Split input into "words" by
                                   // ignoring whitespace.
-                                  sWHITESPACE_AND_PUNCTUATION,
+                                  sSPLIT_WORDS,
                                   limit);
 
                     // Print a message when the test starts.

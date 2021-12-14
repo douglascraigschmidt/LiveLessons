@@ -10,6 +10,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Map.*;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -43,9 +44,11 @@ public class ex37 {
         "completeWorksOfShakespeare.txt";
 
     /**
-     * A regular expression that matches whitespace and punctuation.
+     * A regular expression that matches whitespace and punctuation to
+     * split the text of the complete works of Shakepeare into
+     * individual words.
      */
-    private static final String sWHITESPACE_AND_PUNCTUATION = 
+    private static final String sSPLIT_WORDS =
         "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
 
     /**
@@ -292,7 +295,7 @@ public class ex37 {
         var topWords = results
             .entrySet()
             .stream()
-            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .sorted(Entry.<String, Integer>comparingByValue().reversed())
             .limit(50)
             .map(Objects::toString)
             .collect(toList());
