@@ -38,10 +38,15 @@ public class ImageStreamReactor2
         // Get the list of URLs.
         List<URL> urls = getInput();
 
-        List<Image> filteredImages = ReactorUtils
-            // Convert the URLs in the input list into a parallel flux
-            // stream.
-            .fromIterableParallel(urls)
+        List<Image> filteredImages = Flux
+            // Convert collection into a flux.
+            .fromIterable(iterable)
+
+            // Create a parallel flux.
+            .parallel()
+
+            // Run this flow of operations in the elastic thread pool.
+            .runOn(Schedulers.boundedElastic());
 
             // Use filter() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.

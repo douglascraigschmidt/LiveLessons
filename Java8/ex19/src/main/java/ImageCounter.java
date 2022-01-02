@@ -1,17 +1,18 @@
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.ConcurrentHashSet;
-import utils.FuturesCollector;
+import utils.FuturesCollectorIntStream;
 import utils.Options;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 /**
  * This class counts the number of images in a recursively-defined
- * folder structure using a range of CompletableFuture features.  The
- * root folder can either reside locally (filesystem-based) or
- * remotely (web-based).
+ * folder structure using a range of asynchronous CompletableFuture
+ * features.  The root folder can either reside locally (filesystem
+ * -based) or remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -253,16 +254,12 @@ class ImageCounter {
                              depth + 1))
 
             // Trigger intermediate operation processing and return a
-            // future to a list of completable futures.
-            .collect(FuturesCollector.toFuture())
+            // future to a CompletableFutures<IntStream>.
+            .collect(FuturesCollectorIntStream.toFuture())
 
-            // After all the futures in the list complete then sum all
-            // the integers in the list of results.
-            .thenApply(list -> list
-                       // Convert list to a stream.
-                       .stream()
-                       // Sum all results in the list.
-                       .reduce(0, Integer::sum));
+            // After all the futures in the stream complete then sum
+            // all the integers in the stream of results.
+            .thenApply(IntStream::sum);
     }
 
     /**

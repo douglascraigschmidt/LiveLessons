@@ -53,7 +53,7 @@ public class ImageStreamReactor1
 
                      // Run this flow of operations in the common
                      // fork-join pool.
-                     .transformDeferred(ReactorUtils.commonPoolFlux())
+                     .subscribeOn(Schedulers.boundedElastic())
 
                      // Ignore URLs that are cached locally, i.e.,
                      // only download non-cached images.
