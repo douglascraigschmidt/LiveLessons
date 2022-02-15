@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ex24" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="ex24" />
+    <module name="ex24" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

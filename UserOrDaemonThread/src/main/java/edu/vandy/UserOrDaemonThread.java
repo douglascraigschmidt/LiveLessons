@@ -16,7 +16,8 @@ import java.util.Random;
  * thread exits).  If it's launched with a command-line parameter then
  * it creates a daemon thread, which exits when the main thread exits.
  */
-public class UserOrDaemonThread extends Thread  {
+public class UserOrDaemonThread
+       extends Thread  {
     /**
      * Keep track of whether this is a "user" or a "daemon" thread.
      */
@@ -26,7 +27,7 @@ public class UserOrDaemonThread extends Thread  {
      * Number of times to iterate, which is 100 million to ensure the
      * program runs for a while.
      */
-    private final int MAX_ITERATIONS = 100000000;
+    private final int MAX_ITERATIONS = 100_000_000;
 
     /**
      * Constructor determines what type of thread it being created.

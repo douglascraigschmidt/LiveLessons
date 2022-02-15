@@ -44,6 +44,7 @@ public class DeadlockTest {
          * This hook method is called in a new Thread and it transfers
          * the contents of mAQueue to mBQueue.
          */
+        @Override
         public void run() {
             try {
                 for (int i = 0; i < mIterations; ++i)
@@ -77,7 +78,7 @@ public class DeadlockTest {
      * Entry point into the program that creates two instances of
      * SimpleQueue (aQueue and bQueue) and two Threads that attempt to
      * transfer the contents of aQueue and bQueue in opposite orders.
-     * Although this will work sometimes, it also often deadlocks
+     * Although this will sometimes work, it also often deadlocks
      * since the TransferRunnable.transfer() method running in one
      * Thread will acquire aQueue's monitor lock, while the
      * TransferRunnble.transfer() method running in another Thread
@@ -85,10 +86,10 @@ public class DeadlockTest {
      * Threads are waiting to acquire the other SimpleQueue's monitor
      * lock, which causes a circular wait that doesn't terminate!
      */
-    @Test(timeout=10000)
+    @Test(timeout=5_000)
     public void testDeadlockQueue() {
         // Designated the number of iterations to run in each thread.
-        int iterations = 1000000;
+        int iterations = 1_000_000;
         boolean deadlock = true;
 
         // Create two SimpleQueue's.
@@ -115,6 +116,7 @@ public class DeadlockTest {
         System.out.println("starting second transfer thread");
         transfer2.start();
 
+        // Barrier synchronization.
         try {
             transfer1.join();
             System.out.println("joined first transfer thread");

@@ -23,7 +23,7 @@ public class PingPongWrong {
      */
     public static class PlayPingPongThread extends Thread {
         // The string to print for each ping and pong operation.
-        private String mStringToPrint;
+        private final String mStringToPrint;
 
         public PlayPingPongThread (String stringToPrint) {
             this.mStringToPrint = stringToPrint;
@@ -32,6 +32,7 @@ public class PingPongWrong {
         /**
          * Main event loop that runs in a separate thread of control.
          */
+        @Override
         public void run () {
             for (int loopsDone = 1;
                  loopsDone <= mMaxIterations;

@@ -21,7 +21,8 @@ public class NonReentrantSpinLock
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();
             // Initialize the VarHandle via reflection.
-            VALUE = l.findVarHandle(NonReentrantSpinLock.class, "value", int.class);
+            VALUE = l.findVarHandle(NonReentrantSpinLock.class,
+                               "value", int.class);
         } catch (ReflectiveOperationException e) {
             throw new Error(e);
         }
@@ -57,7 +58,7 @@ public class NonReentrantSpinLock
         // should also check if a shutdown has been requested and if
         // so throw a cancellation exception.
 
-        // Only try to get the lock if its null, which improves
+        // Only try to get the lock if its 0, which improves
         // cache performance.  See the stackoverflow article at
         // http://15418.courses.cs.cmu.edu/spring2013/article/31
         // and stackoverflow.com/a/4939383/13411862 for details.

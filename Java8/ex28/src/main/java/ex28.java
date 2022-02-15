@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This example shows several ways to implement the Singleton pattern
- * via a Java AtomicReference and a Java volatile variable (via the
- * Double-Checked Locking pattern).
+ * via a Java AtomicReference, as well as a Java volatile variable
+ * (via the Double-Checked Locking pattern).
  */
 @SuppressWarnings("ALL")
 public class ex28 {

@@ -11,7 +11,7 @@ import static utils.BigFractionUtils.sVoidM;
 
 /**
  * Define a Subscriber implementation that handles blocking, which is
- * otherwise not well supported by Project Reactor.
+ * otherwise not well-supported by Project Reactor.
  */
 public class BlockingSubscriber<T>
        implements Subscriber<T> {
@@ -48,7 +48,7 @@ public class BlockingSubscriber<T>
      *
      * @param consumer The consumer to invoke on each value
      * @param errorConsumer The consumer to invoke on error signal
-     * @param completeConsumer The consumer to invoke on complete signal
+     * @param completeRunnable The consumer to invoke on complete signal
      * @param n The strictly positive number of elements
      *          to requests to the upstream Publisher
      */

@@ -14,11 +14,11 @@ public class ex1 {
     public static void main (String[] argv) {
         // Test BigFraction multiplication using a synchronous Flux
         // stream.
-       // AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync1);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync1);
 
         // Another test of BigFraction multiplication using a
         // synchronous Flux stream.
-        // AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
 
         // Yet another test of BigFraction multiplication using a synchronous
         // Flux stream.
@@ -26,7 +26,7 @@ public class ex1 {
 
         // A test of the Flux.mapNotNull() operator using a synchronous
         // Flux stream.
-        // AsyncTaskBarrier.register(FluxEx::testMapNotNull);
+        AsyncTaskBarrier.register(FluxEx::testMapNotNull);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.

@@ -51,8 +51,8 @@ public class ImageStreamReactor1
                      // Just omit this one object.
                      .just(url)
 
-                     // Run this flow of operations in the common
-                     // fork-join pool.
+                     // Run this flow of operations in the elastic
+                     // thread pool.
                      .subscribeOn(Schedulers.boundedElastic())
 
                      // Ignore URLs that are cached locally, i.e.,

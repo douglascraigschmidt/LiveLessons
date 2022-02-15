@@ -50,13 +50,13 @@ public abstract class CountDownTimer {
      */
     private final ScheduledExecutorService mScheduledExecutorService =
         Executors.newScheduledThreadPool(1,
-                r -> {
-                    Thread thr = new Thread(r);
-                    // Use a daemon thread to ensure the ScheduledThreadPool
-                    // shuts down when the main thread exits.
-                    thr.setDaemon(true);
-                    return thr;
-                });
+                                         r -> {
+                                             Thread thr = new Thread(r);
+                                             // Use a daemon thread to ensure the ScheduledThreadPool
+                                             // shuts down when the main thread exits.
+                                             thr.setDaemon(true);
+                                             return thr;
+                                         });
 
     /**
      * When to stop the timer.
@@ -64,8 +64,8 @@ public abstract class CountDownTimer {
     private long mStopTimeInFuture;
     
     /**
-    * Boolean representing if the timer was cancelled.
-    */
+     * Boolean representing if the timer was cancelled.
+     */
     private boolean mCancelled = false;
 
     /**
@@ -90,9 +90,11 @@ public abstract class CountDownTimer {
         mMillisInFuture = millisInFuture;
         mCountdownInterval = countDownInterval;
 
-        // Set the policies to clean everything up on shutdown.
+        // Obtain the underlying ScheduledThreadPoolExecutor.
         ScheduledThreadPoolExecutor exec =
-                (ScheduledThreadPoolExecutor) mScheduledExecutorService;
+            (ScheduledThreadPoolExecutor) mScheduledExecutorService;
+
+        // Set the policies to clean everything up on shutdown.
         exec.setRemoveOnCancelPolicy(true);
         exec.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         exec.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
@@ -102,6 +104,8 @@ public abstract class CountDownTimer {
      * Cancel the countdown.
      */
     public final void cancel() {
+        // If mLock isn't a reentrant lock this call
+        // will self-deadlock!
         mLock.lock();
         try {
             // Shared mutable state.
@@ -145,6 +149,79 @@ public abstract class CountDownTimer {
     }
 
     /**
+     * Schedules a timer that performs the count down logic.
+     */
+    private void scheduleTimer() {
+        // Create an object that's (re)scheduled to run periodically.
+        // A lambda-expression can't be used here..
+        Runnable timerHandler = new Runnable() {
+            @Override
+            public void run() {
+                mLock.lock();
+                try {
+                    // Stop running if we've been canceled.
+                    if (mCancelled) {
+                        return;
+                    }
+
+                    // Determine how much time is left.
+                    final long millisLeft =
+                        mStopTimeInFuture - System.currentTimeMillis();
+
+                    // If all the time has elapsed dispatch the
+                    // onFinish() hook method.
+                    if (millisLeft <= 0) {
+                        onFinish();
+                    } else {
+                        long lastTickStart = System.currentTimeMillis();
+                        // Dispatch the onTick() hook method. Note how
+                        // mLock is locked!
+                        onTick(millisLeft);
+
+                        // Take into account user's onTick taking time to
+                        // execute.
+                        long lastTickDuration =
+                            System.currentTimeMillis() - lastTickStart;
+                        long delay;
+
+                        if (millisLeft < mCountdownInterval) {
+                            // Just delay until done.
+                            delay = millisLeft - lastTickDuration;
+
+                            // Special case: user's onTick took
+                            // more than interval to complete,
+                            // trigger onFinish without delay
+                            if (delay < 0) delay = 0;
+                        } else {
+                            delay = mCountdownInterval - lastTickDuration;
+
+                            // Special case: user's onTick took more than
+                            // interval to complete, skip to next interval
+                            while (delay < 0) delay += mCountdownInterval;
+                        }
+
+                        // Reschedule timer handler to run again
+                        // at the appropriate delay in the future.
+                        mScheduledExecutorService
+                            .schedule(this,
+                                      delay,
+                                      TimeUnit.MILLISECONDS);
+                    }
+                } finally {
+                    // Always unlock the lock.
+                    mLock.unlock();
+                }
+            }
+            };
+
+        // Initially schedule the timerHandler to run immediately.
+        mScheduledExecutorService
+            .schedule(timerHandler,
+                      0,
+                      TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Callback fired on regular interval.
      * @param millisUntilFinished The amount of time until finished.
      */
@@ -154,75 +231,4 @@ public abstract class CountDownTimer {
      * Callback fired when the time is up.
      */
     public abstract void onFinish();
-
-    /**
-     * Schedules a timer that performs the count down logic.
-     */
-    private void scheduleTimer() {
-        // Create an object that's (re)scheduled to run periodically.
-        Runnable timerHandler = new Runnable() {
-                @Override
-                public void run() {
-                    mLock.lock();
-                    try {
-                        // Stop running if we've been canceled.
-                        if (mCancelled) {
-                            return;
-                        }
-
-                        // Determine how much time is left.
-                        final long millisLeft =
-                            mStopTimeInFuture - System.currentTimeMillis();
-
-                        // If all the time has elapsed dispatch the
-                        // onFinish() hook method.
-                        if (millisLeft <= 0) {
-                            onFinish();
-                        } else {
-                            long lastTickStart = System.currentTimeMillis();
-                            // Dispatch the onTick() hook method.
-                            onTick(millisLeft);
-
-                            // Take into account user's onTick taking time to
-                            // execute.
-                            long lastTickDuration =
-                                System.currentTimeMillis() - lastTickStart;
-                            long delay;
-
-                            if (millisLeft < mCountdownInterval) {
-                                // Just delay until done.
-                                delay = millisLeft - lastTickDuration;
-
-                                // Special case: user's onTick took
-                                // more than interval to complete,
-                                // trigger onFinish without delay
-                                if (delay < 0) delay = 0;
-                            } else {
-                                delay = mCountdownInterval - lastTickDuration;
-
-                                // Special case: user's onTick took more than
-                                // interval to complete, skip to next interval
-                                while (delay < 0) delay += mCountdownInterval;
-                            }
-
-                            // Reschedule timer handler to run again
-                            // at the appropriate delay in the future.
-                            mScheduledExecutorService
-                                .schedule(this,
-                                          delay,
-                                          TimeUnit.MILLISECONDS);
-                        }
-                    } finally {
-                        // Always unlock the lock.
-                        mLock.unlock();
-                    }
-                }
-            };
-
-        // Initially schedule the timerHandler to run immediately.
-        mScheduledExecutorService
-            .schedule(timerHandler,
-                      0,
-                      TimeUnit.MILLISECONDS);
-    }
 }

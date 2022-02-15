@@ -7,7 +7,7 @@ class SingletonV<T> {
     /**
      * Implement the singleton using a static field.
      */
-    public static volatile SingletonV sSingleton = null;
+    public static volatile SingletonV sSingleton;
 
     /**
      * Define a non-static field.

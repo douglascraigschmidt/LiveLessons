@@ -76,6 +76,7 @@ public class FluxEx {
                  // Display results when processing is done.
                  BigFractionUtils.display(sb.toString());
              },
+             // There is no backpressure required.
              Long.MAX_VALUE);
 
         Mono

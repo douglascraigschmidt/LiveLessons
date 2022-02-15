@@ -41,6 +41,7 @@ public abstract class PingPongThread
      * the core ping/pong algorithm. It plays the role of the
      * "template method" in the Template Method pattern.
      */
+    @Override
     public void run() {
         for (int loopsDone = 1; loopsDone <= mMaxIterations; ++loopsDone) {
             // Perform the template method protocol for printing a
@@ -48,6 +49,7 @@ public abstract class PingPongThread
             // release() hook methods that control the scheduling of
             // the threads are deferred to subclasses.
             acquire();
+
             PlatformStrategy.instance().print(mStringToPrint
                                     + "(" 
                                     + loopsDone 

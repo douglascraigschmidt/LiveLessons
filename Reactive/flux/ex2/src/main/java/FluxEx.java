@@ -120,7 +120,8 @@ public class FluxEx {
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
             // Generate a Long stream starting at 0 periodically in a
-            // background thread from the Schedulers.parallel() thread pool.
+            // background thread from the Schedulers.parallel() thread
+            // pool.
             .interval(sSLEEP_DURATION)
 
             // Generate random numbers between min and max values to

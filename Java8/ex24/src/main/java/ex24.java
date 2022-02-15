@@ -101,10 +101,11 @@ public class ex24 {
                  * Callback fired on regular interval.
                  * @param millisUntilFinished The amount of time until finished.
                  */
+                @Override
                 public void onTick(long millisUntilFinished) {
                     System.out.println("seconds remaining: " + 
                                        millisUntilFinished / 1000);
-                    // Try to cancel the timer after its about halfway
+                    // Try to cancel the timer after it's about halfway
                     // done.
                     if ((millisInFuture - millisUntilFinished) > millisUntilFinished) {
                         // This call will trigger self-deadlock if a
@@ -119,6 +120,7 @@ public class ex24 {
                 /**
                  * Callback fired when the time is up.
                  */
+                @Override
                 public void onFinish() {
                     System.out.println("done");
                 }

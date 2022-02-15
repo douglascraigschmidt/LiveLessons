@@ -44,7 +44,7 @@ public class FluxEx {
         // trigger an ArithmeticException.
         List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
 
-        // Create a function lambda to handle an ArithmeticException.
+        // Create a Function lambda to handle an ArithmeticException.
         Function<Throwable,
                  Flux<BigFraction>> logExceptionAndReturnEmptyFlux = t -> {
             // Record the exception message.
@@ -139,7 +139,7 @@ public class FluxEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionException3()\n");
 
-        // Create a function lambda to handle an ArithmeticException.
+        // Create a Function lambda to handle an ArithmeticException.
         Function<Throwable,
                  Mono<? extends BigFraction>> errorHandler = t -> {
             // Record the exception message.

@@ -22,9 +22,10 @@ public class BigFractionUtils {
      * A big reduced fraction constant.
      */
     public static final BigFraction sBigReducedFraction =
-            BigFraction.valueOf(new BigInteger("846122553600669882"),
-                    new BigInteger("188027234133482196"),
-                    true);
+            BigFraction
+                .valueOf(new BigInteger("846122553600669882"),
+                         new BigInteger("188027234133482196"),
+                         true);
 
     /**
      * A factory method that returns a large random BigFraction whose

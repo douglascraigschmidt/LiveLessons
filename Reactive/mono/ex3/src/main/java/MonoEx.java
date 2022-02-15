@@ -38,8 +38,8 @@ public class MonoEx {
         Mono<BigFraction> bfM2 = bfM1
             .flatMap(bf -> multiplyAsync(bf, sBigReducedFraction));
 
-        // This is what the code would look like if flatMap() was
-        // replaced by map()!
+        // This is what the "awkward" code would look like if flatMap()
+        // was replaced by map()!
         // Mono<Mono<BigFraction>> bfM2 = bfM1
         //         .map(bf -> multiplyAsync(bf, sBigReducedFraction));
 
@@ -103,7 +103,8 @@ public class MonoEx {
         // Create another random BigFraction asynchronously.
         Mono<BigFraction> m3 = makeBigFractionAsync(sRandom, sb);
 
-        // This function combines results from Mono.zip().
+        // This function combines results from Mono.zip() and shows
+        // how Java Streams can be integrated with Project Reactor.
         Function<Object[], BigFraction> combinator = bfArray -> Stream
             // Create a stream of Objects.
             .of(bfArray)
