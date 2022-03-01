@@ -4,18 +4,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * Customizes the SearchTaskGangCommon framework to process a one-shot
- * List of tasks via a variable-sized pool of Threads created by the
- * ExecutorService. The units of concurrency are a "task per search
- * word" *and* the input Strings. The results processing model uses an
- * Asynchronous Future model, which starts processing results
- * immediately.
+ * Customizes the {@link SearchTaskGangCommon} framework to process a
+ * one-shot {@link List} of tasks via a variable-sized pool of {@link
+ * Thread} objects created by the {@link ExecutorService}. The units
+ * of concurrency are a "task per search word" *and* the input
+ * strings. An asynchronous future results processing model is
+ * applied, which starts processing results immediately.
  */
 public class OneShotExecutorCompletionService
        extends SearchTaskGangCommon {
     /**
-     * Processes the results of Futures returned from the
-     * Executor.submit() method.
+     * Processes the results of Futures returned from the {@code
+     * Executor.submit()} method.
      */
     protected ExecutorCompletionService<SearchResults> mCompletionService;
 
