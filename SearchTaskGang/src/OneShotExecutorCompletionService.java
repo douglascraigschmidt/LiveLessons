@@ -1,7 +1,5 @@
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * Customizes the {@link SearchTaskGangCommon} framework to process a
@@ -44,7 +42,7 @@ public class OneShotExecutorCompletionService
      */
     protected void initiateTaskGang(int inputSize) {
         // Enqueue each item in the input List for execution in the
-        // Executor's Thread pool.
+        // Executor's cached thread pool.
         for (int i = 0; i < inputSize; ++i) 
             getExecutor().execute(makeTask(i));
 

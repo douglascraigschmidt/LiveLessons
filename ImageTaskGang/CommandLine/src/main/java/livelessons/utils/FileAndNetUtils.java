@@ -1,18 +1,18 @@
 package livelessons.utils;
 
+import livelessons.filters.Filter;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import sun.rmi.runtime.Log;
-
-import com.sun.jndi.toolkit.url.Uri;
-
 /**
- * Provides some general utility helper methods for network operations.
+ * Provides some general utility helper methods for file and network
+ * operations.
  */
-public final class NetUtils {
+public final class FileAndNetUtils {
     // To refer to bar.png under your package's res/drawable/ directory, use
     // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
     // "drawable-hdpi" directory as well.
@@ -21,14 +21,59 @@ public final class NetUtils {
     /**
      * Logging tag.
      */
-    private static final String TAG = NetUtils.class.getName();
+    private static final String TAG = FileAndNetUtils.class.getName();
 
     /**
      * A utility class should always define a private constructor.
      */
-    private NetUtils() {
+    private FileAndNetUtils() {
     }
     
+    /**
+     * Clears the filter directories.
+     */
+    public static void deleteAllFiles(Filter[] filters) {
+        try {
+        int deletedFiles = 0;
+
+        // Delete all the filter directories.
+        for (Filter filter : filters)
+            deletedFiles += deleteSubFolders
+                (new File(Options.instance().getDirectoryPath(),
+                          filter.getName()).getAbsolutePath());
+
+        System.out.println(deletedFiles
+                           + " previously downloaded file(s) deleted");
+        } catch (Exception ex) {
+            // Swallow exceptions.
+        }
+    }
+
+    /**
+     * Recursively delete files in a specified folder.
+     */
+    public static int deleteSubFolders(String path) {
+        int deletedFiles = 0;
+        File currentFolder = new File(path);
+        File[] files = currentFolder.listFiles();
+
+        if (files == null) 
+            return 0;
+
+        // Java doesn't delete a directory with child files, so we
+        // need to write code that handles this recursively.
+        for (File f : files) {          
+            if (f.isDirectory()) 
+                deletedFiles += deleteSubFolders(f.toString());
+            f.delete();
+            deletedFiles++;
+        }
+
+        // Don't delete the current folder.
+        // currentFolder.delete();
+        return deletedFiles;
+    }
+
     /**
      * Download the contents found at the given URL and return them as
      * a raw byte array.
