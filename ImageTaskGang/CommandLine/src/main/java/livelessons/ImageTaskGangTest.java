@@ -21,7 +21,7 @@ import static livelessons.utils.FileAndNetUtils.deleteAllFiles;
  */
 public class ImageTaskGangTest {
     /**
-     * Enumerated type that lists all the implementation strategies to test.
+     * Enumerated type listing all implementation strategies to test.
      */
     enum TestsToRun {
         EXECUTOR_COMPLETION_SERVICE_CACHED,
@@ -37,15 +37,15 @@ public class ImageTaskGangTest {
     };
 
     /**
-     * Keep track of the timing results of the ImageTaskGang
-     * implementation strategies, so they can be sorted and displayed
-     * when the program is finished.
+     * Store timing results for the ImageTaskGang implementation
+     * strategies, so they can be sorted and displayed when the
+     * program is finished.
      */
     private static final Map<String, List<Long>> mResultsMap = new HashMap<>();
 
     /**
-     * The JVM requires a static main() entry point to run the console version of
-     * the ImageTaskGang app.
+     * Java requires a static main() entry point to run the console
+     * version of the ImageTaskGang app.
      */
     public static void main(String[] args) {
         System.out.println("Starting ImageTaskGangTest");
