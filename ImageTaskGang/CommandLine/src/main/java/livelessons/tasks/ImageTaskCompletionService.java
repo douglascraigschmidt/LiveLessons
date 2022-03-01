@@ -47,6 +47,7 @@ public abstract class ImageTaskCompletionService
         super(filters, 
               urlLists);
 
+        // Set the subclass name for diagnostics.
         mSubclassName = subclassName;
 
         // Initialize the Executor based on what's returned from this
@@ -60,7 +61,8 @@ public abstract class ImageTaskCompletionService
     }
 
     /**
-     * Hook method that returns the desired {@link Executor} implementation
+     * Hook method that returns the desired {@link Executor}
+     * implementation.
      */
     abstract protected Executor executorHook();
 

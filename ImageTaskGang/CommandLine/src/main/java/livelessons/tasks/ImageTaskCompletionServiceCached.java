@@ -36,13 +36,13 @@ public class ImageTaskCompletionServiceCached
     }
 
     /**
-     *
+     * Hook method that returns a cached thread pool implementation of
+     * the {@link Executor}.
      */
     @Override
     public Executor executorHook() {
-        // Initialize the Executor with a cached pool of threads,
-        // which grow and shrink dynamically as new tasks are
-        // executed.
+        // Create an Executor with a cached pool of threads, which
+        // grow and shrink dynamically as new tasks are executed.
         return Executors.newCachedThreadPool();
     }
 }    

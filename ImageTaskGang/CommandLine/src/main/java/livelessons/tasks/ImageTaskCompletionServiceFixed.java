@@ -37,17 +37,19 @@ public class ImageTaskCompletionServiceFixed
     }
 
     /**
-     *
+     * Hook method that returns a fixed-size thread pool
+     * implementation of the {@link Executor}.
      */
     @Override
     public Executor executorHook() {
-        // Initialize the Executor with a fixed pool of threads.
+        // Create and Executor with a fixed pool of threads.
         Executor executor = Executors
             .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         // Prestart all the core threads.
         ((ThreadPoolExecutor) executor).prestartAllCoreThreads();
 
+        // Return the thread-pool executor.
         return executor;
     }
 }    
