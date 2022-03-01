@@ -1,5 +1,7 @@
 package edu.vandy;
 
+import static java.lang.Math.abs;
+
 import java.util.Random;
 
 /**
@@ -62,8 +64,8 @@ public class GCDRunnable
             for (int i = 0; i < MAX_ITERATIONS; ++i) {
                 // Generate two random numbers (nextInt() obtained
                 // from Random superclass).
-                int number1 = nextInt(); 
-                int number2 = nextInt();
+                int number1 = abs(nextInt());
+                int number2 = abs(nextInt());
                 
                 // Print results every 10 million iterations.
                 if ((i % 10000000) == 0)

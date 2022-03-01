@@ -41,7 +41,9 @@ public class OneShotExecutorServiceFuture
     protected void initiateTaskGang(int inputSize) {
         // Preallocate the List of Futures to hold all the
         // SearchResults.
-        mResultFutures = new ArrayList<>(inputSize * mWordsToFind.length);
+        mResultFutures =
+            new ArrayList<>(inputSize
+                            * mWordsToFind.length);
 
         // Process each String of inputData via the processInput()
         // method.  Note that input Strings aren't run concurrently,
@@ -81,8 +83,8 @@ public class OneShotExecutorServiceFuture
     /**
      * Process all the Futures containing search results.
      */
-    protected void processFutureResults(List<Future<SearchResults>> resultFutures) {
-
+    protected void processFutureResults
+        (List<Future<SearchResults>> resultFutures) {
         // Iterate through the List of Futures and print the search
         // results.
         for (Future<SearchResults> resultFuture : resultFutures) {

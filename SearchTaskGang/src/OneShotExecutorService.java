@@ -196,6 +196,10 @@ public class OneShotExecutorService
                     }
                 };
 
+        // This is perhaps a more lightweight way of accomplishing
+        // what's shown below!
+        // processQueuedResultsRunnable.run();
+
         // Create and start a new Thread that processes results
         // concurrently in the background.
         Thread t = new Thread(processQueuedResultsRunnable);

@@ -1,5 +1,7 @@
 package edu.vandy;
 
+import static java.lang.Math.abs;
+
 import java.util.Random;
 
 /**
@@ -82,8 +84,8 @@ public class UserOrDaemonThread
             // Iterate for the given # of iterations.
             for (int i = 0; i < MAX_ITERATIONS; ++i) {
                 // Generate two random numbers.
-                int number1 = random.nextInt(); 
-                int number2 = random.nextInt();
+                int number1 = abs(random.nextInt());
+                int number2 = abs(random.nextInt());
                 
                 // Print results every 10 million iterations.
                 if ((i % 10000000) == 0)

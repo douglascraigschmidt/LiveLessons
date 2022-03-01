@@ -98,7 +98,7 @@ public class RunTimer {
                   entry.getKey()))
 
             // Sort the stream by the timing results (key).
-            .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
+            .sorted(Map.Entry.comparingByKey())
 
             // Append the entries in the sorted stream.
             .forEach(entry -> stringBuffer

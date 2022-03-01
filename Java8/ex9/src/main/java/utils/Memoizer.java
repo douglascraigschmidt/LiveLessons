@@ -57,6 +57,7 @@ public class Memoizer<K, V>
      * no value associated with the key then the function is called to
      * create the value and store it in the cache before returning it.
      */
+    @Override
     public V apply(final K key) {
         return mCache.computeIfAbsent(key, mFunction);
     }

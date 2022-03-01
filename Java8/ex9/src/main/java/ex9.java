@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toMap;
 
 /**
  * This example showcases and benchmarks the use of a Java
- * object-oriented and functional programming feature in the context
+ * object-oriented and functional programming features in the context
  * of a Java ConcurrentHashMap, a Java SynchronizedMap, and a HashMap
  * protected with a Java StampedLock used to compute/cache/retrieve
  * large prime numbers.  This example also demonstrates the Java
@@ -78,7 +78,7 @@ public class ex9 {
 
         // Generate a list of random large integers.
         return new Random()
-                // Generate "count" random large ints
+                // Generate a stream of "count" random large ints.
                 .ints(count,
                         // Try to generate duplicates.
                         maxValue - count,
@@ -262,8 +262,8 @@ public class ex9 {
         int n = primeCandidate;
 
         if (n > 3)
-            // This algorithm is intentionally inefficient to burn
-            // lots of CPU time!
+            // This "brute force" algorithm is intentionally
+            // inefficient to burn lots of CPU time!
             for (int factor = 2;
                  factor <= n / 2;
                  ++factor)

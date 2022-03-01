@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.*;
 
+import static java.lang.Math.abs;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -48,7 +49,9 @@ public class ex38 {
         .rangeClosed(1, 1_000_000)
 
         // Create a stream of GCDParam objects initialized to random values.
-        .mapToObj(___ -> new GCDParam(sRANDOM.nextInt(), sRANDOM.nextInt()))
+        .mapToObj(___ -> 
+                  new GCDParam(abs(sRANDOM.nextInt()), 
+                               abs(sRANDOM.nextInt())))
 
         // Trigger intermediate operations and collect into list.
         .collect(toList());

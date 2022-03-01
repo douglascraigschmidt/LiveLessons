@@ -108,7 +108,7 @@ public abstract class CountDownTimer {
         // will self-deadlock!
         mLock.lock();
         try {
-            // Shared mutable state.
+            // Update shared mutable state.
             mCancelled = true;
 
             // Shutdown the ScheduledExecutorService immediately.
@@ -212,7 +212,7 @@ public abstract class CountDownTimer {
                     mLock.unlock();
                 }
             }
-            };
+        };
 
         // Initially schedule the timerHandler to run immediately.
         mScheduledExecutorService
