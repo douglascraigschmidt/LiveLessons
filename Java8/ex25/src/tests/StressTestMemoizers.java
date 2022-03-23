@@ -100,7 +100,7 @@ public class StressTestMemoizers
 
         // The list of threads that will perform the stress test.
         List<Thread> threads = IntStream
-            // Iterate through the number of threads to create.
+            // Iterate through the number of threads.
             .range(0, Options.instance().numberOfThreads())
 
             // Create a new thread to perform primality checking for a

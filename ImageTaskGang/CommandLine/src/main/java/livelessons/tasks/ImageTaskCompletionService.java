@@ -57,7 +57,7 @@ public abstract class ImageTaskCompletionService
         // Connect the Executor with the CompletionService to process
         // result futures concurrently.
         mCompletionService =
-            new ExecutorCompletionService<Image>(getExecutor());
+            new ExecutorCompletionService<>(getExecutor());
     }
 
     /**
@@ -82,7 +82,6 @@ public abstract class ImageTaskCompletionService
         // file, and puts the results of the filtered image in the
         // completion queue.
         for (Filter filter : mFilters) {
-        	
             // The ExecutorCompletionService receives a Callable and
             // invokes its call() method, which returns the filtered
             // ImageEntity.
@@ -103,7 +102,7 @@ public abstract class ImageTaskCompletionService
 
     /**
      * Initializes the ImageTaskGang to run each task in the
-     * CachedThreadPool.
+     * designated {@link Executor}.
      */
     @Override
     protected void initiateTaskGang(int initialNumberOfURLs) {

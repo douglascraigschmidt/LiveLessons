@@ -110,7 +110,7 @@ public class ex9 {
             timeTest(new Memoizer<>(this::isPrime,
                                     new ConcurrentHashMap<>()),
                      "concurrentHashMapMemoizer");
-
+        
         // Create and time the use of a stamped lock hash map.
         Function<Integer, Integer> stampedLockHashMapMemoizer =
             timeTest(new Memoizer<>(this::isPrime,

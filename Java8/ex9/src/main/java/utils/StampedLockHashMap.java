@@ -26,14 +26,14 @@ public class StampedLockHashMap<K, V>
     /**
      * The StampedLock instance used to protect the HashMap.
      */
-    private final StampedLock mStampedLock;
+    private final StampedLock mSLock;
 
     /**
      * Constructor initializes the field.
      */
     public StampedLockHashMap(){
         mMap = new HashMap<>();
-        mStampedLock = new StampedLock();
+        mSLock = new StampedLock();
     }
 
     /**
@@ -76,34 +76,38 @@ public class StampedLockHashMap<K, V>
     /**
      * If {@code key} is not already associated with a value (or is
      * mapped to null) then compute its value using the given {@code
-     * mappingFunction} and enter it into the map (unless it's null).
+     * mappingFunc} and enter it into the map (unless it's null).
      */
-    public V computeIfAbsent(K key,
-                             Function<? super K, ? extends V> mappingFunction) {
+    public V computeIfAbsent
+        (K key,
+         Function<? super K, ? extends V> mappingFunc) {
         // Determine the appropriate strategy to use!
-        switch (Options.instance().stampedLockStrategy()) {
-        case 'W': return computeIfAbsentWriteLock(key, mappingFunction);
-        case 'C': return computeIfAbsentConditionalWrite(key, mappingFunction);
-        case 'O': return computeIfAbsentOptimisticRead(key, mappingFunction);
-        default: throw new IllegalArgumentException();
-        }
+        return switch (Options.instance().stampedLockStrategy()) {
+        case 'W' -> computeIfAbsentWriteLock(key, mappingFunc);
+        case 'C' -> computeIfAbsentConditionalWrite(key, mappingFunc);
+        case 'O' -> computeIfAbsentOptimisticRead(key, mappingFunc);
+        default -> throw new IllegalArgumentException();
+        };
     }
 
     /**
      * This implementation uses a conventional write lock, which is a
      * pessimistic lock.
      */
-    private V computeIfAbsentWriteLock(K key,
-                                       Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentWriteLock
+        (K key,
+         Function<? super K, ? extends V> mappingFunction) {
         // Acquire the lock for writing.
-        long stamp = mStampedLock.writeLock();
+        long stamp = mSLock.writeLock();
 
+        // The following code is accessed exclusively by the
+        // thread that owns the writelock!
         try {
             // Get the current value (if any).
             V value = mMap.get(key);
 
-            // This is the slow path, i.e., the key does not have a value
-            // associated with it in the map.
+            // This is the slow path, i.e., the key does not have a
+            // value associated with it in the map.
             if (value == null) {
                 // Apply the mapping function.
                 value = mappingFunction.apply(key);
@@ -119,7 +123,7 @@ public class StampedLockHashMap<K, V>
             return value;
         } finally {
             // Unlock the write stamp.
-            mStampedLock.unlockWrite(stamp);
+            mSLock.unlockWrite(stamp);
         }
     }
 
@@ -127,11 +131,14 @@ public class StampedLockHashMap<K, V>
      * This implementation uses a conditional write lock, which is a
      * bit more optimistic.
      */
-    private V computeIfAbsentConditionalWrite(K key,
-                                              Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentConditionalWrite
+        (K key,
+         Function<? super K, ? extends V> mappingFunction) {
         // Acquire the lock for reading.
-        long stamp = mStampedLock.readLock();
+        long stamp = mSLock.readLock();
 
+        // This code can be executed by multiple threads that
+        // share the readlock!
         try {
             // Try to get the value from the map via key.
             V value = mMap.get(key);
@@ -142,19 +149,15 @@ public class StampedLockHashMap<K, V>
                 return value;
             else {
                 // Use a for-ever loop to avoid redundant code.
-                for(;;) {
-                    // Try upgrade to writelock (non-blocking).
-                    long ws = mStampedLock.tryConvertToWriteLock(stamp);
-
+                for (long ws;;) {
+                    // Try upgrade to writelock (non-blocking), where
                     // ws is non-zero on success.
-                    if (ws != 0L) {
+                    if ((ws = mSLock.tryConvertToWriteLock(stamp)) != 0L) {
                         // Update stamp to ws.
                         stamp = ws;
 
                         // Apply mapping function to compute value.
-                        value = mappingFunction.apply(key);
-
-                        if (value != null)
+                        if ((value = mappingFunction.apply(key)) != null)
                             // Put the key in the map on success.
                             mMap.put(key, value);
 
@@ -162,22 +165,14 @@ public class StampedLockHashMap<K, V>
                         break;
                     } else {
                         // Release the read lock.
-                        mStampedLock.unlockRead(stamp);
+                        mSLock.unlockRead(stamp);
 
                         // Block acquiring the write lock.
-                        stamp = mStampedLock.writeLock();
+                        stamp = mSLock.writeLock();
 
                         // Start over again with the write lock held.
-                        value = mMap.get(key);
-
-                        if (value == null)
-                            // Loop around again since the key doesn't
-                            // have a value yet.
-                            continue;
-                        else
-                            // The key already has a value, so break
-                            // out of the loop and return it.
-                            break;
+                        if ((value = mMap.get(key)) != null)
+                            break; // Key has a value so exit loop.
                     }
                 }
             }
@@ -186,16 +181,17 @@ public class StampedLockHashMap<K, V>
             return value;
         } finally {
             // Unlock the stamp (which might be read or write).
-            mStampedLock.unlock(stamp);
+            mSLock.unlock(stamp);
         }
     }
 
     /**
-     * This implementation uses a optimistic read lock, which is
+     * This implementation uses an optimistic read lock, which is
      * optimistic by its very nature ;-).
      */
-    private V computeIfAbsentOptimisticRead(K key,
-                                            Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentOptimisticRead
+        (K key,
+         Function<? super K, ? extends V> mappingFunction) {
         // Initialize some local variables.
         long stamp = 0L;
         V value = null;
@@ -205,42 +201,39 @@ public class StampedLockHashMap<K, V>
         // Try acquiring the lock optimistically a certain # of times.
         for (; tries < maxTries; tries++) {
             // "Acquire" the lock for optimistic reading.
-            stamp = mStampedLock.tryOptimisticRead();
+            stamp = mSLock.tryOptimisticRead();
 
             // Get current value (if any) via optimistic read lock.
             value = mMap.get(key);
 
             // Break out if no writer occurred during this window.
-            if (mStampedLock.validate(stamp))
+            if (mSLock.validate(stamp))
                 break;
         }
 
-        // If we didn't get a valid value within maxTries then revert
-        // to conditional write strategy.
+        // If we didn't get a valid value within maxTries iterations
+        // then revert to conditional write strategy.
         if (tries == maxTries)
             return computeIfAbsentConditionalWrite(key,
                                                    mappingFunction);
         else if (value == null) {
             // This is the first time in for that key.
 
-            // Try upgrade the optimistic readlock to a writelock (non-blocking).
-            stamp = mStampedLock.tryConvertToWriteLock(stamp);
-
-            if (stamp == 0L) 
+            // Try upgrade the optimistic readlock to a writelock
+            // (non-blocking).
+            if ((stamp = mSLock.tryConvertToWriteLock(stamp)) == 0L)
                 // Revert to conditional write strategy.
                 return computeIfAbsentConditionalWrite(key,
                                                        mappingFunction);
             else
                 try {
                     // Apply mapping function to compute the value.
-                    value = mappingFunction.apply(key);
-
-                    if (value != null)
+                    if ((value = mappingFunction.apply(key)) != null)
                         // Put the key in the map on success.
                         mMap.put(key, value);
                 } finally {
                     // Unlock the write lock.
-                    mStampedLock.unlockWrite(stamp);
+                    mSLock.unlockWrite(stamp);
                 }
         }
 

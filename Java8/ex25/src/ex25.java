@@ -12,9 +12,10 @@ import static java.util.stream.Collectors.toList;
 /**
  * This example shows various ways to implement and apply synchronous
  * and asynchronous memoizers using the Java ExecutorService,
- * functional interfaces, streams, and completable futures.
- * Memoization is described at
- * https://en.wikipedia.org/wiki/Memoization.
+ * functional interfaces, streams, and completable futures.  It also
+ * shows the performance difference between synchronized and
+ * concurrent collections. Memoization is described at
+ * http://en.wikipedia.org/wiki/Memoization.
  */
 public class ex25 {
     /**
@@ -69,15 +70,18 @@ public class ex25 {
      * @return A {@link List} of random numbers
      */
     private List<Long> makeRandomNumbers() {
+        // Get the values set either by default or
+        // via options set from the command-line.
         var randomNumberCount = Options.instance().randomNumberCount();
         var maxValue = Options.instance().maxValue();
+
         return new Random()
             // Generate random numbers within the designated range.
             .longs(randomNumberCount,
                    maxValue - randomNumberCount,
                    maxValue)
 
-            // Convert longs to Longs.
+            // Convert primitive longs to Longs.
             .boxed()
 
             // Collect the random numbers into a list.

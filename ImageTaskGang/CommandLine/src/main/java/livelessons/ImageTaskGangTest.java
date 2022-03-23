@@ -41,7 +41,8 @@ public class ImageTaskGangTest {
      * strategies, so they can be sorted and displayed when the
      * program is finished.
      */
-    private static final Map<String, List<Long>> mResultsMap = new HashMap<>();
+    private static final Map<String, List<Long>> mResultsMap =
+        new HashMap<>();
 
     /**
      * Java requires a static main() entry point to run the console
