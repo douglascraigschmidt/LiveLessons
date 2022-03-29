@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ex26" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="ex26" />
+    <module name="Example 25" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

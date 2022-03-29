@@ -4,9 +4,14 @@
  */
 class MyTask implements Runnable {
     /**
-     * Current phase number.
+     * Current entry phase number.
      */
-    int mPhaseNumber;
+    int mEntryPhase;
+
+    /**
+     * Current entry phase number.
+     */
+    int mExitPhase = -1;
 
     /**
      * The task number.
@@ -21,10 +26,12 @@ class MyTask implements Runnable {
     }
 
     /**
-     * Set the phase number.
+     * Set the phase numbers.
      */
-    void setPhaseNumber(int number) {
-        mPhaseNumber = number;
+    void setPhaseNumbers(int entryPhase,
+                         int exitPhase) {
+        mEntryPhase = entryPhase;
+        mExitPhase = exitPhase;
     }
 
     /**
@@ -32,11 +39,16 @@ class MyTask implements Runnable {
      */
     @Override
     public void run() {
+        String exitPhase = mExitPhase == -1
+          ? ""
+          : " and exit phase #" + mExitPhase;
+
         // Print out some diagnostic information.
         System.out.println("Task #" 
                            + mTaskNumber
-                           + " has phase #" 
-                           + mPhaseNumber 
+                           + " has entry phase #"
+                           + mEntryPhase
+                           + exitPhase
                            + " at " 
                            + System.currentTimeMillis());
     }

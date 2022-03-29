@@ -54,8 +54,8 @@ public class ex26 {
     }
 
     /**
-     * A test showcasing a one-shot Phaser that runs a group of {@code
-     * tasks} simultaneously.
+     * This test showcases a one-shot {@link Phaser} that runs a
+     * {@link List} of {@code tasks} simultaneously.
      */
     private static void runOneShotTasks(List<MyTask> tasks) {
         System.out.println("Entering runOneShotTasks()");
@@ -70,31 +70,20 @@ public class ex26 {
         Phaser exitPhaser = new Phaser(tasks.size());
 
         // Iterate through all the tasks.
-        tasks.forEach(task -> {
-                // Register the party with the phaser.
-                entryPhaser.register();
+        tasks
+            .forEach(task -> {
+                    // Register the party with the phaser.
+                    entryPhaser.register();
 
-                // Create/start a new thread to run the task when all
-                // other threads are ready.
-                new Thread(() -> {
-                        // Await start of all the threads.
-                        int phaseNumber = entryPhaser.arriveAndAwaitAdvance();
+                    // Create/start a new thread to run the task when
+                    // all other threads are ready.
+                    new Thread(makeOneShotRunnable(entryPhaser,
+                                                   exitPhaser,
+                                                   task)).start();
+                });
 
-                        // Set the phase number (used for diagnostics).
-                        task.setPhaseNumber(phaseNumber);
-
-                        // Run the task.
-                        task.run();
-
-                        // Indicate that the thread has arrived at the
-                        // exit barrier and is terminating, which acts
-                        // like CountDownLatch.countDown().
-                        exitPhaser.arrive();
-                }).start();
-            });
-
-        // Allow calling thread to continue and deregister self so
-        // threads can run.
+        // Allow calling thread to continue and deregister itself so
+        // the other threads can start to run.
         entryPhaser.arriveAndDeregister();
 
         // Block on the exit barrier until all the threads exit.
@@ -104,60 +93,105 @@ public class ex26 {
     }
 
     /**
-     * A test that showcases a cyclic Phaser that repeatedly performs
-     * actions on the List of {@code tasks} for a given number of
-     * {@code iterations}.
+     * This factory method creates a {@link Runnable} that
+     * demonstrates the use of Java entry and exit
+     * {@link Phaser} objects.
+     *
+     * @param entryPhaser An entry {@link Phaser} instance
+     * @param exitPhaser  An exit {@link Phaser} instance
+     * @param task A {@link MyTask} instance
+     * @return An initialized {@link Runnable}
      */
-    private static void runCyclicTasks(List<MyTask> tasks, int iterations) {
+    private static Runnable makeOneShotRunnable(Phaser entryPhaser,
+                                                Phaser exitPhaser,
+                                                MyTask task) {
+        // Return a runnable lambda.
+        return () -> {
+            // Await start of all the threads.
+            int phaseNumber = entryPhaser.arriveAndAwaitAdvance();
+
+            // Set the phase numbers (used for diagnostics).
+            task.setPhaseNumbers(phaseNumber,
+                                 exitPhaser.getPhase());
+
+            // Run the task.
+            task.run();
+
+            // Indicate that the thread has arrived at the exit
+            // barrier and is terminating, which acts like
+            // CountDownLatch.countDown().
+            exitPhaser.arrive();
+        };
+    }
+
+    /**
+     * This test showcases a cyclic {@link Phaser} that repeatedly
+     * performs actions on the {@link List} of {@code tasks} for a
+     * given number of {@code iterations}.
+     */
+    private static void runCyclicTasks(List<MyTask> tasks,
+                                       int iterations) {
         System.out.println("Entering runCyclicTasks()");
 
         // Create a phaser that iterates 'iterations' number of times.
         Phaser phaser = new Phaser() {
                 /**
                  * Hook method that decides whether to terminate the
-                 * phaser or not.
+                 * phaser or not at the end of each phase.
                  */
                 @Override
                 protected boolean onAdvance(int phase, int regParties) {
-                    // Terminate phaser when we've reached the number of
-                    // iterations or there are no more parties registered.
+                    // Terminate phaser when the number of iterations
+                    // are reached or no more parties are registered.
                     return (phase + 1) == iterations || regParties == 0;
                 }
             };
 
         // Register the calling thread (to defer worker threads
-        // advancing to next phase until the end of this method) and
-        // all of the tasks (so we don't need to do this within the
-        // forEach() loop below).
+        // advancing to next phase via a loop) and all the tasks (so
+        // we don't need to do this within forEach() below).
         phaser.bulkRegister(1 + tasks.size());
 
         // Iterate through all the tasks.
-        tasks.forEach(task -> {
-                // Create/start a new thread to run the task.
-                new Thread(() -> { 
-                        do {
-                            // Run the task.
-                            task.run();
-
-                            // Await phase completion of all other
-                            // tasks/threads.
-                            int phaseNumber = phaser.arriveAndAwaitAdvance();
-
-                            // Set phase number (used for
-                            // diagnostics).
-                            task.setPhaseNumber(phaseNumber);
-                        } while (!phaser.isTerminated());
-                        // Loop until the phaser's terminated by
-                        // onAdvance().
-                }).start();
-            });
+        tasks
+            .forEach(task ->
+                     // Create/start a new thread that demonstrates a
+                     // cyclic Phaser.
+                     new Thread(makeCyclicRunnable(phaser, task))
+                                .start());
 
         // Loop until the phaser's terminated by onAdvance().
         while (!phaser.isTerminated())
-            // Await phase completion of all other
-            // tasks/threads.
+            // Await phase completion of all tasks running
+            // in other threads.
             phaser.arriveAndAwaitAdvance();
 
         System.out.println("Leaving runCyclicTasks()");
+    }
+
+    /**
+     * This factory method creates a {@link Runnable} that
+     * demonstrates a Java cyclic {@link Phaser}.
+     *
+     * @param phaser An {@link Phaser} instance
+     * @param task A {@link MyTask} instance
+     * @return An initialized {@link Runnable}
+     */
+    private static Runnable makeCyclicRunnable(Phaser phaser,
+                                               MyTask task) {
+        // Return a runnable lambda.
+        return () -> {
+            do {
+                // Run the task.
+                task.run();
+
+                // Await phase completion of all other tasks/threads.
+                int phaseNumber = phaser.arriveAndAwaitAdvance();
+
+                // Set phase number (used for diagnostics).
+                task.setPhaseNumbers(phaseNumber, -1);
+            } while (!phaser.isTerminated());
+            // Loop until phaser's terminated by onAdvance().
+        };
     }
 }
