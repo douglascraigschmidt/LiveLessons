@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows various ways to apply one-shot and cyclic Java
- * Phasers.
+ * {@link Phaser} objects.
  */
 public class ex26 {
     /**
@@ -37,7 +37,9 @@ public class ex26 {
     }
 
     /**
-     * @return A List of MyTask objects
+     * A factory method that returns a {@link List} of {@link MyTask} objects.
+     *
+     * @return A {@link List} of {@link MyTask}  objects
      */
     private static List<MyTask> makeTasks() {
         // Create and return a list of tasks.
@@ -61,18 +63,20 @@ public class ex26 {
         System.out.println("Entering runOneShotTasks()");
 
         // Create a phaser that plays the role of an entry barrier
-        // and is initialized with a value of 1 to register itself.
+        // and is initialized with a value of 1 to register itself
+        // with the calling thread.
         Phaser entryPhaser = new Phaser(1);
 
         // Create a phaser that plays the role of an exit barrier
-        // and is initialized with the number of tasks to complete.
+        // and is initialized with the number of tasks to complete
+        // before the phaser is considered "done".
         // This usage pattern of Phaser is similar to a CountDownLatch.
         Phaser exitPhaser = new Phaser(tasks.size());
 
         // Iterate through all the tasks.
         tasks
             .forEach(task -> {
-                    // Register the party with the phaser.
+                    // Register the party/thread with the phaser.
                     entryPhaser.register();
 
                     // Create/start a new thread to run the task when
@@ -137,7 +141,9 @@ public class ex26 {
         Phaser phaser = new Phaser() {
                 /**
                  * Hook method that decides whether to terminate the
-                 * phaser or not at the end of each phase.
+                 * phaser or not at the end of each phase.  When
+                 * {@code onAdvance()} returns true then the phaser
+                 * is considered "terminated".
                  */
                 @Override
                 protected boolean onAdvance(int phase, int regParties) {
