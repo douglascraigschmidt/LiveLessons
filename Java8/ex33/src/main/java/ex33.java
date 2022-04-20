@@ -31,7 +31,7 @@ public class ex33 {
         /**
          * The {@link ReentrantLock}.
          */ 
-        final ReentrantLock mLock;
+        final Lock mLock;
 
         /**
          * Keeps track of whether the lock was obtained.
@@ -41,7 +41,7 @@ public class ex33 {
         /**
          * Constructor initializes the field.
          */
-        ManagedLocker(ReentrantLock lock) {
+        ManagedLocker(Lock lock) {
             mLock = lock; 
         }
 
@@ -110,18 +110,6 @@ public class ex33 {
     }
 
     /**
-     * A {@link ReentrantLock} used for the tests.
-     */
-    static ReentrantLock sLock = new ReentrantLock();
-
-    /**
-     * A {@link BlockingQueue} used for the tests that's implemented
-     * via an {@link ArrayBlockingQueue}.
-     */
-    static BlockingQueue<String> sQueue =
-        new ArrayBlockingQueue<>(10);
-
-    /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) throws InterruptedException {
@@ -136,11 +124,14 @@ public class ex33 {
      * Test the ManagedLocker implementation.
      */
     private static void testManagedLocker() throws InterruptedException {
+         // A ReentrantLock used for the tests.
+         Lock lock = new ReentrantLock();
+
         // Create a ManagedLocker that's associated with sLock.
-        ManagedLocker managedLocker = new ManagedLocker(sLock);
+        ManagedLocker managedLocker = new ManagedLocker(lock);
 
         // Acquire the lock.
-        sLock.lock();
+        lock.lock();
 
         System.out.println("Waiting to acquire the lock at time "
                            + System.currentTimeMillis() / 1000);
@@ -164,15 +155,20 @@ public class ex33 {
         Thread.sleep(1000);
 
         // Release the lock.
-        sLock.unlock();
+        lock.unlock();
     }
 
     /**
      * Test the QueueTaker implementation.
      */
     private static void testQueueTaker() throws InterruptedException {
+        // A BlockingQueue used for the tests that's implemented
+        // via an ArrayBlockingQueue.
+        BlockingQueue<String> queue =
+                new ArrayBlockingQueue<>(10);
+
         // Create a QueueTaker that's associated with sQueue.
-        QueueTaker<String> queueTaker = new QueueTaker<>(sQueue);
+        QueueTaker<String> queueTaker = new QueueTaker<>(queue);
 
         System.out.println("Waiting to take an item at time "
                            + System.currentTimeMillis() / 1000);
@@ -201,7 +197,7 @@ public class ex33 {
         Thread.sleep(1000);
 
         // Put an item into the queue.
-        sQueue.put("hello");
+        queue.put("hello");
     }
 }
 

@@ -93,8 +93,9 @@ public class StampedLockHashMap<K, V>
      * This implementation uses a conventional write lock, which is a
      * pessimistic lock.
      */
-    private V computeIfAbsentWriteLock(K key,
-                                       Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentWriteLock
+                  (K key,
+                   Function<? super K, ? extends V> mappingFunction) {
         // Acquire the lock for writing.
         long stamp = mStampedLock.writeLock();
 
@@ -124,8 +125,9 @@ public class StampedLockHashMap<K, V>
      * This implementation uses a conditional write lock, which is a
      * bit more optimistic.
      */
-    private V computeIfAbsentConditionalWrite(K key,
-                                              Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentConditionalWrite
+                  (K key,
+                   Function<? super K, ? extends V> mappingFunction) {
         // Acquire the lock for reading.
         long stamp = mStampedLock.readLock();
 
@@ -140,7 +142,7 @@ public class StampedLockHashMap<K, V>
             else {
                 // Use a loop to avoid redundant code.
                 for(;;) {
-                    // Try converting to writelock (non-blocking).
+                    // Try upgrading/converting to writelock (non-blocking).
                     long ws = mStampedLock.tryConvertToWriteLock(stamp);
 
                     // ws is non-zero on success.
@@ -191,8 +193,9 @@ public class StampedLockHashMap<K, V>
      * This implementation uses a optimistic read lock, which is
      * optimistic by its very nature ;-).
      */
-    private V computeIfAbsentOptimisticRead(K key,
-                                            Function<? super K, ? extends V> mappingFunction) {
+    private V computeIfAbsentOptimisticRead
+                  (K key,
+                   Function<? super K, ? extends V> mappingFunction) {
         // Initialize some local variables.
         long stamp = 0L;
         V value = null;
@@ -220,7 +223,7 @@ public class StampedLockHashMap<K, V>
         else if (value == null) {
             // This is the first time in for that key.
 
-            // Try converting to writelock (non-blocking).
+            // Try upgrading/converting to writelock (non-blocking).
             stamp = mStampedLock.tryConvertToWriteLock(stamp);
 
             if (stamp == 0L) 

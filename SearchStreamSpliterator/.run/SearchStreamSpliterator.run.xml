@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SearchStreamGang" type="Application" factoryName="Application">
+  <configuration default="false" name="SearchStreamSpliterator" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="jbr-11" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="livelessons.SearchStreamGangTest" />
-    <module name="SearchStreamGang.main" />
+    <option name="MAIN_CLASS_NAME" value="Main" />
+    <module name="SearchStreamSpliterator.main" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
