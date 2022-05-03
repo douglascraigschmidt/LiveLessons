@@ -50,8 +50,8 @@ public class ex33 {
             // Initiate a managedBlock() operation that will block
             // until the lock is available.
             .execute(() -> {
-                     rethrowRunnable(() -> 
-                                     ForkJoinPool.managedBlock(managedLocker));
+                    rethrowRunnable(() ->
+                                    ForkJoinPool.managedBlock(managedLocker));
 
                      System.out.println("Actually acquired the lock at time "
                                         + System.currentTimeMillis() / 1000);

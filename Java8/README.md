@@ -214,3 +214,8 @@ Here's an overview of what's currently included in these examples:
          vs. sequential stream using concurrent and non-concurrent
          collectors for various types of Java Map implementations,
          including HashMap and TreeMap.
+
+. ex39 - This program demonstrates various ways to implement an
+         "AtomicLong" class, including using Java StampedLock
+         ReentrantReadWriteLock, synchronized statements, and
+         VarHandle.

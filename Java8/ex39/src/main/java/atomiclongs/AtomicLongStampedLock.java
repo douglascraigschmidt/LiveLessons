@@ -32,12 +32,21 @@ public class AtomicLongStampedLock
      * @return The current value
      */
     public long get() {
-        long stamp = mStampedLock.readLock();
-
-        try {
-            return mValue;
-        } finally {
-            mStampedLock.unlockRead(stamp);
+        long value;
+        // First try an optimistic read.
+        long stamp = mStampedLock.tryOptimisticRead();
+        value = mValue;
+        if (mStampedLock.validate(stamp))
+            // If the optimistic read succeeds we're done.
+            return value;
+        else {
+            // Otherwise, block for a readLock.
+            stamp = mStampedLock.readLock();
+            try {
+               return mValue;
+            } finally {
+              mStampedLock.unlockRead(stamp);
+            }
         }
     }
 
@@ -51,7 +60,7 @@ public class AtomicLongStampedLock
         try {
           mValue++; // writeLock held.
 
-          // Downgrade to a readlock.
+          // Downgrade to a readLock.
           stamp = mStampedLock.tryConvertToReadLock(stamp);
           return mValue;
         } finally {
@@ -68,9 +77,13 @@ public class AtomicLongStampedLock
         long stamp = mStampedLock.writeLock();
 
         try {
-            return --mValue;
+            // writeLock held.
+            --mValue;
+            // Downgrade to a readLock.
+            stamp = mStampedLock.tryConvertToReadLock(stamp);
+            return mValue;
         } finally {
-            mStampedLock.unlockWrite(stamp);
+            mStampedLock.unlock(stamp);
         }
     }
 
