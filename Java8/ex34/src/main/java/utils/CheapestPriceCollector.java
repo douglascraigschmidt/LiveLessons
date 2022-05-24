@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Define a collector that converts a stream of TripResponses into a
- * List that emits the cheapest priced trips(s).
+ * Define a {@link Collector} that converts a stream of {@link Flight} objects into
+ * a {@link List} that emits the cheapest priced trips(s).
  */
 public class CheapestPriceCollector
              implements Collector<Flight,
@@ -42,20 +42,24 @@ public class CheapestPriceCollector
      */
     @Override
     public BiConsumer<List<Flight>, Flight> accumulator() {
-        return (lowestPrices, tripResponse) -> {
+        return (lowestPrices, flight) -> {
             // If the price of the trip is less than the current min
-            // Add it to the lowestPrices List and update the current
+            // add it to the lowestPrices List and update the current
             // min price.
-            if (tripResponse.getPrice() < mMin) {
+            if (flight.getPrice() < mMin) {
+                // If we have a new min then clear out the old list.
                 lowestPrices.clear();
-                lowestPrices.add(tripResponse);
-                mMin = tripResponse.getPrice();
+
+                // Add the new lowest flight to the list.
+                lowestPrices.add(flight);
+
+                // Update mMin with the new lowest price.
+                mMin = flight.getPrice();
 
             // If the price of the trip is equal to the current min
             // add it to the lowestPrices List.
-            } else if (tripResponse.getPrice().equals(mMin)) {
-                lowestPrices.add(tripResponse);
-            }
+            } else if (flight.getPrice().equals(mMin))
+                lowestPrices.add(flight);
         };
     }
 
@@ -64,7 +68,7 @@ public class CheapestPriceCollector
      * The combiner function may fold state from one argument into the
      * other and return that, or may return a new result container.
      *
-     * @return a function which combines two partial results into a
+     * @return A function which combines two partial results into a
      * combined result
      */
     @Override
@@ -77,7 +81,7 @@ public class CheapestPriceCollector
     }
 
     /**
-     * This method is a no-op.
+     * This method is a no-op since {@code IDENTITY_FINISH} is set.
      */
     @Override
     public Function<List<Flight>, List<Flight>> finisher() {
@@ -89,19 +93,20 @@ public class CheapestPriceCollector
      * indicating the characteristics of this Collector.
      *
      * @return An immutable set of collector characteristics, which in
-     * this case is [UNORDERED|IDENTITY_FINISH].
+     * this case is [UNORDERED|IDENTITY_FINISH]
      */
     @Override
     public Set<Characteristics> characteristics() {
-        return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
-                                                      Collector.Characteristics.IDENTITY_FINISH));
+        return Collections
+            .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
+                                        Collector.Characteristics.IDENTITY_FINISH));
     }
 
     /**
      * This static factory method creates a new
      * CheapestFlightCollector.
      *
-     * @return A new CheapestFlightCollector()
+     * @return A new {@link CheapestPriceCollector}
      */
     public static Collector<Flight, List<Flight>, List<Flight>>
     toList() {

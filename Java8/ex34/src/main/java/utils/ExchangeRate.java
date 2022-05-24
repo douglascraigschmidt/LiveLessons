@@ -8,14 +8,14 @@ import java.util.Map;
  */
 public class ExchangeRate {
     /**
-     * A Map of currencies (e.g., US Dollars, Euros, etc.) to their
+     * A {@link Map} of currencies (e.g., US Dollars, Euros, etc.) to their
      * corresponding exchange rates compared with other currencies.
      */
     private final Map<String, Map<String, Double>> mExchangeRate =
         new HashMap<>();
 
     /**
-     * The constructor initializes the Map.
+     * The constructor initializes the {@link Map}.
      */
     public ExchangeRate() {
         Map<String, Double> usdExchangeRates = new HashMap<>();
@@ -55,7 +55,7 @@ public class ExchangeRate {
      * for {@code fromCurrency}.
      *
      * @param fromCurrency The 3 letter currency code to convert from
-     * @return A Map that contains the all known exchange rates for
+     * @return A {@link Map} that contains the all known exchange rates for
      * {@code fromCurrency}
      */
     public Map<String, Double> getRates(String fromCurrency) {

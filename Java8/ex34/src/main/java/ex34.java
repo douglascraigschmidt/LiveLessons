@@ -76,7 +76,8 @@ public class ex34 {
                  .stream()
 
                  // Only allow flights matching the cheapest.
-                 .filter((Flight tr) -> tr.getPrice().equals(min.getPrice())))
+                 .filter(flight ->
+                         flight.getPrice().equals(min.getPrice())))
 
             // If there are any cheapest flights then print them.
             .ifPresent(s -> s
@@ -105,7 +106,7 @@ public class ex34 {
 
         // If there's at least one flight then continue.
         if (sortedFlights.size() > 0) {
-            // Get the cheapest price.
+            // Store the cheapest price.
             Flight cheapest = sortedFlights.get(0);
 
             sortedFlights
@@ -113,7 +114,8 @@ public class ex34 {
                 .stream()
 
                 // Take all elements matching the cheapest price.
-                .takeWhile(tr -> tr.getPrice().equals(cheapest.getPrice()))
+                .takeWhile(flight ->
+                           flight.getPrice().equals(cheapest.getPrice()))
 
                 // Print the cheapest flights.
                 .forEach(flight ->
@@ -155,7 +157,7 @@ public class ex34 {
         // Return a stream containing all flights with converted
         // prices.
         return TestDataFactory
-            // Get all the flights.
+            // Get all the flights that match the given trip request.
             .findFlights(sTrip)
 
             // Convert flight prices via the currency rates.

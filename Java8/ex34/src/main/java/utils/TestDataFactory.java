@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 /**
- * This utility class contains methods that obtain test data.
+ * This utility class contains methods that obtain test data on
+ * {@link Flight} objects.
  */
 public class TestDataFactory {
     /**
@@ -16,6 +17,9 @@ public class TestDataFactory {
     private TestDataFactory() {
     }
 
+    /**
+     * An array of flight information used for testing.
+     */
     private static final String[] sFlightInfo = {
             // Feel free to add more rows to this array to generate more test data!
             "2025-01-01T07:00:00,2025-01-01T10:00:00,2025-02-01T19:00:00,2025-02-02T07:00:00,LHR,JFK,600.00,AA,USD",
@@ -37,16 +41,16 @@ public class TestDataFactory {
     };
 
     /**
-     * Return a Stream containing {@code TripResponse} objects that
-     * match the given {@code tripRequest}.
+     * Return a Stream containing {@link Flight} objects that
+     * match the given {@link TripRequest}.
      */
     public static Stream<Flight> findFlights(TripRequest tripRequest) {
         return Stream
             // Convert the array into a stream.
             .of(sFlightInfo)
 
-            // Convert the strings into TripResponse objects.
-            .map(TestDataFactory::makeTrip)
+            // Convert the strings into Flight objects.
+            .map(TestDataFactory::makeFlight)
 
             // Only keep TripResponse objects that match the
             // tripRequest.
@@ -58,13 +62,13 @@ public class TestDataFactory {
      * indicating the date/time of the initial departure/arrival, the
      * date/time of the return departure/arrival, the airport code for
      * the departing/arriving airports, the price, and the airline
-     * code into the corresponding {@code TripResponse}.
+     * code into the corresponding {@link Flight}.
      *
      * @param tripString A string containing comma-separated values
      * indicating information about the trip
-     * @return The corresponding {@code TripResponse}
+     * @return The corresponding {@link Flight}
      */
-    private static Flight makeTrip(String tripString) {
+    private static Flight makeFlight(String tripString) {
         String[] result = tripString.split(",");
 
         // Create and return a TripResponse via a factory method.
