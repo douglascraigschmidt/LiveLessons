@@ -14,7 +14,7 @@ class ex39 {
     /**
      * Number of iterations to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 10_000_000;
+    private static final int sMAX_ITERATIONS = 100_000_000;
 
     /**
      * Main entry point into the test program.
@@ -66,7 +66,7 @@ class ex39 {
             new Thread(makeRunnable(entryBarrier,
                                     atomicLong::getAndIncrement)),
             new Thread(makeRunnable(entryBarrier,
-                                    atomicLong::getAndDecrement)),
+                                    atomicLong::getAndDecrement)) /* ,
             new Thread(makeRunnable(entryBarrier,
                         atomicLong::get)),
             new Thread(makeRunnable(entryBarrier,
@@ -74,7 +74,7 @@ class ex39 {
                 new Thread(makeRunnable(entryBarrier,
                         atomicLong::get)),
                 new Thread(makeRunnable(entryBarrier,
-                        atomicLong::get))
+                        atomicLong::get)) */
         };
 
         entryBarrier.bulkRegister(threads.length);

@@ -62,6 +62,8 @@ public class AtomicLongStampedLock
 
           // Downgrade to a readLock.
           stamp = mStampedLock.tryConvertToReadLock(stamp);
+          assert (stamp != 0);
+
           return mValue;
         } finally {
           mStampedLock.unlock(stamp); 
@@ -81,6 +83,7 @@ public class AtomicLongStampedLock
             --mValue;
             // Downgrade to a readLock.
             stamp = mStampedLock.tryConvertToReadLock(stamp);
+            assert (stamp != 0);
             return mValue;
         } finally {
             mStampedLock.unlock(stamp);
@@ -93,13 +96,27 @@ public class AtomicLongStampedLock
      * @return the previous value
      */
     public long getAndIncrement() {
-        long stamp = mStampedLock.writeLock();
-        
+        long stamp = mStampedLock.readLock();
+        long value = 0;
+
         try {
-            return mValue++;
+            for (;;) {
+                value = mValue;
+
+                long ws = mStampedLock.tryConvertToWriteLock(stamp);
+                if (ws != 0) {
+                    mValue++;
+                    stamp = ws;
+                    break;
+                } else {
+                    mStampedLock.unlockRead(stamp);
+                    stamp = mStampedLock.writeLock();
+                }
+            }
         } finally {
             mStampedLock.unlockWrite(stamp);
         }
+        return value;
     }
 
     /**
@@ -108,13 +125,27 @@ public class AtomicLongStampedLock
      * @return The previous value
      */
     public long getAndDecrement() {
-        long stamp = mStampedLock.writeLock();
+        long stamp = mStampedLock.readLock();
+        long value = 0;
 
         try {
-            return mValue--;
+            for (;;) {
+                value = mValue;
+
+                long ws = mStampedLock.tryConvertToWriteLock(stamp);
+                if (ws != 0) {
+                    mValue--;
+                    stamp = ws;
+                    break;
+                } else {
+                    mStampedLock.unlockRead(stamp);
+                    stamp = mStampedLock.writeLock();
+                }
+            }
         } finally {
             mStampedLock.unlockWrite(stamp);
         }
+        return value;
     }
 }
 

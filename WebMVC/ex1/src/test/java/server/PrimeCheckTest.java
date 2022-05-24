@@ -108,7 +108,7 @@ public class PrimeCheckTest {
         // Generate and return a List of random Integer objects.
         return new Random()
             // Generate the given # of large random ints.
-            .ints(Options.instance().count(),
+            .ints(Options.instance().count(), 
                   Integer.MAX_VALUE - Options.instance().count(),
                   Integer.MAX_VALUE)
 

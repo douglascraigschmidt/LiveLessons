@@ -11,10 +11,10 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME;
 import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
-     * This Spring controller demonstrates how WebMVC can be used to
-     * handle HTTP GET requests via Java parallel streams programming.
-     * These requests are mapped to methods that determine the primality
-     * of large random {@link Integer} objects.
+ * This Spring controller demonstrates how WebMVC can be used to
+ * handle HTTP GET requests via Java parallel streams programming.
+ * These requests are mapped to methods that determine the primality
+ * of large random {@link Integer} objects.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
