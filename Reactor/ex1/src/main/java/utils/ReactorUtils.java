@@ -95,7 +95,7 @@ public class ReactorUtils {
      */
     public static <T> Flux<T> justConcurrentIf(T item, boolean parallel) {
         return Flux
-                // Just omit this one item.
+                // Just emit this one item.
                 .just(item)
 
                 // Conditionally convert to run concurrently.
@@ -112,7 +112,7 @@ public class ReactorUtils {
      */
     public static <T extends Iterable<? extends T>> Flux<T> fromIterableConcurrentIf(T item, boolean parallel) {
         return Flux
-                // Just omit this one item.
+                // Just emit this one item.
                 .fromIterable(item)
 
                 // Conditionally convert to run concurrently.
@@ -127,7 +127,7 @@ public class ReactorUtils {
      */
     public static <T> Mono<T> fromCallableConcurrent(Callable<T> item) {
           return Mono
-                  // Just omit this one item.
+                  // Just emit this one item.
                   .fromCallable(item)
 
                   // Conditionally convert to run concurrently.
