@@ -35,7 +35,7 @@ public class CheapestPriceCollector
     }
 
     /**
-     * A function that folds a TripResponse into the mutable result
+     * A function that folds a {@link Flight} into the mutable result
      * container.
      *
      * @return a function which folds a value into a mutable result container

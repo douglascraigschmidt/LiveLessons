@@ -7,6 +7,7 @@ import utils.TestDataFactory;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -16,8 +17,8 @@ import static java.util.stream.Collectors.toList;
  * all the minimum values in an unordered list, which is surprisingly
  * not well documented in the programming literature.  These three
  * algorithms print the cheapest flight(s) from a Stream of available
- * flights, which is part of an Flight Listing App (FLApp) that we're
- * creating for an upcoming online courses on Reactive Microservices.
+ * flights, which is part of an Flight Listing App (FLApp) that we've
+ * create for our online course on Scalable Microservices.
  */
 public class ex34 {
     /**
@@ -35,7 +36,7 @@ public class ex34 {
      * Main entry point into the test program.
      */
     public static void main(String[] argv) {
-        // Print the cheapest flights via a two pass algorithm that
+        // Print the cheapest flights via a two-pass algorithm that
         // uses min() and filter().
         printCheapestFlightsMin();
 
@@ -50,7 +51,7 @@ public class ex34 {
     }
 
     /**
-     * Print the cheapest flights via a two pass algorithm that uses
+     * Print the cheapest flights via a two-pass algorithm that uses
      * min() and filter().
      */
     private static void printCheapestFlightsMin() {
@@ -62,16 +63,16 @@ public class ex34 {
             // Collect into a List.
             .collect(toList());
 
-        flightList
-            // Convert the List into a Stream. 
-            .stream()
+        Optional<Flight> min1 = flightList
+                // Convert the List into a Stream.
+                .stream()
 
-            // Find the cheapest flight (returns an Optional).
-            .min(Comparator.comparing(Flight::getPrice))
+                // Find the cheapest flight (returns an Optional).
+                .min(Comparator.comparing(Flight::getPrice));
 
-            // If there's a cheapest flight then find all the cheapest
+        // If there's a cheapest flight then find all the cheapest
             // flights (returns an Optional).
-            .map(min -> flightList
+        min1.map(min -> flightList
                  // Convert the List into a Stream (again).
                  .stream()
 
