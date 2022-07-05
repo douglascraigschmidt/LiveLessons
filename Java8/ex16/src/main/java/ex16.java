@@ -1,6 +1,5 @@
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.functions.BiFunction;
 import reactor.core.publisher.Flux;
 import utils.RunTimer;
 
@@ -38,12 +37,12 @@ public class ex16 {
     /**
      * Max number of times to run the tests.
      */
-    private static final int sMAX_ITERATIONS = 20000;
+    private static final int sMAX_ITERATIONS = 20_000;
 
     /**
      * Default factorial number.  
      */
-    private static final int sDEFAULT_N = 1000;
+    private static final int sDEFAULT_N = 1_000;
 
     /**
      * This is the entry point into the test program.
