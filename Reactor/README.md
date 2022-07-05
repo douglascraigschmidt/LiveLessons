@@ -11,10 +11,11 @@ overview of what's included:
 . ex2 - This example demonstrates various reactive algorithms for
         finding all the minimum values in an unordered list, which is
         surprisingly not well documented in the literature.  These
-        three algorithms return a Flux that emits the cheapest
-        flight(s) from a Flux of available flights, which is part of
-        an Airline Booking App that we're creating for an upcoming
-        MOOC on Reactive Microservices.
+        three algorithms use Project Reactor features to return
+        Flux/Mono reactive types that emit the cheapest flight(s) from
+        a Flux of available flights, which is part of an Airline
+        Booking App we've created an online course on Reactive
+        Microservices.
 
 . ex3 - This program applies Project Reactor features to implement
         various types of backpressure strategies (e.g., ignore,

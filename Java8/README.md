@@ -92,8 +92,9 @@ Here's an overview of what's currently included in these examples:
          for BigIntegers to demonstrate the performance of alternative
          parallel and sequential algorithms, as well as the dangers of
          sharing unsynchronized state between threads.  It illustrates
-         both Java sequential/parallel Streams and RxJava
-         sequential/parallel reactive streams.
+         both Java sequential/parallel streams and sequential/parallel
+         reactive streams implementations via RxJava and Project
+         Reactor.
 
 . ex17 - This example shows various issues associated with using the
          Java streams reduce() terminal operation, including the need

@@ -17,10 +17,10 @@ import java.util.function.Function;
  * This example demonstrates various reactive algorithms for finding
  * all the minimum values in an unordered list, which is surprisingly
  * not well documented in the programming literature.  These three
- * algorithms return a Flux that emits the cheapest flight(s) from a
- * Flux of available flights, which is part of an Flight Listing App
- * (FLApp) that we're creating for an upcoming online courses on
- * Reactive Microservices.
+ * algorithms use Project Reactor features to return Flux/Mono
+ * reactive types that emit the cheapest flight(s) from a Flux of
+ * available flights, which is part of an Airline Booking App we've
+ * created an online course on Reactive Microservices.
  *
  * This example also shows how to use the AsyncTaskBarrier framework
  * and the flatMapMany() operator that converts flight prices to the
@@ -79,8 +79,7 @@ public class ex2 {
         Mono<ExchangeRate> exchangeRates = Mono
             .fromCallable(ExchangeRate::new)
 
-            // Run this computation in the parallel thread pool
-            // (probably overkill ;-)).
+            // Run this computation in the parallel thread pool.
             .subscribeOn(Schedulers.parallel());
 
         // Asynchronously get all the flights.
@@ -204,10 +203,10 @@ public class ex2 {
      *
      * @param toCurrency Current to convert to
      * @param flight Flight containing the price in the {@code
-     * flight.getCurrency()} format
+     *        flight.getCurrency()} format
      * @param rates The exchange rates
      * @return An updated flight whose price reflects the exchange
-     * rate conversion
+     *         rate conversion
      */
     private static Flight convertCurrency(String toCurrency,
                                           Flight flight,
