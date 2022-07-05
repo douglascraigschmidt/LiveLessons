@@ -16,9 +16,10 @@ import static java.util.stream.Collectors.toList;
  * This example demonstrates various functional algorithms for finding
  * all the minimum values in an unordered list, which is surprisingly
  * not well documented in the programming literature.  These three
- * algorithms print the cheapest flight(s) from a Stream of available
- * flights, which is part of an Flight Listing App (FLApp) that we've
- * create for our online course on Scalable Microservices.
+ * algorithms use Java Streams to print the cheapest flight(s) from a
+ * stream of available flights, which is part of an Flight Listing App
+ * (FLApp) that we've created for our online course on Reactive
+ * Microservices.
  */
 public class ex34 {
     /**

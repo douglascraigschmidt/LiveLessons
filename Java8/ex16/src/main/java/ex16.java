@@ -1,6 +1,7 @@
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.functions.BiFunction;
+import reactor.core.publisher.Flux;
 import utils.RunTimer;
 
 import java.math.BigInteger;
@@ -82,6 +83,10 @@ public class ex16 {
 
         runTest("RxJavaParallelFlowableFactorial",
                 RxJavaParallelFlowableFactorial::factorial,
+                n);
+
+        runTest("ReactorParallelFluxFactorial",
+                ReactorParallelFluxFactorial::factorial,
                 n);
 
         runTest("SynchronizedParallelFactorial",
@@ -293,6 +298,35 @@ public class ex16 {
                 // Block until all the results are finished.  If n was
                 // 0 then return 1.
                 .blockingSingle(BigInteger.ONE);
+        }
+    }
+
+    /**
+     * This class demonstrates how to apply the Project Reactor
+     * ParallelFlux feature to compute factorials in parallel.
+     */
+    private static class ReactorParallelFluxFactorial {
+        /**
+         * Return the factorial for the given {@code n} using the
+         * Project Reactor ParallelFlux and its reduce() operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return Flux
+                // Create a stream of longs from 1 to n.
+                .range(1, n.intValue())
+
+                // Convert the Flowable into a ParallelFlux.
+                .parallel()
+
+                // Create a BigInteger from the long value.
+                .map(BigInteger::valueOf)
+
+                // Use reduce() to perform a reduction on the elements
+                // of this stream to compute the factorial.
+                .reduce(BigInteger::multiply)
+
+                // Block until all the results are finished.
+                .block();
         }
     }
 

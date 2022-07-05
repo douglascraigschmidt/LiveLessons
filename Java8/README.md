@@ -176,15 +176,15 @@ Here's an overview of what's currently included in these examples:
 . ex33 - This example shows examples of applying the ForkJoinPool
          .ManagedBlocker interface, which are based on the code
          fragments shown in the Java documentation at
-         https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.ManagedBlocker.html
+         docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.ManagedBlocker.html
 
 . ex34 - This example demonstrates various functional algorithms for
          finding all the minimum values in an unordered list, which is
          surprisingly not well documented in the programming
-         literature.  These three algorithms print the cheapest
-         flight(s) from a Stream of available flights, which is part
-         of an Flight Listing App (FLApp) that we're creating for an
-         upcoming online courses on Reactive Microservices.
+         literature.  These three algorithms use Java Streams to print
+         the cheapest flight(s) from a stream of available flights,
+         which is part of an Flight Listing App (FLApp) that we've
+         created for our online course on Reactive Microservices.
 
 . ex35 - This example first demonstrates how the testFlatMap()
          intermediate operation doesn't scale in a Java parallel

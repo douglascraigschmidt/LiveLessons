@@ -37,7 +37,7 @@ public class TripRequest {
     private Integer passengers;
 
     /**
-     * Default constructor needed for WebFlux param passing.
+     * Default constructor.
      */
     public TripRequest() {
     }

@@ -54,7 +54,7 @@ public class Flight {
     String currency;
 
     /**
-     * Default constructor needed for WebFlux param passing.
+     * Default constructor.
      */
     public Flight() {
     }
