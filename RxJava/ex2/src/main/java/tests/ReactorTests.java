@@ -166,7 +166,7 @@ public final class ReactorTests {
 
             // You can also get the iterables via a different thread
             // pool.
-            .subscribeOn(Schedulers.elastic())
+            .subscribeOn(Schedulers.boundedElastic())
 
             .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 

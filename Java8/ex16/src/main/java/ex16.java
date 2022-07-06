@@ -240,7 +240,8 @@ public class ex16 {
 
             /**
              * Multiply the running total by {@code n}.  This method
-             * is not synchronized, so it may incur race conditions.
+             * is not synchronized, so it will incur race conditions
+             * when run on a multi-core processor!
              */
             void multiply(BigInteger n) {
                 mTotal = mTotal.multiply(n);
@@ -439,7 +440,7 @@ public class ex16 {
                 // Create a stream of longs from 1 to n.
                 .range(1, n.intValue())
 
-                // Convert the Flowable into a ParallelFlux.
+                // Convert the Flux into a ParallelFlux.
                 .parallel()
 
                 // Create a BigInteger from the long value.

@@ -1,17 +1,17 @@
 package tests;
 
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.FileUtils;
 import utils.Options;
 import utils.RunTimer;
-import utils.RxUtils;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 /**
@@ -82,14 +82,6 @@ public final class RxJavaTests {
         (Function<URL, File> downloadAndStoreImage,
          String testName,
          Scheduler scheduler) {
-        Function<URL, Observable<File>> downloadAndStore = url -> RxUtils
-            // Emit this url and run it concurrently in the common
-            // fork-join pool.
-            .fromCallableConcurrentIf(url, true)
-
-            // Transform each URL to a file by downloading each image.
-            .map(downloadAndStoreImage);
-
         // Get and print a list of files to the downloaded images.
         Observable
             // Convert the URLs in the input list into a stream of
@@ -130,10 +122,15 @@ public final class RxJavaTests {
         (Function<URL, File> downloadAndStoreImage,
          String testName) {
 
-        RxUtils
-            // Convert the URLs in the input list into a parallel
-            // flowable stream.
-            .fromIterableParallel(Options.instance().getUrlList())
+        Flowable
+            // Convert collection into a flowable.
+            .fromIterable(Options.instance().getUrlList())
+
+            // Create a ParallelFlowable.
+            .parallel()
+
+            // Run this flow in the common fork-join pool.
+            .runOn(Schedulers.from(ForkJoinPool.commonPool()))
 
             // Transform each url to a file via downloadAndStoreImage,
             // which downloads each image.
