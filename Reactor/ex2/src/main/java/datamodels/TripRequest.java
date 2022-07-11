@@ -1,10 +1,13 @@
 package datamodels;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
 /**
  * Data structure that defines a request for a trip.
  */
+@Builder
 public class TripRequest {
     /**
      * Date and time of the departure.

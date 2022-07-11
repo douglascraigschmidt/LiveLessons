@@ -1,3 +1,7 @@
+plugins {
+    id "io.franzbecker.gradle-lombok" version "4.0.0"
+}
+
 group 'livelessons'
 version '1.0-SNAPSHOT'
 
@@ -13,4 +17,6 @@ repositories {
 dependencies {
     implementation 'io.projectreactor:reactor-core:3.4.19'
     implementation 'io.projectreactor.addons:reactor-extra:3.4.8'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }

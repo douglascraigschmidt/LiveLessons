@@ -1,5 +1,7 @@
 package datamodels;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
  * returned by various microservices to indicate which flight legs
  * match a {@code TripRequest}.
  */
+@Builder
 public class Flight {
     /**
      * Date and time of the initial departure.

@@ -4,10 +4,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.math.MathFlux;
-import utils.AsyncTaskBarrier;
-import utils.CheapestPriceCollector;
-import utils.ExchangeRate;
-import utils.TestDataFactory;
+import utils.*;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -44,16 +41,25 @@ public class ex2 {
     public static void main(String[] argv) {
         // Print the cheapest flights via a two pass algorithm that
         // uses min() and filter().
-        AsyncTaskBarrier.register(ex2::printCheapestFlightsMin);
+        AsyncTaskBarrier
+                .register(() -> ex2
+                          .runTest(ex2::printCheapestFlightsMin,
+                                   "printCheapestFlightsMin"));
 
         // Print the cheapest flights via a two-pass algorithm that
         // first calls sort() to order the trips by price and then
         // uses takeWhile() to return the cheapest flight(s).
-        AsyncTaskBarrier.register(ex2::printCheapestFlightsSorted);
+        AsyncTaskBarrier
+                .register(() -> ex2
+                        .runTest(ex2::printCheapestFlightsSorted,
+                                 "printCheapestFlightsSorted"));
 
         // Print the cheapest flights via a one-pass algorithm and a
         // custom Java Streams Collector.
-        AsyncTaskBarrier.register(ex2::printCheapestFlightsOnepass);
+        AsyncTaskBarrier
+                .register(() -> ex2
+                        .runTest(ex2::printCheapestFlightsOnepass,
+                                 "printCheapestFlightsOnepass"));
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier
@@ -66,6 +72,24 @@ public class ex2 {
 
         // Print the results.
         System.out.println("Completed " + testCount + " tests");
+        System.out.println(RunTimer.getTimingResults());
+    }
+
+    /**
+     * Run the test named {@code testName} by applying the {@code
+     * downloadAndStoreImage} function.
+     */
+    private static Mono<Void> runTest(Function<Void, Mono<Void>> findMinFlights,
+                                      String testName) {
+        // Let the system garbage collect.
+        System.gc();
+
+        return RunTimer
+            // Record how long the test takes to run.
+            .timeRun(() ->
+                     // Run the test.
+                     findMinFlights.apply(null),
+                     testName);
     }
 
     /**
@@ -107,7 +131,7 @@ public class ex2 {
      * Print the cheapest flights via a two pass algorithm that uses
      * min() and filter().
      */
-    private static Mono<Void> printCheapestFlightsMin() {
+    private static Mono<Void> printCheapestFlightsMin(Void unused) {
         Flux<Flight> flights = ex2
             // Convert the flights into the requested currency.
             .convertFlightPrices(sTrip.getCurrency());
@@ -138,7 +162,7 @@ public class ex2 {
      * calls sort() to order the trips by price and then uses
      * takeWhile() to return the cheapest flight(s).
      */
-    private static Mono<Void> printCheapestFlightsSorted() {
+    private static Mono<Void> printCheapestFlightsSorted(Void unused) {
         Flux<Flight> sortedFlights = ex2
             // Convert the flights into the requested currency.
             .convertFlightPrices(sTrip.getCurrency())
@@ -173,7 +197,7 @@ public class ex2 {
      * Print the cheapest flights via a one-pass algorithm and a
      * custom Java Streams Collector.
      */
-    private static Mono<Void> printCheapestFlightsOnepass() {
+    private static Mono<Void> printCheapestFlightsOnepass(Void unused) {
         Flux<Flight> lowestPrices = ex2
             // Convert the flights into the requested currency.
             .convertFlightPrices(sTrip.getCurrency())
