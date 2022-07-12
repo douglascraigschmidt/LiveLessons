@@ -1,25 +1,18 @@
 package utils;
 
 import datamodels.Flight;
-import datamodels.TripRequest;
+import datamodels.FlightRequest;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * This class creates a list random round flight flights for any
- * number of airlines, airports, travel dates, and number of daily
- * flights.
+ * This class creates a list random round flight flights for any number
+ * of airlines, airports, travel dates, and number of daily flights.
  */
 public class FlightFactory {
     private static final Random random = new Random();
@@ -36,8 +29,6 @@ public class FlightFactory {
     private static final int AIRLINE_DAILY_FLIGHTS = 1;
     private static final int DAYS = 3;
     private static final String CURRENCY = "USD";
-    private static final int MAX_AIRPORTS = 10;
-    private static final int MAX_AIRLINES = 10;
 
     @Builder
     private static class FlightPath {
@@ -46,16 +37,43 @@ public class FlightFactory {
         int distance;
     }
 
+    /**
+     * Builds a list of flights matching a flight request built using the
+     * first flight in a random list of flights. This method should only
+     * be used for FLIGHT and BEST_PRICE requests.
+     *
+     * @return A random list of Flight objects.
+     */
+    public static List<Flight> buildExpectedFlights(String currency, List<String> currencies) {
+        List<Flight> flights = FlightFactory.builder().build();
+        FlightRequest flightRequest = FlightFactory.buildRequestFrom(flights.get(0));
+        flightRequest.setCurrency(currency);
+
+        return flights.stream()
+                .filter(flight ->
+                        flight.getDepartureAirport()
+                                .equals(flightRequest.getDepartureAirport()) &&
+                                flight.getDepartureDate()
+                                        .equals(flightRequest.getDepartureDate()) &&
+                                flight.getArrivalAirport()
+                                        .equals(flightRequest.getArrivalAirport()))
+                .peek(flight -> {
+                    String randomCurrency = currencies.get(random.nextInt(currencies.size()));
+                    flight.setCurrency(randomCurrency);
+                })
+                .collect(Collectors.toList());
+    }
+
     public static RandomFlightBuilder builder() {
         return new RandomFlightBuilder();
     }
 
-    public static List<Flight> randomFlight() {
+    public static Flight randomFlight() {
         return builder()
-            .airlines(1)
-            .airports(2)
-            .dailyFlights(1)
-            .build();
+                .airlines(1)
+                .airports(2)
+                .dailyFlights(1)
+                .build().get(0);
     }
 
     public static class RandomFlightBuilder {
@@ -88,8 +106,8 @@ public class FlightFactory {
 
         public RandomFlightBuilder airlines(List<String> airlines) {
             this.airlines = airlines.stream()
-                .distinct()
-                .collect(Collectors.toList());
+                    .distinct()
+                    .collect(Collectors.toList());
             return this;
         }
 
@@ -105,8 +123,8 @@ public class FlightFactory {
 
         public RandomFlightBuilder airports(List<String> airports) {
             this.airports = airports.stream()
-                .distinct()
-                .collect(Collectors.toList());
+                    .distinct()
+                    .collect(Collectors.toList());
             return this;
         }
 
@@ -167,96 +185,90 @@ public class FlightFactory {
 
     private static List<Flight> randomFlights(RandomFlightBuilder builder) {
         List<FlightPath> flightPaths = new ArrayList<>();
-
         for (int i = 0; i < builder.airports.size() - 1; i++) {
             String fromAirport = builder.airports.get(i);
-
             for (int j = i + 1; j < builder.airports.size(); j++) {
                 String toAirport = builder.airports.get(j);
-
                 int distance = random(builder.minDistanceKm, builder.maxDistanceKm);
-
                 flightPaths.add(FlightPath.builder()
-                                .fromAirport(fromAirport)
-                                .toAirport(toAirport)
-                                .distance(distance)
-                                .build());
-
+                        .fromAirport(fromAirport)
+                        .toAirport(toAirport)
+                        .distance(distance)
+                        .build());
                 flightPaths.add(FlightPath.builder()
-                                .fromAirport(toAirport)
-                                .toAirport(fromAirport)
-                                .distance(distance)
-                                .build());
+                        .fromAirport(toAirport)
+                        .toAirport(fromAirport)
+                        .distance(distance)
+                        .build());
             }
         }
 
-        List<Flight> flights = builder
-            .fromDate
-            .datesUntil(builder.toDate.plusDays(1))
-            .flatMap(date -> builder.airlines
-                     .stream()
-                     .flatMap(airline -> flightPaths
-                              .stream()
-                              .flatMap(flight -> IntStream
-                                       .range(0, builder.dailyFlights)
-                                       .mapToObj(__ ->
-                                                 randomFlight(flight.fromAirport,
-                                                              flight.toAirport,
-                                                              date,
-                                                              flight.distance,
-                                                              builder.basePrice,
-                                                              builder.minPricePerKm,
-                                                              builder.maxPricePerKm,
-                                                              airline,
-                                                              builder.currency)))))
-            .collect(Collectors.toList());
+        List<Flight> flights =
+                builder.fromDate.datesUntil(builder.toDate.plusDays(1)).flatMap(date ->
+                        builder.airlines.stream().flatMap(airline ->
+                                flightPaths.stream().flatMap(flight ->
+                                        IntStream.range(0, builder.dailyFlights).mapToObj(__ ->
+                                                randomFlight(
+                                                        flight.fromAirport,
+                                                        flight.toAirport,
+                                                        date,
+                                                        flight.distance,
+                                                        builder.basePrice,
+                                                        builder.minPricePerKm,
+                                                        builder.maxPricePerKm,
+                                                        airline,
+                                                        builder.currency)
+                                        )
+                                )
+                        )
+                ).collect(Collectors.toList());
 
-        long days = builder
-            .fromDate
-            .datesUntil(builder.toDate.plusDays(1))
-            .count();
+        long days = builder.fromDate.datesUntil(builder.toDate.plusDays(1)).count();
         long expected = builder.airlines.size()
-            * flightPaths.size()
-            * days
-            * builder.dailyFlights;
+                * flightPaths.size()
+                * days
+                * builder.dailyFlights;
 
         return flights;
     }
 
-    private static Flight randomFlight(String departureAirport,
-                                       String arrivalAirport,
-                                       LocalDate date,
-                                       int distance,
-                                       int basePrice,
-                                       double minPricePerKm,
-                                       double maxPricePerKm,
-                                       String airlineCode,
-                                       String currency) {
+    private static Flight randomFlight(
+            String departureAirport,
+            String arrivalAirport,
+            LocalDate date,
+            int distance,
+            int basePrice,
+            double minPricePerKm,
+            double maxPricePerKm,
+            String airlineCode,
+            String currency
+    ) {
 
         LocalTime flightTime = flightTime(distance);
         LocalTime departureTime = randomDepartureTime(flightTime);
         LocalTime arrivalTime = arrivalTime(departureTime, flightTime);
 
-        return Flight
-            .builder()
-            .departureAirport(departureAirport)
-            .departureDateTime(LocalDateTime.from(date))
-            .arrivalAirport(arrivalAirport)
-            .arrivalDateTime(LocalDateTime.from(arrivalTime))
-            .airlineCode(airlineCode)
-            .price(randomPrice(distance, basePrice, minPricePerKm, maxPricePerKm))
-            .currency(currency)
-            .build();
+        return Flight.builder()
+                .departureAirport(departureAirport)
+                .departureDate(date)
+                .departureTime(departureTime)
+                .arrivalAirport(arrivalAirport)
+                .arrivalTime(arrivalTime)
+                .arrivalDate(date)
+                .airlineCode(airlineCode)
+                .kilometers(distance)
+                .price(randomPrice(distance, basePrice, minPricePerKm, maxPricePerKm))
+                .currency(currency)
+                .build();
     }
 
-    public static TripRequest buildRequestFrom(Flight flight) {
-        return TripRequest
-            .builder()
-            .departureAirport(flight.getDepartureAirport())
-            .departureDateTime(flight.getDepartureDateTime())
-            .arrivalAirport(flight.getArrivalAirport())
-            .currency(flight.getCurrency())
-            .build();
+    public static FlightRequest buildRequestFrom(Flight flight) {
+        return FlightRequest.builder()
+                .departureAirport(flight.getDepartureAirport())
+                .departureDate(flight.getDepartureDate())
+                .arrivalAirport(flight.getArrivalAirport())
+                .currency(flight.getCurrency())
+                .build();
     }
 
     private static double random(double min, double max) {
@@ -267,38 +279,32 @@ public class FlightFactory {
         return (int) random((double) min, max);
     }
 
-    private static double randomPrice(int distance,
-                                      int basePrice,
-                                      double min,
-                                      double max) {
-        return basePrice + (distance * random(min, max));
+    private static int randomPrice(
+            int distance, int basePrice, double min, double max) {
+        return basePrice + (int) (distance * random(min, max));
     }
 
     private static LocalTime flightTime(int distance) {
-        return LocalTime
-            .ofSecondOfDay(RUNWAY_MINUTES 
-                           + (long) ((double) distance / FLIGHT_SPEED_KPH * 60 * 60));
+        return LocalTime.ofSecondOfDay(RUNWAY_MINUTES +
+                (long) ((double) distance / FLIGHT_SPEED_KPH * 60 * 60));
     }
 
     private static LocalTime randomDepartureTime(LocalTime flightTime) {
         // Latest departure hour 24 hours - flightTime.hours.
-        return LocalTime
-            .of(random.nextInt(23 - flightTime.getHour()),
+        return LocalTime.of(
+                random.nextInt(23 - flightTime.getHour()),
                 random.nextInt(60));
     }
 
-    private static LocalTime arrivalTime(LocalTime departureTime,
-                                         LocalTime flightTime) {
-        return LocalTime
-            .from(departureTime)
-            .plusHours(flightTime.getHour())
-            .plusMinutes(flightTime.getMinute());
+    private static LocalTime arrivalTime(LocalTime departureTime, LocalTime flightTime) {
+        return LocalTime.from(departureTime)
+                .plusHours(flightTime.getHour())
+                .plusMinutes(flightTime.getMinute());
     }
 
     private static List<String> randomStrings(int count) {
         List<String> strings = new ArrayList<>();
         int length = (int) (Math.log10(count) + 1);
-
         for (int i = 1; i <= count; i++) {
             strings.add(String.format("%0" + length + "d", i));
         }
@@ -309,12 +315,10 @@ public class FlightFactory {
     /**
      * For testing.
      */
-    public static List<Flight> flights() {
-        List<Flight> flights = builder().airlines("AA").currency("USD").build();
-        flights.addAll(builder().airlines("SWA").currency("USD").build());
-        flights.addAll(builder().airlines("LH").currency("EUR").build());
-        flights.addAll(builder().airlines("BAW").currency("GBP").build());
+    public static void main(String[] args) {
+        List<Flight> flights = builder().airlines("AA").build();
 
-        return flights;
+        flights.sort(Comparator.comparing(Flight::getDepartureDate));
+        System.out.println(Flight.toSqlInsertString(flights));
     }
 }

@@ -1,16 +1,19 @@
 package utils;
 
-import datamodels.TripRequest;
 import datamodels.Flight;
 import reactor.core.publisher.Flux;
-import utils.FlightFactory;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * This utility class contains methods that obtain test data.
  */
 public class TestDataFactory {
+    /**
+     * Preferred currency.
+     */
+    public static String CURRENCY = "USD";
+
     /**
      * A utility class should always define a private constructor.
      */
@@ -19,15 +22,11 @@ public class TestDataFactory {
 
     /**
      * Return a Flux that emits {@code TripResponse} objects that
-     * match the given {@code tripRequest}.
+     * match the given {@code flightRequest}.
      */
-    public static Flux<Flight> findFlights(TripRequest tripRequest) {
-        return Flux
-            // Convert the List into a stream.
-            .fromIterable(FlightFactory.flights())
-
-            // Only keep TripResponse objects that match the
-            // tripRequest.
-            .filter(tripRequest::equals);
+    public static Flux<Flight> randomFlights(List<String> currencies) {
+        // Convert the List into a stream.
+        return Flux.fromIterable(
+                FlightFactory.buildExpectedFlights(CURRENCY, currencies));
     }
 }

@@ -3,6 +3,7 @@ package utils;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,31 +14,30 @@ public class ExchangeRate {
      * A Map of currencies (e.g., US Dollars, Euros, etc.) to their
      * corresponding exchange rates compared with other currencies.
      */
-    private final Map<String, Map<String, Double>> mExchangeRate =
-        new HashMap<>();
+    public final Map<String, Map<String, Double>> mExchangeRateMap = new HashMap<>();
 
     /**
      * The constructor initializes the Map.
      */
     public ExchangeRate() {
+
         Map<String, Double> usdExchangeRates = new HashMap<>();
         usdExchangeRates.put("USD", 1.0);
         usdExchangeRates.put("GBP", 0.72);
         usdExchangeRates.put("EUR", 0.85);
-        mExchangeRate.put("USD", usdExchangeRates);
+        mExchangeRateMap.put("USD", usdExchangeRates);
 
         Map<String, Double> eurExchangeRates = new HashMap<>();
         eurExchangeRates.put("EUR", 1.0);
         eurExchangeRates.put("GBP", 0.85);
         eurExchangeRates.put("USD", 1.18);
-        mExchangeRate.put("EUR", eurExchangeRates);
+        mExchangeRateMap.put("EUR", eurExchangeRates);
 
         Map<String, Double> gbpExchangeRates = new HashMap<>();
         gbpExchangeRates.put("GBP", 1.0);
         gbpExchangeRates.put("EUR", 1.18);
         gbpExchangeRates.put("USD", 1.38);
-        mExchangeRate.put("GBP", gbpExchangeRates);
-
+        mExchangeRateMap.put("GBP", gbpExchangeRates);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ExchangeRate {
      * from} and {@code to} parameters.
      */
     public Mono<Double> getRate(String fromCurrency, String toCurrency) {
-        return Mono.just(mExchangeRate.get(fromCurrency).get(toCurrency));
+        return Mono.just(mExchangeRateMap.get(fromCurrency).get(toCurrency));
     }
 
     /**
@@ -62,6 +62,15 @@ public class ExchangeRate {
      * {@code fromCurrency}
      */
     public Map<String, Double> getRates(String fromCurrency) {
-        return mExchangeRate.get(fromCurrency);
+        return mExchangeRateMap.get(fromCurrency);
+    }
+
+    /**
+     * Returns a list of supported currencies.
+     *
+     * @return List of supported currencies.
+     */
+    public List<String> getCurrencies() {
+        return List.copyOf(mExchangeRateMap.keySet());
     }
 }
