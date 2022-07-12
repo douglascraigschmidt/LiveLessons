@@ -53,9 +53,9 @@ public class ex2 {
         // Print the cheapest flights via a two pass algorithm that
         // uses min() and filter().
         AsyncTaskBarrier
-                .register(() -> ex2
-                        .runTest(ex2::printCheapestFlightsMin,
-                                "printCheapestFlightsMin"));
+            .register(() -> ex2
+                      .runTest(ex2::printCheapestFlightsMin,
+                               "printCheapestFlightsMin"));
 
         // Print the cheapest flights via a one-pass algorithm and a
         // custom Java Streams Collector.
@@ -90,7 +90,8 @@ public class ex2 {
      * Run the test named {@code testName} by applying the {@code
      * downloadAndStoreImage} function.
      */
-    private static Mono<Void> runTest(Function<List<Flight>, Mono<Void>> findMinFlights,
+    private static Mono<Void> runTest(Function<List<Flight>,
+                                               Mono<Void>> findMinFlights,
                                       String testName) {
         // Let the system garbage collect.
         System.gc();
@@ -110,10 +111,12 @@ public class ex2 {
     }
 
     /**
-     * Convert the flight prices according to the relevant exchange rate.
+     * Convert the flight prices according to the relevant exchange
+     * rate.
      *
+     * @param flightList The {@link List} of all available flights
      * @param toCurrency The 3 letter currency to convert to
-     * @return A {@link Flux} that emits flights with the correct prices
+     * @return A {@link Flux} that emits flights with the converted prices
      */
     private static Flux<Flight> convertFlightPrices(List<Flight> flightList,
                                                     String toCurrency) {
@@ -126,15 +129,16 @@ public class ex2 {
 
         // Asynchronously get all the flights.
         Flux<Flight> flights = Flux
+            // Convert the List into a Flux stream.
             .fromIterable(flightList)
 
             // Run this computation in the parallel thread pool.
             .subscribeOn(Schedulers.parallel());
 
-        // Return a Flux that emits flights with the correct prices.
+        // Return a Flux that emits flights with the converted prices.
         return exchangeRates
-            // Wait for both the flights and the exchange rates
-            // to complete.
+            // Wait for both the flights and the exchange rates to
+            // complete.
             .flatMapMany(rates -> flights
                          .map(flight ->
                               // Convert flight prices via the
@@ -143,14 +147,18 @@ public class ex2 {
                                               flight,
                                               rates)))
 
-            // Turn this Flux into a hot source and cache last
-            // emitted signals for further Subscribers.
+            // Turn this Flux into a hot source and cache last emitted
+            // signals for further Subscribers.
             .cache();
     }
 
     /**
      * Print the cheapest flights via a two pass algorithm that uses
      * min() and filter().
+     *
+     * @param flightList The {@link List} of all available flights
+     * @return A {@link Mono<Void>} that synchronizes with the {@link
+     *         AsyncTaskBarrier}.
      */
     private static Mono<Void> printCheapestFlightsMin(List<Flight> flightList) {
         Flux<Flight> flights = ex2
@@ -169,19 +177,18 @@ public class ex2 {
                          // Only allow flights matching the cheapest.
                          .filter(tr -> tr.getPrice().equals(min.getPrice())));
 
-        return lowestPrices
-            // Print the cheapest flights.
-            .doOnNext(flight -> 
-                      System.out.println("printCheapestFlightsMin() = " + flight))
-
-            // Sync with the AsyncTaskBarrier framework.
-            .then();
+        return printResults(lowestPrices,
+                            "printCheapestFlightsMin()"); 
     }
 
     /**
      * Print the cheapest flights via a two-pass algorithm that first
      * calls sort() to order the trips by price and then uses
      * takeWhile() to return the cheapest flight(s).
+     *
+     * @param flightList The {@link List} of all available flights
+     * @return A {@link Mono<Void>} that synchronizes with the {@link
+     *         AsyncTaskBarrier}.
      */
     private static Mono<Void> printCheapestFlightsSorted(List<Flight> flightList) {
         Flux<Flight> sortedFlights = ex2
@@ -192,7 +199,8 @@ public class ex2 {
             .sort(Comparator.comparing(Flight::getPrice));
 
         Flux<Flight> lowestPrices = sortedFlights
-            // Get the cheapest price.
+            // Get the cheapest price (i.e., the first item in the
+            // sorted Flux stream).
             .take(1)
 
             // Converts the Mono into a Flux that contains the
@@ -203,20 +211,17 @@ public class ex2 {
                                 .getPrice()
                                 .equals(min.getPrice())));
 
-
-        return lowestPrices
-            // Print the cheapest flights.
-            .doOnNext(flight ->
-                      System.out.println("printCheapestFlightsSorted() = "
-                                         + flight))
-
-            // Sync with the AsyncTaskBarrier framework.
-            .then();
+        return printResults(lowestPrices,
+                            "printCheapestFlightsSorted()");
     }
 
     /**
      * Print the cheapest flights via a one-pass algorithm and a
      * custom Java Streams Collector.
+     *
+     * @param flightList The {@link List} of all available flights
+     * @return A {@link Mono<Void>} that synchronizes with the {@link
+     *         AsyncTaskBarrier}.
      */
     private static Mono<Void> printCheapestFlightsOnepass(List<Flight> flightList) {
         Flux<Flight> lowestPrices = ex2
@@ -231,10 +236,24 @@ public class ex2 {
             // priced trip(s).
             .flatMapMany(Function.identity());
 
+        return printResults(lowestPrices,
+                            "printCheapestFlightsOnepass()");
+    }
+
+    /**
+     * Print the results from the {@code algorithmName}.
+     *
+     * @param lowestPrices A {@link Flux} containing the lowest priced flights
+     * @param algorithmName The algorithm that computed the flight results
+     * @return A {@link Mono<Void>} that synchronizes with the {@link
+     *         AsyncTaskBarrier}.
+     */
+    private static Mono<Void> printResults(Flux<Flight> lowestPrices,
+                                           String algorithmName) {
         return lowestPrices
             // Print the cheapest flights.
             .doOnNext(flight ->
-                      System.out.println("printCheapestFlightsOnepass() = "
+                      System.out.println(algorithmName + " = "
                                          + flight))
 
             // Sync with the AsyncTaskBarrier framework.
@@ -259,8 +278,10 @@ public class ex2 {
         if (!flight.getCurrency().equals(toCurrency)) {
             // Update the price by multiplying it by the currency
             // conversion rate.
-            flight.setPrice((int) (flight.getPrice()
-                                   * rates.getRates(flight.getCurrency()).get(toCurrency)));
+            flight.setPrice((int) (flight.getPrice() * rates
+                                   .getRates(flight.getCurrency())
+                                   .get(toCurrency)));
+
             // Update the currency.
             flight.setCurrency(toCurrency);
         }
