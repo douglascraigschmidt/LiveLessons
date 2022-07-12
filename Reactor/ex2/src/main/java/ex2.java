@@ -7,8 +7,6 @@ import reactor.math.MathFlux;
 import utils.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -51,7 +49,6 @@ public class ex2 {
     public static void main(String[] argv) {
         System.out.println("Searching for best price flights for "
                            + sTrip.toString());
-
 
         // Print the cheapest flights via a two pass algorithm that
         // uses min() and filter().

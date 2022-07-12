@@ -56,7 +56,7 @@ public class CheapestPriceCollector
 
             // If the price of the trip is equal to the current min
             // add it to the lowestPrices List.
-            } else if (tripResponse.getPrice().equals(mMin)) {
+            } else if (tripResponse.getPrice() == mMin) {
                 lowestPrices.add(tripResponse);
             }
         };

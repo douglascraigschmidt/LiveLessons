@@ -19,4 +19,10 @@ dependencies {
     implementation 'io.projectreactor.addons:reactor-extra:3.4.8'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'junit:junit:4.13'
+
+}
+
+test {
+    useJUnitPlatform()
 }
