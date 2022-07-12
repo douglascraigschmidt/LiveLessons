@@ -22,22 +22,21 @@ public class ExchangeRate {
     public ExchangeRate() {
         Map<String, Double> usdExchangeRates = new HashMap<>();
         usdExchangeRates.put("USD", 1.0);
-        usdExchangeRates.put("GBP", 0.72);
-        usdExchangeRates.put("EUR", 0.85);
+        usdExchangeRates.put("GBP", 2.0);
+        usdExchangeRates.put("EUR", 1.25);
         mExchangeRate.put("USD", usdExchangeRates);
 
         Map<String, Double> eurExchangeRates = new HashMap<>();
         eurExchangeRates.put("EUR", 1.0);
-        eurExchangeRates.put("GBP", 0.85);
-        eurExchangeRates.put("USD", 1.18);
+        eurExchangeRates.put("GBP", 2.0);
+        eurExchangeRates.put("USD", 0.75);
         mExchangeRate.put("EUR", eurExchangeRates);
 
         Map<String, Double> gbpExchangeRates = new HashMap<>();
         gbpExchangeRates.put("GBP", 1.0);
-        gbpExchangeRates.put("EUR", 1.18);
-        gbpExchangeRates.put("USD", 1.38);
+        gbpExchangeRates.put("EUR", 0.75);
+        gbpExchangeRates.put("USD", 0.5);
         mExchangeRate.put("GBP", gbpExchangeRates);
-
     }
 
     /**

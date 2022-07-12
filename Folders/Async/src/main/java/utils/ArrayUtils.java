@@ -4,8 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class contains methods that concatenate two lists/arrays into
- * a single array.
+ * This class contains methods that perform Array and List operations.
  */
 public class ArrayUtils {
     /**

@@ -24,7 +24,7 @@ public class CheapestPriceCollector
     /**
      * The minimum value seen by the collector.
      */
-    Double mMin = Double.MAX_VALUE;
+    Integer mMin = Integer.MAX_VALUE;
 
     /**
      * A function that creates and returns a new mutable result
