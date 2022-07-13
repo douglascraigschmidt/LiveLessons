@@ -3,8 +3,6 @@ package datamodels;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Data structure that defines a response for a trip, which is
@@ -317,22 +315,5 @@ public class Flight {
                           price,
                           airlineCode,
                           currency);
-    }
-
-    /**
-     * Perform a deep copy of {@code list}.
-     *
-     * @return A deep copy of the {@code list}
-     */
-    public static List<Flight> deepCopy(List<Flight> list) {
-        // Create a new ArrayList.
-        List<Flight> temp = new ArrayList<>(list.size());
-
-        // Make a deep copy of the list param.
-        for (Flight flight : list)
-            temp.add(new Flight(flight));
-
-        // Return the new list.
-        return temp;
     }
 }

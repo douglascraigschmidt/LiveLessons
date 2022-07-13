@@ -1,12 +1,8 @@
 package utils;
 
 import datamodels.Flight;
-import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -14,13 +10,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Define a collector that converts a stream of TripResponses into
- * a Flux that emits the cheapest priced trips(s).
+ * Define a {@link Collector} that converts a stream of {@link Flight} objects into
+ * a {@link List} that emits the cheapest priced trips(s).
  */
-public class CheapestPriceCollector
+public class CheapestPriceCollectorStream
              implements Collector<Flight,
                                   List<Flight>,
-                                  Flux<Flight>> {
+                                  List<Flight>> {
     /**
      * The minimum value seen by the collector.
      */
@@ -38,27 +34,31 @@ public class CheapestPriceCollector
     }
 
     /**
-     * A function that folds a TripResponse into the mutable result
+     * A function that folds a {@link Flight} into the mutable result
      * container.
      *
      * @return a function which folds a value into a mutable result container
      */
     @Override
     public BiConsumer<List<Flight>, Flight> accumulator() {
-        return (lowestPrices, tripResponse) -> {
+        return (lowestPrices, flight) -> {
             // If the price of the trip is less than the current min
-            // Add it to the lowestPrices List and update the current
+            // add it to the lowestPrices List and update the current
             // min price.
-            if (tripResponse.getPrice() < mMin) {
+            if (flight.getPrice() < mMin) {
+                // If we have a new min then clear out the old list.
                 lowestPrices.clear();
-                lowestPrices.add(tripResponse);
-                mMin = tripResponse.getPrice();
+
+                // Add the new lowest flight to the list.
+                lowestPrices.add(flight);
+
+                // Update mMin with the new lowest price.
+                mMin = flight.getPrice();
 
             // If the price of the trip is equal to the current min
             // add it to the lowestPrices List.
-            } else if (tripResponse.getPrice() == mMin) {
-                lowestPrices.add(tripResponse);
-            }
+            } else if (flight.getPrice().equals(mMin))
+                lowestPrices.add(flight);
         };
     }
 
@@ -67,7 +67,7 @@ public class CheapestPriceCollector
      * The combiner function may fold state from one argument into the
      * other and return that, or may return a new result container.
      *
-     * @return a function which combines two partial results into a
+     * @return A function which combines two partial results into a
      * combined result
      */
     @Override
@@ -80,38 +80,36 @@ public class CheapestPriceCollector
     }
 
     /**
-     * Perform the final transformation from the intermediate
-     * accumulation type {@code A} to the final result type {@code R}.
-     *
-     * @return a function which transforms the intermediate result (a
-     * List<TripResponse>) to the final result (a Flux<TripResponse)
+     * This method is a no-op since {@code IDENTITY_FINISH} is set.
      */
     @Override
-    public Function<List<Flight>, Flux<Flight>> finisher() {
-        // Convert the List into a Flux stream.
-        return Flux::fromIterable;
+    public Function<List<Flight>, List<Flight>> finisher() {
+        return null;
     }
 
     /**
      * Returns a {@code Set} of {@code Collector.Characteristics}
      * indicating the characteristics of this Collector.
      *
-     * @return An emptySet()
+     * @return An immutable set of collector characteristics, which in
+     * this case is [UNORDERED|IDENTITY_FINISH]
      */
     @Override
     public Set<Characteristics> characteristics() {
-        return Collections.emptySet();
+        return Collections
+            .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
+                                        Collector.Characteristics.IDENTITY_FINISH));
     }
 
     /**
      * This static factory method creates a new
      * CheapestFlightCollector.
      *
-     * @return A new CheapestFlightCollector()
+     * @return A new {@link CheapestPriceCollector}
      */
-    public static Collector<Flight, List<Flight>, Flux<Flight>>
-        toFlux() {
-        return new CheapestPriceCollector();
+    public static Collector<Flight, List<Flight>, List<Flight>>
+    toList() {
+        return new CheapestPriceCollectorStream();
     }
 }
 

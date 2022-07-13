@@ -1,5 +1,7 @@
 package datamodels;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
  * returned by various microservices to indicate which flight legs
  * match a {@code TripRequest}.
  */
+@Builder
 public class Flight {
     /**
      * Date and time of the initial departure.
@@ -41,7 +44,7 @@ public class Flight {
     /**
      * Price.
      */
-    Double price;
+    Integer price;
 
     /**
      * Airline code, e.g., "AA", "SWA", etc.
@@ -54,7 +57,7 @@ public class Flight {
     String currency;
 
     /**
-     * Default constructor.
+     * Default constructor needed for WebFlux param passing.
      */
     public Flight() {
     }
@@ -77,7 +80,7 @@ public class Flight {
                   LocalDateTime returnArrivalDateTime,
                   String departureAirport,
                   String arrivalAirport,
-                  Double price,
+                  Integer price,
                   String airlineCode,
                   String currency) {
         this.departureDateTime = departureDateTime;
@@ -92,23 +95,43 @@ public class Flight {
     }
 
     /**
+     * Copy the contents of {@link Flight} into this object.
+     *
+     * @param flight The object to copy
+     */
+    public Flight(Flight flight) {
+        this.departureDateTime = flight.departureDateTime;
+        this.arrivalDateTime = flight.arrivalDateTime;
+        this.returnDepartureDateTime = flight.returnDepartureDateTime;
+        this.returnArrivalDateTime = flight.returnArrivalDateTime;
+        this.departureAirport = flight.departureAirport;
+        this.arrivalAirport = flight.arrivalAirport;
+        this.price = flight.price;
+        this.airlineCode = flight.airlineCode;
+        this.currency = flight.currency;
+    }
+
+    /**
      * @return Returns true if there's a match between this {@code
-     * TripResponse} and the {@code tripResponse} param
+     * TripResponse} and the {@code tripResponse} param, else false
      */
     @Override
     public boolean equals(Object tripResponse) {
-        if (tripResponse.getClass() != this.getClass())
-            return false;
+        System.out.println("equals()");
 
-        Flight t = (Flight) tripResponse;
-        return this.departureDateTime.toLocalDate()
-            .equals(t.departureDateTime.toLocalDate())
-            && this.returnDepartureDateTime.toLocalDate()
-            .equals(t.returnDepartureDateTime.toLocalDate())
-            && this.departureAirport
-            .equals(t.departureAirport)
-            && this.arrivalAirport
-            .equals(t.arrivalAirport);
+        if (tripResponse.getClass() != this.getClass()) {
+            return false;
+        } else {
+            Flight t = (Flight) tripResponse;
+            return this.departureDateTime.toLocalDate()
+                    .equals(t.departureDateTime.toLocalDate())
+                    && this.returnDepartureDateTime.toLocalDate()
+                    .equals(t.returnDepartureDateTime.toLocalDate())
+                    && this.departureAirport
+                    .equals(t.departureAirport)
+                    && this.arrivalAirport
+                    .equals(t.arrivalAirport);
+        }
     }
 
     /**
@@ -116,7 +139,7 @@ public class Flight {
      */
     @Override
     public String toString() {
-        return departureDateTime
+        return /* departureDateTime
             + ", "
             + arrivalDateTime
             + ", "
@@ -127,7 +150,7 @@ public class Flight {
             + departureAirport
             + ", "
             + arrivalAirport
-            + ", "
+            + ", " */
             + price
             + ", "
             + airlineCode
@@ -222,14 +245,14 @@ public class Flight {
     /**
      * Get the price for the flight leg.
      */
-    public Double getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
     /**
      * Set the price for the flight leg.
      */
-    public void setPrice(Double price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
@@ -280,7 +303,7 @@ public class Flight {
                                  LocalDateTime returnArrivalDateTime,
                                  String departureAirport,
                                  String arrivalAirport,
-                                 Double price,
+                                 Integer price,
                                  String airlineCode,
                                  String currency) {
         return new Flight(departureDateTime,

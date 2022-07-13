@@ -4,7 +4,6 @@ import datamodels.TripRequest;
 import datamodels.Flight;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -14,7 +13,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * This utility class contains methods that obtain test data.
  */
-public class TestDataFactory {
+public class FlightFactory {
     /**
      * Number of concatenations.
      */
@@ -23,7 +22,7 @@ public class TestDataFactory {
     /**
      * A utility class should always define a private constructor.
      */
-    private TestDataFactory() {
+    private FlightFactory() {
     }
 
     private static final String[] sFlightInfo1 = {
@@ -94,7 +93,7 @@ public class TestDataFactory {
 
             // Convert the stream of strings into a stream of
             // Flight objects.
-            .map(TestDataFactory::makeTrip)
+            .map(FlightFactory::makeTrip)
 
             // Only keep TripResponse objects that match the
             // tripRequest.

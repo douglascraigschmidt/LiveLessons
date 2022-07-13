@@ -1,6 +1,6 @@
 package folder;
 
-import utils.ArrayUtils;
+import utils.ListAndArrayUtils;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -88,8 +88,8 @@ public class FolderCollector
             // subfolders and documents.
             // CompletableFuture<Dirent>[] var
             var futures =
-                ArrayUtils.concat(folder.mSubFolderFutures,
-                                  folder.mDocumentFutures);
+                ListAndArrayUtils.concat(folder.mSubFolderFutures,
+                                         folder.mDocumentFutures);
 
             if (futures == null) {
                 // This is an empty folder (i.e., with no subfolders

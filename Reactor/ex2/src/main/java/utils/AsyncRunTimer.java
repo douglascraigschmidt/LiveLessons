@@ -2,75 +2,50 @@ package utils;
 
 import java.util.AbstractMap;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * This class simplifies the computation of execution times.
+ * This class simplifies the asynchronous computation of execution
+ * times.
  */
-public class RunTimer {
+public class AsyncRunTimer {
     /**
-     * Keep track of which SearchStreamGang performed the best.
+     * Keep track of which method performed the best.
      */
-    private static Map<String, Long> mResultsMap = new HashMap<>();
-
-    /**
-     * Keeps track of how long the test has run.
-     */
-    private static long sStartTime;
-
-    /**
-     * Keeps track of the execution time.
-     */
-    private static long mExecutionTime;
-
-    /**
-     * Start timing the test run.
-     */
-    private static void startTiming() {
-        // Note the start time.
-        sStartTime = System.nanoTime();
-    }
-
-    /**
-     * Stop timing the test run.
-     */
-    private static void stopTiming() {
-        mExecutionTime = (System.nanoTime() - sStartTime) / 1_000_000;
-    }
+    private static Map<String, Long> mResultsMap = new ConcurrentHashMap<>();
 
     /**
      * Call {@code supplier.get()} and time how long it takes to run.
      *
      * @return The result returned by {@code supplier.get()}
      */
-    public static <U> U timeRun(Supplier<U> supplier,
-                                String testName) {
-        startTiming();
-        U result = supplier.get();
-        stopTiming();
-
-        // Store the execution times into the results map.
-        mResultsMap.put(testName,
-                        mExecutionTime);
-
-        return result;
+    public static <U> U startTimeRun(Supplier<U> supplier,
+                                     String testName) {
+        // Store the start time into the results map.
+        mResultsMap.put(testName, System.nanoTime());
+        return supplier.get();
     }
 
     /**
      * Call {@code runnable.run()} and time how long it takes to run.
      */
-    public static void timeRun(Runnable runnable,
-                               String testName) {
-        startTiming();
+    public static void startTimeRun(Runnable runnable,
+                                    String testName) {
+        // Store the start time into the results map.
+        mResultsMap.put(testName, System.nanoTime());
         runnable.run();
-        stopTiming();
-
-        // Store the execution times into the results map.
-        mResultsMap.put(testName,
-                        mExecutionTime);
     }
+
+    /**
+     * Stop timing the test run.
+     */
+    public static void stopTimeRun(String testName) {
+        mResultsMap.put(testName,
+                (System.nanoTime() - mResultsMap.get(testName)) / 1_000_000);
+    }
+
 
     /**
      * @return A string containing the timing results for all the test runs

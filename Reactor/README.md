@@ -13,9 +13,8 @@ overview of what's included:
         surprisingly not well documented in the literature.  These
         three algorithms use Project Reactor features to return
         Flux/Mono reactive types that emit the cheapest flight(s) from
-        a Flux of available flights, which is part of an Airline
-        Booking App we've created an online course on Reactive
-        Microservices.
+        a Flux of available flights.  Another three algorithms use
+        Java Streams features to perform the same computations.
 
 . ex3 - This program applies Project Reactor features to implement
         various types of backpressure strategies (e.g., ignore,
