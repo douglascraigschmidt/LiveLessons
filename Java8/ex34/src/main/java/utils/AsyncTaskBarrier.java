@@ -3,7 +3,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  *   System.out.println("Completed " + testCount + " tests");
  * }}</pre>
  */
-public class CFTaskBarrier {
+public class AsyncTaskBarrier {
     /**
      * Keeps track of all the registered tasks to run.
      */
@@ -40,9 +40,9 @@ public class CFTaskBarrier {
 
     /**
      * Register the {@code task} so it runs (a)synchronously when
-     * {@code runTasks()} is called.  Each task takes no parameters and
-     * returns a {@code Mono<Void>} result when its {@code Supplier.get()}
-     * method is called.
+     * {@code runTasks()} is called.  Each task takes no parameters
+     * and returns a {@code CompletableFuture<Void>} result when its
+     * {@code Supplier.get()} method is called.
      *
      * @param task The task to register with {@code AsyncTaskBarrier}
      */
@@ -64,18 +64,22 @@ public class CFTaskBarrier {
     }
 
     /**
-     * Run all the registered tasks.
+     * Run all the registered tasks and return a count of the number
+     * that completed successfully.
      *
-     * @return a {@code Completable<Long>} that will be triggered when
+     * @return A {@code Completable<Long>} that will be triggered when
      * all the (a)synchronously-run tasks complete to indicate how
      * many tasks were run.
      */
     public static CompletableFuture<Integer> runTasks() {
+        AtomicInteger errorCounter = new AtomicInteger(0);
+
         // Copy into a local final variable to ensure visibility when
         // used in thenApply() below.
         final int taskListSize = sTasks.size();
 
-        @SuppressWarnings("unchecked") CompletableFuture<Void>[] taskF = sTasks
+        @SuppressWarnings("unchecked") 
+        CompletableFuture<Void>[] taskF = sTasks
             // Factory method that converts the list into a stream.
             .stream()
 
@@ -86,7 +90,23 @@ public class CFTaskBarrier {
             .toArray(CompletableFuture[]::new);
 
         return CompletableFuture
+            // Wait for all CompletableFutures to complete.
             .allOf(taskF)
-            .thenApply(v -> taskListSize);
+
+            // Handle any exceptions that arose.
+            .handle((result, error) -> {
+                if (error == null)
+                    return result;
+                else {
+                    // Increment the exception count.
+                    errorCounter.incrementAndGet();
+                    System.out.println("Exception = " + error.getMessage());
+                    return result;
+                }
+            })
+
+            // Return a count of the number of tasks that completed
+            // successfully.
+            .thenApply(v -> taskListSize - errorCounter.get());
     }
 }

@@ -1,4 +1,4 @@
-package streamtests;
+package streamstests;
 
 import datamodels.Flight;
 import utils.CheapestPriceCollector;

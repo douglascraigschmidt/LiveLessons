@@ -1,17 +1,12 @@
 import datamodels.Flight;
 import datamodels.TripRequest;
-import streamtests.StreamTests;
+import streamstests.StreamsTests;
 import utils.*;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This example demonstrates various functional algorithms for finding
@@ -48,33 +43,33 @@ public class ex34 {
         
         // Print the cheapest flights via a two-pass algorithm that
         // uses min() and filter().
-        CFTaskBarrier
+        AsyncTaskBarrier
             .register(() ->
                       runTest(flightList,
-                              StreamTests::printCheapestFlightsMin,
-                              "StreamTests::printCheapestFlightsMin",
+                              StreamsTests::printCheapestFlightsMin,
+                              "StreamsTests::printCheapestFlightsMin",
                               sTrip.getCurrency()));
 
         // Print the cheapest flights via a two-pass algorithm that
         // first calls sort() to order the trips by price and then
         // uses takeWhile() to return the cheapest flight(s).
-        CFTaskBarrier
+        AsyncTaskBarrier
             .register(() ->
                       runTest(flightList,
-                              StreamTests::printCheapestFlightsSorted,
-                              "StreamTests::printCheapestFlightsSorted",
+                              StreamsTests::printCheapestFlightsSorted,
+                              "StreamsTests::printCheapestFlightsSorted",
                               sTrip.getCurrency()));
 
         // Print the cheapest flights via a one-pass algorithm and a
         // custom Java Streams Collector.
-        CFTaskBarrier
+        AsyncTaskBarrier
             .register(() ->
                       runTest(flightList,
-                              StreamTests::printCheapestFlightsOnepass,
-                              "StreamTests::printCheapestFlightsOnepass",
+                              StreamsTests::printCheapestFlightsOnepass,
+                              "StreamsTests::printCheapestFlightsOnepass",
                               sTrip.getCurrency()));
 
-        int testCount = CFTaskBarrier
+        int testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
 
@@ -107,14 +102,16 @@ public class ex34 {
         // Force the system to garbage collect first.
         System.gc();
 
+        // Deep copy flight list.
+        var flights = ListAndArrayUtils
+            .deepCopy(flightList, Flight::new);
+
         return CompletableFuture
             .supplyAsync(() -> RunTimer
                          // Start timing the test.
                          .timeRun(() -> findMinFlights
                                   // Run the test.
-                                  .apply(ListAndArrayUtils
-                                         // Deep copy flight list.
-                                         .deepCopy(flightList, Flight::new),
+                                  .apply(flights,
                                          currency),
                                   testName));
     }

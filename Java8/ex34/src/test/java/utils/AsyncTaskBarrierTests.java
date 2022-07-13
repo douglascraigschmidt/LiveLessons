@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("ConstantConditions")
 /**
- * Unit tests for the CFTaskBarrier class.
+ * Unit tests for the AsyncTaskBarrier class.
  */
-public class CFTaskBarrierTests {
+public class AsyncTaskBarrierTests {
     /**
      * Intentionally trigger an exception in an asynchronous chain.
      */
@@ -37,21 +37,22 @@ public class CFTaskBarrierTests {
     }
 
     /**
-     * Ensure that the CFTaskBarrier methods work properly, even
+     * Ensure that the AsyncTaskBarrier methods work properly, even
      * when exceptions occur.
      */
     @Test
     public void testExceptions() {
         // Create local variables so that unregister() works properly.
-        Supplier<CompletableFuture<Void>> asyncThrowExceptions = this::asyncThrowException;
+        Supplier<CompletableFuture<Void>> asyncThrowExceptions =
+            this::asyncThrowException;
 
         // Register all the local variables that contain method references.
-        CFTaskBarrier.register(asyncThrowExceptions);
+        AsyncTaskBarrier.register(asyncThrowExceptions);
 
         // Directly register a method reference.
-        CFTaskBarrier.register(this::asyncNoThrow);
+        AsyncTaskBarrier.register(this::asyncNoThrow);
 
-        int testCount = CFTaskBarrier
+        int testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
 
@@ -65,9 +66,9 @@ public class CFTaskBarrierTests {
         System.out.println("Completed " + testCount + " tests successfully\n");
 
         // Remove all but one of the methods being tested.
-        assertTrue(CFTaskBarrier.unregister(asyncThrowExceptions));
+        assertTrue(AsyncTaskBarrier.unregister(asyncThrowExceptions));
 
-        testCount = CFTaskBarrier
+        testCount = AsyncTaskBarrier
             // Run all the tests.
             .runTasks()
 
@@ -90,10 +91,10 @@ public class CFTaskBarrierTests {
     private void display(String calledBy,
                          Integer integer) {
         System.out.println("["
-                + Thread.currentThread().getId()
-                + "] "
-                + calledBy
-                + " "
-                + integer);
+                           + Thread.currentThread().getId()
+                           + "] "
+                           + calledBy
+                           + " "
+                           + integer);
     }
 }

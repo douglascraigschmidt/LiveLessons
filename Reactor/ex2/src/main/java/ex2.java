@@ -3,7 +3,7 @@ import datamodels.TripRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactortests.ReactorTests;
-import streamtests.StreamsTests;
+import streamstests.StreamsTests;
 import utils.*;
 
 import java.time.LocalDateTime;
@@ -69,7 +69,7 @@ public class ex2 {
             .register(() ->
                       runTest(flightList,
                               StreamsTests::printCheapestFlightsSorted,
-                              "StreamTests::printCheapestFlightsSorted",
+                              "StreamsTests::printCheapestFlightsSorted",
                               sTrip.getCurrency()));
 
         // Print the cheapest flights via a two pass algorithm that
@@ -87,7 +87,7 @@ public class ex2 {
             .register(() ->
                       runTest(flightList,
                               StreamsTests::printCheapestFlightsMin,
-                              "StreamTests::printCheapestFlightsMin",
+                              "StreamsTests::printCheapestFlightsMin",
                               sTrip.getCurrency()));
 
         // Print the cheapest flights via a one-pass algorithm and a
@@ -106,7 +106,7 @@ public class ex2 {
             .register(() ->
                       runTest(flightList,
                               StreamsTests::printCheapestFlightsOnepass,
-                              "StreamTests::printCheapestFlightsOnepass",
+                              "StreamsTests::printCheapestFlightsOnepass",
                               sTrip.getCurrency()));
 
         var testCount = AsyncTaskBarrier

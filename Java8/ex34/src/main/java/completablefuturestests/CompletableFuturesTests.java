@@ -1,7 +1,7 @@
-package streamtests;
+package completablefuturestests;
 
 import datamodels.Flight;
-import utils.CheapestPriceCollectorStream;
+import utils.CheapestPriceCollector;
 import utils.ExchangeRate;
 
 import java.util.Comparator;
@@ -17,11 +17,11 @@ import static java.util.stream.Collectors.toList;
  * flight(s) from a {@link List} of available flights using the Java
  * Streams framework.
  */
-public class StreamsTests {
+public class StreamTests {
     /**
      * A Java utility class should have a private constructor.
      */
-    private StreamsTests() {}
+    private StreamTests() {}
 
     /**
      * Print the cheapest flights via a two-pass algorithm that uses
@@ -33,14 +33,13 @@ public class StreamsTests {
     public static Void printCheapestFlightsMin(List<Flight> flightList,
                                                String currency) {
         // Create a List of flights that match sTrip. 
-        List<Flight> flights = StreamsTests
+        List<Flight> flights = StreamTests
             // Convert the flights into the requested currency.
             .convertFlightPrices(flightList, currency)
 
             // Collect into a List.
             .collect(toList());
 
-        // Stores the cheapest flight in the stream.
         Optional<Flight> min1 = flights
                 // Convert the List into a Stream.
                 .stream()
@@ -49,8 +48,8 @@ public class StreamsTests {
                 .min(Comparator.comparing(Flight::getPrice));
 
         min1
-            // If a cheapest flight exists then find all the cheapest
-            // flights that match (returns an Optional).
+            // If there's a cheapest flight then find all the cheapest
+            // flights (returns an Optional).
             .map(min -> flights
                  // Convert the List into a Stream (again).
                  .stream()
@@ -63,7 +62,7 @@ public class StreamsTests {
             .ifPresent(s -> s
                        // Print the cheapest flights.
                        .forEach(flight ->
-                                System.out.println("StreamTests::printCheapestFlightsMin() = "
+                                System.out.println("printCheapestFlightsMin() = " 
                                                    + flight)));
 
         return null;
@@ -80,7 +79,7 @@ public class StreamsTests {
     public static Void printCheapestFlightsSorted(List<Flight> flightList,
                                                   String currency) {
         // Create a sorted List of flights that match sTrip. 
-        List<Flight> sortedFlights = StreamsTests
+        List<Flight> sortedFlights = StreamTests
             // Convert the flights into the requested currency.
             .convertFlightPrices(flightList, currency)
 
@@ -105,7 +104,7 @@ public class StreamsTests {
 
                 // Print the cheapest flights.
                 .forEach(flight ->
-                         System.out.println("StreamTests::printCheapestFlightsSorted() = " + flight));
+                         System.out.println("printCheapestFlightsSorted() = " + flight));
         }
 
         return null;
@@ -120,17 +119,17 @@ public class StreamsTests {
      */
     public static Void printCheapestFlightsOnepass(List<Flight> flightList,
                                                    String currency) {
-        StreamsTests
+        StreamTests
             // Convert the flights into the requested currency.
             .convertFlightPrices(flightList, currency)
 
             // Convert the Stream of TripResponses into a List that
             // emits the cheapest priced trips(s).
-            .collect(CheapestPriceCollectorStream.toList())
+            .collect(CheapestPriceCollector.toList())
 
             // Print the cheapest flights.
             .forEach(flight ->
-                     System.out.println("StreamTests::printCheapestFlightsOnepass() = "
+                     System.out.println("printCheapestFlightsOnepass() = " 
                                         + flight));
 
         return null;
