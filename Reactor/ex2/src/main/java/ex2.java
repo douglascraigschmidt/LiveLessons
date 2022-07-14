@@ -184,6 +184,7 @@ public class ex2 {
             .deepCopy(flightList, Flight::new);
 
         return Mono
+            // Create a Mono from a callable lambda.
             .fromCallable(() -> {
                     var cheapestFlights = AsyncRunTimer
                         // Start timing the test.
@@ -203,7 +204,10 @@ public class ex2 {
                     return printResults(cheapestFlights,
                                         algorithmName);
                 })
-            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()))
+            // Run the algorithm in the parallel thread pool.
+            .subscribeOn(Schedulers.parallel())
+
+            // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
             .flatMap(Function.identity());
     }
 
@@ -258,6 +262,7 @@ public class ex2 {
             .deepCopy(flightList, Flight::new);
 
         return Mono
+            // Create a Mono from a callable lambda.
             .fromCallable(() -> {
                     // Wait for all the other tasks to reach the entry
                     // barrier before proceeding.
@@ -282,7 +287,10 @@ public class ex2 {
                     // Synchronize with the AsyncTaskBarrier.
                     return Mono.empty();
                 })
+            // Run the algorithm in the parallel thread pool.
             .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()))
+
+            // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
             .then();
     }
 
