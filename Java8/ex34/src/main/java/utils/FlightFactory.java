@@ -17,7 +17,7 @@ public class FlightFactory {
     /**
      * Number of concatenations.
      */
-    private static final int sMAX_CONCATENATIONS = 300_000;
+    private static final int sMAX_CONCATENATIONS = 200_000;
 
     /**
      * A utility class should always define a private constructor.

@@ -68,10 +68,9 @@ public class ReactorTests {
      * @param flightList The {@link List} of all available flights
      * @param testName The algorithm that computed the flight results
      * @param currency The currency to convert to
-     * @return A {@link Mono<Void>} that synchronizes with the {@link
-     *         AsyncTaskBarrier}.
+     * @return A {@link Flux} that emits the cheapest {@link Flight} objects
      */
-    public static Mono<Void> printCheapestFlightsMin(List<Flight> flightList,
+    public static Flux<Flight> findCheapestFlightsMin(List<Flight> flightList,
                                                      String testName,
                                                      String currency) {
         Flux<Flight> flights = ReactorTests
@@ -79,7 +78,7 @@ public class ReactorTests {
             .convertFlightPrices(flightList, currency);
 
         // Find the cheapest flights.
-        Flux<Flight> lowestPrices = MathFlux
+        return MathFlux
             // Find the cheapest flight (returns a Mono).
             .min(flights,
                  Comparator.comparing(Flight::getPrice))
@@ -89,9 +88,6 @@ public class ReactorTests {
             .flatMapMany(min -> flights
                          // Only allow flights matching the cheapest.
                          .filter(tr -> tr.getPrice().equals(min.getPrice())));
-
-        return printResults(lowestPrices,
-                            testName);
     }
 
     /**
@@ -102,10 +98,9 @@ public class ReactorTests {
      * @param flightList The {@link List} of all available flights
      * @param testName The algorithm that computed the flight results
      * @param currency The currency to convert to
-     * @return A {@link Mono<Void>} that synchronizes with the {@link
-     *         AsyncTaskBarrier}.
+     * @return A {@link Flux} that emits the cheapest {@link Flight} objects
      */
-    public static Mono<Void> printCheapestFlightsSorted(List<Flight> flightList,
+    public static Flux<Flight> findCheapestFlightsSorted(List<Flight> flightList,
                                                         String testName,
                                                         String currency) {
         Flux<Flight> sortedFlights = ReactorTests
@@ -115,7 +110,7 @@ public class ReactorTests {
             // Sort the flights from lowest to highest price.
             .sort(Comparator.comparing(Flight::getPrice));
 
-        Flux<Flight> lowestPrices = sortedFlights
+        return sortedFlights
             // Get the cheapest price (i.e., the first item in the
             // sorted Flux stream).
             .take(1)
@@ -128,9 +123,6 @@ public class ReactorTests {
                      .takeWhile(tr -> tr
                                 .getPrice()
                                 .equals(min.getPrice())));
-
-        return printResults(lowestPrices,
-                            testName);
     }
 
     /**
@@ -140,13 +132,12 @@ public class ReactorTests {
      * @param flightList The {@link List} of all available flights
      * @param testName The algorithm that computed the flight results
      * @param currency The currency to convert to
-     * @return A {@link Mono<Void>} that synchronizes with the {@link
-     *         AsyncTaskBarrier}.
+     * @return A {@link Flux} that emits the cheapest {@link Flight} objects
      */
-    public static Mono<Void> printCheapestFlightsOnepass(List<Flight> flightList,
+    public static Flux<Flight> findCheapestFlightsOnepass(List<Flight> flightList,
                                                          String testName,
                                                          String currency) {
-        Flux<Flight> lowestPrices = ReactorTests
+        return ReactorTests
             // Convert the flights into the requested currency.
             .convertFlightPrices(flightList, currency)
 
@@ -157,9 +148,6 @@ public class ReactorTests {
             // Convert the Mono into a Flux that emits the cheapest
             // priced trip(s).
             .flatMapMany(Function.identity());
-
-        return printResults(lowestPrices,
-                            testName);
     }
 
     /**
@@ -190,28 +178,5 @@ public class ReactorTests {
 
         // Return the flight (which may or may not be updated).
         return flight;
-    }
-
-    /**
-     * Print the results from the {@code algorithmName}.
-     *
-     * @param lowestPrices A {@link Flux} containing the lowest priced flights
-     * @param testName The algorithm that computed the flight results
-     * @return A {@link Mono<Void>} that synchronizes with the {@link
-     *         AsyncTaskBarrier}.
-     */
-    private static Mono<Void> printResults(Flux<Flight> lowestPrices,
-                                           String testName) {
-        return lowestPrices
-            // Print the cheapest flights.
-            .doOnNext(flight ->
-                      System.out.println(testName + " = "
-                                         + flight))
-
-            // Record the time for this run.
-            .doFinally(___ -> AsyncRunTimer.stopTimeRun(testName))
-
-            // Sync with the AsyncTaskBarrier framework.
-            .then();
     }
 }
