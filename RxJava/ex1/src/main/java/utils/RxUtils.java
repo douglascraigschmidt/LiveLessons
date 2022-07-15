@@ -22,7 +22,7 @@ public class RxUtils {
     /**
      * @return Schedule a single to run on the common fork-join pool.
      */
-    public static <T> SingleTransformer<T, T> commonPoolSingle() {
+    public static <T> SingleTransformer<T, T>   commonPoolSingle() {
         return single -> single
             .subscribeOn(Schedulers.from(ForkJoinPool.commonPool()));
     }

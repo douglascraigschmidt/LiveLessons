@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A Flux subscriber that implements backpressure.
+ * A {@link Flux} {@link Subscriber} that implements backpressure.
  */
 public class BackpressureSubscriber
        implements Subscriber<PrimeUtils.Result>,
@@ -35,8 +35,8 @@ public class BackpressureSubscriber
     private boolean mIsDisposed;
 
     /**
-     * Barrier synchronizer a calling thread can use to wait until the
-     * subscriber has completed all its processing.
+     * Barrier synchronizer that a calling thread can use to wait
+     * until the subscriber completes all its processing.
      */
     private CountDownLatch mLatch;
 
@@ -79,8 +79,7 @@ public class BackpressureSubscriber
         mSubscription = subscription;
 
         // Set the initial request size.
-        mSubscription
-            .request(nextRequestSize());
+        mSubscription.request(nextRequestSize());
     }
 
     /**
@@ -125,7 +124,8 @@ public class BackpressureSubscriber
 
             // Check to see if we've consumed 70% our window of items.
             if (++mItemsProcessedSinceLastRequest == seventyPercent) {
-                Options.debug(TAG, "subscriber requesting next tranche of items");
+                Options.debug(TAG,
+                              "subscriber requesting next tranche of items");
 
                 // Request next tranche of items.
                 mSubscription.request(nextRequestSize());

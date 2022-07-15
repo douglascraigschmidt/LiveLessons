@@ -3,10 +3,8 @@ from my webinars on [Modern Java by
 Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
-. ex1 - This example shows how to reduce and/or multiply big fractions
-        asynchronously using a wide range of features in the Reactor
-        framework, including flatMap(), collectList(), zipWith(),
-        first(), when(), and onErrorResume().
+. ex1 - This example shows how to apply timeouts with the Project
+         Reactor framework.
   
 . ex2 - This example demonstrates various reactive algorithms for
         finding all the minimum values in an unordered list, which is

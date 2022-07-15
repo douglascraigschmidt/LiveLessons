@@ -80,20 +80,21 @@ public class ex3 {
 
         // Generate a list of 'count' random Integers whose values
         // don't exceed the given maximum.
-        mRandomIntegers = generateRandomIntegers(Options.instance().count(),
-                                                 Options.instance().maxValue());
+        mRandomIntegers = Utils
+            .generateRandomIntegers(Options.instance().count(),
+                                    Options.instance().maxValue());
 
-        // Run the publisher in a single thread.
+        // Run the publisher in its own thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
 
-        // Maybe run the subscriber in a different thread.
+        // Conditionally run the subscriber in a different thread.
         mSubscriberScheduler = Options.instance().parallel()
             // Choose a different scheduler if we're running in parallel.
             ? Schedulers.newParallel("subscriber",
                                      Options.instance().parallelism())
 
-            // Run everything in the publisher scheduler.
+            // Otherwise run everything on the publisher's scheduler.
             : mPublisherScheduler;
 
         // A subscriber that implements hybrid push/pull backpressure.
@@ -137,7 +138,8 @@ public class ex3 {
         Options.print(RunTimer.getTimingResults());
 
         if (Options.instance().diagnosticsEnabled())
-            // Print the results (which demonstrates slicing on the ConcurrentHashMap).
+            // Print the results (which demonstrates slicing on the
+            // ConcurrentHashMap).
             printResults(memoizerCopy);
     }
 
@@ -145,9 +147,10 @@ public class ex3 {
      * Run the prime number test.
      * 
      * @param primeChecker A function that maps candidate primes to their
-     * smallest factor (if they aren't prime) or 0 if they are prime
+     *                     smallest factor (if they aren't prime) or 0 if
+     *                     they are prime
      * @param testName Name of the test
-     * @return The prime checker (which may be updated during the test).
+     * @return The prime checker (which may be updated during the test)
      */
     private Function<Integer, Integer> runTest
         (Function<Integer, Integer> primeChecker,
@@ -175,14 +178,14 @@ public class ex3 {
         // Create a publisher that runs on its own scheduler
         // and returns a Flux that emits random Integers.
         publishRandomIntegers(mPublisherScheduler)
-
             // Conditionally enable logging.
             .transform(ReactorUtils
                        // Conditionally enable logging.
                        .logIf(Options.instance().loggingEnabled()))
 
-            // Use the flatMap() concurrency idiom to concurrently (maybe)
-            // check each random # to see if it's prime.
+            // Concurrently (maybe) check each random # to see if it's prime.
+            // This operation may run on the subscriber's scheduler, depending
+            // on the options used to run the program.
             .flatMap(check4Prime)
 
             // The subscriber starts all the wheels in motion!
@@ -203,7 +206,7 @@ public class ex3 {
     /**
      * Publish a stream of random numbers.
      *
-     * @param scheduler Scheduler to publishRandomIntegers the numbers on
+     * @param scheduler {@link Scheduler} to publish the random numbers on
      * @return Return a {@link Flux} that publishes random numbers
      */
     private Flux<Integer> publishRandomIntegers(Scheduler scheduler) {
@@ -229,6 +232,8 @@ public class ex3 {
      * Demonstrate how to slice by applying the Project Reactor Flux
      * {@code skipWhile()} and {@code takeWhile()} operations to the
      * {@code map} parameter.
+     *
+     * @param map A {@link Map} containing results
      */
     private void printResults(Map<Integer, Integer> map) {
         // Sort the map by its values.
@@ -249,6 +254,7 @@ public class ex3 {
     
     /**
      * Create and return the proper exit string based on various conditions.
+     *
      * @return The proper exit string.
      */
     private String makeExitString(String testName,
@@ -266,29 +272,6 @@ public class ex3 {
                     + " duplicates)";
         else
             return prefix;
-    }
-
-
-    /**
-     * Generate and return a {@link List} of random {@link Integer}s.
-     *
-     * @param count The number of random Integers to generate
-     * @param maxValue The maximum value of the random {@link Integer}s
-     * @return A {@link List} of random {@link Integer}s
-     */
-    private List<Integer> generateRandomIntegers(int count, int maxValue) {
-        return new Random()
-            // Generate "count" random ints.
-            .ints(count,
-                  // Try to generate duplicates.
-                  maxValue - count,
-                  maxValue)
-
-            // Convert each primitive int to Integer.
-            .boxed()
-
-            // Trigger intermediate operations and collect into list.
-            .collect(toList());
     }
 }
     

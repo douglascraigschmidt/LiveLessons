@@ -3,9 +3,8 @@ webinars on [Modern Java by
 Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
-. ex1 - This example is currently just a placeholder for random things
-        I'm playing around with for RxJava.  It's likely to change
-        radically from time to time.
+. ex1 - This example shows how to apply timeouts with the RxJava
+        framework.
   
 . ex2 - This example downloads multiple images from a remote web
         server via several different Java concurrency/parallelism
@@ -25,7 +24,3 @@ overview of what's included:
         images in a recursively-defined folder structure using a range
         of RxJava features.  The root folder can either reside locally
         (filesystem-based) or remotely (web-based).
-
-. ex5 -- This example shows how to apply timeouts with the RxJava
-         framework.
-

@@ -167,7 +167,8 @@ public abstract class SearchStreamGang
     public String getTitle(CharSequence input) {
         // Create a Matcher.
         Matcher m = Pattern
-            // Compile a regex that matches only the first line in the input.
+            // Compile a regex that matches only the first line in the
+            // input.
             .compile("(?m)^.*$")
 
             // Create a matcher for this pattern.
@@ -178,11 +179,8 @@ public abstract class SearchStreamGang
             // Return the title string if there's a match.
             ? m.group()
 
-            // Return null if there's no match.
+            // Return an empty string if there's no match.
             : "";
-        /* Could also use
-           return inputData.substring(0, inputData.indexOf('\n'));
-        */
     }
 
     /**
