@@ -1,11 +1,23 @@
+buildscript {
+    ext.kotlin_version = '1.6.10'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 plugins {
     id "io.franzbecker.gradle-lombok" version "4.0.0"
+    id 'java'
 }
 
 group 'livelessons'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 java.targetCompatibility = JavaVersion.VERSION_11
 java.sourceCompatibility = JavaVersion.VERSION_11
@@ -19,10 +31,22 @@ dependencies {
     implementation 'io.projectreactor.addons:reactor-extra:3.4.8'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'junit:junit:4.13'
-
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'io.mockk:mockk:1.12.4'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
 }
 
-test {
-    useJUnitPlatform()
+//test {
+//    useJUnitPlatform()
+//}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }

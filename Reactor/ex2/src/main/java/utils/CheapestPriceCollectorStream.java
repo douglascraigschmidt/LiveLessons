@@ -14,13 +14,13 @@ import java.util.stream.Collector;
  * a {@link List} that emits the cheapest priced trips(s).
  */
 public class CheapestPriceCollectorStream
-             implements Collector<Flight,
-                                  List<Flight>,
-                                  List<Flight>> {
+        implements Collector<Flight,
+        List<Flight>,
+        List<Flight>> {
     /**
      * The minimum value seen by the collector.
      */
-    Integer mMin = Integer.MAX_VALUE;
+    Double mMin = Double.MAX_VALUE;
 
     /**
      * A function that creates and returns a new mutable result
@@ -55,9 +55,9 @@ public class CheapestPriceCollectorStream
                 // Update mMin with the new lowest price.
                 mMin = flight.getPrice();
 
-            // If the price of the trip is equal to the current min
-            // add it to the lowestPrices List.
-            } else if (flight.getPrice().equals(mMin))
+                // If the price of the trip is equal to the current min
+                // add it to the lowestPrices List.
+            } else if (flight.getPrice() == mMin)
                 lowestPrices.add(flight);
         };
     }
@@ -97,18 +97,17 @@ public class CheapestPriceCollectorStream
     @Override
     public Set<Characteristics> characteristics() {
         return Collections
-            .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
-                                        Collector.Characteristics.IDENTITY_FINISH));
+                .unmodifiableSet(EnumSet.of(Collector.Characteristics.UNORDERED,
+                        Collector.Characteristics.IDENTITY_FINISH));
     }
 
     /**
      * This static factory method creates a new
      * CheapestFlightCollector.
      *
-     * @return A new {@link CheapestPriceCollector}
+     * @return A new {@link CheapestPriceCollectorStream}
      */
-    public static Collector<Flight, List<Flight>, List<Flight>>
-    toList() {
+    public static Collector<Flight, List<Flight>, List<Flight>> toList() {
         return new CheapestPriceCollectorStream();
     }
 }

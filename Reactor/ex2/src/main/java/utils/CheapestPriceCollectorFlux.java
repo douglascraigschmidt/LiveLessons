@@ -14,21 +14,22 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Define a collector that converts a stream of TripResponses into
- * a Flux that emits the cheapest priced trips(s).
+ * Define a {@code collector} that converts a stream of
+ * {@code Flight}s into a {@code Flux} that emits the
+ * cheapest priced trips(s).
  */
 public class CheapestPriceCollectorFlux
-             implements Collector<Flight,
-                                  List<Flight>,
-                                  Flux<Flight>> {
+        implements Collector<Flight,
+        List<Flight>,
+        Flux<Flight>> {
     /**
      * The minimum value seen by the collector.
      */
-    Integer mMin = Integer.MAX_VALUE;
+    double mMin = Double.MAX_VALUE;
 
     /**
      * A function that creates and returns a new mutable result
-     * container that will hold all the TripResponses in the stream.
+     * container that will hold all the Flights in the stream.
      *
      * @return a function which returns a new, mutable result container
      */
@@ -38,26 +39,26 @@ public class CheapestPriceCollectorFlux
     }
 
     /**
-     * A function that folds a TripResponse into the mutable result
+     * A function that folds a Flight into the mutable result
      * container.
      *
      * @return a function which folds a value into a mutable result container
      */
     @Override
     public BiConsumer<List<Flight>, Flight> accumulator() {
-        return (lowestPrices, tripResponse) -> {
+        return (lowestPrices, Flight) -> {
             // If the price of the trip is less than the current min
             // Add it to the lowestPrices List and update the current
             // min price.
-            if (tripResponse.getPrice() < mMin) {
+            if (Flight.getPrice() < mMin) {
                 lowestPrices.clear();
-                lowestPrices.add(tripResponse);
-                mMin = tripResponse.getPrice();
+                lowestPrices.add(Flight);
+                mMin = Flight.getPrice();
 
-            // If the price of the trip is equal to the current min
-            // add it to the lowestPrices List.
-            } else if (tripResponse.getPrice() == mMin) {
-                lowestPrices.add(tripResponse);
+                // If the price of the trip is equal to the current min
+                // add it to the lowestPrices List.
+            } else if (Flight.getPrice() == mMin) {
+                lowestPrices.add(Flight);
             }
         };
     }
@@ -84,7 +85,7 @@ public class CheapestPriceCollectorFlux
      * accumulation type {@code A} to the final result type {@code R}.
      *
      * @return a function which transforms the intermediate result (a
-     * List<TripResponse>) to the final result (a Flux<TripResponse)
+     * List<Flight>) to the final result (a Flux<Flight)
      */
     @Override
     public Function<List<Flight>, Flux<Flight>> finisher() {
@@ -110,8 +111,7 @@ public class CheapestPriceCollectorFlux
      * @return A new CheapestFlightCollector()
      */
     public static Collector<Flight, List<Flight>, Flux<Flight>>
-        toFlux() {
+    toFlux() {
         return new CheapestPriceCollectorFlux();
     }
 }
-
