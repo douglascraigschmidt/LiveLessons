@@ -54,23 +54,23 @@ public class ex2 {
     private final List
             <SimpleEntry<BiFunction<List<Flight>, String, List<Flight>>, String>>
             sStreamsAlgorithmsMap = new ArrayList<>() {
-//        {
-//            // Print the cheapest flights via a two-pass algorithm
-//            // that uses min() and filter().
-//            add(new SimpleEntry<>
-//                    (StreamsTests::findCheapestFlightsMin,
-//                            "StreamsTests::findCheapestFlightsMin"));
-//        }
-//
-//        {
-//            // Print the cheapest flights via a two-pass algorithm
-//            // that first calls sort() to order the trips by price and
-//            // then uses takeWhile() to return the cheapest flight(s).
-//            add(new SimpleEntry<>
-//                    (StreamsTests::findCheapestFlightsSorted,
-//                            "StreamsTests::findCheapestFlightsSorted"));
-//        }
-//
+        {
+            // Print the cheapest flights via a two-pass algorithm
+            // that uses min() and filter().
+            add(new SimpleEntry<>
+                    (StreamsTests::findCheapestFlightsMin,
+                            "StreamsTests::findCheapestFlightsMin"));
+        }
+
+        {
+            // Print the cheapest flights via a two-pass algorithm
+            // that first calls sort() to order the trips by price and
+            // then uses takeWhile() to return the cheapest flight(s).
+            add(new SimpleEntry<>
+                    (StreamsTests::findCheapestFlightsSorted,
+                            "StreamsTests::findCheapestFlightsSorted"));
+        }
+
         {
             // Print the cheapest flights via a one-pass algorithm and
             // a custom Java Streams Collector.
@@ -87,30 +87,30 @@ public class ex2 {
     private final List
             <SimpleEntry<TriFunction<List<Flight>, String, String, Flux<Flight>>, String>>
             sReactorAlgorithmsMap = new ArrayList<>() {
-//        {
-//            // Print the cheapest flights via a two-pass algorithm
-//            // that uses min() and filter().
-//            add(new SimpleEntry<>
-//                    (ReactorTests::findCheapestFlightsMin,
-//                            "ReactorTests::findCheapestFlightsMin"));
-//        }
-//
-//        {
-//            // Print the cheapest flights via a two-pass algorithm
-//            // that first calls sort() to order the trips by price and
-//            // then uses takeWhile() to return the cheapest flight(s).
-//            add(new SimpleEntry<>
-//                    (ReactorTests::findCheapestFlightsSorted,
-//                            "ReactorTests::findCheapestFlightsSorted"));
-//        }
-//
-//        {
-//            // Print the cheapest flights via a one-pass algorithm and
-//            // a custom Java Streams Collector.
-//            add(new SimpleEntry<>
-//                    (ReactorTests::findCheapestFlightsOnePass,
-//                            "ReactorTests::findCheapestFlightsOnePass"));
-//        }
+        {
+            // Print the cheapest flights via a two-pass algorithm
+            // that uses min() and filter().
+            add(new SimpleEntry<>
+                    (ReactorTests::findCheapestFlightsMin,
+                            "ReactorTests::findCheapestFlightsMin"));
+        }
+
+        {
+            // Print the cheapest flights via a two-pass algorithm
+            // that first calls sort() to order the trips by price and
+            // then uses takeWhile() to return the cheapest flight(s).
+            add(new SimpleEntry<>
+                    (ReactorTests::findCheapestFlightsSorted,
+                            "ReactorTests::findCheapestFlightsSorted"));
+        }
+
+        {
+            // Print the cheapest flights via a one-pass algorithm and
+            // a custom Java Streams Collector.
+            add(new SimpleEntry<>
+                    (ReactorTests::findCheapestFlightsOnePass,
+                            "ReactorTests::findCheapestFlightsOnePass"));
+        }
     };
 
     private void runTests() {
