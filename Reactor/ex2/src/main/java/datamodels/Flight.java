@@ -14,18 +14,20 @@ import java.time.LocalTime;
 @Builder(toBuilder = true)
 @With
 public class Flight {
-    String departureAirport;
-    LocalDate departureDate;
-    LocalTime departureTime;
-    String arrivalAirport;
-    LocalDate arrivalDate;
-    LocalTime arrivalTime;
-    int kilometers;
-    double price;
-    String currency;
-    String airlineCode;
+    public long id;
+    public String departureAirport;
+    public LocalDate departureDate;
+    public LocalTime departureTime;
+    public String arrivalAirport;
+    public LocalDate arrivalDate;
+    public LocalTime arrivalTime;
+    public int kilometers;
+    public double price;
+    public String currency;
+    public String airlineCode;
 
     public Flight(
+            long id,
             String departureAirport,
             LocalDate departureDate,
             LocalTime departureTime,
@@ -37,6 +39,7 @@ public class Flight {
             String currency,
             String airlineCode
     ) {
+        this.id = id;
         this.departureAirport = departureAirport;
         this.departureDate = departureDate;
         this.departureTime = departureTime;
@@ -77,22 +80,10 @@ public class Flight {
      */
     @Override
     public String toString() {
-        return /* departureDateTime
-            + ", "
-            + arrivalDateTime
-            + ", "
-            + returnDepartureDateTime
-            + ", "
-            + returnArrivalDateTime
-            + ", "
-            + departureAirport
-            + ", "
-            + arrivalAirport
-            + ", " */
-                +price
-                        + ", "
-                        + airlineCode
-                        + ", "
-                        + currency;
+        return "id = " + id +
+                " airlineCode = " + airlineCode +
+                " departureTime = " + departureTime +
+                " price = " + price +
+                " currency = " + currency;
     }
 }

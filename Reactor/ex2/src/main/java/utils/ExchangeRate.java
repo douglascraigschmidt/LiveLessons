@@ -48,12 +48,13 @@ public class ExchangeRate {
      * the {@code from} and {@code to} parameters asynchronously.
      *
      * @param from Currency to convert from.
-     * @param to Currency to convert to.
+     * @param to   Currency to convert to.
      * @return A Mono that emits the converted currency value.
      */
-    public static Mono<Double> convertMono(Double value, Currency from , Currency to) {
+    public static Mono<Double> convertMono(Double value, Currency from, Currency to) {
         return Mono.just(convertCurrency(from, to, value));
     }
+
     /**
      * This method converts the passed {@code from} currency
      * {@code value} to the {@code to} currency value.
@@ -71,10 +72,10 @@ public class ExchangeRate {
      * {@code value} to the {@code to} currency value.
      *
      * @param from Currency to convert from.
-     * @param to Currency to convert to.
+     * @param to   Currency to convert to.
      * @return The converted currency value.
      */
-    public static Double convert(Double value, Currency from , Currency to) {
+    public static Double convert(Double value, Currency from, Currency to) {
         return convertCurrency(from, to, value);
     }
 
@@ -82,8 +83,7 @@ public class ExchangeRate {
         if (from.equals(to)) {
             return value;
         } else {
-            BigDecimal usd = convertToUSD(from, BigDecimal.valueOf(value));
-            return convertFromUSD(to, usd)
+            return convertFromUSD(to, convertToUSD(from, BigDecimal.valueOf(value)))
                     .setScale(RESULT_SCALE, ROUNDING_MODE)
                     .doubleValue();
         }

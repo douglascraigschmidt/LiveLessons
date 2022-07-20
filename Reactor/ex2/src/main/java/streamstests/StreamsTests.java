@@ -42,7 +42,7 @@ public class StreamsTests {
                 // Collect into a List.
                 .collect(toList());
 
-        Optional<Flight> min1 = flights
+        Optional<Flight> min1 = convertedFlights
                 // Convert the List into a Stream.
                 .stream()
 
@@ -139,18 +139,8 @@ public class StreamsTests {
                 // Convert the List into a Stream.
                 .stream()
 
-                // If necessary, create a new Flight instance that
+                // Create a new Flight instance that
                 // has a price in the desired currency.
-                .map(flight -> {
-                    // Only convert Flights that are not already
-                    // in the desired currency.
-                    if (flight.getCurrency().equals(currency)) {
-                        // No need to convert so just return the same flight.
-                        return flight;
-                    } else {
-                        // Return a new Flight instance in the desired currency.
-                        return flight.inCurrency(currency);
-                    }
-                });
+                .map(flight -> flight.inCurrency(currency));
     }
 }

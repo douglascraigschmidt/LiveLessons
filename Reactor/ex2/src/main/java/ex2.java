@@ -17,7 +17,6 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static utils.ExceptionUtils.rethrowSupplier;
 
@@ -53,7 +52,7 @@ public class ex2 {
      */
     private final List
             <SimpleEntry<BiFunction<List<Flight>, String, List<Flight>>, String>>
-            sStreamsAlgorithmsMap = new ArrayList<>() {
+            streamsAlgorithmsMap = new ArrayList<>() {
         {
             // Print the cheapest flights via a two-pass algorithm
             // that uses min() and filter().
@@ -121,26 +120,31 @@ public class ex2 {
                         .Builder()
                         .minFlights(5_000_000)
                         .maxFlights(5_000_000)
+                        .minLowestPriceMatches(2)
+                        .maxLowestPriceMatches(4)
                         .fromAirport("NYC")
                         .toAirport("FCO")
                         .from(LocalDate.now().plusDays(1))
                         .generateFlights();
 
         // Generate a random FlightRequest from the list of random flights.
-        FlightRequest flightRequest = FlightFactory.buildRandomRequestFrom(flights);
+        FlightRequest flightRequest =
+                FlightFactory.buildFlightRequestFrom(flights)
+                        .withCurrency("USD");
 
         System.out.println("Searching among "
                 + flights.size()
                 + " flights for best price flights matching "
-                + flightRequest);
+                + flightRequest
+                + "\n");
 
         // Create an entry barrier to ensure all
         // algorithms start at the same time.
         CyclicBarrier entryBarrier =
-                new CyclicBarrier(sStreamsAlgorithmsMap.size()
+                new CyclicBarrier(streamsAlgorithmsMap.size()
                         + sReactorAlgorithmsMap.size());
 
-        sStreamsAlgorithmsMap
+        streamsAlgorithmsMap
                 // Register all the Streams find-min algorithms.
                 .forEach(entry -> AsyncTaskBarrier
                         .register(() ->
