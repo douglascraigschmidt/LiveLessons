@@ -66,6 +66,11 @@ public class Flight {
                 .build();
     }
 
+    /**
+     * Constructs a {@code FlightRequest} that will match this Flight.
+     *
+     * @return A {@code FlightRequest} that matches this {@code Flight}.
+     */
     public FlightRequest buildRequest() {
         return FlightRequest.builder()
                 .departureAirport(departureAirport)
