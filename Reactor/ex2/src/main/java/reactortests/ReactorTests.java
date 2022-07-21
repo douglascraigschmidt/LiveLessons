@@ -23,7 +23,7 @@ public class ReactorTests {
 
     /**
      * Print the cheapest flights via a two pass algorithm that uses
-     * min() and filter().
+     * {@code MathFlux.min()} and {@code Flux.filter().
      *
      * @param flightList The {@link List} of all available flights
      * @param testName   The algorithm that computed the flight results
@@ -52,8 +52,8 @@ public class ReactorTests {
 
     /**
      * Print the cheapest flights via a two-pass algorithm that first
-     * calls sort() to order the trips by price and then uses
-     * takeWhile() to return the cheapest flight(s).
+     * calls {@code sort()} to order the trips by price and then uses
+     * {@code takeWhile()} to return the cheapest flight(s).
      *
      * @param flightList The {@link List} of all available flights
      * @param testName   The algorithm that computed the flight results

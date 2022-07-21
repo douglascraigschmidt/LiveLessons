@@ -11,8 +11,9 @@ import kotlin.math.log10
 import kotlin.math.min
 
 /**
- * This class creates a list random round flight flights for any number
- * of airlines, airports, travel dates, and number of daily flights.
+ * This class creates a list random round flight flights for any
+ * number of airlines, airports, travel dates, and number of daily
+ * flights.
  */
 object FlightFactory {
     private const val AIRLINES = 2

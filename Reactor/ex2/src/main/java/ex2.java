@@ -114,61 +114,62 @@ public class ex2 {
     };
 
     private void runTests() {
+        // Configure the FlightFactory to generate a set of random
+        // flights.
+        List<Flight> flights = new FlightFactory
+            .Builder()
+            .minFlights(5_000_000)
+            .maxFlights(5_000_000)
+            .fromAirport("NYC")
+            .toAirport("FCO")
+            .from(LocalDate.now().plusDays(1))
+            .generateFlights();
 
-        // Configure the FlightFactory to generate a set of random flights.
-        List<Flight> flights =
-                new FlightFactory
-                        .Builder()
-                        .minFlights(5_000_000)
-                        .maxFlights(5_000_000)
-                        .fromAirport("NYC")
-                        .toAirport("FCO")
-                        .from(LocalDate.now().plusDays(1))
-                        .generateFlights();
-
-        // Generate a random FlightRequest from the list of random flights.
-        FlightRequest flightRequest = FlightFactory.buildRandomRequestFrom(flights);
+        // Generate a random FlightRequest from the list of random
+        // flights.
+        FlightRequest flightRequest =
+            FlightFactory.buildRandomRequestFrom(flights);
 
         System.out.println("Searching among "
-                + flights.size()
-                + " flights for best price flights matching "
-                + flightRequest);
+                           + flights.size()
+                           + " flights for best price flights matching "
+                           + flightRequest);
 
-        // Create an entry barrier to ensure all
-        // algorithms start at the same time.
+        // Create an entry barrier to ensure all algorithms start at
+        // the same time.
         CyclicBarrier entryBarrier =
-                new CyclicBarrier(sStreamsAlgorithmsMap.size()
-                        + sReactorAlgorithmsMap.size());
+            new CyclicBarrier(sStreamsAlgorithmsMap.size()
+                              + sReactorAlgorithmsMap.size());
 
         sStreamsAlgorithmsMap
-                // Register all the Streams find-min algorithms.
-                .forEach(entry -> AsyncTaskBarrier
-                        .register(() ->
-                                // Run the algorithm.
-                                runTest(entryBarrier,
-                                        flights,
-                                        entry.getKey(),
-                                        entry.getValue(),
-                                        flightRequest.getCurrency())));
+            // Register all the Streams find-min algorithms.
+            .forEach(entry -> AsyncTaskBarrier
+                     .register(() ->
+                               // Run the algorithm.
+                               runTest(entryBarrier,
+                                       flights,
+                                       entry.getKey(),
+                                       entry.getValue(),
+                                       flightRequest.getCurrency())));
 
         sReactorAlgorithmsMap
-                // Register all the Streams find-min algorithms.
-                .forEach(entry -> AsyncTaskBarrier
-                        .register(() ->
-                                // Run the algorithm.
-                                runTest(entryBarrier,
-                                        flights,
-                                        entry.getKey(),
-                                        entry.getValue(),
-                                        flightRequest.getCurrency())));
+            // Register all the Reactor find-min algorithms.
+            .forEach(entry -> AsyncTaskBarrier
+                     .register(() ->
+                               // Run the algorithm.
+                               runTest(entryBarrier,
+                                       flights,
+                                       entry.getKey(),
+                                       entry.getValue(),
+                                       flightRequest.getCurrency())));
 
         var testCount = AsyncTaskBarrier
-                // Run all the tests.
-                .runTasks()
+            // Run all the tests.
+            .runTasks()
 
-                // Block until all the tests are done to allow future
-                // computations to complete running.
-                .block();
+            // Block until all the tests are done to allow future
+            // computations to complete running.
+            .block();
 
         // Print the results.
         System.out.println("Completed " + testCount + " tests");
@@ -199,31 +200,31 @@ public class ex2 {
         System.gc();
 
         return Mono
-                // Create a Mono from a callable lambda.
-                .fromCallable(() -> {
+            // Create a Mono from a callable lambda.
+            .fromCallable(() -> {
                     var cheapestFlights = AsyncRunTimer
-                            // Start timing the test.
-                            .startTimeRun(() -> {
-                                        // Wait for all the other tasks to reach the entry
-                                        // barrier before proceeding.
-                                        rethrowSupplier(entryBarrier::await).get();
+                        // Start timing the test.
+                        .startTimeRun(() -> {
+                                // Wait for all the other tasks to reach the entry
+                                // barrier before proceeding.
+                                rethrowSupplier(entryBarrier::await).get();
 
-                                        return findMinFlights
-                                                // Run the test.
-                                                .apply(flights,
-                                                        algorithmName,
-                                                        currency);
-                                    },
-                                    algorithmName);
+                                return findMinFlights
+                                // Run the test.
+                                .apply(flights,
+                                       algorithmName,
+                                       currency);
+                            },
+                            algorithmName);
 
                     return printResults(cheapestFlights,
-                            algorithmName);
+                                        algorithmName);
                 })
-                // Run the algorithm in the parallel thread pool.
-                .subscribeOn(Schedulers.parallel())
+            // Run the algorithm in the parallel thread pool.
+            .subscribeOn(Schedulers.parallel())
 
-                // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
-                .flatMap(Function.identity());
+            // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
+            .flatMap(Function.identity());
     }
 
     /**
@@ -232,7 +233,7 @@ public class ex2 {
      * @param lowestPrices  A {@link Flux} containing the lowest priced flights
      * @param algorithmName The algorithm that computed the flight results
      * @return A {@link Mono<Void>} that synchronizes with the {@link
-     * AsyncTaskBarrier}.
+     *         AsyncTaskBarrier}.
      */
     private Mono<Void> printResults(Flux<Flight> lowestPrices,
                                     String algorithmName) {
@@ -259,7 +260,7 @@ public class ex2 {
      *                       algorithm
      * @param currency       The currency to convert into
      * @return A {@link Mono<Void>} that synchronizes with the {@link
-     * AsyncTaskBarrier}.
+     *         AsyncTaskBarrier}.
      */
     private Mono<Void> runTest
     (CyclicBarrier entryBarrier,
@@ -271,42 +272,42 @@ public class ex2 {
         System.gc();
 
         return Mono
-                // Create a Mono from a callable lambda.
-                .fromCallable(() -> {
+            // Create a Mono from a callable lambda.
+            .fromCallable(() -> {
                     // Wait for all the other tasks to reach the entry
                     // barrier before proceeding.
                     rethrowSupplier(entryBarrier::await).get();
 
                     var cheapestFlights = AsyncRunTimer
-                            // Start timing the test.
-                            .startTimeRun(() -> findMinFlights
-                                            // Run the test.
-                                            .apply(flights, currency),
-                                    algorithmName);
+                        // Start timing the test.
+                        .startTimeRun(() -> findMinFlights
+                                      // Run the test.
+                                      .apply(flights, currency),
+                                      algorithmName);
 
                     // Stop the timer for this algorithm.
                     AsyncRunTimer.stopTimeRun(algorithmName);
 
                     // Print the cheapest flights.
                     cheapestFlights
-                            .forEach(flight ->
-                                    printResults(algorithmName + " = " + flight));
+                        .forEach(flight ->
+                                 printResults(algorithmName + " = " + flight));
 
                     // Synchronize with the AsyncTaskBarrier.
                     return Mono.empty();
                 })
-                // Run the algorithm in the parallel thread pool.
-                .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()))
+            // Run the algorithm in the parallel thread pool.
+            .subscribeOn(Schedulers.fromExecutor(ForkJoinPool.commonPool()))
 
-                // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
-                .then();
+            // Return a Mono<Void> to synchronize with AsyncTaskBarrier.
+            .then();
     }
 
     /**
      * Display the {@code results} by prepending the current thread
      * id.
      *
-     * @param results The string to display
+     * @param results The {@link String} to display
      */
     private void printResults(String results) {
         System.out.println("["
