@@ -79,6 +79,7 @@ public class ExchangeRate {
             // Emit the converted currency value.
             .just(convertCurrency(from, to, value));
     }
+
     /**
      * This method converts the passed {@code from} currency
      * {@code value} to the {@code to} currency value.
@@ -100,7 +101,7 @@ public class ExchangeRate {
      * @param to Currency to convert to
      * @return The converted currency value
      */
-    public static Double convert(Double value, Currency from , Currency to) {
+    public static Double convert(Double value, Currency from, Currency to) {
         return convertCurrency(from, to, value);
     }
 
@@ -117,8 +118,7 @@ public class ExchangeRate {
         if (from.equals(to)) {
             return value;
         } else {
-            BigDecimal usd = convertToUSD(from, BigDecimal.valueOf(value));
-            return convertFromUSD(to, usd)
+            return convertFromUSD(to, convertToUSD(from, BigDecimal.valueOf(value)))
                     .setScale(RESULT_SCALE, ROUNDING_MODE)
                     .doubleValue();
         }

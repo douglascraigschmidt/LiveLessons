@@ -35,60 +35,66 @@ import java.time.LocalTime;
 @With
 public class Flight {
     /**
+     * The ID of the Flight.
+     */
+    public long id;
+
+    /**
      * The three letter code name of the departure airport.
      */
-    String departureAirport;
+    public String departureAirport;
 
     /**
      * The date of the departure.
      */
-    LocalDate departureDate;
+    public LocalDate departureDate;
 
     /**
      * The time of the departure.
      */
-    LocalTime departureTime;
+    public LocalTime departureTime;
 
     /**
      * The three letter code name of the arrival airport.
      */
-    String arrivalAirport;
+    public String arrivalAirport;
 
     /**
      * The date of the arrival.
      */
-    LocalDate arrivalDate;
+    public LocalDate arrivalDate;
 
     /**
      * The time of the arrival.
      */
-    LocalTime arrivalTime;
+    public LocalTime arrivalTime;
 
     /**
      * The distance in kilometers from the departure to the arrival
      * airports.
      */
-    int kilometers;
+    public int kilometers;
 
     /**
      * The price of the flight.
      */
-    double price;
+    public double price;
 
     /**
      * The currency of a flight's price.
      */
-    String currency;
+    public String currency;
 
     /**
      * The airline code.
      */
-    String airlineCode;
+    public String airlineCode;
 
     /**
      * Constructor that initializes all the fields.
      */ 
-    public Flight(String departureAirport,
+    public Flight(long id,
+                  String departureAirport,
                   LocalDate departureDate,
                   LocalTime departureTime,
                   String arrivalAirport,
@@ -97,8 +103,8 @@ public class Flight {
                   int kilometers,
                   double price,
                   String currency,
-                  String airlineCode
-                  ) {
+                  String airlineCode) {
+        this.id = id;
         this.departureAirport = departureAirport;
         this.departureDate = departureDate;
         this.departureTime = departureTime;
@@ -133,7 +139,9 @@ public class Flight {
     }
 
     /**
-     * Factory method that builds a {@link FlightRequest}
+     * Constructs a {@code FlightRequest} that will match this Flight.
+     *
+     * @return A {@code FlightRequest} that matches this {@code Flight}
      */
     public FlightRequest buildRequest() {
         return FlightRequest.builder()
@@ -158,22 +166,15 @@ public class Flight {
      */
     @Override
     public String toString() {
-        return /* departureDateTime
-                  + ", "
-                  + arrivalDateTime
-                  + ", "
-                  + returnDepartureDateTime
-                  + ", "
-                  + returnArrivalDateTime
-                  + ", "
-                  + departureAirport
-                  + ", "
-                  + arrivalAirport
-                  + ", " */
-            + price
-            + ", "
-            + airlineCode
-            + ", "
+        return "id = " 
+            + id 
+            + " airlineCode = " 
+            + airlineCode 
+            + " departureTime = " 
+            + departureTime 
+            + " price = " 
+            + price 
+            + " currency = " 
             + currency;
     }
 }

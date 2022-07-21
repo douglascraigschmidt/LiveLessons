@@ -16,7 +16,7 @@ import kotlin.math.min
  * flights.
  */
 object FlightFactory {
-    private const val AIRLINES = 2
+    private const val AIRLINES = 5
     private const val DAYS = 1
     private const val BASE_PRICE_USD = 100
     private const val MIN_PRICE_PER_KM_USD = 0.4
@@ -25,25 +25,22 @@ object FlightFactory {
     private const val MAX_DISTANCE_KM = 5000
     private const val FLIGHT_SPEED_KPH = 400
     private const val RUNWAY_MINUTES = 15
-    private const val GENERATE_RETURN_FLIGHTS = false
     private const val DAILY_FLIGHTS = 100
     private const val MIN_LOWEST_PRICE_MATCHES = 1
     private const val MAX_LOWEST_PRICE_MATCHES = 3
 
     private val random = Random()
 
-    data class Currency(
-        val name: String,
-        val rates: Map<String, Double>
-    )
+    private val expectedMatches = mutableListOf<Flight>()
 
     @JvmStatic
-    fun buildRandomRequestFrom(flights: List<Flight>): FlightRequest {
+    fun buildFlightRequestFrom(flights: List<Flight>): FlightRequest {
         return flights[random(0, flights.size)].buildRequest()
     }
 
     class Builder {
         var airports = randomStrings(2, prefix = "Airport-")
+        var airlines = randomStrings(AIRLINES, prefix = "Airline-")
         var fromAirport = airports.first()
         var toAirport = airports.last()
         var minFlights = DAILY_FLIGHTS
@@ -51,7 +48,6 @@ object FlightFactory {
         var fromDate: LocalDate = LocalDate.now()
         var toDate: LocalDate = fromDate.plusDays(DAYS.toLong())
         var currencies = ExchangeRate.Currency.values().map { it.toString() }
-        var airlines = randomStrings(AIRLINES)
         var minDistanceKm = MIN_DISTANCE_KM
         var maxDistanceKm = MAX_DISTANCE_KM
         var minPricePerKm = MIN_PRICE_PER_KM_USD
@@ -88,7 +84,7 @@ object FlightFactory {
         }
 
         fun maxLowestPriceMatches(matches: Int): Builder {
-            this.minLowestPriceMatches = matches
+            this.maxLowestPriceMatches = matches
             return this
         }
 
@@ -182,13 +178,15 @@ object FlightFactory {
         fun generateFlights(): List<Flight> {
             validate()
 
-            var minPrice = Double.MAX_VALUE
-            val flights = mutableListOf<Flight>()
+            expectedMatches.clear()
 
-            val distance = random(minDistanceKm, maxDistanceKm)
+            var minPrice = Double.MAX_VALUE
+            var flights = mutableListOf<Flight>()
+
+            val distance = random(minDistanceKm, maxDistanceKm + 1)
 
             var flightCount = random(minFlights, maxFlights + 1)
-            val matches = random(minLowestPriceMatches, maxLowestPriceMatches)
+            val matches = random(minLowestPriceMatches, maxLowestPriceMatches + 1)
 
             (1..flightCount).map { count ->
                 val flightTime = flightTime(distance)
@@ -218,6 +216,7 @@ object FlightFactory {
                 val currency = currencies.random()
 
                 val flight = Flight(
+                    count.toLong(),
                     fromAirport,
                     departureDateTime.toLocalDate(),
                     departureDateTime.toLocalTime(),
@@ -235,7 +234,46 @@ object FlightFactory {
 
             check(flights.count() in minFlights..maxFlights)
 
-            return flights.shuffled(random)
+            val shuffled = flights.shuffled(random)
+
+            val min = shuffled.minOf { ExchangeRate.convert(it.price, it.currency, "USD") }
+            val cheapest = shuffled.filter { ExchangeRate.convert(it.price, it.currency, "USD") == min }
+
+            println("FlightFactory has generated ${shuffled.count()} " +
+                    "flights with ${cheapest.count()} cheapest flight${if (cheapest.count() > 1) "s" else ""}.")
+            println("\nCONFIGURATION:\n")
+            printConfiguration()
+
+            println("\nCHEAPEST FLIGHT${if (cheapest.count() > 1) "S" else ""}:\n")
+            cheapest.forEach {
+                println("\t$it")
+            }
+            println()
+
+            check(cheapest.count() in minLowestPriceMatches..maxLowestPriceMatches)
+
+
+            return shuffled
+        }
+
+        private fun printConfiguration() {
+            println(
+                "\tfromAirport = $fromAirport\n" +
+                        "\ttoAirport = $toAirport\n" +
+                        "\tminFlights = $minFlights\n" +
+                        "\tmaxFlights = $maxFlights\n" +
+                        "\tfromDate = $fromDate\n" +
+                        "\ttoDate = $toDate\n" +
+                        "\tcurrencies = $currencies\n" +
+                        "\tairlines = $airlines\n" +
+                        "\tminDistanceKm = $minDistanceKm\n" +
+                        "\tmaxDistanceKm = $maxDistanceKm\n" +
+                        "\tminPricePerKm = $minPricePerKm\n" +
+                        "\tmaxPricePerKm = $maxPricePerKm\n" +
+                        "\tbasePrice = $basePrice\n" +
+                        "\tminLowestPriceMatches = $minLowestPriceMatches\n" +
+                        "\tmaxLowestPriceMatches = $maxLowestPriceMatches"
+            )
         }
     }
 

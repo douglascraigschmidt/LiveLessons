@@ -17,7 +17,6 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static utils.ExceptionUtils.rethrowSupplier;
 
@@ -52,96 +51,99 @@ public class ex2 {
      * associated metadata.
      */
     private final List
-            <SimpleEntry<BiFunction<List<Flight>, String, List<Flight>>, String>>
-            sStreamsAlgorithmsMap = new ArrayList<>() {
-        {
-            // Print the cheapest flights via a two-pass algorithm
-            // that uses min() and filter().
-            add(new SimpleEntry<>
-                    (StreamsTests::findCheapestFlightsMin,
-                            "StreamsTests::findCheapestFlightsMin"));
-        }
+        <SimpleEntry<BiFunction<List<Flight>, String, List<Flight>>, String>>
+        streamsAlgorithmsMap = new ArrayList<>() {
+                {
+                    // Print the cheapest flights via a two-pass algorithm
+                    // that uses min() and filter().
+                    add(new SimpleEntry<>
+                        (StreamsTests::findCheapestFlightsMin,
+                         "StreamsTests::findCheapestFlightsMin"));
+                }
 
-        {
-            // Print the cheapest flights via a two-pass algorithm
-            // that first calls sort() to order the trips by price and
-            // then uses takeWhile() to return the cheapest flight(s).
-            add(new SimpleEntry<>
-                    (StreamsTests::findCheapestFlightsSorted,
-                            "StreamsTests::findCheapestFlightsSorted"));
-        }
+                {
+                    // Print the cheapest flights via a two-pass algorithm
+                    // that first calls sort() to order the trips by price and
+                    // then uses takeWhile() to return the cheapest flight(s).
+                    add(new SimpleEntry<>
+                        (StreamsTests::findCheapestFlightsSorted,
+                         "StreamsTests::findCheapestFlightsSorted"));
+                }
 
-        {
-            // Print the cheapest flights via a one-pass algorithm and
-            // a custom Java Streams Collector.
-            add(new SimpleEntry<>
-                    (StreamsTests::findCheapestFlightsOnePass,
-                            "StreamsTests::findCheapestFlightsOnePass"));
-        }
-    };
+                {
+                    // Print the cheapest flights via a one-pass algorithm and
+                    // a custom Java Streams Collector.
+                    add(new SimpleEntry<>
+                        (StreamsTests::findCheapestFlightsOnePass,
+                         "StreamsTests::findCheapestFlightsOnePass"));
+                }
+            };
 
     /**
      * A {@link List} of all the Reactor find-min algorithms and their
      * associated metadata.
      */
     private final List
-            <SimpleEntry<TriFunction<List<Flight>, String, String, Flux<Flight>>, String>>
-            sReactorAlgorithmsMap = new ArrayList<>() {
-        {
-            // Print the cheapest flights via a two-pass algorithm
-            // that uses min() and filter().
-            add(new SimpleEntry<>
-                    (ReactorTests::findCheapestFlightsMin,
-                            "ReactorTests::findCheapestFlightsMin"));
-        }
+        <SimpleEntry<TriFunction<List<Flight>, String, String, Flux<Flight>>, String>>
+        sReactorAlgorithmsMap = new ArrayList<>() {
+                {
+                    // Print the cheapest flights via a two-pass algorithm
+                    // that uses min() and filter().
+                    add(new SimpleEntry<>
+                        (ReactorTests::findCheapestFlightsMin,
+                         "ReactorTests::findCheapestFlightsMin"));
+                }
 
-        {
-            // Print the cheapest flights via a two-pass algorithm
-            // that first calls sort() to order the trips by price and
-            // then uses takeWhile() to return the cheapest flight(s).
-            add(new SimpleEntry<>
-                    (ReactorTests::findCheapestFlightsSorted,
-                            "ReactorTests::findCheapestFlightsSorted"));
-        }
+                {
+                    // Print the cheapest flights via a two-pass algorithm
+                    // that first calls sort() to order the trips by price and
+                    // then uses takeWhile() to return the cheapest flight(s).
+                    add(new SimpleEntry<>
+                        (ReactorTests::findCheapestFlightsSorted,
+                         "ReactorTests::findCheapestFlightsSorted"));
+                }
 
-        {
-            // Print the cheapest flights via a one-pass algorithm and
-            // a custom Java Streams Collector.
-            add(new SimpleEntry<>
-                    (ReactorTests::findCheapestFlightsOnePass,
-                            "ReactorTests::findCheapestFlightsOnePass"));
-        }
-    };
+                {
+                    // Print the cheapest flights via a one-pass algorithm and
+                    // a custom Java Streams Collector.
+                    add(new SimpleEntry<>
+                        (ReactorTests::findCheapestFlightsOnePass,
+                         "ReactorTests::findCheapestFlightsOnePass"));
+                }
+            };
 
     private void runTests() {
-        // Configure the FlightFactory to generate a set of random
-        // flights.
-        List<Flight> flights = new FlightFactory
+        // Configure the FlightFactory to generate a set of random flights.
+        List<Flight> flights =
+            new FlightFactory
             .Builder()
             .minFlights(5_000_000)
             .maxFlights(5_000_000)
+            .minLowestPriceMatches(2)
+            .maxLowestPriceMatches(4)
             .fromAirport("NYC")
             .toAirport("FCO")
             .from(LocalDate.now().plusDays(1))
             .generateFlights();
 
-        // Generate a random FlightRequest from the list of random
-        // flights.
+        // Generate a random FlightRequest from the list of random flights.
         FlightRequest flightRequest =
-            FlightFactory.buildRandomRequestFrom(flights);
+            FlightFactory.buildFlightRequestFrom(flights)
+            .withCurrency("USD");
 
         System.out.println("Searching among "
                            + flights.size()
                            + " flights for best price flights matching "
-                           + flightRequest);
+                           + flightRequest
+                           + "\n");
 
         // Create an entry barrier to ensure all algorithms start at
         // the same time.
         CyclicBarrier entryBarrier =
-            new CyclicBarrier(sStreamsAlgorithmsMap.size()
+            new CyclicBarrier(streamsAlgorithmsMap.size()
                               + sReactorAlgorithmsMap.size());
 
-        sStreamsAlgorithmsMap
+        streamsAlgorithmsMap
             // Register all the Streams find-min algorithms.
             .forEach(entry -> AsyncTaskBarrier
                      .register(() ->
@@ -191,11 +193,11 @@ public class ex2 {
      * AsyncTaskBarrier}.
      */
     private Mono<Void> runTest
-    (CyclicBarrier entryBarrier,
-     List<Flight> flights,
-     TriFunction<List<Flight>, String, String, Flux<Flight>> findMinFlights,
-     String algorithmName,
-     String currency) {
+        (CyclicBarrier entryBarrier,
+         List<Flight> flights,
+         TriFunction<List<Flight>, String, String, Flux<Flight>> findMinFlights,
+         String algorithmName,
+         String currency) {
         // Force the system to garbage collect.
         System.gc();
 
@@ -210,10 +212,10 @@ public class ex2 {
                                 rethrowSupplier(entryBarrier::await).get();
 
                                 return findMinFlights
-                                // Run the test.
-                                .apply(flights,
-                                       algorithmName,
-                                       currency);
+                                    // Run the test.
+                                    .apply(flights,
+                                           algorithmName,
+                                           currency);
                             },
                             algorithmName);
 
@@ -238,14 +240,14 @@ public class ex2 {
     private Mono<Void> printResults(Flux<Flight> lowestPrices,
                                     String algorithmName) {
         return lowestPrices
-                // Print the cheapest flights.
-                .doOnNext(flight -> printResults(algorithmName + " = " + flight))
+            // Print the cheapest flights.
+            .doOnNext(flight -> printResults(algorithmName + " = " + flight))
 
-                // Record the time for this run.
-                .doFinally(___ -> AsyncRunTimer.stopTimeRun(algorithmName))
+            // Record the time for this run.
+            .doFinally(___ -> AsyncRunTimer.stopTimeRun(algorithmName))
 
-                // Sync with the AsyncTaskBarrier framework.
-                .then();
+            // Sync with the AsyncTaskBarrier framework.
+            .then();
     }
 
     /**
@@ -263,11 +265,11 @@ public class ex2 {
      *         AsyncTaskBarrier}.
      */
     private Mono<Void> runTest
-    (CyclicBarrier entryBarrier,
-     List<Flight> flights,
-     BiFunction<List<Flight>, String, List<Flight>> findMinFlights,
-     String algorithmName,
-     String currency) {
+        (CyclicBarrier entryBarrier,
+         List<Flight> flights,
+         BiFunction<List<Flight>, String, List<Flight>> findMinFlights,
+         String algorithmName,
+         String currency) {
         // Force the system to garbage collect first.
         System.gc();
 
@@ -311,8 +313,8 @@ public class ex2 {
      */
     private void printResults(String results) {
         System.out.println("["
-                + Thread.currentThread().getId()
-                + "] "
-                + results);
+                           + Thread.currentThread().getId()
+                           + "] "
+                           + results);
     }
 }
