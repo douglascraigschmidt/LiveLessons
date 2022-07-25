@@ -220,3 +220,7 @@ Here's an overview of what's currently included in these examples:
          "AtomicLong" class, including using Java StampedLock
          ReentrantReadWriteLock, synchronized statements, and
          VarHandle.
+
+. ex40 - This program demonstrates how to use modern Java features to
+         build a cosine vector Map from a CSV file containing the
+         cosine values for movies.
