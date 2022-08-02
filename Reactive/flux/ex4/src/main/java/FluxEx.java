@@ -128,31 +128,18 @@ public class FluxEx {
 
         // Perform processing in a sequential stream and return a
         // Mono<Void>.
-        return Stream
-            // Generate a stream of random, large, and unreduced big
-            // fractions.
-            .generate(() -> BigFractionUtils
-                      .makeBigFraction(sRANDOM,false))
-
-            // Stop after generating sMAX_FRACTIONS big fractions.
-            .limit(sMAX_FRACTIONS)
-
-            // Reduce and multiply these fractions asynchronously.
-            .map(unreducedBigFraction ->
-                 reduceAndMultiplyFraction(unreducedBigFraction,
-                                           Schedulers
-                                           // Use the common fork-join pool.
-                                           .fromExecutor(ForkJoinPool
-                                                         .commonPool()),
-                                           sb))
-
+        return FluxEx
+            // Get a stream of random Mono<BigFraction> objects that
+            // are being reduced and multiplied concurrently.
+            .getMonoStream(sb)
+                
             // Trigger intermediate operation processing and return a
-            // mono to a list of big fractions that are being reduced
-            // and multiplied asynchronously.
+            // Mono to a List of BigFraction objects that are being
+            // reduced and multiplied asynchronously.
             .collect(toMonoList())
 
-            // After all asynchronous fraction reductions complete
-            // use Mono.flatMap() to sort and print the results.
+            // After all asynchronous fraction reductions complete use
+            // Mono.flatMap() to sort and print the results.
             .flatMap(list -> BigFractionUtils
                      .sortAndPrintList(list, sb));
     }
@@ -170,26 +157,14 @@ public class FluxEx {
 
         // Process the function in a sequential stream and return a
         // Flux.
-        Flux<BigFraction> bigFractionFlux = Stream
-            // Generate a stream of random, large, and unreduced big
-            // fractions.
-            .generate(() -> makeBigFraction(sRANDOM, false))
-
-            // Stop after generating sMAX_FRACTIONS big fractions.
-            .limit(sMAX_FRACTIONS)
-
-            // Reduce and multiply these fractions asynchronously.
-            .map(unreducedBigFraction ->
-                 reduceAndMultiplyFraction(unreducedBigFraction,
-                                           Schedulers
-                                           // Use the common fork-join pool.
-                                           .fromExecutor(ForkJoinPool
-                                                         .commonPool()),
-                                           sb))
+        Flux<BigFraction> bigFractionFlux = FluxEx
+            // Get a stream of random Mono<BigFraction> objects that
+            // are being reduced and multiplied concurrently.
+            .getMonoStream(sb)
 
             // Trigger intermediate operation processing and return a
-            // mono to a list of big fractions that are being reduced
-            // and multiplied asynchronously.
+            // Mono to a List of BigFraction objects that are being
+            // reduced and multiplied asynchronously.
             .collect(toMonoList())
 
             // Convert the Mono<List<BigFraction>> to a
@@ -216,9 +191,35 @@ public class FluxEx {
 
         // Perform processing in a sequential stream and return a
         // Flux.
-        Flux<BigFraction> bigFractionFlux = Stream
-            // Generate a stream of random, large, and unreduced big
-            // fractions.
+        Flux<BigFraction> bigFractionFlux = FluxEx
+            // Get a stream of random Mono<BigFraction> objects that
+            // are being reduced and multiplied concurrently.
+            .getMonoStream(sb)
+
+            // Trigger intermediate operation processing and return a
+            // Mono to a Flux of BigFraction objects that are being
+            // reduced and multiplied asynchronously.
+            .collect(toMonoFlux());
+
+        return BigFractionUtils
+            // After all asynchronous fraction reductions have
+            // completed sort and print the results.
+            .sortAndPrintFlux(bigFractionFlux, sb);
+    }
+
+    /**
+     * Generate a {@link Stream} of random {@link Mono<BigFraction>}
+     * objects that are being reduced and multiplied concurrently.
+     *
+     * @param sb The {@link StringBuffer} to store logging messages
+     * @return A {@link Stream} of random {@link Mono<BigFraction>}
+     *         objects that are being reduced and multiplied
+     *         concurrently
+     */
+    private static Stream<Mono<BigFraction>> getMonoStream(StringBuffer sb) {
+        return Stream
+            // Generate a stream of random, large, and unreduced
+            // big fractions.
             .generate(() -> makeBigFraction(sRANDOM, false))
 
             // Stop after generating sMAX_FRACTIONS big fractions.
@@ -231,38 +232,35 @@ public class FluxEx {
                                            // Use the common fork-join pool.
                                            .fromExecutor(ForkJoinPool
                                                          .commonPool()),
-                                           sb))
-
-            // Trigger intermediate operation processing and return a
-            // mono to a flux of big fractions that are being reduced
-            // and multiplied asynchronously.
-            .collect(toMonoFlux());
-
-        return BigFractionUtils
-            // After all asynchronous fraction reductions have
-            // completed sort and print the results.
-            .sortAndPrintFlux(bigFractionFlux, sb);
+                                           sb));
     }
 
     /**
-     * This factory method returns a Mono that's signaled after the
-     * {@code unreducedFraction} is reduced/multiplied asynchronously
-     * in background threads from the given {@link Scheduler}.
+     * This factory method returns a {@link Mono} that's signaled
+     * after the {@code unreducedFraction} is reduced/multiplied
+     * asynchronously in background threads from the given {@link
+     * Scheduler}.
+     *
+     * @param unreducedFraction An unreduced {@link BigFraction}
+     * @param scheduler The {@link Scheduler} to perform the
+     *                  computation in
+     * @param sb The {@link StringBuffer} to store logging messages
+     * @return A {@link Mono<BigFraction>} that's signaled when the
+     *         asynchronous computation completes
      */
     private static Mono<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
          Scheduler scheduler,
          StringBuffer sb) {
         return Mono
-            // Omit one item that performs the reduction.
+            // Emit one item that performs the reduction.
             .fromCallable(() -> BigFraction
                           .reduce(unreducedFraction))
 
-            // Perform all processing asynchronously in a pool of
-            // background threads.
+            // Perform all processing asynchronously in the scheduler.
             .subscribeOn(scheduler)
 
-            // Return a Mono to a multiplied big fraction.
+            // Return a Mono to a multiplied BigFraction.
             .flatMap(reducedFraction ->
                      multiplyFraction(reducedFraction,
                                       sBigReducedFraction,
