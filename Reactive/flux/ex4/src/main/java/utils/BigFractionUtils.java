@@ -1,5 +1,6 @@
 package utils;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -73,8 +74,7 @@ public class BigFractionUtils {
 
     /**
      * Sort the {@code list} in parallel using quicksort and mergesort
-     * and then store the results in the {@code StringBuilder}
-     * parameter.
+     * and store the results in the {@link StringBuffer} parameter.
      */
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
                                               StringBuffer sb) {
@@ -101,10 +101,13 @@ public class BigFractionUtils {
         // Display the results as mixed fractions.
         Consumer<List<BigFraction>> displayList = sortedList -> {
             // Iterate through each BigFraction in the sorted list.
-            sortedList.forEach(fraction ->
-                               sb.append("\n     "
-                                         + fraction.toMixedString()));
+            sortedList .forEach(fraction ->
+                                // Store the big fraction in sb.
+                                sb.append("\n     "
+                                          + fraction.toMixedString()));
             sb.append("\n");
+
+            // Display the results.
             display(sb.toString());
         };
 
@@ -119,7 +122,30 @@ public class BigFractionUtils {
             .doOnSuccess(displayList)
                 
             // Use then() to return an empty mono to synchronize with
-            // the AsyncTester framework.
+            // the AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Sort the {@link flux} and store the results in the {@link
+     * StringBuffer} parameter.
+     */
+    public static Mono<Void> sortAndPrintFlux(Flux<BigFraction> flux,
+                                              StringBuffer sb) {
+        return flux
+            // Sort the flux.
+            .sort()
+
+            // Store the big fraction in sb.
+            .doOnNext(fraction ->
+                      sb.append("\n    "
+                                + fraction.toMixedString()))
+
+            // Display the results.
+            .doFinally(___ -> display(sb.toString()))
+
+            // Use then() to return an empty mono to synchronize with
+            // the AsyncTaskBarrier framework.
             .then();
     }
 

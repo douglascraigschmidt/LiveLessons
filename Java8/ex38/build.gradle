@@ -3,13 +3,13 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-java.targetCompatibility = JavaVersion.VERSION_16
-java.sourceCompatibility = JavaVersion.VERSION_16
+java.targetCompatibility = JavaVersion.VERSION_18
+java.sourceCompatibility = JavaVersion.VERSION_18
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'io.projectreactor:reactor-core:3.4.6'
+    implementation 'io.projectreactor:reactor-core:3.4.19'
 }

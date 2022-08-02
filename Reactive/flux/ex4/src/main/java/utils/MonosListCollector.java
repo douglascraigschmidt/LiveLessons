@@ -14,19 +14,19 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Implements a custom collector that converts a stream of Reactor
- * Mono objects into a single Mono object that is triggered when all
- * the Mono objects in the stream complete.
+ * {@link Mono} objects into a single {@link Mono} object that is
+ * triggered when all {@link Mono} objects in the stream complete.
  */
-public class MonosCollector<T>
-      implements Collector<Mono<T>,
-                           List<Mono<T>>,
-                           Mono<List<T>>> {
+public class MonosListCollector<T>
+       implements Collector<Mono<T>,
+                            List<Mono<T>>,
+                            Mono<List<T>>> {
     /**
-     * A function that creates and returns a new mutable result
+     * This factory method creates and returns a new mutable result
      * container that will hold all the monos in the stream.
      *
-     * @return a function which returns a new, mutable result
-     * container
+     * @return A {@link Supplier} that returns a new, mutable result
+     *         container implemented as an {@link ArrayList}
      */
     @Override
     public Supplier<List<Mono<T>>> supplier() {
@@ -34,9 +34,11 @@ public class MonosCollector<T>
     }
 
     /**
-     * A function that folds a mono into the mutable result container.
+     * This factory method folds a {@link Mono} into the mutable
+     * result container.
      *
-     * @return a function which folds a value into a mutable result container
+     * @return A {@link BiConsumer} that folds a value into a mutable
+     *         result container
      */
     @Override
     public BiConsumer<List<Mono<T>>, Mono<T>> accumulator() {
@@ -44,17 +46,16 @@ public class MonosCollector<T>
     }
 
     /**
-     * A function that accepts two partial results and merges them.
-     * The combiner function may fold state from one argument into the
-     * other and return that, or may return a new result container.
+     * This factory method accepts two partial results and merges
+     * them.  The combiner function folds the contents of one argument
+     * into the other and returns that.
      *
-     * @return a function which combines two partial results into a combined
-     * result
+     * @return A {@link BinaryOperator} that combines two partial
+     *         results into a combined result
      */
     @Override
     public BinaryOperator<List<Mono<T>>> combiner() {
-        return (List<Mono<T>> one,
-                List<Mono<T>> another) -> {
+        return (one, another) -> {
             one.addAll(another);
             return one;
         };
@@ -64,8 +65,8 @@ public class MonosCollector<T>
      * Perform the final transformation from the intermediate
      * accumulation type {@code A} to the final result type {@code R}.
      *
-     * @return a function which transforms the intermediate result to
-     * the final result
+     * @return A {@link Function} that transforms the intermediate
+     * result to the final result
      */
     @Override
     public Function<List<Mono<T>>, Mono<List<T>>> finisher() {
@@ -85,8 +86,8 @@ public class MonosCollector<T>
                      .fromIterable(monos)
 
                      // Use map() to block() all monos and yield
-                     // objects of type T (block() will not
-                     // actually block).
+                     // objects of type T (block() will not actually
+                     // block).
                      .map(Mono::block)
 
                      // Collect the results of type T into a list.
@@ -98,8 +99,8 @@ public class MonosCollector<T>
      * indicating the characteristics of this Collector.  This set
      * should be immutable.
      *
-     * @return An immutable set of collector characteristics, which in
-     * this case is simply UNORDERED
+     * @return An immutable {@link Set} of collector {@link
+     * Characteristics}, which is just {@code UNORDERED}
      */
     @Override
     public Set<Characteristics> characteristics() {
@@ -107,12 +108,13 @@ public class MonosCollector<T>
     }
 
     /**
-     * This static factory method creates a new MonosCollector.
+     * This static factory method creates a new {@link
+     * MonosListCollector}.
      *
-     * @return A new MonosCollector
+     * @return A new {@link MonosListCollector}
      */
     public static <T> Collector<Mono<T>, ?, Mono<List<T>>>
-                          toMono() {
-        return new MonosCollector<T>();
+    toMonoList() {
+        return new MonosListCollector<T>();
     }
 }

@@ -19,7 +19,8 @@ import static java.util.stream.Collectors.*;
  * between collecting results in a parallel stream vs. sequential
  * stream using concurrent and non-concurrent collectors for various
  * types of Java {@link Map} implementations, including {@link
- * HashMap} and {@link TreeMap}.
+ * HashMap} and {@link TreeMap}.  In addition, it shows how to use the
+ * Java {@link record} type.
  */
 @SuppressWarnings("ALL")
 public class ex38 {

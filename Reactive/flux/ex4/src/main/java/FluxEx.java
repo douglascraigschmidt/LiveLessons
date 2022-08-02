@@ -6,13 +6,14 @@ import utils.BigFraction;
 import utils.BigFractionUtils;
 import utils.BlockingSubscriber;
 
-import java.math.BigInteger;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static utils.BigFractionUtils.*;
-import static utils.MonosCollector.toMono;
+import static utils.MonosFluxCollector.toMonoFlux;
+import static utils.MonosListCollector.toMonoList;
 
 /**
  * This class shows how to apply Project Reactor features
@@ -20,9 +21,9 @@ import static utils.MonosCollector.toMono;
  * fromArray(), map(), flatMap(), collect(), subscribeOn(), and
  * various types of thread pools.  It also shows various Mono
  * operations, such as when(), firstWithSignal(), materialize(),
- * flatMap(), flatMapMany(), subscribeOn(), and the parallel thread
- * pool.  In addition, it demonstrates how to combine the Java streams
- * framework with the Project Reactor framework.
+ * flatMap(), flatMapMany(), flatMapIterable(), subscribeOn(), and the
+ * parallel thread pool.  In addition, it demonstrates how to combine
+ * the Java streams framework with the Project Reactor framework.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -66,7 +67,7 @@ public class FluxEx {
 
                 // Display results when processing is done.
                 BigFractionUtils.display(sb.toString());
-             },
+            },
              () -> {
                  // Add some useful diagnostic output.
                  sb.append("["
@@ -125,7 +126,8 @@ public class FluxEx {
 
         sb.append("     Printing sorted results:");
 
-        // Process the function in a sequential stream.
+        // Perform processing in a sequential stream and return a
+        // Mono<Void>.
         return Stream
             // Generate a stream of random, large, and unreduced big
             // fractions.
@@ -147,12 +149,99 @@ public class FluxEx {
             // Trigger intermediate operation processing and return a
             // mono to a list of big fractions that are being reduced
             // and multiplied asynchronously.
-            .collect(toMono())
+            .collect(toMonoList())
 
-            // After all the asynchronous fraction reductions have
-            // completed sort and print the results.
+            // After all asynchronous fraction reductions complete
+            // use Mono.flatMap() to sort and print the results.
             .flatMap(list -> BigFractionUtils
                      .sortAndPrintList(list, sb));
+    }
+
+    /**
+     * Test BigFraction multiplications by combining the Java Streams
+     * framework with the Project Reactor framework and the Java
+     * common fork-join framework in a slightly different way.
+     */
+    public static Mono<Void> testFractionMultiplicationsStreamsEx1() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationsStreamsEx1()\n");
+
+        sb.append("     Printing sorted results:");
+
+        // Process the function in a sequential stream and return a
+        // Flux.
+        Flux<BigFraction> bigFractionFlux = Stream
+            // Generate a stream of random, large, and unreduced big
+            // fractions.
+            .generate(() -> makeBigFraction(sRANDOM, false))
+
+            // Stop after generating sMAX_FRACTIONS big fractions.
+            .limit(sMAX_FRACTIONS)
+
+            // Reduce and multiply these fractions asynchronously.
+            .map(unreducedBigFraction ->
+                 reduceAndMultiplyFraction(unreducedBigFraction,
+                                           Schedulers
+                                           // Use the common fork-join pool.
+                                           .fromExecutor(ForkJoinPool
+                                                         .commonPool()),
+                                           sb))
+
+            // Trigger intermediate operation processing and return a
+            // mono to a list of big fractions that are being reduced
+            // and multiplied asynchronously.
+            .collect(toMonoList())
+
+            // Convert the Mono<List<BigFraction>> to a
+            // Flux<BigFraction>.
+            .flatMapIterable(Function.identity());
+
+        return BigFractionUtils
+            // After all asynchronous fraction reductions have
+            // completed sort and print the results.
+            .sortAndPrintFlux(bigFractionFlux, sb);
+    }
+
+    /**
+     * Test BigFraction multiplications by combining the Java Streams
+     * framework with the Project Reactor framework and the Java
+     * common fork-join framework in yet another slightly different
+     * way.
+     */
+    public static Mono<Void> testFractionMultiplicationsStreamsEx2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplicationsStreamsEx2()\n");
+
+        sb.append("     Printing sorted results:");
+
+        // Perform processing in a sequential stream and return a
+        // Flux.
+        Flux<BigFraction> bigFractionFlux = Stream
+            // Generate a stream of random, large, and unreduced big
+            // fractions.
+            .generate(() -> makeBigFraction(sRANDOM, false))
+
+            // Stop after generating sMAX_FRACTIONS big fractions.
+            .limit(sMAX_FRACTIONS)
+
+            // Reduce and multiply these fractions asynchronously.
+            .map(unreducedBigFraction ->
+                 reduceAndMultiplyFraction(unreducedBigFraction,
+                                           Schedulers
+                                           // Use the common fork-join pool.
+                                           .fromExecutor(ForkJoinPool
+                                                         .commonPool()),
+                                           sb))
+
+            // Trigger intermediate operation processing and return a
+            // mono to a flux of big fractions that are being reduced
+            // and multiplied asynchronously.
+            .collect(toMonoFlux());
+
+        return BigFractionUtils
+            // After all asynchronous fraction reductions have
+            // completed sort and print the results.
+            .sortAndPrintFlux(bigFractionFlux, sb);
     }
 
     /**

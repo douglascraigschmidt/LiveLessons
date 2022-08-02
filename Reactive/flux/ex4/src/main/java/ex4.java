@@ -24,6 +24,17 @@ public class ex4 {
         // the Java common fork-join pool.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreams);
 
+        // Test BigFraction multiplications by combining the Java
+        // Streams framework with the Project Reactor framework and
+        // the Java common fork-join pool in a slightly different way.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreamsEx1);
+
+        // Test BigFraction multiplications by combining the Java
+        // Streams framework with the Project Reactor framework and
+        // the Java common fork-join pool in yet another slightly
+        // different way.
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreamsEx2);
+
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier
             // Run all the tests.

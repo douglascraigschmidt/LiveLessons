@@ -214,7 +214,8 @@ Here's an overview of what's currently included in these examples:
          overhead between collecting results in a parallel stream
          vs. sequential stream using concurrent and non-concurrent
          collectors for various types of Java Map implementations,
-         including HashMap and TreeMap.
+         including HashMap and TreeMap.  In addition, it shows how to
+         use the Java record type.
 
 . ex39 - This program demonstrates various ways to implement an
          "AtomicLong" class, including using Java StampedLock
