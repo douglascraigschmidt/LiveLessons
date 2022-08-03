@@ -47,7 +47,7 @@ public class ex6 {
         AtomicInteger sum = new AtomicInteger(0);
 
         // Create a Queue that can be updated concurrently.
-        Queue<Integer> resultList =
+        Queue<Integer> results =
             new ConcurrentLinkedQueue<>();
 
         Flux
@@ -71,16 +71,20 @@ public class ex6 {
             .collect(ArrayList<Integer>::new, List::add)
 
             // This terminal operator is called for each batch.
-            .subscribe((ArrayList<Integer> ints) -> {
-                    sum.addAndGet(ints.size());
+            .subscribe(integers -> {
+                    // Increment sum with the number of integers
+                    // received from the completed rail.
+                    sum.addAndGet(integers.size());
+
                     display("sum = "
                             + sum.get()
                             + " ints.size() = "
-                            + ints.size()
+                            + integers.size()
                             + " "
-                            + ints.toString());
+                            + integers.toString());
 
-                    resultList.addAll(ints);
+                    // Atomically add the contents of integers to results.
+                    results.addAll(integers);
 
                     // Decrement the latch by one.
                     latch.countDown();
@@ -103,7 +107,7 @@ public class ex6 {
         latch.await();
 
         // Sort the results via a TreeSet.
-        Set<Integer> sorted = new TreeSet<>(resultList);
+        Set<Integer> sorted = new TreeSet<>(results);
 
         // Print the sorted results.
         display("results = "
