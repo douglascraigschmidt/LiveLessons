@@ -48,3 +48,4 @@ overview of what's included:
         These price are displayed after the microservices complete
         their computations.
 
+. ex6 - 

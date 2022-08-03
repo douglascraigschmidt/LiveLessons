@@ -62,8 +62,7 @@ public final class ReactorTests {
     /**
      * Run the test named {@code testName} by appying the {@code
      * downloadAndStoreImage} function with the Reactor driver that
-     * uses its ParallelFlowable mechanism to download files in
-     * parallel.
+     * uses its ParallelFlux mechanism to download files in parallel.
      *
      * @param downloadAndStoreImage A function that downloads and stores the image
      * @param testName Name of the test used to record the runtime stats
