@@ -1,33 +1,56 @@
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
+import utils.GetTopN;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows how to collect results using the Project Reactor
- * {@link ParallelFlux} class.  It also demonstrates {@link Sinks.Many}.
+ * {@link ParallelFlux} class.
  */
 public class ex6 {
+    /**
+     * The total random numbers to generate.
+     */
+    private static final int sCount = 10_000;
+
+    /**
+     * The maximum numbers to take.
+     */
+    private static final int sTopN = 5;
+
+    /**
+     * Initialize the input List.
+     */
+    private static final List<Integer> sInput = ex6.makeRandomNumbers(sCount);
+
     /**
      * The Java execution environment requires a static main() entry
      * point method to run the app.
      */
     public static void main(String[] args) throws InterruptedException {
-        // The number of items to emit.
-        int length = 10;
+        ex6.test1();
+        ex6.test2();
+        ex6.test3();
+    }
 
+    /**
+     * This test demonstrates {@link Sinks.Many}.
+     */
+    private static void test1() throws InterruptedException {
         // The approximate size of each batch.
-        int batchSize = 3;
+        int batchSize = sCount / 10;
 
         // The count used to initialize the CountDownLatch.
-        int latchCount = length / batchSize;
+        int latchCount = sInput.size() / batchSize;
 
         // Initialize this barrier synchronizer with the given latch
         // count.
@@ -38,29 +61,32 @@ public class ex6 {
                 + " batchSize = "
                 + batchSize);
 
-        // Create a Sink that transmits only newly pushed data to its
+        // Atomically sum the number of items processed per rail.
+        AtomicInteger sum = new AtomicInteger(0);
+
+        //  Create a Sink that transmits only newly-pushed data to its
         // subscriber.
         Sinks.Many<Integer> sink =
             Sinks.many().unicast().onBackpressureBuffer();
-
-        // Atomically sum the number of items processed per rail.
-        AtomicInteger sum = new AtomicInteger(0);
 
         // Create a Queue that can be updated concurrently.
         Queue<Integer> results =
             new ConcurrentLinkedQueue<>();
 
         Flux
-            // Return a Flux view of this Sink.
+            // Return a Flux view of sink.
             .from(sink.asFlux())
 
             // Publish on a thread in the parallel thread pool.
             .publishOn(Schedulers.parallel())
 
+            /*
             // Display each integer that's published.
-            .doOnNext(integer -> 
+            .doOnNext(integer ->
                       display("integer = "
                               + integer))
+            */
+
             // Create a ParallelFlux with batchSize rails.
             .parallel(latchCount)
 
@@ -90,18 +116,18 @@ public class ex6 {
                     latch.countDown();
                 });
 
-        display("Starting test");
+        display("Starting test1");
         
         Flux
-            // Iterate 'length' times.
-            .range(1, length)
+            // Convert the sInput List to a Flux.
+            .fromIterable(sInput)
             
             // Subscribe to the Sink.
             .subscribe(sink::tryEmitNext,
                        sink::tryEmitError,
                        sink::tryEmitComplete);
 
-        display("Awaiting test completion");
+        display("Awaiting test1 completion");
 
         // Block until all the processing completes.
         latch.await();
@@ -114,16 +140,188 @@ public class ex6 {
                 + sorted.toString());
 
         // Determine whether the test succeeded or failed.
-        if (sum.get() == length)
-            display("Test success, sum = "
+        if (sum.get() == sInput.size())
+            display("Test1 succeeded, sum = "
                     + sum.get()
                     + " length = "
-                    + length);
+                    + sInput.size());
         else
-            display("Test failure, sum = "
+            display("Test1 failed, sum = "
                     + sum.get()
                     + " length = "
-                    + length);
+                    + sInput.size());
+    }
+
+    /**
+     *
+     */
+    private static void test2() throws InterruptedException {
+        // The degree of parallelism for the ParallelFlux.
+        int parallelism = 4;
+
+        // Initialize this barrier synchronizer the degree of
+        // parallelism.
+        CountDownLatch latch = new CountDownLatch(parallelism);
+
+        display("parallelism = "
+                + parallelism);
+
+        //  Create a Sink that transmits only newly-pushed data to its
+        // subscriber.
+        Sinks.Many<Integer> sink =
+            Sinks.many().unicast().onBackpressureBuffer();
+
+        // Create a Queue that can be updated concurrently.
+        Queue<Integer> results =
+            new ConcurrentLinkedQueue<>();
+
+        // The number of items to take.
+        int maxCount = sInput.size() / 2;
+
+        Flux
+            // Return a Flux view of sink.
+            .from(sink.asFlux())
+
+            // Publish on a thread in the parallel thread pool.
+            .publishOn(Schedulers.parallel())
+
+            // Display each integer that's published.
+            /*
+            .doOnNext(integer ->
+                      display("integer = "
+                              + integer))
+            */
+
+            // Create a ParallelFlux with batchSize rails.
+            .parallel(parallelism)
+
+            // Run each rail in the parallel thread pool.
+            .runOn(Schedulers.parallel())
+
+            // Collect the results into an ArrayList.
+            .collect(ArrayList<Integer>::new, List::add)
+
+            // This terminal operator is called for each batch.
+            .subscribe(integers -> {
+                    display("integers.size() = "
+                            + integers.size());
+
+                    // Atomically add the contents of integers to
+                    // results.
+                    results.addAll(integers);
+
+                    // Decrement the latch by one.
+                    latch.countDown();
+                });
+
+        display("Starting test2");
+
+        Flux
+            // Convert the sInput List to a Flux.
+            .fromIterable(sInput)
+            
+            // Subscribe to the Sink.
+            .subscribe(sink::tryEmitNext,
+                       sink::tryEmitError,
+                       sink::tryEmitComplete);
+
+        display("Awaiting test2 completion");
+
+        // Block until all the processing completes.
+        latch.await();
+
+        Flux
+            // Convert the results Queue to a Flux.
+            .fromIterable(results)
+
+            // Sort the results.
+            .sort(Comparator.reverseOrder())
+
+            // Suppress duplicates.
+            .distinct()
+
+            // Limit the Flux to sTake.
+            .take(sTopN)
+
+            // Print each result.
+            .doOnNext(integer ->
+                      display("next integer = "
+                              + integer))
+
+            // Block until all results are processed.
+            .blockLast();
+
+        display("Test2 completed");
+    }
+
+    /**
+     *
+     */
+    private static void test3() throws InterruptedException {
+        // The degree of parallelism for the ParallelFlux.
+        int parallelism = 4;
+
+        // Initialize this barrier synchronizer the degree of
+        // parallelism.
+        CountDownLatch latch = new CountDownLatch(parallelism);
+
+        display("parallelism = "
+                + parallelism);
+
+        //  Create a Sink that transmits only newly-pushed data to its
+        // subscriber.
+        Sinks.Many<Integer> sink =
+            Sinks.many().unicast().onBackpressureBuffer();
+
+        // The number of items to take.
+        int maxCount = sInput.size() / 2;
+
+        display("Starting test3");
+
+        Flux
+            // Convert List into a Flux.
+            .fromIterable(sInput)
+
+            // Publish on a thread in the parallel thread pool.
+            .publishOn(Schedulers.parallel())
+
+            // Display each integer that's published.
+            /*
+              .doOnNext(integer ->
+              display("integer = "
+              + integer))
+            */
+
+            // Create a ParallelFlux with batchSize rails.
+            .parallel(parallelism)
+
+            // Run each rail in the parallel thread pool.
+            .runOn(Schedulers.parallel())
+
+            // Collect the results into an ArrayList.
+            .collect(ArrayList<Integer>::new, List::add)
+
+            // Convert ParallelFlux back into a Flux.
+            .sequential()
+
+            // Merge all the ArrayLists together.
+            .flatMapIterable(Function.identity())
+
+            // Suppress duplicates.
+            .distinct()
+            
+            // Sort the results.
+            .transform(GetTopN.getTopN(sTopN))
+
+            // Print each result.
+            .doOnNext(integer ->
+                      display("next integer = "
+                              + integer))
+
+            // Block until all results are processed.
+            .blockLast();
+
+        display("Test3 completed");
     }
 
     /**
@@ -135,4 +333,25 @@ public class ex6 {
                            + "]: "
                            + output);
     }
+
+    /**
+     * @return A {@link List} of {@code count} random {@link Integer}
+     *         objects
+     */
+    private static List<Integer> makeRandomNumbers(int count) {
+        var maxValue = Integer.MAX_VALUE;
+
+        return new Random()
+            // Generate random numbers within the designated range.
+            .ints(count,
+                   maxValue - count,
+                   maxValue)
+
+            // Convert primitive longs to Longs.
+            .boxed()
+
+            // Collect the random numbers into a list.
+            .collect(toList());
+    }
 }
+
