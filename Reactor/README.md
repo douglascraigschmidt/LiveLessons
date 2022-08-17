@@ -48,4 +48,8 @@ overview of what's included:
         These price are displayed after the microservices complete
         their computations.
 
-. ex6 - 
+. ex6 - This program shows performance differences between Project
+        Reactor's single-threaed Flux, the flatMap() concurrency
+        idiom, and several variants of ParallelFlux when creating Set
+        objects containing the unique words appearing in the complete
+        work of William Shapespeare.

@@ -1,357 +1,402 @@
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
-import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import utils.GetTopN;
+import utils.ConcurrentHashSet;
+import utils.ConcurrentSetCollector;
+import utils.RunTimer;
+import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-
-import static java.util.stream.Collectors.toList;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
- * This example shows how to collect results using the Project Reactor
- * {@link ParallelFlux} class.
+ * This example shows performance differences between Project Reactor
+ * concurrency/parallelism features when creating {@link Set} objects
+ * containing the unique words appearing in the complete work of
+ * William Shapespeare.  These tests compare (1) two implementations
+ * based on the {@code flatMap()} concurrency idiom and (2) two
+ * implementations based on {@link ParallelFlux}.
  */
 public class ex6 {
     /**
-     * The total random numbers to generate.
+     * Number of iterations to run the timing tests.
      */
-    private static final int sCount = 10_000;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
-     * The maximum numbers to take.
+     * The complete works of William Shakespeare.
      */
-    private static final int sTopN = 5;
+    private static final String sSHAKESPEARE_DATA_FILE =
+        "completeWorksOfShakespeare.txt";
 
     /**
-     * Initialize the input List.
+     * A regular expression that matches whitespace and punctuation to
+     * split the text of the complete works of Shakespeare into
+     * individual words.
      */
-    private static final List<Integer> sInput = ex6.makeRandomNumbers(sCount);
+    private static final String sSPLIT_WORDS =
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
 
     /**
      * The Java execution environment requires a static main() entry
      * point method to run the app.
      */
     public static void main(String[] args) throws InterruptedException {
-        ex6.test1();
-        ex6.test2();
-        ex6.test3();
+        System.out.println("Entering the test program with "
+                           + Runtime.getRuntime().availableProcessors()
+                           + " cores available");
+
+        // Warm up the threads in the parallel thread pool so timing
+        // results will be more accurate.
+        warmUpThreadPool();
+
+        // Run test that records the performance of the flatMap()
+        // concurrency idiom using Mono.just().
+        runTests("timeFlatMapJust",
+                 ex6::runFlatMapTestJust);
+
+        // Run test that records the performance of the flatMap()
+        // concurrency idiom using Mono.fromCallable().
+        runTests("timeFlatMapFromCallable",
+                 ex6::runFlatMapTestFromCallable);
+
+        runTests("timeParallelFlux1",
+                 ex6::runParallelFluxTest1);
+
+        runTests("timeParallelFlux2",
+                 ex6::runParallelFluxTest2);
+
+        runTests("timeParallelFlux3",
+                 ex6::runParallelFluxTest3);
+
+        // Print the results.
+        System.out.println("Printing test results for the largest number of input words\n"
+                           + RunTimer.getTimingResults());
+
+        System.out.println("Exiting the test program");
     }
 
     /**
-     * This test demonstrates {@link Sinks.Many}.
+     * Run tests that demonstrate the performance differences bewteen
+     * Project Reactor concurrency/parallelism features when creating
+     * {@link Set} objects containing the unique words appearing in
+     * the complete work of William Shapespeare.
+     * 
+     * @param testType The type of test
+     * @param test A {@link Function} that performs the test
      */
-    private static void test1() throws InterruptedException {
-        // The approximate size of each batch.
-        int batchSize = sCount / 10;
+    private static void runTests
+        (String testType,
+         Function<List<CharSequence>, Integer> test) {
+        Arrays
+            // Create tests for different sizes of input data.
+            .asList(1_000, 10_000, 100_000, 1_000_000)
 
-        // The count used to initialize the CountDownLatch.
-        int latchCount = sInput.size() / batchSize;
+            // Run the tests for various input data sizes.
+            .forEach (limit -> {
+                    // Create a List of CharSequences containing
+                    // 'limit' words from the works of Shakespeare.
+                    List<CharSequence> arrayWords = TestDataFactory
+                        .getInput(sSHAKESPEARE_DATA_FILE,
+                                  // Split input into "words" by
+                                  // ignoring whitespace.
+                                  sSPLIT_WORDS,
+                                  limit);
 
-        // Initialize this barrier synchronizer with the given latch
-        // count.
-        CountDownLatch latch = new CountDownLatch(latchCount);
+                    // Print a message when the test starts.
+                    System.out.println("Starting "
+                                       + testType
+                                       + " test for "
+                                       + arrayWords.size() 
+                                       + " words..");
 
-        display("latchCount = "
-                + latchCount
-                + " batchSize = "
-                + batchSize);
+                    // Run the tests using the "standard"
+                    // implementation.
+                    timeTest(testType,
+                             arrayWords,
+                             test);
 
-        // Atomically sum the number of items processed per rail.
-        AtomicInteger sum = new AtomicInteger(0);
-
-        //  Create a Sink that transmits only newly-pushed data to its
-        // subscriber.
-        Sinks.Many<Integer> sink =
-            Sinks.many().unicast().onBackpressureBuffer();
-
-        // Create a Queue that can be updated concurrently.
-        Queue<Integer> results =
-            new ConcurrentLinkedQueue<>();
-
-        Flux
-            // Return a Flux view of sink.
-            .from(sink.asFlux())
-
-            // Publish on a thread in the parallel thread pool.
-            .publishOn(Schedulers.parallel())
-
-            /*
-            // Display each integer that's published.
-            .doOnNext(integer ->
-                      display("integer = "
-                              + integer))
-            */
-
-            // Create a ParallelFlux with batchSize rails.
-            .parallel(latchCount)
-
-            // Run each rail in the parallel thread pool.
-            .runOn(Schedulers.parallel())
-
-            // Collect the results into an ArrayList.
-            .collect(ArrayList<Integer>::new, List::add)
-
-            // This terminal operator is called for each batch.
-            .subscribe(integers -> {
-                    // Increment sum with the number of integers
-                    // received from the completed rail.
-                    sum.addAndGet(integers.size());
-
-                    display("sum = "
-                            + sum.get()
-                            + " ints.size() = "
-                            + integers.size()
-                            + " "
-                            + integers.toString());
-
-                    // Atomically add the contents of integers to results.
-                    results.addAll(integers);
-
-                    // Decrement the latch by one.
-                    latch.countDown();
                 });
-
-        display("Starting test1");
-        
-        Flux
-            // Convert the sInput List to a Flux.
-            .fromIterable(sInput)
-            
-            // Subscribe to the Sink.
-            .subscribe(sink::tryEmitNext,
-                       sink::tryEmitError,
-                       sink::tryEmitComplete);
-
-        display("Awaiting test1 completion");
-
-        // Block until all the processing completes.
-        latch.await();
-
-        // Sort the results via a TreeSet.
-        Set<Integer> sorted = new TreeSet<>(results);
-
-        // Print the sorted results.
-        display("results = "
-                + sorted.toString());
-
-        // Determine whether the test succeeded or failed.
-        if (sum.get() == sInput.size())
-            display("Test1 succeeded, sum = "
-                    + sum.get()
-                    + " length = "
-                    + sInput.size());
-        else
-            display("Test1 failed, sum = "
-                    + sum.get()
-                    + " length = "
-                    + sInput.size());
     }
 
     /**
+     * Determines how long it takes to lowercase a {@link List} of
+     * {@code words} and collect the results using the given {@code
+     * test}.
      *
+     * @param testType The type of test
+     * @param words A {@link List} of words to lowercase
+     * @param test  The test to run
      */
-    private static void test2() throws InterruptedException {
-        // The degree of parallelism for the ParallelFlux.
-        int parallelism = 4;
+    private static void timeTest
+        (String testType,
+         List<CharSequence> words,
+         Function<List<CharSequence>, Integer> test) {
+        // Run the garbage collector before each test.
+        System.gc();
 
-        // Initialize this barrier synchronizer the degree of
-        // parallelism.
-        CountDownLatch latch = new CountDownLatch(parallelism);
+        // Record the number of unique words.
+        int[] uniqueWords = new int[1];
 
-        display("parallelism = "
-                + parallelism);
+        RunTimer
+            // Time how long it takes to run the test.
+            .timeRun(() -> {
+                    for (int i = 0; i < sMAX_ITERATIONS; i++) 
+                        uniqueWords[0] += test.apply(words);
+                },
+                testType);
 
-        //  Create a Sink that transmits only newly-pushed data to its
-        // subscriber.
-        Sinks.Many<Integer> sink =
-            Sinks.many().unicast().onBackpressureBuffer();
-
-        // Create a Queue that can be updated concurrently.
-        Queue<Integer> results =
-            new ConcurrentLinkedQueue<>();
-
-        // The number of items to take.
-        int maxCount = sInput.size() / 2;
-
-        Flux
-            // Return a Flux view of sink.
-            .from(sink.asFlux())
-
-            // Publish on a thread in the parallel thread pool.
-            .publishOn(Schedulers.parallel())
-
-            // Display each integer that's published.
-            /*
-            .doOnNext(integer ->
-                      display("integer = "
-                              + integer))
-            */
-
-            // Create a ParallelFlux with batchSize rails.
-            .parallel(parallelism)
-
-            // Run each rail in the parallel thread pool.
-            .runOn(Schedulers.parallel())
-
-            // Collect the results into an ArrayList.
-            .collect(ArrayList<Integer>::new, List::add)
-
-            // This terminal operator is called for each batch.
-            .subscribe(integers -> {
-                    display("integers.size() = "
-                            + integers.size());
-
-                    // Atomically add the contents of integers to
-                    // results.
-                    results.addAll(integers);
-
-                    // Decrement the latch by one.
-                    latch.countDown();
-                });
-
-        display("Starting test2");
-
-        Flux
-            // Convert the sInput List to a Flux.
-            .fromIterable(sInput)
-            
-            // Subscribe to the Sink.
-            .subscribe(sink::tryEmitNext,
-                       sink::tryEmitError,
-                       sink::tryEmitComplete);
-
-        display("Awaiting test2 completion");
-
-        // Block until all the processing completes.
-        latch.await();
-
-        Flux
-            // Convert the results Queue to a Flux.
-            .fromIterable(results)
-
-            // Sort the results.
-            .sort(Comparator.reverseOrder())
-
-            // Suppress duplicates.
-            .distinct()
-
-            // Limit the Flux to sTake.
-            .take(sTopN)
-
-            // Print each result.
-            .doOnNext(integer ->
-                      display("next integer = "
-                              + integer))
-
-            // Block until all results are processed.
-            .blockLast();
-
-        display("Test2 completed");
+        System.out.println("Number of unique words for "
+                           + testType
+                           + " = "
+                           + uniqueWords[0] / sMAX_ITERATIONS);
     }
 
     /**
+     * 
      *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
      */
-    private static void test3() throws InterruptedException {
-        // The degree of parallelism for the ParallelFlux.
-        int parallelism = 4;
+    private static int runFlatMapTestJust(List<CharSequence> words) {
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
 
-        // Initialize this barrier synchronizer the degree of
-        // parallelism.
-        CountDownLatch latch = new CountDownLatch(parallelism);
+                            // Use the flatMap() concurrency idiom to
+                            // map each string to lower case using the
+                            // given Scheduler.
+                            .flatMap(word -> Mono
+                                     // Emit the word in the assembly
+                                     // thread.
+                                     .just(word)
 
-        display("parallelism = "
-                + parallelism);
+                                     // Run each computation in the
+                                     // parallel thread pool.
+                                     .subscribeOn(Schedulers.parallel())
 
-        //  Create a Sink that transmits only newly-pushed data to its
-        // subscriber.
-        Sinks.Many<Integer> sink =
-            Sinks.many().unicast().onBackpressureBuffer();
+                                     // Map each word to lower case.
+                                     .map(___ ->
+                                          word.toString().toLowerCase()))
 
-        // The number of items to take.
-        int maxCount = sInput.size() / 2;
+                            // Collect unique words into a Set.
+                            .collect(Collectors.toSet())
 
-        display("Starting test3");
+                            // Wait until all computations are done. 
+                            .block())
 
-        Flux
-            // Convert List into a Flux.
-            .fromIterable(sInput)
+            // Return the number of unique words in this input.
+            .size();
+    }
 
-            // Publish on a thread in the parallel thread pool.
-            .publishOn(Schedulers.parallel())
+    /**
+     * 
+     *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
+     */
+    private static int runFlatMapTestFromCallable(List<CharSequence> words) {
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
 
-            // Display each integer that's published.
-            /*
-              .doOnNext(integer ->
-              display("integer = "
-              + integer))
-            */
+                            // Use the flatMap() concurrency idiom
+                            // to map each string to lower case
+                            // using the given Scheduler.
+                            .flatMap(word -> Mono
+                                     // Emit the word in a thread from
+                                     // the parallel thread pool.
+                                     .fromCallable(() -> word)
 
-            // Create a ParallelFlux with batchSize rails.
-            .parallel(parallelism)
+                                     // Run each computation in the
+                                     // parallel thread pool.
+                                     .subscribeOn(Schedulers.parallel())
 
-            // Run each rail in the parallel thread pool.
-            .runOn(Schedulers.parallel())
+                                     // Map each word to lower case.
+                                     .map(___ ->
+                                          word.toString().toLowerCase()))
 
-            // Collect the results into an ArrayList.
-            .collect(ArrayList<Integer>::new, List::add)
+                            // Collect unique words into a Set.
+                            .collect(Collectors.toSet())
 
-            // Convert ParallelFlux back into a Flux.
-            .sequential()
+                            // Wait until all computations are done. 
+                            .block())
 
-            // Merge all the ArrayLists together.
-            .flatMapIterable(Function.identity())
+            // Return the number of unique words in this input.
+            .size();
+    }
 
-            // Suppress duplicates.
-            .distinct()
+    /**
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using the canonical means of collecting
+     * results from a {@link ParallelFlux} into a {@link Set}.
+     *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
+     */
+    private static int runParallelFluxTest1(List<CharSequence> words) {
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
+
+                            // Convert the Flux to a ParallelFlux.
+                            .parallel()
+
+                            // Run all the rails in the parallel Scheduler.
+                            .runOn(Schedulers.parallel())
+
+                            // Transform each string to lower case.
+                            .map(word ->
+                                 word.toString().toLowerCase())
+
+                            // Convert the ParallelFlux back to a Flux.
+                            .sequential()
+
+                            // Collect the words into a Set.
+                            .collect(Collectors.toSet())
+
+                            // Block until all the processing is done.
+                            .block())
             
-            // Sort the results.
-            .transform(GetTopN.getTopN(sTopN))
-
-            // Print each result.
-            .doOnNext(integer ->
-                      display("next integer = "
-                              + integer))
-
-            // Block until all results are processed.
-            .blockLast();
-
-        display("Test3 completed");
+            // Return the number of unique words in this input.
+            .size();
     }
 
     /**
-     * Display the {@code output}.
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using a {@link ParallelFlux} that collects
+     * into a single {@link ConcurrentHashSet}.
+     *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
      */
-    private static void display(String output) {
-        System.out.println("["
-                           + Thread.currentThread().getId()
-                           + "]: "
-                           + output);
+    private static int runParallelFluxTest2(List<CharSequence> words) {
+        var set = new ConcurrentHashSet<String>();
+
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
+
+                            // Convert the Flux to a ParallelFlux.
+                            .parallel()
+
+                            // Run all the rails in the parallel Scheduler.
+                            .runOn(Schedulers.parallel())
+
+                            // Transform each string to lower case.
+                            .map(word ->
+                                 word.toString().toLowerCase())
+
+                            // Concurrently collect the words into a
+                            // single ConcurrentHashSet.
+                            .collect(() -> set,
+                                     ConcurrentHashSet<String>::add)
+
+                            // Convert the ParallelFlux into a Flux.
+                            .sequential()
+
+                            // Block until all the processing is done.
+                            .blockLast())
+            
+            // Return the number of unique words in this input.
+            .size();
     }
 
     /**
-     * @return A {@link List} of {@code count} random {@link Integer}
-     *         objects
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using a {@link ParallelFlux} that collects
+     * into a series of {@link ArrayList} objects that are then merged
+     * together to create a {@link Set}.
+     *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
      */
-    private static List<Integer> makeRandomNumbers(int count) {
-        var maxValue = Integer.MAX_VALUE;
+    private static int runParallelFluxTest3(List<CharSequence> words) {
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
 
-        return new Random()
-            // Generate random numbers within the designated range.
-            .ints(count,
-                   maxValue - count,
-                   maxValue)
+                            // Convert the Flux to a ParallelFlux.
+                            .parallel()
 
-            // Convert primitive longs to Longs.
-            .boxed()
+                            // Run all the rails in the parallel
+                            // Scheduler.
+                            .runOn(Schedulers.parallel())
 
-            // Collect the random numbers into a list.
-            .collect(toList());
+                            // Transform each string to lower case.
+                            .map(word ->
+                                 word.toString().toLowerCase())
+
+                            // Collect each rail into a List.
+                            .collect(ArrayList<String>::new,
+                                     List::add)
+
+                            // Convert the ParallelFlux into a Flux.
+                            .sequential()
+
+                            // Concatenate all the List objects together.
+                            .flatMapIterable(Function.identity())
+
+                            // Collect the words into a Set.
+                            .collect(Collectors.toSet())
+
+                            // Block until all the processing is done.
+                            .block())
+            
+            // Return the number of unique words in this input.
+            .size();
+    }
+
+    /**
+     * Warm up the threads in the parallel thread pool so the timing
+     * results will be more accurate.
+     */
+    private static void warmUpThreadPool() {
+        System.out.println("\nWarming up the parallel thread pool\n");
+
+        List<CharSequence> words = TestDataFactory
+            .getInput(sSHAKESPEARE_DATA_FILE,
+                      // Split input into "words" by ignoring
+                      // whitespace.
+                      sSPLIT_WORDS);
+
+        // Create an empty list.
+        List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++) 
+            list
+                // Append the new words to the end of the list.
+                .addAll(Objects
+                        .requireNonNull(Flux
+                                        // Convert The List into a Flux.
+                                        .fromIterable(words)
+
+                                        // Use the flatMap() concurrency idiom to map
+                                        // each string to lower case using the given
+                                        // Scheduler.
+                                        .flatMap(word -> Mono
+                                                 .fromCallable(() -> word)
+                                                 .subscribeOn(Schedulers.parallel())
+                                                 .map(___ ->
+                                                      word.toString().toLowerCase()))
+
+                                        // Collect unique words into a Set.
+                                        .collect(Collectors.toSet())
+                                        .block()));
     }
 }
-

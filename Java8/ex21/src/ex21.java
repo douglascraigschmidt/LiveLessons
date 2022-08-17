@@ -4,6 +4,7 @@ import utils.RunTimer;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -33,6 +34,9 @@ public class ex21 {
         System.out.println("\nRunning the test program with "
                            + Options.instance().maxIntegers()
                            + " Integers");
+
+        // Test characteristics of the distinct() operation.
+        testDistinct();
 
         // Create a List of random integers, where List enforces
         // encounter order.
@@ -127,6 +131,18 @@ public class ex21 {
         // Print out the timing results for the ordered and unordered
         // limit() tests.
         System.out.println(RunTimer.getTimingResults(true));
+    }
+
+    /**
+     * This method demonstrates that the distinct() operation works
+     * properly on unsorted streams.
+     */
+    private static void testDistinct() {
+        // Create an unsorted List of integers containing duplicates.
+        List<Integer> list = List.of(100, 30, 100, 40, 100, 10, 100);
+
+        System.out.println("Distinct numbers = "
+                         + list.stream().distinct().collect(Collectors.toList()));
     }
 
     /**

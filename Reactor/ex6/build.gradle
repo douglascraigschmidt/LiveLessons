@@ -9,4 +9,5 @@ repositories {
 
 dependencies {
     implementation 'io.projectreactor:reactor-core:3.4.21'
+    implementation 'org.jetbrains:annotations:22.0.0'
 }

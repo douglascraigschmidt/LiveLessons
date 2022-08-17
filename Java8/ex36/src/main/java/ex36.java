@@ -42,7 +42,7 @@ public class ex36 {
 
     /**
      * A regular expression that matches whitespace and punctuation to
-     * split the text of the complete works of Shakepeare into
+     * split the text of the complete works of Shakespeare into
      * individual words.
      */
     private static final String sSPLIT_WORDS =
@@ -231,7 +231,7 @@ public class ex36 {
             .getInput(sSHAKESPEARE_DATA_FILE,
                       // Split input into "words" by ignoring
                       // whitespace.
-                      "\\s+");
+                      sSPLIT_WORDS);
 
         // Create an empty list.
         List<String> list = new ArrayList<>();
