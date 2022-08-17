@@ -89,7 +89,7 @@ public class ex37 {
         printResults(getResults(true,
                                  TestDataFactory
                                  .getInput(sSHAKESPEARE_DATA_FILE,
-                                           sWHITESPACE_AND_PUNCTUATION,
+                                           sSPLIT_WORDS,
                                            1_000_000),
                                  ConcurrentMapCollector
                                  .toMap(Function.identity(),
@@ -140,7 +140,7 @@ public class ex37 {
                                   // Split input into "words" by
                                   // ignoring whitespace and
                                   // punctuation.
-                                  sWHITESPACE_AND_PUNCTUATION,
+                                  sSPLIT_WORDS,
                                   limit);
 
                     // Print a message when the test starts.

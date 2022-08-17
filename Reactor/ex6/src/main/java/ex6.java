@@ -63,7 +63,8 @@ public class ex6 {
 
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.fromCallable().
-        runTests("timeFlatMapFromCallable",
+        runTests("timeFlatMapFromCallabl" +
+                        "e",
                  ex6::runFlatMapTestFromCallable);
 
         runTests("timeParallelFlux1",
