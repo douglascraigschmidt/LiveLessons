@@ -51,6 +51,11 @@ public class ex6 {
         // results will be more accurate.
         warmUpThreadPool();
 
+        // Run test that records the performance of a sequential
+        // Flux-based solution.
+        runTests("timeSequential",
+                 ex6::runSequential);
+
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.just().
         runTests("timeFlatMapJust",
@@ -154,7 +159,41 @@ public class ex6 {
     }
 
     /**
-     * 
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using a sequential {@link Flux}-based
+     * implementation.
+     *
+     * @param words A {@link List} of words to lowercase
+     * @return The number of unique words in this portion of
+     *         Shakespeare's works
+     */
+    private static int runSequential(List<CharSequence> words) {
+        return Objects
+            .requireNonNull(Flux
+                            // Convert The List into a Flux.
+                            .fromIterable(words)
+
+                            // Use the flatMap() concurrency idiom to
+                            // map each string to lower case using the
+                            // given Scheduler.
+                            .map(word ->
+                                 // Map each word to lower case.
+                                 word.toString().toLowerCase())
+
+                            // Collect unique words into a Set.
+                            .collect(Collectors.toSet())
+
+                            // Wait until all computations are done. 
+                            .block())
+
+            // Return the number of unique words in this input.
+            .size();
+    }
+
+    /**
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using the {@code flatMap()} concurrency
+     * idiom and the {@link Mono.just} operator.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
@@ -193,7 +232,9 @@ public class ex6 {
     }
 
     /**
-     * 
+     * Compute the number of unique words in a portion of
+     * Shakespeares' works using the {@code flatMap()} concurrency
+     * idiom and the {@link Mono.fromCallable} operator.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
