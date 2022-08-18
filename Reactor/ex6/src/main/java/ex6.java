@@ -10,6 +10,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 /**
  * This example shows performance differences between Project Reactor
  * concurrency/parallelism features when creating {@link Set} objects
@@ -25,9 +28,9 @@ public class ex6 {
     private static final int sMAX_ITERATIONS = 10;
 
     /**
-     * The complete works of William Shakespeare.
+     * A file containing the complete works of William Shakespeare.
      */
-    private static final String sSHAKESPEARE_DATA_FILE =
+    private static final String sSHAKESPEARE_WORKS_FILE =
         "completeWorksOfShakespeare.txt";
 
     /**
@@ -35,8 +38,27 @@ public class ex6 {
      * split the text of the complete works of Shakespeare into
      * individual words.
      */
-    private static final String sSPLIT_WORDS =
+    private static final String sSPLIT_BARD_WORDS =
         "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+
+    /**
+     * A file containing common words.
+     */
+    private static final String sCOMMON_WORDS_FILE =
+        "commonWords.txt";
+    /**
+     * A regular expression that's used to.
+     */
+    private static final String sSPLIT_COMMON_WORDS =
+        "[\\n\\r]+";
+
+    /**
+     * A {@link Set} containing common words to filter out.
+     */
+    private static final List<CharSequence> sCommonWords = TestDataFactory
+            .getInput(sCOMMON_WORDS_FILE,
+                      // Split into "words".
+                      sSPLIT_COMMON_WORDS);
 
     /**
      * The Java execution environment requires a static main() entry
@@ -103,24 +125,24 @@ public class ex6 {
             .forEach (limit -> {
                     // Create a List of CharSequences containing
                     // 'limit' words from the works of Shakespeare.
-                    List<CharSequence> arrayWords = TestDataFactory
-                        .getInput(sSHAKESPEARE_DATA_FILE,
+                    List<CharSequence> bardWords = TestDataFactory
+                        .getInput(sSHAKESPEARE_WORKS_FILE,
                                   // Split input into "words" by
                                   // ignoring whitespace.
-                                  sSPLIT_WORDS,
+                                  sSPLIT_BARD_WORDS,
                                   limit);
 
                     // Print a message when the test starts.
                     System.out.println("Starting "
                                        + testType
                                        + " test for "
-                                       + arrayWords.size() 
+                                       + bardWords.size() 
                                        + " words..");
 
                     // Run the tests using the "standard"
                     // implementation.
                     timeTest(testType,
-                             arrayWords,
+                             bardWords,
                              test);
 
                 });
@@ -181,8 +203,12 @@ public class ex6 {
                                  // Map each word to lower case.
                                  word.toString().toLowerCase())
 
+                            // Filter out common words.
+                            .filter(lowerCaseWord ->
+                                    !sCommonWords.contains(lowerCaseWord))
+
                             // Collect unique words into a Set.
-                            .collect(Collectors.toSet())
+                            .collect(toSet())
 
                             // Wait until all computations are done. 
                             .block())
@@ -194,7 +220,7 @@ public class ex6 {
     /**
      * Compute the number of unique words in a portion of
      * Shakespeares' works using the {@code flatMap()} concurrency
-     * idiom and the {@link Mono.just} operator.
+     * idiom and the {@code Mono.just} operator.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
@@ -220,10 +246,14 @@ public class ex6 {
 
                                      // Map each word to lower case.
                                      .map(___ ->
-                                          word.toString().toLowerCase()))
+                                          word.toString().toLowerCase())
+                                          
+                                     // Filter out common words.
+                                     .filter(lowerCaseWord ->
+                                             sCommonWords.contains(lowerCaseWord)))
 
                             // Collect unique words into a Set.
-                            .collect(Collectors.toSet())
+                            .collect(toSet())
 
                             // Wait until all computations are done. 
                             .block())
@@ -235,7 +265,7 @@ public class ex6 {
     /**
      * Compute the number of unique words in a portion of
      * Shakespeares' works using the {@code flatMap()} concurrency
-     * idiom and the {@link Mono.fromCallable} operator.
+     * idiom and the {@code Mono.fromCallable} operator.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
@@ -261,10 +291,14 @@ public class ex6 {
 
                                      // Map each word to lower case.
                                      .map(___ ->
-                                          word.toString().toLowerCase()))
+                                          word.toString().toLowerCase())
+
+                                     // Filter out common words.
+                                     .filter(lowerCaseWord ->
+                                             !sCommonWords.contains(lowerCaseWord)))
 
                             // Collect unique words into a Set.
-                            .collect(Collectors.toSet())
+                            .collect(toSet())
 
                             // Wait until all computations are done. 
                             .block())
@@ -298,11 +332,15 @@ public class ex6 {
                             .map(word ->
                                  word.toString().toLowerCase())
 
+                            // Filter out common words.
+                            .filter(lowerCaseWord ->
+                                    !sCommonWords.contains(lowerCaseWord))
+
                             // Convert the ParallelFlux back to a Flux.
                             .sequential()
 
                             // Collect the words into a Set.
-                            .collect(Collectors.toSet())
+                            .collect(toSet())
 
                             // Block until all the processing is done.
                             .block())
@@ -337,6 +375,10 @@ public class ex6 {
                             // Transform each string to lower case.
                             .map(word ->
                                  word.toString().toLowerCase())
+
+                            // Filter out common words.
+                            .filter(lowerCaseWord ->
+                                    !sCommonWords.contains(lowerCaseWord))
 
                             // Concurrently collect the words into a
                             // single ConcurrentHashSet.
@@ -380,6 +422,10 @@ public class ex6 {
                             .map(word ->
                                  word.toString().toLowerCase())
 
+                            // Filter out common words.
+                            .filter(lowerCaseWord ->
+                                    !sCommonWords.contains(lowerCaseWord))
+
                             // Collect each rail into a List.
                             .collect(ArrayList<String>::new,
                                      List::add)
@@ -391,7 +437,7 @@ public class ex6 {
                             .flatMapIterable(Function.identity())
 
                             // Collect the words into a Set.
-                            .collect(Collectors.toSet())
+                            .collect(toSet())
 
                             // Block until all the processing is done.
                             .block())
@@ -408,33 +454,25 @@ public class ex6 {
         System.out.println("\nWarming up the parallel thread pool\n");
 
         List<CharSequence> words = TestDataFactory
-            .getInput(sSHAKESPEARE_DATA_FILE,
-                      // Split input into "words" by ignoring
-                      // whitespace.
-                      sSPLIT_WORDS);
+            .getInput(sSHAKESPEARE_WORKS_FILE,
+                      sSPLIT_BARD_WORDS);
 
         // Create an empty list.
         List<String> list = new ArrayList<>();
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) 
             list
-                // Append the new words to the end of the list.
                 .addAll(Objects
                         .requireNonNull(Flux
-                                        // Convert The List into a Flux.
                                         .fromIterable(words)
-
-                                        // Use the flatMap() concurrency idiom to map
-                                        // each string to lower case using the given
-                                        // Scheduler.
                                         .flatMap(word -> Mono
                                                  .fromCallable(() -> word)
                                                  .subscribeOn(Schedulers.parallel())
                                                  .map(___ ->
-                                                      word.toString().toLowerCase()))
-
-                                        // Collect unique words into a Set.
-                                        .collect(Collectors.toSet())
+                                                      word.toString().toLowerCase())
+                                                 .filter(lowerCaseWord ->
+                                                         !sCommonWords.contains(lowerCaseWord)))
+                                        .collect(toSet())
                                         .block()));
     }
 }
