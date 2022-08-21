@@ -4,6 +4,7 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 import reactortests.ReactorTests;
 import rxjavatests.RxJavaTests;
+import streamstests.StreamsTests;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
@@ -75,26 +76,26 @@ public class ex6 {
 
         // Run test that records the performance of a sequential
         // Flux-based solution.
-        runTests("ReactorTests::timeSequential",
+        runTests("ReactorTests::runSequential",
                  ReactorTests::runSequential);
 
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.just().
-        runTests("ReactorTests::timeFlatMapJust",
+        runTests("ReactorTests::runFlatMapTestJust",
                  ReactorTests::runFlatMapTestJust);
 
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.fromCallable().
-        runTests("ReactorTests::timeFlatMapFromCallable",
+        runTests("ReactorTests::runFlatMapTestFromCallable",
                  ReactorTests::runFlatMapTestFromCallable);
 
-        runTests("ReactorTests::timeParallelFlux1",
+        runTests("ReactorTests::runParallelFluxTest1",
                  ReactorTests::runParallelFluxTest1);
 
-        runTests("ReactorTests::timeParallelFlux2",
+        runTests("ReactorTests::runParallelFluxTest2",
                  ReactorTests::runParallelFluxTest2);
 
-        runTests("ReactorTests::timeParallelFlux3",
+        runTests("ReactorTests::runParallelFluxTest3",
                  ReactorTests::runParallelFluxTest3);
 
         /*
@@ -110,14 +111,23 @@ public class ex6 {
 
          */
 
-        runTests("RxJavaTests::timeParallelFlowable1",
+        runTests("RxJavaTests::runParallelFlowableTest1",
                 RxJavaTests::runParallelFlowableTest1);
 
-        runTests("RxJavaTests::timeParallelFlowable2",
+        runTests("RxJavaTests::runParallelFlowableTest2",
                 RxJavaTests::runParallelFlowableTest2);
 
-        runTests("RxJavaTests::timeParallelFlowable3",
+        runTests("RxJavaTests::runParallelFlowableTest3",
                 RxJavaTests::runParallelFlowableTest3);
+
+        runTests("StreamsTests::runSequential",
+                StreamsTests::runSequential);
+
+        runTests("StreamsTests::runParallel1",
+                StreamsTests::runParallel1);
+
+        runTests("StreamsTests::runParallel2",
+                 StreamsTests::runParallel2);
 
         // Print the results.
         System.out.println("Printing test results for the largest number of input words\n"

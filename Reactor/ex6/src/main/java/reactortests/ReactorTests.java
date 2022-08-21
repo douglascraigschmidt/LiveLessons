@@ -31,9 +31,7 @@ public class ReactorTests {
                             // Convert the List into a Flux.
                             .fromIterable(words)
 
-                            // Use the flatMap() concurrency idiom to
-                            // map each string to lower case using the
-                            // given Scheduler.
+                            // Map each string to lower case.
                             .map(word ->
                                  // Map each word to lower case.
                                  word.toString().toLowerCase())
