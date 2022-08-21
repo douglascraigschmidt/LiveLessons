@@ -97,6 +97,7 @@ public class ex6 {
         runTests("ReactorTests::timeParallelFlux3",
                  ReactorTests::runParallelFluxTest3);
 
+        /*
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Observable.fromCallable().
         runTests("RxJavaTests::timeFlatMapFromCallable",
@@ -106,6 +107,17 @@ public class ex6 {
         // concurrency idiom using Observable.just().
         runTests("RxJavaTests::timeFlatMapJust",
                 RxJavaTests::runFlatMapTestJust);
+
+         */
+
+        runTests("RxJavaTests::timeParallelFlowable1",
+                RxJavaTests::runParallelFlowableTest1);
+
+        runTests("RxJavaTests::timeParallelFlowable2",
+                RxJavaTests::runParallelFlowableTest2);
+
+        runTests("RxJavaTests::timeParallelFlowable3",
+                RxJavaTests::runParallelFlowableTest3);
 
         // Print the results.
         System.out.println("Printing test results for the largest number of input words\n"
