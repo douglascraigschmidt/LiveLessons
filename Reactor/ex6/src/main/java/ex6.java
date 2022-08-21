@@ -2,22 +2,22 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
-import utils.ConcurrentHashSet;
+import reactortests.ReactorTests;
+import rxjavatests.RxJavaTests;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 /**
  * This example shows performance differences between Project Reactor
  * concurrency/parallelism features when creating {@link Set} objects
  * containing the unique words appearing in the complete work of
- * William Shapespeare.  These tests compare (1) two implementations
+ * William Shakespeare.  These tests compare (1) two implementations
  * based on the {@code flatMap()} concurrency idiom and (2) two
  * implementations based on {@link ParallelFlux}.
  */
@@ -75,28 +75,37 @@ public class ex6 {
 
         // Run test that records the performance of a sequential
         // Flux-based solution.
-        runTests("timeSequential",
-                 ex6::runSequential);
+        runTests("ReactorTests::timeSequential",
+                 ReactorTests::runSequential);
 
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.just().
-        runTests("timeFlatMapJust",
-                 ex6::runFlatMapTestJust);
+        runTests("ReactorTests::timeFlatMapJust",
+                 ReactorTests::runFlatMapTestJust);
 
         // Run test that records the performance of the flatMap()
         // concurrency idiom using Mono.fromCallable().
-        runTests("timeFlatMapFromCallabl" +
-                        "e",
-                 ex6::runFlatMapTestFromCallable);
+        runTests("ReactorTests::timeFlatMapFromCallable",
+                 ReactorTests::runFlatMapTestFromCallable);
 
-        runTests("timeParallelFlux1",
-                 ex6::runParallelFluxTest1);
+        runTests("ReactorTests::timeParallelFlux1",
+                 ReactorTests::runParallelFluxTest1);
 
-        runTests("timeParallelFlux2",
-                 ex6::runParallelFluxTest2);
+        runTests("ReactorTests::timeParallelFlux2",
+                 ReactorTests::runParallelFluxTest2);
 
-        runTests("timeParallelFlux3",
-                 ex6::runParallelFluxTest3);
+        runTests("ReactorTests::timeParallelFlux3",
+                 ReactorTests::runParallelFluxTest3);
+
+        // Run test that records the performance of the flatMap()
+        // concurrency idiom using Observable.fromCallable().
+        runTests("RxJavaTests::timeFlatMapFromCallable",
+                 RxJavaTests::runFlatMapTestFromCallable);
+
+        // Run test that records the performance of the flatMap()
+        // concurrency idiom using Observable.just().
+        runTests("RxJavaTests::timeFlatMapJust",
+                RxJavaTests::runFlatMapTestJust);
 
         // Print the results.
         System.out.println("Printing test results for the largest number of input words\n"
@@ -116,7 +125,7 @@ public class ex6 {
      */
     private static void runTests
         (String testType,
-         Function<List<CharSequence>, Integer> test) {
+         BiFunction<List<CharSequence>, List<CharSequence>, Integer> test) {
         Arrays
             // Create tests for different sizes of input data.
             .asList(1_000, 10_000, 100_000, 1_000_000)
@@ -143,6 +152,7 @@ public class ex6 {
                     // implementation.
                     timeTest(testType,
                              bardWords,
+                             sCommonWords,
                              test);
 
                 });
@@ -160,7 +170,8 @@ public class ex6 {
     private static void timeTest
         (String testType,
          List<CharSequence> words,
-         Function<List<CharSequence>, Integer> test) {
+         List<CharSequence> commonWords,
+         BiFunction<List<CharSequence>, List<CharSequence>, Integer> test) {
         // Run the garbage collector before each test.
         System.gc();
 
@@ -171,7 +182,7 @@ public class ex6 {
             // Time how long it takes to run the test.
             .timeRun(() -> {
                     for (int i = 0; i < sMAX_ITERATIONS; i++) 
-                        uniqueWords[0] += test.apply(words);
+                        uniqueWords[0] += test.apply(words, commonWords);
                 },
                 testType);
 
@@ -179,271 +190,6 @@ public class ex6 {
                            + testType
                            + " = "
                            + uniqueWords[0] / sMAX_ITERATIONS);
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using a sequential {@link Flux}-based
-     * implementation.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runSequential(List<CharSequence> words) {
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Use the flatMap() concurrency idiom to
-                            // map each string to lower case using the
-                            // given Scheduler.
-                            .map(word ->
-                                 // Map each word to lower case.
-                                 word.toString().toLowerCase())
-
-                            // Filter out common words.
-                            .filter(lowerCaseWord ->
-                                    !sCommonWords.contains(lowerCaseWord))
-
-                            // Collect unique words into a Set.
-                            .collect(toSet())
-
-                            // Wait until all computations are done. 
-                            .block())
-
-            // Return the number of unique words in this input.
-            .size();
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using the {@code flatMap()} concurrency
-     * idiom and the {@code Mono.just} operator.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runFlatMapTestJust(List<CharSequence> words) {
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Use the flatMap() concurrency idiom to
-                            // map each string to lower case using the
-                            // given Scheduler.
-                            .flatMap(word -> Mono
-                                     // Emit the word in the assembly
-                                     // thread.
-                                     .just(word)
-
-                                     // Run each computation in the
-                                     // parallel thread pool.
-                                     .subscribeOn(Schedulers.parallel())
-
-                                     // Map each word to lower case.
-                                     .map(___ ->
-                                          word.toString().toLowerCase())
-                                          
-                                     // Filter out common words.
-                                     .filter(lowerCaseWord ->
-                                             sCommonWords.contains(lowerCaseWord)))
-
-                            // Collect unique words into a Set.
-                            .collect(toSet())
-
-                            // Wait until all computations are done. 
-                            .block())
-
-            // Return the number of unique words in this input.
-            .size();
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using the {@code flatMap()} concurrency
-     * idiom and the {@code Mono.fromCallable} operator.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runFlatMapTestFromCallable(List<CharSequence> words) {
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Use the flatMap() concurrency idiom
-                            // to map each string to lower case
-                            // using the given Scheduler.
-                            .flatMap(word -> Mono
-                                     // Emit the word in a thread from
-                                     // the parallel thread pool.
-                                     .fromCallable(() -> word)
-
-                                     // Run each computation in the
-                                     // parallel thread pool.
-                                     .subscribeOn(Schedulers.parallel())
-
-                                     // Map each word to lower case.
-                                     .map(___ ->
-                                          word.toString().toLowerCase())
-
-                                     // Filter out common words.
-                                     .filter(lowerCaseWord ->
-                                             !sCommonWords.contains(lowerCaseWord)))
-
-                            // Collect unique words into a Set.
-                            .collect(toSet())
-
-                            // Wait until all computations are done. 
-                            .block())
-
-            // Return the number of unique words in this input.
-            .size();
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using the canonical means of collecting
-     * results from a {@link ParallelFlux} into a {@link Set}.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runParallelFluxTest1(List<CharSequence> words) {
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Convert the Flux to a ParallelFlux.
-                            .parallel()
-
-                            // Run all the rails in the parallel Scheduler.
-                            .runOn(Schedulers.parallel())
-
-                            // Transform each string to lower case.
-                            .map(word ->
-                                 word.toString().toLowerCase())
-
-                            // Filter out common words.
-                            .filter(lowerCaseWord ->
-                                    !sCommonWords.contains(lowerCaseWord))
-
-                            // Convert the ParallelFlux back to a Flux.
-                            .sequential()
-
-                            // Collect the words into a Set.
-                            .collect(toSet())
-
-                            // Block until all the processing is done.
-                            .block())
-            
-            // Return the number of unique words in this input.
-            .size();
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using a {@link ParallelFlux} that collects
-     * into a single {@link ConcurrentHashSet}.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runParallelFluxTest2(List<CharSequence> words) {
-        var set = new ConcurrentHashSet<String>();
-
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Convert the Flux to a ParallelFlux.
-                            .parallel()
-
-                            // Run all the rails in the parallel Scheduler.
-                            .runOn(Schedulers.parallel())
-
-                            // Transform each string to lower case.
-                            .map(word ->
-                                 word.toString().toLowerCase())
-
-                            // Filter out common words.
-                            .filter(lowerCaseWord ->
-                                    !sCommonWords.contains(lowerCaseWord))
-
-                            // Concurrently collect the words into a
-                            // single ConcurrentHashSet.
-                            .collect(() -> set,
-                                     ConcurrentHashSet<String>::add)
-
-                            // Convert the ParallelFlux into a Flux.
-                            .sequential()
-
-                            // Block until all the processing is done.
-                            .blockLast())
-            
-            // Return the number of unique words in this input.
-            .size();
-    }
-
-    /**
-     * Compute the number of unique words in a portion of
-     * Shakespeares' works using a {@link ParallelFlux} that collects
-     * into a series of {@link ArrayList} objects that are then merged
-     * together to create a {@link Set}.
-     *
-     * @param words A {@link List} of words to lowercase
-     * @return The number of unique words in this portion of
-     *         Shakespeare's works
-     */
-    private static int runParallelFluxTest3(List<CharSequence> words) {
-        return Objects
-            .requireNonNull(Flux
-                            // Convert The List into a Flux.
-                            .fromIterable(words)
-
-                            // Convert the Flux to a ParallelFlux.
-                            .parallel()
-
-                            // Run all the rails in the parallel
-                            // Scheduler.
-                            .runOn(Schedulers.parallel())
-
-                            // Transform each string to lower case.
-                            .map(word ->
-                                 word.toString().toLowerCase())
-
-                            // Filter out common words.
-                            .filter(lowerCaseWord ->
-                                    !sCommonWords.contains(lowerCaseWord))
-
-                            // Collect each rail into a List.
-                            .collect(ArrayList<String>::new,
-                                     List::add)
-
-                            // Convert the ParallelFlux into a Flux.
-                            .sequential()
-
-                            // Concatenate all the List objects together.
-                            .flatMapIterable(Function.identity())
-
-                            // Collect the words into a Set.
-                            .collect(toSet())
-
-                            // Block until all the processing is done.
-                            .block())
-            
-            // Return the number of unique words in this input.
-            .size();
     }
 
     /**
