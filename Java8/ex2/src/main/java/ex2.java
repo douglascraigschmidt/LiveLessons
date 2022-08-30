@@ -16,8 +16,8 @@ public class ex2 {
     static public void main(String[] argv) {
         // A List containing odd and even numbers.
         List<Integer> list =
-            // Must wrap the immutable List with an ArrayList.
-            new ArrayList<>(List.of(1, 2, 3, 4, 5, 4, 3, 2, 1));
+            // Create a mutable List.
+            Arrays.asList(1, 2, 3, 4, 5, 4, 3, 2, 1);
 
         // Print the count of the items in the stream.
         System.out.println(list);

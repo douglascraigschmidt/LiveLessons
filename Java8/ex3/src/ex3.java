@@ -2,8 +2,8 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * This example shows how Function objects can be composed together
- * via andThen().
+ * This example shows how {@code Function} objects can be composed together
+ * via the {@code andThen()} method.
  */
 public class ex3 {
     /**
