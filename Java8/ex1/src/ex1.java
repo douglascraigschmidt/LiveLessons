@@ -1,16 +1,17 @@
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * This example shows how to use Java lambda expressions and method
  * references to create a closure, as well as to sort elements of a
  * collection using a Java anonymous inner class, lambda expression,
- * and method reference.  It also shows how to use the Java 8
+ * and method reference.  It also shows how to use the modern Java
  * forEach() method for Streams and collections.
  */
 public class ex1 {
     /**
-     * This class demonstrates how to implement closures using Java 8.
+     * This class demonstrates how to implement closures using modern Java.
      */
     static class ClosureExample {
         /**
@@ -26,8 +27,8 @@ public class ex1 {
          */
         Thread makeThreadClosure(String string, int n) {
             // Create and return a new thread whose runnable lambda
-            // expression defines a closure that reads the parameters
-            // and updates the mRes field.
+            // expression defines a closure that reads the methods
+            // parameters and updates the mRes field.
             return new Thread(() ->
                               System.out.println(string + (mRes += n)));
         }
@@ -47,12 +48,8 @@ public class ex1 {
         }
     }
 
-    static public void main(String[] argv) throws InterruptedException {
-        // Run the closure example.
-        new ClosureExample();
-
-        // The array to sort and print.
-        String[] nameArray = {
+    // The array to sort and print.
+    private static final String[] sNameArray = {
             "Barbara",
             "James",
             "Mary",
@@ -62,16 +59,25 @@ public class ex1 {
             "Linda",
             "james",
             "mary"
-        };
+    };
 
+    /**
+     * This {@link Supplier} makes a copy of an array.
+     */
+    private static final Supplier<String[]> sArrayCopy =
+            () -> Arrays.copyOf(sNameArray, sNameArray.length);
+
+    static public void main(String[] argv) throws InterruptedException {
+        // First demonstrates the closure example.
+        new ClosureExample();
+
+        // Next demonstrate various techniques for sorting/printing an array.
         System.out.println("Original array:\n"
-                           + List.of(nameArray));
-
-        // Demonstrate the various techniques.
-        showInnerClass(nameArray);
-        showLambdaExpression(nameArray);
-        showMethodReference1(nameArray);
-        showMethodReference2(nameArray);
+                           + List.of(sNameArray));
+        showInnerClass(sArrayCopy.get());
+        showLambdaExpression(sArrayCopy.get());
+        showMethodReference1(sArrayCopy.get());
+        showMethodReference2(sArrayCopy.get());
     }
 
     /**
@@ -80,19 +86,15 @@ public class ex1 {
     private static void showInnerClass(String[] nameArray) {
         System.out.println("showInnerClass()");
 
-        // Make a copy of the array.
-        String[] nameArrayCopy = 
-            Arrays.copyOf(nameArray, nameArray.length);
-
         // Sort using an anonymous inner class.
-        Arrays.sort(nameArrayCopy, new Comparator<String>() {
-                public int compare(String s, String t) { 
-                    return s.toLowerCase().compareTo(t.toLowerCase()); 
+        Arrays.sort(nameArray, new Comparator<String>() {
+                public int compare(String s, String t) {
+                    return s.toLowerCase().compareTo(t.toLowerCase());
                 }
             });
 
         // Print out the sorted contents as an array.
-        System.out.println(List.of(nameArrayCopy));
+        System.out.println(List.of(nameArray));
     }
 
     /**
@@ -101,17 +103,13 @@ public class ex1 {
     private static void showLambdaExpression(String[] nameArray) {
         System.out.println("showLambdaExpression()");
 
-        // Make a copy of the array.
-        String[] nameArrayCopy = 
-            Arrays.copyOf(nameArray, nameArray.length);
-
         // Sort using a lambda expression.
-        Arrays.sort(nameArrayCopy,
+        Arrays.sort(nameArray,
                     // Note type deduction here:
                     (s, t) -> s.compareToIgnoreCase(t));
 
         // Print out the sorted contents as an array.
-        System.out.println(List.of(nameArrayCopy));
+        System.out.println(List.of(nameArray));
     }
 
     /**
@@ -120,17 +118,13 @@ public class ex1 {
     private static void showMethodReference1(String[] nameArray) {
         System.out.println("showMethodReference1()");
 
-        // Make a copy of the array.
-        String[] nameArrayCopy = 
-            Arrays.copyOf(nameArray, nameArray.length);
-
         // Sort using a method reference.
-        Arrays.sort(nameArrayCopy,
+        Arrays.sort(nameArray,
                     String::compareToIgnoreCase);
 
-        // Print out the sorted contents using the Java 8 Stream
+        // Print out the sorted contents using the modern Java Stream
         // forEach() method.
-        Stream.of(nameArrayCopy).forEach(System.out::print);
+        Stream.of(nameArray).forEach(System.out::print);
     }
 
     /**
@@ -139,17 +133,13 @@ public class ex1 {
     private static void showMethodReference2(String[] nameArray) {
         System.out.println("\nshowMethodReference2()");
 
-        // Make a copy of the array.
-        String[] nameArrayCopy = 
-            Arrays.copyOf(nameArray, nameArray.length);
-
         // Sort using a method reference.
-        Arrays.sort(nameArrayCopy,
+        Arrays.sort(nameArray,
                     String::compareToIgnoreCase);
 
-        // Print out the sorted contents using the Java 8 Iterable
+        // Print out the sorted contents using the modern Java Iterable
         // forEach() method.
-        List.of(nameArrayCopy).forEach(System.out::print);
+        List.of(nameArray).forEach(System.out::print);
     }
 }
 
