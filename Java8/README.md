@@ -11,11 +11,11 @@ Here's an overview of what's currently included in these examples:
 
 . ex0 - This example two zap() method implementations that removes
         strings from a list of strings.  One method uses basic Java 7
-        features and the other uses basic Java 8 features.
+        features and the other uses basic modern Java features.
 
-. ex1 - This example shows how to use Java 8 lambda expressions and
+. ex1 - This example shows how to use modern Java lambda expressions and
         method references to sort elements of a collection.  It also
-        shows how to use the Java 8 forEach() method.
+        shows how to use the modern Java forEach() method.
   
 . ex2 - This example shows the use of a simple lambda expression in
         the context of a Java List/ArrayList removeIf() method.
@@ -25,14 +25,15 @@ Here's an overview of what's currently included in these examples:
   
 . ex4 - This example shows how a Java 7 BiFunction lambda can be used
         to replace all the values of all keys in a ConcurrentHashMap.
-        It also contrasts the Java 8 BiFunction with a conventional
-        Java 7 solution using a foreach loop.
+        It also contrasts the modern Java BiFunction with a
+        conventional Java 7 solution using a foreach loop.
 
-. ex5 - This example shows how a Java 8 Consumer interface can be used
-        with forEach() to print out the values in a list by binding
-        the System.out println() method to the forEach() Consumer
-        parameter.  It also shows how to sort a list in ascending and
-        descending order using a Comparator and a Function interface.
+. ex5 - This example shows how a modern Java Consumer interface can be
+        used with forEach() to print out the values in a list by
+        binding the System.out println() method to the forEach()
+        Consumer parameter.  It also shows how to sort a list in
+        ascending and descending order using a Comparator and a
+        Function interface.
 
 . ex6 - This example shows how a Java Supplier interface can be used
         in conjunction with the Java Optional class to print a default
@@ -85,8 +86,8 @@ Here's an overview of what's currently included in these examples:
           applied to accumulate results in a stream.
 
 . ex15 - This example shows the limitations of using inherently
-         sequential Java 8 streams operations (such as iterate() and
-         limit()) in the context of parallel streams.
+         sequential modern Java streams operations (such as iterate()
+         and limit()) in the context of parallel streams.
 
 . ex16 - This program implements various ways of computing factorials
          for BigIntegers to demonstrate the performance of alternative

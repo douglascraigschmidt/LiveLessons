@@ -13,16 +13,33 @@ import java.util.function.Function;
  * {@link Comparator} and a {@link Function} functional interface.
  */
 public class ex5 {
+    /**
+     * A simple wrapper around the {@link Thread} class.
+     */
     static class MyThread extends Thread {
+        /**
+         * Constructor initializes the name of the {@link Thread}.
+         * @param name The name of the {@link Thread}
+         */
         MyThread(String name) {
             super(name);
         }
+
+        /**
+         * Print the name of the {@link Thread} and the thread's id.
+         */
         @Override
         public void run() {
-            System.out.println(this.getName());
+            System.out.println("[Thread "
+                               + getId()
+                               + "] "
+                               + this.getName());
         }
     }
 
+    /**
+     * A Java program needs a main entry point.
+     */
     static public void main(String[] argv) {
         // Create a list of Thread objects.
         List<Thread> threads = Arrays
