@@ -2,21 +2,40 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
- * This program demonstrates how to use modern Java features to build a cosine
- * vector {@link Map} from a CSV file containing the cosine values for movies.
+ * This program demonstrates how to use modern Java features to build
+ * a cosine vector {@link Map} from a CSV file containing the cosine
+ * values for movies.
  */
 class ex40 {
+    /**
+     * Main entry point into the test program.
+     */
+    public static void main (String[] argv) {
+        // Create a Map containing the movie dataset.
+        Map<String, List<Double>> map = vectorMap("dataset.csv");
+
+        System.out.println("Size of the movie dataset = "
+                           + map.size());
+
+        // Print the contents of the movie dataset.
+        map.forEach((title, cosineVector) -> {
+                System.out.println("Title = \""
+                                   + title
+                                   + "\" cosine vector "
+                                   + cosineVector);
+            });
+    }
+
     /**
      * Constructs a {@link Map} that loads the cosine vector map from
      * resources.
@@ -40,8 +59,8 @@ class ex40 {
      */
     private static Map<String, List<Double>> loadCSVFile(String path) {
         // Read all lines from filename and convert into a Stream of
-        // Strings.  The "try-with-resources" statement endures
-        // cleanup is done automatically!
+        // Strings.  The "try-with-resources" statement endures the
+        // Stream cleanup is done automatically!
         try (Stream<String> lines = Files.lines(Paths.get(path))) {
             return lines
                 // Consume the first line, which gives the format of
@@ -71,25 +90,27 @@ class ex40 {
 
     /**
      * Convert the {@link String} representation of movie cosine
-     * values into a {@link Double[]}.
+     * values into a {@link List}.
      *
      * @param movieValues The {@link String} vector of cosine values
      *                    representing a movie
-     * @return A {@link Double[]} containing the movie cosine values
+     * @return A {@link List} containing the movie cosine values
      */
     private static List<Double> parseVector(String movieValues) {
         // Access the vector that's stored in String form.
         return Pattern
-            // Compile splitter into a regular expression (regex).
+            // Compile splitter into a regular expression (regex) that
+            // splits by the space separating the values.
             .compile(" ")
 
             // Use the regex to split the vector into a stream of
             // strings.
             .splitAsStream(movieValues
-                           // Remove brackets and spaces.
+                           // Remove leading/trailing brackets and
+                           // leading space.
                            .substring(3, movieValues.length() - 2))
 
-            // Make the stream a parallel stream.
+            // Convert the stream to a parallel stream.
             .parallel()
 
             // Convert each cosine value from String to Double.
@@ -97,24 +118,5 @@ class ex40 {
 
             // Collect the Stream<Double> into an List<Double>.
             .collect(toList());
-    }
-
-    /**
-     * Main entry point into the test program.
-     */
-    public static void main (String[] argv) {
-        // Create a Map containing the movie dataset.
-        Map<String, List<Double>> map = vectorMap("dataset.csv");
-
-        System.out.println("Size of the movie dataset = "
-                           + map.size());
-
-        // Print the contents of the movie dataset.
-        map.forEach((title, cosineVector) -> {
-            System.out.println("Title = \""
-                              + title
-                               + "\" cosine vector "
-                               + cosineVector);
-        });
     }
 }
