@@ -1,14 +1,16 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.*;
 
 /**
  * This program demonstrates how to use modern Java features to build a cosine
@@ -22,7 +24,7 @@ class ex40 {
      * @param dataset Dataset resource file name
      * @return A map containing all movie cosine vectors
      */
-    public static Map<String, Double[]> vectorMap(final String dataset) {
+    public static Map<String, List<Double>> vectorMap(final String dataset) {
         return loadCSVFile(requireNonNull(ex40.class
                                           .getResource("/" + dataset))
                            .getFile());
@@ -36,9 +38,10 @@ class ex40 {
      * @return A {@link Map} that associates the movie title with the
      *         cosine vector for each movie
      */
-    private static Map<String, Double[]> loadCSVFile(String path) {
+    private static Map<String, List<Double>> loadCSVFile(String path) {
         // Read all lines from filename and convert into a Stream of
-        // Strings.
+        // Strings.  The "try-with-resources" statement endures
+        // cleanup is done automatically!
         try (Stream<String> lines = Files.lines(Paths.get(path))) {
             return lines
                 // Consume the first line, which gives the format of
@@ -50,15 +53,14 @@ class ex40 {
 
                 // Put the title and the associated cosine vector in
                 // the map.
-                .map(strings -> new SimpleImmutableEntry<>
+                .map(strings -> new SimpleEntry<>
                      (strings[0], parseVector(strings[1])))
 
                 // Trigger intermediate processing and collect the
                 // results into a Map.
-                .collect(Collectors
-                         .toMap(SimpleImmutableEntry::getKey,
-                                SimpleImmutableEntry::getValue,
-                                (x, y) -> x));
+                .collect(toMap(SimpleEntry::getKey,
+                               SimpleEntry::getValue,
+                               (x, y) -> x));
         } catch (IOException e) {
             // There is no point in continuing if the underlying
             // database has loading issues.
@@ -66,6 +68,7 @@ class ex40 {
             throw new RuntimeException(e);
         }
     }
+
     /**
      * Convert the {@link String} representation of movie cosine
      * values into a {@link Double[]}.
@@ -74,7 +77,7 @@ class ex40 {
      *                    representing a movie
      * @return A {@link Double[]} containing the movie cosine values
      */
-    private static Double[] parseVector(String movieValues) {
+    private static List<Double> parseVector(String movieValues) {
         // Access the vector that's stored in String form.
         return Pattern
             // Compile splitter into a regular expression (regex).
@@ -92,8 +95,8 @@ class ex40 {
             // Convert each cosine value from String to Double.
             .map(Double::valueOf)
 
-            // Collect the Stream<Double> into an Double[].
-            .toArray(Double[]::new);
+            // Collect the Stream<Double> into an List<Double>.
+            .collect(toList());
     }
 
     /**
@@ -101,7 +104,7 @@ class ex40 {
      */
     public static void main (String[] argv) {
         // Create a Map containing the movie dataset.
-        Map<String, Double[]> map = vectorMap("dataset.csv");
+        Map<String, List<Double>> map = vectorMap("dataset.csv");
 
         System.out.println("Size of the movie dataset = "
                            + map.size());
@@ -111,7 +114,7 @@ class ex40 {
             System.out.println("Title = \""
                               + title
                                + "\" cosine vector "
-                               + Arrays.toString(cosineVector));
+                               + cosineVector);
         });
     }
 }

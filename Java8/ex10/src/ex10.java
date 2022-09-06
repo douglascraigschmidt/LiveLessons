@@ -5,12 +5,13 @@ import java.util.function.Predicate;
 
 /**
  * This example shows the use of predicate lambda expressions in the
- * context of a Java ConcurrentHashMap removeIf() method.
+ * context of a Java {@link ConcurrentHashMap} {@code removeIf()}
+ * method.
  */
 public class ex10 {
     /**
-     * This factory method creates a ConcurrentHashMap containing the
-     * names of Stooges and their IQs.
+     * This factory method creates a {@link ConcurrentHashMap}
+     * containing the names of Stooges and their IQs.
      */
     static private Map<String, Integer> makeMap() {
        return new ConcurrentHashMap<String, Integer>()  {
@@ -42,6 +43,7 @@ public class ex10 {
         // Create two predicate objects.
         Predicate<Map.Entry<String, Integer>> iq =
             entry -> entry.getValue() <= 100;
+
         Predicate<Map.Entry<String, Integer>> curly = 
             entry -> entry.getKey().equals("Curly");
 

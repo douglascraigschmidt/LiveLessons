@@ -2,14 +2,14 @@ import java.util.function.Supplier;
 
 /**
  * This example of shows how the Java functional interfaces (including
- * Supplier and a custom functional interface) can be used in
+ * {@link Supplier} and a custom functional interface) can be used in
  * conjunction with Java constructor references.
  */
 public class CrDemo
        implements Runnable {
     /**
-     * This class extends CrDemo and overrides its run() method to
-     * uppercase the string.
+     * This class extends {@link CrDemo} and overrides its {@code
+     * run()} method to uppercase the string.
      */
     private static class CrDemoEx
             extends CrDemo {
@@ -59,8 +59,8 @@ public class CrDemo
     }
 
     /**
-     * Demonstrate how a Supplier can be used as a factory for a
-     * zero-parameter constructor reference.
+     * Demonstrate how a {@link Supplier} can be used as a factory for
+     * a zero-parameter constructor reference.
      */
     private static void zeroParamConstructorRef() {
         // Assign a constructor reference to a supplier that acts as a
@@ -74,8 +74,8 @@ public class CrDemo
     }
 
     /**
-     * Demonstrate how Suppliers can be used as factories for multiple
-     * zero-parameter constructor references.
+     * Demonstrate how {@link Supplier} objects can be used as
+     * factories for multiple zero-parameter constructor references.
      */
     private static void zeroParamConstructorRefEx() {
         // Assign a constructor reference to a supplier that acts as a
@@ -94,7 +94,7 @@ public class CrDemo
 
     /**
      * Use the given {@code factory} to create a new object and call
-     * its run() method.
+     * its {@code run()} method.
      */
     private static <T extends Runnable> void runDemo(Supplier<T> factory) {
         factory.get().run();
@@ -109,9 +109,9 @@ public class CrDemo
     }
 
     /**
-     * Demonstrate how a custom functional interface (i.e., TriFactor,
-     * which is defined below) can be used as a factory for a
-     * three-parameter constructor reference.
+     * Demonstrate how a custom functional interface (i.e., {@link
+     * TriFactor}, which is defined below) can be used as a factory
+     * for a three-parameter constructor reference.
      */
     private static void threeParamConstructorRef() {
         // Assign a constructor reference to a customized functional
@@ -127,8 +127,8 @@ public class CrDemo
 
     /**
      * Represents a factory that accepts three arguments and produces
-     * a result.  This is a functional interface whose functional
-     * method is {@link #of(Object, Object, Object)}.
+     * a result.  This is a functional interface whose abstract method
+     * is {@link #of(Object, Object, Object)}.
      */
     @FunctionalInterface
     interface TriFactory<P1,

@@ -226,3 +226,8 @@ Here's an overview of what's currently included in these examples:
 . ex40 - This program demonstrates how to use modern Java features to
          build a cosine vector Map from a CSV file containing the
          cosine values for movies.
+
+. ex41 - This program shows the difference between using traditional
+         Java 7 features to replace substrings vs. using modern Java
+         features.
+
