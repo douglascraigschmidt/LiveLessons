@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static utils.ExceptionUtils.rethrowConsumer;
+
 /**
  * This example shows how a modern Java {@link Consumer} interface can
  * be used with the {@code forEach()} method to print out the values
@@ -33,7 +35,7 @@ public class ex5 {
             System.out.println("[Thread "
                                + getId()
                                + "] "
-                               + this.getName());
+                               + getName());
         }
     }
 
@@ -75,7 +77,7 @@ public class ex5 {
         // rethrowConsumer() converts a checked exception to an
         // unchecked exception.
         threads
-            .forEach(ExceptionUtils.rethrowConsumer(Thread::join));
+            .forEach(rethrowConsumer(Thread::join));
     }
 }
 

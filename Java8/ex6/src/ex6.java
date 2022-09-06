@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * This example shows how a Java {@link Supplier} interface can be

@@ -1,11 +1,6 @@
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the use of a simple lambda expression in the
@@ -17,12 +12,12 @@ public class ex2 {
         // A List containing odd and even numbers.
         List<Integer> list =
             // Create a mutable List.
-            Arrays.asList(1, 2, 3, 4, 5, 4, 3, 2, 1);
+            new ArrayList<>(List.of(1, 2, 3, 4, 5, 4, 3, 2, 1));
 
-        // Print the count of the items in the stream.
+        // Print the items in the List.
         System.out.println(list);
 
-        // Create a Predicate that returns true if a number is
+        // Create a Predicate lambda that returns true if a number is
         // even, else false.
         Predicate<Integer> isEven = i -> i % 2 == 0;
 
@@ -30,7 +25,7 @@ public class ex2 {
         // list.
         list.removeIf(isEven);
 
-        // Print the count of the items in the stream.
+        // Print the items in the stream.
         System.out.println(list);
     }
 }

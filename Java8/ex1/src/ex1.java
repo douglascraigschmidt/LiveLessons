@@ -4,7 +4,7 @@ import java.util.stream.Stream;
 
 /**
  * This example shows how to use Java lambda expressions and method
- * references to create a closure, as well as to sort elements of a
+ * references to create a closure, as well as to sort elements in a
  * collection using a Java anonymous inner class, lambda expression,
  * and method reference.  It also shows how to use the modern Java
  * forEach() method for Streams and collections.
@@ -26,8 +26,8 @@ public class ex1 {
          * @return The background thread reference
          */
         Thread makeThreadClosure(String string, int n) {
-            // Create and return a new thread whose runnable lambda
-            // expression defines a closure that reads the methods
+            // Create and return a new Thread whose runnable lambda
+            // expression defines a closure that reads the method
             // parameters and updates the mRes field.
             return new Thread(() ->
                               System.out.println(string + (mRes += n)));

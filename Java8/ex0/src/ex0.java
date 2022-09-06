@@ -7,7 +7,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows two zap*() method implementations that remove
- * strings from a list of strings.  One method uses traditional Java 7
+ * a string from a list of strings.  One method uses traditional Java 7
  * features and the other uses basic modern Java features.
  */
 public class ex0 {
