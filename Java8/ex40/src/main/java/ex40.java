@@ -12,7 +12,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * This program demonstrates how to use modern Java features to build
+ * This program demonstrates how to use modern Java features (including
+ * lambda expressions, method references, and parallel streams) to build
  * a cosine vector {@link Map} from a CSV file containing the cosine
  * values for movies.
  */
@@ -59,10 +60,13 @@ class ex40 {
      */
     private static Map<String, List<Double>> loadCSVFile(String path) {
         // Read all lines from filename and convert into a Stream of
-        // Strings.  The "try-with-resources" statement endures the
+        // Strings.  The "try-with-resources" statement ensures the
         // Stream cleanup is done automatically!
         try (Stream<String> lines = Files.lines(Paths.get(path))) {
             return lines
+                // Convert the stream into a parallel stream.
+                .parallel()
+
                 // Consume the first line, which gives the format of
                 // the CSV file.
                 .skip(1)

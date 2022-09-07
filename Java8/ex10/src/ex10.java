@@ -31,6 +31,7 @@ public class ex10 {
         Map<String, Integer> stooges = makeMap();
 
         System.out.println(stooges);
+
         // This lambda expression removes entries with IQ less than or
         // equal to 100.
         stooges.entrySet().removeIf(entry -> entry.getValue() <= 100);
@@ -50,7 +51,6 @@ public class ex10 {
         // This lambda expression removes entries with IQ less than or
         // equal to 100 with the name "curly".
         stooges.entrySet().removeIf(iq.and(curly));
-        
         System.out.println(stooges);
     }
 }

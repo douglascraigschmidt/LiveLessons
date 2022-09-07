@@ -25,15 +25,21 @@ class ex41 {
      * @return The modified {@link List} of URLs
      */
     private static List<String> java7Replace(List<String> urls) {
+        // Make a copy of the urls.
         urls = new ArrayList<>(urls);
 
+        // Loop through all the urls.
         for (int i = 0; i < urls.size(); ++i) {
+            // Remove the url at index 'i' if it doesn't
+            // match what's expected.
             if (!urls.get(i).contains("cse.wustl")) {
                 urls.remove(i);
                 continue;
             }
+            // Replace the url at index 'i'.
             urls.set(i,
-                     urls.get(i).replace("cse.wustl","dre.vanderbilt"));
+                     urls.get(i).replace("cse.wustl",
+                             "dre.vanderbilt"));
         }
         return urls;
     }
@@ -46,9 +52,17 @@ class ex41 {
      */
     private static List<String> modernJavaReplace(List<String> urls) {
         return urls
+            // Convert the List to a Stream.
             .stream()
+
+            // Remove items from the Stream if they don't match what's expected.
             .filter(s -> s.contains("cse.wustl"))
+
+            // Perform the replacement on each item remaining in the stream.
             .map(s -> s.replace("cse.wustl", "dre.vanderbilt"))
+
+            // Trigger intermediate processing and collect the results
+            // into a List.
             .collect(toList());
     }
 
@@ -60,8 +74,11 @@ class ex41 {
         List<String> list = Arrays.asList(sUrlArray);
         System.out.println(list);
 
-        // Perform the replacements and print the results.
+        // Perform the Java 7 replacements and print the results.
         System.out.println(java7Replace(list));
+
+        System.out.println(list);
+        // Perform the modern Java replacements and print the results.
         System.out.println(modernJavaReplace((list)));
     }
 }
