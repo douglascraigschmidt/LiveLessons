@@ -175,7 +175,7 @@ object FlightFactory {
                 it.currencies = currencies
             }
 
-        fun generateFlights(): List<Flight> {
+        fun generateFlights(debug : Boolean): List<Flight> {
             validate()
 
             expectedMatches.clear()
@@ -239,19 +239,22 @@ object FlightFactory {
             val min = shuffled.minOf { ExchangeRate.convert(it.price, it.currency, "USD") }
             val cheapest = shuffled.filter { ExchangeRate.convert(it.price, it.currency, "USD") == min }
 
-            println("FlightFactory has generated ${shuffled.count()} " +
-                    "flights with ${cheapest.count()} cheapest flight${if (cheapest.count() > 1) "s" else ""}.")
-            println("\nCONFIGURATION:\n")
-            printConfiguration()
+            if (debug) {
+                println(
+                    "FlightFactory has generated ${shuffled.count()} " +
+                            "flights with ${cheapest.count()} cheapest flight${if (cheapest.count() > 1) "s" else ""}."
+                )
+                println("\nCONFIGURATION:\n")
+                printConfiguration()
 
-            println("\nCHEAPEST FLIGHT${if (cheapest.count() > 1) "S" else ""}:\n")
-            cheapest.forEach {
-                println("\t$it")
+                println("\nCHEAPEST FLIGHT${if (cheapest.count() > 1) "S" else ""}:\n")
+                cheapest.forEach {
+                    println("\t$it")
+                }
+                println()
             }
-            println()
 
             check(cheapest.count() in minLowestPriceMatches..maxLowestPriceMatches)
-
 
             return shuffled
         }

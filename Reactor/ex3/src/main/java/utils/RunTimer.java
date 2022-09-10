@@ -40,9 +40,9 @@ public class RunTimer {
     }
 
     /**
-     * Call @a supplier.get() and time how long it takes to run.
+     * Call {@code supplier.get()} and time how long it takes to run.
      *
-     * @return The result returned by @a supplier.get()
+     * @return The result returned by {@code supplier.get()}
      */
     public static <U> U timeRun(Supplier<U> supplier,
                                 String testName) {
@@ -58,7 +58,7 @@ public class RunTimer {
     }
 
     /**
-     * Call @a runnable.run() and time how long it takes to run.
+     * Call {@code runnable.run()} and time how long it takes to run.
      */
     public static void timeRun(Runnable runnable,
                                String testName) {
