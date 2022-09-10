@@ -148,7 +148,6 @@ public class RunTimer {
      * @param methodName The name of the method being tested
      * @param invocationId A unique value corresponding to the method
      *                     invocation
-     * @return The result returned by {@code supplier.get()}
      */
     public static void timeRun(Runnable runnable,
                                String methodName,
@@ -233,8 +232,9 @@ public class RunTimer {
     /**
      * Stop timing the execution time of the given {@code methodName}.
      *
-     * @param methodName
-     * @param invocationId
+     * @param methodName The name of the method being run
+     * @param invocationId A unique value corresponding to the method
+     *                     invocation
      */
     private static void stopTimingRecord(String methodName,
                                          long invocationId) {

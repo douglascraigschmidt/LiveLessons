@@ -231,6 +231,7 @@ public class ex2 {
                             methodName,
                             invocationId);
 
+                    // Print the cheapest flights.
                     return printResults(cheapestFlights,
                                         methodName,
                                         invocationId);
@@ -309,6 +310,8 @@ public class ex2 {
                                 results
                                     .forEach(flight ->
                                              printResults(methodName + " = " + flight));
+
+                                // Return the results.
                                 return results;
                             },
                             methodName,
