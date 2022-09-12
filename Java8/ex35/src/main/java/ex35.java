@@ -8,10 +8,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * This example first demonstrates how the {@code flatMap()}
- * intermediate operation doesn't scale in a Java parallel stream and
- * then shows how a combination of {@code map()}, {@code reduce()},
- * and {@code Stream.concat()} fixes this problem.
+ * This example demonstrates how the {@code flatMap()} intermediate
+ * operation doesn't scale in a Java parallel stream since it forces
+ * sequential processing.  It then shows how a combination of {@code
+ * map()}, {@code reduce()}, and {@code Stream.concat()} fixes this
+ * problem.
  */
 public class ex35 {
     /**

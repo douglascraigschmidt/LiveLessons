@@ -33,6 +33,7 @@ public class ex12  {
         ex.runCollectReduce2();
         ex.runCollectReduce3();
         ex.runCollectMapReduce();
+        ex.runCollectMapReduceEx();
     }
 
     /**
@@ -641,5 +642,56 @@ public class ex12  {
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
     }
-}
 
+    /**
+     * This example demonstrates the use of the three-parameter
+     * reduce() operation, which is useful when the type being
+     * streamed is different from the type of the accumulator.  In
+     * particular, the inputs are Map.Entry (i.e., the 'entry'),
+     * accumulator is a Double (i.e., the 'sum'), and the combiner
+     * uses combines Double values.
+     */
+    private void runCollectMapReduceEx() {
+        System.out.println("\nResults from runCollectMapReduceEx():");
+
+        Map<String, Double> baseline = new HashMap<>() {
+                { put("AZ", 0.00123); }
+                { put("MI", 0.02497); }
+                { put("WI", 0.01238); }
+                { put("WY", 0.04232); }
+            };
+
+        Map<String, Double> actual = new HashMap<>() {
+                { put("AZ", 0.01023); }
+                { put("MI", 0.09497); }
+                { put("WI", 0.00238); }
+            };
+
+        Double breakoutFactor = baseline
+            // Obtain the set of entries from the map.
+            .entrySet()
+
+            // Convert the map into a stream.
+            .stream()
+
+            // Use the three-parameter version of reduce().
+            .reduce(0.0,
+                    // The accumulator operates on the Map's contents.
+                    (Double sum, Map.Entry<String, Double> entry) -> {
+                        Double difference = entry.getValue();
+                        if (actual.containsKey(entry.getKey())) 
+                            difference =
+                                Math.abs(entry.getValue() - actual.get(entry.getKey()));
+
+                        return sum + difference;
+                    },
+
+                    // The combiner just sums Double values.
+                    Double::sum);
+
+        // Print the results.
+        System.out.println("The breakout factor = " 
+                           + breakoutFactor);
+                    
+    }
+}

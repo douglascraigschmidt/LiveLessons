@@ -188,10 +188,11 @@ Here's an overview of what's currently included in these examples:
          which is part of an Flight Listing App (FLApp) that we've
          created for our online course on Reactive Microservices.
 
-. ex35 - This example first demonstrates how the testFlatMap()
-         intermediate operation doesn't scale in a Java parallel
-         stream and then shows how a combination of reduce() and
-         Stream.concat() fixes this problem.
+. ex35 - This example demonstrates how the flatMap() intermediate
+         operation doesn't scale in a Java parallel stream since it
+         forces sequential processing.  It then shows how a
+         combination of map(), reduce(), and Stream.concat() fixes
+         this problem.
 
 . ex36 - This program creates various Set objects containing the
          unique words appearing in the complete work of William
