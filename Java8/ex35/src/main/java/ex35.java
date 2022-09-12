@@ -8,17 +8,12 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * This example first demonstrates how the {@code testFlatMap()}
+ * This example first demonstrates how the {@code flatMap()}
  * intermediate operation doesn't scale in a Java parallel stream and
  * then shows how a combination of {@code map()}, {@code reduce()},
  * and {@code Stream.concat()} fixes this problem.
  */
 public class ex35 {
-    /**
-     * Logging tag.
-     */
-    private static final String TAG = ex35.class.getName();
-
     /**
      * These constants are used to differentiate different results
      * from the checkInnerStreamThreadIds() method, which determines
@@ -44,7 +39,7 @@ public class ex35 {
         runTest(ex35::testFlatMap, "testFlatMap()");
 
         // Run the reduce()/Stream.concat() test, which shows how to
-        // overcoming the limitations with flatMap().
+        // overcome the limitations with flatMap().
         runTest(ex35::testReduceConcat, "testReduceConcat()");
 
         // Print the timing results.
@@ -62,7 +57,6 @@ public class ex35 {
      */
     private static void runTest(Runnable test,
                                 String testName) {
-
         // Let the system garbage collect to start on an
         // even playing field.
         System.gc();
@@ -173,7 +167,7 @@ public class ex35 {
         AtomicInteger innerThreadIdCounter = new AtomicInteger();
 
         // Create a ConcurrentHashMap that associates thread ids with
-        // a count of the number of integers processed by that thread.
+        // a count of the number of integers processed by each thread.
         Map<Long, AtomicInteger> threadMap = new ConcurrentHashMap<>();
 
         return IntStream
@@ -193,7 +187,8 @@ public class ex35 {
                                            threadMap,
                                            outerThreadId))
 
-            // Remove all intermediate results.
+            // Remove all sIntermediaResult values, leaving just
+            // sSequentialResult and sParallelResult values.
             .filter(value -> value > sIntermediateResult);
     }
 
@@ -201,7 +196,7 @@ public class ex35 {
      * Determine and print how many threads are used to process an
      * inner stream.  If the inner stream runs sequentially its thread
      * id will match the {@code outerThreadId}.  If the inner stream
-     * runs in parallel then its thread it may not match the {@code
+     * runs in parallel then its thread id may not match the {@code
      * outerThreadId}.
      *
      * @param maxIterations The max number of iterations
@@ -223,7 +218,7 @@ public class ex35 {
         // Try to find the AtomicInteger associated with current
         // thread id in the map.
         var value = threadMap
-            // If it's the first time in give an initial value of 1.
+            // If it's the first time in make an initial value of 1.
             .putIfAbsent(Thread.currentThread().getId(),
                          new AtomicInteger(1));
 
@@ -245,7 +240,7 @@ public class ex35 {
                             + " suggests "
                             + (wasSequential 
                                ? "sequential execution" 
-                               : "parallel excecution"));
+                               : "parallel execution"));
 
             // Indicate if the inner stream ran sequentially or in
             // parallel.
