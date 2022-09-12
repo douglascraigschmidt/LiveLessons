@@ -25,6 +25,7 @@ public class ex12  {
         ex.runFlatMapLimit();
         ex.runForEachOfConcatenation();
         ex.runCollectToList();
+        ex.runCollectJoining();
         ex.runCollectToSet();
         ex.runCollectToMap();
         ex.runCollectGroupingBy();
@@ -245,6 +246,48 @@ public class ex12  {
             // processing and collects the results into a list, which
             // contains duplicates.
             .collect(toList());
+
+        // Print the results.
+        System.out.println(results);
+    }
+
+    /**
+     * Run an example using the collect() terminal operation to put
+     * the results into a String using the joining() collector.
+     */
+    private void runCollectJoining() {
+        System.out.println("\nResults from runCollectJoining():");
+
+        // Create a list of key characters in Hamlet.
+        List<String> characters = List
+            .of("horatio",
+                "claudius",
+                "Gertrude",
+                "Hamlet",
+                "Hamlet", // Hamlet appears twice.
+                "laertes",
+                "Ophelia");
+
+        // Create String containing the sorted list of characters
+        // starting with 'h' or 'H'.
+        String results = characters
+            // Create a stream of characters from William
+            // Shakespeare's Hamlet.
+            .stream()
+
+            // Remove any strings that don't start with 'h' or 'H'.
+            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+
+            // Capitalize the first letter in the string.
+            .map(this::capitalize)
+
+            // Sort the results in ascending order.
+            .sorted()
+
+            // This terminal operation triggers aggregate operation
+            // processing and collects the results into a String,
+            // which contains duplicates.
+            .collect(joining(" "));
 
         // Print the results.
         System.out.println(results);
