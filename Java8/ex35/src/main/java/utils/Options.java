@@ -80,4 +80,16 @@ public class Options {
     public int iterations() {
         return mIterations;
     }
+
+
+    /**
+     * Conditionally display the {@link String} parameter depending
+     * on whether diagnostics are enabled or not.
+     *
+     * @param string The {@link String} to print
+     */
+    public static void display(String string) {
+        if (Options.instance().diagnosticsEnabled())
+            System.out.println(string);
+    }
 }
