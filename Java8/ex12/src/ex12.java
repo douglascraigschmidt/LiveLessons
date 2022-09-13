@@ -8,11 +8,12 @@ import static java.util.stream.Collectors.*;
 
 /**
  * This program shows many modern Java Streams terminal operations,
- * including forEach*(), collect(), and several variants of reduce().
- * In addition, it includes a classic Java example as a baseline.  It
- * also shows how Java Streams can be used with "pure" functions
- * (i.e., functions whose return values are only determined by their
- * input values) that have no side effects.
+ * including forEach*(), collect() (and various pre-defined
+ * collectors), and several variants of reduce().  It also includes a
+ * classic Java example as a baseline.  In addition, this program
+ * shows how Java Streams can be used with "pure" functions (i.e.,
+ * functions whose return values are only determined by their input
+ * values) that have no side effects.
  */
 public class ex12 {
     /** 
