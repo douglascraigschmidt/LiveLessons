@@ -65,38 +65,6 @@ public class ex14 {
     }
 
     /**
-     * Warm up the threads in the fork/join pool so the timing results
-     * will be more accurate.
-     */
-    private static void warmUpForkJoinPool() {
-        System.out.println("\n++Warming up the fork/join pool\n");
-
-        List<CharSequence> words = Objects
-            .requireNonNull(TestDataFactory
-                            .getInput(sSHAKESPEARE_DATA_FILE,
-                                      // Split input into "words" by
-                                      // ignoring whitespace.
-                                      sWHITESPACE_AND_PUNCTUATION));
-        // Create an empty list.
-        List<String> list = new ArrayList<>();
-
-        for (int i = 0; i < sMAX_ITERATIONS; i++) 
-            // Append the new words to the end of the list.
-            list.addAll(words
-                        // Convert the list into a parallel stream
-                        // (which uses a spliterator internally).
-                        .parallelStream()
-
-                        // Uppercase each string.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toUpperCase())
-
-                        // Collect the stream into a list.
-                        .collect(toList()));
-    }
-
-    /**
      * Run tests that demonstrate performance differences between
      * {@link ArrayList} and {@link LinkedList} spliterators.
      */
@@ -394,5 +362,38 @@ public class ex14 {
                             .forEach(uniqueWords::add);
                     }},
                 testName);
+    }
+
+
+    /**
+     * Warm up the threads in the fork/join pool so the timing results
+     * will be more accurate.
+     */
+    private static void warmUpForkJoinPool() {
+        System.out.println("\n++Warming up the fork/join pool\n");
+
+        List<CharSequence> words = Objects
+                .requireNonNull(TestDataFactory
+                        .getInput(sSHAKESPEARE_DATA_FILE,
+                                // Split input into "words" by
+                                // ignoring whitespace.
+                                sWHITESPACE_AND_PUNCTUATION));
+        // Create an empty list.
+        List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < sMAX_ITERATIONS; i++)
+            // Append the new words to the end of the list.
+            list.addAll(words
+                    // Convert the list into a parallel stream
+                    // (which uses a spliterator internally).
+                    .parallelStream()
+
+                    // Uppercase each string.  A "real"
+                    // application would likely do something
+                    // interesting with the words at this point.
+                    .map(charSeq -> charSeq.toString().toUpperCase())
+
+                    // Collect the stream into a list.
+                    .collect(toList()));
     }
 }

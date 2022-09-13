@@ -35,7 +35,6 @@ public class ex12 {
     private final String sCharactersStr =
         "horatio,claudius,Gertrude,Fortinbras,fortinbras,Hamlet,Hamlet,laertes,Ophelia";
 
-
     /**
      * Create an array of {@link List} objects containing characters
      * from Hamlet.
@@ -55,20 +54,50 @@ public class ex12 {
                 "Gildenstern"),
         List.of("Fortinbras")};
 
+    /**
+     * The main entry point into the test program.
+     */
     static public void main(String[] argv) {
         // Create an instance of this class.
         ex12 ex = new ex12();
 
-        // Demonstrate various approaches.
+        // Demonstrate the Java 7 baseline.
         ex.runClassicJava();
+
+        // Demonstrate the forEach() terminal operations.
+        forEachTests(ex);
+
+        // Demonstrate the collect() terminal operations.
+        collectTests(ex);
+
+        // Demonstrate the reduce() terminal operations.
+        reduceTests(ex);
+    }
+
+    /**
+     * Demonstrate the forEach() terminal operations.
+     */
+    private static void forEachTests(ex12 ex) {
         ex.runForEach();
         ex.runFlatMapLimit();
         ex.runForEachOfConcatenation();
+    }
+
+    /**
+     * Demonstrate the collect() terminal operations.
+     */
+    private static void collectTests(ex12 ex) {
         ex.runCollectToList();
         ex.runCollectJoining();
         ex.runCollectToSet();
         ex.runCollectToMap();
         ex.runCollectGroupingBy();
+    }
+    
+    /**
+     * Demonstrate the reduce() terminal operations.
+     */
+    private static void reduceTests(ex12 ex) {
         ex.runCollectReduce1();
         ex.runCollectReduce2();
         ex.runCollectReduce3();
