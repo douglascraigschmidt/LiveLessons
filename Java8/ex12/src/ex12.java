@@ -10,11 +10,51 @@ import static java.util.stream.Collectors.*;
  * This program shows many modern Java Streams terminal operations,
  * including forEach*(), collect(), and several variants of reduce().
  * In addition, it includes a classic Java example as a baseline.  It
- * also shows how Java Streams can be used with "pure" functions,
- * i.e., functions whose return values are only determined by their
- * input values, without any side effects.
+ * also shows how Java Streams can be used with "pure" functions
+ * (i.e., functions whose return values are only determined by their
+ * input values) that have no side effects.
  */
-public class ex12  {
+public class ex12 {
+    /** 
+     * A {@link List} of key characters in the play Hamlet.
+     */
+    private final List<String> sCharacters = List
+        .of("horatio",
+            "claudius",
+            "Gertrude",
+            "Fortinbras", // Fortinbras appears twice.
+            "fortinbras",
+            "Hamlet",
+            "Hamlet", // Hamlet appears twice.
+            "laertes",
+            "Ophelia");
+
+    /**
+     * A {@link String} of key characters in the play Hamlet.
+     */
+    private final String sCharactersStr =
+        "horatio,claudius,Gertrude,Fortinbras,fortinbras,Hamlet,Hamlet,laertes,Ophelia";
+
+
+    /**
+     * Create an array of {@link List} objects containing characters
+     * from Hamlet.
+     */
+    List<String>[] sArray = new List[]{
+        List.of("Hamlet",
+                "claudius",
+                "Gertrude"),
+        List.of("Ophelia",
+                "laertes",
+                "Polonius"),
+        List.of("Reynaldo",
+                "horatio",
+                "Voltemand",
+                "Cornelius",
+                "Rosencrantz",
+                "Gildenstern"),
+        List.of("Fortinbras")};
+
     static public void main(String[] argv) {
         // Create an instance of this class.
         ex12 ex = new ex12();
@@ -60,13 +100,7 @@ public class ex12  {
     private void runClassicJava() {
         System.out.println("Results from runClassicJava():");
 
-        List<String> listOfCharacters = new LinkedList<>
-            (List.of("horatio",
-                     "claudius",
-                     "Gertrude",
-                     "Hamlet",
-                     "laertes",
-                     "Ophelia"));
+        List<String> listOfCharacters = new ArrayList<>(sCharacters);
 
         // Loop through all the characters.
         for (int i = 0; i < listOfCharacters.size();) {
@@ -95,24 +129,9 @@ public class ex12  {
     private void runForEach() {
         System.out.println("\nResults from runForEach():");
 
-        Stream
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "laertes",
-                "Ophelia")
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted()
+        this
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
             // Terminal operation that triggers intermediate operation
             // processing and prints the results.
@@ -126,38 +145,23 @@ public class ex12  {
     private void runFlatMapLimit() {
         System.out.println("\nResults from runFlatMapLimit():");
 
-        // Create several lists containing characters from Hamlet.
-        List<String> l1 = List.of("Hamlet",
-                                  "claudius",
-                                  "Gertrude");
-        List<String> l2 = List.of("Ophelia",
-                                  "laertes",
-                                  "Polonius");
-        List<String> l3 = List.of("Reynaldo",
-                                  "horatio",
-                                  "Voltemand",
-                                  "Cornelius",
-                                  "Rosencrantz",
-                                  "Gildenstern");
-        List<String> l4 = List.of("Fortinbras");
-
         Stream
             // Create a stream of characters from William
             // Shakespeare's Hamlet using of() to concatenate lists.
-            .of(l1, l2, l3, l4)
+            .of(sArray)
 
             // Flatten the stream of lists of strings into a stream of
             // strings.
             .flatMap(strings -> {
-                // Print strings to see how far we go in the stream!
-                System.out.println (strings);
-                return strings.stream();
-            })
+                    // Print strings to see how far we go in the stream!
+                    System.out.println (strings);
+                    return strings.stream();
+                })
 
             // Limit the output to the first 4 elements in the stream.
             .limit(4)
 
-            // This terminal operation triggers aggregate operation
+            // This terminal operation triggers intermediate operation
             // processing and prints the results in "encounter order".
             .forEachOrdered(System.out::println);
     }
@@ -169,25 +173,10 @@ public class ex12  {
     private void runForEachOfConcatenation() {
         System.out.println("\nResults from runForEachOfConcatenation():");
 
-        // Create several lists containing characters from Hamlet.
-        List<String> l1 = List.of("Hamlet",
-                                  "claudius",
-                                  "Gertrude");
-        List<String> l2 = List.of("Ophelia",
-                                  "laertes",
-                                  "Polonius");
-        List<String> l3 = List.of("Reynaldo",
-                                  "horatio",
-                                  "Voltemand",
-                                  "Cornelius",
-                                  "Rosencrantz",
-                                  "Gildenstern");
-        List<String> l4 = Collections.singletonList("Fortinbras");
-
-        Stream
+        Stream<String> flattenedStream = Stream
             // Create a stream of characters from William
             // Shakespeare's Hamlet using of() to concatenate lists.
-            .of(l1, l2, l3, l4)
+            .of(sArray)
 
             // Process the stream in parallel, which is overkill for
             // this simple example.
@@ -195,18 +184,12 @@ public class ex12  {
 
             // Flatten the stream of lists of strings into a stream of
             // strings.
-            .flatMap(List::stream)
+            .flatMap(List::stream);
 
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+        this
+            .generateHCharacters(flattenedStream)
 
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted()
-
-            // This terminal operation triggers aggregate operation
+            // This terminal operation triggers intermediate operation
             // processing and prints the results in "encounter order".
             .forEachOrdered(System.out::println);
     }
@@ -218,32 +201,11 @@ public class ex12  {
     private void runCollectToList() {
         System.out.println("\nResults from runCollectToList():");
 
-        // Create a list of key characters in Hamlet.
-        List<String> characters = List
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "Hamlet", // Hamlet appears twice.
-                "laertes",
-                "Ophelia");
+        var results = this
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
-        // Create sorted list of characters starting with 'h' or 'H'.
-        List<String> results = characters
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .stream()
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted()
-
-            // This terminal operation triggers aggregate operation
+            // This terminal operation triggers intermediate operation
             // processing and collects the results into a list, which
             // contains duplicates.
             .collect(toList());
@@ -259,33 +221,11 @@ public class ex12  {
     private void runCollectJoining() {
         System.out.println("\nResults from runCollectJoining():");
 
-        // Create a list of key characters in Hamlet.
-        List<String> characters = List
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "Hamlet", // Hamlet appears twice.
-                "laertes",
-                "Ophelia");
+        var results = this
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
-        // Create String containing the sorted list of characters
-        // starting with 'h' or 'H'.
-        String results = characters
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .stream()
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted()
-
-            // This terminal operation triggers aggregate operation
+            // This terminal operation triggers intermediate operation
             // processing and collects the results into a String,
             // which contains duplicates.
             .collect(joining(" "));
@@ -301,31 +241,13 @@ public class ex12  {
     private void runCollectToSet() {
         System.out.println("\nResults from runCollectToSet():");
 
-        // Create a list of key characters in Hamlet.
-        List<String> characters = List
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "Hamlet", // Hamlet appears twice.
-                "laertes",
-                "Ophelia");
+        var results = this
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
-        // Create sorted set of characters starting with 'h' or 'H'.
-        Set<String> results = characters
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .stream()
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // This terminal operationd that triggers aggregate
-            // operation processing and collects the results into a
-            // set (which contains no duplicates).
+            // This terminal operation triggers intermediate operation
+            // processing and collects the results into a set (which
+            // contains no duplicates).
             .collect(toSet());
 
         // Print the results.
@@ -339,29 +261,11 @@ public class ex12  {
     private void runCollectToMap() {
         System.out.println("\nResults from runCollectToMap():");
 
-        // Create a list of key characters in Hamlet.
-        List<String> characters = List
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "Hamlet", // Hamlet appears twice.
-                "laertes",
-                "Ophelia");
+        var results = this
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
-        // Create sorted set of characters starting with 'h' or 'H'.
-        Map<String, Integer> results = characters
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .stream()
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Terminal operation that triggers aggregate operation
+            // Terminal operation that triggers intermediate operation
             // processing and collects the results into a map.
             .collect(toMap(identity(), String::length, Integer::sum));
 
@@ -378,38 +282,11 @@ public class ex12  {
     private void runCollectGroupingBy() {
         System.out.println("\nResults from runCollectGroupingBy():");
 
-        // Create a list of key characters in Hamlet.
-        List<String> characters = List
-            .of("horatio",
-                "claudius",
-                "Gertrude",
-                "Hamlet",
-                "Hamlet", // Hamlet appears twice.
-                "laertes",
-                "Ophelia");
-
-        // Create sorted set of characters starting with 'h' or 'H'.
-        Map<String, Long> results = characters
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .stream()
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Terminal operation that triggers aggregate operation
-            // processing and collects the results into a map.
-            // Terminal operation that triggers aggregate operation
-            // processing and groups the results into a map whose keys
-            // are strings of matching Hamlet characters and whose
-            // values are the length of each string.
-            .collect(groupingBy(identity(),
-                                // Use a TreeMap to sort the results.
-                                TreeMap::new,
-                                summingLong(String::length)));
+        // Generate a Map of characters from the play Hamlet whose
+        // keys start with upper- or lower-case 'h' whose names are
+        // consistently capitalized and whose values are the lengths
+        // of the character's names.
+        var results = generateHCharactersMap(sCharactersStr);
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
@@ -424,37 +301,16 @@ public class ex12  {
     private void runCollectReduce1() {
         System.out.println("\nResults from runCollectReduce1():");
 
-        // Create map of Hamlet characters starting with 'h' or 'H'
-        // (key) and the length of each characters name (value).
-        Map<String, Long> matchingCharactersMap = Pattern
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .compile(",")
-            .splitAsStream("horatio,claudius,Gertrude,Hamlet,laertes,Ophelia")
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Terminal operation that triggers aggregate operation
-            // processing and groups the results into a map whose keys
-            // are strings of matching Hamlet characters and whose
-            // values are the length of each string.
-            .collect(groupingBy(identity(),
-                                // Use a TreeMap to sort the results.
-                                TreeMap::new,
-                                summingLong(String::length)));
+        var results = generateHCharactersMap(sCharactersStr);
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
                            // Get the list of character names and name lengths.
-                           + matchingCharactersMap);
+                           + results);
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
-        long countOfCharacterNameLengths = matchingCharactersMap
+        long countOfCharacterNameLengths = results
             // Extract values (i.e., Long count of string lengths)
             // from the map.
             .values()
@@ -471,7 +327,7 @@ public class ex12  {
         // Print the results.
         System.out.println("Count of lengths of Hamlet characters' names "
                            // Get the list of character names.
-                           + matchingCharactersMap.keySet()
+                           + results.keySet()
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
     }
@@ -483,37 +339,20 @@ public class ex12  {
     private void runCollectReduce2() {
         System.out.println("\nResults from runCollectReduce2():");
 
-        // Create map of Hamlet characters starting with 'h' or 'H'
-        // (key) and the length of each characters name (value).
-        Map<String, Long> matchingCharactersMap = Pattern
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .compile(",")
-            .splitAsStream("horatio,claudius,Gertrude,Hamlet,laertes,Ophelia")
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Terminal operation that triggers aggregate operation
-            // processing and groups the results into a map whose keys
-            // are strings of matching Hamlet characters and whose
-            // values are the length of each string.
-            .collect(groupingBy(identity(),
-                                // Use a TreeMap to sort the results.
-                                TreeMap::new,
-                                summingLong(String::length)));
+        // Generate a Map of characters from the play Hamlet whose
+        // keys start with upper- or lower-case 'h' whose names are
+        // consistently capitalized and whose values are the lengths
+        // of the character's names.
+        var results = generateHCharactersMap(sCharactersStr);
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
                            // Get the list of character names and name lengths.
-                           + matchingCharactersMap);
+                           + results);
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
-        long countOfCharacterNameLengths = matchingCharactersMap
+        long countOfCharacterNameLengths = results
             // Extract values (i.e., Long count of string lengths)
             // from the map.
             .values()
@@ -530,7 +369,7 @@ public class ex12  {
         // Print the results.
         System.out.println("Count of lengths of Hamlet characters' names "
                            // Get the list of character names.
-                           + matchingCharactersMap.keySet()
+                           + results.keySet()
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
     }
@@ -542,37 +381,20 @@ public class ex12  {
     private void runCollectReduce3() {
         System.out.println("\nResults from runCollectReduce3():");
 
-        // Create map of Hamlet characters starting with 'h' or 'H'
-        // (key) and the length of each characters name (value).
-        Map<String, Long> matchingCharactersMap = Pattern
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .compile(",")
-            .splitAsStream("horatio,claudius,Gertrude,Hamlet,laertes,Ophelia")
-
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
-
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Terminal operation that triggers aggregate operation
-            // processing and groups the results into a map whose keys
-            // are strings of matching Hamlet characters and whose
-            // values are the length of each string.
-            .collect(groupingBy(identity(),
-                                // Use a TreeMap to sort the results.
-                                TreeMap::new,
-                                summingLong(String::length)));
+        // Generate a Map of characters from the play Hamlet whose
+        // keys start with upper- or lower-case 'h' whose names are
+        // consistently capitalized and whose values are the lengths
+        // of the character's names.
+        var results = generateHCharactersMap(sCharactersStr);
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
                            // Get the list of character names and name lengths.
-                           + matchingCharactersMap);
+                           + results);
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
-        long countOfCharacterNameLengths = matchingCharactersMap
+        long countOfCharacterNameLengths = results
             // Extract values (i.e., Long count of string lengths)
             // from the map.
             .values()
@@ -587,7 +409,7 @@ public class ex12  {
         // Print the results.
         System.out.println("Count of lengths of Hamlet characters' names "
                            // Get the list of character names.
-                           + matchingCharactersMap.keySet()
+                           + results.keySet()
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
     }
@@ -599,32 +421,30 @@ public class ex12  {
     private void runCollectMapReduce() {
         System.out.println("\nResults from runCollectMapReduce():");
 
-        List<String> characterList = Pattern
-            // Create a stream of characters from William
-            // Shakespeare's Hamlet.
-            .compile(",")
-            .splitAsStream("horatio,claudius,Gertrude,Hamlet,laertes,Ophelia")
 
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+        // Generate a Map of characters from the play Hamlet whose
+        // keys start with upper- or lower-case 'h' whose names are
+        // consistently capitalized and whose values are the lengths
+        // of the character's names.
+        var results = this
+            // Generate a Stream.
+            .generateHCharacters(Pattern
+                                 // Create a stream of characters from William
+                                 // Shakespeare's Hamlet.
+                                 .compile(",")
+                                 .splitAsStream(sCharactersStr))
 
-            // Capitalize the first letter in the string.
-            .map(this::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted()
-
-            // Terminal operation that triggers aggregate operation
+            // Terminal operation that triggers intermediate operation
             // processing and collects the results into a list.
             .collect(toList());
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
-        long countOfCharacterNameLengths = characterList
+        long countOfCharacterNameLengths = results
             // Convert the list of strings into a stream of strings.
             .parallelStream()
 
-            // Terminal operation that triggers aggregate operation
+            // Terminal operation that triggers intermediate operation
             // processing and uses the three-parameter version of
             // reduce() to sum the length of each name.  This approach
             // is overkill here, but is useful for more sophisticated
@@ -638,9 +458,51 @@ public class ex12  {
         // Print the results.
         System.out.println("Count of lengths of Hamlet characters' names "
                            // Get the list of character names.
-                           + characterList
+                           + results
                            + " starting with 'h' or 'H' = "
                            + countOfCharacterNameLengths);
+    }
+
+    /**
+     * @return A sorted {@link Stream} of characters from the play
+     * Hamlet whose names start with upper- or lower-case 'h' whose
+     * names are consistently capitalized.
+     */
+    private Stream<String> generateHCharacters(Stream<String> characters) {
+        return characters
+            // Remove any strings that don't start with 'h' or 'H'.
+            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+
+            // Capitalize the first letter in the string.
+            .map(this::capitalize)
+
+            // Sort the results in ascending order.
+            .sorted();
+    }
+
+    /**
+     * @return A {@link Map} of characters from the play Hamlet whose
+     * keys start with upper- or lower-case 'h' whose names are
+     * consistently capitalized and whose values are the lengths of
+     * the character's names.
+     */
+    private Map<String, Long> generateHCharactersMap(String characters) {
+        return this
+            // Generate a Stream.
+            .generateHCharacters(Pattern
+                                 // Create a stream of characters from William
+                                 // Shakespeare's Hamlet.
+                                 .compile(",")
+                                 .splitAsStream(characters))
+
+            // Terminal operation that triggers intermediate operation
+            // processing and groups the results into a map whose keys
+            // are strings of matching Hamlet characters and whose
+            // values are the length of each string.
+            .collect(groupingBy(identity(),
+                                // Use a TreeMap to sort the results.
+                                TreeMap::new,
+                                summingLong(String::length)));
     }
 
     /**
@@ -695,3 +557,4 @@ public class ex12  {
                     
     }
 }
+
