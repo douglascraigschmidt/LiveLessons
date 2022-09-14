@@ -176,7 +176,7 @@ public class ex12 {
         System.out.println("\nResults from runFlatMapLimit():");
 
         Stream
-            // Create a stream of characters from William
+            // Create a stream of Lists of characters from William
             // Shakespeare's Hamlet using of() to concatenate lists.
             .of(sArray)
 
@@ -204,7 +204,7 @@ public class ex12 {
         System.out.println("\nResults from runForEachOfConcatenation():");
 
         Stream<String> flattenedStream = Stream
-            // Create a stream of characters from William
+            // Create a stream of lists of characters from William
             // Shakespeare's Hamlet using of() to concatenate lists.
             .of(sArray)
 
@@ -212,11 +212,17 @@ public class ex12 {
             // this simple example.
             .parallel()
 
-            // Flatten the stream of lists of strings into a stream of
-            // strings.
-            .flatMap(List::stream);
+            // Conver the stream of lists of characters into a stream
+            // of stream of characters.
+            .map(List::stream)
+
+            // Flatten the stream of stream of strings into a stream
+            // of strings.
+            .reduce(Stream::concat)
+            .orElse(Stream.empty());
 
         this
+            // Generate a Stream.
             .generateHCharacters(flattenedStream)
 
             // This terminal operation triggers intermediate operation
@@ -335,7 +341,8 @@ public class ex12 {
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
-                           // Get the list of character names and name lengths.
+                           // Get the list of character names and name
+                           // lengths.
                            + results);
 
         // Count of the length of each Hamlet character names that
@@ -377,7 +384,8 @@ public class ex12 {
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
-                           // Get the list of character names and name lengths.
+                           // Get the list of character names and name
+                           // lengths.
                            + results);
 
         // Count of the length of each Hamlet character names that
@@ -390,7 +398,7 @@ public class ex12 {
             // Convert these values into a stream.
             .stream()
 
-            // Map values to long.
+            // Map Long values to primitive long values.
             .mapToLong(Long::longValue)
 
             // Trigger intermediate operations and sum the results.
@@ -419,7 +427,8 @@ public class ex12 {
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
-                           // Get the list of character names and name lengths.
+                           // Get the list of character names and name
+                           // lengths.
                            + results);
 
         // Count of the length of each Hamlet character names that
@@ -451,7 +460,6 @@ public class ex12 {
     private void runCollectMapReduce() {
         System.out.println("\nResults from runCollectMapReduce():");
 
-
         // Generate a Map of characters from the play Hamlet whose
         // keys start with upper- or lower-case 'h' whose names are
         // consistently capitalized and whose values are the lengths
@@ -459,8 +467,8 @@ public class ex12 {
         var results = this
             // Generate a Stream.
             .generateHCharacters(Pattern
-                                 // Create a stream of characters from William
-                                 // Shakespeare's Hamlet.
+                                 // Create a stream of characters from
+                                 // William Shakespeare's Hamlet.
                                  .compile(",")
                                  .splitAsStream(sCharactersStr))
 
@@ -480,9 +488,11 @@ public class ex12 {
             // is overkill here, but is useful for more sophisticated
             // applications using parallel streams.
             .reduce(0L,
-                    // This is the "map" operation.
+                    // This is the "map" operation
+                    // (a.k.a. "accumulator").
                     (sum, s) -> sum + s.length(),
-                    // This is the "reduce" operation.
+                    // This is the "reduce" operation
+                    // (a.k.a. "combiner").
                     Long::sum);
 
         // Print the results.
@@ -520,8 +530,8 @@ public class ex12 {
         return this
             // Generate a Stream.
             .generateHCharacters(Pattern
-                                 // Create a stream of characters from William
-                                 // Shakespeare's Hamlet.
+                                 // Create a stream of characters from
+                                 // William Shakespeare's Hamlet.
                                  .compile(",")
                                  .splitAsStream(characters))
 
@@ -572,13 +582,16 @@ public class ex12 {
                     (Double sum, Map.Entry<String, Double> entry) -> {
                         Double difference = entry.getValue();
                         if (actual.containsKey(entry.getKey())) 
-                            difference =
-                                Math.abs(entry.getValue() - actual.get(entry.getKey()));
+                            difference = Math
+                                .abs(entry.getValue()
+                                     - actual.get(entry.getKey()));
 
+                        // Update the sum.
                         return sum + difference;
                     },
 
-                    // The combiner just sums Double values.
+                    // The combiner sums Double values for parallel
+                    // streams, but is ignored for sequential streams.
                     Double::sum);
 
         // Print the results.

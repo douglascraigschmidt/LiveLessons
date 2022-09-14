@@ -31,18 +31,22 @@ public class ex11 {
 
         if (!useSequentialStream)
             stream
-                // Conditionally convert the list into parallel stream.
+                // Conditionally convert the sequential stream into
+                // parallel stream.
                 .parallel();
 
         stream
             // Improperly modify the stream during its processing,
-            // which should generate a ConcurrentModificationException.
+            // which generates a ConcurrentModificationException.
             .peek(list::remove)
 
             // Print out the results of the stream.
             .forEach(ex11::display);
     }
 
+    /**
+     * Print the {@link Integer}.
+     */
     private static void display(Integer integer) {
         System.out.println("["
                            + Thread.currentThread().getId()
