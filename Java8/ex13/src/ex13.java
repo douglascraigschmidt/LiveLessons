@@ -4,8 +4,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * This example shows several examples of using Java Spliterators and
- * streams to traverse each word in a list containing a quote from a
- * famous Shakespeare play.
+ * both sequential and parallel streams to traverse each word in a
+ * list containing a classic quote from a famous Shakespeare play.
  */
 @SuppressWarnings({"UnnecessaryContinue", "SimplifyStreamApiCallChains"})
 public class ex13 {
@@ -26,8 +26,9 @@ public class ex13 {
         // Show the various spliterator examples.
         showTryAdvance(bardQuote);
         showTrySplit(bardQuote);
-        showStreamSupport(bardQuote);
         showStream(bardQuote);
+        showParallelStream(bardQuote);
+        showStreamSupport(bardQuote);
     }
 
     /**
@@ -40,7 +41,7 @@ public class ex13 {
         // Traverse through the words in the quote and print each one.
         for (Spliterator<String> s = quote.spliterator();
              // Keep iterating until there are no more words.
-             s.tryAdvance(System.out::print);
+             s.tryAdvance(ex13::display);
              )
             continue;
     }
@@ -62,13 +63,45 @@ public class ex13 {
 
         // Use the bulk forEachRemaining() method to print out the
         // first half of the spliterator.
-        firstHalf.forEachRemaining(System.out::print);
+        firstHalf.forEachRemaining(ex13::display);
 
         System.out.println("\n--Traversing the second half of the spliterator");
 
         // Use the bulk forEachRemaining() method to print out the
         // second half of the spliterator.
-        secondHalf.forEachRemaining(System.out::print);
+        secondHalf.forEachRemaining(ex13::display);
+    }
+
+    /**
+     * Show how the stream() factory method can implicitly use a
+     * spliterator to create a sequential stream.
+     */
+    private static void showStream(List<String> quote) {
+        System.out.println("\n\n++Showing the stream() factory method:");
+
+        quote
+            // Implicitly use a spliterator to create a sequential
+            // stream.
+            .stream()
+
+            // Print out each element of the stream.
+            .forEach(ex13::display);
+    }
+
+    /**
+     * Show how the parallelStream() factory method can implicitly use a
+     * spliterator to create a parallel stream.
+     */
+    private static void showParallelStream(List<String> quote) {
+        System.out.println("\n\n++Showing the parallel() factory method:");
+
+        quote
+                // Implicitly use a spliterator to create a parallel
+                // stream.
+                .parallelStream()
+
+                // Print out each element of the stream.
+                .forEach(ex13::display);
     }
 
     /**
@@ -85,23 +118,17 @@ public class ex13 {
                     false)
 
             // Print out each element of the stream.
-            .forEach(System.out::print);
+            .forEach(ex13::display);
     }
 
     /**
-     * Show how the stream() factory method can implicitly use a
-     * spliterator to create a sequential stream.
+     * Print the {@link String}.
      */
-    private static void showStream(List<String> quote) {
-        System.out.println("\n\n++Showing the stream() factory method:");
-
-        quote
-            // Implicitly use a spliterator to create a sequential
-            // stream.
-            .stream()
-
-            // Print out each element of the stream.
-            .forEach(System.out::print);
+    private static void display(String string) {
+        System.out.println("["
+                + Thread.currentThread().getId()
+                + "] "
+                + string);
     }
 }
 

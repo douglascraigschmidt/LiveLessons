@@ -89,7 +89,7 @@ public class ex15 {
             // Terminate the stream and collect results into a list.
             .collect(toList());
 
-            assert number == result.size();
+            assert maxNumber == result.size();
         };
 
         RunTimer
@@ -135,7 +135,7 @@ public class ex15 {
             // into a list.
             .collect(toList());
 
-            assert number == result.size();
+            assert maxNumber == result.size();
         };
 
         RunTimer
