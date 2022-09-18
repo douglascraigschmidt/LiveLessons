@@ -164,7 +164,7 @@ public class ex9 {
 
         this
             // Generate a stream of random large numbers.
-            .publisher(Options.instance().parallel())
+            .publishRandomIntegers(Options.instance().parallel())
 
             // Print stats if we're debugging.
             .peek(item -> Options
@@ -198,7 +198,7 @@ public class ex9 {
      * @param parallel True if the stream should be parallel, else false
      * @return Return a stream containing random large numbers
      */
-    private Stream<Integer> publisher(boolean parallel) {
+    private Stream<Integer> publishRandomIntegers(boolean parallel) {
         Stream<Integer> intStream = mRandomIntegers
             // Convert the list into a stream.
             .stream();

@@ -31,7 +31,7 @@ import java.util.stream.LongStream;
  * However, due to the exponential growth rate of factorials we use
  * a BigInteger result instead of a long result.  A more interesting
  * (albeit more complicated) solution that also uses BigIntegers for
- * the type of 'n' appears at https://github.com/jevad/egfactorial.
+ * the type of 'n' appears <a href="https://github.com/jevad/egfactorial">here</a>.
  */
 public class ex16 {
     /**
@@ -76,8 +76,12 @@ public class ex16 {
                 SequentialReactorFluxFactorial::factorial,
                 n);
 
-        runTest("BuggyFactorial",
-                BuggyFactorial::factorial,
+        runTest("BuggyFactorial1",
+                BuggyFactorial1::factorial,
+                n);
+
+        runTest("BuggyFactorial2",
+                BuggyFactorial1::factorial,
                 n);
 
         runTest("ParallelStreamFactorial",
@@ -224,9 +228,11 @@ public class ex16 {
 
     /**
      * This class demonstrates how race conditions can occur when
-     * state is shared between Java threads.
+     * state is shared between worker threads in the Java common
+     * fork-join pool via a mutable shared object and the forEach()
+     * terminal operation.
      */
-    private static class BuggyFactorial {
+    private static class BuggyFactorial1 {
         /**
          * This class keeps a running total of the factorial and
          * provides a (buggy) method for multiplying this running
@@ -266,13 +272,87 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Multiple the latest value in the range by the
+                // Multiply the latest value in the range by the
                 // running total (not properly synchronized).
                 .forEach(t::multiply);
 
             // Return the total, which is also not properly
             // synchronized.
             return t.mTotal;
+        }
+    }
+
+    /**
+     * This class demonstrates how race conditions can occur when
+     * state is shared between worker threads in the Java common
+     * fork-join pool via a mutable shared object and the reduce()
+     * terminal operation.
+     */
+    private static class BuggyFactorial2 {
+        /**
+         * This class intentionally provides a buggy method for
+         * multiplying {@link BigInteger} objects together.
+         */
+        static class BIMultiplier {
+            /**
+             * Stores the {@link BigInteger}.
+             */
+            BigInteger mBigInteger;
+
+            /**
+             * Constructor converts the {@code long} value to a {@link BigInteger}.
+             *
+             * @param l The {@code long} value to convert to a {@link BigInteger}
+             */
+            BIMultiplier(long l) {
+                // Convert 'l' to a BigInteger.
+                mBigInteger = BigInteger.valueOf(l);
+            }
+
+            /**
+             * Multiply this {@link BIMultiplier} by {@code biMultiplier}.
+             * This method is not synchronized and thus may incur race
+             * conditions when run on a multi-core processor!
+             */
+            BIMultiplier multiply(BIMultiplier biMultiplier) {
+                mBigInteger = mBigInteger
+                    // Multiply the values together.
+                    .multiply(biMultiplier.mBigInteger);
+
+                // Return the updated value.
+                return this;
+            }
+
+            /**
+             * @return The current value of the {@link BigInteger}
+             */
+            BigInteger bigInteger() {
+                return mBigInteger;
+            }
+        }
+
+        /**
+         * Attempts to return the factorial for the given {@code n}.
+         * There are race conditions wrt accessing shared state,
+         * however, so the result may not always be correct.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return LongStream
+                // Create a stream of longs from 1 to n.
+                .rangeClosed(1, n.longValue())
+
+                // Run the forEach() terminal operation concurrently.
+                .parallel()
+
+                // Create a BIMultiplier from the long value.
+                .mapToObj(BIMultiplier::new)
+
+                // Perform a reduction (not properly synchronized).
+                .reduce(new BIMultiplier(0L),
+                        BIMultiplier::multiply)
+
+                // Return the total.
+                .bigInteger();
         }
     }
 
