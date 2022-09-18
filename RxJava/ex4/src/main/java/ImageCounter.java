@@ -2,9 +2,9 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import utils.ConcurrentHashSet;
 import utils.Options;
 import utils.RxUtils;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.List;
 
@@ -23,8 +23,8 @@ class ImageCounter {
     /**
      * A cache of unique URIs that have already been processed.
      */
-    private final ConcurrentHashSet<String> mUniqueUris =
-        new ConcurrentHashSet<>();
+    private final KeySetView<Object, Boolean> mUniqueUris =
+        ConcurrentHashMap.newKeySet();
 
     /**
      * Stores a completed single with value of 0.
@@ -77,7 +77,10 @@ class ImageCounter {
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
-        else if (!mUniqueUris.putIfAbsent(pageUri)) {
+        else if (mUniqueUris
+                 .getMap()
+                 .putIfAbsent(pageUri,
+                              mUniqueUris.getMappedValue()) != null) {
             print("(depth "
                   + depth
                   + ") Already processed "

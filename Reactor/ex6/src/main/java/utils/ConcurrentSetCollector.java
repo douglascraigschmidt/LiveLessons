@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -9,7 +10,7 @@ import java.util.stream.Collector;
 
 /**
  * A concurrent collector that accumulates input elements of type
- * {@code E} into a {@link ConcurrentHashSet} and the returns a type
+ * {@code E} into a {@link java.util.concurrent.ConcurrentHashMap.KeySetView} and the returns a type
  * {@link S} that extends {@link Set}.
  */
 public class ConcurrentSetCollector<E, S extends Set<E>>
@@ -36,18 +37,18 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
 
     /**
      * A factory method that creates and returns a new mutable result
-     * container of type {@link ConcurrentHashSet} that holds all the
+     * container of type {@link ConcurrentHashMap.KeySetView} that holds all the
      * elements in the stream.
      *
      * @return a function which returns a new, mutable result container
      */
     @Override
     public Supplier<Set<E>> supplier() {
-        return ConcurrentHashSet::new;
+        return ConcurrentHashMap::newKeySet;
     }
 
     /**
-     * A method that folds an element into the {@link ConcurrentHashSet}.
+     * A method that folds an element into the {@link ConcurrentHashMap.KeySetView}.
      *
      * @return a function that folds a value into a mutable result container
      */
@@ -73,7 +74,7 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
 
     /**
      * Perform the final transformation from the intermediate
-     * accumulation type {@link ConcurrentHashSet} to the final result
+     * accumulation type {@link ConcurrentHashMap.KeySetView} to the final result
      * type {@code S}, which extends {@link Set}.
      *
      * @return A {@link Set} containing the contents of the stream
@@ -87,7 +88,7 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
             // Check whether we've been instantiated to return a
             // ConcurrentHashSet, in which case there's no need to
             // convert anything!
-            if (newSet instanceof ConcurrentHashSet)
+            if (newSet instanceof ConcurrentHashMap.KeySetView)
                 //noinspection unchecked
                 return (S) set;
             else {

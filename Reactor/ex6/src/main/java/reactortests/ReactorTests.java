@@ -4,9 +4,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
-import utils.ConcurrentHashSet;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toSet;
@@ -188,7 +188,7 @@ public class ReactorTests {
     /**
      * Compute the number of unique words in a portion of
      * Shakespeare's works using a {@link ParallelFlux} that collects
-     * into a single {@link ConcurrentHashSet}.
+     * into a single {@link ConcurrentHashMap.KeySetView}.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
@@ -196,7 +196,7 @@ public class ReactorTests {
      */
     public static int runParallelFluxTest2(List<CharSequence> words,
                                            List<CharSequence> commonWords) {
-        var set = new ConcurrentHashSet<String>();
+        var set = ConcurrentHashMap.newKeySet();
 
         return Objects
             .requireNonNull(Flux
@@ -218,9 +218,9 @@ public class ReactorTests {
                                     !commonWords.contains(lowerCaseWord))
 
                             // Concurrently collect the words into a
-                            // single ConcurrentHashSet.
+                            // single ConcurrentHashMap.KeySetView.
                             .collect(() -> set,
-                                     ConcurrentHashSet<String>::add)
+                                    ConcurrentHashMap.KeySetView::add)
 
                             // Convert the ParallelFlux into a Flux.
                             .sequential()

@@ -4,10 +4,9 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import utils.ConcurrentHashSet;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -153,7 +152,7 @@ public class RxJavaTests{
     /**
      * Compute the number of unique words in a portion of
      * Shakespeare's works using a {@link ParallelFlowable} that collects
-     * into a single {@link ConcurrentHashSet}.
+     * into a single {@link ConcurrentHashMap.KeySetView}.
      *
      * @param words A {@link List} of words to lowercase
      * @return The number of unique words in this portion of
@@ -161,7 +160,7 @@ public class RxJavaTests{
      */
     public static int runParallelFlowableTest2(List<CharSequence> words,
                                            List<CharSequence> commonWords) {
-        var set = new ConcurrentHashSet<String>();
+        var set = ConcurrentHashMap.newKeySet();
 
         return Objects
             .requireNonNull(Flowable
@@ -183,9 +182,9 @@ public class RxJavaTests{
                                     !commonWords.contains(lowerCaseWord))
 
                             // Concurrently collect the words into a
-                            // single ConcurrentHashSet.
+                            // single ConcurrentHashMap.KeySetView.
                             .collect(() -> set,
-                                     ConcurrentHashSet<String>::add)
+                                     ConcurrentHashMap.KeySetView::add)
 
                             // Convert the ParallelFlowable into a Flowable.
                             .sequential()

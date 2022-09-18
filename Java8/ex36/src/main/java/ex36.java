@@ -1,9 +1,9 @@
-import utils.ConcurrentHashSet;
 import utils.ConcurrentSetCollector;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -66,7 +66,7 @@ public class ex36 {
         // that use HashSets, which are unordered.
         runSetCollectorTests("HashSet",
                              HashSet::new,
-                             ConcurrentHashSet::new,
+                             ConcurrentHashMap::newKeySet,
                              ex36::timeStreamCollect);
 
         // Run tests that demonstrate the performance differences

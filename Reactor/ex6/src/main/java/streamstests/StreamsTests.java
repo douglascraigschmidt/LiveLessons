@@ -4,6 +4,7 @@ import utils.ConcurrentHashSet;
 import utils.ConcurrentSetCollector;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -99,7 +100,7 @@ public class StreamsTests {
                     !commonWords.contains(lowerCaseWord))
 
             // Collect unique words into a Set.
-            .collect(ConcurrentSetCollector.toSet(ConcurrentHashSet::new))
+            .collect(ConcurrentSetCollector.toSet(ConcurrentHashMap::newKeySet))
 
             // Return the number of unique words in this input.
             .size();

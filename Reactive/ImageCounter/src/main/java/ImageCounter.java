@@ -2,7 +2,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import utils.ConcurrentHashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import utils.Options;
 import utils.ReactorUtils;
 
@@ -30,8 +31,8 @@ public class ImageCounter {
     /**
      * A thread-safe cache of URIs that have already been processed.
      */
-    private final ConcurrentHashSet<String> mUniqueUris =
-        new ConcurrentHashSet<>();
+    private final KeySetView<Object, Boolean> mUniqueUris =
+        ConcurrentHashMap.newKeySet();
 
     /**
      * Stores a completed Mono with value of 0.
@@ -95,7 +96,10 @@ public class ImageCounter {
         // Atomically check to see if we've already visited pageUri
         // and if not add it to the hashset to avoid revisiting
         // it again unnecessarily.
-        else if (!mUniqueUris.putIfAbsent(pageUri)) {
+        else if (mUniqueUris
+                 .getMap()
+                 .putIfAbsent(pageUri,
+                              mUniqueUris.getMappedValue()) != null) {
             print("(depth "
                   + depth
                   + ") Already processed "

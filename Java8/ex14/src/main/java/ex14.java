@@ -1,10 +1,12 @@
-import utils.*;
+import utils.RunTimer;
+import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.stream.Collector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the difference in overhead/performance for using
@@ -203,7 +205,7 @@ public class ex14 {
                                        + " words..");
 
                     // Compute the time required to aggregate results
-                    // into a ConcurrentHashSet using the forEach()
+                    // into a ConcurrentHashMap.KeySetView using the forEach()
                     // terminal operation.
                     timeStreamForEachToSet("ArrayList",
                                            false,
@@ -312,14 +314,14 @@ public class ex14 {
     /**
      * Determines how long it takes to collect results into a {@link
      * HashSet} using the {@code forEachOrdered()} terminal operation
-     * and into a {@link ConcurrentHashSet} using the {@code
+     * and into a {@link ConcurrentHashMap.KeySetView} using the {@code
      * forEach()} terminal operation.
 
      * @param testName The name of the test being run
      * @param ordered If {@code ordered} is true then {@code
      *                forEachOrdered()} and a {@link HashMap} is used,
      *                else {@code forEach()} and a {@link
-     *                ConcurrentHashSet} is used.
+     *                ConcurrentHashMap.KeySetView} is used.
      * @param words The {@link List} of words to upper case
      */
     private static void timeStreamForEachToSet(String testName,
@@ -358,10 +360,10 @@ public class ex14 {
                 testName);
         else
             RunTimer.timeRun(() -> {
-                    // Create a ConcurrentHashSet since forEach() does not
+                    // Create a ConcurrentHashMap.KeySetView since forEach() does not
                     // perform synchronization implicitly.
                     Set<CharSequence> uniqueWords = 
-                        new ConcurrentHashSet<>();
+                        ConcurrentHashMap.newKeySet();
 
                     for (int i = 0; i < sMAX_ITERATIONS; i++) {
                         words
