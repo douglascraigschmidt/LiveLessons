@@ -115,7 +115,7 @@ class ImageCounter {
                 .of(getStartPage(pageUri))
 
                 // Trigger the intermediate operations and collect the
-                // results.
+                // results via the teeing Collector. 
                 .collect(// Sum the results of counting the # of
                          // images on the page and the number of
                          // images reachable from links on this page.

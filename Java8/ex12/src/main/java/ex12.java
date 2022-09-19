@@ -54,6 +54,7 @@ public class ex12 {
         CollectTests.runCollectToMap();
         CollectTests.runCollectGroupingBy();
         CollectTests.runCollectJoining();
+        CollectTests.runTeeingCollector();
     }
     
     /**

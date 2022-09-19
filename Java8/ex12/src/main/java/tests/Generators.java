@@ -3,6 +3,7 @@ package tests;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,6 +67,13 @@ public class Generators {
         List.of("Fortinbras")};
 
     /**
+     * @return true if the {@link String} starts with 'H' or 'h'.
+     */
+    static Predicate<String> startsWithHh() {
+        return s -> toLowerCase(s.charAt(0)) == 'h';
+    }
+
+    /**
      * Capitalize {@code s} by making the first letter uppercase and
      * the rest lowercase.  This "pure" function's return value is
      * only determined by its input.
@@ -90,7 +98,7 @@ public class Generators {
     public static Stream<String> generateHCharacters(Stream<String> characters) {
         return characters
             // Remove any strings that don't start with 'h' or 'H'.
-            .filter(s -> toLowerCase(s.charAt(0)) == 'h')
+            .filter(startsWithHh())
 
             // Capitalize the first letter in the string.
             .map(Generators::capitalize)

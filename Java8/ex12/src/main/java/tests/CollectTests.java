@@ -1,11 +1,14 @@
 package tests;
 
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import static java.lang.Character.toLowerCase;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
-import static tests.Generators.sCharacters;
-import static tests.Generators.sCharactersStr;
+import static tests.Generators.*;
 
 /**
  * These tests show how to use the modern Java collect()
@@ -113,4 +116,46 @@ public class CollectTests {
         // Print the results.
         System.out.println(results);
     }
+
+    /**
+     * Run an example using the collect() terminal operation in
+     * conjunction with the {@code teeing} {@link Collector}.
+     */
+    public static void runTeeingCollector() {
+        System.out.println("\nResults from runTeeingCollector():");
+
+        var results = sCharacters
+            // Generate a Stream.
+            .stream()
+
+            // Capitalize the first letter in the string.
+            .map(Generators::capitalize)
+
+            // Sort the elements in ascending order.
+            .sorted()
+
+            // Trigger the intermediate operations and collect the
+            // results via the teeing Collector. 
+            .collect(
+                     // Collect all the characters starting with 'H'
+                     // or 'h' into one List and Collect all the
+                     // characters not starting with 'H' or 'h' into
+                     // a separate List.
+                     teeing(// Filter out non 'H' or 'h' characters.
+                            filtering(startsWithHh(),
+                                      toList()),
+                            // Filter out 'H' or 'h' characters.
+                            filtering(startsWithHh(),
+                                      toList()),
+                            // Merge the Lists together.
+                            (l1, l2) -> {
+                                l1.addAll(l2);
+                                return l1;
+                            }));
+
+        // Print the results.
+        System.out.println(results);
+    }
+
+
 }
