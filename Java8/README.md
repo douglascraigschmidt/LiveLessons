@@ -233,3 +233,6 @@ Here's an overview of what's currently included in these examples:
          Java 7 features to replace substrings vs. using modern Java
          features.
 
+. ex42 - This example shows how to count the number of images in a
+         recursively-defined folder structure using the Java
+         sequential stream framework and the teeing Collector.

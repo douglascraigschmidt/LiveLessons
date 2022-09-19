@@ -3,7 +3,7 @@ import utils.Options;
 /**
  * This example shows how to count the number of images in a
  * recursively-defined folder structure using the Java sequential
- * stream framework.
+ * stream framework and the {@code teeing} {@link Collector}.
  */
 public class ex42 {
     /**

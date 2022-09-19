@@ -1,6 +1,7 @@
 import org.jsoup.nodes.Document;
 import utils.Options;
 
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,9 +11,9 @@ import static java.util.stream.Collectors.*;
 
 /**
  * This class counts the number of images in a recursively-defined
- * folder structure using the Java sequential stream framework.  The
- * root folder can either reside locally (filesystem -based) or
- * remotely (web-based).
+ * folder structure using the Java sequential stream framework and
+ * the {@code teeing} {@link Collector}.  The root folder can either
+ * reside locally (filesystem -based) or remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -22,6 +23,8 @@ class ImageCounter {
 
     /**
      * A cache of unique URIs that have already been processed.
+     * {@link KeySetView} is part of the {@link ConcurrentHashMap}
+     * class.
      */
     private final KeySetView<Object, Boolean> mUniqueUris =
         ConcurrentHashMap.newKeySet();
@@ -60,6 +63,7 @@ class ImageCounter {
                   + "]: Exceeded max depth of "
                   + Options.instance().maxDepth());
 
+            // Return 0 if we've exceeded the depth param.
             return 0;
         }
 
@@ -67,25 +71,25 @@ class ImageCounter {
         // and add the new url to the hashset, so we don't try to
         // revisit it again unnecessarily.
         else if (mUniqueUris
+                // Get the ConcurrentHashMap that implements the
+                // KeySetView.
                  .getMap()
+                // Perform the atomic-check-then-act operation.
                  .putIfAbsent(pageUri,
                               mUniqueUris.getMappedValue()) != null) {
             print(TAG
-                  + "[Depth"
-                  + depth
-                  + "]: Already processed "
-                  + pageUri);
+                    + "[Depth"
+                    + depth
+                    + "]: Already processed "
+                    + pageUri);
 
             // Return 0 if we've already examined this url.
             return 0;
-        }
-
-        // Synchronously (1) count the number of images on this page
-        // and (2) crawl other hyperlinks accessible via this page and
-        // count their images.
-        else {
-            long count = countImagesImpl(pageUri,
-                                         depth);
+        } else {
+            // Synchronously (1) count the number of images on this page
+            // and (2) crawl other hyperlinks accessible via this page and
+            // count their images.
+            long count = countImagesImpl(pageUri, depth);
             print(TAG
                   + "[Depth"
                   + depth
@@ -95,6 +99,8 @@ class ImageCounter {
                   + pageUri
                   + " in thread "
                   + Thread.currentThread().getId());
+
+            // Return the count from this level in the traversal.
             return count;
         }
     }
@@ -164,7 +170,7 @@ class ImageCounter {
     /**
      * Recursively crawl through hyperlinks that are in {@code page}.
      *
-     * @param page The page containing HTML
+     * @param page The page containing the HTML document
      * @param depth The depth of the level of web page traversal
      * @return A count of how many images were in each hyperlink on
      *         the page

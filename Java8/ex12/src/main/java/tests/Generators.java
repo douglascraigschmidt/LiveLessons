@@ -67,10 +67,13 @@ public class Generators {
         List.of("Fortinbras")};
 
     /**
-     * @return true if the {@link String} starts with 'H' or 'h'.
+     * @return true if the {@link String} starts with 'H' or 'h'.     
      */
-    static Predicate<String> startsWithHh() {
-        return s -> toLowerCase(s.charAt(0)) == 'h';
+    static Predicate<String> startsWithHh(boolean yes) {
+        if (yes)
+            return s -> toLowerCase(s.charAt(0)) == 'h';
+        else
+            return s -> toLowerCase(s.charAt(0)) != 'h';
     }
 
     /**
@@ -98,7 +101,7 @@ public class Generators {
     public static Stream<String> generateHCharacters(Stream<String> characters) {
         return characters
             // Remove any strings that don't start with 'h' or 'H'.
-            .filter(startsWithHh())
+            .filter(startsWithHh(true))
 
             // Capitalize the first letter in the string.
             .map(Generators::capitalize)

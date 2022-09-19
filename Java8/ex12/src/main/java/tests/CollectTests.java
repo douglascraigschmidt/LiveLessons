@@ -142,10 +142,10 @@ public class CollectTests {
                      // characters not starting with 'H' or 'h' into
                      // a separate List.
                      teeing(// Filter out non 'H' or 'h' characters.
-                            filtering(startsWithHh(),
+                            filtering(startsWithHh(true),
                                       toList()),
                             // Filter out 'H' or 'h' characters.
-                            filtering(startsWithHh(),
+                            filtering(startsWithHh(false),
                                       toList()),
                             // Merge the Lists together.
                             (l1, l2) -> {
