@@ -13,9 +13,11 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 /**
  * This Spring controller demonstrates how WebMVC can be used to
  * handle HTTP GET requests via the Java Streams framework.  These
- * requests are mapped to methods that determine the primality of
- * large random {@link Integer} objects using either a sequential or
- * parallel stream, based on parameters passed by clients.
+ * requests are mapped to endpoint handler methods that determine the
+ * primality of large random {@link Integer} objects.  These methods
+ * can be passed either individual prime candidates or a {@link List}
+ * of prime candidates and process these candidates using a sequential
+ * or parallel stream in response to client directives.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the

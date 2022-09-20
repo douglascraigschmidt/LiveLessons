@@ -14,9 +14,10 @@ import static java.util.stream.Collectors.toList;
  * Streams framework.  A sequential or parallel stream is used based
  * on parameters passed by clients.
  *
- * This class is annotated as a Spring {@code @Service}, which enables
- * the auto-detection and wiring of dependent implementation classes
- * via classpath scanning.
+ * This class is annotated as a Spring {@code @Service}, which
+ * indicates this class implements "business logic" and enables the
+ * auto-detection and wiring of dependent implementation classes via
+ * classpath scanning.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Service

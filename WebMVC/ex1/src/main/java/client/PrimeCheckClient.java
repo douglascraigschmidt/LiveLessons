@@ -15,8 +15,11 @@ import static common.Constants.SERVER_BASE_URL;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This client uses Spring WebMVC features to perform synchronous remote
- * method invocations on the {@link PrimeCheckController} web service.
+ * This client uses Spring WebMVC features to perform synchronous
+ * remote method invocations on the {@link PrimeCheckController} web
+ * service to determine the primality of large integers.  These
+ * invocations can be made individually or in bulk, as well as
+ * sequentially or in parallel using Java Streams.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
