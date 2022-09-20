@@ -1,19 +1,18 @@
 package server;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 import utils.Options;
 
 import java.util.List;
 
-import static common.Constants.EndPoint.CHECK_IF_PRIME;
-import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 import static java.util.stream.Collectors.toList;
 
 /**
  * This class defines implementation methods that are called by the
  * {@link PrimeCheckController}. These implementation methods check
- * the primality of one or more {@link Integer} objects.
+ * the primality of one or more {@link Integer} objects using the Java
+ * Streams framework.  A sequential or parallel stream is used based
+ * on parameters passed by clients.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the auto-detection and wiring of dependent implementation classes
@@ -93,27 +92,37 @@ public class PrimeCheckService {
     }
 
     /**
-     * This method provides a brute-force determination of whether
-     * the {@code primeCandidate} param is prime.
+     * This method determines whether the {@code primeCandidate} param
+     * is prime.
      *
      * @param primeCandidate The {@link Integer} to check for primality
      * @return Returns 0 if {@code primeCandidate} is prime, or the
-     * smallest factor if it is not prime.
+     *         smallest factor if it is not prime
      */
     private Integer isPrime(Integer primeCandidate) {
         int n = primeCandidate;
 
-        if (n > 3)
-            // This algorithm is intentionally inefficient to burn
-            // lots of CPU time!
-            for (int factor = 2;
-                 factor <= n / 2;
-                 ++factor)
-                if (Thread.interrupted()) {
-                    break;
-                } else if (n / factor * factor == n)
-                    return factor;
+        // Check if n is a multiple of 2 and return
+        // immediately if it is.
+        if (n % 2 == 0) 
+            return 2;
 
+        // If not, then just check the odds.
+        for (int factor = 3;
+             factor * factor <= n;
+             // Skip over even numbers.
+             factor += 2)
+            // Check for interrupts every 1,000 iterations.
+            if ((factor % (n / 1_000)) == 0
+                && Thread.interrupted()) {
+                    System.out.println("Prime checker thread interrupted "
+                                       + Thread.currentThread());
+                    break;
+            } else if (n % factor == 0)
+                // The primeCandidate number is not a prime.
+                return factor;
+
+        // The primeCandidate number is a prime.
         return 0;
     }
 }

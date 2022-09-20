@@ -1,17 +1,17 @@
 package tests;
 
+import utils.Utils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.Character.toLowerCase;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingLong;
+import static utils.Utils.startsWithHh;
 
 /**
  * This class defines various generators and input that these
@@ -67,33 +67,6 @@ public class Generators {
         List.of("Fortinbras")};
 
     /**
-     * @return true if the {@link String} starts with 'H' or 'h'.     
-     */
-    static Predicate<String> startsWithHh(boolean yes) {
-        if (yes)
-            return s -> toLowerCase(s.charAt(0)) == 'h';
-        else
-            return s -> toLowerCase(s.charAt(0)) != 'h';
-    }
-
-    /**
-     * Capitalize {@code s} by making the first letter uppercase and
-     * the rest lowercase.  This "pure" function's return value is
-     * only determined by its input.
-     */
-    public static String capitalize(String s) {
-        if (s.length() == 0)
-            return s;
-        return s
-            // Uppercase the first character of the string.
-            .substring(0, 1)
-            .toUpperCase()
-            // Lowercase the remainder of the string.
-            + s.substring(1)
-            .toLowerCase();
-    }
-
-    /**
      * @return A sorted {@link Stream} of characters from the play
      * Hamlet whose names start with upper- or lower-case 'h' whose
      * names are consistently capitalized.
@@ -104,7 +77,7 @@ public class Generators {
             .filter(startsWithHh(true))
 
             // Capitalize the first letter in the string.
-            .map(Generators::capitalize)
+            .map(Utils::capitalize)
 
             // Sort the results in ascending order.
             .sorted();

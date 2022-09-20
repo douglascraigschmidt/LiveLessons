@@ -7,14 +7,15 @@ import org.springframework.web.client.RestTemplate;
 import server.PrimeCheckService;
 
 /**
- * This class contains a {@code Bean} annotation that can be injected
- * into classes using the {@code @Autowired} annotation.
+ * This class contains {@code Bean} annotated methods that can be
+ * injected into client and server classes using the {@code @Autowired}
+ * annotation.
  */
 @Component
 public class Components {
     /**
      * This factory method returns a new {@link RestTemplate}, which
-     * enables a synchronous client to perform HTTP requests.
+     * enables a client to perform HTTP requests synchronously.
      * 
      * @return A new {@link RestTemplate}
      */

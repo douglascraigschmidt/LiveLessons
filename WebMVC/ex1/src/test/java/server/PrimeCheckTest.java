@@ -48,9 +48,9 @@ public class PrimeCheckTest {
      */
     private final String[] mArgv = new String[]{
         "-d",
-        "true",
+        "false",
         "-c",
-        "5"
+        "500"
     };
 
     /**
@@ -129,40 +129,43 @@ public class PrimeCheckTest {
      * @param parallel True if using parallel streams, else false
      * @param testName The name of the test
      */
-    private void timeTest(BiFunction<List<Integer>, Boolean, Void> test,
+    private void timeTest(BiFunction<List<Integer>, Boolean, List<Integer>> test,
                           List<Integer> primeCandidates,
                           Boolean parallel,
                           String testName) {
-        RunTimer
+        Options.print("Starting "
+                + testName
+                + " with count = "
+                + Options.instance().count());
+
+        var results = RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
                      // Run test using the given Function and params.
                      runTest(test, primeCandidates, parallel, testName),
                      testName);
+
+        // Display the results.
+        Options.displayResults(primeCandidates, results);
     }
 
     /**
-     * Run the test.
+     * Run the test and return the results.
      * 
      * @param test A {@link BiFunction} that performs the test
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
      * @param testName Name of the test
+     * @return The {@link List} of results of applying the primality test
      */
-    private Void runTest
-        (BiFunction<List<Integer>, Boolean, Void> test,
+    private List<Integer> runTest
+        (BiFunction<List<Integer>, Boolean, List<Integer>> test,
          List<Integer> primeCandidates,
          Boolean parallel,
          String testName) {
-        Options.print("Starting "
-                      + testName
-                      + " with count = "
-                      + Options.instance().count());
-
-        // Run the test.
-        test.apply(primeCandidates, parallel);
-        return null;
+        // Run the test and return the results.
+        return test.apply(primeCandidates, parallel);
     }
 }
     

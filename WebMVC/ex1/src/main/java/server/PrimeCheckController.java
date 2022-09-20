@@ -12,9 +12,10 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
  * This Spring controller demonstrates how WebMVC can be used to
- * handle HTTP GET requests via Java parallel streams programming.
- * These requests are mapped to methods that determine the primality
- * of large random {@link Integer} objects.
+ * handle HTTP GET requests via the Java Streams framework.  These
+ * requests are mapped to methods that determine the primality of
+ * large random {@link Integer} objects using either a sequential or
+ * parallel stream, based on parameters passed by clients.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -37,9 +38,8 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 @ResponseBody
 public class PrimeCheckController {
     /**
-     * This auto-wired field connects the {@link
-     * PrimeCheckController} to the {@link
-     * PrimeCheckService}.
+     * This auto-wired field connects the {@link PrimeCheckController}
+     * to the {@link PrimeCheckService}.
      */
     @Autowired
     PrimeCheckService mService;
@@ -78,7 +78,8 @@ public class PrimeCheckController {
      * @param primeCandidates The {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if primality checking should run in
-     *                 parallel, else false if it should run sequentially
+     *                 parallel, else false if it should run
+     *                 sequentially
      * @return An {@link List} whose elements are 0 if the
      *         corresponding element in {@code primeCandidate} is
      *         prime or its smallest factor if it's not prime

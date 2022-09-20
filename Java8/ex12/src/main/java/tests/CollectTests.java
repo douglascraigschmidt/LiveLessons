@@ -1,14 +1,14 @@
 package tests;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import utils.Utils;
 
-import static java.lang.Character.toLowerCase;
+import java.util.stream.Collector;
+
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
-import static tests.Generators.*;
+import static tests.Generators.sCharacters;
+import static tests.Generators.sCharactersStr;
+import static utils.Utils.startsWithHh;
 
 /**
  * These tests show how to use the modern Java collect()
@@ -129,7 +129,7 @@ public class CollectTests {
             .stream()
 
             // Capitalize the first letter in the string.
-            .map(Generators::capitalize)
+            .map(Utils::capitalize)
 
             // Sort the elements in ascending order.
             .sorted()
@@ -137,8 +137,8 @@ public class CollectTests {
             // Trigger the intermediate operations and collect the
             // results via the teeing Collector. 
             .collect(
-                     // Collect all the characters starting with 'H'
-                     // or 'h' into one List and Collect all the
+                     // Collect all  characters starting with 'H' or
+                     // 'h' into one List followed by collecting all
                      // characters not starting with 'H' or 'h' into
                      // a separate List.
                      teeing(// Filter out non 'H' or 'h' characters.
@@ -147,15 +147,13 @@ public class CollectTests {
                             // Filter out 'H' or 'h' characters.
                             filtering(startsWithHh(false),
                                       toList()),
-                            // Merge the Lists together.
-                            (l1, l2) -> {
-                                l1.addAll(l2);
-                                return l1;
-                            }));
+                            // Merge the Lists so the 'H'/'h'
+                            // characters comes first followed
+                            // by the non-'H'/'h' characters.
+                            Utils::concat));
 
         // Print the results.
         System.out.println(results);
     }
-
 
 }

@@ -5,8 +5,8 @@ import tests.ReduceTests;
 import java.util.*;
 
 import static java.lang.Character.toLowerCase;
-import static tests.Generators.capitalize;
 import static tests.Generators.sCharacters;
+import static utils.Utils.capitalize;
 
 /**
  * This program shows many modern Java Streams terminal operations,
