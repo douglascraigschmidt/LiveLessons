@@ -360,8 +360,9 @@ public class ex14 {
                 testName);
         else
             RunTimer.timeRun(() -> {
-                    // Create a ConcurrentHashMap.KeySetView since forEach() does not
-                    // perform synchronization implicitly.
+                    // Create a ConcurrentHashMap.KeySetView since
+                    // forEach() does not perform synchronization
+                    // implicitly.
                     Set<CharSequence> uniqueWords = 
                         ConcurrentHashMap.newKeySet();
 
