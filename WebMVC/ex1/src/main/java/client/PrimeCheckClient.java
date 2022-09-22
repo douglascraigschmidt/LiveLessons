@@ -19,7 +19,13 @@ import static java.util.stream.Collectors.toList;
  * remote method invocations on the {@link PrimeCheckController} web
  * service to determine the primality of large integers.  These
  * invocations can be made individually or in bulk, as well as
- * sequentially or in parallel using Java Streams.
+ * be make sequentially or in parallel using Java Streams.
+ *
+ * The {@code @Component} annotation allows Spring to automatically
+ * detect custom beans, i.e., Spring will scan the application for
+ * classes annotated with {@code @Component}, instantiate them, and
+ * inject the specified dependencies into them without having to write
+ * any explicit code.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
@@ -38,16 +44,19 @@ public class PrimeCheckClient {
     private RestTemplate mRestTemplate;
 
     /**
-     * Test individual HTTP GET requests to the server to check if a
+     * Send individual HTTP GET requests to the server to check if a
      * the {@code primeCandidates} {@link List} of {@link Integer}
      * objects are prime or not.
      *
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
+     * @return A {@link List} of {@link Integer} objects indicating
+     *         the primality of the corresponding {@code primeCandidates}
+     *         elements
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
-                                             Boolean parallel) {
+                                             boolean parallel) {
         var stream = primeCandidates
             // Convert the List to a stream.
             .stream();
@@ -74,13 +83,16 @@ public class PrimeCheckClient {
     }
 
     /**
-     * Test passing a {@link List} of {@code primeCandidate} {@link
-     * Integer} objects in one HTTP GET request to the server to
-     * determine which {@link List} elements are prime or not.
+     * Sends a {@link List} of {@code primeCandidate} {@link Integer}
+     * objects in one HTTP GET request to the server to determine
+     * which {@link List} elements are prime or not.
      *
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
+     * @return A {@link List} of {@link Integer} objects indicating
+     *         the primality of the corresponding {@code primeCandidates}
+     *         elements
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
@@ -110,10 +122,14 @@ public class PrimeCheckClient {
      *         determine if the {@link Integer} is prime
      */
     private String makeCheckIfPrimeUrl(Integer integer) {
-        return mBaseUrl
+        var getRequestUrl = mBaseUrl
             + CHECK_IF_PRIME
             + "?primeCandidate="
             + integer;
+
+        Options.debug("url = " + getRequestUrl);
+
+        return getRequestUrl;
     }
 
     /**
@@ -127,11 +143,15 @@ public class PrimeCheckClient {
      */
     private String makeCheckIfPrimeListUrl(String stringOfIntegers,
                                            boolean parallel) {
-        return mBaseUrl
+        var getRequestUrl = mBaseUrl
             + CHECK_IF_PRIME_LIST
             + "?primeCandidates="
             + stringOfIntegers
             + "&parallel="
             + parallel;
+
+        Options.debug("url = " + getRequestUrl);
+
+        return getRequestUrl;
     }
 }

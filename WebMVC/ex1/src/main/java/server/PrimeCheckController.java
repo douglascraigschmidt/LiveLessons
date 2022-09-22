@@ -32,12 +32,11 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * requests invoked from any HTTP web client (e.g., a web browser or
  * client app) or command-line utility (e.g., Curl or Postman).
  *
- * The {@code @ResponseBody} annotation tells a controller that the
- * object returned is automatically serialized into JSON and passed
+ * The {@code @RestController} annotation also tells a controller that
+ * the object returned is automatically serialized into JSON and passed
  * back within the body of an {@link HttpResponse} object.
  */
 @RestController
-@ResponseBody
 public class PrimeCheckController {
     /**
      * This auto-wired field connects the {@link PrimeCheckController}
@@ -87,8 +86,9 @@ public class PrimeCheckController {
      *         prime or its smallest factor if it's not prime
      */
     @GetMapping(CHECK_IF_PRIME_LIST)
-    public List<Integer> checkIfPrimeList(@RequestParam List<Integer> primeCandidates,
-                                          Boolean parallel) {
+    public List<Integer> checkIfPrimeList
+        (@RequestParam List<Integer> primeCandidates,
+         Boolean parallel) {
         Options.debug("checkIfPrimeList()");
 
         return mService

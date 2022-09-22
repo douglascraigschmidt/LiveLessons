@@ -2,11 +2,10 @@ package server;
 
 import client.PrimeCheckClient;
 import common.Components;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import utils.Options;
 import utils.RunTimer;
@@ -21,36 +20,40 @@ import static java.util.stream.Collectors.toList;
  * This program tests the {@link PrimeCheckClient} and its ability to
  * communicate with the {@link PrimeCheckController} via Spring WebMVC
  * features.
+ *
+ * The {@code @SpringBootTest} annotation tells Spring to look for a
+ * main configuration class (a {@code @SpringBootApplication}, i.e.,
+ * {@link PrimeCheckApplication}) and use that to start a Spring
+ * application context to serve as the target of the tests.
+ *
+ * The {@code @ContextConfiguration} annotation defines class-level
+ * metadata that is used to determine how to load and configure an
+ * {@link ApplicationContext} for integration tests like this one.
  */
 @SpringBootTest
 @ContextConfiguration(classes = {
     Components.class,
-    PrimeCheckClient.class,
-    PrimeCheckController.class
+    PrimeCheckClient.class
 })
 public class PrimeCheckTest {
     /**
-     * Debugging tag used by the logger.
-     */
-    private final String TAG = getClass().getSimpleName();
-
-    /**
-     * This object connects to the {@code testClient}.  The {@code @Autowired}
-     * annotation ensures this field is initialized via Spring
-     * dependency injection, where an object receives another object
-     * it depends on (e.g., by creating a {@link PrimeCheckClient}).
+     * This object connects {@link PrimeCheckTest} to the {@code
+     * PrimeCheckClient}.  The {@code @Autowired} annotation ensures
+     * this field is initialized via Spring dependency injection,
+     * where an object receives another object it depends on (e.g., by
+     * creating a {@link PrimeCheckClient}).
      */
     @Autowired
     private PrimeCheckClient testClient;
 
     /**
-     * Emulate the "command-line" arguments.
+     * Emulate the "command-line" arguments for the tests.
      */
     private final String[] mArgv = new String[]{
         "-d",
-        "false",
+        "false", // Disable debugging messages.
         "-c",
-        "500"
+        "500" // Generate and test 500 random large Integer objects.
     };
 
     /**
@@ -65,34 +68,35 @@ public class PrimeCheckTest {
         // Generate a list of random numbers.
         List<Integer> randomIntegers = generateRandomNumbers();
 
-        // Test individual HTTP GET requests to the server to check if
-        // an Integer is prime or not sequentially.
+        // Test sending individual HTTP GET requests to the server
+        // sequentially to check if an Integer is prime or not
         timeTest(testClient::testIndividualCalls,
                  randomIntegers,
                  false,
                  "individualCallsSequential");
 
-        // Test passing a List in one HTTP GET request to the server
-        // to see if all the List elements are prime or not sequentially.
+        // Test sending individual HTTP GET requests to the server in
+        // parallel to check if an Integer is prime or not.
+        timeTest(testClient::testIndividualCalls,
+                randomIntegers,
+                true,
+                "individualCallsParallel");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which sequentially checks List elements for primality.
         timeTest(testClient::testListCall,
                  randomIntegers,
                  false,
                  "listCallSequential");
 
-        // Test individual HTTP GET requests to the server to check if
-        // an Integer is prime or not in parallel.
-        timeTest(testClient::testIndividualCalls,
-                 randomIntegers,
-                 true,
-                 "individualCallsParallel");
-
-        // Test passing a List in one HTTP GET request to the server
-        // to see if all the List elements are prime or not in parallel.
+        // Test sending a List in one HTTP GET request to the server,
+        // which check List elements for primality in parallel.
         timeTest(testClient::testListCall,
                  randomIntegers,
                  true,
                  "listCallParallel");
 
+        // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Leaving runTests()");
@@ -129,10 +133,11 @@ public class PrimeCheckTest {
      * @param parallel True if using parallel streams, else false
      * @param testName The name of the test
      */
-    private void timeTest(BiFunction<List<Integer>, Boolean, List<Integer>> test,
-                          List<Integer> primeCandidates,
-                          Boolean parallel,
-                          String testName) {
+    private void timeTest
+        (BiFunction<List<Integer>, Boolean, List<Integer>> test,
+         List<Integer> primeCandidates,
+         Boolean parallel,
+         String testName) {
         Options.print("Starting "
                 + testName
                 + " with count = "
@@ -142,7 +147,7 @@ public class PrimeCheckTest {
             // Time how long this test takes to run.
             .timeRun(() ->
                      // Run test using the given Function and params.
-                     runTest(test, primeCandidates, parallel, testName),
+                     runTest(test, primeCandidates, parallel),
                      testName);
 
         // Display the results.
@@ -156,14 +161,13 @@ public class PrimeCheckTest {
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if using parallel streams, else false
-     * @param testName Name of the test
-     * @return The {@link List} of results of applying the primality test
+     * @return The {@link List} of results from applying the primality
+     *         test
      */
     private List<Integer> runTest
         (BiFunction<List<Integer>, Boolean, List<Integer>> test,
          List<Integer> primeCandidates,
-         Boolean parallel,
-         String testName) {
+         Boolean parallel) {
         // Run the test and return the results.
         return test.apply(primeCandidates, parallel);
     }
