@@ -29,7 +29,8 @@ public class FileCounterWalkFileTree
      */
     @Override
     protected Long compute() {
-        // Use an AtomicLong since anonymous classes can't (easily) have side-effects.
+        // Use an AtomicLong since anonymous classes can't (easily)
+        // have side-effects.
         AtomicLong totalSize = new AtomicLong(0);
         try {
             Files
