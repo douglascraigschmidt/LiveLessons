@@ -7,10 +7,11 @@ my Live Training courses.  Here's an overview of what's included:
   framework with the Java sequential streams framework to process
   entries in a recursively-structured folder hierarchy concurrently.
 
-. ForkJoin -- This example shows how to use the Java fork-join pool
-  and Java sequential streams frameworks to count the number of files
-  in a large recursive folder hierarchy, as well as calculate the
-  cumulative sizes of all the files.
+. ForkJoin -- This example shows how to use various Java mechanisms
+  (including the Java fork-join pool framework and sequential/parallel
+  Streams framework) to count the number of files in a (large)
+  recursive folder hierarchy, as well as calculate the cumulative
+  sizes of all the files.
 
 . Reactor -- This example shows the use of Project Reactor to process
   entries in a recursively-structured directory folder sequentially

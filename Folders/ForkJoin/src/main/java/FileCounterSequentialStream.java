@@ -12,21 +12,21 @@ import static java.util.stream.Collectors.toList;
  * streams framework to compute the size in bytes of a given file, as
  * well as all the files in folders reachable from this file.
  */
-public class FileCounterStream
+public class FileCounterSequentialStream
        extends AbstractFileCounter {
     /**
      * Constructor initializes the fields.
      */
-    FileCounterStream(File file) {
+    FileCounterSequentialStream(File file) {
         super(file);
     }
 
     /**
      * Constructor initializes the fields (used internally).
      */
-    private FileCounterStream(File file,
-                              AtomicLong documentCount,
-                              AtomicLong folderCount) {
+    private FileCounterSequentialStream(File file,
+                                        AtomicLong documentCount,
+                                        AtomicLong folderCount) {
         super(file, documentCount, folderCount);
     }
 
@@ -51,17 +51,17 @@ public class FileCounterStream
             // Create a list of tasks to fork to process the contents
             // of a folder.
             List<ForkJoinTask<Long>> forks = Stream
-                // Convert the list of files into a stream of files.
-                .of(Objects.requireNonNull(mFile.listFiles()))
+                    // Convert the list of files into a stream of files.
+                    .of(Objects.requireNonNull(mFile.listFiles()))
 
-                // Map each file into a FileCounterStream and fork it.
-                .map(temp -> new FileCounterStream(temp,
-                                                   mDocumentCount,
-                                                   mFolderCount).fork())
+                    // Map each file into a FileCounterStream and fork it.
+                    .map(temp -> new FileCounterSequentialStream(temp,
+                            mDocumentCount,
+                            mFolderCount).fork())
 
-                // Trigger intermediate operation processing and
-                // collect the results into a list.
-                .collect(toList());
+                    // Trigger intermediate operations and collect
+                    // results into a List.
+                    .toList();
 
             return forks
                 // Convert the list to a stream.

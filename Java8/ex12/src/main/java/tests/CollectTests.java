@@ -17,8 +17,9 @@ import static utils.Utils.startsWithHh;
  */
 public class CollectTests {
     /**
-     * Run an example using the collect() terminal operation to put
-     * the results into a ArrayList using the toList() collector.
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link ArrayList} using the {@code
+     * toList()} collector.
      */
     public static void runCollectToList() {
         System.out.println("\nResults from runCollectToList():");
@@ -37,8 +38,30 @@ public class CollectTests {
     }
 
     /**
-     * Run an example using the collect() terminal operation to put
-     * the results into a HashSet using the toSet() collector.
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link ArrayList} using the {@code
+     * toList()} terminal operation added in Java 16.
+     */
+    public static void runCollectToImmutableList() {
+        System.out.println("\nResults from runCollectToImmutableList():");
+
+        var results = Generators
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
+
+            // This terminal operation triggers intermediate operation
+            // processing and collects the results into an immutable
+            // list, which contains duplicates, but can't be modified.
+            .toList();
+
+        // Print the results.
+        System.out.println(results);
+    }
+
+    /**
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link HashSet} using the {@code
+     * toSet()} collector.
      */
     public static void runCollectToSet() {
         System.out.println("\nResults from runCollectToSet():");
@@ -57,8 +80,9 @@ public class CollectTests {
     }
 
     /**
-     * Run an example using the collect() terminal operation to put
-     * the results into a HashMap using the toMap() collector.
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link HashMap} using the {@code
+     * toMap()} collector.
      */
     public static void runCollectToMap() {
         System.out.println("\nResults from runCollectToMap():");
@@ -78,14 +102,16 @@ public class CollectTests {
     }
 
     /**
-     * Run an example using the collect() terminal operation to put
-     * the results into a TreeMap using the groupingBy() collector.
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link TreeMap} using the {@code
+     * groupingBy()} collector.
      */
     public static void runCollectGroupingBy() {
         System.out.println("\nResults from runCollectGroupingBy():");
 
         // Generate a Map of characters from the play Hamlet whose
         // keys start with upper- or lower-case 'h' whose names are
+
         // consistently capitalized and whose values are the lengths
         // of the character's names.
         var results = Generators.
@@ -98,8 +124,9 @@ public class CollectTests {
     }
 
     /**
-     * Run an example using the collect() terminal operation to put
-     * the results into a String using the joining() collector.
+     * Run an example using the {@code collect()} terminal operation
+     * to put the results into a {@link String} using the {@code
+     * joining()} collector.
      */
     public static void runCollectJoining() {
         System.out.println("\nResults from runCollectJoining():");
@@ -118,8 +145,8 @@ public class CollectTests {
     }
 
     /**
-     * Run an example using the collect() terminal operation in
-     * conjunction with the {@code teeing} {@link Collector}.
+     * Run an example using the {@code collect()} terminal operation
+     * in conjunction with the {@code teeing} {@link Collector}.
      */
     public static void runTeeingCollector() {
         System.out.println("\nResults from runTeeingCollector():");

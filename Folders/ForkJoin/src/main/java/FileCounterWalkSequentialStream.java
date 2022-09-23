@@ -1,25 +1,18 @@
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
  * This task uses the Java Files.walk() method and a sequential stream
  * to count the files and compute the size in bytes of all files in
  * folders reachable from the given root file.
  */
-public class FileCounterWalkStream
+public class FileCounterWalkSequentialStream
        extends AbstractFileCounter {
     /**
      * Constructor initializes the super class.
      */
-    FileCounterWalkStream(File rootFile) {
+    FileCounterWalkSequentialStream(File rootFile) {
         super(rootFile);
     }
 

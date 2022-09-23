@@ -50,6 +50,7 @@ public class ex12 {
      */
     private static void collectTests() {
         CollectTests.runCollectToList();
+        CollectTests.runCollectToImmutableList();
         CollectTests.runCollectToSet();
         CollectTests.runCollectToMap();
         CollectTests.runCollectGroupingBy();

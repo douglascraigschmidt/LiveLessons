@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 
 /**
  * This example shows how to use various Java mechanisms (including
- * the Java fork-join pool framework and sequential/parallel streams
+ * the Java fork-join pool framework and sequential/parallel Streams
  * framework) to count the number of files in a (large) recursive
  * folder hierarchy, as well as calculate the cumulative sizes of all
  * the files.
@@ -24,8 +24,8 @@ class Main {
         runFileCounterWalkFileTree();
 
         // Run a test that uses the Java Files.walk() method and
-        // a sequential stream to count the files.
-        runFileCounterWalkStream();
+        // a Java sequential stream to count the files.
+        runFileCounterWalkSequentialStream();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.
@@ -33,7 +33,7 @@ class Main {
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java sequential streams features.
-        runFileCounterStream();
+        runFileCounterSequentialStream();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java parallel streams features.
@@ -61,9 +61,9 @@ class Main {
      * Run a test that uses the Java Files.walk() method and a
      * sequential stream to count the files.
      */
-    private static void runFileCounterWalkStream() throws URISyntaxException {
+    private static void runFileCounterWalkSequentialStream() throws URISyntaxException {
         runTest(ForkJoinPool.commonPool(),
-                new FileCounterWalkStream
+                new FileCounterWalkSequentialStream
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterWalkStream",
                 false);
@@ -85,9 +85,9 @@ class Main {
      * Run a test that uses the Java fork-join framework in
      * conjunction with Java sequential streams features.
      */
-    private static void runFileCounterStream() throws URISyntaxException {
+    private static void runFileCounterSequentialStream() throws URISyntaxException {
         runTest(new ForkJoinPool(),
-                new FileCounterStream
+                new FileCounterSequentialStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterStream",
                 true);
