@@ -1,7 +1,7 @@
-package server;
+package primechecker.server;
 
 import org.springframework.stereotype.Service;
-import utils.Options;
+import primechecker.utils.Options;
 
 import java.util.List;
 

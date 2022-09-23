@@ -1,17 +1,16 @@
-package client;
+package primechecker.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import server.PrimeCheckController;
-import utils.Options;
-import utils.WebUtils;
+import primechecker.common.Constants;
+import primechecker.server.PrimeCheckController;
+import primechecker.utils.Options;
+import primechecker.utils.WebUtils;
 
 import java.util.List;
 
-import static common.Constants.EndPoint.CHECK_IF_PRIME;
-import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
-import static common.Constants.SERVER_BASE_URL;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -33,7 +32,7 @@ public class PrimeCheckClient {
     /**
      * Location of the server.
      */
-    private final String mBaseUrl = SERVER_BASE_URL;
+    private final String mBaseUrl = Constants.SERVER_BASE_URL;
 
     /**
      * This auto-wired field connects the {@link
@@ -123,7 +122,7 @@ public class PrimeCheckClient {
      */
     private String makeCheckIfPrimeUrl(Integer integer) {
         var getRequestUrl = mBaseUrl
-            + CHECK_IF_PRIME
+            + Constants.EndPoint.CHECK_IF_PRIME
             + "?primeCandidate="
             + integer;
 
@@ -144,7 +143,7 @@ public class PrimeCheckClient {
     private String makeCheckIfPrimeListUrl(String stringOfIntegers,
                                            boolean parallel) {
         var getRequestUrl = mBaseUrl
-            + CHECK_IF_PRIME_LIST
+            + Constants.EndPoint.CHECK_IF_PRIME_LIST
             + "?primeCandidates="
             + stringOfIntegers
             + "&parallel="

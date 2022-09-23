@@ -1,14 +1,9 @@
-package utils;
+package primechecker.utils;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class implements the Singleton pattern to handle command-line

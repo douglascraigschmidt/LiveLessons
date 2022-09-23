@@ -1,14 +1,14 @@
-package server;
+package primechecker.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import utils.Options;
+import primechecker.utils.Options;
 
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import static common.Constants.EndPoint.CHECK_IF_PRIME;
-import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
+import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
+import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
  * This Spring controller demonstrates how WebMVC can be used to
@@ -18,7 +18,7 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * can be passed either individual prime candidates or a {@link List}
  * of prime candidates and process these candidates using a sequential
  * or parallel stream in response to client directives.
- *
+ * <p>
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
  * endpoints/routes for each supported operation, i.e.,
@@ -26,12 +26,12 @@ import static common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * {@code @DeleteMapping}, which correspond to the HTTP GET, POST,
  * PUT, and DELETE calls, respectively.  These components are
  * identified by the {@code @RestController} annotation below.
- *
+ * <p>
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
  * requests onto methods in the {@link PrimeCheckController}.  GET
  * requests invoked from any HTTP web client (e.g., a web browser or
  * client app) or command-line utility (e.g., Curl or Postman).
- *
+ * <p>
  * The {@code @RestController} annotation also tells a controller that
  * the object returned is automatically serialized into JSON and passed
  * back within the body of an {@link HttpResponse} object.
@@ -48,23 +48,23 @@ public class PrimeCheckController {
     /**
      * Checks the {@code primeCandidate} param for primality,
      * returning 0 if it's prime or the smallest factor if it's not.
-     *
+     * <p>
      * Spring WebMVC maps HTTP GET requests sent to the {@code
      * CHECK_IF_PRIME} endpoint to this method.
      *
      * @param primeCandidate The {@link Integer} to check for
      *                       primality
      * @return An {@link Integer} that is 0 if the {@code
-     *         primeCandidate} is prime and its smallest factor if
-     *         it's not prime
+     * primeCandidate} is prime and its smallest factor if
+     * it's not prime
      */
     @GetMapping(CHECK_IF_PRIME)
-    public Integer checkIfPrime(Integer primeCandidate) {
+    public int checkIfPrime(@RequestParam int primeCandidate) {
         Options.debug("checkIfPrime()");
 
         return mService
-            // Forward to the service.
-            .checkIfPrime(primeCandidate);
+                // Forward to the service.
+                .checkIfPrime(primeCandidate);
     }
 
     /**
@@ -72,28 +72,28 @@ public class PrimeCheckController {
      * List} param for primality and return a corresponding {@link
      * List} whose results indicate 0 if an element is prime or the
      * smallest factor if it's not.
-     *
+     * <p>
      * Spring WebMVC maps HTTP GET requests sent to the {@code
      * CHECK_IF_PRIME_LIST} endpoint to this method.
      *
      * @param primeCandidates The {@link List} of {@link Integer}
      *                        objects to check for primality
-     * @param parallel True if primality checking should run in
-     *                 parallel, else false if it should run
-     *                 sequentially
+     * @param parallel        True if primality checking should run in
+     *                        parallel, else false if it should run
+     *                        sequentially
      * @return An {@link List} whose elements are 0 if the
-     *         corresponding element in {@code primeCandidate} is
-     *         prime or its smallest factor if it's not prime
+     * corresponding element in {@code primeCandidate} is
+     * prime or its smallest factor if it's not prime
      */
     @GetMapping(CHECK_IF_PRIME_LIST)
     public List<Integer> checkIfPrimeList
-        (@RequestParam List<Integer> primeCandidates,
-         Boolean parallel) {
+    (@RequestParam List<Integer> primeCandidates,
+     Boolean parallel) {
         Options.debug("checkIfPrimeList()");
 
         return mService
-            // Forward to the service.
-            .checkIfPrimeList(primeCandidates,
-                              parallel);
+                // Forward to the service.
+                .checkIfPrimeList(primeCandidates,
+                        parallel);
     }
 }

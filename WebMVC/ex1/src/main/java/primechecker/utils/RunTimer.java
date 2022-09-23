@@ -1,4 +1,4 @@
-package utils;
+package primechecker.utils;
 
 import java.util.*;
 import java.util.function.Supplier;
