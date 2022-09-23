@@ -40,22 +40,22 @@ public class StreamsTests {
             .collect(toList());
 
         Optional<Flight> min1 = flights
-                // Convert the List into a Stream.
-                .stream()
+            // Convert the List into a Stream.
+            .stream()
 
-                // Find the cheapest flight (returns an Optional).
-                .min(Comparator.comparing(Flight::getPrice));
+            // Find the cheapest flight (returns an Optional).
+            .min(Comparator.comparing(Flight::getPrice));
 
         Optional<Stream<Flight>> flightStream = min1
-                // If there's a cheapest flight then find all the cheapest
-                // flights (returns an Optional).
-                .map(min -> flights
-                        // Convert the List into a Stream (again).
-                        .stream()
+            // If there's a cheapest flight then find all the cheapest
+            // flights (returns an Optional).
+            .map(min -> flights
+                 // Convert the List into a Stream (again).
+                 .stream()
 
-                        // Only allow flights matching the cheapest.
-                        .filter(flight ->
-                                flight.getPrice().equals(min.getPrice())));
+                 // Only allow flights matching the cheapest.
+                 .filter(flight ->
+                         flight.getPrice().equals(min.getPrice())));
 
         // If there are any cheapest flights return them as a List.
         return flightStream.orElseGet(Stream::empty).collect(toList());
@@ -71,7 +71,7 @@ public class StreamsTests {
      * @return The {@link List} of cheapest {@link Flight} objects
      */
     public static List<Flight> findCheapestFlightsSorted(List<Flight> flightList,
-                                                  String currency) {
+                                                         String currency) {
         // Create a sorted List of flights that match sTrip. 
         List<Flight> sortedFlights = StreamsTests
             // Convert the flights into the requested currency.
@@ -112,7 +112,7 @@ public class StreamsTests {
      * @return The {@link List} of cheapest {@link Flight} objects
      */
     public static List<Flight> findCheapestFlightsOnepass(List<Flight> flightList,
-                                                   String currency) {
+                                                          String currency) {
         return StreamsTests
             // Convert the flights into the requested currency.
             .convertFlightPrices(flightList, currency)

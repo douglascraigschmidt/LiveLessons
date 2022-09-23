@@ -20,11 +20,11 @@ my Live Training courses.  Here's an overview of what's included:
   a recursively-structured directory folder sequentially and
   concurrently.
 
-. Sync -- This example shows the use of the Java streams framework to
-  process entries in a recursively-structured directory folder using
-  the Java sequential and parallel streams frameworks.  It also shows
-  how to implement spliterators and collectors for Java sequential and
-  parallel streams.
+. Streams -- This example shows the use of the Java streams framework
+  to process entries in a recursively-structured directory folder
+  using the Java sequential and parallel streams frameworks.  It also
+  shows how to implement spliterators and collectors for Java
+  sequential and parallel streams.
 
 . WebFlux -- This example shows how to use the Spring WebFlux
   framework together with Project Reactor to process entries in a
