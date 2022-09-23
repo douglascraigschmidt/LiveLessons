@@ -33,8 +33,6 @@ public class PrimeCheckService {
      *         it's not prime
      */
     public Integer checkIfPrime(Integer primeCandidate) {
-        System.out.println("checkIfPrime()");
-
         // Determine primality.
         var result = isPrime(primeCandidate);
 
@@ -65,8 +63,6 @@ public class PrimeCheckService {
      */
     public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
                                           Boolean parallel) {
-        System.out.println("checkIfPrimeList()");
-
         var stream = primeCandidates
             // Create a (sequential) stream.
             .stream();

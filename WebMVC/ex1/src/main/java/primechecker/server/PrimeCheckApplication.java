@@ -13,8 +13,8 @@ import primechecker.utils.Options;
  * auto-configuration, component scan, and to define extra
  * configurations on their "application" class.
  * <p>
- * The {@code @PropertySource} annotation is used to provide a
- * properties file to the Spring Environment.
+ * The {@code @ComponentScan} annotation configures component scanning
+ * directives for use with {@code @Configuration} classes.
  */
 @SpringBootApplication
 @ComponentScan("primechecker")

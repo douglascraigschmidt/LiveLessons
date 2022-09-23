@@ -27,16 +27,14 @@ import static java.util.stream.Collectors.toList;
  * {@link PrimeCheckApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  * <p>
- * The {@code @ContextConfiguration} annotation defines class-level
- * metadata that is used to determine how to load and configure an
- * {@link ApplicationContext} for integration tests like this one.
+ * The {@code @SpringBootConfiguration} annotation indicates that a
+ * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootConfiguration
 @SpringBootTest(
         classes = PrimeCheckApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class PrimeCheckTest {
-
     /**
      * This object connects {@link PrimeCheckTest} to the {@code
      * PrimeCheckClient}.  The {@code @Autowired} annotation ensures
@@ -148,30 +146,12 @@ public class PrimeCheckTest {
         var results = RunTimer
                 // Time how long this test takes to run.
                 .timeRun(() ->
-                                // Run test using the given Function and params.
-                                runTest(test, primeCandidates, parallel),
-                        testName);
+                         // Run test using the given Function and params.
+                         test.apply(primeCandidates, parallel),
+                         testName);
 
         // Display the results.
         Options.displayResults(primeCandidates, results);
-    }
-
-    /**
-     * Run the test and return the results.
-     *
-     * @param test            A {@link BiFunction} that performs the test
-     * @param primeCandidates A {@link List} of {@link Integer}
-     *                        objects to check for primality
-     * @param parallel        True if using parallel streams, else false
-     * @return The {@link List} of results from applying the primality
-     * test
-     */
-    private List<Integer> runTest
-    (BiFunction<List<Integer>, Boolean, List<Integer>> test,
-     List<Integer> primeCandidates,
-     Boolean parallel) {
-        // Run the test and return the results.
-        return test.apply(primeCandidates, parallel);
     }
 }
     
