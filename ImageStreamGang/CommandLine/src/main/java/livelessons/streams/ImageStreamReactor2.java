@@ -4,6 +4,7 @@ import livelessons.filters.Filter;
 import livelessons.utils.Image;
 import livelessons.utils.ReactorUtils;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -40,13 +41,13 @@ public class ImageStreamReactor2
 
         List<Image> filteredImages = Flux
             // Convert collection into a flux.
-            .fromIterable(iterable)
+            .fromIterable(urls)
 
             // Create a parallel flux.
             .parallel()
 
             // Run this flow of operations in the elastic thread pool.
-            .runOn(Schedulers.boundedElastic());
+            .runOn(Schedulers.boundedElastic())
 
             // Use filter() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
