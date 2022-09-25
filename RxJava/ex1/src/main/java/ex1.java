@@ -37,7 +37,7 @@ public class ex1 {
     */
     public static void main(String[] args) {
         // Run the test program.
-        new ex5().run();
+        new ex1().run();
     }
 
     /**
