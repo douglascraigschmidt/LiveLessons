@@ -7,6 +7,7 @@ import utils.RxUtils;
 import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 
 /**
  * This class concurrently counts the number of images in a
