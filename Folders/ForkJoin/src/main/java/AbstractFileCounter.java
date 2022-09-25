@@ -59,22 +59,5 @@ public abstract class AbstractFileCounter
     public long folderCount() {
         return mFolderCount.get();
     }
-
-    protected long handleDocument(File document) {
-        // Increment the count of documents.
-        mDocumentCount.incrementAndGet();
-
-        // Return the length of the document.
-        return document.length();
-    }
-
-    protected long handleFolder(File folder,
-                                Supplier<Long> factory) {
-        // Increment the count of folders.
-        mFolderCount.incrementAndGet();
-
-        // Recursively count the number of files in a (sub)folder.
-        return factory.get();
-    };
 }
 

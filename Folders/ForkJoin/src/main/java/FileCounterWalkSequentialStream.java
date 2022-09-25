@@ -22,11 +22,11 @@ public class FileCounterWalkSequentialStream
      */
     @Override
     protected Long compute() {
-        try {
-            return Files
+        try (var stream = Files
                 // Return a stream of all entries rooted at mFile.
-                .walk(mFile.toPath())
+                .walk(mFile.toPath())) {
 
+            return stream
                 // Handle files (documents) and directories (folders).
                 .mapToLong(entry -> {
                         if (Files.isDirectory(entry)) {

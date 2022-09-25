@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compile 'org.jsoup:jsoup:1.14.3'
+    compile 'org.jsoup:jsoup:1.15.3'
 }

@@ -70,13 +70,7 @@ class ImageCounter {
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset, so we don't try to
         // revisit it again unnecessarily.
-        else if (mUniqueUris
-                // Get the ConcurrentHashMap that implements the
-                // KeySetView.
-                 .getMap()
-                // Perform the atomic-check-then-act operation.
-                 .putIfAbsent(pageUri,
-                              mUniqueUris.getMappedValue()) != null) {
+        else if (!mUniqueUris.add(pageUri)) {
             print(TAG
                     + "[Depth"
                     + depth

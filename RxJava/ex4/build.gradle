@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile 'org.jsoup:jsoup:1.10.3'
-    compile 'io.reactivex.rxjava3:rxjava:3.0.6'
+    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
 }

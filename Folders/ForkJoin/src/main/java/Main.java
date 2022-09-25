@@ -35,20 +35,6 @@ class Main {
         // conjunction with Java sequential streams features.
         runFileCounterSequentialStream();
 
-        // Run a test that uses the Java fork-join framework in
-        // conjunction with Java parallel streams features.
-        runFileCounterParallelStream();
-
-        // Run a test that uses the Java fork-join framework in
-        // conjunction with Java parallel streams features with
-        // the teeing collector.
-        runFileCounterParallelStreamTeeing();
-
-        // Run a test that uses the Java fork-join framework in
-        // conjunction with Java parallel streams features with
-        // direct indexing.
-        runFileCounterParallelStreamIndex();
-
         // Get and print the timing results.
         System.out.println(RunTimer.getTimingResults());
 
@@ -100,44 +86,6 @@ class Main {
                 new FileCounterSequentialStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterStream",
-                true);
-    }
-
-    /**
-     * Run a test that uses the Java fork-join framework in
-     * conjunction with Java parallel streams features.
-     */
-    private static void runFileCounterParallelStream() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStreamTeeing
-                (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStream",
-                true);
-    }
-
-    /**
-     * Run a test that uses the Java fork-join framework in
-     * conjunction with Java parallel streams features and
-     * direct indexing.
-     */
-    private static void runFileCounterParallelStreamIndex() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStreamIndex
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStreamIndex",
-                true);
-    }
-
-    /**
-     * Run a test that uses the Java fork-join framework in
-     * conjunction with Java parallel streams features and
-     * the teeing collector.
-     */
-    private static void runFileCounterParallelStreamTeeing() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStreamTeeing
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStreamTeeing",
                 true);
     }
 

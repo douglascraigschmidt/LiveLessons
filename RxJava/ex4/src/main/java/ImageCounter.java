@@ -76,12 +76,9 @@ class ImageCounter {
             return mZero;
         }
         // Atomically check to see if we've already visited this URL
-        // and add the new url to the hashset so we don't try to
-        // revisit it again unnecessarily.
-        else if (mUniqueUris
-                 .getMap()
-                 .putIfAbsent(pageUri,
-                              mUniqueUris.getMappedValue()) != null) {
+        // and add the new url to the hashset to avoid revisiting
+        // it again unnecessarily.
+        else if (!mUniqueUris.add(pageUri)) {
             print("(depth "
                   + depth
                   + ") Already processed "

@@ -38,39 +38,7 @@ public class FileCounterWalkFileTree
                 // using the Visitor pattern.
                 .walkFileTree(mFile.toPath(),
                               // Create a new file visitor.
-                              new SimpleFileVisitor<Path>() {
-                                  @Override
-                                  /*
-                                   * Visit a directory (folder) and
-                                   * increment its count.
-                                   */
-                                  public FileVisitResult preVisitDirectory(Path dir,
-                                                                           BasicFileAttributes attrs) {
-                                      // Increment the count of folders.
-                                      mFolderCount.incrementAndGet();
-
-                                      // Keep going.
-                                      return CONTINUE;
-                                  }
-
-                                  @Override
-                                  /*
-                                   * Visit a file (document),
-                                   * increment its count, and
-                                   * increment the total length.
-                                   */
-                                  public FileVisitResult visitFile(Path file,
-                                                                   BasicFileAttributes attrs) {
-                                      // Increment the count of documents.
-                                      mDocumentCount.incrementAndGet();
-
-                                      // Increment the total size of all the bytes.
-                                      totalSize.addAndGet(file.toFile().length());
-
-                                      // Keep going.
-                                      return CONTINUE;
-                                  }
-                              });
+                              makeVisitor(totalSize));
         } catch (IOException e) {
             // Swallow exception for simplicity.
         }
@@ -78,6 +46,48 @@ public class FileCounterWalkFileTree
         // Return the total size of all the bytes reachable from the
         // root file.
         return totalSize.get();
+    }
+
+    /**
+     * A factory method returning a {@link SimpleFileVisitor} that
+     * traverses the file system.
+     *
+     * @param totalSize An {@link AtomicLong} that keeps track of the total size
+     *                 since anonymous classes can't (easily) have side-effects
+     * @return A .
+     */
+    private SimpleFileVisitor<Path> makeVisitor(AtomicLong totalSize) {
+        return new SimpleFileVisitor<Path>() {
+            @Override
+            /*
+             * Visit a directory (folder) and increment its count.
+             */
+            public FileVisitResult preVisitDirectory(Path dir,
+                                                     BasicFileAttributes attrs) {
+                // Increment the count of folders.
+                mFolderCount.incrementAndGet();
+
+                // Keep going.
+                return CONTINUE;
+            }
+
+            @Override
+            /*
+             * Visit a file (document), increment its count, and
+             * increment the total length.
+             */
+            public FileVisitResult visitFile(Path file,
+                                             BasicFileAttributes attrs) {
+                // Increment the count of documents.
+                mDocumentCount.incrementAndGet();
+
+                // Increment the total size of all the bytes.
+                totalSize.addAndGet(file.toFile().length());
+
+                // Keep going.
+                return CONTINUE;
+            }
+        };
     }
 }
 
