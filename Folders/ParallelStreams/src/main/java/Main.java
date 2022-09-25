@@ -5,11 +5,10 @@ import java.net.URISyntaxException;
 import java.util.concurrent.*;
 
 /**
- * This example shows how to use various Java mechanisms (including
- * the Java fork-join pool framework and sequential/parallel Streams
- * framework) to count the number of files in a (large) recursive
- * folder hierarchy, as well as calculate the cumulative sizes of all
- * the files.
+ * This example shows how to use various Java parallel Streams
+ * framework features to count the number of files in a (large)
+ * recursive folder hierarchy, as well as calculate the cumulative
+ * sizes of all the files.
  */
 class Main {
     /**

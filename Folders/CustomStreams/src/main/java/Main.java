@@ -11,10 +11,9 @@ import java.util.stream.Stream;
 
 /**
  * This example shows the use of the Java streams framework to process
- * entries in a recursively-structured directory folder using the Java
- * sequential and parallel streams frameworks.  This example also
- * shows how to implement spliterators and collectors for Java
- * sequential and parallel streams.
+ * entries in a recursively-structured directory folder using custom
+ * spliterators and collectors for Java sequential and parallel
+ * streams.
  */
 @SuppressWarnings("ALL")
 public class Main {
