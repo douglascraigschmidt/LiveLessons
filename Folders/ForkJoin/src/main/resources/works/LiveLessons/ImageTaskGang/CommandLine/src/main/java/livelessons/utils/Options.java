@@ -5,10 +5,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -60,7 +57,7 @@ public class Options {
     /**
      * Pathname for the file containing URLs to download.
      */
-    private String mPathname = "defaultUrls.txt";
+    private final String mPathname = "defaultUrls.txt";
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -189,12 +186,10 @@ public class Options {
                 (convertStringToUrls(suggestedUrls));
           return variableNumberOfInputURLs;
         */
+        // Convert the array of strings into a list of strings.
+        // Convert the list into a stream.
         return Arrays
-            // Convert the array of strings into a list of strings.
-            .asList(mDefaultUrls)
-
-            // Convert the list into a stream.
-            .stream()
+            .stream(mDefaultUrls)
 
             // Map each string in the list into a list of URLs.
             .map(this::convertStringToUrls)
@@ -266,7 +261,7 @@ public class Options {
             .splitAsStream(stringOfUrls)
 
             // Convert each String in the Stream to a URL.
-            .map(urlFactory::apply)
+            .map(urlFactory)
 
             // Create a list of URLs.
             .collect(toList());
@@ -280,9 +275,58 @@ public class Options {
     }
 
     /**
+     * Print out all the timing results for all the test runs in order
+     * from fastest to slowest.
+     */
+    public static void printTimingResults(Map<String, List<Long>> resultsMap) {
+        // Determine how many runs of the tests took place.
+        int numberOfRuns =
+            resultsMap.entrySet().iterator().next().getValue().size();
+
+        // Iterate through the results of each of the test runs.
+        for (int i = 0;
+             i < numberOfRuns;
+             i++) {
+            final int runNumber = i;
+            System.out.println("\nPrinting "
+                               + resultsMap.entrySet().size()
+                               + " results for input file "
+                               + (runNumber + 1)
+                               + " from fastest to slowest");
+
+            // Print out the contents of the resultsMap in sorted
+            // order.
+            resultsMap
+                // Get the entrySet for the resultsMap.
+                .entrySet()
+
+                // Convert the entrySet into a stream.
+                .stream()
+
+                // Create a SimpleImmutableEntry containing the timing
+                // results (value) followed by the test name (key).
+                .map(entry
+                     -> new AbstractMap.SimpleImmutableEntry<>
+                        (entry.getValue().get(runNumber),
+                         entry.getKey()))
+
+                // Sort the stream by the timing results (key).
+                .sorted(Map.Entry.comparingByKey())
+
+                // Print all the entries in the sorted stream.
+                .forEach(entry
+                         -> System.out.println(""
+                                               + entry.getValue()
+                                               + " executed in "
+                                               + entry.getKey()
+                                               + " msecs"));
+        }
+    }
+
+    /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 if (argv[argc].equals("-d"))
@@ -291,11 +335,9 @@ public class Options {
                     mInputSource = getInputSource(argv[argc + 1]);
                 } else {
                     printUsage();
-                    return false;
+                    return;
                 }
-            return true;
-        } else
-            return false;
+        }
     }
 
     /**

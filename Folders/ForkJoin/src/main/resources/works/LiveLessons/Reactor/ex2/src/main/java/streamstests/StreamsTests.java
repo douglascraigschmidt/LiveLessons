@@ -1,0 +1,148 @@
+package streamstests;
+
+import datamodels.Flight;
+import utils.CheapestPriceCollectorStream;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+
+/**
+ * This Java utility class provides three algorithms find the cheapest
+ * flight(s) from a {@link List} of available flights using the Java
+ * Streams framework.
+ */
+public class StreamsTests {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private StreamsTests() {
+    }
+
+    /**
+     * Print the cheapest flights via a two-pass algorithm that uses
+     * {@code min()} and {@code filter()}.
+     *
+     * @param flights  The {@link List} of all available flights
+     * @param currency The currency to convert to
+     * @return The {@link List} of cheapest {@link Flight} objects
+     */
+    public static List<Flight> findCheapestFlightsMin(List<Flight> flights,
+                                                      String currency) {
+        // Create a List of flights that match sTrip. 
+        List<Flight> convertedFlights = StreamsTests
+                // Convert the flights into the requested currency.
+                .convertFlightPrices(flights, currency)
+
+                // Collect into a List.
+                .collect(toList());
+
+        Optional<Flight> min1 = convertedFlights
+                // Convert the List into a Stream.
+                .stream()
+
+                // Find the cheapest flight (returns an Optional).
+                .min(Comparator.comparing(Flight::getPrice));
+
+        Optional<Stream<Flight>> flightStream = min1
+                // If there's a cheapest flight then find all the cheapest
+                // flights (returns an Optional).
+                .map(min -> convertedFlights
+                        // Convert the List into a Stream (again).
+                        .stream()
+
+                        // Only allow flights matching the cheapest.
+                        .filter(flight ->
+                                flight.getPrice() == min.getPrice()));
+
+        // If there are any cheapest flights return them as a List.
+        return flightStream
+            .orElseGet(Stream::empty)
+            .collect(toList());
+    }
+
+    /**
+     * Print the cheapest flights via a two-pass algorithm that first
+     * calls {@code sort()}{ to order the trips by price and then uses
+     * {@code takeWhile()} to return the cheapest flight(s).
+     *
+     * @param flightList The {@link List} of all available flights
+     * @param currency   The currency to convert to
+     * @return The {@link List} of cheapest {@link Flight} objects
+     */
+    public static List<Flight> findCheapestFlightsSorted(List<Flight> flightList,
+                                                         String currency) {
+        // Create a sorted List of flights that match sTrip. 
+        List<Flight> sortedFlights = StreamsTests
+                // Convert the flights into the requested currency.
+                .convertFlightPrices(flightList, currency)
+
+                // Sort the flights from lowest to highest price.
+                .sorted(Comparator.comparing(Flight::getPrice))
+
+                // Collect into a List.
+                .collect(toList());
+
+        // If there's at least one flight then continue.
+        if (sortedFlights.size() > 0) {
+            // Store the cheapest price.
+            Flight cheapest = sortedFlights.get(0);
+
+            return sortedFlights
+                    // Converts the List into a Stream.
+                    .stream()
+
+                    // Take all elements matching the cheapest price.
+                    .takeWhile(flight ->
+                            flight.getPrice() == cheapest.getPrice())
+
+                    // Print the cheapest flights.
+                    .collect(toList());
+        } else
+            // Return an empty ArrayList.
+            return new ArrayList<>();
+    }
+
+    /**
+     * Print the cheapest flights via a one-pass algorithm and a
+     * custom Java Streams {@link Collector}.
+     *
+     * @param flightList The {@link List} of all available flights
+     * @param currency   The currency to convert to
+     * @return The {@link List} of cheapest {@link Flight} objects
+     */
+    public static List<Flight> findCheapestFlightsOnePass(List<Flight> flightList,
+                                                          String currency) {
+        return StreamsTests
+                // Convert the flights into the requested currency.
+                .convertFlightPrices(flightList, currency)
+
+                // Convert the Stream of TripResponses into a List that
+                // emits the cheapest priced trips(s).
+                .collect(CheapestPriceCollectorStream.toList());
+    }
+
+    /**
+     * Convert the flight prices according to the relevant exchange rate.
+     *
+     * @param currency The 3 letter currency to convert to
+     * @return A {@link Stream} that emits flights with the correct
+     * prices
+     */
+    private static Stream<Flight> convertFlightPrices(List<Flight> flightList,
+                                                      String currency) {
+        // Return a stream containing all flights with converted prices.
+        return flightList
+                // Convert the List into a Stream.
+                .stream()
+
+                // Create a new Flight instance that
+                // has a price in the desired currency.
+                .map(flight -> flight.inCurrency(currency));
+    }
+}

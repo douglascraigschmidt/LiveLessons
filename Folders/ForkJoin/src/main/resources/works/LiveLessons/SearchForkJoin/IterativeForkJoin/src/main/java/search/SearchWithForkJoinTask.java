@@ -32,7 +32,7 @@ public class SearchWithForkJoinTask
     private final boolean mParallelSearching;
 
     /**
-     * Indicates whether to processes the phrases in parallel.
+     * Indicates whether to process the phrases in parallel.
      */
     private final boolean mParallelPhrases;
 
@@ -92,8 +92,8 @@ public class SearchWithForkJoinTask
                 
         // Iterate through all works of Shakespeare.
         for (Folder work : subFolders)
-            // Map each work in the folder to a SearchDocsInWorkTask and
-            // fork it to run in parallel.
+            // Map each work in the folder to a SearchDocsInWorkTask
+            // and fork it to run in parallel.
             forks.add(new SearchDocsInWorkTask(work,
                                                mPhrasesToFind,
                                                mParallelSearching,

@@ -8,8 +8,8 @@ import java.util.concurrent.RecursiveTask;
 import static utils.StreamsUtils.QuadFunction;
 
 /**
- * This class demonstrates the use of the Java 7 fork-join framework
- * to search for phrases in the works of Shakespeare.
+ * This class demonstrates the use of the Java fork-join framework to
+ * search for phrases in the works of Shakespeare.
  */
 public class SearchWithForkJoinTask
        extends RecursiveTask<List<List<SearchResults>>> {
@@ -59,7 +59,7 @@ public class SearchWithForkJoinTask
      * This constructor reference creates the appropriate
      * [IndexAware]SearchForPhrasesTask object.
      */
-    SearchForPhrasesTaskFactory mConsRef;
+    SearchForPhrasesTaskFactory mConstructorRef;
 
     /**
      * Constructor initializes the fields.
@@ -76,7 +76,7 @@ public class SearchWithForkJoinTask
         mParallelInput = parallelInput;
         mMinSplitSize = getPartitionSize() / 2;
         // By default use the SearchForPhrasesTask.
-        mConsRef = SearchForPhrasesTask::new;
+        mConstructorRef = SearchForPhrasesTask::new;
     }
 
     /**
@@ -96,7 +96,7 @@ public class SearchWithForkJoinTask
         mParallelPhrases = parallelPhrases;
         mParallelInput = parallelInput;
         mMinSplitSize = minSplitSize;
-        mConsRef = SearchForPhrasesTask::new;
+        mConstructorRef = SearchForPhrasesTask::new;
     }
 
     /**
@@ -105,8 +105,8 @@ public class SearchWithForkJoinTask
     @Override
     protected List<List<SearchResults>> compute() {
         int partitionSize = getPartitionSize();
-        if (partitionSize <= mMinSplitSize
-                || !mParallelInput)
+
+        if (partitionSize <= mMinSplitSize || !mParallelInput)
             return computeSequentially(getStartIndex(), getEndIndex());
         else
             // Compute position to split the input list and forward to
@@ -115,14 +115,14 @@ public class SearchWithForkJoinTask
     }
 
     /**
-     * Perform the computations sequentially at this point from @a
-     * startIndex to @a endIndex.
+     * Perform the computations sequentially at this point from {@code
+     * startIndex} to {@code endIndex}.
      */
     private List<List<SearchResults>> computeSequentially(int startIndex,
                                                           int endIndex) {
         // Create a list to hold the results.
         List<List<SearchResults>> results =
-                new ArrayList<>(getPartitionSize());
+            new ArrayList<>(getPartitionSize());
 
         // Loop through each input string in the "sublist" range.
         for (int i = startIndex; i < endIndex; i++) {
@@ -133,10 +133,10 @@ public class SearchWithForkJoinTask
             // string for a list of phrases and store the results from
             // computing the task.
             List<SearchResults> lsr =
-                mConsRef.apply(input,
-                               mPhrasesToFind,
-                               mParallelSearching,
-                               mParallelPhrases).compute();
+                mConstructorRef.apply(input,
+                                      mPhrasesToFind,
+                                      mParallelSearching,
+                                      mParallelPhrases).compute();
 
             // If a phrase was found add it to the list of results.
             if (lsr.size() > 0)
@@ -175,23 +175,32 @@ public class SearchWithForkJoinTask
      */
     private List<List<SearchResults>> splitInputList(int splitPos) {
         // Create and fork a new SearchWithForkJoinTask that
-        // concurrently handles the "left hand" part of the input,
-        // while "this" handles the "right hand" part of the input.
+        // concurrently handles the "left hand" part of the input.
         ForkJoinTask<List<List<SearchResults>>> leftTask =
-                forkLeftTask(splitPos, mMinSplitSize);
+            forkLeftTask(splitPos, mMinSplitSize);
 
+        // Recursively compute the right task.
         List<List<SearchResults>> rightResult =
-                computeRightTask(splitPos,
-                                 mMinSplitSize);
+            computeRightTask(splitPos,
+                             mMinSplitSize);
 
-        // Wait and join the results from the left task.,
-        List<List<SearchResults>> leftResult = leftTask.join();
+        // Return the combined result from the leftTask with the
+        // rightResult.
+        return combineResults(leftTask, rightResult);
+    }
 
-        // sConcatenate the left result with the right result.
-        leftResult.addAll(rightResult);
-
-        // Return the result.
-        return leftResult;
+    /**
+     * Create and fork a new SearchWithForkJoinTask that concurrently
+     * handles the "left hand" part of the input
+     */
+    protected ForkJoinTask<List<List<SearchResults>>> forkLeftTask(int splitPos,
+                                                                   int mMinSplitSize) {
+        return new SearchWithForkJoinTask(mInputList.subList(0, splitPos),
+                                          mPhrasesToFind,
+                                          mParallelSearching,
+                                          mParallelPhrases,
+                                          mParallelInput,
+                                          mMinSplitSize).fork();
     }
 
     /**
@@ -209,16 +218,19 @@ public class SearchWithForkJoinTask
     }
 
     /**
-     * Create and fork a new SearchWithForkJoinTask that concurrently
-     * handles the "left hand" part of the input
+     * @return the combined result from the {@code leftTask} with the
+     * {@code rightResult}
      */
-    protected ForkJoinTask<List<List<SearchResults>>> forkLeftTask(int splitPos,
-                                                                   int mMinSplitSize) {
-        return new SearchWithForkJoinTask(mInputList.subList(0, splitPos),
-                                          mPhrasesToFind,
-                                          mParallelSearching,
-                                          mParallelPhrases,
-                                          mParallelInput,
-                                          mMinSplitSize).fork();
+    protected List<List<SearchResults>> 
+        combineResults(ForkJoinTask<List<List<SearchResults>>> leftTask,
+                       List<List<SearchResults>> rightResult) {
+        // Wait and join the results from the left task.,
+        List<List<SearchResults>> leftResult = leftTask.join();
+
+        // sConcatenate the left result with the right result.
+        leftResult.addAll(rightResult);
+
+        // Return the result.
+        return leftResult;
     }
 }

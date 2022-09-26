@@ -16,7 +16,7 @@ class BuggyQueue<E>
     /**
      * The queue consists of a LinkedList of E's.
      */
-    private LinkedList<E> mList = new LinkedList<>();
+    private LinkedList<E> mList;
 
     /**
      * The maximum capacity of the queue or Integer.MAX_VALUE if none.

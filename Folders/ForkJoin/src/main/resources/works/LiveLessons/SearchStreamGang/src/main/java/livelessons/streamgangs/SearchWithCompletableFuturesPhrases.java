@@ -2,8 +2,11 @@ package livelessons.streamgangs;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
+import livelessons.utils.ListOfFuturesCollector;
 import livelessons.utils.SearchResults;
+import livelessons.utils.StreamOfFuturesCollector;
 import livelessons.utils.StreamsUtils;
 
 import static java.util.stream.Collectors.toList;
@@ -33,9 +36,8 @@ public class SearchWithCompletableFuturesPhrases
      */
     @Override
     protected List<List<SearchResults>> processStream() {
-        // Convert the phrases to find into a list of CompletableFutures
-        // to lists of SearchResults.
-        List<CompletableFuture<List<SearchResults>>> listOfFutures = mPhrasesToFind
+        // Convert the phrases to find into a list of lists of SearchResults.
+        return mPhrasesToFind
             // Create a sequential stream of phrases to find.
             .stream()
 
@@ -45,15 +47,8 @@ public class SearchWithCompletableFuturesPhrases
 
             // Terminate stream and return a list of
             // CompletableFutures.
-            .collect(toList());
+            .collect(StreamOfFuturesCollector.toFuture())
                     
-        // Convert all the completed CompletableFutures in the
-        // listOfFutures into a list of lists of SearchResults.
-        return StreamsUtils
-            // Return a single completable future to a stream of
-            // completable futures.
-            .joinAllStream(listOfFutures)
-
             // This completion stage method is called when the future
             // completes (which occurs after all the futures in the
             // stream complete).
@@ -83,7 +78,7 @@ public class SearchWithCompletableFuturesPhrases
     private CompletableFuture<List<SearchResults>> processPhraseAsync(String phrase) {
         // Convert the input strings into a list of
         // CompletableFutures to SearchResults.
-        List<CompletableFuture<SearchResults>> listOfFutures = getInput()
+        return getInput()
             // Create a sequential stream of phrases to find.
             .stream()
 
@@ -107,11 +102,6 @@ public class SearchWithCompletableFuturesPhrases
 
             // Terminate stream and return a list of
             // CompletableFutures.
-            .collect(toList());
-
-        // Return a CompletableFuture to a list of SearchResults that
-        // will complete when all the CompletableFutures in the
-        // listOfFutures have completed.
-        return StreamsUtils.joinAll(listOfFutures);
+            .collect(ListOfFuturesCollector.toFuture());
     }
 }

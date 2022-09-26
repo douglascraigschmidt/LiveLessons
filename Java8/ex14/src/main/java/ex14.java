@@ -67,7 +67,7 @@ public class ex14 {
                         TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                                  // Split input into "words" by
                                                  // ignoring whitespace.
-                                                 "\\s+",
+                                                 sWHITESPACE_AND_PUNCTUATION,
                                                  limit);
 
                     // Create a LinkedList from the ArrayList.
@@ -79,19 +79,28 @@ public class ex14 {
                                        + arrayWords.size()
                                        + " words..");
 
-                    // Compute the time required to split/uppercase an
-                    // ArrayList via a sequential stream (and thus a
-                    // sequential spliterator).
-                    timeStreamUppercase("ArrayList",
-                                        arrayWords,
-                                        false);
-
                     // Compute the time required to split/uppercase a
                     // LinkedList via a sequential stream (and thus a
                     // sequential spliterator).
                     timeStreamUppercase("LinkedList",
                                         linkedWords,
                                         false);
+
+                    // Compute the time required to split/uppercase an
+                    // ArrayList via a sequential stream (and thus a
+                    // sequential spliterator).
+                    timeStreamUppercase("ArrayList",
+                                        arrayWords,
+                                        false);
+                    
+                    // Compute the time required to split/uppercase a
+                    // LinkedList via a parallel stream (and thus a
+                    // parallel spliterator).  The performance of this
+                    // test should be worse than the ArrayList test
+                    // since a LinkedList splits poorly.
+                    timeStreamUppercase("LinkedList",
+                                        linkedWords,
+                                        true);
 
                     // Compute the time required to split/uppercase an
                     // ArrayList via a parallel stream (and thus a
@@ -102,15 +111,6 @@ public class ex14 {
                     // (leading to balanced computation trees).
                     timeStreamUppercase("ArrayList",
                                         arrayWords,
-                                        true);
-
-                    // Compute the time required to split/uppercase a
-                    // LinkedList via a parallel stream (and thus a
-                    // parallel spliterator).  The performance of this
-                    // test should be worse than the ArrayList test
-                    // since a LinkedList splits poorly.
-                    timeStreamUppercase("LinkedList",
-                                        linkedWords,
                                         true);
 
                     // Print the results.
@@ -153,13 +153,33 @@ public class ex14 {
                                      .stream(words.spliterator(),
                                              parallel)
 
-                                     // Uppercase each string.
-                                     .map(string -> string.toUpperCase())
+                                     // Modify each string.
+                                     .map(string ->
+                                          rot13(string.toUpperCase()).toLowerCase())
 
                                      // Convert the Stream into a List.
                                      .toList()));
             },
             testName);
+    }
+
+    /**
+     * Computes and returns the rot13 encoding of the {@code input}.
+     *
+     * @param input The {@link String} to encode
+     * @return The rot13 encoding of the {@code input} {@link String}
+     */
+    static String rot13(String input) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if       (c >= 'a' && c <= 'm') c += 13;
+            else if  (c >= 'A' && c <= 'M') c += 13;
+            else if  (c >= 'n' && c <= 'z') c -= 13;
+            else if  (c >= 'N' && c <= 'Z') c -= 13;
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     /**
@@ -169,7 +189,7 @@ public class ex14 {
     private static void warmUpForkJoinPool() {
         System.out.println("\n++Warming up the fork/join pool\n");
 
-        List<CharSequence> words = Objects
+        List<String> words = Objects
             .requireNonNull(TestDataFactory
                             .getInput(sSHAKESPEARE_DATA_FILE,
                                       // Split input into "words" by
@@ -188,7 +208,7 @@ public class ex14 {
                         // Uppercase each string.  A "real"
                         // application would likely do something
                         // interesting with the words at this point.
-                        .map(charSeq -> charSeq.toString().toUpperCase())
+                        .map(string -> string.toUpperCase())
 
                         // Collect the stream into a list.
                         .collect(toList()));

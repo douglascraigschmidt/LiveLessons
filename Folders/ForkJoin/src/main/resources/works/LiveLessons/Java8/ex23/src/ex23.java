@@ -26,7 +26,7 @@ public class ex23 {
      * A counter used to monotonically/atomically generate a new value
      * each time it's called.
      */
-    private static AtomicInteger mCounter = 
+    private static final AtomicInteger mCounter =
         // Start at 10.
         new AtomicInteger(10);
 
@@ -34,7 +34,7 @@ public class ex23 {
      * This supplier increments the atomic counter, sleeps for 1
      * second, and then returns the incremented value.
      */
-    private static Supplier<Integer> mSupplier = () -> {
+    private static final Supplier<Integer> mSupplier = () -> {
         int result = mCounter.incrementAndGet();
         display("enter Supplier with value "
                 + result);
@@ -47,7 +47,7 @@ public class ex23 {
      * This function returns odd numbers passed to it and null if an
      * even number is passed to it.
      */
-    private static Function<Integer, Integer> mAction = i -> {
+    private static final Function<Integer, Integer> mAction = i -> {
         display("enter Function with value "
                 + i);
         display("leave Function");
@@ -59,7 +59,6 @@ public class ex23 {
      */
     public static void main (String[] argv) throws IOException {
         // A list of suppliers that return integers.
-        // List<Supplier<Integer>>
         var suppliers =
             List.of(mSupplier,
                     mSupplier,
@@ -133,7 +132,7 @@ public class ex23 {
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Apply action to results of the previous completion stage.
+            // Apply action to result of the previous completion stage.
             .map(intFuture -> intFuture.thenApply(mAction))
 
             // Trigger intermediate operations and return a future to

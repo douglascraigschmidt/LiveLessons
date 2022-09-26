@@ -5,8 +5,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This task uses the Java fork-join framework and the sequential
  * streams framework to compute the size in bytes of a given file, as

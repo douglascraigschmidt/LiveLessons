@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * This example shows how to apply Java 9 timeouts with the Java
- * completable futures framework.
+ * This example shows how to apply timeouts with the Java completable
+ * futures framework features available in Java 9.
  */
 public class ex27 {
     /**
@@ -63,8 +63,8 @@ public class ex27 {
                                    2,
                                    TimeUnit.SECONDS);
 
-            // Call this::convert method reference when both
-            // previous stages complete.
+            // Call this::convert method reference when both previous
+            // stages complete.
             bestPriceF
                 .thenCombine(exchangeRateF,
                              // Convert the price in dollars to the
@@ -121,7 +121,7 @@ public class ex27 {
         randomDelay();
 
         // Debugging print.
-        print("Rate comparision between " 
+        print("Rate comparison between "
               + source
               + " and "
               + destination);

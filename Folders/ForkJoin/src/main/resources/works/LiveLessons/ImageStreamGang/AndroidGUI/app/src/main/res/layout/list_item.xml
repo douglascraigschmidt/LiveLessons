@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoCompleteTextView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:hint="@string/url_prompt"
+	android:singleLine="false">
+	<requestFocus />  
+</AutoCompleteTextView>

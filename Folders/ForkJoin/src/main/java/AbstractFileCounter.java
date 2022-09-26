@@ -1,8 +1,6 @@
 import java.io.File;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Abstract super class for the various {@code FileCounter*} subclasses.
@@ -10,7 +8,7 @@ import java.util.function.Supplier;
 public abstract class AbstractFileCounter
        extends RecursiveTask<Long> {
     /**
-     * The current file that's being analyzed.
+     * The current file (i.e., document or folder) that's being analyzed.
      */
     protected final File mFile;
 

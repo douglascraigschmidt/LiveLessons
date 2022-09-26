@@ -1,23 +1,19 @@
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
- * @class OneShotExecutorCompletionService
- *
- * @brief Customizes the SearchTaskGangCommon framework to process a
- *        one-shot List of tasks via a variable-sized pool of Threads
- *        created by the ExecutorService. The units of concurrency are
- *        a "task per search word" *and* the input Strings. The
- *        results processing model uses an Asynchronous Future model,
- *        which starts processing results immediately.
+ * Customizes the {@link SearchTaskGangCommon} framework to process a
+ * one-shot {@link List} of tasks via a variable-sized pool of {@link
+ * Thread} objects created by the {@link ExecutorService}. The units
+ * of concurrency are a "task per search word" *and* the input
+ * strings. An asynchronous future results processing model is
+ * applied, which starts processing results immediately.
  */
 public class OneShotExecutorCompletionService
        extends SearchTaskGangCommon {
     /**
-     * Processes the results of Futures returned from the
-     * Executor.submit() method.
+     * Processes the results of Futures returned from the {@code
+     * Executor.submit()} method.
      */
     protected ExecutorCompletionService<SearchResults> mCompletionService;
 
@@ -34,10 +30,10 @@ public class OneShotExecutorCompletionService
         // which grow dynamically.
         setExecutor (Executors.newCachedThreadPool());
 
-        // Connect the Executor with the CompletionService
-        // to process SearchResults concurrently. 
+        // Connect the Executor with the CompletionService to process
+        // SearchResults concurrently.
         mCompletionService =
-            new ExecutorCompletionService<SearchResults>(getExecutor());
+            new ExecutorCompletionService<>(getExecutor());
     }
 
     /**
@@ -46,7 +42,7 @@ public class OneShotExecutorCompletionService
      */
     protected void initiateTaskGang(int inputSize) {
         // Enqueue each item in the input List for execution in the
-        // Executor's Thread pool.
+        // Executor's cached thread pool.
         for (int i = 0; i < inputSize; ++i) 
             getExecutor().execute(makeTask(i));
 
@@ -64,7 +60,6 @@ public class OneShotExecutorCompletionService
         // Iterate through each word and submit a Callable that will
         // search concurrently for this word in the inputData.
         for (final String word : mWordsToFind) {
-
             // This submit() call stores the Future result in the
             // ExecutorCompletionService for concurrent results
             // processing.
@@ -84,15 +79,14 @@ public class OneShotExecutorCompletionService
     protected void concurrentlyProcessQueuedFutures() {
         // Need to account for all the input data and all the words
         // that were searched for.
-        final int count = 
-            getInput().size() * mWordsToFind.length;
+        int count = getInput().size() * mWordsToFind.length;
 
         // Loop for the designated number of results.
         for (int i = 0; i < count; ++i) 
             try {
                 // Take the next ready Future off the
                 // CompletionService's queue.
-                final Future<SearchResults> resultFuture =
+                Future<SearchResults> resultFuture =
                     mCompletionService.take();
 
                 // The get() call will not block since the results

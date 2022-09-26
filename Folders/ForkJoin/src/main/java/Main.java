@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 
 /**
  * This example shows how to use various Java mechanisms (including
- * the Java fork-join pool framework and sequential/parallel Streams
+ * the Java fork-join pool framework and sequential Streams
  * framework) to count the number of files in a (large) recursive
  * folder hierarchy, as well as calculate the cumulative sizes of all
  * the files.
@@ -18,6 +18,13 @@ class Main {
     public static void main(String[] args) throws URISyntaxException {
         System.out.println("Starting the file counter program");
 
+        // Warmup the thread pool.
+        warmupThreadPool();
+
+        // Run a test that uses the Java fork-join framework in
+        // conjunction with Java 7 features.
+        runFileCounterTask();
+
         // Run a test that uses the Java Files.walkFileTree() method,
         // Java 7 features, and the Visitor pattern to count the
         // files.
@@ -26,10 +33,6 @@ class Main {
         // Run a test that uses the Java Files.walk() method and
         // a Java sequential stream to count the files.
         runFileCounterWalkSequentialStream();
-
-        // Run a test that uses the Java fork-join framework in
-        // conjunction with Java 7 features.
-        runFileCounterTask();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java sequential streams features.
@@ -70,7 +73,7 @@ class Main {
      * conjunction with Java 7 features.
      */
     private static void runFileCounterTask() throws URISyntaxException {
-        runTest(new ForkJoinPool(),
+        runTest(ForkJoinPool.commonPool(),
                 new FileCounterTask
                 (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterTask",
@@ -85,8 +88,19 @@ class Main {
         runTest(new ForkJoinPool(),
                 new FileCounterSequentialStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterStream",
+                "FileCounterSequentialStream",
                 true);
+    }
+
+    /**
+     * Warmup the thread pool.
+     */
+    private static void warmupThreadPool() throws URISyntaxException {
+        runTest(new ForkJoinPool(),
+                new FileCounterTask
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "warmup",
+                false);
     }
 
     /**
@@ -102,6 +116,11 @@ class Main {
                                 boolean printStats) {
         // Run the GC first to avoid perturbing the tests.
         System.gc();
+
+        if (testName.equals("warmup")) {
+            fJPool.invoke(testTask);
+            return;
+        }
 
         // Run the task on the root of a large directory hierarchy.
         long size = RunTimer.timeRun(() -> fJPool.invoke(testTask),

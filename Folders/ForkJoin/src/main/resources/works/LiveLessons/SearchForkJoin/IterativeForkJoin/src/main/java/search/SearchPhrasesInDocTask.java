@@ -8,14 +8,15 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
 /**
- * A RecursiveTask that searches a Document for a list of phrases.
+ * A {@link RecursiveTask} that searches a {@link Document} for a list
+ * of phrases.
  */
 public class SearchPhrasesInDocTask
        extends RecursiveTask<List<SearchResults>> {
     /**
      * Title of the work that's being searched.
      */
-    private String mTitle;
+    private final String mTitle;
 
     /**
      * The Document to search.
@@ -25,17 +26,17 @@ public class SearchPhrasesInDocTask
     /**
      * The list of phrases to find.
      */
-    private List<String> mPhraseList;
+    private final List<String> mPhraseList;
 
     /**
      * Indicates whether to run the search concurrently.
      */
-    private boolean mParallelSearching;
+    private final boolean mParallelSearching;
 
     /**
      * Indicates whether to run the phrases concurrently.
      */
-    private boolean mParallelPhrases;
+    private final boolean mParallelPhrases;
 
     /**
      * Constructor initializes the field.
@@ -53,7 +54,7 @@ public class SearchPhrasesInDocTask
     }
 
     /**
-     * This method searches the @a inputString for all occurrences of
+     * This method searches a {@link Document} for all occurrences of
      * the phrases to find.
      */
     @Override

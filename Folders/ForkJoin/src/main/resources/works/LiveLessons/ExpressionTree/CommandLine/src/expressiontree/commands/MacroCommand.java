@@ -14,8 +14,7 @@ public class MacroCommand
     /** 
      * Vector of commands that are executed as a macro. 
      */
-    private List<UserCommand> mMacroCommands =
-        new ArrayList<>();
+    private List<UserCommand> mMacroCommands;
 
     /**
      * Constructor that provides the appropriate @a TreeContext and

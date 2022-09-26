@@ -1,6 +1,7 @@
 package expressiontree.interpreter.postorder;
 
-import expressiontree.interpreter.InterpreterImpl;
+import expressiontree.interpreter.*;
+import expressiontree.interpreter.exprs.*;
 
 import java.util.Spliterators;
 import java.util.Stack;
@@ -30,7 +31,7 @@ class ExprSpliterator
     /**
      * The stack that stores intermediate and final expression results.
      */
-    private Stack<Expr> mStack;
+    private final Stack<Expr> mStack;
 
     /**
      * Constructor initializes the fields.
@@ -67,7 +68,7 @@ class ExprSpliterator
                 c = mInputExpression.charAt(mIndex++);
 
             // Handle a variable or number.
-            if (Character.isLetterOrDigit(c))
+            if (Character.isLetterOrDigit(c)) 
                 mStack.push(makeNumber(mInputExpression,
                             mIndex - 1));
             else {

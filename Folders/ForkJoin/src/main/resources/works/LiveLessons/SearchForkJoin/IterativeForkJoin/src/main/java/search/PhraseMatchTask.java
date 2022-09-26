@@ -8,10 +8,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is used in conjunction with the Java 8 fork-join pool to
- * create a list of SearchResults.Result objects that match the number
- * of times a phrase appears in an input string.  The comparison is
- * case-insensitive.
+ * This class is used in conjunction with the Java fork-join pool to
+ * create a list of {@link SearchResults.Result} objects that match
+ * the number of times a phrase appears in an input string.  The
+ * comparison is case-insensitive.
  */
 public class PhraseMatchTask
        extends RecursiveTask<SearchResults> {
@@ -83,7 +83,7 @@ public class PhraseMatchTask
             + "\\b";
 
         regexPhrase = regexPhrase
-            // Move various punctations so they aren't considered part
+            // Move various punctuations so they aren't considered part
             // of a word.
             .replace("?\\b", "\\b?")
             .replace(".\\b", "\\b.")
