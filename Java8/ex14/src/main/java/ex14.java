@@ -17,7 +17,7 @@ public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 1;
+    private static final int sMAX_ITERATIONS = 10;
 
     /**
      * The complete works of William Shakespeare.
