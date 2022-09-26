@@ -77,13 +77,8 @@ Here's an overview of what's currently included in these examples:
          containing a quote from a famous Shakespeare play.
 
 . ex14 - This example shows the difference in overhead/performance for
-          using a parallel spliterator to split a Java LinkedList and
-          an ArrayList into chunks.  It also demonstrates the
-          performance differences between concurrent and
-          non-concurrent techniques for joining results in a stream.
-          In addition, it demonstrates performance differences between
-          forEach() and forEachOrdered() terminal operations when
-          applied to accumulate results in a stream.
+         using parallel and sequential spliterators to split a Java
+         LinkedList and an ArrayList into chunks.
 
 . ex15 - This example shows the limitations of using inherently
          sequential modern Java streams operations (such as iterate()
@@ -236,3 +231,9 @@ Here's an overview of what's currently included in these examples:
 . ex42 - This example shows how to count the number of images in a
          recursively-defined folder structure using the Java
          sequential stream framework and the teeing Collector.
+
+. ex43 - This program demonstrates the performance differences between
+         concurrent and non-concurrent techniques for joining results
+         in a stream.  It also demonstrates performance differences
+         between forEach() and forEachOrdered() terminal operations
+         when applied to accumulate results in a stream.

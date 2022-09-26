@@ -22,7 +22,7 @@ public class Main {
      * Main entry point into the program.
      */
     static public void main(String[] argv) {
-        System.out.println("Starting ReactorFolders test");
+        System.out.println("Starting WebFluxFolders test");
 
         // Parse the options.
         Options.getInstance().parseArgs(argv);
@@ -57,7 +57,7 @@ public class Main {
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
 
-        System.out.println("Ending ReactorFolders test");
+        System.out.println("Ending WebFluxFolders test");
     }
 
     /**

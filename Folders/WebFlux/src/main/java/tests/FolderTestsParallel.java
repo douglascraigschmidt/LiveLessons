@@ -14,7 +14,7 @@ import static tests.FolderTestsUtils.sWORKS;
 
 /**
  * This Java utility class contains methods that run all the tests in
- * parallel using Reactor ParallelFlux mechanisms.
+ * parallel using {@code Reactor} {@link ParallelFlux} mechanisms.
  */
 public final class FolderTestsParallel {
     /**

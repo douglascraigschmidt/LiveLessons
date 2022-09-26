@@ -20,7 +20,7 @@ public class TestDataFactory {
 
     /**
      * Return a File object that's used to search a recursive
-     * directory containing the complete works of William Shakespeare.
+     * directory containing test folder contents.
      */
     public static File getRootFolderFile(String rootFolderName){
         Function<String, File> getFile = ExceptionUtils

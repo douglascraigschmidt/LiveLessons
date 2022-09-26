@@ -2,21 +2,15 @@ import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the difference in overhead/performance for using
- * a parallel spliterator to split a Java {@link LinkedList} and an
- * {@link ArrayList} into chunks.  It also demonstrates the
- * performance differences between concurrent and non-concurrent
- * techniques for joining results in a stream.  In addition, it
- * demonstrates performance differences between {@code forEach()} and
- * {@code forEachOrdered()} terminal operations when applied to
- * accumulate results in a stream.
+ * parallel and sequential spliterators to split a Java {@link LinkedList}
+ * and an {@link ArrayList} into chunks.
  */
 @SuppressWarnings("ALL")
 public class ex14 {
@@ -53,16 +47,6 @@ public class ex14 {
         // ArrayList and LinkedList spliterators.
         runSpliteratorTests();
 
-        // Run tests that demonstrate performance differences between
-        // concurrent and non-concurrent techniques for joining
-        // results in a stream.
-        runJoiningTests();
-
-        // Run tests that demonstrate performance differences between
-        // forEach() and forEachOrdered() terminal operations when
-        // applied to accumulate results in a stream.
-        runForEachTests();
-
         System.out.println("Exiting the test program");
     }
 
@@ -79,17 +63,15 @@ public class ex14 {
             .forEach (limit -> {
                     // Create a list of strings containing all the
                     // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
+                    List<String> arrayWords =
                         TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                                  // Split input into "words" by
                                                  // ignoring whitespace.
                                                  "\\s+",
                                                  limit);
 
-                    assert arrayWords != null;
-
                     // Create a LinkedList from the ArrayList.
-                    List<CharSequence> linkedWords =
+                    List<String> linkedWords =
                         new LinkedList<>(arrayWords);
 
                     // Print a message when the test starts.
@@ -98,125 +80,38 @@ public class ex14 {
                                        + " words..");
 
                     // Compute the time required to split/uppercase an
+                    // ArrayList via a sequential stream (and thus a
+                    // sequential spliterator).
+                    timeStreamUppercase("ArrayList",
+                                        arrayWords,
+                                        false);
+
+                    // Compute the time required to split/uppercase a
+                    // LinkedList via a sequential stream (and thus a
+                    // sequential spliterator).
+                    timeStreamUppercase("LinkedList",
+                                        linkedWords,
+                                        false);
+
+                    // Compute the time required to split/uppercase an
                     // ArrayList via a parallel stream (and thus a
                     // parallel spliterator).  The performance of this
                     // test should be good since ArrayLists have low
                     // split costs (just a few arithmetic operations
                     // and an object creation) and also split evenly
                     // (leading to balanced computation trees).
-                    timeParallelStreamUppercase("ArrayList",
-                                                arrayWords);
+                    timeStreamUppercase("ArrayList",
+                                        arrayWords,
+                                        true);
 
                     // Compute the time required to split/uppercase a
                     // LinkedList via a parallel stream (and thus a
                     // parallel spliterator).  The performance of this
                     // test should be worse than the ArrayList test
                     // since a LinkedList splits poorly.
-                    timeParallelStreamUppercase("LinkedList",
-                                                linkedWords);
-
-                    // Print the results.
-                    System.out.println("..printing results\n"
-                                       + RunTimer.getTimingResults());
-                });
-    }
-
-    /**
-     * Run tests that demonstrate performance differences between
-     * concurrent and non-concurrent techniques for joining results in
-     * a stream.
-     */
-    private static void runJoiningTests() {
-        Arrays
-            // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
-
-            // For each input data size run the following tests.
-            .forEach (limit -> {
-                    // Create a list of strings containing all the
-                    // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
-                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                 // Split input into "words" by
-                                                 // ignoring whitespace.
-                                                 "\\s+",
-                                                 limit);
-
-                    assert arrayWords != null;
-
-                    // Print a message when the test starts.
-                    System.out.println("Starting joining tests for "
-                                       + arrayWords.size() 
-                                       + " words..");
-
-                    // Compute the time required to join arrayWords
-                    // via collect() and Collectors.joining() in a
-                    // sequential stream.  The performance of this
-                    // test should be better than the parallel stream
-                    // version below since there's less overhead for
-                    // combining/joining the various partial results.
-                    timeStreamJoining("ArrayList",
-                                      false,
-                                      arrayWords);
-
-                    // Compute the time required to join arrayWords
-                    // via collect() and Collectors.joining() in a
-                    // parallel stream.  The performance of this test
-                    // should be worse than the sequential stream
-                    // version above due to the overhead of
-                    // combining/joining the various partial results
-                    // in parallel.
-                    timeStreamJoining("ArrayList",
-                                      true,
-                                      arrayWords);
-
-                    // Print the results.
-                    System.out.println("..printing results\n"
-                                       + RunTimer.getTimingResults());
-                });
-    }
-
-    /**
-     * Run tests that demonstrate the performance differences between
-     * the {@code forEach()} and {@code forEachOrdered()} terminal
-     * opperations when applied to accumulate results in a stream.
-     */
-    private static void runForEachTests() {
-        Arrays
-            // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
-
-            // For each input data size run the following tests.
-            .forEach (limit -> {
-                    // Create a list of strings containing all the
-                    // words in the complete works of Shakespeare.
-                    List<CharSequence> arrayWords =
-                        TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
-                                                 // Split input into "words" by
-                                                 // ignoring whitespace.
-                                                 "\\s+",
-                                                 limit);
-
-                    assert arrayWords != null;
-
-                    // Print a message when the test starts.
-                    System.out.println("Starting forEach* tests for "
-                                       + arrayWords.size() 
-                                       + " words..");
-
-                    // Compute the time required to aggregate results
-                    // into a ConcurrentHashMap.KeySetView using the forEach()
-                    // terminal operation.
-                    timeStreamForEachToSet("ArrayList",
-                                           false,
-                                           arrayWords);
-
-                    // Compute the time required to aggregate results
-                    // into a HashSet using the forEachOrdered()
-                    // terminal operation.
-                    timeStreamForEachToSet("ArrayList",
-                                           true,
-                                           arrayWords);
+                    timeStreamUppercase("LinkedList",
+                                        linkedWords,
+                                        true);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -226,165 +121,46 @@ public class ex14 {
 
     /**
      * Determines how long it takes to split and uppercase the word
-     * list via a parallel spliterator for various types of lists.
+     * list via a parallel or sequential spliterator for various
+     * types of lists.
      *
      * @param testName The name of the test being run
      * @param words The {@link List} of words to upper case
+     * @param parallel True if stream should be parallel else false
      */
-    private static void timeParallelStreamUppercase(String testName,
-                                                    List<CharSequence> words) {
+    private static void timeStreamUppercase(String testName,
+                                            List<String> words,
+                                            boolean parallel) {
         // Run the garbage collector before each test.
         System.gc();
 
-        testName += " parallel";
-        // System.out.println("Starting " + testName);
+        testName += parallel ? " parallel" : " sequential";
 
         RunTimer.timeRun(() -> {
                 // Create an empty list.
                 List<String> list = new ArrayList<>();
 
-                for (int i = 0; i < sMAX_ITERATIONS; i++) 
-                    // Append the new words to the end of the list.
-                    list.addAll(words
-                                // Convert the list into a parallel stream
-                                // (which uses a spliterator internally).
-                                .parallelStream()
+                IntStream
+                    // Iterate sMAX_ITERATIONS times.
+                    .range(0, sMAX_ITERATIONS)
+                    
+                    // Perform the following action each iteration.
+                    .forEach((i) -> list
+                             // Append new words to end of the list.
+                             .addAll(StreamSupport
+                                     // Convert List to sequential
+                                     // or parallel stream.
+                                     .stream(words.spliterator(),
+                                             parallel)
 
-                                // Uppercase each string.  A "real"
-                                // app would do something interesting
-                                // with the words at this point.
-                                .map(charSeq -> charSeq.toString().toUpperCase())
+                                     // Uppercase each string.
+                                     .map(string -> string.toUpperCase())
 
-                                // Collect the stream into a list.
-                                .collect(toList()));
+                                     // Convert the Stream into a List.
+                                     .toList()));
             },
             testName);
     }
-
-    /**
-     * Determines how long it takes to combine partial results in the
-     * word list via {@code collect()} and {@code
-     * Collectors.joining()} in a stream.  If {@code parallel} is true
-     * then a parallel stream is used, else a sequential stream is
-     * used.
-     *
-     * @param testName The name of the test being run
-     * @param parallel True if the test should run in parallel, else
-     *                 run sequentially
-     * @param words The {@link List} of words to upper case
-     */
-    private static void timeStreamJoining(String testName,
-                                          boolean parallel,
-                                          List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (parallel ? " parallel" : " sequential")
-            + " timeStreamJoining()";
-
-        // System.out.println("Starting " + testName);
-
-        RunTimer.timeRun(() -> {
-                StringBuilder results = new StringBuilder();
-
-                for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                    Stream<CharSequence> wordStream = words
-                        // Convert the list into a stream (which uses a
-                        // spliterator internally).
-                        .stream();
-
-                    if (parallel)
-                        // Convert to a parallel stream.
-                        wordStream.parallel();
-
-                    // A "real" application would likely do something
-                    // interesting with the words at this point.
-
-                    // Join all the words in the stream.
-                    CharSequence charSequence = wordStream
-                        .collect(joining(" "));
-
-                    // Add the joined results to the string builder.
-                    results.append(charSequence);
-                }},
-            testName);
-    }
-
-    /**
-     * Determines how long it takes to collect results into a {@link
-     * HashSet} using the {@code forEachOrdered()} terminal operation
-     * and into a {@link ConcurrentHashMap.KeySetView} using the {@code
-     * forEach()} terminal operation.
-
-     * @param testName The name of the test being run
-     * @param ordered If {@code ordered} is true then {@code
-     *                forEachOrdered()} and a {@link HashMap} is used,
-     *                else {@code forEach()} and a {@link
-     *                ConcurrentHashMap.KeySetView} is used.
-     * @param words The {@link List} of words to upper case
-     */
-    private static void timeStreamForEachToSet(String testName,
-                                               boolean ordered,
-                                               List<CharSequence> words) {
-        // Run the garbage collector before each test.
-        System.gc();
-
-        testName +=
-            (ordered ? " forEachOrdered()" : " forEach()")
-            + " timeStreamForEachToSet()";
-
-        if (ordered)
-            RunTimer.timeRun(() -> {
-                    // Create an unsynchronized HashSet since forEachOrdered()
-                    // performs synchronization implicitly.
-                    Set<CharSequence> uniqueWords = 
-                        new HashSet<>();
-
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        words
-                            // Convert the list into a stream (which
-                            // uses a spliterator internally).
-                            .parallelStream()
-
-                            // Map each string to lower case.  A
-                            // "real" application would likely do
-                            // something interesting with the words at
-                            // this point.
-                            .map(charSeq -> charSeq.toString().toLowerCase())
-
-                            // Trigger intermediate processing and
-                            // collect unique words into a HashSet.
-                            .forEachOrdered(uniqueWords::add);
-                    }},
-                testName);
-        else
-            RunTimer.timeRun(() -> {
-                    // Create a ConcurrentHashMap.KeySetView since
-                    // forEach() does not perform synchronization
-                    // implicitly.
-                    Set<CharSequence> uniqueWords = 
-                        ConcurrentHashMap.newKeySet();
-
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        words
-                            // Convert the list into a stream (which
-                            // uses a spliterator internally).
-                            .parallelStream()
-
-                            // Map each string to lower case.  A
-                            // "real" application would likely do
-                            // something interesting with the words at
-                            // this point.
-                            .map(charSeq -> charSeq.toString().toLowerCase())
-
-                            // Trigger intermediate processing and
-                            // collect unique words into a HashSet.
-                            .forEach(uniqueWords::add);
-                    }},
-                testName);
-    }
-
 
     /**
      * Warm up the threads in the fork/join pool so the timing results
