@@ -43,10 +43,9 @@ class Main {
      * Warmup the thread pool.
      */
     private static void warmUpThreadPool() throws URISyntaxException {
-        runTest(new ForkJoinPool(),
-                new FileCounterParallelStream
+        runTest(new FileCountParallelStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "WarmupThreadPool");
+                "warmup");
     }
 
     /**
@@ -54,8 +53,7 @@ class Main {
      * conjunction with Java parallel streams features.
      */
     private static void runFileCounterParallelStream() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStream
+        runTest(new FileCountParallelStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterParallelStream");
     }
@@ -66,8 +64,7 @@ class Main {
      * direct indexing.
      */
     private static void runFileCounterParallelStreamIndex() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStreamIndex
+        runTest(new FileCountParallelStreamIndex
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterParallelStreamIndex");
     }
@@ -78,8 +75,7 @@ class Main {
      * the teeing collector.
      */
     private static void runFileCounterParallelStreamTeeing() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStreamTeeing
+        runTest(new FileCountParallelStreamTeeing
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterParallelStreamTeeing");
     }
@@ -87,15 +83,18 @@ class Main {
     /**
      * Run all the tests and collect/print the results.
      *
-     * @param fJPool The fork-join pool to use for the test
      * @param testTask The file counter task to run
      * @param testName The name of the test
      */
-    private static void runTest(ForkJoinPool fJPool,
-                                AbstractFileCounter testTask,
+    private static void runTest(AbstractFileCounter testTask,
                                 String testName) {
         // Run the GC first to avoid perturbing the tests.
         System.gc();
+
+        if (testName.equals("warmup")) {
+            testTask.compute();
+            return;
+        }
 
         // Run the task on the root of a large directory hierarchy.
         long size = RunTimer.timeRun(testTask::compute,

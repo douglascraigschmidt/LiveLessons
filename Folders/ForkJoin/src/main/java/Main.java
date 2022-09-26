@@ -6,10 +6,9 @@ import java.util.concurrent.*;
 
 /**
  * This example shows how to use various Java mechanisms (including
- * the Java fork-join pool framework and sequential Streams
- * framework) to count the number of files in a (large) recursive
- * folder hierarchy, as well as calculate the cumulative sizes of all
- * the files.
+ * the Java fork-join pool framework and streams framework) to count
+ * the number of files in a (large) recursive folder hierarchy, as
+ * well as calculate the cumulative sizes of all the files.
  */
 class Main {
     /**
@@ -19,20 +18,18 @@ class Main {
         System.out.println("Starting the file counter program");
 
         // Warmup the thread pool.
-        warmupThreadPool();
+        warmupThreadPool2();
+
+        // Run a test that uses the Java fork-join framework in
+        // conjunction with Java parallel streams features.
+        runFileCounterParallelStream();
+
+        // Warmup the thread pool.
+        warmupThreadPool1();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.
         runFileCounterTask();
-
-        // Run a test that uses the Java Files.walkFileTree() method,
-        // Java 7 features, and the Visitor pattern to count the
-        // files.
-        runFileCounterWalkFileTree();
-
-        // Run a test that uses the Java Files.walk() method and
-        // a Java sequential stream to count the files.
-        runFileCounterWalkSequentialStream();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java sequential streams features.
@@ -45,30 +42,6 @@ class Main {
     }
 
     /**
-     * Run a test that uses the Java Files.walkFileTree() method, Java
-     * 7 features, and the Visitor pattern to count the files.
-     */
-    private static void runFileCounterWalkFileTree() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterWalkFileTree
-                (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkFileTree",
-                false);
-    }
-
-    /**
-     * Run a test that uses the Java Files.walk() method and a
-     * sequential stream to count the files.
-     */
-    private static void runFileCounterWalkSequentialStream() throws URISyntaxException {
-        runTest(ForkJoinPool.commonPool(),
-                new FileCounterWalkSequentialStream
-                (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterWalkStream",
-                false);
-    }
-
-    /**
      * Run a test that uses the Java fork-join framework in
      * conjunction with Java 7 features.
      */
@@ -76,8 +49,7 @@ class Main {
         runTest(ForkJoinPool.commonPool(),
                 new FileCounterTask
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterTask",
-                true);
+                "FileCounterTask");
     }
 
     /**
@@ -85,22 +57,38 @@ class Main {
      * conjunction with Java sequential streams features.
      */
     private static void runFileCounterSequentialStream() throws URISyntaxException {
-        runTest(new ForkJoinPool(),
+        runTest(ForkJoinPool.commonPool(),
                 new FileCounterSequentialStream
                 (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterSequentialStream",
-                true);
+                "FileCounterSequentialStream");
+    }
+
+    /**
+     * Run a test that uses the Java fork-join framework in
+     * conjunction with Java parallel streams features.
+     */
+    private static void runFileCounterParallelStream() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterParallelStream
+                (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterParallelStream");
     }
 
     /**
      * Warmup the thread pool.
      */
-    private static void warmupThreadPool() throws URISyntaxException {
-        runTest(new ForkJoinPool(),
+    private static void warmupThreadPool1() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
                 new FileCounterTask
                         (new File(ClassLoader.getSystemResource("works").toURI())),
-                "warmup",
-                false);
+                "warmup");
+    }
+
+    private static void warmupThreadPool2() throws URISyntaxException {
+        runTest(ForkJoinPool.commonPool(),
+                new FileCounterParallelStream
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "warmup");
     }
 
     /**
@@ -112,8 +100,7 @@ class Main {
      */
     private static void runTest(ForkJoinPool fJPool,
                                 AbstractFileCounter testTask,
-                                String testName,
-                                boolean printStats) {
+                                String testName) {
         // Run the GC first to avoid perturbing the tests.
         System.gc();
 
@@ -138,15 +125,6 @@ class Main {
                            + " folders) contained "
                            + size // / 1_000_000)
                            + " bytes");
-
-        // Only print these results for certain tests.
-        if (printStats)
-            System.out.println("pool size = "
-                               + fJPool.getPoolSize()
-                               + ", steal count = "
-                               + fJPool.getStealCount()
-                               + ", running thread count = "
-                               + fJPool.getRunningThreadCount());
     }
 }
 

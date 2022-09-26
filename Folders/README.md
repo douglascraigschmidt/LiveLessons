@@ -31,6 +31,11 @@ my Live Training courses.  Here's an overview of what's included:
   a recursively-structured directory folder sequentially and
   concurrently.
 
+. WalkTree - This example shows how to use various Java directory
+  traversal mechanisms to count the number of files in a (large)
+  recursive folder hierarchy, as well as calculate the cumulative
+  sizes of all the files.
+
 . WebFlux -- This example shows how to use the Spring WebFlux
   framework together with Project Reactor to process entries in a
   large recursive directory folder concurrently as a web service.

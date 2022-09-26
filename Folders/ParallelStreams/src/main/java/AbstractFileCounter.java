@@ -1,7 +1,7 @@
+import utils.TriFunction;
+
 import java.io.File;
-import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -84,19 +84,23 @@ public abstract class AbstractFileCounter {
      * Process a folder.
      *
      * @param folder The folder to process
-     * @param factory A {@link Supplier} factory that
+     * @param function A {@link TriFunction} factory that
      *                recursively counts the number of
      *                files in a (sub)folder
      * @return A count of the number of files in a (sub)folder
      */
     protected long handleFolder(File folder,
-                                Supplier<Long> factory) {
+                                AtomicLong documentCount,
+                                AtomicLong folderCount,
+                                TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter> function) {
         // Increment the count of folders.
         mFolderCount.incrementAndGet();
 
         // Call the factory to recursively count the number of files
         // in a (sub)folder.
-        return factory.get();
+        return function
+            .apply(folder, documentCount, folderCount)
+            .compute();
     };
 }
 
