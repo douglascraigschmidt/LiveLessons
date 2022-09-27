@@ -1,17 +1,20 @@
 package primechecker.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import primechecker.common.Constants;
 import primechecker.server.PrimeCheckController;
 import primechecker.utils.Options;
 import primechecker.utils.WebUtils;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
+import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
@@ -30,14 +33,9 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class PrimeCheckClient {
     /**
-     * Location of the server.
-     */
-    private final String mBaseUrl = Constants.SERVER_BASE_URL;
-
-    /**
-     * This auto-wired field connects the {@link
-     * PrimeCheckClient} to the {@link RestTemplate}
-     * that performs HTTP requests synchronously.
+     * This auto-wired field connects the {@link PrimeCheckClient} to
+     * the {@link RestTemplate} that performs HTTP requests
+     * synchronously.
      */
     @Autowired
     private RestTemplate mRestTemplate;
@@ -56,23 +54,20 @@ public class PrimeCheckClient {
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
                                              boolean parallel) {
-        var stream = primeCandidates
-            // Convert the List to a stream.
-            .stream();
-
-        // Conditionally convert to a parallel stream on
-        // the client.
-        if (parallel)
-            stream.parallel();
-
-        return stream
+        return StreamSupport
+            // Convert the List to a sequential or parallel stream.
+            .stream(primeCandidates.spliterator(), parallel)
             // Perform a remote call for each primeCandidate.
             .map(primeCandidate -> WebUtils
                  // Create and send a GET request to the server to
                  // check if the primeCandidate is prime or not.
                  .makeGetRequest(mRestTemplate,
                                  // Create the encoded URL.
-                                 makeCheckIfPrimeUrl(primeCandidate),
+                                 UriComponentsBuilder
+                                 .fromPath(CHECK_IF_PRIME)
+                                 .queryParam("primeCandidate", primeCandidate)
+                                 .build()
+                                 .toString(),
                                  // The return type is an Integer.
                                  Integer.class))
 
@@ -95,62 +90,22 @@ public class PrimeCheckClient {
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
-        // Create the encoded URL.
-        var getRequestUrl = makeCheckIfPrimeListUrl
-            (WebUtils
-             // Convert the List to a String.
-             .list2String(primeCandidates),
-             // Use parallel streams or not on the server.
-             parallel);
-
         return WebUtils
             // Create and send a GET request to the server to
             // check if the Integer objects in primeCandidates
             // are prime or not.
             .makeGetRequestList(mRestTemplate,
-                                getRequestUrl,
+                                // Create the encoded URL.
+                                UriComponentsBuilder
+                                .fromPath(CHECK_IF_PRIME_LIST)
+                                .queryParam("primeCandidates",
+                                            WebUtils
+                                            // Convert the List to a String.
+                                            .list2String(primeCandidates))
+                                .queryParam("parallel", parallel)
+                                .build()
+                                .toString(),
+                                // The return type of an array of Integer objects.
                                 Integer[].class);
-    }
-
-    /**
-     * This factory method creates a URL that can be passed to an HTTP
-     * GET request to determine if an {@link Integer} is prime.
-     *
-     * @param integer An {@link Integer} to check for primality
-     * @return A URL that can be passed to an HTTP GET request to
-     *         determine if the {@link Integer} is prime
-     */
-    private String makeCheckIfPrimeUrl(Integer integer) {
-        var getRequestUrl = mBaseUrl
-            + Constants.EndPoint.CHECK_IF_PRIME
-            + "?primeCandidate="
-            + integer;
-
-        Options.debug("url = " + getRequestUrl);
-
-        return getRequestUrl;
-    }
-
-    /**
-     * This factory method creates a URL that can be passed to an HTTP GET
-     * request to determine the primality of the {@code stringOfIntegers}.
-     *
-     * @param stringOfIntegers A {@link String} containing a comma-
-     *                         separated list of integers
-     * @return A URL that can be passed to an HTTP GET request to
-     *         determine the primality of {@code stringOfIntegers}
-     */
-    private String makeCheckIfPrimeListUrl(String stringOfIntegers,
-                                           boolean parallel) {
-        var getRequestUrl = mBaseUrl
-            + Constants.EndPoint.CHECK_IF_PRIME_LIST
-            + "?primeCandidates="
-            + stringOfIntegers
-            + "&parallel="
-            + parallel;
-
-        Options.debug("url = " + getRequestUrl);
-
-        return getRequestUrl;
     }
 }

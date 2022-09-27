@@ -1,24 +1,20 @@
-package primechecker.client;
+package folders.client;
 
+import folders.common.FolderOps;
+import folders.folder.Dirent;
+import folders.folder.Document;
+import folders.server.FolderController;
+import folders.utils.Options;
+import folders.utils.RunTimer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import primechecker.common.Constants;
-import primechecker.server.FolderController;
-import primechecker.utils.Options;
-import primechecker.utils.WebUtils;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
  * remote method invocations on the {@link FolderController} web
- * service to determine the primality of large integers.  These
- * invocations can be made individually or in bulk, as well as
- * be make sequentially or in parallel using Java Streams.
+ * service to process entries in a recursively-structured directory
+ * folder sequentially, concurrently, and in parallel in a
+ * client/server environment.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -26,131 +22,126 @@ import static java.util.stream.Collectors.toList;
  * inject the specified dependencies into them without having to write
  * any explicit code.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
 public class FolderClient {
-    /**
-     * Location of the server.
-     */
-    private final String mBaseUrl = Constants.SERVER_BASE_URL;
-
-    /**
-     * This auto-wired field connects the {@link
-     * FolderClient} to the {@link RestTemplate}
-     * that performs HTTP requests synchronously.
-     */
     @Autowired
-    private RestTemplate mRestTemplate;
+    private FolderProxy mFolderTestsProxy;
 
     /**
-     * Send individual HTTP GET requests to the server to check if a
-     * the {@code primeCandidates} {@link List} of {@link Integer}
-     * objects are prime or not.
+     * Create a folder either sequentially or concurrently (depending
+     * on the value of {@code concurrent}).
      *
-     * @param primeCandidates A {@link List} of {@link Integer}
-     *                        objects to check for primality
-     * @param parallel True if using parallel streams, else false
-     * @return A {@link List} of {@link Integer} objects indicating
-     *         the primality of the corresponding {@code primeCandidates}
-     *         elements
+     * @return Return A {@link Dirent} that contains a folder
      */
-    public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
-                                             boolean parallel) {
-        var stream = primeCandidates
-            // Convert the List to a stream.
-            .stream();
-
-        // Conditionally convert to a parallel stream on
-        // the client.
-        if (parallel)
-            stream.parallel();
-
-        return stream
-            // Perform a remote call for each primeCandidate.
-            .map(primeCandidate -> WebUtils
-                 // Create and send a GET request to the server to
-                 // check if the primeCandidate is prime or not.
-                 .makeGetRequest(mRestTemplate,
-                                 // Create the encoded URL.
-                                 makeCheckIfPrimeUrl(primeCandidate),
-                                 // The return type is an Integer.
-                                 Integer.class))
-
-            // Trigger the intermediate operations and collect the
-            // results into a List.
-            .collect(toList());
+    private Dirent createFolder(boolean concurrent,
+                                String mode) {
+            // Return a Dirent to a remote folder.
+            return RunTimer
+                // Compute the time needed to create a new remote
+                // folder synchronously.
+                .timeRun(() -> mFolderTestsProxy
+                         .createRemoteFolder(concurrent),
+                         "createFolder() remote " + mode);
     }
 
     /**
-     * Sends a {@link List} of {@code primeCandidate} {@link Integer}
-     * objects in one HTTP GET request to the server to determine
-     * which {@link List} elements are prime or not.
-     *
-     * @param primeCandidates A {@link List} of {@link Integer}
-     *                        objects to check for primality
-     * @param parallel True if using parallel streams, else false
-     * @return A {@link List} of {@link Integer} objects indicating
-     *         the primality of the corresponding {@code primeCandidates}
-     *         elements
+     * Run the tests either sequentially or concurrently (depending on
+     * the value of {@code concurrent}).
      */
-    public List<Integer> testListCall(List<Integer> primeCandidates,
-                                      boolean parallel) {
-        // Create the encoded URL.
-        var getRequestUrl = makeCheckIfPrimeListUrl
-            (WebUtils
-             // Convert the List to a String.
-             .list2String(primeCandidates),
-             // Use parallel streams or not on the server.
-             parallel);
+    public void runTests(boolean concurrent) {
+        // Record whether we're running concurrently or sequentially.
+        String mode = concurrent ? "concurrently" : "sequentially";
 
-        return WebUtils
-            // Create and send a GET request to the server to
-            // check if the Integer objects in primeCandidates
-            // are prime or not.
-            .makeGetRequestList(mRestTemplate,
-                                getRequestUrl,
-                                Integer[].class);
+        Options.print("Starting the mostly local tests " + mode);
+
+        // The word to search for while the folder's being
+        // constructed.
+        final String searchWord = "CompletableFuture";
+
+        // Get a folder from the server.
+        Dirent rootFolder = createFolder(concurrent,
+                                         mode);
+
+        var matches = RunTimer
+            // Compute the time taken to synchronously search for a
+            // word in all folders starting at the rootFolder.
+            .timeRun(() -> FolderOps
+                     .countWordMatches(rootFolder,
+                                       searchWord,
+                                       concurrent),
+                     "searchFolders() local " + mode);
+
+        Options.debug(searchWord + " matched " + matches + " times");
+
+        var entries = RunTimer
+            // Compute the time taken to count the entries in the
+            // folder.
+            .timeRun(() -> FolderOps
+                     .countEntries(rootFolder, concurrent),
+                     "countEntries() local " + mode);
+
+        Options.debug("The number of entries = " + entries);
+
+        var lines = RunTimer
+            // Compute the time taken to count the # of lines in the
+            // folder.
+            .timeRun(() -> FolderOps
+                     .countLines(rootFolder, concurrent),
+                     "countLines() local " + mode);
+
+        Options.debug("The number of lines = " + lines);
+        
+        var documents = RunTimer
+            // Compute the time taken to determine how many documents
+            // the search word appeared in.
+            .timeRun(() -> FolderOps
+                     .getDocuments(rootFolder,
+                                   "CompletableFuture",
+                                   concurrent),
+                     "getDocuments() local " + mode);
+
+        Options.debug(searchWord + " was found in " + documents.size() + " documents");
+
+        Options.print("Ending the mostly local tests " + mode);
     }
 
     /**
-     * This factory method creates a URL that can be passed to an HTTP
-     * GET request to determine if an {@link Integer} is prime.
-     *
-     * @param integer An {@link Integer} to check for primality
-     * @return A URL that can be passed to an HTTP GET request to
-     *         determine if the {@link Integer} is prime
+     * Run the remote tests either sequentially or concurrently
+     * (depending on the value of {@code concurrent}).
      */
-    private String makeCheckIfPrimeUrl(Integer integer) {
-        var getRequestUrl = mBaseUrl
-            + Constants.EndPoint.CHECK_IF_PRIME
-            + "?primeCandidate="
-            + integer;
+    public void runRemoteTests(boolean concurrent) {
+        Options.print("Starting the remote tests");
 
-        Options.debug("url = " + getRequestUrl);
+        // Record whether we're running concurrently or sequentially.
+        String mode = concurrent ? "concurrently" : "sequentially";
 
-        return getRequestUrl;
-    }
+        var count = RunTimer
+            .timeRun(() -> mFolderTestsProxy
+                     .countEntries(concurrent),
+                     "countEntries remote " + mode);
 
-    /**
-     * This factory method creates a URL that can be passed to an HTTP GET
-     * request to determine the primality of the {@code stringOfIntegers}.
-     *
-     * @param stringOfIntegers A {@link String} containing a comma-
-     *                         separated list of integers
-     * @return A URL that can be passed to an HTTP GET request to
-     *         determine the primality of {@code stringOfIntegers}
-     */
-    private String makeCheckIfPrimeListUrl(String stringOfIntegers,
-                                           boolean parallel) {
-        var getRequestUrl = mBaseUrl
-            + Constants.EndPoint.CHECK_IF_PRIME_LIST
-            + "?primeCandidates="
-            + stringOfIntegers
-            + "&parallel="
-            + parallel;
+        System.out.println("Count of dirent entries = "
+                           + count);
 
-        Options.debug("url = " + getRequestUrl);
+        var search = RunTimer
+            .timeRun(() -> mFolderTestsProxy
+                     .searchWord("CompletableFuture",
+                                 concurrent),
+                     "searchWord remote " + mode);
 
-        return getRequestUrl;
+        System.out.println("Count # of times \"CompletableFuture\" appears = "
+                           + search);
+
+        var results = RunTimer
+            .timeRun(() -> mFolderTestsProxy
+                     .getDocuments("CompletableFuture",
+                                   concurrent),
+                     "getDocuments remote " + mode);
+        
+        System.out.println("Count # of documents \"CompletableFuture\" appears = "
+                           // Count the # of documents that match.
+                           + results.size());
+
+        Options.print("Ending the remote tests");
     }
 }

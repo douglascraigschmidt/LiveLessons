@@ -1,14 +1,16 @@
-package primechecker.common;
+package folders.common;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import primechecker.server.PrimeCheckService;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+
+import static folders.common.Constants.SERVER_BASE_URL;
 
 /**
  * This class contains {@code Bean} annotated methods that can be
- * injected into client and server classes using the {@code @Autowired}
- * annotation.
+ * injected into client and server classes using the
+ * {@code @Autowired} annotation.
  */
 @Component
 public class Components {
@@ -20,6 +22,13 @@ public class Components {
      */
     @Bean
     public RestTemplate getRestTemplate() {
-        return new RestTemplate();
+        var restTemplate = new RestTemplate();
+
+        restTemplate
+            // Set the base URL for the RestTemplate.
+            .setUriTemplateHandler(new DefaultUriBuilderFactory(SERVER_BASE_URL));
+
+        // Return restTemplate.
+        return restTemplate;
     }
 }

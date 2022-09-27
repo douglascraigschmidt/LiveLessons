@@ -1,125 +1,115 @@
-package primechecker.server;
+package folders.server;
 
+import folders.common.FolderOps;
+import folders.folder.Dirent;
 import org.springframework.stereotype.Service;
-import primechecker.utils.Options;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This class defines implementation methods that are called by the
- * {@link FolderController}. These implementation methods check
- * the primality of one or more {@link Integer} objects using the Java
- * Streams framework.  A sequential or parallel stream is used based
- * on parameters passed by clients.
+ * {@link FolderController}. These implementation methods perform
+ * operations on recursively-structured folders containing documents
+ * and/or sub-folders.  A sequential or parallel Java stream is used
+ * based on parameters passed by clients.
  *
  * This class is annotated as a Spring {@code @Service}, which
  * indicates this class implements "business logic" and enables the
  * auto-detection and wiring of dependent implementation classes via
  * classpath scanning.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @Service
 public class FolderService {
     /**
-     * Checks the {@code primeCandidate} param for primality,
-     * returning 0 if it's prime or the smallest factor if it's not.
+     * This method returns a {@link Long} that counts the number of
+     * entries in the folder starting at {@code rootDir}.
      *
-     * @param primeCandidate The {@link Integer} to check for
-     *                       primality
-     * @return An {@link Integer} that is 0 if the {@code
-     *         primeCandidate} is prime and its smallest factor if
-     *         it's not prime
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Long} that counts the number of entries in the
+     *         folder starting at {@code rootDir}
      */
-    public Integer checkIfPrime(Integer primeCandidate) {
-        // Determine primality.
-        var result = isPrime(primeCandidate);
+    public Long countEntries(String rootDir,
+                             Boolean concurrent) {
+        Dirent rootFolder = FolderOps
+            // Create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
 
-        // Conditional print the result.
-        Options.debug("Result for "
-                      + primeCandidate
-                      + " = "
-                      + result);
-
-        // Return 0 if primeCandidate was prime and its smallest
-        // factor if it's not prime.
-        return result;
+        return FolderOps
+            // Return the # of entries starting at rootDir.
+            .countEntries(rootFolder,
+                          concurrent);
     }
 
     /**
-     * Checks all the elements in the {@code primeCandidates} {@link
-     * List} param for primality and return a corresponding {@link
-     * List} whose results indicate 0 if an element is prime or the
-     * smallest factor if it's not.
+     * This method returns a {@link Long} that emits a count of the
+     * number of times a {@code word} appears in the folder starting
+     * at {@code rootDir}.
      *
-     * @param primeCandidates The {@link List} of {@link Integer}
-     *                        objects to check for primality
-     * @param parallel True if primality checking should run in
-     *                 parallel, else false if it should run sequentially
-     * @return An {@link List} whose elements are 0 if the
-     *         corresponding element in {@code primeCandidate} is
-     *         prime or its smallest factor if it's not prime
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done concurrently or not
+     * @return A {@link Long} that counts the number of times {@code
+     *         word} appears in the folder starting at {@code rootDir}
      */
-    public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
-                                          Boolean parallel) {
-        var stream = primeCandidates
-            // Create a (sequential) stream.
-            .stream();
+    public Long searchWord(String rootDir,
+                           String word,
+                           Boolean concurrent) {
+        Dirent rootFolder = this
+            // Synchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
 
-        // Conditionally convert the sequential stream to a parallel
-        // stream.
-        if (parallel)
-            stream.parallel();
-
-        var results = stream
-            // Call the isPrime() method on each Integer in the
-            // stream.
-            .map(this::isPrime)
-
-            // Trigger intermediate operations and collect into a List.
-            .collect(toList());
-
-        // Conditionally display the results.
-        if (Options.instance().diagnosticsEnabled())
-            Options.displayResults(primeCandidates, results);
-
-        // Return the results.
-        return results;
+        return FolderOps
+            // Return the number of times word appears in the root
+            // folder.
+            .countWordMatches(rootFolder, word, concurrent);
     }
 
     /**
-     * This method determines whether the {@code primeCandidate} param
-     * is prime.
+     * This method returns a {@link Dirent} that contains all the
+     * entries in the folder, starting at {@code rootDir}.
      *
-     * @param primeCandidate The {@link Integer} to check for primality
-     * @return Returns 0 if {@code primeCandidate} is prime, or the
-     *         smallest factor if it is not prime
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Dirent} that contains all the entries in the
+     *         folder starting at {@code rootDir}
      */
-    private Integer isPrime(Integer primeCandidate) {
-        int n = primeCandidate;
-
-        // Check if n is a multiple of 2 and return
-        // immediately if it is.
-        if (n % 2 == 0) 
-            return 2;
-
-        // If not, then just check the odds.
-        for (int factor = 3;
-             factor * factor <= n;
-             // Skip over even numbers.
-             factor += 2)
-            // Check for interrupts every 1,000 iterations.
-            if ((factor % (n / 1_000)) == 0
-                && Thread.interrupted()) {
-                    System.out.println("Prime checker thread interrupted "
-                                       + Thread.currentThread());
-                    break;
-            } else if (n % factor == 0)
-                // The primeCandidate number is not a prime.
-                return factor;
-
-        // The primeCandidate number is a prime.
-        return 0;
+    public Dirent createFolder(String rootDir,
+                               Boolean concurrent) {
+        // Return a Dirent containing the initialized folder.
+        return FolderOps
+            // Create a folder with all works in the root
+            // directory.
+            .createFolder(rootDir,
+                          concurrent);
     }
+
+    /**
+     * This method returns a {@link List} containing all the documents
+     * where a {@code word} appears in the folder, starting at {@code
+     * rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done
+     *                   concurrently or not
+     * @return A {@link List} containing all the documents where
+     *         {@code word} appears in the folder starting at {@code
+     *         rootDir}
+     */
+    public List<Dirent> getDocuments(String rootDir,
+                                     String word,
+                                     Boolean concurrent) {
+        Dirent rootFolder = this
+            // Synchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
+            // Return a List containing all documents where the search
+            // word appears starting from the root folder.
+            .getDocuments(rootFolder, word, concurrent);
+    }
+
 }

@@ -1,24 +1,32 @@
-package primechecker.utils;
+package folders.utils;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import static java.util.stream.Collectors.toList;
 
 /**
- * This class implements the Singleton pattern to handle command-line
- * option processing.
+ * The options singleton.
  */
 public class Options {
     /**
-     * Logging tag.
+     * The one and only singleton unique instance.
      */
-    private static final String TAG = Options.class.getName();
+    private static Options sInstance;
 
-    /** 
-     * The singleton {@code Options} instance.
+    /**
+     * Return the one and only singleton unique instance.
      */
-    private static Options sInstance = null;
+    public static Options getInstance() {
+        if (sInstance == null)
+            sInstance = new Options();
+
+        return sInstance;
+    }
 
     /**
      * Controls whether debugging output will be generated (defaults
@@ -27,45 +35,21 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
-     * Controls whether backpressure is enabled (defaults to true).
+     * Keeps track of whether to run the tests sequentially or not.
+     * Defaults to true.
      */
-    private boolean mBackPressureEnabled = true;
+    private boolean mSequential = true;
 
     /**
-     * Controls how many longs are generated.
+     * Keeps track of whether to run the tests concurrently or not.
+     * Defaults to false.
      */
-    private int mCount = 100;
+    private boolean mConcurrent = false;
 
     /**
-     * Controls the max value of the random numbers.
+     * Keeps track of whether logging is enabled.  Default is false.
      */
-    private int mMaxValue = Integer.MAX_VALUE;
-
-    /**
-     * Controls whether logging is enabled
-     */
-    private boolean mLoggingEnabled;
-
-    /**
-     * True if the producer and consumer should run in parallel, else
-     * false.
-     */
-    private boolean mParallel = true;
-
-    /**
-     * The parallelism level if mParallel is true.  Defaults to 1.
-     */
-    private int mParallelism = 1;
-
-    /**
-     * Method to return the one and only singleton uniqueInstance.
-     */
-    public static Options instance() {
-        if (sInstance == null)
-            sInstance = new Options();
-
-        return sInstance;
-    }
+    private boolean mLoggingEnabled = false;
 
     /**
      * @return True if debugging output is printed, else false.
@@ -75,39 +59,64 @@ public class Options {
     }
 
     /**
-     * @return True the producer and consumer should run in parallel,
-     * else false.
+     * The tags to use to control how {@code Options.debug()} behaves.
      */
-    public boolean parallel() {
-        return mParallel;
+    private List<String> mTagsList = new ArrayList<>();
+
+    /**
+     * A singleton should have a private constructor.
+     */
+    private Options() {
+        // Disable the verbose/annoying Spring "debug" logging.
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+            LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        logger.setLevel(Level.toLevel("error"));
     }
 
     /**
-     * @return The parallelism level.
+     * Parse command-line arguments and set the appropriate values.
      */
-    public int parallelism() {
-        return mParallelism;
+    public boolean parseArgs(String[] argv) {
+        // Process the arguments.
+        if (argv != null) {
+            for (int argc = 0; argc < argv.length; argc += 2)
+                switch (argv[argc]) {
+                case "-c":
+                    mConcurrent = argv[argc + 1].equals("true");
+                    break;
+                case "-d":
+                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    break;
+                case "-s":
+                    mSequential = argv[argc + 1].equals("true");
+                    break;
+                case "-T":
+                    mTagsList = Pattern
+                        .compile(",")
+                        .splitAsStream(argv[argc + 1])
+                        .collect(toList());
+                    break;
+                case "-v":
+                    mLoggingEnabled = argv[argc + 1].equals("true");
+                    break;
+                default:
+                    printUsage();
+                    return false;
+                }
+        }
+
+        return true;
     }
 
-    /**
-     * @return The number of integers to generate.
+    /** 
+     * Print out usage and default values. 
      */
-    public int count() {
-        return mCount;
-    }
-
-    /**
-     * @return The max value for the random numbers.
-     */
-    public int maxValue() {
-        return mMaxValue;
-    }
-
-    /**
-     * @return True if logging is enabled, else false.
-     */
-    public boolean loggingEnabled() {
-        return mLoggingEnabled;
+    private void printUsage() {
+        System.out.println("Usage: ");
+        System.out.println("-c [true|false]\n"
+                           + "-d [true|false]\n"
+                           + "-T [tag,...]\n"
+                           + "-v [true|false]");
     }
 
     /**
@@ -127,7 +136,8 @@ public class Options {
      * diagnostics are enabled.
      */
     public static void debug(String tag, String string) {
-        if (sInstance.mDiagnosticsEnabled)
+        if (sInstance.mDiagnosticsEnabled
+            && sInstance.mTagsList.contains(tag))
             Options.debug(string);
     }
 
@@ -142,86 +152,16 @@ public class Options {
     }
 
     /**
-     * Parse command-line arguments and set the appropriate values.
+     * @return True if running sequential, else false
      */
-    public void parseArgs(String[] argv) {
-        if (argv != null) {
-            for (int argc = 0; argc < argv.length; argc += 2)
-                switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
-                        break;
-                case "-c":
-                    mCount = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-m":
-                    mMaxValue = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-p":
-                    mParallel = argv[argc + 1].equals("true");
-                    break;
-                case "-P":
-                    mParallelism = Integer.parseInt(argv[argc + 1]);
-                    break;
-                default:
-                    printUsage();
-                    return;
-                }
-            if (mMaxValue - mCount <= 0)
-                throw new IllegalArgumentException("maxValue - count must be greater than 0");
-        }
+    public boolean sequential() {
+        return mSequential;
     }
 
     /**
-     * Iterate through the original List of prime candidates and
-     * display both each prime candidate and the corresponding prime
-     * result.
-     *
-     * @param primeCandidates A {@link List} of prime candidates
-     * @param results A {@link List} containing the results of the
-     *                primality checks
+     * @return True if running concurrently, else false.
      */
-    public static void displayResults(List<Integer> primeCandidates,
-                                      List<Integer> results) {
-        // Iterate through the original List of prime candidates and
-        // conditionally print each prime candidate and the
-        // corresponding prime result.
-        for (int i = 0; i < primeCandidates.size(); i++) {
-            var original = primeCandidates.get(i);
-            var result = results.get(i);
-
-            // assert original.equals(result);
-
-            Options.debug("Result for "
-                         + original
-                         + " = "
-                         + result);
-        }
-    }
-
-    /**
-     * Print out usage and default values.
-     */
-    private void printUsage() {
-        System.out.println("Usage: ");
-        System.out.println("-c [n] "
-                           + "-d [true|false] "
-                           + "-l [true|false] "
-                           + "-m [maxValue] "
-                           + "-p [true|false]"
-                           + "-P [parallelism]");
-    }
-
-    /**
-     * Make the constructor private for a singleton.
-     */
-    private Options() {
-        // Disable the verbose/annoying Spring "debug" logging.
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
-            LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        logger.setLevel(Level.toLevel("error"));
+    public boolean concurrent() {
+        return mConcurrent;
     }
 }

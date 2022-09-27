@@ -1,4 +1,4 @@
-package primechecker.utils;
+package folders.utils;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;

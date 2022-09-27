@@ -1,99 +1,134 @@
-package primechecker.server;
+package folders.server;
 
+import folders.folder.Dirent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import primechecker.utils.Options;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
-import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
-import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
+import static folders.common.Constants.EndPoint.*;
 
 /**
  * This Spring controller demonstrates how WebMVC can be used to
- * handle HTTP GET requests via the Java Streams framework.  These
- * requests are mapped to endpoint handler methods that determine the
- * primality of large random {@link Integer} objects.  These methods
- * can be passed either individual prime candidates or a {@link List}
- * of prime candidates and process these candidates using a sequential
- * or parallel stream in response to client directives.
- * <p>
+ * handle HTTP GET requests via Java streams programming.  These GET
+ * requests are mapped to various methods that perform operations on
+ * recursively-structured folders containing documents and/or
+ * sub-folders.
+ *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
  * endpoints/routes for each supported operation, i.e.,
  * {@code @GetMapping}, {@code @PostMapping}, {@code @PutMapping} and
  * {@code @DeleteMapping}, which correspond to the HTTP GET, POST,
  * PUT, and DELETE calls, respectively.  These components are
- * identified by the {@code @RestController} annotation below.
- * <p>
+ * identified by the @RestController annotation below.
+ *
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@link FolderController}.  GET
- * requests invoked from any HTTP web client (e.g., a web browser or
- * client app) or command-line utility (e.g., Curl or Postman).
- * <p>
- * The {@code @RestController} annotation also tells a controller that
- * the object returned is automatically serialized into JSON and passed
- * back within the body of an {@link HttpResponse} object.
+ * requests onto methods in the {@code FolderController}.  GET
+ * requests invoked from any HTTP web client (e.g., a web browser) or
+ * command-line utility (e.g., Curl or Postman).
  */
 @RestController
+@RequestMapping(FOLDERS)
 public class FolderController {
     /**
-     * This auto-wired field connects the {@link FolderController}
-     * to the {@link FolderService}.
+     * This auto-wired field connects the {@link FolderController} to
+     * the {@link FolderService}.
      */
     @Autowired
-    FolderService mService;
+    private FolderService mFolderService;
 
     /**
-     * Checks the {@code primeCandidate} param for primality,
-     * returning 0 if it's prime or the smallest factor if it's not.
-     * <p>
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * CHECK_IF_PRIME} endpoint to this method.
+     * This method returns a {@link Long} that counts the number of
+     * times a {@code word} appears in the folder starting at {@code
+     * rootDir}.
      *
-     * @param primeCandidate The {@link Integer} to check for
-     *                       primality
-     * @return An {@link Integer} that is 0 if the {@code
-     * primeCandidate} is prime and its smallest factor if
-     * it's not prime
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/SearchFolder" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done concurrently or not
+     * @return A {@link Long} that counts the number of times {@code
+     *         word} appears in the folder starting at {@code rootDir}
      */
-    @GetMapping(CHECK_IF_PRIME)
-    public int checkIfPrime(@RequestParam int primeCandidate) {
-        Options.debug("checkIfPrime()");
-
-        return mService
-                // Forward to the service.
-                .checkIfPrime(primeCandidate);
+    @GetMapping(PATH + SEARCH)
+    public Long searchWord(@PathVariable String rootDir,
+                           @RequestParam String word,
+                           @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .searchWord(rootDir, word, concurrent);
     }
 
     /**
-     * Checks all the elements in the {@code primeCandidates} {@link
-     * List} param for primality and return a corresponding {@link
-     * List} whose results indicate 0 if an element is prime or the
-     * smallest factor if it's not.
-     * <p>
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * CHECK_IF_PRIME_LIST} endpoint to this method.
+     * This method returns a {@link List} that containing all the
+     * documents where a {@code word} appears in the folder, starting
+     * at {@code rootDir}.
      *
-     * @param primeCandidates The {@link List} of {@link Integer}
-     *                        objects to check for primality
-     * @param parallel        True if primality checking should run in
-     *                        parallel, else false if it should run
-     *                        sequentially
-     * @return An {@link List} whose elements are 0 if the
-     * corresponding element in {@code primeCandidate} is
-     * prime or its smallest factor if it's not prime
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/getDocuments" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done
+     *                   concurrently or not
+     * @return A {@link List} containing all the documents where
+     *         {@code word} appears in the folder starting at {@code
+     *         rootDir}
      */
-    @GetMapping(CHECK_IF_PRIME_LIST)
-    public List<Integer> checkIfPrimeList
-    (@RequestParam List<Integer> primeCandidates,
-     Boolean parallel) {
-        Options.debug("checkIfPrimeList()");
+    @GetMapping(PATH + GET_DOCUMENTS)
+    public List<Dirent> getDocuments(@PathVariable String rootDir,
+                                     @RequestParam String word,
+                                     @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .getDocuments(rootDir, word, concurrent);
+    }
+	
+    /**
+     * This method returns {@link Long} that counts the number
+     * of entries in the folder starting at {@code rootDir}.
+     *
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/countDocuments" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Long} that counts the number of entries in the
+     *         folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + COUNT_DOCUMENTS)
+    public Long countEntries(@PathVariable String rootDir,
+                             @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .countEntries(rootDir, concurrent);
+    }
 
-        return mService
-                // Forward to the service.
-                .checkIfPrimeList(primeCandidates,
-                        parallel);
+    /**
+     * This method returns a {@link Dirent} that contains all the
+     * entries in the folder, starting at {@code rootDir}.
+     *
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/createFolder" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Dirent} that contains all the entries in the
+     *         folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + CREATE_FOLDER)
+    public Dirent createFolder(@PathVariable String rootDir,
+                               @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .createFolder(rootDir, concurrent);
     }
 }
