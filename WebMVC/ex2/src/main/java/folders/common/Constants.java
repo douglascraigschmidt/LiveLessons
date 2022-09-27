@@ -16,6 +16,7 @@ public class Constants {
         public static final String SEARCH = "/searchFolder";
         public static final String GET_DOCUMENTS = "/getDocuments";
         public static final String COUNT_DOCUMENTS = "/countDocuments";
+        public static final String COUNT_LINES = "/countLines";
         public static final String CREATE_FOLDER = "/createFolder";
     }
 }

@@ -112,6 +112,27 @@ public class FolderController {
     }
 
     /**
+     * This method returns {@link Long} that counts the number of
+     * lines in entries in the folder starting at {@code rootDir}.
+     *
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/countLines" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Long} that counts the number of lines in
+     *         entries in the folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + COUNT_LINES)
+    public Long countLines(@PathVariable String rootDir,
+                           @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .countLines(rootDir, concurrent);
+    }
+
+    /**
      * This method returns a {@link Dirent} that contains all the
      * entries in the folder, starting at {@code rootDir}.
      *

@@ -21,6 +21,26 @@ import java.util.List;
 @Service
 public class FolderService {
     /**
+     * This method returns a {@link Dirent} that contains all the
+     * entries in the folder, starting at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Dirent} that contains all the entries in the
+     *         folder starting at {@code rootDir}
+     */
+    public Dirent createFolder(String rootDir,
+                               Boolean concurrent) {
+        // Return a Dirent containing the initialized folder.
+        return FolderOps
+            // Create a folder with all works in the root
+            // directory.
+            .createFolder(rootDir,
+                          concurrent);
+    }
+
+    /**
      * This method returns a {@link Long} that counts the number of
      * entries in the folder starting at {@code rootDir}.
      *
@@ -40,6 +60,28 @@ public class FolderService {
             // Return the # of entries starting at rootDir.
             .countEntries(rootFolder,
                           concurrent);
+    }
+
+    /**
+     * This method returns {@link Long} that counts the number of
+     * lines in entries in the folder starting at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Long} that counts the number of lines in
+     *         entries in the folder starting at {@code rootDir}
+     */
+    public Long countLines(String rootDir,
+                           Boolean concurrent) {
+        Dirent rootFolder = FolderOps
+            // Create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
+            // Return the # of lines of entries starting at rootDir.
+            .countLines(rootFolder,
+                        concurrent);
     }
 
     /**
@@ -64,26 +106,6 @@ public class FolderService {
             // Return the number of times word appears in the root
             // folder.
             .countWordMatches(rootFolder, word, concurrent);
-    }
-
-    /**
-     * This method returns a {@link Dirent} that contains all the
-     * entries in the folder, starting at {@code rootDir}.
-     *
-     * @param rootDir The root directory to start the search
-     * @param concurrent True if the folder should be created
-     *                   concurrently or not
-     * @return A {@link Dirent} that contains all the entries in the
-     *         folder starting at {@code rootDir}
-     */
-    public Dirent createFolder(String rootDir,
-                               Boolean concurrent) {
-        // Return a Dirent containing the initialized folder.
-        return FolderOps
-            // Create a folder with all works in the root
-            // directory.
-            .createFolder(rootDir,
-                          concurrent);
     }
 
     /**

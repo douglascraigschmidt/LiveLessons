@@ -21,19 +21,18 @@ import static java.util.stream.Collectors.toList;
  * This program tests the {@link PrimeCheckClient} and its ability to
  * communicate with the {@link PrimeCheckController} via Spring WebMVC
  * features.
- * <p>
+ *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
  * {@link PrimeCheckApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
- * <p>
+ *
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootConfiguration
-@SpringBootTest(
-        classes = PrimeCheckApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = PrimeCheckApplication.class,
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class PrimeCheckTest {
     /**
      * This object connects {@link PrimeCheckTest} to the {@code

@@ -34,8 +34,14 @@ public final class FolderProxy {
     /**
      * A URI to count the entries in the root folder.
      */
-    private final String mCountURI =
+    private final String mCountEntriesURI =
         FOLDERS + ROOT_DIR + COUNT_DOCUMENTS;
+
+    /**
+     * A URI to count the lines in entries in the root folder.
+     */
+    private final String mCountLinesURI =
+        FOLDERS + ROOT_DIR + COUNT_LINES;
 
     /**
      * A URI to count the number of times a word appears in the root folder.
@@ -68,81 +74,116 @@ public final class FolderProxy {
      */
     public
     Dirent createRemoteFolder(boolean concurrent) {
-        // Return a mono to the folder initialized remotely.
+        // Return Dirent to the folder initialized remotely.
         return WebUtils
             .makeGetRequest(mRestTemplate,
-                            // Add the uri to the baseUrl.
+                            // Encode the URL.
                             UriComponentsBuilder
                             .fromPath(mCreateURI)
                             .queryParam("concurrent", concurrent)
                             .build()
                             .toString(),
+                            // Indicate the return type.
                             Dirent.class);
     }
 
     /**
-     * Asynchronously and remotely count the number of entries in the folder.
+     * Synchronously and remotely count the number of entries in the
+     * folder.
      *
      * @param concurrent Flag indicating whether to run the test
      *                   concurrently or not
-     * @return A {@link Long} that counts the number of
-     *         entries in the folder
+     * @return A {@link Long} that counts the number of entries in the
+     *         remote folder
      */
     public Long countEntries(boolean concurrent) {
-        // Return a mono to the folder initialized remotely.
+        // Return a count of # the entries in the remote folder.
         return WebUtils
             .makeGetRequest(mRestTemplate,
-                            // Add the uri to the baseUrl.
+                            // Encode the URL.
                             UriComponentsBuilder
-                            .fromPath(mCountURI)
+                            .fromPath(mCountEntriesURI)
                             .queryParam("concurrent", concurrent)
                             .build()
                             .toString(),
+                            // Indicate the return type.
                             Long.class);
     }
 
     /**
-     * Asynchronously and remotely count the number of times that
+     * Synchronously and remotely count the number lines in entries in
+     * the remote folder.
+     *
+     * @param concurrent Flag indicating whether to run the test
+     *                   concurrently or not
+     * @return A {@link Long} that counts the number of lines in
+     *         entries in the folder
+     */
+    public Long countLines(boolean concurrent) {
+        // Return a count of the number of lines in the remote folder.
+        return WebUtils
+            .makeGetRequest(mRestTemplate,
+                            // Encode the URL.
+                            UriComponentsBuilder
+                            .fromPath(mCountEntriesURI)
+                            .queryParam("concurrent", concurrent)
+                            .build()
+                            .toString(),
+                            // Indicate the return type.
+                            Long.class);
+    }
+
+    /**
+     * Synchronously and remotely count the number of times that
      * {@code word} appears in the folder.
      *
      * @param word The word to search for
      * @param concurrent True if the search should be done
      *                   concurrently else false
-     * @return A {@link Long} that counts the number of
-     *         entries in the folder
+     * @return A {@link Long} that counts the number of times {@code}
+     *         appears in the remote folder
      */
     public Long searchWord(String word,
-                                  boolean concurrent) {
-        // Return a mono to the folder initialized remotely.
+                           boolean concurrent) {
+        // Return a count of the number of times 'word' appears in the
+        // remote folder.
         return WebUtils
             .makeGetRequest(mRestTemplate,
+                            // Encode the URL.
                             UriComponentsBuilder
                             .fromPath(mSearchURI)
                             .queryParam("word", word)
                             .queryParam("concurrent", concurrent)
                             .build()
                             .toString(),
+                            // Indicate the return type.
                             Long.class);
     }
 
     /**
-     * Returns a {@link Stream} of documents that match the {@code word}
+     * Synchronously and remotely get a {@link Stream} of documents
+     * that match the {@code word}
      *
      * @param word The word to search for
-     * @param concurrent True if the search should run concurrently, else false
-     * @return A {@link List<Dirent>} containing documents that match the {@code word}
+     * @param concurrent True if the search should run concurrently,
+     *                   else false
+     * @return A {@link List<Dirent>} containing documents that match
+     *         the {@code word} in the remote folder.
      */
     public List<Dirent> getDocuments(String word,
                                      boolean concurrent) {
-        // Return a Stream to the folder initialized remotely.
+        // Return a List of documents that match 'word' in the remote
+        // folder.
         return WebUtils
             .makeGetRequestList(mRestTemplate,
+                                // Encode the URL.
                                 UriComponentsBuilder
                                 .fromPath(mGetDocumentsURI)
                                 .queryParam("word", word)
                                 .queryParam("concurrent", concurrent)
                                 .build()
                                 .toString(),
+                                // Indicate the return type.
                                 Dirent[].class);
     }
 }
