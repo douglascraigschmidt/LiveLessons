@@ -1,4 +1,4 @@
-package folders.folder;
+package folders.datamodel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -89,19 +89,25 @@ public class Folder
     public static Dirent fromDirectory(File rootFile,
                                        boolean parallel) {
         return StreamSupport
-                .stream(Arrays.asList(Objects.requireNonNull(rootFile
-                        .listFiles())).spliterator(), parallel)
+            // Create a parallel stream.
+            .stream(Arrays
+                    // Convert the array of File objects
+                    // into a List.
+                    .asList(Objects
+                            .requireNonNull(rootFile
+                                            .listFiles()))
 
+                    // Convert the List into a parallel stream.
+                    .spliterator(), parallel)
 
-                     // Eliminate rootPath to avoid infinite
-                     // recursion.
-                     .filter(path -> !path.equals(rootFile))
+            // Eliminate rootPath to avoid infinite recursion.
+            .filter(path -> !path.equals(rootFile))
 
-                     // Create a stream of dirents.
-                     .map(path -> Folder
-                              // Create and return a dirent containing
-                              // all the contents at the given path.
-                              .createEntry(path, parallel))
+            // Create a stream of dirents.
+            .map(path -> Folder
+                 // Create and return a Dirent containing all the
+                 // contents at the given path.
+                 .createEntry(path, parallel))
 
             // Collect the results into a folder containing all the
             // entries in stream.
@@ -117,28 +123,14 @@ public class Folder
      * rootFile} in parallel.
      *
      * @param rootFile The root file in the file system
-     * @return An open folder containing all contents in the {@code rootFile}
+     * @return A {@link Dirent} containing all contents in {@code
+     *         rootFile}
      */
     public static Dirent fromDirectoryParallel(File rootFile) {
-        // Create and return a dirent containing all the contents at
-        // the given path.
-        return Arrays
-                .asList((Objects.requireNonNull(rootFile.listFiles())))
-                .parallelStream()
-
-            // Eliminate rootPath to avoid infinite recursion.
-            .filter(path -> !path.equals(rootFile))
-
-            // Create and process each entry in parallel.
-            .map(Folder::createEntryParallel)
-
-            // Collect the results into a folder containing all
-            // entries in the stream.
-            .collect(Collector
-                     // Create a custom collector.
-                     .of(() -> new Folder(rootFile),
-                         Folder::addEntry,
-                         Folder::merge));
+        // Create and return a Dirent containing all the contents at
+        // the given path using a parallel stream.
+        return Folder.fromDirectory(rootFile,
+                                    true);
     }
 
     /**
@@ -147,13 +139,12 @@ public class Folder
     static Dirent createEntry(File entry,
                               boolean parallel) {
         // Add entry to the appropriate list.
-        if (entry.isDirectory()) {
+        if (entry.isDirectory())
             // Recursively create a folder from the entry.
             return Folder.fromDirectory(entry, parallel);
-        } else {
+        else
             // Create a document from the entry and return it.
             return Document.fromPath(entry);
-        }
     }
 
     /**
@@ -163,13 +154,12 @@ public class Folder
      */
     static Dirent createEntryParallel(File entry) {
         // Add entry to the appropriate list.
-        if (entry.isDirectory()) {
+        if (entry.isDirectory())
             // Recursively create a folder from the entry.
             return Folder.fromDirectoryParallel(entry);
-        } else {
+        else
             // Create a document from the entry and return it.
             return Document.fromPath(entry);
-        }
     }
 
     /**
@@ -197,8 +187,8 @@ public class Folder
     /**
      * Merge contents of {@code folder} into contents of this folder.
      *
-     * @param folder The folder to merge from
-     * @return The merged result
+     * @param folder The {@link Folder} to merge from
+     * @return The merged {@link Folder}
      */
     Folder merge(Folder folder) {
         // Update the lists.

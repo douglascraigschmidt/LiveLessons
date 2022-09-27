@@ -1,8 +1,8 @@
 package folders.common;
 
-import folders.folder.Dirent;
-import folders.folder.Document;
-import folders.folder.Folder;
+import folders.datamodel.Dirent;
+import folders.datamodel.Document;
+import folders.datamodel.Folder;
 import folders.utils.TestDataFactory;
 
 import java.util.List;
@@ -35,7 +35,8 @@ public final class FolderOps {
                                     boolean concurrent) {
         // Return a count of the # of entries starting at rootDir.
         return StreamSupport
-            // Convert into a parallel or sequential stream.
+            // Create a parallel or sequential stream from
+            // a Dirent.
             .stream(rootFolder.spliterator(), concurrent)
 
             // Count the number of entries in the stream.
@@ -55,8 +56,10 @@ public final class FolderOps {
      */
     public static Long countLines(Dirent rootFolder,
                                   boolean concurrent) {
-        // This function counts the # of lines in one dirent.
+        // This function counts the # of lines in a Dirent.
         return StreamSupport
+            // Create a parallel or sequential stream from
+            // a Dirent.
             .stream(rootFolder.spliterator(),
                     concurrent)
 
@@ -87,9 +90,12 @@ public final class FolderOps {
     public static Long countWordMatches(Dirent rootFolder,
                                         String word,
                                         boolean concurrent) {
-        // This function counts # of searchWord matches in a dirent.
+        // This function counts # of 'word' matches in a Dirent.
         return StreamSupport
-            .stream(rootFolder.spliterator(), concurrent)
+            // Create a parallel or sequential stream from
+            // a Dirent.
+            .stream(rootFolder.spliterator(), 
+                    concurrent)
 
             // Only search documents.
             .filter(Document::isDocument)
@@ -124,7 +130,8 @@ public final class FolderOps {
         // Return a List containing all documents where searchWord
         // appears in the folder starting at the root directory.
         return StreamSupport
-            // Create a parallel or sequential stream.
+            // Create a parallel or sequential stream from
+            // a Dirent.
             .stream(rootFolder.spliterator(), concurrent)
 
             // Only consider documents.
@@ -155,8 +162,7 @@ public final class FolderOps {
                                       Boolean concurrent) {
         // Return a Dirent containing the initialized folder.
         return Folder
-            // Create a folder with all works in the root
-            // directory.
+            // Create a folder with all works in the root directory.
             .fromDirectory(TestDataFactory.getRootFolderFile(rootDir),
                            concurrent);
     }
@@ -173,16 +179,16 @@ public final class FolderOps {
      */
     public static Stream<String> splitAsStream(Dirent document,
                                                String regex) {
-        // Return a List of strings.
+        // Return a Stream of String objects.
         return Pattern
             // Compile the regular expression (regex).
             .compile(regex)
 
-            // Split the string into a stream of strings
-            // based on the regular expression.
+            // Split the string into a stream of strings based on the
+            // regular expression.
             .splitAsStream(document
-                           // Create a string containing the document's
-                           // contents.
+                           // Create a string containing the
+                           // document's contents.
                            .getContents().toString());
     }
 

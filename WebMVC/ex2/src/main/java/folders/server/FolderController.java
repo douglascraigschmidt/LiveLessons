@@ -1,6 +1,6 @@
 package folders.server;
 
-import folders.folder.Dirent;
+import folders.datamodel.Dirent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

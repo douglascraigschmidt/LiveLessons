@@ -1,9 +1,9 @@
 package folders.client;
 
 import folders.common.FolderOps;
-import folders.folder.Dirent;
+import folders.datamodel.Dirent;
 import folders.server.FolderController;
-import folders.utils.Options;
+import folders.common.Options;
 import folders.utils.RunTimer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

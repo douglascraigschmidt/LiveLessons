@@ -1,4 +1,4 @@
-package folders.utils;
+package folders.common;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The options singleton.
+ * The options singleton for the {@link FolderApplication}.
  */
 public class Options {
     /**

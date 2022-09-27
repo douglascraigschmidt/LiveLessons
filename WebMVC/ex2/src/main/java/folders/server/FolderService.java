@@ -1,7 +1,7 @@
 package folders.server;
 
 import folders.common.FolderOps;
-import folders.folder.Dirent;
+import folders.datamodel.Dirent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

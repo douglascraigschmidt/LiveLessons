@@ -1,6 +1,6 @@
 package folders.client;
 
-import folders.folder.Dirent;
+import folders.datamodel.Dirent;
 import folders.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static folders.common.Constants.EndPoint.*;
-import static folders.common.Constants.SERVER_BASE_URL;
 
 /**
- * This class is a proxy to the FolderApplication micro-service.
+ * This class is a proxy to the FolderApplication service and the
+ * {@link FolderController}.
  */
 @SuppressWarnings("FieldCanBeLocal")
 @Component
@@ -73,9 +73,10 @@ public final class FolderProxy {
      *         works
      */
     public
-    Dirent createRemoteFolder(boolean concurrent) {
-        // Return Dirent to the folder initialized remotely.
+        Dirent createRemoteFolder(boolean concurrent) {
+        // Return a Dirent containing the remote folder.
         return WebUtils
+            // Create and send an HTTP GET request.
             .makeGetRequest(mRestTemplate,
                             // Encode the URL.
                             UriComponentsBuilder
@@ -99,6 +100,7 @@ public final class FolderProxy {
     public Long countEntries(boolean concurrent) {
         // Return a count of # the entries in the remote folder.
         return WebUtils
+            // Create and send an HTTP GET request.
             .makeGetRequest(mRestTemplate,
                             // Encode the URL.
                             UriComponentsBuilder
@@ -122,6 +124,7 @@ public final class FolderProxy {
     public Long countLines(boolean concurrent) {
         // Return a count of the number of lines in the remote folder.
         return WebUtils
+            // Create and send an HTTP GET request.
             .makeGetRequest(mRestTemplate,
                             // Encode the URL.
                             UriComponentsBuilder
@@ -148,6 +151,7 @@ public final class FolderProxy {
         // Return a count of the number of times 'word' appears in the
         // remote folder.
         return WebUtils
+            // Create and send an HTTP GET request.
             .makeGetRequest(mRestTemplate,
                             // Encode the URL.
                             UriComponentsBuilder
@@ -175,6 +179,7 @@ public final class FolderProxy {
         // Return a List of documents that match 'word' in the remote
         // folder.
         return WebUtils
+            // Create and send an HTTP GET request.
             .makeGetRequestList(mRestTemplate,
                                 // Encode the URL.
                                 UriComponentsBuilder
