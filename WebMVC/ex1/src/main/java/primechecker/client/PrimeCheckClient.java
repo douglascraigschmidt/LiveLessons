@@ -20,8 +20,8 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * This client uses Spring WebMVC features to perform synchronous
  * remote method invocations on the {@link PrimeCheckController} web
  * service to determine the primality of large integers.  These
- * invocations can be made individually or in bulk, as well as
- * be make sequentially or in parallel using Java Streams.
+ * invocations can be made individually or in bulk, as well as be make
+ * sequentially or in parallel using Java Streams.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -34,11 +34,11 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 public class PrimeCheckClient {
     /**
      * This auto-wired field connects the {@link PrimeCheckClient} to
-     * the {@link RestTemplate} that performs HTTP requests
+     * the {@link PrimeCheckProxy} that performs HTTP requests
      * synchronously.
      */
     @Autowired
-    private RestTemplate mRestTemplate;
+    private PrimeCheckProxy mPrimeCheckProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -57,23 +57,13 @@ public class PrimeCheckClient {
         return StreamSupport
             // Convert the List to a sequential or parallel stream.
             .stream(primeCandidates.spliterator(), parallel)
-            // Perform a remote call for each primeCandidate.
-            .map(primeCandidate -> WebUtils
-                 // Create and send a GET request to the server to
-                 // check if the primeCandidate is prime or not.
-                 .makeGetRequest(mRestTemplate,
-                                 // Create the encoded URL.
-                                 UriComponentsBuilder
-                                 .fromPath(CHECK_IF_PRIME)
-                                 .queryParam("primeCandidate", primeCandidate)
-                                 .build()
-                                 .toString(),
-                                 // The return type is an Integer.
-                                 Integer.class))
+
+            // Forward each prime candidate to the proxy.
+            .map(mPrimeCheckProxy::checkIfPrime)
 
             // Trigger the intermediate operations and collect the
             // results into a List.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -90,22 +80,8 @@ public class PrimeCheckClient {
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
-        return WebUtils
-            // Create and send a GET request to the server to
-            // check if the Integer objects in primeCandidates
-            // are prime or not.
-            .makeGetRequestList(mRestTemplate,
-                                // Create the encoded URL.
-                                UriComponentsBuilder
-                                .fromPath(CHECK_IF_PRIME_LIST)
-                                .queryParam("primeCandidates",
-                                            WebUtils
-                                            // Convert the List to a String.
-                                            .list2String(primeCandidates))
-                                .queryParam("parallel", parallel)
-                                .build()
-                                .toString(),
-                                // The return type of an array of Integer objects.
-                                Integer[].class);
+        return mPrimeCheckProxy
+            // Forward to the proxy.
+            .checkIfPrimeList(primeCandidates, parallel);
     }
 }

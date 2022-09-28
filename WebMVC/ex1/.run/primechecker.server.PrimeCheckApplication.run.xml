@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PrimeCheckApplication" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="ALTERNATIVE_JRE_PATH" value="corretto-11" />
+  <configuration default="false" name="primechecker.server.PrimeCheckApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="openjdk-18" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="primechecker.PrimeCheckApplication" />
+    <option name="MAIN_CLASS_NAME" value="primechecker.server.PrimeCheckApplication" />
     <module name="ex1.main" />
     <option name="PROGRAM_PARAMETERS" value="-d true" />
     <extension name="coverage">

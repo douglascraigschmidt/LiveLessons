@@ -56,7 +56,8 @@ public class PrimeCheckService {
      * @param primeCandidates The {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if primality checking should run in
-     *                 parallel, else false if it should run sequentially
+     *                 parallel, else false if it should run
+     *                 sequentially
      * @return An {@link List} whose elements are 0 if the
      *         corresponding element in {@code primeCandidate} is
      *         prime or its smallest factor if it's not prime

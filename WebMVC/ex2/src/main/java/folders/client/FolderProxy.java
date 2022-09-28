@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 import static folders.common.Constants.EndPoint.*;
 
 /**
- * This class is a proxy to the FolderApplication service and the
- * {@link FolderController}.
+ * This class is a proxy to the {@link FolderApplication} service and
+ * the {@link FolderController}.
  */
 @SuppressWarnings("FieldCanBeLocal")
 @Component

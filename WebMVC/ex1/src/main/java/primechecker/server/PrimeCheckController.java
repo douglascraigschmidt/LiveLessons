@@ -18,7 +18,7 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * can be passed either individual prime candidates or a {@link List}
  * of prime candidates and process these candidates using a sequential
  * or parallel stream in response to client directives.
- * <p>
+ *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
  * endpoints/routes for each supported operation, i.e.,
@@ -26,12 +26,12 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * {@code @DeleteMapping}, which correspond to the HTTP GET, POST,
  * PUT, and DELETE calls, respectively.  These components are
  * identified by the {@code @RestController} annotation below.
- * <p>
+ *
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
  * requests onto methods in the {@link PrimeCheckController}.  GET
  * requests invoked from any HTTP web client (e.g., a web browser or
  * client app) or command-line utility (e.g., Curl or Postman).
- * <p>
+ *
  * The {@code @RestController} annotation also tells a controller that
  * the object returned is automatically serialized into JSON and passed
  * back within the body of an {@link HttpResponse} object.
