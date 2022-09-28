@@ -3,120 +3,21 @@ package folders.common;
 import folders.datamodel.Dirent;
 import folders.datamodel.Document;
 import folders.datamodel.Folder;
-import folders.utils.ExceptionUtils;
 import folders.utils.TestDataFactory;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
- * This Java utility class contains methods that can be used on both
- * the client and the server.
+ * This Java utility class contains methods used on both the
+ * client and the server.
  */
 public final class FolderOps {
     /**
      * A Java utility class should have a private constructor.
      */ 
     private FolderOps() {}
-
-    /**
-     * This factory method creates a folder from the given {@code
-     * rootFile}.
-     *
-     * @param rootFile The root file in the file system
-     * @param parallel A flag that indicates whether to create the
-     *                 folder sequentially or in parallel
-     *
-     * @return An open folder containing all contents in the {@code rootFile}
-     */
-    public static Dirent fromDirectory(File rootFile,
-                                       boolean parallel) {
-        return StreamSupport
-            // Create a parallel stream.
-            .stream(Arrays
-                    // Convert the array of File objects
-                    // into a List.
-                    .asList(Objects
-                            .requireNonNull(rootFile
-                                            .listFiles()))
-
-                    // Convert the List into a parallel stream.
-                    .spliterator(), parallel)
-
-            // Eliminate rootPath to avoid infinite recursion.
-            .filter(path -> !path.equals(rootFile))
-
-            // Create a stream of Dirent objects.
-            .map(path -> FolderOps
-                 // Create and return a Dirent containing all the
-                 // contents at the given path.
-                 .createEntry(path, parallel))
-
-            // Collect the results into a Folder containing all the
-            // entries in stream.
-            .collect(Collector
-                     // Create a custom collector.
-                     .of(() -> new Folder(rootFile),
-                         Folder::addEntry,
-                         Folder::merge));
-    }
-
-    /**
-     * Create a new {@code entry} and return it.
-     */
-    static Dirent createEntry(File entry,
-                              boolean parallel) {
-        // Add entry to the appropriate list.
-        if (entry.isDirectory())
-            // Recursively create a folder from the entry.
-            return FolderOps.fromDirectory(entry, parallel);
-        else
-            // Create a document from the entry and return it.
-            return FolderOps.fromPath(entry);
-    }
-
-    /**
-     * @param entry Either a file or directory
-     * @return A new {@link Dirent} that encapsulates the {@code
-     *         entry}
-     */
-    static Dirent createEntryParallel(File entry) {
-        // Add entry to the appropriate list.
-        if (entry.isDirectory())
-            // Recursively create a folder from the entry in parallel.
-            return FolderOps.fromDirectory(entry, true);
-        else
-            // Create a document from the entry and return it.
-            return FolderOps.fromPath(entry);
-    }
-
-    /**
-     * This factory method creates a {@link Dirent} document from the
-     * file at the given {@code path}.
-     *
-     * @param path The path of the document in the file system
-     * @return A {@link Dirent} containing the document's contents
-     */
-    public static Dirent fromPath(File path) {
-        // Create an exception adapter.
-        Function<Path, byte[]> getBytes = ExceptionUtils
-            // mMake it easier to use a checked exception.
-            .rethrowFunction(Files::readAllBytes);
-
-        // Create a new document containing all the bytes of the
-        // file at the given path.
-        return new Document(new String(getBytes.apply(path.toPath())),
-                            path);
-    }
 
     /**
      * @return True if {@code dirent} is a document, else false
@@ -141,10 +42,10 @@ public final class FolderOps {
     public static Long countEntries(Dirent rootFolder,
                                     boolean parallel) {
         // Return a count of the # of entries starting at rootDir.
-        return StreamSupport
+        return rootFolder
             // Create a parallel or sequential stream from
             // a Dirent.
-            .stream(rootFolder.spliterator(), parallel)
+            .stream(parallel)
 
             // Count the number of entries in the stream.
             .count();
@@ -266,7 +167,7 @@ public final class FolderOps {
     public static Dirent createFolder(String rootDir,
                                       Boolean parallel) {
         // Return a Dirent containing the initialized folder.
-        return FolderOps
+        return Folder
             // Create a folder with all works in the root directory.
             .fromDirectory(TestDataFactory.getRootFolderFile(rootDir),
                            parallel);

@@ -77,9 +77,70 @@ public class Folder
     }
 
     /**
+     * This factory method returns a {@link Dirent} that's
+     * either a {@link Document} or a {@link Folder}.
+     *
+     * @param entry A {@link File} entry
+     * @param parallel True if
+     * @return A new {@link Dirent} that's either a
+     *         {@link Document} or a {@link Folder}
+     */
+    private static Dirent createEntry(File entry,
+                                      boolean parallel) {
+        return entry.isDirectory()
+            // Recursively create a folder from the entry.
+            ? Folder.fromDirectory(entry, parallel)
+
+            // Create a document from the entry and return it.
+            : Document.fromPath(entry);
+    }
+
+    /**
+     * This factory method creates a {@link Dirent }folder from the
+     * given {@code rootFile}.
+     *
+     * @param rootFile A root file in the file system
+     * @param parallel A flag that indicates whether to create the
+     *                 folder sequentially or in parallel
+     * @return A {@link Dirent} folder containing all contents in the
+     *         {@code rootFile}
+     */
+    public static Dirent fromDirectory(File rootFile,
+                                       boolean parallel) {
+        return StreamSupport
+            // Create a parallel stream.
+            .stream(Arrays
+                    // Convert the array of File objects
+                    // into a List.
+                    .asList(Objects
+                            .requireNonNull(rootFile
+                                            .listFiles()))
+
+                    // Convert the List into a parallel stream.
+                    .spliterator(), parallel)
+
+            // Eliminate rootPath to avoid infinite recursion.
+            .filter(path -> !path.equals(rootFile))
+
+            // Create a stream of Dirent objects.
+            .map(path -> Folder
+                 // Create and return a Dirent containing all the
+                 // contents at the given path.
+                 .createEntry(path, parallel))
+
+            // Collect the results into a Folder containing all the
+            // entries in stream.
+            .collect(Collector
+                     // Create a custom collector.
+                     .of(() -> new Folder(rootFile),
+                         Folder::addEntry,
+                         Folder::merge));
+    }
+
+    /**
      * Add a new {@code entry} to the appropriate list of futures.
      */
-    public void addEntry(Dirent entry) {
+    private void addEntry(Dirent entry) {
         // Add entry to the appropriate list.
         if (entry instanceof Folder) {
             // Add the new folder to the subfolders list.
@@ -104,7 +165,7 @@ public class Folder
      * @param folder The {@link Folder} to merge from
      * @return The merged {@link Folder}
      */
-    public Folder merge(Folder folder) {
+    private Folder merge(Folder folder) {
         // Update the lists.
         getSubFolders().addAll(folder.getSubFolders());
         getDocuments().addAll(folder.getDocuments());
