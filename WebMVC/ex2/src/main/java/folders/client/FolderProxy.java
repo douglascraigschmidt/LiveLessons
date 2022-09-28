@@ -1,6 +1,7 @@
 package folders.client;
 
 import folders.datamodel.Dirent;
+import folders.server.FolderApplication;
 import folders.server.FolderController;
 import folders.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;

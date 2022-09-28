@@ -5,13 +5,12 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This example shows how to combine Java parallel streams with and
  * without the ForkJoinPool.ManagedBlocker interface and the Java
- * fork-join framework to download and store multiple images from a remote
- * server.
+ * common fork-join pool to download and store multiple images from a
+ * remote server.
  */
 public class ex20 {
     /**
@@ -42,20 +41,20 @@ public class ex20 {
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
-        // Runs the tests using the using the Java fork-join
+        // Runs the tests using the Java fork-join
         // framework's default behavior, which does not add new worker
         // threads to the pool when blocking occurs.
         runTest(this::downloadAndStoreImage,
                 "testDefaultDownloadBehavior()");
 
-        // Run the tests using the using the BlockingTask wrapper
+        // Run the tests using the BlockingTask wrapper
         // around the Java fork-join framework's ManagedBlocker
         // mechanism, which adds new worker threads to the pool
         // adaptively when blocking occurs.
         runTest(this::downloadAndStoreImageMB,
                 "testAdaptiveMBDownloadBehavior()");
 
-        // Run the tests using the using the BlockingTask wrapper for
+        // Run the tests using the BlockingTask wrapper for
         // the Java fork-join framework's ManagedBlocker mechanism,
         // which adds new worker threads to the pool adaptively when
         // blocking occurs.
@@ -106,7 +105,7 @@ public class ex20 {
 
             // Terminate the stream and collect the results into list
             // of images.
-            .collect(Collectors.toList());
+            .toList();
 
         // Print the statistics for this test run.
         printStats(testName, imageFiles.size());
@@ -114,7 +113,7 @@ public class ex20 {
 
     /**
      * Transform URL to a File by downloading each image via its URL
-     * and storing it *without* using the Java fork-join framework's
+     * and storing it *without* using the Java common fork-join pool's
      * ManagedBlocker mechanism, i.e., the pool of worker threads will
      * not be expanded.
      */

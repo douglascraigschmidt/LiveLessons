@@ -1,8 +1,11 @@
 package primechecker.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import primechecker.server.PrimeCheckApplication;
+import primechecker.server.PrimeCheckController;
 import primechecker.utils.WebUtils;
 
 import java.util.List;
@@ -14,6 +17,7 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * This class is a proxy to the {@link PrimeCheckApplication} service
  * and the {@link PrimeCheckController}.
  */
+@Component
 public class PrimeCheckProxy {
     /**
      * This auto-wired field connects the {@link PrimeCheckClient} to

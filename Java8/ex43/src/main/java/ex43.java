@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
  * when applied to accumulate results in a stream.
  */
 @SuppressWarnings("ALL")
-public class ex14 {
+public class ex43 {
     /**
      * Number of iterations to run the timing tests.
      */

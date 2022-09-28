@@ -53,7 +53,6 @@ public class Image
                                   getFileName());
         
         // Store the image using try-with-resources
-        
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
             // Write the image to the output file.

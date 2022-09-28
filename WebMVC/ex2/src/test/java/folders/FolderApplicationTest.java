@@ -10,12 +10,12 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * This example shows the use of a Spring WebFlux micro-service to
- * apply Java sequential and parallel to process entries in a
- * recursively-structured directory folder sequentially and/or concurrently
- * in a client/server environment.  This example also shows how to encode/decode
- * complex objects that use inheritance relationships and transmits them
- * between processes.
+ * This example shows the use of Spring WebMVC to apply Java
+ * sequential and parallel streams to process entries in a
+ * recursively-structured directory folder sequentially and/or
+ * concurrently in a client/server environment.  This example also
+ * shows how to encode/decode complex objects that use inheritance
+ * relationships and transmits them between processes.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,

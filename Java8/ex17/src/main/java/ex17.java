@@ -186,7 +186,7 @@ public class ex17 {
     private static void buggyStreamReduce3a(boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "buggyStreamReduce3 implementation");
+                           + "buggyStreamReduce3a implementation");
 
         List<String> allStrings =
             List.of("The quick brown fox jumps over the lazy dog\n",
@@ -235,11 +235,11 @@ public class ex17 {
     }
 
     /**
-     * Reduce partial results into a StringBuilder using the three
+     * Reduce partial results into a StringBuffer using the three
      * parameter version of reduce().  If @a parallel is true then a
      * parallel stream is used, else a sequential stream is used.
      * When a sequential stream is used the results of this test will
-     * be correct even though a mutable object (StringBuilder) is used
+     * be correct even though a mutable object (StringBuffer) is used
      * with reduce().  When a parallel stream is used, however, the
      * results of this test will be incorrect due to the use of a
      * mutable object (StringBuffer) with reduce(), which expects
@@ -301,7 +301,7 @@ public class ex17 {
      * concatenation (i.e., the '+' operator).  If @a parallel is
      * true then a parallel stream is used, else a sequential stream
      * is used.  This solution is correct, but inefficient due to the
-     * overhead of string concatentation.
+     * overhead of string concatenation.
      */
     private static void streamReduceConcat(boolean parallel) {
         System.out.println("\n++Running the "
@@ -338,7 +338,6 @@ public class ex17 {
             // requires string concatenation.
             .reduce("",
                     (x, y) -> x + y);
-
 
         // Record the stop time.
         long stopTime = (System.nanoTime() - startTime) / 1_000_000;
@@ -403,7 +402,7 @@ public class ex17 {
                            + allStrings.size()
                            + " strings into "
                            + reducedString.split("\\n").length
-                           + " strings took"
+                           + " strings took "
                            + stopTime
                            + " milliseconds.  Here are the strings:\n"
                            + reducedString);

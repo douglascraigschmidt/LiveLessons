@@ -55,19 +55,13 @@ public class Dirent
     }
 
     /**
-     * @return A sequential stream of {@link Dirent} objects
+     * @param parallel True if a parallel stream should be created,
+     *                 false if a sequential stream should be created
+     * @return A stream of {@link Dirent} objects
      */
-    public Stream<Dirent> stream() {
+    public Stream<Dirent> stream(boolean parallel) {
         return StreamSupport
-                .stream(spliterator(), false);
-    }
-
-    /**
-     * @return A parallel stream of {@link Dirent} objects
-     */
-    public Stream<Dirent> parallelStream() {
-        return StreamSupport
-                .stream(spliterator(), true);
+                .stream(spliterator(), parallel);
     }
 
     /**
