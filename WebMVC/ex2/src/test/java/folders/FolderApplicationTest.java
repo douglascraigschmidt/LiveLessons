@@ -12,14 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * This example shows the use of a Spring WebFlux micro-service to
  * apply Java sequential and parallel to process entries in a
- * recursively-structured directory folder sequentially, concurrently,
- * and in parallel in a client/server environment.  This example also
- * shows how to encode/decode complex objects that use inheritance
- * relationships and transmits them between processes.
+ * recursively-structured directory folder sequentially and/or concurrently
+ * in a client/server environment.  This example also shows how to encode/decode
+ * complex objects that use inheritance relationships and transmits them
+ * between processes.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
- * {@link PrimeCheckApplication}) and use that to start a Spring
+ * {@link FolderApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  *
  * The {@code @SpringBootConfiguration} annotation indicates that a
@@ -60,25 +60,21 @@ public class FolderApplicationTest {
 
         Options.getInstance().parseArgs(mArgv);
 
-        if (Options.getInstance().sequential()) {
+        if (Options.getInstance().sequential())
             // Run the mostly local tests sequentially.
             mFolderClient.runTests(false);
-        }
 
-        if (Options.getInstance().concurrent()) {
+        if (Options.getInstance().concurrent())
             // Run the mostly local tests concurrently.
             mFolderClient.runTests(true);
-        }
 
-        if (Options.getInstance().sequential()) {
+        if (Options.getInstance().sequential())
             // Run the remote tests sequentially.
             mFolderClient.runRemoteTests(false);
-        }
 
-        if (Options.getInstance().concurrent()) {
+        if (Options.getInstance().concurrent())
             // Run the remote tests concurrently.
             mFolderClient.runRemoteTests(true);
-        }
 
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());

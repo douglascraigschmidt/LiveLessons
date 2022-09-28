@@ -1,6 +1,7 @@
 package folders.client;
 
 import folders.datamodel.Dirent;
+import folders.server.FolderController;
 import folders.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,14 @@ import static folders.common.Constants.EndPoint.*;
  */
 @SuppressWarnings("FieldCanBeLocal")
 @Component
-public final class FolderProxy {
+public class FolderProxy {
     /**
-     * A Java utility class should have a private constructor.
+     * This auto-wired field connects the {@link
+     * FolderProxy} to the {@link RestTemplate}
+     * that performs HTTP requests synchronously.
      */
-    private FolderProxy() {}
+    @Autowired
+    private RestTemplate mRestTemplate;
 
     /**
      * A URI to the input "works" to process, which is a large
@@ -55,13 +59,6 @@ public final class FolderProxy {
     private final String mGetDocumentsURI =
         FOLDERS + ROOT_DIR + GET_DOCUMENTS;
 
-    /**
-     * This auto-wired field connects the {@link
-     * FolderProxy} to the {@link RestTemplate}
-     * that performs HTTP requests synchronously.
-     */
-    @Autowired
-    private RestTemplate mRestTemplate;
 
     /**
      * Synchronously and remotely create an in-memory folder
@@ -72,8 +69,7 @@ public final class FolderProxy {
      * @return A {@link Dirent} that holds a folder containing all the
      *         works
      */
-    public
-        Dirent createRemoteFolder(boolean concurrent) {
+    public Dirent createRemoteFolder(boolean concurrent) {
         // Return a Dirent containing the remote folder.
         return WebUtils
             // Create and send an HTTP GET request.

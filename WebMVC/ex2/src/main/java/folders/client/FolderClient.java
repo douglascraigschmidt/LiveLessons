@@ -163,7 +163,7 @@ public class FolderClient {
             // Compute the time taken to determine how many documents
             // the search word appeared in the remote folder.
             .timeRun(() -> mFolderProxy
-                     .getDocuments("CompletableFuture",
+                     .getDocuments(searchWord,
                                    concurrent),
                      "getDocuments remote " + mode);
         
