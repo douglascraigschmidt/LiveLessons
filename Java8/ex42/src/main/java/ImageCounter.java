@@ -2,7 +2,6 @@ import org.jsoup.nodes.Document;
 import utils.Options;
 
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
@@ -26,7 +25,7 @@ class ImageCounter {
      * {@link KeySetView} is part of the {@link ConcurrentHashMap}
      * class.
      */
-    private final KeySetView<Object, Boolean> mUniqueUris =
+    private final KeySetView<String, Boolean> mUniqueUris =
         ConcurrentHashMap.newKeySet();
 
     /**

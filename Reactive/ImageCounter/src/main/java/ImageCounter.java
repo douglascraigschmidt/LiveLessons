@@ -31,7 +31,7 @@ public class ImageCounter {
     /**
      * A thread-safe cache of URIs that have already been processed.
      */
-    private final KeySetView<Object, Boolean> mUniqueUris =
+    private final KeySetView<String, Boolean> mUniqueUris =
         ConcurrentHashMap.newKeySet();
 
     /**
