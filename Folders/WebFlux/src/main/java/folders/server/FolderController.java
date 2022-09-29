@@ -1,7 +1,6 @@
 package folders.server;
 
 import folders.folder.Dirent;
-import folders.tests.FolderTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +44,27 @@ public class FolderController {
     private FolderService mFolderService;
 
     /**
+     * This method returns a {@link Mono} that emits all the entries
+     * in the folder, starting at {@code rootDir}.
+     *
+     * WebFlux maps HTTP GET requests sent to the
+     * "/{rootDir}/createFolder" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Mono} that emits all the entries in the folder
+     *         starting at {@code rootDir}
+     */
+    @GetMapping(PATH + CREATE_FOLDER)
+    public Mono<Dirent> createFolder(@PathVariable String rootDir,
+                                     @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .createFolder(rootDir, concurrent);
+    }
+
+    /**
      * This method returns a {@link Mono} that emits a count of the
      * number of times a {@code word} appears in the folder starting
      * at {@code rootDir}.
@@ -66,6 +86,48 @@ public class FolderController {
         return mFolderService
             // Forward to the service.
             .searchWord(rootDir, word, concurrent);
+    }
+
+    /**
+     * This method returns {@link Mono} that emits a count of the
+     * number of entries in the folder starting at {@code rootDir}.
+     *
+     * WebFlux maps HTTP GET requests sent to the
+     * "/{rootDir}/countDocuments" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Mono} that emits a count of the number of
+     *         entries in the folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + COUNT_DOCUMENTS)
+    public Mono<Long> countEntries(@PathVariable String rootDir,
+                                   @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .countEntries(rootDir, concurrent);
+    }
+
+    /**
+     * This method returns {@link Long} that counts the number of
+     * lines in entries in the folder starting at {@code rootDir}.
+     *
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/countLines" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Long} that counts the number of lines in
+     *         entries in the folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + COUNT_LINES)
+    public Mono<Long> countLines(@PathVariable String rootDir,
+                                 @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .countLines(rootDir, concurrent);
     }
 
     /**
@@ -91,49 +153,5 @@ public class FolderController {
         return mFolderService
             // Forward to the service.
             .getDocuments(rootDir, word, concurrent);
-    }
-	
-    /**
-     * This method returns {@link Mono} that emits a count of the
-     * number of entries in the folder starting at {@code rootDir}.
-     *
-     * WebFlux maps HTTP GET requests sent to the
-     * "/{rootDir}/countDocuments" endpoint to this method.
-     *
-     * @param rootDir The root directory to start the search
-     * @param concurrent True if the count should be done concurrently
-     *                   or not
-     * @return A {@link Mono} that emits a count of the number of
-     *         entries in the folder starting at {@code rootDir}
-     */
-    @GetMapping(PATH + COUNT_DOCUMENTS)
-    public Mono<Long> countEntries(@PathVariable String rootDir,
-                                   @RequestParam Boolean concurrent) {
-        return mFolderService
-            // Forward to the service.
-            .countEntries(rootDir, concurrent);
-    }
-
-    /**
-     * This method returns a {@link Mono} that emits all the entries
-     * in the folder, starting at {@code rootDir}.
-     *
-     * WebFlux maps HTTP GET requests sent to the
-     * "/{rootDir}/createFolder" endpoint to this method.
-     *
-     * @param rootDir The root directory to start the search
-     * @param memoize True if the created folder should be cached
-     * @param concurrent True if the folder should be created
-     *                   concurrently or not
-     * @return A {@link Mono} that emits all the entries in the folder
-     *         starting at {@code rootDir}
-     */
-    @GetMapping(PATH + CREATE_FOLDER)
-    public Mono<Dirent> createFolder(@PathVariable String rootDir,
-                                     @RequestParam Boolean memoize,
-                                     @RequestParam Boolean concurrent) {
-        return mFolderService
-            // Forward to the service.
-            .createFolder(rootDir, memoize, concurrent);
     }
 }

@@ -1,7 +1,7 @@
 package expressiontree.visitors;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.composites.*;
+import expressiontree.nodes.*;
 
 import java.util.Stack;
 

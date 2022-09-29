@@ -41,6 +41,30 @@ public class FolderService {
     }
 
     /**
+     * This method returns a {@link Long} that emits a count of the
+     * number of times a {@code word} appears in the folder starting
+     * at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done concurrently or not
+     * @return A {@link Long} that counts the number of times {@code
+     *         word} appears in the folder starting at {@code rootDir}
+     */
+    public Long searchWord(String rootDir,
+                           String word,
+                           Boolean concurrent) {
+        Dirent rootFolder = this
+            // Synchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
+            // Return the number of times word appears in the root
+            // folder.
+            .countWordMatches(rootFolder, word, concurrent);
+    }
+
+    /**
      * This method returns a {@link Long} that counts the number of
      * entries in the folder starting at {@code rootDir}.
      *
@@ -82,30 +106,6 @@ public class FolderService {
             // Return the # of lines of entries starting at rootDir.
             .countLines(rootFolder,
                         concurrent);
-    }
-
-    /**
-     * This method returns a {@link Long} that emits a count of the
-     * number of times a {@code word} appears in the folder starting
-     * at {@code rootDir}.
-     *
-     * @param rootDir The root directory to start the search
-     * @param word The word to search for, starting at {@code rootDir}
-     * @param concurrent True if the search should be done concurrently or not
-     * @return A {@link Long} that counts the number of times {@code
-     *         word} appears in the folder starting at {@code rootDir}
-     */
-    public Long searchWord(String rootDir,
-                           String word,
-                           Boolean concurrent) {
-        Dirent rootFolder = this
-            // Synchronously create a folder starting at rootDir.
-            .createFolder(rootDir, concurrent);
-
-        return FolderOps
-            // Return the number of times word appears in the root
-            // folder.
-            .countWordMatches(rootFolder, word, concurrent);
     }
 
     /**

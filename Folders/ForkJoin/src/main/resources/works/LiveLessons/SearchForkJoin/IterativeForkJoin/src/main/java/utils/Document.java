@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Represents the contents of a document, which is stored as a {@link
- * CharSequence} of bytes.
+ * Represents the contents of a document, which is stored as a
+ * CharSequence of bytes.
  */
 public class Document {
     /**
@@ -43,11 +43,11 @@ public class Document {
 
     /**
      * Factory method that creates a document from the file at the
-     * given {@link path}.
+     * given @a path.
      */
     static Document fromPath(Path path) throws IOException {
-        // Create a new document that contains all the bytes of the
-        // file at the given path.
+        // Create a new document that contains all the bytes
+        // of the file at the given path.
         Document document =
             new Document(new String(Files.readAllBytes(path)));
 

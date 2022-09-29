@@ -1,6 +1,6 @@
 package folders.server;
 
-import folders.utils.Options;
+import folders.common.Options;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;

@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ex3" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="ex3" />
-    <module name="Example 3" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
-</component>

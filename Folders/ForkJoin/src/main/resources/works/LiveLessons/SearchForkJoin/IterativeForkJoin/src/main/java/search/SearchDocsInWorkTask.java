@@ -10,14 +10,13 @@ import java.util.concurrent.RecursiveTask;
 
 /**
  * Implements RecursiveTask and uses the fork-join framework to search
- * for list of phrases in document 'acts' for a given work of
- * Shakespeare.
+ * for list of phrases in documents in a given work of Shakespeare.
  */
 class SearchDocsInWorkTask
       extends RecursiveTask<List<SearchResults>> {
     /**
-     * The recursive directory folder containing a particular work of
-     * Shakespeare.
+     * The recursive directory folder containing a particular work
+     * of Shakespeare.
      */
     private final Folder mWork;
         
@@ -27,18 +26,18 @@ class SearchDocsInWorkTask
     private final List<String> mPhrasesToFind;
 
     /**
-     * Indicates whether to search for a phrase in each work in
-     * parallel.
+     * Indicates whether to search for a phrase in each work
+     * in parallel.
      */
     private final boolean mParallelSearching;
 
     /**
-     * Indicates whether to process the phrases in parallel.
+     * Indicates whether to processes the phrases in parallel.
      */
     private final boolean mParallelPhrases;
 
     /**
-     * Indicates whether to process the docs in parallel.
+     * Indicates whether to processes the docs in parallel.
      */
     private final boolean mParallelDocument;
 
@@ -58,7 +57,8 @@ class SearchDocsInWorkTask
     }
 
     /**
-     * Searches one work to find all occurrences of the given phrases.
+     * Searches one work to find all occurrences of the given
+     * phrases.
      */
     @Override
     protected List<SearchResults> compute() {
@@ -70,7 +70,7 @@ class SearchDocsInWorkTask
         List<Document> docs =
             mWork.getDocuments();
 
-        // Then add all the "act" documents if there are any.
+        // Then add all the act documents if there are any.
         if (docsFolder.size() > 0)
             docs.addAll(docsFolder.get(0).getDocuments());
             
@@ -81,8 +81,7 @@ class SearchDocsInWorkTask
     }
 
     /**
-     * Search for the docs in the work in parallel using the fork-join
-     * pool.
+     * Search for the docs in the work in parallel using the fork-join pool.
      */
     private List<SearchResults> computeParallel(List<Document> docs) {
         // The list of fork-join tasks to run in parallel.

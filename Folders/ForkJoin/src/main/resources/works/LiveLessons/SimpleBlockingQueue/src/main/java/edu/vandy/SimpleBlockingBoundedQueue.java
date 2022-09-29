@@ -85,7 +85,7 @@ class SimpleBlockingBoundedQueue<E>
             // longer full".
             notifyAll();
 
-            // Remove/return first item on the queue without blocking.
+            // Remove/return first item on the queue.
             return mList.poll();
         }
     } 

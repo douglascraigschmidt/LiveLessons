@@ -11,20 +11,20 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class StreamGang<E>
        implements Runnable {
     /**
-     * Debugging tag that indicates the name of each subclass.
+     * Debugging tag
      */
     protected String TAG = this.getClass().getName();
 
     /**
      * The input List that's processed, which can be initialized via
-     * the {@code makeInputList()} factory method.
+     * the @code makeInputList() factory method.
      */
-    protected volatile List<E> mInput;
+    protected volatile List<E> mInput = null;
 
     /**
-     * Executes submitted runnable tasks in a thread pool.
+     * Executes submitted Runnable tasks in a Thread pool.
      */
-    private Executor mExecutor;
+    private Executor mExecutor = null;
 
     /**
      * Keeps track of which cycle is currently active.
@@ -62,7 +62,6 @@ public abstract class StreamGang<E>
     /**
      * Increment to the next cycle.
      */
-    @SuppressWarnings("UnusedReturnValue")
     protected long incrementCycle() {
         return mCurrentCycle.incrementAndGet();
     }
@@ -81,8 +80,7 @@ public abstract class StreamGang<E>
     protected abstract List<E> getNextInput();
 
     /**
-     * Hook method that starts the StreamGang processing for
-     * a particular implementation strategy.
+     * Hook method that starts the StreamGang processing.
      */
     protected abstract void initiateStream();
 
@@ -90,7 +88,7 @@ public abstract class StreamGang<E>
      * Hook method that can be used as an exit barrier to wait for the gang of
      * tasks to exit.
      */
-    protected void awaitTasksDone() {}
+    protected abstract void awaitTasksDone();
 
     /**
      * Template method that initiates all the tasks in the StreamGang
@@ -101,7 +99,7 @@ public abstract class StreamGang<E>
         // Invoke hook method to get initial List of input data to
         // process.
         if (setInput(getNextInput()) != null) {
-            // Invoke hook method to initiate stream gang processing.
+            // Invoke hook method to initiate Stream processing.
             initiateStream();
 
             // Invoke hook method to wait for all the tasks to exit.

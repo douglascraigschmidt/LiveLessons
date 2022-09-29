@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.*;
+import org.junit.Test;
 
 /**
  * Test program for the BuggyQueue that induces race conditions due to
@@ -138,7 +138,7 @@ public class BuggyQueueTest {
      */
     @Test(timeout=10000)
     public void testBuggyQueue() {
-        final BoundedQueue<Integer> buggyQueue =
+        final BuggyQueue<Integer> buggyQueue =
             new BuggyQueue<>(sQUEUE_SIZE);
 
         try {

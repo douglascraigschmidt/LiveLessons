@@ -56,8 +56,7 @@ public class SimpleBlockingBoundedQueueTest {
                 for (int i = 0; i < mMaxIterations; i++) {
                     mCount.incrementAndGet();
 
-                    // Call the put() method, which blocks until
-                    // there's room in the queue.
+                    // Call the put() method.
                     mQueue.put(i);
                 }
             } catch (InterruptedException e) {
@@ -92,14 +91,12 @@ public class SimpleBlockingBoundedQueueTest {
             Integer integer = null;
 
             try {
-                // Get the first item from the queue, blocking until it gets
-                // the first item.
+                // Get the first item from the queue.
                 Integer previous = mQueue.take();
                 mCount.decrementAndGet();
 
                 for (int i = 1; i < mMaxIterations; ++i) {
-                    // Calls the take() method, which blocks until
-                    // the queue has an entry to remove.
+                    // Calls the take() method.
                     integer = mQueue.take();
 
                     // Make sure the entries are ordered.
@@ -130,7 +127,7 @@ public class SimpleBlockingBoundedQueueTest {
      */
     @Test
     public void testSimpleBlockingBoundedQueue() {
-        final BoundedQueue<Integer> simpleQueue =
+        final SimpleBlockingBoundedQueue<Integer> simpleQueue =
             new SimpleBlockingBoundedQueue<>(sQUEUE_SIZE);
 
         try {

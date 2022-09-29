@@ -40,13 +40,12 @@ public class ImageStreamRxJava1
         List<URL> urls = getInput();
 
         Observable
-            // Convert the URLs in the input list into an observable
-            // stream.
+            // Convert the URLs in the input list into a stream of
+            // observables.
             .fromIterable(urls)
 
-            // Use the RxJava flatMap() concurrency idiom to transform
-            // the stream of urls by downloading and filtering them in
-            // parallel.
+            // Transform the stream of urls by downloading and
+            // filtering them in parallel.
             .flatMap(url ->
                      Observable
                      // Just omit this one object.
@@ -70,8 +69,7 @@ public class ImageStreamRxJava1
                      // multiple filtered versions of each image.
                      .flatMap(this::applyFilters))
 
-            // Reduce the downloaded and filtered images by appending
-            // them into a single list.
+            // Reduce the downloaded and filtered images into a list.
             .reduceWith(ArrayList<Image>::new,
                         this::append)
 
@@ -95,9 +93,8 @@ public class ImageStreamRxJava1
             // observables.
             .fromIterable(mFilters)
 
-            // Use the RxJava flatMap() concurrency idiom to transform
-            // an observable by applying a set of operations to each
-            // item emitted by the source.
+            // Transforms an observable by applying a set of
+            // operations to each item emitted by the source.
             .flatMap(filter -> Observable
                      // Just omit this one object.
                      .just(filter)
@@ -123,4 +120,6 @@ public class ImageStreamRxJava1
         // Return the updated list.
         return list;
     }
+
+
 }

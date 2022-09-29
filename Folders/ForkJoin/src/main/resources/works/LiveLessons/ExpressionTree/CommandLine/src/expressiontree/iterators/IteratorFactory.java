@@ -2,7 +2,10 @@ package expressiontree.iterators;
 
 import expressiontree.tree.ExpressionTree;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,7 +39,7 @@ public class IteratorFactory {
      * implementations and dispatch the execute() method of the
      * requested iterator.
      */
-    private Map<String, IteratorFactoryCommand> mIteratorMap =
+    private HashMap<String, IteratorFactoryCommand> mIteratorMap =
         new HashMap<>();
 	
     /** 
@@ -98,7 +101,7 @@ public class IteratorFactory {
      * pre-order iteration algorithm.
      */
     public static class LevelOrderIterator
-        implements Iterator<ExpressionTree> {
+           implements Iterator<ExpressionTree> {
         /**
          * Queue of expression trees.
          */

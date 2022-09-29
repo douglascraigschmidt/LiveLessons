@@ -1,8 +1,9 @@
 package folders.tests;
 
+import folders.common.FolderOps;
 import folders.folder.Dirent;
 import folders.folder.Folder;
-import folders.utils.Options;
+import folders.common.Options;
 import folders.utils.ReactorUtils;
 import folders.utils.TestDataFactory;
 import reactor.core.publisher.Mono;
@@ -10,7 +11,7 @@ import reactor.core.publisher.ParallelFlux;
 
 import java.util.function.Function;
 
-import static folders.tests.FolderTestsUtils.sWORKS;
+import static folders.common.Constants.sWORKS;
 
 /**
  * This Java utility class contains methods that run all the tests in
@@ -52,7 +53,7 @@ public final class FolderTestsParallel {
      */
     public static Mono<Long> countLinesParallel(Mono<Dirent> rootFolderM) {
         // This function counts the # of lines in a dirent.
-        Function<Dirent, Mono<Long>> countLines = document -> FolderTestsUtils.
+        Function<Dirent, Mono<Long>> countLines = document -> FolderOps.
             // Split the document into lines.
             splitAsFlux(document, "\\r?\\n")
             
@@ -67,7 +68,7 @@ public final class FolderTestsParallel {
                      .fromIterableParallel(rootFolder)
 
                      // Only search documents.
-                     .filter(FolderTestsUtils::isDocument)
+                     .filter(FolderOps::isDocument)
 
                      // Count the # of lines in the document in parallel
                      // with other documents in the dirent.
@@ -99,7 +100,7 @@ public final class FolderTestsParallel {
     public static Mono<Long> searchFoldersParallel(Mono<Dirent> rootFolderM,
                                                    String word) {
         // This function counts # times word appears in dirent.
-        Function<Dirent, Mono<Long>> countMatches = document -> FolderTestsUtils
+        Function<Dirent, Mono<Long>> countMatches = document -> FolderOps
             // Count # of times word appears in the document.
             .occurrencesCount(document, word);
 
@@ -111,7 +112,7 @@ public final class FolderTestsParallel {
                      .fromIterableParallel(rootFolder)
 
                      // Only search documents.
-                     .filter(FolderTestsUtils::isDocument)
+                     .filter(FolderOps::isDocument)
 
                      // Search document looking for matches.
                      .flatMap(countMatches)

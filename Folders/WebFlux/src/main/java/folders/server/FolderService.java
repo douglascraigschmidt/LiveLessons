@@ -1,7 +1,7 @@
 package folders.server;
 
+import folders.common.FolderOps;
 import folders.folder.Dirent;
-import folders.tests.FolderTests;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,6 +26,24 @@ public class FolderService {
     private Mono<Dirent> mMemoizedDirent = null;
 
     /**
+     * This method returns a {@link Mono} that emits all the entries
+     * in the folder, starting at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Mono} that emits all the entries in the folder
+     *         starting at {@code rootDir}
+     */
+    public Mono<Dirent> createFolder(String rootDir,
+                                     Boolean concurrent) {
+        return FolderOps
+            // Asynchronously create and return a folder starting at
+            // rootDir.
+            .createFolder(rootDir, concurrent);
+    }
+
+    /**
      * This method returns a {@link Mono} that emits a count of the
      * number of times a {@code word} appears in the folder starting
      * at {@code rootDir}.
@@ -40,10 +58,59 @@ public class FolderService {
     public Mono<Long> searchWord(String rootDir,
                                  String word,
                                  Boolean concurrent) {
-        return FolderTests
+        Mono<Dirent> rootFolder = FolderOps
+            // Asynchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
             // Asynchronously count the # of times 'word' appears in
-            // the folder starting at rootDir.
-            .performCountWordMatches(rootDir, word, concurrent);
+            // the folder starting at rootFolder.
+            .countWordMatches(rootFolder, word, concurrent);
+    }
+
+    /**
+     * This method returns a {@link Mono} that emits a count of the
+     * number of entries in the folder starting at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Mono} that emits a count of the number of
+     *         entries in the folder starting at {@code rootDir}
+     */
+    public Mono<Long> countEntries(String rootDir,
+                                   Boolean concurrent) {
+        Mono<Dirent> rootFolder = FolderOps
+            // Asynchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
+            // Asynchronously count the # of entries in the folder
+            // starting at rootFolder.
+            .countEntries(rootFolder, concurrent);
+    }
+
+    /**
+     * This method returns {@link Long} that counts the number of
+     * lines in entries in the folder starting at {@code rootDir}.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the count should be done concurrently
+     *                   or not
+     * @return A {@link Mono} that emits the number of lines in
+     *         entries in the folder starting at {@code rootDir}
+     */
+    public Mono<Long> countLines(String rootDir,
+                                 Boolean concurrent) {
+        Mono<Dirent> rootFolder = FolderOps
+            // Asynchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
+            // Return the # of lines of entries starting at
+            // rootFolder.
+            .countLines(rootFolder,
+                        concurrent);
     }
 
     /**
@@ -62,59 +129,13 @@ public class FolderService {
     public Flux<Dirent> getDocuments(String rootDir,
                                      String word,
                                      Boolean concurrent) {
-        return FolderTests
+        Mono<Dirent> rootFolder = FolderOps
+            // Asynchronously create a folder starting at rootDir.
+            .createFolder(rootDir, concurrent);
+
+        return FolderOps
             // Asynchronously count the # of times 'word' appears in
-            // the folder starting at rootDir.
-            .performGetDocuments(rootDir, word, concurrent);
-    }
-
-    /**
-     * This method returns a {@link Mono} that emits a count of the
-     * number of entries in the folder starting at {@code rootDir}.
-     *
-     * @param rootDir The root directory to start the search
-     * @param concurrent True if the count should be done concurrently
-     *                   or not
-     * @return A {@link Mono} that emits a count of the number of
-     *         entries in the folder starting at {@code rootDir}
-     */
-    public Mono<Long> countEntries(String rootDir,
-                                   Boolean concurrent) {
-        return FolderTests
-            // Asynchronously count the # of entries in the
-            // folder starting at rootDir.
-            .performCount(rootDir, concurrent);
-    }
-
-    /**
-     * This method returns a {@link Mono} that emits all the entries
-     * in the folder, starting at {@code rootDir}.
-     *
-     * @param rootDir The root directory to start the search
-     * @param memoize True if the created folder should be cached
-     * @param concurrent True if the folder should be created
-     *                   concurrently or not
-     * @return A {@link Mono} that emits all the entries in the folder
-     *         starting at {@code rootDir}
-     */
-    public Mono<Dirent> createFolder(String rootDir,
-                                     Boolean memoize,
-                                     Boolean concurrent) {
-        if (memoize) {
-            if (mMemoizedDirent != null)
-                // Return the cached folder contents.
-                return mMemoizedDirent;
-            else {
-                mMemoizedDirent = FolderTests
-                    // Asynchronously and concurrently create and
-                    // return a folder starting at rootDir.
-                    .createFolder(rootDir, concurrent);
-            }
-            return mMemoizedDirent;
-        } else
-            return FolderTests
-                // Asynchronously and concurrently create and
-                // return a folder starting at rootDir.
-                .createFolder(rootDir, true);
+            // the folder starting at rootFolder.
+            .getDocuments(rootFolder, word, concurrent);
     }
 }

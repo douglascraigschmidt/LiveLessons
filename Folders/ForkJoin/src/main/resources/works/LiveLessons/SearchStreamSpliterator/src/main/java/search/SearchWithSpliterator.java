@@ -168,5 +168,12 @@ public class SearchWithSpliterator {
         return m.find()
                 ? m.group()
                 : "";
+
+        /* Could also use
+          
+        int index = inputData.indexOf('\n');
+        return inputData.substring(0,
+                                   index);
+        */
     }
 }

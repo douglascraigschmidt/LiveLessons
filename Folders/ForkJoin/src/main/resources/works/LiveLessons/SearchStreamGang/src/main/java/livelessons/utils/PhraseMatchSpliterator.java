@@ -9,9 +9,9 @@ import static livelessons.utils.SearchResults.Result;
 
 /**
  * This class is used in conjunction with StreamSupport.stream() to
- * create a stream of SearchResults.Result objects that track the
- * locations (if any) of a phrase that appears in an input string.
- * The comparison is case-insensitive.
+ * create a stream of SearchResults.Result objects that match the
+ * number of times a phrase appears in an input string.  The
+ * comparison is case-insensitive.
  */
 public class PhraseMatchSpliterator
        implements Spliterator<Result> {
@@ -56,23 +56,20 @@ public class PhraseMatchSpliterator
         
         // Create a regex that will match the phrase across lines.
         String regexPhrase = 
-            // Start phase with a word boundary.
+            // Start with a word boundary.
             "\\b"
             + phrase
-
             // Remove leading/trailing whitespace.
             .trim()
-
             // Replace multiple spaces with one whitespace boundary
             // expression and delimit words.
             .replaceAll("\\s+", "\\\\b\\\\s+\\\\b")
-
-            // End phrase with a word boundary.
+            // End with a word boundary.
             + "\\b";
 
         regexPhrase = regexPhrase
-            // Modify various punctuations so they aren't considered
-            // part of a word.
+            // Move various punctations so they aren't considered part
+            // of a word.
             .replace("?\\b", "\\b?")
             .replace(".\\b", "\\b.")
             .replace(",\\b", "\\b,")
@@ -83,26 +80,24 @@ public class PhraseMatchSpliterator
             // Quote any question marks to avoid problems.
             .replace("?", "\\?");
 
-        // Create a regex pattern that ignores case and searches for
-        // phrases that split across lines.
+        // System.out.println("regex phrase = " + regexPhrase);
+
+        // Ignore case and search for phrases that split across lines.
         mPattern = Pattern.compile(regexPhrase,
-                                   Pattern.CASE_INSENSITIVE
-                                   | Pattern.DOTALL);
+                                   Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
         // Create a regex matcher.
         mPhraseMatcher = mPattern.matcher(input);
 
-        // Initialize the input.
+        // Initialize the fields.
         mInput = input;
-
-        // Compute the minimum split size, which is used by
-        // parallel spliterators to preclude further splits.
         mMinSplitSize = input.length() / 2;
     }
 
     /**
      * This constructor is used internally by the trySplit() method.
-     * It initializes all fields for the "left hand size" of a split.
+     * It initializes all the fields for the "left hand size" of a
+     * split.
      */
     private PhraseMatchSpliterator(CharSequence input,
                                    String phrase,
@@ -129,7 +124,7 @@ public class PhraseMatchSpliterator
         else {
             // Create/accept a new Result object that stores the index
             // of where the phrase occurs in the original string
-            // (we add mOffset to handle parallel splits).
+            // (which is why we add mOffset).
             action.accept(new Result(mOffset + mPhraseMatcher.start()));
 
             // Indicate that the spliterator should continue.

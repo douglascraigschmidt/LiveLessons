@@ -143,7 +143,7 @@ public class Image {
      * constructed from.
      */
     public String getFileName() {
-        return FileAndNetUtils.getFileNameForUrl(mSourceUrl);
+        return NetUtils.getFileNameForUrl(mSourceUrl);
     }
 
     /**

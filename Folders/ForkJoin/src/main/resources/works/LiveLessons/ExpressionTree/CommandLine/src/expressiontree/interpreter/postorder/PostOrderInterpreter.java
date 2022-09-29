@@ -1,7 +1,6 @@
 package expressiontree.interpreter.postorder;
 
 import expressiontree.interpreter.*;
-import expressiontree.interpreter.exprs.Expr;
 import expressiontree.tree.ExpressionTree;
 import expressiontree.tree.ExpressionTreeFactory;
 

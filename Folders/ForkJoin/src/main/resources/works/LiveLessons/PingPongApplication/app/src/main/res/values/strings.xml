@@ -1,9 +1,0 @@
-<resources>
-
-    <string name="app_name">PlayPingPong</string>
-    <string name="action_settings">Settings</string>
-    <string name="play_button">Play PingPong!</string>
-    <string name="reset_button">Reset Game</string>
-    <string name="empty_string"></string>
-
-</resources>

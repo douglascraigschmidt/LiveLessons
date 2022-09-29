@@ -31,7 +31,7 @@ public class UserCommandFactory {
      * implementations and dispatch the execute() method of the
      * requested user command.
      */
-    private Map<String, UserCommandFactoryCommand> commandMap =
+    private HashMap<String, UserCommandFactoryCommand> commandMap =
         new HashMap<>();
 
     /** 
@@ -69,18 +69,18 @@ public class UserCommandFactory {
     	// A "macro" string maps to a command object that creates a
         // {@code MacroCommand} implementation.
         commandMap.put("macro", param -> {
-                // A MacroCommand contains a "in-order"
-                // FormatCommand, the user mInput expression, and a
-                // "post-order" EvalCommand.  It's used to
-                // implement "Succinct Mode".
-                return new MacroCommand(treeContext, Arrays
-                                        .asList(new FormatCommand(treeContext,
-                                                                  "in-order"),
-                                                new ExprCommand(treeContext,
-                                                                param),
-                                                new EvalCommand(treeContext,
-                                                                "post-order")));
-            });
+            // A MacroCommand contains a "in-order"
+            // FormatCommand, the user mInput expression, and a
+            // "post-order" EvalCommand.  It's used to
+            // implement "Succinct Mode".
+            return new MacroCommand(treeContext, Arrays
+                    .asList(new FormatCommand(treeContext,
+                                     "in-order"),
+                            new ExprCommand(treeContext,
+                                            param),
+                            new EvalCommand(treeContext,
+                                    "post-order")));
+        });
 		
     	// A "quit" string maps to a command object that creates a
         // {@code QuitCommand} implementation.

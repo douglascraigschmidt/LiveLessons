@@ -1,8 +1,11 @@
 /**
- * This test driver showcases how various subclasses of the {@link
- * TaskGang} framework use different Java barrier synchronizers to
- * implement an "embarrassingly parallel" app that concurrently
- * searches for words in one or more Lists of input Strings.
+ * @class BarrierTaskGangTest
+ *
+ * @brief This test driver showcases how various subclasses of the
+ *        TaskGang framework use different Java barrier synchronizers
+ *        to implement an "embarrassingly parallel" application that
+ *        concurrently searches for words in one or more Lists of
+ *        input Strings.
  */
 public class BarrierTaskGangTest {
     /**
@@ -41,7 +44,7 @@ public class BarrierTaskGangTest {
                                                "do"};
         
     /**
-     * Used by the {@link OneShotSearchWithCountDownLatch} test that
+     * This input array is used by the OneShotSearchWithCountDownLatch test that 
      * searches for the words concurrently in multiple threads.
      */
     private final static String[][] mOneShotInputStrings = {
@@ -49,9 +52,9 @@ public class BarrierTaskGangTest {
     };
 
     /**
-     * Used by the {@link CyclicSearchWithCyclicBarrier} test that
-     * continues to search a fixed number of words/Threads
-     * concurrently until there's no more input to process.
+     * This input array is used by the CyclicSearchWithCyclicBarrier test that 
+     * continues to search a fixed number of words/Threads concurrently until
+     * there's no more input to process.
      */
     private final static String[][] mFixedNumberOfInputStrings = {
         {"xdoodoo", "xreo", "xmiomio", "xfao", "xsoosoo", "xlao", "xtiotio", "xdoo"},
@@ -59,9 +62,9 @@ public class BarrierTaskGangTest {
     };
 
     /**
-     * Used by the {@link CyclicSearchWithPhaser} test that continues
-     * to search a variable number of words/threads concurrently until
-     * there's no more input to process.
+     * This input array is used by the CyclicSearchWithPhaser test that continues to
+     * search a variable number of words/Threads concurrently until there's no more 
+     * input to process.
      */
     private final static String[][] mVariableNumberOfInputStrings = {
         {"xfaofao"},
@@ -97,15 +100,13 @@ public class BarrierTaskGangTest {
     static public void main(String[] args) {
         printDebugging("Starting BarrierTaskGangTest");
         
-        // Iterate through all the tests.
+        // Create/run appropriate type of TaskGang to search for words
+        // concurrently.
+
         for (TestsToRun test : TestsToRun.values()) {
             printDebugging("Starting "
                            + test);
-
-            // Create/run appropriate type of TaskGang to search for
-            // words concurrently.
             makeTaskGang(mWordList, test).run();
-
             printDebugging("Ending "
                            + test);
         }

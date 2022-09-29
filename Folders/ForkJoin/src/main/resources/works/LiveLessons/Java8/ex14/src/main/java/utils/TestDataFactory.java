@@ -3,6 +3,7 @@ package utils;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -58,7 +59,7 @@ public class TestDataFactory {
      * {@code splitter} regular expression and return a list of up to
      * {@code limit} strings.
      */
-    public static List<String> getInput(String filename,
+    public static List<CharSequence> getInput(String filename,
                                               String splitter,
                                               int limit) {
         try {
@@ -66,7 +67,7 @@ public class TestDataFactory {
             URI uri = ClassLoader.getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
-            String bytes =
+            CharSequence bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
             return Pattern
@@ -83,7 +84,7 @@ public class TestDataFactory {
                 // Only return up to 'limit' strings.
                 .limit(limit)
 
-                // Collect the results into a List of String objects.
+                // Collect the results into a string.
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();

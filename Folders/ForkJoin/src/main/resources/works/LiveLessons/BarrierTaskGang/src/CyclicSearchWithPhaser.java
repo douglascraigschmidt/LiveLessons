@@ -2,15 +2,17 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
 
 /**
- * Customizes the {@link SearchTaskGangCommon} framework with a {@link
- * Phaser} to continue searching a variable number of words/threads
- * concurrently until there's no more input to process.
+ * @class CyclicSearchWithPhaser
+ *
+ * @brief Customizes the SearchTaskGangCommon framework with a Phaser
+ *        to continue searching a variable number of words/Threads
+ *        concurrently until there's no more input to process.
  */
 public class CyclicSearchWithPhaser 
              extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
-     * Thread must await on mPhaser for all the other threads to
+     * Thread must await on mPhaser for all the other Threads to
      * complete their processing before they all attempt to move to
      * the next cycle en masse.
      */
@@ -46,9 +48,8 @@ public class CyclicSearchWithPhaser
         mPhaser = new Phaser() {
             // Hook method that performs actions prior to an impending
             // phase advance.
-            @Override
-            public boolean onAdvance(int phase,
-                                     int registeredParties) {
+            protected boolean onAdvance(int phase,
+                                        int registeredParties) {
                 // Record the size of the previous input List to see
                 // if a reconfiguration is needed or not.
                 int prevSize = getInput().size();

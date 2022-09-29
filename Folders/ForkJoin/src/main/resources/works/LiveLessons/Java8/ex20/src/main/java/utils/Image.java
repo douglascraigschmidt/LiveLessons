@@ -38,7 +38,7 @@ public class Image
      * constructed from.
      */
     private String getFileName() {
-        return FileAndNetUtils.getFileNameForUrl(mSourceUrl);
+        return NetUtils.getFileNameForUrl(mSourceUrl);
     }
 
     /**
@@ -60,7 +60,7 @@ public class Image
             PlatSpec.writeImageFile(outputFile, this);
             return imageFile;
         } catch (Exception e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }

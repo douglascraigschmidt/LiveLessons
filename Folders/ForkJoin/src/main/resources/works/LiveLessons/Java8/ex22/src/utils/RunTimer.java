@@ -74,8 +74,8 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuilder stringBuffer =
-            new StringBuilder();
+        StringBuffer stringBuffer =
+            new StringBuffer();
 
         stringBuffer.append("Printing ")
             .append(mResultsMap.entrySet().size())

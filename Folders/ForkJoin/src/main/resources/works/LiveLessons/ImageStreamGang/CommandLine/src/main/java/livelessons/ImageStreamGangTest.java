@@ -12,11 +12,7 @@ import livelessons.filters.NullFilter;
 
 /**
  * This class is the main entry point for the Java console version of
- * the ImageStreamGang app.  It runs all the implementation strategies
- * (including strategies implemented via Java sequential streams,
- * parallel streams, completable futures, RxJava, and Project Reactor
- * frameworks) and provides apples-to-apples comparisons of these
- * strategies in terms of there performance and scalability.
+ * the ImageStreamGang app.
  */
 public class ImageStreamGangTest {
     /**
@@ -29,9 +25,7 @@ public class ImageStreamGangTest {
         COMPLETABLE_FUTURES_1,
         COMPLETABLE_FUTURES_2,
         RXJAVA1, 
-        RXJAVA2,
-        REACTOR1,
-        REACTOR2
+        RXJAVA2
     }
     
     /**
@@ -48,7 +42,7 @@ public class ImageStreamGangTest {
      * implementation strategies so they can be sorted and displayed
      * when the program is finished.
      */
-    private static final Map<String, List<Long>> mResultsMap = new HashMap<>();
+    private static Map<String, List<Long>> mResultsMap = new HashMap<>();
 
     /**
      * The JVM requires a static main() entry point to run the console
@@ -70,7 +64,7 @@ public class ImageStreamGangTest {
      * Iterates through all the implementation strategies to test how
      * they perform.
      */
-    public static void runTests() {
+    private static void runTests() {
         // Warm up the fork-join pool.
         warmUpForkJoinPool();
 
@@ -89,8 +83,6 @@ public class ImageStreamGangTest {
 
             // Run garbage collector first to avoid perturbing test timing.
             System.gc();
-
-            assert streamGang != null;
 
             // Start running the test (which initiates the timer).
             streamGang.run();
@@ -131,23 +123,9 @@ public class ImageStreamGangTest {
                                          urlIterator);
         case RXJAVA2:
                 return new ImageStreamRxJava2(filters,
-                                              urlIterator);
-        case REACTOR1:
-                return new ImageStreamRxJava2(filters,
-                                              urlIterator);
-
-        case REACTOR2:
-                return new ImageStreamRxJava2(filters,
-                                              urlIterator);
+                           urlIterator);
         }
         return null;
-    }
-
-    /**
-     * @return The timing results from all the tests.
-     */
-    public static Map<String, List<Long>>  getTimingResults(){
-        return mResultsMap;
     }
 
     /**

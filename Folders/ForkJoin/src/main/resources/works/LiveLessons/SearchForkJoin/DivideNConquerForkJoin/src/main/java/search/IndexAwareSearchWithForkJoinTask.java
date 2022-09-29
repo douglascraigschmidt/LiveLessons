@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 
 /**
- * This class demonstrates the use of the Java fork-join framework to
- * search for phrases in the works of Shakespeare.  It uses indices
+ * This class demonstrates the use of the Java 7 fork-join framework
+ * to search for phrases in the works of Shakespeare.  It uses indices
  * instead of sublists to minimize copying.  Thanks to Sanjeev Kumar
  * for suggesting/implementing this approach.
  */

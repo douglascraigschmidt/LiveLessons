@@ -46,9 +46,9 @@ public interface BoundedQueue<E> {
      * @return {@code true} if the element was added to this queue, else
      *         {@code false}
      */
-     default boolean offer(E e) {
-         return false;
-     }
+    default boolean offer(E e) {
+        return false;
+    }
 
     /**
      * Returns <tt>true</tt> if this queue contains no elements, else false.
@@ -71,3 +71,6 @@ public interface BoundedQueue<E> {
      */
     int size();
 }
+
+
+

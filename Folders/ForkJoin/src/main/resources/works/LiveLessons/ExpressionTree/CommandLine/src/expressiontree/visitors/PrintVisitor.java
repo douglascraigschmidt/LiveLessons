@@ -1,7 +1,7 @@
 package expressiontree.visitors;
 
 import expressiontree.platspecs.Platform;
-import expressiontree.composites.*;
+import expressiontree.nodes.*;
 
 /**
  * This class serves as a visitor that print the contents of each getType

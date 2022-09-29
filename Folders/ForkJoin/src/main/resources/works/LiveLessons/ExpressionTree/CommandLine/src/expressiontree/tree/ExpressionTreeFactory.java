@@ -1,6 +1,6 @@
 package expressiontree.tree;
 
-import expressiontree.composites.ComponentNode;
+import expressiontree.nodes.ComponentNode;
 
 /**
  * This class implements the Factory Method pattern to create {@code

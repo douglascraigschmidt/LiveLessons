@@ -10,7 +10,7 @@ public class RunTimer {
     /**
      * Keep track of which SearchStreamGang performed the best.
      */
-    private static final Map<String, Long> mResultsMap = new HashMap<>();
+    private static Map<String, Long> mResultsMap = new HashMap<>();
 
     /**
      * Keeps track of how long the test has run.
@@ -38,7 +38,7 @@ public class RunTimer {
     }
 
     /**
-     * Call {@code supplier.get()} and time how long it takes to run.
+     * Call @a supplier.get() and time how long it takes to run.
      *
      * @return The result returned by @a supplier.get()
      */
@@ -56,7 +56,7 @@ public class RunTimer {
     }
 
     /**
-     * Call {@code runnable.run()} and time how long it takes to run.
+     * Call @a runnable.run() and time how long it takes to run.
      */
     public static void timeRun(Runnable runnable,
                                String testName) {
@@ -74,10 +74,10 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuilder stringBuilder =
-            new StringBuilder();
+        StringBuffer stringBuffer =
+            new StringBuffer();
 
-        stringBuilder.append("\nPrinting ")
+        stringBuffer.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest\n");
 
@@ -96,20 +96,16 @@ public class RunTimer {
                                                            entry.getKey()))
 
             // Sort the stream by the timing results (key).
-            .sorted(Map.Entry.comparingByKey())
+            .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
 
             // Append the entries in the sorted stream.
-            .forEach(entry -> 
-                     // Create the desired output.
-                     stringBuilder
-                     // Right-justify the runtime.
-                     .append(String.format("%5d", entry.getKey()))
-                     .append(" msecs needed to run ")
-                     // Just get the last portion of the test name.
-                     .append(StringUtils.lastSegment(entry.getValue(), '.'))
-                     .append("\n"));
+            .forEach(entry -> stringBuffer
+                     .append("")
+                     .append(entry.getValue())
+                     .append(" executed in ")
+                     .append(entry.getKey())
+                     .append(" msecs\n"));
 
-        // Convert the result into a string.
-        return stringBuilder.toString();
+        return stringBuffer.toString();
     }
 }

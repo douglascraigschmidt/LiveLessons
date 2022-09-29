@@ -1,18 +1,17 @@
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.ConcurrentHashSet;
-import utils.FuturesCollectorIntStream;
 import utils.Options;
+import utils.StreamOfFuturesCollector;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
 
 /**
  * This class counts the number of images in a recursively-defined
- * folder structure using a range of asynchronous CompletableFuture
- * features.  The root folder can either reside locally (filesystem
- * -based) or remotely (web-based).
+ * folder structure using a range of CompletableFuture features.  The
+ * root folder can either reside locally (filesystem-based) or
+ * remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -48,7 +47,8 @@ class ImageCounter {
             .handle((totalImages, ex) -> {
                     if (totalImages == null)
                         totalImages = 0;
-                    print(TAG + ": " + totalImages
+                    print(""
+                          + totalImages
                           + " total image(s) are reachable from "
                           + rootUri);
                     return 0;
@@ -60,8 +60,7 @@ class ImageCounter {
 
             // When the future completes print the total number of images.
             .thenAccept(totalImages ->
-            print(TAG
-            + ": " 
+            print("" 
             + totalImages
             + " total image(s) are reachable from "
             + rootUri))
@@ -83,10 +82,9 @@ class ImageCounter {
                                                    int depth) {
         // Return 0 if we've reached the depth limit of the crawling.
         if (depth > Options.instance().maxDepth()) {
-            print(TAG 
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Exceeded max depth of "
+                  + ") Exceeded max depth of "
                   + Options.instance().maxDepth());
 
             return mZero;
@@ -96,10 +94,9 @@ class ImageCounter {
         // and add the new url to the hashset so we don't try to
         // revisit it again unnecessarily.
         else if (!mUniqueUris.putIfAbsent(pageUri)) {
-            print(TAG 
-                  + "[Depth"
+            print("(depth "
                   + depth
-                  + "]: Already processed "
+                  + ") Already processed "
                   + pageUri);
 
             // Return 0 if we've already examined this url.
@@ -114,17 +111,16 @@ class ImageCounter {
                                     depth)
                 .whenComplete((totalImages, ex) -> {
                         if (totalImages != null)
-                            print(TAG
-                                  + "[Depth"
+                            print("(depth "
                                   + depth
-                                  + "]: found "
+                                  + ") found "
                                   + totalImages
                                   + " images for "
                                   + pageUri
                                   + " in thread " 
                                   + Thread.currentThread().getId());
                         else 
-                            print(TAG + ": exception " + ex.getMessage());
+                            print(" exception " + ex.getMessage());
                     });
 
     }
@@ -141,13 +137,13 @@ class ImageCounter {
         try {
             // Get a future to the page at the root URI.
             // var is CompletableFuture<Document>
-            CompletableFuture<Document> pageFuture =
+            var pageFuture =
                 getStartPage(pageUri);
 
             // Asynchronously count the # of images on this page and
             // return a future to the count.
             // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInPageFuture = pageFuture
+            var imagesInPageFuture = pageFuture
                 // The getImagesInPage() method runs synchronously, so
                 // call it via thenApplyAsync().
                 .thenApplyAsync(this::getImagesInPage)
@@ -158,7 +154,7 @@ class ImageCounter {
             // Asynchronously count the # of images in link on this
             // page and returns a future to this count.
             // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
+            var imagesInLinksFuture = pageFuture
                 // The crawlLinksInPage() methods runs synchronously,
                 // so thenComposeAsync() is used to avoid blocking via
                 // "flatMap()" semantics wrt nesting of futures.
@@ -254,12 +250,14 @@ class ImageCounter {
                              depth + 1))
 
             // Trigger intermediate operation processing and return a
-            // future to a CompletableFutures<IntStream>.
-            .collect(FuturesCollectorIntStream.toFuture())
+            // future to a stream of completable futures.
+            .collect(StreamOfFuturesCollector.toFuture())
 
             // After all the futures in the stream complete then sum
             // all the integers in the stream of results.
-            .thenApply(IntStream::sum);
+            .thenApply(stream -> stream
+                       // Sum all results in the stream.
+                       .reduce(0, Integer::sum));
     }
 
     /**
@@ -268,6 +266,9 @@ class ImageCounter {
      */
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())
-            System.out.println(string);
+            System.out.println("Thread["
+                               + Thread.currentThread().getId()
+                               + "]: "
+                               + string);
     }
 }

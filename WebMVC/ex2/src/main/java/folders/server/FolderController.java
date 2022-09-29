@@ -43,6 +43,27 @@ public class FolderController {
     private FolderService mFolderService;
 
     /**
+     * This method returns a {@link Dirent} that contains all the
+     * entries in the folder, starting at {@code rootDir}.
+     *
+     * WebMVC maps HTTP GET requests sent to the
+     * "/{rootDir}/createFolder" endpoint to this method.
+     *
+     * @param rootDir The root directory to start the search
+     * @param concurrent True if the folder should be created
+     *                   concurrently or not
+     * @return A {@link Dirent} that contains all the entries in the
+     *         folder starting at {@code rootDir}
+     */
+    @GetMapping(PATH + CREATE_FOLDER)
+    public Dirent createFolder(@PathVariable String rootDir,
+                               @RequestParam Boolean concurrent) {
+        return mFolderService
+            // Forward to the service.
+            .createFolder(rootDir, concurrent);
+    }
+
+    /**
      * This method returns a {@link Long} that counts the number of
      * times a {@code word} appears in the folder starting at {@code
      * rootDir}.
@@ -65,31 +86,6 @@ public class FolderController {
             .searchWord(rootDir, word, concurrent);
     }
 
-    /**
-     * This method returns a {@link List} that containing all the
-     * documents where a {@code word} appears in the folder, starting
-     * at {@code rootDir}.
-     *
-     * WebMVC maps HTTP GET requests sent to the
-     * "/{rootDir}/getDocuments" endpoint to this method.
-     *
-     * @param rootDir The root directory to start the search
-     * @param word The word to search for, starting at {@code rootDir}
-     * @param concurrent True if the search should be done
-     *                   concurrently or not
-     * @return A {@link List} containing all the documents where
-     *         {@code word} appears in the folder starting at {@code
-     *         rootDir}
-     */
-    @GetMapping(PATH + GET_DOCUMENTS)
-    public List<Dirent> getDocuments(@PathVariable String rootDir,
-                                     @RequestParam String word,
-                                     @RequestParam Boolean concurrent) {
-        return mFolderService
-            // Forward to the service.
-            .getDocuments(rootDir, word, concurrent);
-    }
-	
     /**
      * This method returns {@link Long} that counts the number
      * of entries in the folder starting at {@code rootDir}.
@@ -133,23 +129,27 @@ public class FolderController {
     }
 
     /**
-     * This method returns a {@link Dirent} that contains all the
-     * entries in the folder, starting at {@code rootDir}.
+     * This method returns a {@link List} that containing all the
+     * documents where a {@code word} appears in the folder, starting
+     * at {@code rootDir}.
      *
      * WebMVC maps HTTP GET requests sent to the
-     * "/{rootDir}/createFolder" endpoint to this method.
+     * "/{rootDir}/getDocuments" endpoint to this method.
      *
      * @param rootDir The root directory to start the search
-     * @param concurrent True if the folder should be created
+     * @param word The word to search for, starting at {@code rootDir}
+     * @param concurrent True if the search should be done
      *                   concurrently or not
-     * @return A {@link Dirent} that contains all the entries in the
-     *         folder starting at {@code rootDir}
+     * @return A {@link List} containing all the documents where
+     *         {@code word} appears in the folder starting at {@code
+     *         rootDir}
      */
-    @GetMapping(PATH + CREATE_FOLDER)
-    public Dirent createFolder(@PathVariable String rootDir,
-                               @RequestParam Boolean concurrent) {
+    @GetMapping(PATH + GET_DOCUMENTS)
+    public List<Dirent> getDocuments(@PathVariable String rootDir,
+                                     @RequestParam String word,
+                                     @RequestParam Boolean concurrent) {
         return mFolderService
             // Forward to the service.
-            .createFolder(rootDir, concurrent);
+            .getDocuments(rootDir, word, concurrent);
     }
 }

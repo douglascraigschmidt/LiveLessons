@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ex28" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="ex28" />
-    <module name="ex28" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
-</component>

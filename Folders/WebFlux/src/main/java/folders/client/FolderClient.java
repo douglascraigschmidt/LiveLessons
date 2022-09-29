@@ -1,44 +1,67 @@
 package folders.client;
 
+import folders.common.FolderOps;
 import folders.folder.Dirent;
-import folders.tests.FolderTests;
+import folders.server.FolderController;
 import folders.tests.FolderTestsParallel;
-import folders.tests.FolderTestsProxy;
-import folders.utils.Options;
+import folders.common.Options;
 import folders.utils.RunTimer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
+import static folders.common.Constants.sWORKS;
 
+/**
+ * This client uses Spring WebFlux features to perform asynchronous
+ * remote method invocations on the {@link FolderController} web
+ * service to process entries in a recursively-structured directory
+ * folder sequentially, concurrently, and in parallel in a
+ * client/server environment.
+ *
+ * The {@code @Component} annotation allows Spring to automatically
+ * detect custom beans, i.e., Spring will scan the application for
+ * classes annotated with {@code @Component}, instantiate them, and
+ * inject the specified dependencies into them without having to write
+ * any explicit code.
+ */
+@Component
 public class FolderClient {
+    /**
+     * This object connects {@link FolderClient} to the {@code
+     * FolderProxy}.  The {@code @Autowired} annotation ensures this
+     * field is initialized via Spring dependency injection, where an
+     * object receives another object it depends on (e.g., by creating
+     * a {@link FolderProxy}).
+     */
+    @Autowired
+    private FolderProxy mFolderProxy;
+
     /**
      * Create a folder either sequentially or concurrently (depending
      * on the value of {@code concurrent}) and locally or remotely
      * (depending on the value of {@code remote}).
      *
-     * @return Return A {@link Mono} that emits a folder
+     * @return A {@link Mono} that emits a {@link Dirent} folder
      */
-    private static Mono<Dirent> createFolder(boolean concurrent,
-                                             boolean remote,
-                                             String mode) {
-        if (remote)
-            // Return a mono to a remote Folder.
-            return RunTimer
-                // Compute the time needed to create a new remote
-                // folder asynchronously.
-                .timeRun(() -> FolderTestsProxy
-                         .createRemoteFolder(Options.getInstance().memoize(),
-                                             concurrent),
-                         "createFolder() " + mode);
-        else
-            // Return a mono to a local Folder.
-            return RunTimer
-                    // Compute the time needed to create a new local
-                    // folder asynchronously.
-                .timeRun(() -> FolderTests
-                         .createFolder(concurrent),
-                         "createFolder() " + mode);
+    private Mono<Dirent> createFolder(boolean concurrent,
+                                      boolean remote,
+                                      String mode) {
+        return remote
+            // Return a Mono that emits a remote Folder.
+            ? RunTimer
+            // Compute the time needed to create a new remote Folder
+            // asynchronously.
+            .timeRun(() -> mFolderProxy
+                     .createRemoteFolder(concurrent),
+                     "createFolder() " + mode)
+            : // Return a Mono that emits a local Folder.
+            RunTimer
+            // Compute the time needed to create a new local Folder
+            // asynchronously.
+            .timeRun(() -> FolderOps
+                     .createFolder(sWORKS, concurrent),
+                     "createFolder() " + mode);
     }
 
     /**
@@ -46,58 +69,66 @@ public class FolderClient {
      * the value of {@code concurrent}) and locally or remotely
      * (depending on the value of {@code remote}).
      */
-    public static void runTests(boolean concurrent, boolean remote) {
+    public void runTests(boolean concurrent, boolean remote) {
         // Record whether we're running concurrently or sequentially.
         String mode = concurrent ? "concurrently" : "sequentially";
         mode += remote ? " and remotely" : " and locally";
 
         Options.print("Starting the test " + mode);
 
-        // The word to search for while the folder's being
-        // constructed.
-        final String searchWord = "CompletableFuture";
-
-        // Get a mono to a Folder.
+        // Get a Mono to a Folder.
         Mono<Dirent> rootFolderM =
             createFolder(concurrent,
                          remote,
                          mode);
 
-        RunTimer
+        // The word to search for while the folder's being
+        // constructed.
+        final String searchWord = "CompletableFuture";
+
+        var matches = RunTimer
             // Compute the time taken to synchronously search for a
             // word in all folders starting at the rootFolder.
-            .timeRun(() -> FolderTests
+            .timeRun(() -> FolderOps
                      .countWordMatches(rootFolderM,
                                        searchWord,
                                        concurrent)
                      .block(),
                      "searchFolders() " + mode);
 
-        RunTimer
+        Options.debug(searchWord + " matched " + matches + " times");
+
+        var entries = RunTimer
             // Compute the time taken to count the entries in the
             // folder.
-            .timeRun(() -> FolderTests
+            .timeRun(() -> FolderOps
                      .countEntries(rootFolderM, concurrent)
                      .block(),
                      "countEntries() " + mode);
 
-        RunTimer
+        Options.debug("The number of entries = " + entries);
+
+        var lines = RunTimer
             // Compute the time taken to count the # of lines in the
             // folder.
-            .timeRun(() -> FolderTests
+            .timeRun(() -> FolderOps
                      .countLines(rootFolderM, concurrent)
                      .block(),
                      "countLines() " + mode);
 
-        RunTimer
+        Options.debug("The number of lines = " + lines);
+
+        var documents = RunTimer
             // Compute the time taken to count the # of lines in the
             // folder.
-            .timeRun(() -> FolderTests
+            .timeRun(() -> FolderOps
                      .getDocuments(rootFolderM,
                                    "CompletableFuture",
                                    concurrent)
                      .collectList().block(),
                      "getDocuments() " + mode);
+
+        Options.debug(searchWord + " was found in " + documents.size() + " documents");
 
         Options.print("Ending the test " + mode);
     }
@@ -105,7 +136,7 @@ public class FolderClient {
     /**
      * Run the tests in parallel via Reactor's ParallelFlux mechanism.
      */
-    public static void runTestsParallel() {
+    public void runTestsParallel() {
         Options.print("Starting the test in parallel");
 
         // The word to search for while the folder's being
@@ -140,37 +171,70 @@ public class FolderClient {
     }
 
     /**
-     * Run the remote tests.
+     * Run the remote tests either sequentially or concurrently
+     * (depending on the value of {@code concurrent}).
      */
-    public static void runRemoteTests() {
-        Options.print("Starting the remote tests");
+    public void runRemoteTests(boolean concurrent) {
+        // Record whether we're running concurrently or sequentially.
+        String mode = concurrent ? "concurrently" : "sequentially";
 
-        CompletableFuture<Long> countF = FolderTestsProxy
-            .countEntriesAsync(Options.getInstance().concurrent());
+        Options.print("Starting the remote tests " + mode);
 
-        System.out.println("Count of dirent entries (as CompletableFuture) = "
-                           + countF.join());
+        // The word to search for while the folder's being
+        // constructed.
+        final String searchWord = "CompletableFuture";
 
-        Mono<Long> countM = FolderTestsProxy
-            .countEntries(Options.getInstance().concurrent());
+        var matches = RunTimer
+            // Compute the time taken to synchronously search for a
+            // word in all folders in the remote rootFolder.
+            .timeRun(() -> mFolderProxy
+                     .searchWord(searchWord,
+                                 concurrent).block(),
+                     "searchWord remote " + mode);
 
-        System.out.println("Count of dirent entries (as Mono) = "
-                           + countM.block());
+        Options.debug(searchWord + " matched " 
+                      + matches + " times");
 
-        Mono<Long> searchM = FolderTestsProxy
-            .searchWord("CompletableFuture",
-                        Options.getInstance().concurrent());
+        var entries = RunTimer
+            // Compute the time taken to count the entries in the
+            // remote folder.
+            .timeRun(() -> mFolderProxy
+                     .countEntriesAsync(concurrent).join(),
+                     "countEntries remote " + mode);
 
-        System.out.println("Count # of times \"CompletableFuture\" appears (as Mono) = "
-                           + searchM.block());
+        System.out.println("The number of entries (as Mono) = " 
+                           + entries);
 
-        Stream<Dirent> results = FolderTestsProxy
-            .getDocumentsWithWordMatches("CompletableFuture",
-                                         Options.getInstance().concurrent());
+        entries = RunTimer
+            // Compute the time taken to count the entries in the
+            // remote folder.
+            .timeRun(() -> mFolderProxy
+                     .countEntries(concurrent).block(),
+                     "countEntries remote " + mode);
 
-        System.out.println("Count # of documents \"CompletableFuture\" appears (as stream) = "
-                           // Count the # of documents that match.
-                           + results.count());
+        System.out.println("The number of entries (as Mono) = " 
+                           + entries);
+
+        var lines = RunTimer
+            // Compute the time taken to count the # of lines in the
+            // local folder.
+            .timeRun(() -> mFolderProxy
+                     .countLines(concurrent),
+                     "countLines() remote " + mode);
+
+        Options.debug("The number of lines = " 
+                      + lines.block());
+
+        var documents = RunTimer
+            // Compute the time taken to determine how many documents
+            // the search word appeared in the remote folder.
+            .timeRun(() -> mFolderProxy
+                     .getDocuments(searchWord,
+                                   concurrent),
+                     "getDocuments remote " + mode);
+        
+        Options.debug(searchWord + " was found in " 
+                      + documents.count() + " documents");
 
         Options.print("Ending the remote tests");
     }

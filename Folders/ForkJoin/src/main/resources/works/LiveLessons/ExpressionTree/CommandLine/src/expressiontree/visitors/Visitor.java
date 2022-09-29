@@ -1,6 +1,6 @@
 package expressiontree.visitors;
 
-import expressiontree.composites.*;
+import expressiontree.nodes.*;
 
 /**
  * Abstract base class for all visitors to all classes that derive

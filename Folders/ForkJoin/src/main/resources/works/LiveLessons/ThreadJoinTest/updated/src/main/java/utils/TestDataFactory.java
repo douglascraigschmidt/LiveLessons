@@ -3,6 +3,7 @@ package utils;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -32,10 +33,10 @@ public class TestDataFactory {
             // Open the file and read all the bytes.
             String bytes = new String(Files.readAllBytes(Paths.get(uri)));
 
-            return Pattern
+            return
                 // Compile a regular expression that's used to split the
                 // file into a list of strings.
-                .compile(splitter).splitAsStream(bytes)
+                Pattern.compile(splitter).splitAsStream(bytes)
 
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
@@ -68,7 +69,6 @@ public class TestDataFactory {
                 // Read all lines from filename into a stream.
                 .lines(Paths.get(ClassLoader.getSystemResource
                                  (filename).toURI()))
-
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 

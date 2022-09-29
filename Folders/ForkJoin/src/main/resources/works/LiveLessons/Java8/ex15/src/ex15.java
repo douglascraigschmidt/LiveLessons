@@ -1,30 +1,31 @@
-import utils.RunTimer;
+import com.sun.istack.internal.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.stream.*;
 
+import static java.lang.Character.toLowerCase;
 import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the limitations of using inherently sequential
- * Java Streams operations (such as {@code iterate()} and {@code
- * limit()}) in the context of parallel streams.  It also shows how to
- * overcome these limitations by using other Java Streams operations
- * that are "parallelism-friendly".
+ * Java 8 streams operations (such as iterate() and limit()) in the
+ * context of parallel streams.
  */
 public class ex15 {
     /**
      * Number of times to iterate the tests.
      */
-    private static long sNUMBER = 10_000_000;
+    private static long sNUMBER = 10000000;
 
     /**
      * Main entry point into the program.
      */
     public static void main(String[] args) {
         // Override the number of iterations if user requests it.
-        sNUMBER = args.length > 0 ? Long.parseLong(args[0]) : sNUMBER;
+        sNUMBER = args.length > 0 ? Long.valueOf(args[0]) : sNUMBER;
 
         ex15 test = new ex15();
 
@@ -37,7 +38,7 @@ public class ex15 {
         // cannot be split effectively.
         test.testStreamIterate(true, sNUMBER);
 
-        // This sequential variant will perform poorly since iterate()
+        // This sequental variant will perform poorly since iterate()
         // is relatively inefficient.
         test.testStreamIterate(false, sNUMBER);
 
@@ -48,40 +49,32 @@ public class ex15 {
         // This parallel variant will perform very well since range()
         // can be split effectively.
         test.testStreamRange(true, sNUMBER);
-
-        // Print the results.
-        System.out.println(RunTimer.getTimingResults());
     }
 
     /**
      * Use a stream and the Stream.iterate() operation to compute the
-     * sqrt of the first {@code number} even numbers.
-     *
-     * @param parallel If {@code parallel} is true use a parallel
-     *        stream, else use a sequential stream.
-     * @param maxNumber The maximum number of items to process
+     * sqrt of the first @a number even numbers.  If @a parallel is
+     * true use a parallel stream, else use a sequential stream.
      */
     private void testStreamIterate(boolean parallel,
-                                   long maxNumber) {
-        // Run the garbage collector before each test.
-        System.gc();
+                                   long number) {
+        // Record the start time.
+        long startTime = System.nanoTime();
 
-        // Define the computation to time.
-        Runnable computation = () -> {
-            Stream<Long> stream = Stream
-            // Generate a stream of numbers starting at 2.
-            .iterate(2L, l -> l + 1);
+        Stream<Long> stream = Stream
+                // Generate a stream of numbers starting at 2.
+                .iterate(2L, l -> l + 1);
 
-            if (parallel)
-                // Run the stream concurrently.
-                stream.parallel();
+        if (parallel)
+            // Run the stream concurrently.
+            stream.parallel();
 
-            List<Double> result = stream
+        List<Double> result = stream
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
-            // Limit the # of elements in the stream to number.
-            .limit(maxNumber)
+            // Limit the # of elements in the stream to @a number.
+            .limit(number)
 
             // Compute the sqrt of each even number in the stream.
             .map(this::findSQRT)
@@ -89,60 +82,69 @@ public class ex15 {
             // Terminate the stream and collect results into a list.
             .collect(toList());
 
-            assert maxNumber == result.size();
-        };
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
-        RunTimer
-            // Time this computation.
-            .timeRun(computation,
-                     (parallel ? "parallel" : "sequential") 
-                     + " stream using Stream.iterate()");
+        assert number == result.size();
+
+        // System.out.println(result);
+        System.out.println("The "
+                           + (parallel ? "parallel" : "sequential") 
+                           + " stream using Stream.iterate() took "
+                           + stopTime
+                           + " milliseconds to find the sqrt of the first "
+                           + number
+                           + " even numbers");
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**
      * Use a stream and the LongStream.range() operation to compute
-     * the sqrt of the first {@code number} even numbers.
-     *
-     * @param parallel If {@code parallel} is true use a parallel
-     *        stream, else use a sequential stream.
-     * @param maxNumber The maximum number of items to process
+     * the sqrt of the first @a number even numbers.  If @a parallel
+     * is true use a parallel stream, else use a sequential stream.
      */
     private void testStreamRange(boolean parallel,
-                                 long maxNumber) {
-        // Run the garbage collector before  each test.
-        System.gc();
+                                 long number) {
+        // Record the start time.
+        long startTime = System.nanoTime();
 
-        // Define the computation to time.
-        Runnable computation = () -> {
-            LongStream stream = LongStream
+        LongStream stream = LongStream
             // Generate a stream of numbers starting at 2 and
-            // continuing up to maxNumber * 2.
-            .range(2, (maxNumber * 2) + 1);
+            // continuing up to @a number * 2.
+            .range(2, (number * 2) + 1);
 
-            if (parallel)
-                // Run the stream concurrently.
-                stream.parallel();
+        if (parallel)
+            // Run the stream concurrently.
+            stream.parallel();
 
-            List<Double> result = stream
+        List<Double> result = stream
             // Remove all the odd numbers from the stream.
             .filter(this::isEven)
 
-            // Compute the sqrt of each even number in the
-            // stream.
+            // Compute the sqrt of each even number in the stream.
             .mapToObj(this::findSQRT)
 
-            // Terminate the stream and collect results
-            // into a list.
+            // Terminate the stream and collect results into a list.
             .collect(toList());
 
-            assert maxNumber == result.size();
-        };
+        // Record the stop time.
+        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
 
-        RunTimer
-            // Time this computation.
-            .timeRun(computation,
-                     (parallel ? "parallel" : "sequential") 
-                     + " stream using IntStream.range()");
+        assert number == result.size();
+
+        // System.out.println(result);
+        System.out.println("The "
+                           + (parallel ? "parallel" : "sequential") 
+                           + " stream using IntStream.range() took "
+                           + stopTime
+                           + " milliseconds to find the sqrt of the first "
+                           + number
+                           + " even numbers");
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**
@@ -176,7 +178,7 @@ public class ex15 {
      * Return the sqrt of @a number.
      */
     private Double findSQRT(long number){
-        var v = Math.sqrt(number);
+        Double v = Math.sqrt(number);
         /*
           System.out.println("findSQRT:: "
           + number
@@ -194,9 +196,9 @@ public class ex15 {
     private boolean isEven(long number){
         /*
           System.out.println("isEven:: "
-          + number
-          + " in "
-          + Thread.currentThread());
+                               + number
+                               + " in "
+                               + Thread.currentThread());
         */
         // Use the bit-wise operator to determine if a number is even
         // or odd.

@@ -2,7 +2,7 @@ package livelessons.tasks;
 
 import livelessons.filters.Filter;
 import livelessons.utils.Image;
-import livelessons.utils.FileAndNetUtils;
+import livelessons.utils.NetUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -74,7 +74,7 @@ public abstract class ImageTaskGang
      */
     protected Image downloadImage(URL url) {
         return new Image(url,
-                         FileAndNetUtils.downloadContent(url));
+                         NetUtils.downloadContent(url));
     }
 
     /**
@@ -85,7 +85,7 @@ public abstract class ImageTaskGang
     /**
      * Keeps track of all the execution times.
      */
-    private final List<Long> mExecutionTimes = new ArrayList<>();
+    private List<Long> mExecutionTimes = new ArrayList<>();
 
     /**
      * Return the time needed to execute the test.

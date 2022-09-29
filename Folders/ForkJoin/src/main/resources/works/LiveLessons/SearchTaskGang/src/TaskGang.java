@@ -3,15 +3,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Defines a framework for spawning and running a "gang" of tasks that
- * concurrently process input from a generic List of elements E for
- * one or more iteration cycles.
+ * @class TaskGang
+ *
+ * @brief Defines a framework for spawning and running a "gang" of
+ *        tasks that concurrently process input from a generic List of
+ *        elements E for one or more iteration cycles.
  */
-public abstract class TaskGang<E> 
-       implements Runnable {
+public abstract class TaskGang<E> implements Runnable {
     /**
      * The input List that's processed, which can be initialized via
-     * the {@code makeInputList} factory method.
+     * the @code makeInputList() factory method.
      */
     private volatile List<E> mInput = null;
 
@@ -142,29 +143,32 @@ public abstract class TaskGang<E>
 
     /**
      * Factory method that creates a Runnable task that will process
-     * one node of the input List (at location {@code index}) in a
+     * one node of the input List (at location @code index) in a
      * background task provided by the Executor.
      */
     protected Runnable makeTask(final int index) {
-        // This method runs in background task provided by the
-        // Executor.
-        return () -> {
-            try {
-                // Get the input data element associated with
-                // this index.
-                E element = getInput().get(index);
+        return new Runnable() {
 
-                // Process input data element.
-                if (processInput(element))
-                    // Success indicates the worker task is done
-                    // with this cycle.
-                    taskDone(index);
-                else
-                    // A problem occurred, so return.
+            // This method runs in background task provided by the
+            // Executor.
+            public void run() {
+                try {
+                    // Get the input data element associated with
+                    // this index.
+                    E element = getInput().get(index);
+
+                    // Process input data element.
+                    if (processInput(element))
+                        // Success indicates the worker task is done
+                        // with this cycle.
+                        taskDone(index);
+                    else
+                        // A problem occurred, so return.
+                        return;
+
+                } catch (IndexOutOfBoundsException e) {
                     return;
-
-            } catch (IndexOutOfBoundsException e) {
-                return;
+                }
             }
         };
     }

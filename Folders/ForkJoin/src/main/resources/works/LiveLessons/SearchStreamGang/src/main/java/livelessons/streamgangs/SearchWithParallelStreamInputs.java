@@ -12,8 +12,9 @@ import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use a Java Stream to
- * concurrently search each input string and then sequentially search
- * for each phrase (from a list of phrases) in the input string.
+ * concurrently search each input data String and the sequentially
+ * looking for each phrase (from an array of phrases) in the input data
+ * String.
  */
 public class SearchWithParallelStreamInputs
        extends SearchStreamGang {
@@ -28,7 +29,7 @@ public class SearchWithParallelStreamInputs
     }
 
     /**
-     * Perform the processing, which uses a Java stream to
+     * Perform the processing, which uses a Java 8 Stream to
      * concurrently search each input string for phrases to find.
      */
     @Override
@@ -38,7 +39,7 @@ public class SearchWithParallelStreamInputs
             // Concurrently process each string in the input list.
             .parallelStream()
 
-            // Concurrently map each string to a stream containing the
+            // Concurrently map each string to a Stream containing the
             // phrases found in the input string.
             .map(this::processInput)
 
@@ -48,7 +49,7 @@ public class SearchWithParallelStreamInputs
     }
 
     /**
-     * Search the {@code inputSeq} for all occurrences of the phrases to
+     * Search the @a inputString for all occurrences of the phrases to
      * find.
      */
     private List<SearchResults> processInput(CharSequence inputSeq) {
@@ -59,14 +60,14 @@ public class SearchWithParallelStreamInputs
         CharSequence input = inputSeq.subSequence(title.length(),
                                                   inputSeq.length());
 
-        // Sequentially iterate through each phrase we're searching
-        // for and try to find it in the input.
+        // Sequentially iterate through each phrase we're searching for
+        // and try to find it in the inputData.
         return mPhrasesToFind
-            // Convert the list of phrases into a sequential stream.
+            // Convert the array of phrases into a sequential stream.
             .stream()
 
             // Sequentially search for all places where the phrase
-            // matches the input.
+            // matches the input data.
             .map(phrase -> 
                  searchForPhrase(phrase,
                                  input,

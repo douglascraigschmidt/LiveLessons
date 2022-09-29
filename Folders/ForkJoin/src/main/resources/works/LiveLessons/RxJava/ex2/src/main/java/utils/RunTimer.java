@@ -1,8 +1,11 @@
 package utils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * This class simplifies computing and printing execution times of tests.
@@ -75,9 +78,9 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuffer stringBuffer = new StringBuffer();
 
-        stringBuilder.append("\nPrinting ")
+        stringBuffer.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest\n");
 
@@ -94,13 +97,13 @@ public class RunTimer {
             .sorted(Map.Entry.comparingByValue())
 
             // Append the sorted entries into the string buffer.
-            .forEach(entry -> stringBuilder
+            .forEach(entry -> stringBuffer
                      .append(entry.getKey())
                      .append(" executed in ")
                      .append(entry.getValue())
                      .append(" msecs\n"));
 
         // Convert the string buffer into a string and return it.
-        return stringBuilder.toString();
+        return stringBuffer.toString();
     }
 }

@@ -3,7 +3,6 @@ package utils;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -15,11 +14,6 @@ import static java.util.stream.Collectors.toList;
  * option processing.
  */
 public class Options {
-    /**
-     * Logging tag.
-     */
-    private static final String TAG = Options.class.getName();
-
     /** 
      * The singleton @a Options instance. 
      */
@@ -28,7 +22,7 @@ public class Options {
     /**
      * The path to the image directory.
      */
-    private static final String sIMAGE_DIRECTORY_PATH =
+    private static final String IMAGE_DIRECTORY_PATH =
         "DownloadImages";
 
     /**
@@ -92,16 +86,6 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
-     * Controls how many entries are generated.
-     */
-    private int mMAX_SIZE = Integer.MAX_VALUE;
-
-    /**
-     * Controls whether logging is enabled
-     */
-    private boolean mLoggingEnabled;
-
-    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -115,7 +99,7 @@ public class Options {
      * Return the path for the directory where images are stored.
      */
     public String getDirectoryPath() {
-        return new File(sIMAGE_DIRECTORY_PATH).getAbsolutePath();
+        return new File(IMAGE_DIRECTORY_PATH).getAbsolutePath();
     }
 
     /**
@@ -128,9 +112,6 @@ public class Options {
 
             // Map each string in the list into a list of URLs.
             .flatMap(this::convertStringToUrls)
-
-            // Limit the number of entries generated.
-            .limit(mMAX_SIZE)
 
             // Create and return a list of a list of URLs.
             .collect(toList());
@@ -171,33 +152,22 @@ public class Options {
     }
 
     /**
-     * Returns whether logging is enabled or not.
-     */
-    public boolean loggingEnabled() {
-        return mLoggingEnabled;
-    }
-
-    /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public void parseArgs(String[] argv) {
+    public boolean parseArgs(String argv[]) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
                 case "-d":
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     break;
-                case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
-                        break;
-                case "-s":
-                    mMAX_SIZE = Integer.parseInt(argv[argc + 1]);
-                    break;
                 default:
                     printUsage();
-                    return;
+                    return false;
                 }
-        }
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -205,39 +175,7 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-d [true|false] -l [true|false] -s [n]");
-    }
-
-    /**
-     * Display the statistics about the test.
-     */
-    public void printStats(String testName,
-                            int imageCount) {
-        if (!testName.equals("warmup"))
-            System.out.println(testName
-                               + " downloaded and stored "
-                               + imageCount
-                               + " images using "
-                               + (ForkJoinPool.commonPool().getPoolSize() + 1)
-                               + " threads in the pool");
-    }
-
-    /**
-     * Print the {@code element} and the {@code operation} along with
-     * the current thread name to aid debugging and comprehension.
-     *
-     * @param element The given element
-     * @param operation The Reactor operation being performed
-     * @return The element parameter
-     */
-    public static <T> T logIdentity(T element, String operation) {
-        System.out.println("["
-                           + Thread.currentThread().getName()
-                           + "] "
-                           + operation
-                           + " -- " 
-                           + element);
-        return element;
+        System.out.println("-d [true|false]");
     }
 
     /**

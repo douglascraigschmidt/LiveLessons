@@ -1,13 +1,5 @@
 package livelessons.streams;
 
-import livelessons.filters.Filter;
-import livelessons.filters.FilterDecoratorWithImage;
-import livelessons.filters.OutputFilterDecorator;
-import livelessons.utils.BlockingTask;
-import livelessons.utils.Image;
-import livelessons.utils.NetUtils;
-import livelessons.utils.Options;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,7 +8,16 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import livelessons.utils.BlockingTask;
+import livelessons.utils.Image;
+import livelessons.utils.NetUtils;
+import livelessons.utils.Options;
+import livelessons.filters.Filter;
+import livelessons.filters.FilterDecoratorWithImage;
+import livelessons.filters.OutputFilterDecorator;
 
 /**
  * This abstract class customizes the StreamGang framework to use Java
@@ -35,7 +36,7 @@ public abstract class ImageStreamGang
      * An iterator to the List of input URLs that are used to download
      * (or open) images.
      */
-    private final Iterator<List<URL>> mUrlListIterator;
+    private Iterator<List<URL>> mUrlListIterator;
 
     /**
      * The List of filters to apply to the images.
@@ -203,13 +204,20 @@ public abstract class ImageStreamGang
     protected boolean urlCached(URL url) {
         // Iterate through the list of filters and check to see which
         // images already exist in the cache.
-        return mFilters
+        long count = mFilters
             // Convert list of filters into a stream.
             .stream()
 
-            // Return true if any file already exists, else false.
-            .anyMatch(filter ->
-                      urlCached(url, filter.getName()));
+            // Find files that already exist.
+            .filter(filter -> 
+                    urlCached(url, filter.getName()))
+
+            // Return a count of the number of files that already
+            // exist.
+            .count();
+
+        // A count > 0 means the url has already been cached.
+        return count > 0;
     }
 
     /**
@@ -220,7 +228,7 @@ public abstract class ImageStreamGang
     /**
      * Keeps track of all the execution times.
      */
-    private final List<Long> mExecutionTimes = new ArrayList<>();
+    private List<Long> mExecutionTimes = new ArrayList<>();
 
     /**
      * Return the time needed to execute the test.

@@ -10,8 +10,9 @@ import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use Java parallel
- * streams to perform a concurrent search of each input string and
- * each phrase (from a list of phrases) within each input string.
+ * streams to perform a parallel search of each input data string and
+ * each phrase (from an array of phrases) within each input data
+ * string.
  */
 public class SearchWithParallelStreams
        extends SearchStreamGang {
@@ -26,8 +27,8 @@ public class SearchWithParallelStreams
     }
 
     /**
-     * Perform the processing, which uses a Java stream to search for
-     * phrases in the input data in parallel.
+     * Perform the processing, which uses a Java 8 Stream to search
+     * for phrases in the input data in parallel.
      */
     @Override
     protected List<List<SearchResults>> processStream() {
@@ -49,7 +50,7 @@ public class SearchWithParallelStreams
     }
     
     /**
-     * Concurrently search {@code input} for all occurrences of the
+     * Concurrently search @a inputSeq for all occurrences of the
      * phrases to find.
      */
     private List<SearchResults> processInput(CharSequence inputSeq) {

@@ -3,13 +3,13 @@ package utils;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * Collect statistics on timing.
+ * 
  */
 public final class StatCollector {
     /** 
      * The amount of time that elapsed.
      */
-    private final LongAdder mTime;
+    private LongAdder mTime;
 
     public StatCollector() {
         mTime = new LongAdder();

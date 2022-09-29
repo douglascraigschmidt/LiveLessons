@@ -1,9 +1,12 @@
+
 /**
- * This test driver showcases how various subclasses customize the
- * TaskGang framework with different Java concurrency and
- * synchronization mechanisms to implement an "embarrassingly
- * parallel" application that concurrently searches for words in a
- * List of input Strings.
+ * @class TaskGangTest
+ *
+ * @brief This test driver showcases how various subclasses customize
+ *        the TaskGang framework with different Java concurrency and
+ *        synchronization mechanisms to implement an "embarrassingly
+ *        parallel" application that concurrently searches for words
+ *        in a List of input Strings.
  */
 public class TaskGangTest {
     /**
@@ -19,18 +22,21 @@ public class TaskGangTest {
     /**
      * Array of words to search for in the input.
      */
-    private final static String[] mWordList = {
-        "do", "re", "mi", "fa", "so", "la", "ti", "do", "oo"
-    };
+    private final static String[] mWordList = {"do",
+                                               "re",
+                                               "mi",
+                                               "fa",
+                                               "so",
+                                               "la",
+                                               "ti",
+                                               "do"};
         
     /**
      * This input array is used by the one-shot tests that search for
      * the words concurrently in multiple threads.
      */
-    private final static String[][] mOneShotInputStrings = { 
-        {
-            "xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoooo"
-        }
+    private final static String[][] mOneShotInputStrings = {
+        {"xreo", "xfao", "xmiomio", "xlao", "xtiotio", "xsoosoo", "xdoo", "xdoodoo"}
     };
 
     /**
@@ -76,15 +82,13 @@ public class TaskGangTest {
     public static void main(String[] args) {
         printDebugging("Starting TaskGangTest");
         
-        // Iterate through all the tests.
+        // Create/run appropriate type of SearchTaskGang to search for
+        // words concurrently.
+
         for (TestsToRun test : TestsToRun.values()) {
             printDebugging("Starting "
                            + test);
-
-            // Create/run appropriate type of SearchTaskGang to search
-            // for words concurrently.
             makeTaskGang(mWordList, test).run();
-
             printDebugging("Ending "
                            + test);
         }

@@ -1,16 +1,20 @@
 package livelessons.streamgangs;
 
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 import livelessons.utils.SearchResults;
 
-import java.util.List;
+import javax.naming.directory.SearchResult;
 
 import static java.util.stream.Collectors.toList;
 import static livelessons.utils.StreamsUtils.not;
 
 /**
  * Customizes the SearchStreamGang framework to use Java Streams to
- * sequentially search an input character sequence for each phrase in
- * a list of phrases.
+ * sequentially search an input data string for each phrase in an array
+ * of phrases.
  */
 public class SearchWithSequentialStreams
        extends SearchStreamGang {
@@ -25,7 +29,7 @@ public class SearchWithSequentialStreams
     }
 
     /**
-     * Perform the processing, which uses a Java Stream to
+     * Perform the processing, which uses a Java 8 Stream to
      * sequentially search for phrases in the input data.
      */
     @Override
@@ -59,27 +63,28 @@ public class SearchWithSequentialStreams
         CharSequence input = inputSeq.subSequence(title.length(),
                                                   inputSeq.length());
 
-        // Iterate through each phrase we're searching for, try to
-        // find it in the input, and return the results.
-        return mPhrasesToFind
+        // Iterate through each phrase we're searching for and try to
+        // find it in the inputData.
+        List<SearchResults> results = mPhrasesToFind
             // Convert the list of phrases into a sequential stream.
             .stream()
-
-            // Find all indices where phrase matches the input.
+            
+            // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
                                            false))
-
+            
             // Only keep a result that has at least one match.
             .filter(not(SearchResults::isEmpty))
             // Filtering can also be done as
             // .filter(result -> result.size() > 0)
-            // or
-            // .filter(((Predicate<String>) String::isEmpty).negate())
-
+            
             // Terminate stream and return a list of SearchResults.
             .collect(toList());
+            
+        // Return the results.
+        return results;
     }
 }
 

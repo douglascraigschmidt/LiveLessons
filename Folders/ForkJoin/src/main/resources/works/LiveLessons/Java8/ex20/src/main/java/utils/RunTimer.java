@@ -66,7 +66,7 @@ public class RunTimer {
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
-                        mExecutionTime);
+                mExecutionTime);
     }
 
     /**
@@ -74,8 +74,8 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuilder stringBuffer =
-            new StringBuilder();
+        StringBuffer stringBuffer =
+            new StringBuffer();
 
         stringBuffer.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())

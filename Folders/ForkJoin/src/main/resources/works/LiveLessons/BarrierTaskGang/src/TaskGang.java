@@ -3,20 +3,21 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Defines a framework for spawning and running a "gang" of tasks that
- * concurrently process input from a generic List of elements E for
- * one or more iteration cycles.
+ * @class TaskGang
+ *
+ * @brief Defines a framework for spawning and running a "gang" of
+ *        tasks that concurrently process input from a generic List of
+ *        elements E for one or more iteration cycles.
  */
-public abstract class TaskGang<E> 
-       implements Runnable {
+public abstract class TaskGang<E> implements Runnable {
     /**
      * The input List that's processed, which can be initialized via
-     * the {@code makeInputList()} factory method.
+     * the @code makeInputList() factory method.
      */
     private volatile List<E> mInput = null;
 
     /**
-     * Executes submitted {@link Runnable} tasks in a thread pool.
+     * Executes submitted Runnable tasks in a Thread pool.
      */
     private Executor mExecutor = null;
         
@@ -27,28 +28,28 @@ public abstract class TaskGang<E>
         new AtomicLong(0);
     
     /**
-     * Get the {@link List} to use as input.
+     * Get the List to use as input.
      */
     protected List<E> getInput() {
         return mInput;
     }
 
     /**
-     * Set the {@link List} to use as input and also return it.
+     * Set the List to use as input and also return it.
      */
     protected List<E> setInput(List<E> input) {
         return mInput = input;
     }
 
     /**
-     * Set the {@link Executor} to use to submit/run tasks.
+     * Set the Executor to use to submit/run tasks.
      */
     protected void setExecutor(Executor executor) {
         mExecutor = executor;
     }
 
     /**
-     * Get the {@link Executor} to use to submit/run tasks.
+     * Get the Executor to use to submit/run tasks.
      */
     protected Executor getExecutor() {
         return mExecutor;
@@ -69,13 +70,13 @@ public abstract class TaskGang<E>
     }
 
     /**
-     * Factory method that makes the next {@link List} of input to be
-     * processed concurrently by the gang of tasks.
+     * Factory method that makes the next List of input to be
+     * processed concurrently by the gang of Tasks.
      */
     protected abstract List<E> getNextInput();
 
     /**
-     * Hook method called back by {@code initiateTaskGang()} to enable
+     * Hook method called back by initiateTaskGang() to enable
      * subclasses to perform custom initializations before the tasks
      * in the gang are spawned.
      */
@@ -84,14 +85,14 @@ public abstract class TaskGang<E>
     }
 
     /**
-     * Initiate the {@link TaskGang}.
+     * Initiate the TaskGang.
      */
     protected abstract void initiateTaskGang(int inputSize);
 
     /**
      * Hook method that returns true as long as the task processing
      * should continue.  By default, returns false, which means a
-     * {@link TaskGang} will be only "one-shot" unless this method is
+     * TaskGang will be only "one-shot" unless this method is
      * overridden.
      */
     protected boolean advanceTaskToNextCycle() {
@@ -109,8 +110,8 @@ public abstract class TaskGang<E>
      * conjunction with a one-shop or cyclic barrier to wait for all
      * the other tasks to complete their current cycle.  It's passed
      * the index of the work that's done.  Returns true if the wait
-     * was successfully or throws the {@link
-     * IndexOutOfBoundsException} if the item has been removed.
+     * was successfully or throws the IndexOutOfBoundsException if the
+     * item has been removed.
      */
     protected void taskDone(int index) throws IndexOutOfBoundsException {
         // No-op.
@@ -141,9 +142,9 @@ public abstract class TaskGang<E>
     }
 
     /**
-     * Factory method that creates a {@link Runnable} task that will
-     * process one node of the input {@link List} (at location {@code
-     * index}) in a background task provided by the {@link Executor}.
+     * Factory method that creates a Runnable task that will process
+     * one node of the input List (at location @code index) in a
+     * background task provided by the Executor.
      */
     protected Runnable makeTask(final int index) {
         return new Runnable() {
@@ -158,7 +159,7 @@ public abstract class TaskGang<E>
 
                     // Process input data element.
                     if (processInput(element))
-
+                        // Success indicates the worker task is done
                         // with this cycle.
                         taskDone(index);
                     else

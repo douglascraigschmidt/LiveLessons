@@ -112,14 +112,14 @@ public class SearchForPhrasesTask
     }
 
     /**
-     * This method searches the {@code inputString} for all
-     * occurrences of the phrases to find.
+     * This method searches the @a inputString for all occurrences of
+     * the phrases to find.
      */
     @Override
     public List<SearchResults> compute() {
         int partitionSize = getPartitionSize();
-
-        if (partitionSize < mMinSplitSize || !mParallelPhrases)
+        if (partitionSize < mMinSplitSize
+            || !mParallelPhrases)
             return computeSequentially(getStartIndex(),
                                        getEndIndex());
         else 
@@ -128,9 +128,6 @@ public class SearchForPhrasesTask
             return splitPhraseList(partitionSize / 2);
     }
 
-    /**
-     * @return The size of the partition
-     */
     protected int getPartitionSize() {
         return mPhraseList.size();
     }
@@ -153,9 +150,14 @@ public class SearchForPhrasesTask
         List<SearchResults> rightResult = computeRightTask(splitPos,
                                                            mMinSplitSize);
 
-        // Return the combined result from the leftTask with the
-        // rightResult.
-        return combineResults(leftTask, rightResult);
+        // Wait and join the results from the left task.
+        List<SearchResults> leftResult = leftTask.join();
+
+        // Concatenate the left result with the right result.
+        leftResult.addAll(rightResult);
+
+        // Return the result.
+        return leftResult;
     }
 
     /**
@@ -188,25 +190,7 @@ public class SearchForPhrasesTask
     }
 
     /**
-     * @return the combined result from the {@code leftTask} with the
-     * {@code rightResult}
-     */
-    protected List<SearchResults>
-        combineResults(ForkJoinTask<List<SearchResults>> leftTask,
-                       List<SearchResults> rightResult) {
-
-        // Wait and join the results from the left task.
-        List<SearchResults> leftResult = leftTask.join();
-
-        // Concatenate the left result with the right result.
-        leftResult.addAll(rightResult);
-
-        // Return the result.
-        return leftResult;
-    }
-
-    /**
-     * @return The title portion of the {@code inputData}
+     * Return the title portion of the @a inputData.
      */
     private String getTitle(CharSequence input) {
         // Create a Matcher.

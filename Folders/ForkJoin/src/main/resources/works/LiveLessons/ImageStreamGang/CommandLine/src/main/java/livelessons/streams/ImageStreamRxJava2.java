@@ -98,8 +98,8 @@ public class ImageStreamRxJava2
             .parallel().compose(RxUtils.commonPoolParallelFlowable())
 
             // Use map() to create an OutputFilterDecorator for each
-            // image and run it to filter each image and store it in
-            // an output file.
+            // image and run it to filter each image and store it in an
+            // output file.
             .map(filter ->
                  makeFilterDecoratorWithImage(filter, image).run())
                

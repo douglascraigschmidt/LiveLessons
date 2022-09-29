@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * This example shows how to combine Java parallel streams with and
  * without the ForkJoinPool.ManagedBlocker interface and the Java
- * fork-join framework to download and store multiple images from a remote
+ * fork-join framework to download multiple images from a remote
  * server.
  */
 public class ex20 {
@@ -69,14 +69,11 @@ public class ex20 {
     }
 
     /**
-     * Run the test named {@code testName} by applying the {@code
+     * Run the test named {@code testName} by appying the {@code
      * downloadAndStoreImage} function.
      */
     private void runTest(Function<URL, File> downloadAndStoreImage,
                          String testName) {
-        // Delete any image files from the previous run.
-        FileAndNetUtils.deleteDownloadedImages(Options.instance().getDirectoryPath());
-
         // Let the system garbage collect.
         System.gc();
 
@@ -94,6 +91,9 @@ public class ex20 {
      */
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
+        // Delete any the filtered images from the previous run.
+        deleteDownloadedImages();
+
         // Get the list of files to the downloaded images.
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
@@ -134,13 +134,13 @@ public class ex20 {
      * pool adaptively when blocking occurs.
      */
     private File downloadAndStoreImageMB(URL url) {
-        // Create a one-element array so we can update it in the
+        // Create a one element array so we can update it in the
         // anonymous inner class instance below.
         final Image[] image = new Image[1];
 
         try {
             ForkJoinPool
-                // Submit an anonymous managedBlocker implementation to
+                // Submit an anonymous managedBlock implementation to
                 // the common ForkJoin thread pool.  This call ensures
                 // the common fork/join thread pool is expanded to
                 // handle the blocking image download.
@@ -192,7 +192,7 @@ public class ex20 {
      */
     private Image downloadImage(URL url) {
         return new Image(url,
-                         FileAndNetUtils.downloadContent(url));
+                         NetUtils.downloadContent(url));
     }
 
     /**
@@ -209,6 +209,45 @@ public class ex20 {
                                + " images using "
                                + (ForkJoinPool.commonPool().getPoolSize() + 1)
                                + " threads in the pool");
+    }
+
+    /**
+     * Clears the filter directories.
+     */
+    private void deleteDownloadedImages() {
+        int deletedFiles =
+            deleteSubFolders(Options.instance().getDirectoryPath());
+
+        if (Options.instance().diagnosticsEnabled())
+            System.out.println(TAG
+                               + ": "
+                               + deletedFiles
+                               + " previously downloaded file(s) deleted");
+    }
+
+    /**
+     * Recursively delete files in a specified directory.
+     */
+    private int deleteSubFolders(String path) {
+        int deletedFiles = 0;
+        File currentFolder = new File(path);        
+        File[] files = currentFolder.listFiles();
+
+        if (files == null) 
+            return 0;
+
+        // Java doesn't delete a directory with child files, so we
+        // need to write code that handles this recursively.
+        for (File f : files) {          
+            if (f.isDirectory()) 
+                deletedFiles += deleteSubFolders(f.toString());
+            f.delete();
+            deletedFiles++;
+        }
+
+        // Don't delete the current folder.
+        // currentFolder.delete();
+        return deletedFiles;
     }
 
     /**

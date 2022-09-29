@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collector;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * Keeps track of how many times a word appears in an input string.
  */
@@ -17,7 +19,7 @@ public class SearchResults {
          * The index in the search String where the word that was
          * found.
          */
-        private final int mIndex;
+        private int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search
@@ -183,10 +185,10 @@ public class SearchResults {
 
                 // Create a custom collector to join all the results
                 // together.
-                .collect(Collector.of(() -> new StringJoiner("|"),   // supplier
-                                      (j, r) -> j.add(r.toString()), // accumulator
-                                      StringJoiner::merge,           // combiner
-                                      StringJoiner::toString))       // finisher
+                .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
+                                      (j, r) -> j.add(r.toString()),       // accumulator
+                                      StringJoiner::merge,                 // combiner
+                                      StringJoiner::toString))             // finisher
                 + "]";
         }
         

@@ -88,7 +88,7 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public void parseArgs(String[] argv) {
+    public boolean parseArgs(String argv[]) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc++)
                 switch (argv[argc]) {
@@ -99,7 +99,7 @@ public class Options {
                     mLocal = true;
                     break;
                 case "-m":
-                    mMaxDepth = Integer.parseInt(argv[++argc]);
+                    mMaxDepth = Integer.valueOf(argv[++argc]);
                     break;
                 case "-u":
                     mRootUrl = argv[++argc];
@@ -109,7 +109,7 @@ public class Options {
                     break;
                 default:
                     printUsage(argv[argc]);
-                    return;
+                    return false;
                 }
 
             // Set whether JSuper performs web-based or local
@@ -118,7 +118,9 @@ public class Options {
                 ? new JSuper(true)
                 : new JSuper(false);
 
-        }
+            return true;
+        } else
+            return false;
     }
 
     /**

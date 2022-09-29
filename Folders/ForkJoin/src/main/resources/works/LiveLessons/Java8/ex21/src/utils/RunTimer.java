@@ -73,9 +73,9 @@ public class RunTimer {
      * @return A string containing the timing results for all the test runs
      * ordered from fastest to slowest.
      */
-    public static String getTimingResults(boolean reset) {
-        StringBuilder stringBuffer =
-            new StringBuilder();
+    public static String getTimingResults() {
+        StringBuffer stringBuffer =
+            new StringBuffer();
 
         stringBuffer.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())
@@ -107,10 +107,6 @@ public class RunTimer {
                      .append(" executed in ")
                      .append(entry.getKey())
                      .append(" msecs\n"));
-
-        // Clear the map if reset is true.
-        if (reset)
-            mResultsMap.clear();
 
         return stringBuffer.toString();
     }

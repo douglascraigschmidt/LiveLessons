@@ -49,7 +49,7 @@ public class OutputFilterDecorator
             // Write the image to the output file.
             PlatSpec.writeImageFile(outputFile, image);
         } catch (Exception e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
         

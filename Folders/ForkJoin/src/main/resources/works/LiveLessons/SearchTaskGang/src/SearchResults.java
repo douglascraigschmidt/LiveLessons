@@ -2,7 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the search results.
+ * @class SearchResults
+ *
+ * @brief Holds the search results.
  */
 public class SearchResults {
     /**
@@ -19,7 +21,7 @@ public class SearchResults {
 
         /**
          * Create a Result object contains meta-data about a search
-         * result.
+         * result..
          */
         public Result(int index) {
             mIndex = index;
