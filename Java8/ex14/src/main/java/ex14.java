@@ -3,7 +3,6 @@ import utils.TestDataFactory;
 
 import java.util.*;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -28,8 +27,8 @@ public class ex14 {
     /**
      * A regular expression that matches whitespace and punctuation.
      */
-    private static final String sWHITESPACE_AND_PUNCTUATION = 
-        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+    private static final String sSPLIT_WORDS =
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]}_|? ]+";
 
     /**
      * Main entry point into the tests program.
@@ -67,7 +66,7 @@ public class ex14 {
                         TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                                  // Split input into "words" by
                                                  // ignoring whitespace.
-                                                 sWHITESPACE_AND_PUNCTUATION,
+                                sSPLIT_WORDS,
                                                  limit);
 
                     // Create a LinkedList from the ArrayList.
@@ -193,7 +192,7 @@ public class ex14 {
                             .getInput(sSHAKESPEARE_DATA_FILE,
                                       // Split input into "words" by
                                       // ignoring whitespace.
-                                      sWHITESPACE_AND_PUNCTUATION));
+                                    sSPLIT_WORDS));
         // Create an empty list.
         List<String> list = new ArrayList<>();
 

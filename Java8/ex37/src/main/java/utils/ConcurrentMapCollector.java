@@ -6,10 +6,11 @@ import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
- * A concurrent collector that accumulates input elements of type
- * {@code T} into a {@link ConcurrentHashMap} parameterized with
- * {@code K} and {@code V} types and returns a type {@link M} that
- * extends {@link Map}.
+ * This generic custom concurrent collector accumulates input elements
+ * of type {@code T} into a {@link ConcurrentHashMap} parameterized
+ * with {@code K} and {@code V} types and returns a type {@link M}
+ * that extends {@link Map}, which enables the resulting {@link Map}
+ * to produce the elements in sorted order.
  */
 public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
        implements Collector<T,
@@ -36,7 +37,7 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
      * A {@link Supplier} that returns a new, empty {@link Map} into
      * which the results will be inserted.
      */
-    private final Supplier<M> mMapSupplier;
+    private final Supplier<M> mResultMapSupplier;
 
     /**
      * This static factory method creates a concurrent {@link
@@ -101,7 +102,7 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
         mKeyMapper = keyMapper;
         mValueMapper = valueMapper;
         mMergeFunction = mergeFunction;
-        mMapSupplier = mapSupplier;
+        mResultMapSupplier = mapSupplier;
     }
 
     /**
@@ -157,8 +158,8 @@ public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     @Override
     public Function<Map<K, V>, M> finisher() {
         return map -> {
-            // Create the appropriate map.
-            M newMap = mMapSupplier.get();
+            // Create the appropriate Map to return results.
+            M newMap = mResultMapSupplier.get();
 
             // Check whether we've been instantiated to return a
             // ConcurrentHashMap, in which case there's no need to

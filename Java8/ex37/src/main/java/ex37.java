@@ -1,13 +1,16 @@
+import org.jetbrains.annotations.NotNull;
 import utils.ConcurrentMapCollector;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Map.Entry;
 import static java.util.stream.Collectors.toList;
@@ -54,7 +57,7 @@ public class ex37 {
      * individual words.
      */
     private static final String sSPLIT_WORDS =
-        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]}_? ]+";
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]}_|? ]+";
 
     /**
      * Main entry point into the tests program.
@@ -74,7 +77,7 @@ public class ex37 {
         // that use HashMaps, which are unordered.
         runMapCollectorTests("HashMap",
                              Function.identity(),
-                             (s) -> 1,
+                             initialKeyValue(),
                              HashMap::new,
                              ConcurrentHashMap::new,
                              ex37::timeStreamCollect);
@@ -85,25 +88,33 @@ public class ex37 {
         // that use TreeMaps, which are ordered.
         runMapCollectorTests("TreeMap",
                              Function.identity(),
-                             (s) -> 1,
+                             initialKeyValue(),
                              TreeMap::new,
                              TreeMap::new,
                              ex37::timeStreamCollect);
 
         // Print the results.
         printResults(getResults(true,
-                                 TestDataFactory
-                                 .getInput(sSHAKESPEARE_DATA_FILE,
-                                           sSPLIT_WORDS,
-                                           1_000_000),
-                                 ConcurrentMapCollector
-                                 .toMap(Function.identity(),
-                                        (s) -> 1,
-                                        (o1, o2) -> o1,
-                                        TreeMap::new)),
+                                TestDataFactory
+                                .getInput(sSHAKESPEARE_DATA_FILE,
+                                          sSPLIT_WORDS,
+                                          1_000_000),
+                                ConcurrentMapCollector
+                                .toMap(Function.identity(),
+                                       initialKeyValue(),
+                                       mergeDuplicateKeyValues(),
+                                       TreeMap::new)),
                      "Final results");
 
         System.out.println("Exiting the test program");
+    }
+
+    /**
+     * @return The initial value for a key (which is 1)
+     */
+    @NotNull
+    private static Function<String, Integer> initialKeyValue() {
+        return (s) -> 1;
     }
 
     /**
@@ -117,7 +128,7 @@ public class ex37 {
      *                    non-concurrent {@link Map}
      * @param concurrentMapSupplier A {@link Supplier} that creates
      *                              the given concurrent {@link Map}
-     * @param collect A {@link QuadFunction} that performs the test
+     * @param streamCollect A {@link QuadFunction} that performs the test
      *                using either a non-concurrent or concurrent
      *                {@link Collector}
      */
@@ -128,10 +139,10 @@ public class ex37 {
          Supplier<Map<String, Integer>> mapSupplier,
          Supplier<Map<String, Integer>> concurrentMapSupplier,
          QuadFunction<String,
-                      Boolean,
-                      List<String>,
-                      Collector<String, ?, Map<String, Integer>>,
-                      Void> collect) {
+         Boolean,
+         List<String>,
+         Collector<String, ?, Map<String, Integer>>,
+         Void> streamCollect) {
         Arrays
             // Create tests for different sizes of input data.
             .asList(1_000, 10_000, 100_000, 1_000_000)
@@ -157,56 +168,68 @@ public class ex37 {
 
                     // Collect results into a sequential stream via a
                     // non-concurrent collector.
-                    collect
+                    streamCollect
                         .apply("non-concurrent " + testType,
                                false,
                                arrayWords,
-                               Collectors.
-                               toMap(keyMapper,
-                                     valueMapper,
-                                     (o1, o2) -> o1,
-                                     mapSupplier));
+                               Collectors
+                               .toMap(keyMapper,
+                                      valueMapper,
+                                      mergeDuplicateKeyValues(),
+                                      mapSupplier));
 
                     // Collect results into a parallel stream via a
                     // non-concurrent collector.
-                    collect
+                    streamCollect
                         .apply("non-concurrent " + testType,
                                true,
                                arrayWords,
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       mapSupplier));
 
                     // Collect results into a sequential stream via a
                     // concurrent collector.
-                    collect
+                    streamCollect
                         .apply("concurrent " + testType,
                                false,
                                arrayWords,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       concurrentMapSupplier));
 
                     // Collect results into a parallel stream via a
                     // concurrent collector.
-                    collect
+                    streamCollect
                         .apply("concurrent " + testType,
                                true,
                                arrayWords,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       concurrentMapSupplier));
 
                     // Print the results.
                     System.out.println("..printing results\n"
                                        + RunTimer.getTimingResults());
                 });
+    }
+
+    /**
+     * Duplicate keys are handled by adding their values together and
+     * updating the map.
+     *
+     * @return The result of adding the values of duplicate keys together
+     */
+    @NotNull
+    private static BinaryOperator<Integer> mergeDuplicateKeyValues() {
+        // Add the values of duplicate keys together.
+        return (o1, o2) -> o1 + o2;
     }
 
     /**
@@ -229,6 +252,8 @@ public class ex37 {
         // Run the garbage collector before each test.
         System.gc();
 
+        // Update the name of the test to indicate whether the
+        // stream is running sequentially or in parallel.
         String testName =
             (parallel ? " parallel" : " sequential")
             + " "
@@ -237,16 +262,21 @@ public class ex37 {
         RunTimer
             // Time how long it takes to run the test.
             .timeRun(() -> {
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) 
-                        getResults(parallel, words, collector);
+                    IntStream
+                        // Iterate sMAX_ITERATIONS times.
+                        .range(0, sMAX_ITERATIONS)
+
+                        // Perform computations that create a
+                        // Map of unique Shakespeare words.
+                        .forEach(i -> getResults(parallel, words, collector));
                 },
                 testName);
         return null;
     }
 
     /**
-     * Perform computations that create a Map of unique words in
-     * Shakespeare's works.
+     * Perform computations that create a {@link Map} of unique words
+     * in Shakespeare's works.
      * 
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
@@ -260,17 +290,17 @@ public class ex37 {
         (boolean parallel,
          List<String> words,
          Collector<String, ?, Map<String, Integer>> collector) {
-            // Return a Map of unique words in Shakespeare's works.
-            return // Create a parallel or sequential stream.
-                (parallel ? words.parallelStream()
-                          : words.stream())
+        // Return a Map of unique words in Shakespeare's works.
+        return // Create a parallel or sequential stream.
+            (parallel ? words.parallelStream()
+             : words.stream())
 
-                // Map each string to lower case.
-                .map(word -> word.toString().toLowerCase())
+            // Lower case each String.
+            .map(word -> word.toString().toLowerCase())
 
-                // Trigger intermediate processing and collect the
-                // unique words into the given collector.
-                .collect(collector);
+            // Trigger intermediate processing and collect the
+            // unique words into the given collector.
+            .collect(collector);
     }
 
     /**
@@ -334,10 +364,8 @@ public class ex37 {
                         // (which uses a spliterator internally).
                         .parallelStream()
 
-                        // Uppercase each string.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(word -> word.toString().toUpperCase())
+                        // Lowercase each string.
+                        .map(word -> word.toString().toLowerCase())
 
                         // Collect the stream into a list.
                         .collect(toList()));
