@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=19
+org.eclipse.jdt.core.compiler.compliance=19
+org.eclipse.jdt.core.compiler.problem.enablePreviewFeatures=enabled
+org.eclipse.jdt.core.compiler.source=19

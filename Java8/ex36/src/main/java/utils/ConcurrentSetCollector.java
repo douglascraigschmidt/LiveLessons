@@ -10,8 +10,8 @@ import java.util.stream.Collector;
 
 /**
  * A concurrent collector that accumulates input elements of type
- * {@code E} into a {@link ConcurrentHashMap.KeySetView} and the returns a type
- * {@link S} that extends {@link Set}.
+ * {@code E} into a {@link ConcurrentHashMap.KeySetView} and the returns a
+ * type {@link S} that extends {@link Set}.
  */
 public class ConcurrentSetCollector<E, S extends Set<E>>
        implements Collector<E,
@@ -59,7 +59,10 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
     }
 
     /**
-     * A method that accepts two partial results and merges them.
+     * A method that accepts two partial results and merges them.  This
+     * method isn't really necessary when a parallel stream is used!
+     * However, we also use it with a sequential stream, so we need to
+     * provide an implementation here.
      *
      * @return A {@link BinaryOperator} that merges two maps together
      */
@@ -115,11 +118,6 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
         return Collections
             .unmodifiableSet(EnumSet.of(Collector.Characteristics.CONCURRENT,
                                         Collector.Characteristics.UNORDERED));
-    }
-
-    @Override
-    public String toString() {
-        return "ConcurrentSetCollector<>";
     }
 
     /**

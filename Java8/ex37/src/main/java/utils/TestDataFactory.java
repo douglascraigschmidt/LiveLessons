@@ -87,7 +87,7 @@ public class TestDataFactory {
                 .limit(limit)
 
                 // Collect the results into a List of String objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

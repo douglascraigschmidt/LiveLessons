@@ -8,22 +8,27 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.Map.*;
+import static java.util.Map.Entry;
 import static java.util.stream.Collectors.toList;
 
 /**
  * This program creates various {@link Map} objects that associate
  * unique words in the complete works of William Shakespeare with the
- * number of times each word appears.  It also shows the difference in
- * overhead between collecting results in a parallel stream
- * vs. sequential stream using concurrent and non-concurrent
- * collectors for various types of Java {@link Map} implementations,
- * including {@link HashMap} and {@link TreeMap}.
+ * number of times each word appears and prints the top 50 words in
+ * Shakespeare's works.  It also shows the difference in overhead
+ * between collecting results in a parallel stream vs. sequential
+ * stream using concurrent and non-concurrent collectors for various
+ * types of Java {@link Map} implementations, including {@link
+ * HashMap} and {@link TreeMap}.
  */
 @SuppressWarnings("ALL")
 public class ex37 {
+    /**
+     * The maximum number of top Bard words to print.
+     */
+    private static long sMAX_WORDS = 50;
+
     /**
      * This interface converts four params to a result type.
      */
@@ -49,7 +54,7 @@ public class ex37 {
      * individual words.
      */
     private static final String sSPLIT_WORDS =
-        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]}_? ]+";
 
     /**
      * Main entry point into the tests program.
@@ -94,7 +99,7 @@ public class ex37 {
                                  ConcurrentMapCollector
                                  .toMap(Function.identity(),
                                         (s) -> 1,
-                                        (o1, o2) -> o1 + o2,
+                                        (o1, o2) -> o1,
                                         TreeMap::new)),
                      "Final results");
 
@@ -159,7 +164,7 @@ public class ex37 {
                                Collectors.
                                toMap(keyMapper,
                                      valueMapper,
-                                     (o1, o2) -> o1 + o2,
+                                     (o1, o2) -> o1,
                                      mapSupplier));
 
                     // Collect results into a parallel stream via a
@@ -171,7 +176,7 @@ public class ex37 {
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1 + o2,
+                                      (o1, o2) -> o1,
                                       mapSupplier));
 
                     // Collect results into a sequential stream via a
@@ -183,7 +188,7 @@ public class ex37 {
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1 + o2,
+                                      (o1, o2) -> o1,
                                       concurrentMapSupplier));
 
                     // Collect results into a parallel stream via a
@@ -195,7 +200,7 @@ public class ex37 {
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1 + o2,
+                                      (o1, o2) -> o1,
                                       concurrentMapSupplier));
 
                     // Print the results.
@@ -255,17 +260,11 @@ public class ex37 {
         (boolean parallel,
          List<String> words,
          Collector<String, ?, Map<String, Integer>> collector) {
-            Stream<String> wordStream = words
-                // Convert the list into a stream (which
-                // uses a spliterator internally).
-                .stream();
-
-            if (parallel)
-                // Convert to a parallel stream.
-                wordStream.parallel();
-
             // Return a Map of unique words in Shakespeare's works.
-            return wordStream
+            return // Create a parallel or sequential stream.
+                (parallel ? words.parallelStream()
+                          : words.stream())
+
                 // Map each string to lower case.
                 .map(word -> word.toString().toLowerCase())
 
@@ -282,23 +281,22 @@ public class ex37 {
      */
     private static void printResults(Map<String, Integer> results,
                                      String testName) {
-        // Convert the first 10 elements of the Map contents into a
-        // String.
-        var output = results
+        // Convert the first sMAX_WORDS elements of the Map contents
+        // into a String.
+        var allWords = results
             .entrySet()
             .stream()
-            .limit(50)
             .map(Objects::toString)
-            .collect(toList());
+            .toList();
 
-        // Convert the top 10 most common words into a String.
+        // Convert the top sMAX_WORDS most common words into a String.
         var topWords = results
             .entrySet()
             .stream()
             .sorted(Entry.<String, Integer>comparingByValue().reversed())
-            .limit(50)
+            .limit(sMAX_WORDS)
             .map(Objects::toString)
-            .collect(toList());
+            .toList();
 
         // Print the results.
         System.out.println("Results for "
@@ -306,8 +304,10 @@ public class ex37 {
                            + " of size "
                            + results.size()
                            + " was:\n"
-                           + output
-                           + "\nwith top words being\n"
+                           + allWords
+                           + "\nwith top "
+                           + sMAX_WORDS
+                           + " words being\n"
                            + topWords);
     }
 

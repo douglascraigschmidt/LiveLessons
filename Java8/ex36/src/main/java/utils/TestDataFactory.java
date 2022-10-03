@@ -26,14 +26,14 @@ public class TestDataFactory {
      * strings.
      */
     @NotNull
-    public static List<CharSequence> getInput(String filename,
-                                              String splitter) {
+    public static List<String> getInput(String filename,
+                                        String splitter) {
         try {
             // Convert the filename into a pathname.
             URI uri = ClassLoader.getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
-            CharSequence bytes =
+            String bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
             return Pattern
@@ -51,7 +51,7 @@ public class TestDataFactory {
                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -60,15 +60,15 @@ public class TestDataFactory {
      * {@code splitter} regular expression and return a list of up to
      * {@code limit} strings.
      */
-    public static List<CharSequence> getInput(String filename,
-                                              String splitter,
-                                              int limit) {
+    public static List<String> getInput(String filename,
+                                        String splitter,
+                                        int limit) {
         try {
             // Convert the filename into a pathname.
             URI uri = ClassLoader.getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
-            CharSequence bytes =
+            String bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
             return Pattern
@@ -86,7 +86,7 @@ public class TestDataFactory {
                 .limit(limit)
 
                 // Collect the results into a List of CharSequence objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

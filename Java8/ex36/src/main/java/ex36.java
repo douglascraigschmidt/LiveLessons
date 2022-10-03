@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -32,7 +32,7 @@ public class ex36 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 10;
+    private static final int sMAX_ITERATIONS = 5;
 
     /**
      * The complete works of William Shakespeare.
@@ -46,7 +46,7 @@ public class ex36 {
      * individual words.
      */
     private static final String sSPLIT_WORDS =
-        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]? ]+";
+        "[\\t\\n\\x0B\\f\\r'!()\"#&-.,;0-9:@<>\\[\\]}_? ]+";
 
     /**
      * Main entry point into the tests program.
@@ -98,12 +98,12 @@ public class ex36 {
      */
     private static void runSetCollectorTests
         (String testType,
-         Supplier<Set<CharSequence>> setSupplier,
-         Supplier<Set<CharSequence>> concurrentSetSupplier,
+         Supplier<Set<String>> setSupplier,
+         Supplier<Set<String>> concurrentSetSupplier,
          QuadFunction<String,
                       Boolean,
-                      List<CharSequence>,
-                      Collector<CharSequence, ?, Set<CharSequence>>,
+                      List<String>,
+                      Collector<String, ?, Set<String>>,
                       Void> collect) {
         Arrays
             // Create tests for different sizes of input data.
@@ -111,9 +111,9 @@ public class ex36 {
 
             // Run the tests for various input data sizes.
             .forEach (limit -> {
-                    // Create a List of CharSequences containing
+                    // Create a List of String objects containing
                     // 'limit' words from the works of Shakespeare.
-                    List<CharSequence> arrayWords = TestDataFactory
+                    List<String> arrayWords = TestDataFactory
                         .getInput(sSHAKESPEARE_DATA_FILE,
                                   // Split input into "words" by
                                   // ignoring whitespace.
@@ -182,8 +182,8 @@ public class ex36 {
     private static Void timeStreamCollect
         (String testType,
          boolean parallel,
-         List<CharSequence> words,
-         Collector<CharSequence, ?, Set<CharSequence>> collector) {
+         List<String> words,
+         Collector<String, ?, Set<String>> collector) {
         // Run the garbage collector before each test.
         System.gc();
 
@@ -195,29 +195,49 @@ public class ex36 {
         RunTimer
             // Time how long it takes to run the test.
             .timeRun(() -> {
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        Stream<CharSequence> wordStream = words
-                            // Convert the list into a stream (which uses a
-                            // spliterator internally).
-                            .stream();
+                // Create an empty list.
+                List<String> list = new ArrayList<>();
 
-                        if (parallel)
-                            // Convert to a parallel stream.
-                            wordStream.parallel();
+                IntStream
+                    // Iterate sMAX_ITERATIONS times.
+                    .range(0, sMAX_ITERATIONS)
+                    
+                    // Perform the following action each iteration.
+                    .forEach((i) -> list
+                             // Append new words to end of the list.
+                             .addAll(// Convert List to parallel
+                                     // or sequental stream.
+                                     (parallel ? words.parallelStream()
+                                               : words.stream())
 
-                        // A Set of unique words in Shakespeare's
-                        // works.
-                        Set<CharSequence> uniqueWords = wordStream
-                            // Map each string to lower case.
-                            .map(word -> word.toString().toLowerCase())
+                                     // Modify each word.
+                                     .map(word ->
+                                          rot13(rot13(word.toUpperCase()).toLowerCase()))
 
-                            // Trigger intermediate processing and
-                            // collect the unique words into the given
-                            // collector.
-                            .collect(collector);
-                    }},
+                                     // Convert the Stream into a List.
+                                     .toList()));
+                    },
             testName);
         return null;
+    }
+
+    /**
+     * Computes and returns the rot13 encoding of the {@code input}.
+     *
+     * @param input The {@link String} to encode
+     * @return The rot13 encoding of the {@code input} {@link String}
+     */
+    static String rot13(String input) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if       (c >= 'a' && c <= 'm') c += 13;
+            else if  (c >= 'A' && c <= 'M') c += 13;
+            else if  (c >= 'n' && c <= 'z') c -= 13;
+            else if  (c >= 'N' && c <= 'Z') c -= 13;
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     /**
@@ -227,7 +247,7 @@ public class ex36 {
     private static void warmUpForkJoinPool() {
         System.out.println("\n++Warming up the fork/join pool\n");
 
-        List<CharSequence> words = TestDataFactory
+        List<String> words = TestDataFactory
             .getInput(sSHAKESPEARE_DATA_FILE,
                       // Split input into "words" by ignoring
                       // whitespace.

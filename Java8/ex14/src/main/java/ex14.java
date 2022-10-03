@@ -147,11 +147,10 @@ public class ex14 {
                     // Perform the following action each iteration.
                     .forEach((i) -> list
                              // Append new words to end of the list.
-                             .addAll(StreamSupport
-                                     // Convert List to sequential
+                             .addAll(// Convert List to sequential
                                      // or parallel stream.
-                                     .stream(words.spliterator(),
-                                             parallel)
+                                     (parallel ? words.parallelStream()
+                                               : words.stream())
 
                                      // Modify each string.
                                      .map(string ->
