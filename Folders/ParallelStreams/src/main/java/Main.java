@@ -20,6 +20,11 @@ class Main {
         warmUpThreadPool();
 
         // Run a test that uses the Java fork-join framework in
+        // conjunction with Java parallel streams features with
+        // the teeing collector.
+        runFileCounterParallelStreamTeeing();
+
+        // Run a test that uses the Java fork-join framework in
         // conjunction with Java parallel streams features.
         runFileCounterParallelStream();
 
@@ -27,11 +32,6 @@ class Main {
         // conjunction with Java parallel streams features with
         // direct indexing.
         runFileCounterParallelStreamIndex();
-
-        // Run a test that uses the Java fork-join framework in
-        // conjunction with Java parallel streams features with
-        // the teeing collector.
-        runFileCounterParallelStreamTeeing();
 
         // Get and print the timing results.
         System.out.println(RunTimer.getTimingResults());

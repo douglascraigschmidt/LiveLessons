@@ -4,10 +4,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 /**
- * This task uses the Java fork-join framework and the parallel
- * streams framework to compute the size in bytes of a given file, as
+ * This class uses the Java parallel streams framework and the Java
+ * ternary operator to compute the size in bytes of a given file, as
  * well as all the files in folders reachable from this file.
  */
+@SuppressWarnings("ConstantConditions")
 public class FileCountParallelStream
        extends AbstractFileCounter {
     /**
@@ -33,8 +34,8 @@ public class FileCountParallelStream
     @Override
     protected long compute() {
         return Stream
-            // Convert the list of files into a stream of files.
-            .of(Objects.requireNonNull(mFile.listFiles()))
+            // Convert the array of files into a stream of files.
+            .of(mFile.listFiles())
 
             // Convert the sequential stream to a parallel stream.
             .parallel()
@@ -44,10 +45,17 @@ public class FileCountParallelStream
                        // Determine if mFile is a file (document)
                        // vs. a directory (folder).
                        .isFile()
+
+                       // Handle a document.
                        ? handleDocument(file)
+
+                       // Handle a folder.
                        : handleFolder(file,
                                       mDocumentCount,
                                       mFolderCount,
+                                      // A factory that creates a
+                                      // FileCountParallelStream
+                                      // object.
                                       FileCountParallelStream::new))
 
             // Sum the sizes of all the files.

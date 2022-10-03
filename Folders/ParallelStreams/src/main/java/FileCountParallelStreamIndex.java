@@ -1,29 +1,35 @@
 import java.io.File;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
- * This task uses the Java fork-join framework and the parallel
- * streams framework to compute the size in bytes of a given file, as
- * well as all the files in folders reachable from this file.
+ * This class uses the Java parallel streams framework and direct
+ * indexing into an array of two {@link ToLongFunction} objects to
+ * compute the size in bytes of a given file, as well as all the files
+ * in folders reachable from this file.
  */
+@SuppressWarnings("ConstantConditions")
 public class FileCountParallelStreamIndex
        extends AbstractFileCounter {
     /**
-     * This two element array is used to optimize the
-     * {@code compute} method below!
+     * This two element array is used to optimize the {@code
+     * compute()} method below!
      */
     private final ToLongFunction<File>[] mOps = new ToLongFunction[] {
-            // Count the number of bypes in a document.
-            file -> handleDocument((File) file),
+        // Count the number of bytes in a recursive folder.
+        folder -> handleFolder((File) folder,
+                               mDocumentCount,
+                               mFolderCount,
+                               // A factory that creates a
+                               // FileCountParallelStreamIndex object.
+                               FileCountParallelStreamIndex::new),
 
-            // Count the number of bypes in a recursive folder.
-            folder -> handleFolder((File) folder,
-                    mDocumentCount,
-                    mFolderCount,
-                    FileCountParallelStreamIndex::new)
+        // Count the number of bytes in a document.
+        file -> handleDocument((File) file)
     };
 
     /**
@@ -44,23 +50,26 @@ public class FileCountParallelStreamIndex
 
     /**
      * @return The size in bytes of the file, as well as all the files
-     * in folders reachable from this file
+     *         in folders reachable from this file
      */
     @Override
     protected long compute() {
-        return Stream
-            // Convert file list into a sequential stream of files.
-            .of(Objects.requireNonNull(mFile.listFiles()))
+        return Arrays
+            // Convert file array into a List of files.
+            .asList(mFile.listFiles())
 
-            // Convert the sequential stream to a parallel stream.
-            .parallel()
+            // Convert the List to a parallel stream.
+            .parallelStream()
 
             // Get the number of bytes for a document or a recursive
             // folder.
             .mapToLong(entry ->
-                       // Index to the right array entry and call
-                       // the method.
-                       mOps[entry.isFile() ? 0 : 1].applyAsLong(entry))
+                       // Index into the appropriate array entry to
+                       // get the right Function.
+                       mOps[Boolean.compare(entry.isFile(), false)]
+
+                       // Apply the Function.
+                       .applyAsLong(entry))
 
             // Sum all the results together.
             .sum();

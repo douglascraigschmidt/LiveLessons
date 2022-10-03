@@ -52,7 +52,7 @@ public abstract class AbstractFileCounter {
 
     /**
      * @return The number of documents counted during the recursive
-     * traversal
+     *         traversal
      */
     public long documentCount() {
         return mDocumentCount.get();
@@ -60,7 +60,7 @@ public abstract class AbstractFileCounter {
 
     /**
      * @return The number of folders counted during the recursive
-     * traversal
+     *         traversal
      */
     public long folderCount() {
         return mFolderCount.get();
@@ -84,22 +84,27 @@ public abstract class AbstractFileCounter {
      * Process a folder.
      *
      * @param folder The folder to process
-     * @param function A {@link TriFunction} factory that
-     *                recursively counts the number of
-     *                files in a (sub)folder
+     * @param documentCount Count the number of documents
+     * @param folderCount Count the number of folders
+     * @param function A factory that returns an object used to
+     *                recursively count the number of files in a
+     *                (sub)folder
      * @return A count of the number of files in a (sub)folder
      */
-    protected long handleFolder(File folder,
-                                AtomicLong documentCount,
-                                AtomicLong folderCount,
-                                TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter> function) {
+    protected long handleFolder
+        (File folder,
+         AtomicLong documentCount,
+         AtomicLong folderCount,
+         TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter> function) {
         // Increment the count of folders.
         mFolderCount.incrementAndGet();
 
-        // Call the factory to recursively count the number of files
-        // in a (sub)folder.
         return function
+            // Call the factory to create a subclass of
+            // AbstractFileCount.
             .apply(folder, documentCount, folderCount)
+
+            // Recursively count the number of files in a (sub)folder.
             .compute();
     };
 }

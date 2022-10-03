@@ -10,8 +10,8 @@ import static java.util.stream.Collectors.*;
 
 /**
  * This class counts the number of images in a recursively-defined
- * folder structure using the Java sequential stream framework and
- * the {@code teeing} {@link Collector}.  The root folder can either
+ * folder structure using the Java sequential stream framework and the
+ * {@code teeing} {@link Collector}.  The root folder can either
  * reside locally (filesystem -based) or remotely (web-based).
  */
 class ImageCounter {
@@ -71,10 +71,10 @@ class ImageCounter {
         // revisit it again unnecessarily.
         else if (!mUniqueUris.add(pageUri)) {
             print(TAG
-                    + "[Depth"
-                    + depth
-                    + "]: Already processed "
-                    + pageUri);
+                  + "[Depth"
+                  + depth
+                  + "]: Already processed "
+                  + pageUri);
 
             // Return 0 if we've already examined this url.
             return 0;
