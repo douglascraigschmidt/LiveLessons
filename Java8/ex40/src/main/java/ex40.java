@@ -1,3 +1,5 @@
+import utils.RunTimer;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,33 +10,52 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * This program demonstrates how to use modern Java features (including
- * lambda expressions, method references, and parallel streams) to build
- * a cosine vector {@link Map} from a CSV file containing the cosine
- * values for movies.
+ * This program demonstrates how to use modern Java features
+ * (including lambda expressions, method references, and
+ * sequential/parallel streams) to build a cosine vector {@link Map}
+ * from a CSV file containing the cosine values for movies.  It also
+ * compares the performance of using a sequential vs. a parallel stream.
  */
+@SuppressWarnings("ConstantConditions")
 class ex40 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        // Create a Map containing the movie dataset.
-        Map<String, List<Double>> map = vectorMap("dataset.csv");
+        // Create a Map containing the movie dataset using
+        // a sequential stream.
+        var results = RunTimer
+            .timeRun(() -> vectorMap("dataset.csv", false),
+                      "sequential split");
+
+        // Create a Map containing the movie dataset using
+        // a parallel stream in a "warm-up" run.
+        results = RunTimer
+            .timeRun(() -> vectorMap("dataset.csv", true),
+                      "parallel split (warmup)");
+
+        // Create a Map containing the movie dataset using
+        // a parallel stream.
+        results = RunTimer
+                .timeRun(() -> vectorMap("dataset.csv", true),
+                        "parallel split (final)");
+
+        results
+            // Print the contents of the movie dataset.
+            .forEach((title, cosineVector) -> {
+                    System.out.println("Title = \""
+                                       + title
+                                       + "\" cosine vector "
+                                       + cosineVector);
+                });
 
         System.out.println("Size of the movie dataset = "
-                           + map.size());
+                + results.size());
 
-        // Print the contents of the movie dataset.
-        map.forEach((title, cosineVector) -> {
-                System.out.println("Title = \""
-                                   + title
-                                   + "\" cosine vector "
-                                   + cosineVector);
-            });
+        System.out.println(RunTimer.getTimingResults());
     }
 
     /**
@@ -44,30 +65,34 @@ class ex40 {
      * @param dataset Dataset resource file name
      * @return A map containing all movie cosine vectors
      */
-    public static Map<String, List<Double>> vectorMap(final String dataset) {
-        return loadCSVFile(requireNonNull(ex40.class
-                                          .getResource("/" + dataset))
-                           .getFile());
+    public static Map<String, List<Double>> vectorMap(final String dataset,
+                                                      boolean parallel) {
+        return loadCSVFile(ex40.class
+                           .getResource("/" + dataset)
+                           .getFile(),
+                           parallel);
     }
 
     /**
      * Factory method that builds a cosine vector {@link Map} from a
      * CSV file containing the cosine values for all the movies.
      *
-     * @param path Resource file path
+     * @param path     Resource file path
+     * @param parallel If true use a parallel stream, else a sequential stream
      * @return A {@link Map} that associates the movie title with the
-     *         cosine vector for each movie
+     * cosine vector for each movie
      */
-    private static Map<String, List<Double>> loadCSVFile(String path) {
+    private static Map<String, List<Double>> loadCSVFile(String path,
+                                                         boolean parallel) {
         // Read all lines from filename and convert into a Stream of
         // Strings.  The "try-with-resources" statement ensures the
         // Stream cleanup is done automatically!
         try (Stream<String> lines = Files.lines(Paths.get(path))) {
-            return lines
-                // Convert the stream into a parallel stream.
-                .parallel()
+            return (parallel ? lines
+                    // Convert the stream into a parallel stream.
+                    .parallel() : lines)
 
-                // Consume the first line, which gives the format of
+                // Consume the first line, which describes the format of
                 // the CSV file.
                 .skip(1)
 
@@ -121,6 +146,6 @@ class ex40 {
             .map(Double::valueOf)
 
             // Collect the Stream<Double> into an List<Double>.
-            .collect(toList());
+            .toList();
     }
 }
