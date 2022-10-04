@@ -51,7 +51,7 @@ public class Dirent
      */
     public Spliterator<Dirent> spliterator() {
         return Spliterators
-                .spliteratorUnknownSize(iterator(), 0);
+            .spliteratorUnknownSize(iterator(), 0);
     }
 
     /**
@@ -61,7 +61,7 @@ public class Dirent
      */
     public Stream<Dirent> stream(boolean parallel) {
         return StreamSupport
-                .stream(spliterator(), parallel);
+            .stream(spliterator(), parallel);
     }
 
     /**

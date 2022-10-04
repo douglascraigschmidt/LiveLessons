@@ -11,9 +11,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * This custom collector recursively converts a stream of Path objects
- * into a single Folder object that forms the root of a hierarchical
- * directory structure.
+ * This custom {@link Collector} recursively converts a stream of
+ * {@link Path} objects into a single {@link Folder} object that forms
+ * the root of a hierarchical directory structure.
  */
 public class FolderCollector
       implements Collector<Path,
@@ -39,12 +39,12 @@ public class FolderCollector
     }
 
     /**
-     * This factory method returns a supplier that creates and returns
-     * a new mutable result container that holds all the documents and
-     * subfolders in the stream.
+     * This factory method returns a {@link Supplier} that creates and
+     * returns a new mutable result container that holds all the
+     * documents and subfolders in the stream.
      *
      * @return A {@link Supplier} that returns a new, mutable result
-     * container
+     *         container
      */
     @Override
     public Supplier<Folder> supplier() {
@@ -52,11 +52,11 @@ public class FolderCollector
     }
     
     /**
-     * This factory method returns a biconsumer that adds a path to
-     * the mutable result container.
+     * This factory method returns a {@link BiConsumer} that adds a
+     * path to the mutable result container.
      *
      * @return A {@link BiConsumer} that adds a path to the mutable
-     * result container
+     *         result container
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
@@ -83,11 +83,11 @@ public class FolderCollector
 
     /**
      * This factory method returns a function that performs the final
-     * transformation of the mutable result container type {@code
-     * Folder} to the final result type {@code Folder}.
+     * transformation of the mutable result container type {@link
+     * Folder} to the final result type {@link Folder}.
      *
      * @return A {@link Function} that transforms the intermediate
-     * result to the final result
+     *         result to the final result
      */
     @Override
     public Function<Folder, Folder> finisher() {
@@ -96,13 +96,13 @@ public class FolderCollector
     }
 
     /**
-     * Returns a {@code Set} of {@code Collector.Characteristics}
+     * Returns a {@link Set} of {@code Collector.Characteristics}
      * indicating the characteristics of this Collector.  This set
      * should be immutable.
      *
      * @return An immutable {@link Set} of collector characteristics,
-     * which in this case is {@code UNORDERED} and {@code
-     * IDENTITY_FINISH}.
+     *         which in this case is {@code UNORDERED} and {@code
+     *         IDENTITY_FINISH}
      */
     @Override
     public Set<Collector.Characteristics> characteristics() {
@@ -114,9 +114,13 @@ public class FolderCollector
     }
 
     /**
-     * This factory method creates a new {@code FolderCollector}.
+     * This factory method creates a new {@link FolderCollector} that
+     * encapsulates the contents at the {@code path}.
      *
-     * @return A {@code FolderCollector}
+     * @param parallel True if processing should run in parallel, else
+     *                 false
+     * @param path The pathname for the folder to encapsulate
+     * @return A {@link FolderCollector}
      */
     public static Collector<Path, Folder, Folder> toFolder(boolean parallel,
                                                            Path path) {

@@ -76,6 +76,8 @@ public abstract class AbstractFileCounter {
         // Increment the count of documents.
         mDocumentCount.incrementAndGet();
 
+        // System.out.println("Document thread = " + Thread.currentThread().getId());
+
         // Return the length of the document.
         return document.length();
     }
@@ -89,7 +91,7 @@ public abstract class AbstractFileCounter {
      * @param function A factory that returns an object used to
      *                recursively count the number of files in a
      *                (sub)folder
-     * @return A count of the number of files in a (sub)folder
+     * @return A count of the number of bytes in files in a (sub)folder
      */
     protected long handleFolder
         (File folder,
@@ -99,12 +101,15 @@ public abstract class AbstractFileCounter {
         // Increment the count of folders.
         mFolderCount.incrementAndGet();
 
+        // System.out.println("Folder thread = " + Thread.currentThread().getId());
+
         return function
             // Call the factory to create a subclass of
             // AbstractFileCount.
             .apply(folder, documentCount, folderCount)
 
-            // Recursively count the number of files in a (sub)folder.
+            // Recursively count the number of bytes in files in
+            // a (sub)folder.
             .compute();
     };
 }

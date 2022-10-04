@@ -101,18 +101,15 @@ public abstract class Dirent {
     }
 
     /**
-     * @return A sequential stream containing all elements rooted at
-     * this directory entry
+     * Create a parallel or sequential stream to process the contents
+     * of this {@link Dirent}.
+     *
+     * @param parallel True if creating a parallel stream, else false
+     *                 if creating a sequential stream.
+     * @return A stream containing all elements rooted at this
+     *         directory entry
      */
-    public Stream<Dirent> stream() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return A parallel stream containing all elements rooted at
-     * this directory entry
-     */
-    public Stream<Dirent> parallelStream() {
+    public Stream<Dirent> stream(boolean parallel) {
         throw new UnsupportedOperationException();
     }
 }

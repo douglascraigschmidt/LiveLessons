@@ -12,13 +12,14 @@ import java.util.function.Consumer;
 /**
  * In conjunction with {@code StreamSupport.stream()} and {@code
  * Spliterators.spliterator()} this class creates a sequential or
- * parallel stream of {@code Dirents} from a recursively-structured
- * directory folder.
+ * parallel stream of {@link Dirent} objects from a
+ * recursively-structured directory folder.
  */
 public class BatchFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
     /**
-     * Size of the batch to process, which doubles every time it's used.
+     * Size of the batch to process, which doubles every time it's
+     * used.
      */
     private int mBatchSize;
 
@@ -55,7 +56,8 @@ public class BatchFolderSpliterator
     }
 
     /**
-     * Attempt to advance the spliterator by one Dirent.
+     * Attempt to advance the {@link Spliterator} by one {@link
+     * Dirent}.
      */
     public boolean tryAdvance(Consumer<? super Dirent> action) {
         // If there's a dirent available.
@@ -70,9 +72,10 @@ public class BatchFolderSpliterator
     }
 
     /**
-     * If this spliterator can be partitioned, returns a spliterator
-     * covering elements in the current folder, that will, upon return
-     * from this method, not be covered by this spliterator.
+     * If this {@link Spliterator} can be partitioned, returns a
+     * {@link Spliterator} covering elements in the current folder,
+     * that will, upon return from this method, not be covered by this
+     * spliterator.
      */
     public Spliterator<Dirent> trySplit() {
         // If there's a dirent available.

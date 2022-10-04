@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 /**
- * Represents the contents of a document, which is stored as a
- * CharSequence of bytes.
+ * Represents the contents of a document, which is stored as a {@link
+ * CharSequence} of bytes.
  */
 public class Document 
        extends Dirent {

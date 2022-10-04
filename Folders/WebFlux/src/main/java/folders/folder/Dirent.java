@@ -46,17 +46,21 @@ public class Dirent
     }
 
     /**
-     * This factory method is needed to keep Reactor fromIterable() happy..
+     * @return A {@link Spliterator} for this {@link Dirent}
      */
     public Spliterator<Dirent> spliterator() {
-        return new Spliterators
-            .AbstractSpliterator<Dirent>(getSize(),
-                                         Spliterator.SIZED) {
-            @Override
-            public boolean tryAdvance(Consumer<? super Dirent> action) {
-                return false;
-            }
-        };
+        return Spliterators
+            .spliteratorUnknownSize(iterator(), 0);
+    }
+
+    /**
+     * @param parallel True if a parallel stream should be created,
+     *                 false if a sequential stream should be created
+     * @return A stream of {@link Dirent} objects
+     */
+    public Stream<Dirent> stream(boolean parallel) {
+        return StreamSupport
+            .stream(spliterator(), parallel);
     }
 
     /**

@@ -5,7 +5,6 @@ import utils.Options;
 import utils.RunTimer;
 import utils.TestDataFactory;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -55,7 +54,7 @@ public class Main {
 
     /**
      * Run all the tests, either sequentially or in parallel,
-     * depending on the value of @a parallel.
+     * depending on the value of {@code parallel}.
      */
     private static void runTests(boolean parallel) {
         // Record whether we're running in parallel or sequentially.
@@ -76,18 +75,19 @@ public class Main {
                                             parallel),
                          "countEntries() " + mode);
 
+
         // Compute the time taken to count the # of lines in the
         // folder.
         RunTimer.timeRun(() -> countLines(rootFolder,
                                           parallel),
-                         "countLines() in " + mode);
+                         "countLines() " + mode);
 
         // Compute the time taken to synchronously search for a word
         // in all folders starting at the rootFolder.
         RunTimer.timeRun(() -> searchFolders(rootFolder,
                                              searchWord,
                                              parallel),
-                         "searchFolders() in " + mode);
+                         "searchFolders() " + mode);
 
         display("Ending the test " + mode);
     }
@@ -110,17 +110,13 @@ public class Main {
      */
     private static void countEntries(Dirent rootFolder,
                                      boolean parallel) {
-        // Create a stream of dirents starting at the rootFolder,
-        // which triggers the use of our *FolderSpliterator.
-        Stream<Dirent> folderStream = rootFolder
-            .stream();
+        long count = rootFolder
+            // Create a stream of dirents starting at the rootFolder,
+            // which triggers the use of *FolderSpliterator.
+            .stream(parallel)
 
-        // Conditionally convert to a parallel stream.
-        if (parallel)
-            folderStream.parallel();
-
-        // Get a count of the number of elements in the stream.
-        long count = folderStream.count();
+            // Count the number of elements in the stream.
+            .count();
 
         display("number of entries in the folder = "
                 + count);
@@ -133,17 +129,12 @@ public class Main {
     private static void searchFolders(Dirent rootFolder,
                                       String searchWord,
                                       boolean parallel) {
-        // Create a stream of dirents starting at the rootFolder,
-        // which triggers the use of our *FolderSpliterator.
-        Stream<Dirent> folderStream = rootFolder
-            .stream();
-
-        // Conditionally convert to a parallel stream.
-        if (parallel)
-            folderStream.parallel();
-
         // Compute the total number of matches of searchWord.
-        long matches = folderStream
+        long matches = rootFolder
+            // Create a stream of dirents starting at the rootFolder,
+            // which triggers the use of *FolderSpliterator.
+            .stream(parallel)
+
             // Only search documents.
             .filter(Main::isDocument)
 
@@ -196,17 +187,12 @@ public class Main {
      */
     private static void countLines(Dirent rootFolder, 
                                    boolean parallel) {
-        // Create a stream of dirents starting at the rootFolder,
-        // which triggers the use of our *FolderSpliterator.
-        Stream<Dirent> folderStream = rootFolder
-            .stream();
-
-        // Conditionally convert to a parallel stream.
-        if (parallel)
-            folderStream.parallel();
-
         // Count # of lines in documents residing in the folder.
-        long lineCount = folderStream
+        long lineCount = rootFolder
+            // Create a stream of dirents starting at the rootFolder,
+            // which triggers the use of *FolderSpliterator.
+            .stream(parallel)
+
             // Only consider documents. 
             .filter(Main::isDocument)
 

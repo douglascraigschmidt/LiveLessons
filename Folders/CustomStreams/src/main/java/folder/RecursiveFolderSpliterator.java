@@ -11,10 +11,11 @@ import java.util.function.Consumer;
 /**
  * In conjunction with {@code StreamSupport.stream()} and {@code
  * Spliterators.spliterator()} this class creates a sequential or
- * parallel stream of Dirents from a recursively-structured directory
- * folder.  Since it processes the contents of subfolders in parallel
- * whenever possible it works best if the contents of the
- * recursively-structured directory folder are relatively balanced.
+ * parallel stream of {@link Dirent} objects from a
+ * recursively-structured directory folder.  Since it processes the
+ * contents of subfolders in parallel whenever possible it works best
+ * if the contents of the recursively-structured directory folder are
+ * relatively balanced.
  */
 public class RecursiveFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
@@ -56,12 +57,12 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * Attempt to advance the spliterator by one dirent.  This is
-     * used exclusively be sequential streams and at certain points
-     * for parallel streams.
+     * Attempt to advance the {@link Spliterator} by one {@link
+     * Dirent}.  This method is used extensively by sequential streams
+     * and at certain points for parallel streams.
      *
      * @return True if the streams framework should continue the
-     * traversal process, else false.
+     *         traversal process, else false
      */
     public boolean tryAdvance(Consumer<? super Dirent> action) {
         Dirent currentEntry;
@@ -94,13 +95,13 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * This method attempts to partition the folder contents relatively
-     * evenly for parallel streams.
+     * This method attempts to partition the folder contents
+     * relatively evenly for parallel streams.
      *
-     * @return A spliterator covering dirents in the current folder,
-     *         that will, upon return from this method, not be covered
-     *         by this spliterator (if this spliterator can be
-     *         partitioned at all).
+     * @return A {@link Spliterator} covering {@link Dirent} objects
+     *         in the current folder, that will, upon return from this
+     *         method, not be covered by this spliterator (if this
+     *         spliterator can be partitioned at all)
      */
     public Spliterator<Dirent> trySplit() {
         // Determine the current size of the folders list.
@@ -120,10 +121,11 @@ public class RecursiveFolderSpliterator
     /**
      * Split the contents of folder that has at least two subfolders.
      *
-     * @param splitPos The index into mFoldersList where the split occurs
-     * @return A spliterator that's null if there's only one entry in
-     *         the folder, else one that contains the "left-hand"
-     *         dirents of the split.
+     * @param splitPos The index into mFoldersList where the split
+     *                 occurs
+     * @return A {@link Spliterator} that's null if there's only one
+     *         entry in the folder, else one that contains the
+     *         "left-hand" dirents of the split.
      */
     private Spliterator<Dirent> splitMultipleFolders(int splitPos) {
         // If there are 2 or more subfolders then split them in half
@@ -146,8 +148,9 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * @return A spliterator either covering documents in the current
-     *         folder or subfolders associated with the current folder
+     * @return A {@link Spliterator} either covering documents in the
+     *         current folder or subfolders associated with the
+     *         current folder
      */
     private Spliterator<Dirent> splitSingleFolder() {
         // Remove the one and only folder in the list and make it the
@@ -176,10 +179,9 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * @return A spliterator that's null if there's no current folder.
-     *         If there is a current folder then a spliterator is
-     *         returned that contains all the documents (if any) plus
-     *         the current folder.
+     * @return null if there's no current folder or if there's a
+     *         current folder then a {@link Spliterator} containing
+     *         all the documents (if any) plus the current folder
      */
     private Spliterator<Dirent> splitCurrentFolderAndDocs() {
         // See if there's no more to be done.
@@ -212,7 +214,7 @@ public class RecursiveFolderSpliterator
     }
 
     /**
-     * Only prints @a string when the verbose option is enabled.
+     * Print the {@link String} when the verbose option is enabled.
      */
     void debug(String string) {
         if (Options.getInstance().getVerbose())

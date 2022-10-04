@@ -1,9 +1,9 @@
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -17,35 +17,31 @@ import static java.util.stream.Collectors.*;
 public class FileCountParallelStreamTeeing
        extends AbstractFileCounter {
     /**
-     * This Function handles a document.
+     * This {@link Collector} handles a {@link Document}.
      */
-    Function<File, Long> mHandleDocument = entry ->
-        // Is entry a document?
-        entry.isFile()
-
-        // Handle a document
-        ? handleDocument(entry)
-
-        // Return 0.
-        : 0L;
+    Collector<File, ?, Long> documentCollector = Collector
+        .of(() -> new long[1],
+            (a, f) -> a[0] += handleDocument(f),
+            (a, b) -> {
+                a[0] += b[0];
+                return a;
+            },
+            a -> a[0]);
 
     /**
-     * This Function handles a folder.
+     * This {@link Collector} handles a {@link Folder}.
      */
-    Function<File, Long> mHandleFolder = entry ->
-        // Is entry a folder?
-        !entry.isFile()
-
-        // Handle a folder.
-        ? handleFolder(entry,
-                       mDocumentCount,
-                       mFolderCount,
-                       // A factory that creates a
-                       // FileCountParallelStreamTeeing object.
-                       FileCountParallelStreamTeeing::new)
-
-        // Return 0.
-        : 0L;
+    Collector<File, ?, Long> folderCollector = Collector
+        .of(() -> new long[1],
+            (a, f) -> a[0] += handleFolder(f,
+                                           mDocumentCount,
+                                           mFolderCount,
+                                           FileCountParallelStreamTeeing::new),
+            (a, b) -> {
+                a[0] += b[0];
+                return a;
+            },
+            a -> a[0]);
 
     /**
      * Constructor initializes the fields.
@@ -79,20 +75,18 @@ public class FileCountParallelStreamTeeing
             // Collect the results into a single Long value.
             .collect(// Use the teeing collector to process each entry
                      // according to its type.
-                     teeing(
-                            // Handle documents.
-                            mapping(mHandleDocument,
-                                    // Sum document results together.
-                                    summingLong(Long::longValue)),
+                     teeing(// Handle documents.
+                            filtering(File::isFile, 
+                                      documentCollector),
 
                             // Handle folders.
-                            mapping(mHandleFolder,
-                                    // Sum folder results together.
-                                    summingLong(Long::longValue)),
+                            filtering(Predicate.not(File::isFile), 
+                                      folderCollector),
 
                             // Sum both document and folder results
                             // together.
                             Long::sum));
     }
 }
+
 

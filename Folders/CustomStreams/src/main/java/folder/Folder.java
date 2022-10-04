@@ -66,23 +66,18 @@ public class Folder
     }
 
     /**
-     * @return A sequential stream containing all elements rooted at
-     * this folder
+     * Create a parallel or sequential stream to process the contents
+     * of this {@link Dirent}.
+     *
+     * @param parallel True if creating a parallel stream, else false
+     *                 if creating a sequential stream.
+     * @return A stream containing all elements rooted at this
+     *         directory entry
      */
     @Override
-    public Stream<Dirent> stream() {
+    public Stream<Dirent> stream(boolean parallel) {
         return StreamSupport.stream(spliterator(),
-                                    false);
-    }
-
-    /**
-     * @return A parallel stream containing all elements rooted at
-     * this folder
-     */
-    @Override
-    public Stream<Dirent> parallelStream() {
-        return StreamSupport.stream(spliterator(),
-                                    true);
+                                    parallel);
     }
 
     /*
