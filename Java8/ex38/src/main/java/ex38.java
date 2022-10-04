@@ -1,15 +1,13 @@
-import utils.ConcurrentMapCollector;
-import utils.GCDResult;
-import utils.GCDParam;
-import utils.RunTimer;
+import utils.*;
+import gcd.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.*;
 
-import static java.lang.Math.abs;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -20,42 +18,21 @@ import static java.util.stream.Collectors.*;
  * stream using concurrent and non-concurrent collectors for various
  * types of Java {@link Map} implementations, including {@link
  * HashMap} and {@link TreeMap}.  In addition, it shows how to use the
- * Java {@link record} type.
+ * Java {@code record} type.
  */
-@SuppressWarnings("ALL")
 public class ex38 {
     /**
-     * This interface converts four params to a result type.
+     * This interface applies four params to perform a computation.
      */
     @FunctionalInterface
-    interface QuadFunction<P1, P2, P3, P4, R> {
-        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
+    interface QuadFunction<P1, P2, P3, P4> {
+        void apply(P1 p1, P2 p2, P3 p3, P4 p4);
     }
     
     /**
      * Number of iterations to run the timing tests.
      */
     private static final int sMAX_ITERATIONS = 10;
-
-    /**
-     * The random number generator.
-     */
-    private static Random sRANDOM = new Random();
-
-    /**
-     * Create a {@link List} of random {@link GCDParam} objects.
-     */
-    static List<GCDParam> sRANDOM_PARAMS = IntStream
-        // Iterate from 1 to 1_000_000.
-        .rangeClosed(1, 1_000_000)
-
-        // Create a stream of GCDParam objects initialized to random values.
-        .mapToObj(___ -> 
-                  new GCDParam(abs(sRANDOM.nextInt()), 
-                               abs(sRANDOM.nextInt())))
-
-        // Trigger intermediate operations and collect into list.
-        .collect(toList());
 
     /**
      * Main entry point into the tests program.
@@ -91,6 +68,9 @@ public class ex38 {
                              TreeMap::new,
                              ex38::timeStreamCollect);
 
+        // Print the results.
+        printResults();
+
         System.out.println("Exiting the test program");
     }
 
@@ -101,13 +81,13 @@ public class ex38 {
      * types of Java {@link Map} types.
      * 
      * @param testType The type of test, i.e., HashMap or TreeMap
-     * @param setSupplier A {@link Supplier} that creates the given
+     * @param mapSupplier A {@link Supplier} that creates the given
      *                    non-concurrent {@link Map}
      * @param concurrentMapSupplier A {@link Supplier} that creates
      *                              the given concurrent {@link Map}
-     * @param collect A {@link Function} that performs the test using
-     *                either a non-concurrent or concurrent {@link
-     *                Collector
+     * @param streamCollect A {@link Function} that performs the test
+     *                      using either a non-concurrent or
+     *                      concurrent {@link Collector
      */
     private static void runMapCollectorTests
         (String testType,
@@ -118,16 +98,17 @@ public class ex38 {
          QuadFunction<String,
                       Boolean,
                       List<GCDParam>,
-                      Collector<GCDResult, ?, Map<GCDParam, Integer>>,
-                      Void> collect) {
+                      Collector<GCDResult, ?, Map<GCDParam, Integer>>>
+                 streamCollect) {
         Arrays
             // Create tests for different sizes of input data.
-            .asList(1_000, 10_000, 100_000, 500_000)
+            .asList(1_000, 10_000, 100_000)
 
             // Run the tests for various input data sizes.
             .forEach (count -> {
                     // Get a List of 'count' random GCDParam objects.
-                    List<GCDParam> randomParams = getRandomData(count);
+                    List<GCDParam> randomParams = GCDUtils
+                        .getRandomData(count);
 
                     // Print a message when the test starts.
                     System.out.println("Starting "
@@ -138,56 +119,65 @@ public class ex38 {
 
                     // Collect results into a sequential stream via a
                     // non-concurrent collector.
-                    collect
+                    streamCollect
                         .apply("non-concurrent " + testType,
                                false,
                                randomParams,
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       mapSupplier));
 
                     // Collect results into a parallel stream via a
                     // non-concurrent collector.
-                    collect
+                    streamCollect
                         .apply("non-concurrent " + testType,
                                true,
                                randomParams,
                                Collectors
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       mapSupplier));
 
                     // Collect results into a sequential stream via a
                     // concurrent collector.
-                    collect
+                    streamCollect
                         .apply("concurrent " + testType,
                                false,
                                randomParams,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       concurrentMapSupplier));
 
                     // Collect results into a parallel stream via a
                     // concurrent collector.
-                    collect
+                    streamCollect
                         .apply("concurrent " + testType,
                                true,
                                randomParams,
                                ConcurrentMapCollector
                                .toMap(keyMapper,
                                       valueMapper,
-                                      (o1, o2) -> o1,
+                                      mergeDuplicateKeyValues(),
                                       concurrentMapSupplier));
 
                     // Print the results.
                     System.out.println("..printing results\n"
                                        + RunTimer.getTimingResults());
                 });
+    }
+
+    /**
+     * Merge duplicate keys by simply choosing one of the key's values.
+     *
+     * @return One of the values
+     */
+    private static BinaryOperator<Integer> mergeDuplicateKeyValues() {
+        return (o1, o2) -> o1;
     }
 
     /**
@@ -202,7 +192,7 @@ public class ex38 {
      * @param collector The {@link Collector} used to combine the
      *                  results
      */
-    private static Void timeStreamCollect
+    private static void timeStreamCollect
         (String testType,
          boolean parallel,
          List<GCDParam> randomNumbers,
@@ -218,15 +208,24 @@ public class ex38 {
         RunTimer
             // Time how long it takes to run the test.
             .timeRun(() -> {
-                    for (int i = 0; i < sMAX_ITERATIONS; i++) {
-                        getResults(parallel, randomNumbers, collector);
-                    }},
-            testName);
-        return null;
+                    IntStream
+                        // Iterate for sMAX_ITERATIONS.
+                        .range(0, sMAX_ITERATIONS)
+
+                        // Run the test.
+                        .forEach(i ->
+                                 // Get the results.
+                                 getResults(parallel,
+                                            randomNumbers,
+                                            collector));
+
+                },
+                testName);
     }
 
     /**
-     * Perform computations that create a Map of {@ink GCDResult} objects
+     * Perform computations that create a {@link Map} of {@link
+     * GCDParam} and {@link Integer} objects.
      * 
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
@@ -239,103 +238,55 @@ public class ex38 {
         (boolean parallel,
          List<GCDParam> randomNumbers,
          Collector<GCDResult, ?, Map<GCDParam, Integer>> collector) {
-        // Convert into a sequential stream.
-        Stream<GCDParam> intStream = randomNumbers
-            .stream();
+        // Conditionally convert into a parallel or sequential stream.
+        return (parallel ? randomNumbers.parallelStream()
+                  : randomNumbers.stream())
 
-        // Conditionally convert stream to parallel
-        // stream.
-        if (parallel)
-            intStream.parallel();
-
-        return intStream
             // Compute the GCD of the params.
-            .map(params -> computeGCD(params))
+            .map(GCDUtils::computeGCD)
 
             // Trigger intermediate processing and
             // collect GCDResults into the given
             // collector.
             .collect(collector);
     }
+
     /**
-     * Print the {@code result} of the {@code testName}.
-     *
-     * @param result The results of applying the test
-     * @param testName The name of the test.
+     * Print the results.
      */
-    private static void printResults(Map<Integer[], Integer> results,
-                                     String testName) {
-        // Convert the first 10 elements of the Map contents into a
-        // String.
-        var output = results
+    private static void printResults() {
+        var treeMapResults = getResults(true,
+                GCDUtils.getRandomData(10),
+                Collectors
+                        .toMap(GCDResult::integers,
+                                GCDResult::gcd  ,
+                                mergeDuplicateKeyValues(),
+                                TreeMap::new));
+
+        var hashMapResults = getResults(true,
+                GCDUtils.getRandomData(10),
+                Collectors
+                        .toMap(GCDResult::integers,
+                                GCDResult::gcd  ,
+                                mergeDuplicateKeyValues(),
+                                HashMap::new));
+
+        Function<Map<GCDParam, Integer>, String> display = results ->
+            results
             .entrySet()
             .stream()
-            .limit(10)
             .map(entry ->
-                 "["
-                 + entry.getKey()[0]
-                 + ","
-                 + entry.getKey()[1]
-                 + "]="
+                 "GCD of "
+                 + entry.getKey()
+                 + " is "
                  + entry.getValue())
             .collect(joining("|"));
 
         // Print the results.
-        System.out.println("Results for "
-                           + testName
-                           + " of size "
-                           + results.size()
-                           + " was:\n"
-                           + output);
-    }
-
-    /**
-     * Generate random data for use by the various hashmaps.
-     *
-     * @return A {@link List} of random {@link Integer} objects
-     */
-    private static List<GCDParam> getRandomData(int count) {
-        return sRANDOM_PARAMS
-            // Convert the List into a Stream.
-            .stream()
-
-            // Limit the size of the stream by 'count'.
-            .limit(count)
-
-            // Collect the results into a List.
-            .collect(toList());
-    }
-
-    /**
-     * Compute the GCD of the two-element array {@code integers}.
-     *
-     * @param integers A two-element array containing the numbers to
-     *                 compute the GCD
-     * @return A {@link GCDResult}
-     */
-    private static GCDResult computeGCD(GCDParam integers) {
-        // Create a record to hold the GCD results.
-        return new GCDResult(integers,
-                             gcd(integers));
-    }
-
-    /**
-     * Provides an iterative implementation of Euclid's algorithm to
-     * compute the "greatest common divisor" (GCD) of {@code number1}
-     * and {@code number2}.
-     */
-    private static int gcd(GCDParam integers) {
-        int number1 = integers.first();
-        int number2 = integers.second();
-        for (;;) {
-            int remainder = number1 % number2;
-            if (remainder == 0){
-                return number2;
-            } else{
-                number1 = number2;
-                number2 = remainder;
-            }
-        }
+        System.out.println("Results of hashMapResults was:\n"
+                           + display.apply(hashMapResults));
+        System.out.println("Results of treeMapResults was:\n"
+                + display.apply(treeMapResults));
     }
 
     /**
@@ -346,12 +297,12 @@ public class ex38 {
         System.out.println("\n++Warming up the fork/join pool\n");
 
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
-            Stream<GCDParam> intStream = getRandomData(100000)
-                .parallelStream();
+            var results = GCDUtils
+                .getRandomData(100000)
+                .parallelStream()
 
-            Map<GCDParam, Integer> resultMap = intStream
                 // Compute the GCD of the params.
-                .map(params -> computeGCD(params))
+                .map(GCDUtils::computeGCD)
 
                 // Trigger intermediate processing and
                 // collect GCDResults into the given

@@ -6,12 +6,13 @@ import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
- * A concurrent collector that accumulates input elements of type
- * {@code T} into a {@link ConcurrentHashMap} parameterized with
- * {@code K} and {@code V} types and returns a type {@link M} that
- * extends {@link Map}.
+ * This generic custom concurrent collector accumulates input elements
+ * of type {@code T} into a {@link ConcurrentHashMap} parameterized
+ * with {@code K} and {@code V} types and returns a type {@link M}
+ * that extends {@link Map}, which enables the resulting {@link Map}
+ * to produce the elements in sorted order.
  */
-public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
+public class ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
        implements Collector<T,
                             Map<K, V>,
                             M> {
@@ -36,14 +37,14 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
      * A {@link Supplier} that returns a new, empty {@link Map} into
      * which the results will be inserted.
      */
-    private final Supplier<M> mMapSupplier;
+    private final Supplier<M> mResultMapSupplier;
 
     /**
      * This static factory method creates a concurrent {@link
      * Collector} that accumulates elements into a {@link Map} whose
      * keys and values are the result of applying the provided mapping
      * functions to the input elements.
-     * 
+     *
      * If the mapped keys contains duplicates (according to {@link
      * Object#equals(Object)}), the value mapping function is applied
      * to each equal element, and the results are merged using the
@@ -62,10 +63,10 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
      *                      the same key, as supplied to {@link
      *                      Map#merge(Object, Object, BiFunction)}
      * @return a {@link Collector} that collects elements into a
-     *        {@link Map} whose keys are the result of applying a key
-     *        mapping function to the input elements and whose values
-     *        are the result of applying a value mapping function to
-     *        all input elements equal to the key
+     *         {@link Map} whose keys are the result of applying a key
+     *         mapping function to the input elements and whose values
+     *         are the result of applying a value mapping function to
+     *         all input elements equal to the key
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M>
     toMap(Function<? super T, ? extends K> keyMapper,
@@ -73,12 +74,12 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
           BinaryOperator<V> mergeFunction,
           Supplier<M> mapSupplier) {
         return new ConcurrentMapCollector<>
-            (keyMapper,
-             valueMapper,
-             mergeFunction,
-             mapSupplier);
+                       (keyMapper,
+                        valueMapper,
+                        mergeFunction,
+                        mapSupplier);
     }
-
+    
     /**
      * Create a {@link Collector} that accumulates elements into a
      * {@link Map} whose keys and values are the result of applying
@@ -101,7 +102,7 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
         mKeyMapper = keyMapper;
         mValueMapper = valueMapper;
         mMergeFunction = mergeFunction;
-        mMapSupplier = mapSupplier;
+        mResultMapSupplier = mapSupplier;
     }
 
     /**
@@ -117,10 +118,11 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     }
 
     /**
-     * A method that folds an element into the {@link ConcurrentHashMap}.
+     * A method that folds an element into the {@link
+     * ConcurrentHashMap}.
      *
-     * @return a function that folds a value into a mutable result
-     *         container
+     * @return a {@link BiConsumer} that folds a value into the
+     * mutable result container
      */
     @Override
     public BiConsumer<Map<K, V>, T> accumulator() {
@@ -156,8 +158,8 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
     @Override
     public Function<Map<K, V>, M> finisher() {
         return map -> {
-            // Create the appropriate map.
-            M newMap = mMapSupplier.get();
+            // Create the appropriate Map to return results.
+            M newMap = mResultMapSupplier.get();
 
             // Check whether we've been instantiated to return a
             // ConcurrentHashMap, in which case there's no need to
@@ -178,19 +180,18 @@ public class    ConcurrentMapCollector<T, K, V, M extends Map<K, V>>
 
     /**
      * Returns a {@link Set} of {@link Collector.Characteristics}
-     * indicating the characteristics of this Collector.  This set
-     * is immutable.
+     * indicating the characteristics of this Collector.  This set is
+     * immutable.
      *
-     * @return An immutable set of collector characteristics, which in
-     * this case is [UNORDERED|CONCURRENT].
+     * @return An immutable set of {@link Collector} characteristics,
+     * which in this case is {@code [UNORDERED|CONCURRENT]}
      */
     @Override
     public Set<Characteristics> characteristics() {
         return Collections
-            // Ensure the Set is immutable!
-            .unmodifiableSet(EnumSet.of
-                    (Collector.Characteristics.CONCURRENT,
-                     Collector.Characteristics.UNORDERED));
+            .unmodifiableSet(EnumSet
+                .of(Collector.Characteristics.CONCURRENT,
+                    Collector.Characteristics.UNORDERED));
     }
 }
 

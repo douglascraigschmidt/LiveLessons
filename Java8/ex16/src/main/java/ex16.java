@@ -5,6 +5,7 @@ import utils.RunTimer;
 
 import java.math.BigInteger;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
@@ -68,20 +69,16 @@ public class ex16 {
                 SequentialStreamFactorial::factorial,
                 n);
 
-        runTest("SequentialRxJavaObservableFactorial",
-                SequentialRxJavaObservableFactorial::factorial,
-                n);
-
-        runTest("SequentialReactorFluxFactorial",
-                SequentialReactorFluxFactorial::factorial,
-                n);
-
         runTest("BuggyFactorial1",
                 BuggyFactorial1::factorial,
                 n);
 
         runTest("BuggyFactorial2",
                 BuggyFactorial1::factorial,
+                n);
+
+        runTest("SynchronizedParallelFactorial",
+                SynchronizedParallelFactorial::factorial,
                 n);
 
         runTest("ParallelStreamFactorial",
@@ -92,6 +89,14 @@ public class ex16 {
                 ParallelStreamFactorialEx::factorial,
                 n);
 
+        runTest("SequentialRxJavaObservableFactorial",
+                SequentialRxJavaObservableFactorial::factorial,
+                n);
+
+        runTest("SequentialReactorFluxFactorial",
+                SequentialReactorFluxFactorial::factorial,
+                n);
+
         runTest("RxJavaParallelFlowableFactorial",
                 RxJavaParallelFlowableFactorial::factorial,
                 n);
@@ -100,17 +105,14 @@ public class ex16 {
                 ReactorParallelFluxFactorial::factorial,
                 n);
 
-        runTest("SynchronizedParallelFactorial",
-                SynchronizedParallelFactorial::factorial,
-                n);
-
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending Factorial Tests");
     }
 
     /**
-     * Run the given {@code factorialTest} and print the result.
+     * Run the given {@code factorialTest} to compute the factorial of
+     * {@code n} and print the result.
      */
     private static <T> void runTest(String factorialTest,
                                     Function<T, T> factorial,
@@ -118,9 +120,15 @@ public class ex16 {
         // Help out the garbage collector.
         System.gc();
 
-        RunTimer.timeRun(() -> {
-                for (int i = 0; i < sMAX_ITERATIONS; i++)
-                    factorial.apply(n);
+        RunTimer
+            // Time the test.
+            .timeRun(() -> {
+                    IntStream
+                        // Iterate sMAX_ITERATION times.
+                        .range(0, sMAX_ITERATIONS)
+                        
+                        // Apply the factorial computation.
+                        .forEach(i -> factorial.apply(n));
             },
             factorialTest);
 
@@ -169,60 +177,8 @@ public class ex16 {
 
                 // Performs a reduction on the elements of this stream
                 // to compute the factorial.
-                .reduce(BigInteger.ONE, BigInteger::multiply);
-        }
-    }
-
-    /**
-     * This class demonstrates a baseline factorial implementation
-     * using a sequential RxJava Observable.
-     */
-    private static class SequentialRxJavaObservableFactorial {
-        /**
-         * Return the factorial for the given {@code n} using a
-         * sequential RxJava Observable and its reduce() operation.
-         */
-        static BigInteger factorial(BigInteger n) {
-            return Observable
-                // Create a stream of longs from 1 to n.
-                .rangeLong(1, n.longValue())
-
-                // Create a BigInteger from the long value.
-                .map(BigInteger::valueOf)
-
-                // Use reduce() to perform a reduction on the elements
-                // of this stream to compute the factorial.
-                .reduce(BigInteger::multiply)
-
-                // Block until all the results are finished.  If n was
-                // 0 then return 1.
-                .blockingGet(BigInteger.ONE);
-        }
-    }
-
-    /**
-     * This class demonstrates a baseline factorial implementation
-     * using a sequential Project Reactor Flux.
-     */
-    private static class SequentialReactorFluxFactorial {
-        /**
-         * Return the factorial for the given {@code n} using a
-         * sequential Project Reactor Flux and its reduce() operation.
-         */
-        static BigInteger factorial(BigInteger n) {
-            return Flux
-                // Create a stream of longs from 1 to n.
-                .range(1, n.intValue())
-
-                // Create a BigInteger from the long value.
-                .map(BigInteger::valueOf)
-
-                // Use reduce() to perform a reduction on the elements
-                // of this stream to compute the factorial.
-                .reduce(BigInteger::multiply)
-
-                // Block until all the results are finished.
-                .block();
+                .reduce(BigInteger.ONE,
+                        BigInteger::multiply);
         }
     }
 
@@ -300,9 +256,11 @@ public class ex16 {
             BigInteger mBigInteger;
 
             /**
-             * Constructor converts the {@code long} value to a {@link BigInteger}.
+             * Constructor converts the {@code long} value to a {@link
+             * BigInteger}.
              *
-             * @param l The {@code long} value to convert to a {@link BigInteger}
+             * @param l The {@code long} value to convert to a {@link
+             * BigInteger}
              */
             BIMultiplier(long l) {
                 // Convert 'l' to a BigInteger.
@@ -376,19 +334,15 @@ public class ex16 {
              * Multiply the running total by {@code n}.  This method
              * is synchronized to avoid race conditions.
              */
-            void multiply(BigInteger n) {
-                synchronized (this) {
-                    mTotal = mTotal.multiply(n);
-                }
+            synchronized void multiply(BigInteger n) {
+                mTotal = mTotal.multiply(n);
             }
 
             /**
              * Synchronize get() to ensure visibility of the data.
              */
-            BigInteger get() {
-                synchronized (this) {
-                    return mTotal;
-                }
+            synchronized BigInteger get() {
+                return mTotal;
             }
         }
 
@@ -419,8 +373,9 @@ public class ex16 {
     }
 
     /**
-     * This class demonstrates how the two parameter Java 8 reduce()
-     * operation avoids sharing state between Java threads altogether.
+     * This class demonstrates how the two-parameter modern Java
+     * reduce() operation avoids sharing state between Java threads
+     * altogether.
      */
     private static class ParallelStreamFactorial {
         /**
@@ -442,13 +397,15 @@ public class ex16 {
                 // perform a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
-                .reduce(BigInteger.ONE, BigInteger::multiply);
+                .reduce(BigInteger.ONE,
+                        BigInteger::multiply);
         }
     }
 
     /**
-     * This class demonstrates how the three parameter Java 8 reduce()
-     * operation avoids sharing state between Java threads altogether.
+     * This class demonstrates how the three-parameter modern Java
+     * reduce() operation avoids sharing state between Java threads
+     * altogether.
      */
     private static class ParallelStreamFactorialEx {
         /**
@@ -473,6 +430,59 @@ public class ex16 {
                 .reduce(BigInteger.ONE,
                         BigInteger::multiply,
                         BigInteger::multiply);
+        }
+    }
+
+    /**
+     * This class demonstrates a baseline factorial implementation
+     * using a sequential RxJava Observable.
+     */
+    private static class SequentialRxJavaObservableFactorial {
+        /**
+         * Return the factorial for the given {@code n} using a
+         * sequential RxJava Observable and its reduce() operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return Observable
+                // Create a stream of longs from 1 to n.
+                .rangeLong(1, n.longValue())
+
+                // Create a BigInteger from the long value.
+                .map(BigInteger::valueOf)
+
+                // Use reduce() to perform a reduction on the elements
+                // of this stream to compute the factorial.
+                .reduce(BigInteger::multiply)
+
+                // Block until all the results are finished.  If n was
+                // 0 then return 1.
+                .blockingGet(BigInteger.ONE);
+        }
+    }
+
+    /**
+     * This class demonstrates a baseline factorial implementation
+     * using a sequential Project Reactor Flux.
+     */
+    private static class SequentialReactorFluxFactorial {
+        /**
+         * Return the factorial for the given {@code n} using a
+         * sequential Project Reactor Flux and its reduce() operation.
+         */
+        static BigInteger factorial(BigInteger n) {
+            return Flux
+                // Create a stream of longs from 1 to n.
+                .range(1, n.intValue())
+
+                // Create a BigInteger from the long value.
+                .map(BigInteger::valueOf)
+
+                // Use reduce() to perform a reduction on the elements
+                // of this stream to compute the factorial.
+                .reduce(BigInteger::multiply)
+
+                // Block until all the results are finished.
+                .block();
         }
     }
 

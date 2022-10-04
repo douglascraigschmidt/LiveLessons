@@ -1,4 +1,4 @@
-package utils;
+package gcd;
 
 import java.util.Comparator;
 
@@ -6,15 +6,14 @@ import java.util.Comparator;
  * Define a Java record that holds the "plain old data" (POD) to pass
  * as the params to the greatest common divisor (GCD) method.
  */
-public record GCDParam
-(
+public record GCDParam (
  /*
-  * The first integer to process.
+  * The first int to process.
   */
  int first,
 
  /*
-  * The second integer to process.
+  * The second int to process.
   */
  int second) implements Comparable<GCDParam> {
     /**
@@ -33,6 +32,14 @@ public record GCDParam
         else
             // Continue on to compare the second elements.
             return this.second - rhs.second;
+    }
+
+    /**
+     * @return A {@link String} representation of the {@link GCDParam}
+     */
+    @Override
+    public String toString() {
+        return first + " and " + second;
     }
 }
 

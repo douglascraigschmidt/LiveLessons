@@ -139,10 +139,10 @@ public class ex37 {
          Supplier<Map<String, Integer>> mapSupplier,
          Supplier<Map<String, Integer>> concurrentMapSupplier,
          QuadFunction<String,
-         Boolean,
-         List<String>,
-         Collector<String, ?, Map<String, Integer>>,
-         Void> streamCollect) {
+                      Boolean,
+                      List<String>,
+                      Collector<String, ?, Map<String, Integer>>,
+                      Void> streamCollect) {
         Arrays
             // Create tests for different sizes of input data.
             .asList(1_000, 10_000, 100_000, 1_000_000)
