@@ -23,6 +23,14 @@ class Main {
         // baseline for the parallel streams tests.
         runFileCounterSequentialStream();
 
+        // Run a test that uses Java sequential streams features with
+        // direct indexing.
+        runFileCounterSequentialStreamIndex();
+
+        // Run a test that uses Java sequential streams features with
+        // the teeing collector.
+        runFileCounterSequentialStreamTeeing();
+
         // Run a test that uses Java parallel streams features.
         runFileCounterParallelStream();
 
@@ -78,6 +86,16 @@ class Main {
     }
 
     /**
+     * Run a test that uses Java sequential streams features and
+     * direct indexing.
+     */
+    private static void runFileCounterSequentialStreamIndex() throws URISyntaxException {
+        runTest(new FileCountSequentialStreamIndex
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterSequentialStreamIndex");
+    }
+
+    /**
      * Run a test that uses Java parallel streams features and the
      * teeing collector.
      */
@@ -85,6 +103,16 @@ class Main {
         runTest(new FileCountParallelStreamTeeing
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "FileCounterParallelStreamTeeing");
+    }
+
+    /**
+     * Run a test that uses Java sequential streams features and the
+     * teeing collector.
+     */
+    private static void runFileCounterSequentialStreamTeeing() throws URISyntaxException {
+        runTest(new FileCountSequentialStreamTeeing
+                        (new File(ClassLoader.getSystemResource("works").toURI())),
+                "FileCounterSequentialStreamTeeing");
     }
 
     /**

@@ -7,12 +7,12 @@ import java.util.stream.Collector;
 import static java.util.stream.Collectors.*;
 
 /**
- * This class uses the Java parallel streams framework and a teeing
+ * This class uses the Java sequential streams framework and a teeing
  * {@link Collector} to compute the size in bytes of a given file, as
  * well as all the files in folders reachable from this file.
  */
 @SuppressWarnings("ConstantConditions")
-public class FileCountParallelStreamTeeing
+public class FileCountSequentialStreamTeeing
        extends AbstractFileCounter {
     /**
      * This {@link Collector} handles a document.
@@ -38,7 +38,7 @@ public class FileCountParallelStreamTeeing
             (f,
              mDocumentCount,
              mFolderCount,
-             FileCountParallelStreamTeeing::new),
+             FileCountSequentialStreamTeeing::new),
             // Combiner.
             (a, b) -> { a[0] += b[0]; return a; },
             // Finisher.
@@ -47,16 +47,16 @@ public class FileCountParallelStreamTeeing
     /**
      * Constructor initializes the fields.
      */
-    FileCountParallelStreamTeeing(File file) {
+    FileCountSequentialStreamTeeing(File file) {
         super(file);
     }
 
     /**
      * Constructor initializes the fields (used internally).
      */
-    private FileCountParallelStreamTeeing(File file,
-                                          AtomicLong documentCount,
-                                          AtomicLong folderCount) {
+    private FileCountSequentialStreamTeeing(File file,
+                                            AtomicLong documentCount,
+                                            AtomicLong folderCount) {
         super(file, documentCount, folderCount);
     }
 
@@ -67,11 +67,9 @@ public class FileCountParallelStreamTeeing
     @Override
     protected long compute() {
         return Arrays
-            // Convert the list of files into a stream of files.
+            // Convert the list of files into a sequential stream of
+            // files.
             .stream(mFile.listFiles())
-
-            // Convert the sequential stream to a parallel stream.
-            .parallel()
 
             // Collect the results into a single Long value.
             .collect(// Use the teeing collector to process each entry

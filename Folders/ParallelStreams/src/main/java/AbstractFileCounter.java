@@ -97,7 +97,8 @@ public abstract class AbstractFileCounter {
         (File folder,
          AtomicLong documentCount,
          AtomicLong folderCount,
-         TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter> function) {
+         TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter>
+                 function) {
         // Increment the count of folders.
         mFolderCount.incrementAndGet();
 
