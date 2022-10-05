@@ -1,5 +1,5 @@
 import filecounters.AbstractFileCounter;
-import filecounters.FileCountStream;
+import filecounters.FileCountStreamTernary;
 import filecounters.FileCountStreamIndexing;
 import filecounters.FileCountStreamTeeing;
 import utils.RunTimer;
@@ -8,10 +8,10 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 /**
- * This example shows how to use various Java parallel Streams
- * framework features to count the number of files in a (large)
- * recursive folder hierarchy, as well as calculate the cumulative
- * sizes of all the files.
+ * This example shows how to use various Java sequential and parallel
+ * streams framework features to count the number of folders and
+ * documents in a (large) recursive folder hierarchy, as well as
+ * calculate the cumulative size in bytes of all the documents.
  */
 class Main {
     /**
@@ -55,7 +55,7 @@ class Main {
      * Warmup the thread pool.
      */
     private static void warmUpThreadPool() throws URISyntaxException {
-        runTest(new FileCountStream
+        runTest(new FileCountStreamTernary
                 (new File(ClassLoader.getSystemResource("works").toURI()),
                  true),
                 "warmup");
@@ -67,7 +67,7 @@ class Main {
      */
     private static void runFileCounterStream(boolean parallel)
         throws URISyntaxException {
-        runTest(new FileCountStream
+        runTest(new FileCountStreamTernary
                 (new File(ClassLoader.getSystemResource("works")
                           .toURI()),
                  parallel),

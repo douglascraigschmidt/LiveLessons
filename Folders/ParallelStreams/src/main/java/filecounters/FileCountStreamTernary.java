@@ -5,24 +5,25 @@ import java.util.List;
 
 /**
  * This class uses the Java streams framework and the Java ternary
- * operator to compute the size in bytes of a given file, as well as
- * all the files in folders reachable from this file.
+ * operator to count the number of folders and documents in a (large)
+ * recursive folder hierarchy, as well as calculate the cumulative
+ * size in bytes of all the documents.
  */
 @SuppressWarnings("ConstantConditions")
-public class FileCountStream
+public class FileCountStreamTernary
        extends AbstractFileCounter {
     /**
      * Constructor initializes the fields.
      */
-    public FileCountStream(File file,
-                           boolean parallel) {
+    public FileCountStreamTernary(File file,
+                                  boolean parallel) {
         super(file, parallel);
     }
 
     /**
      * Constructor initializes the superclass (internal).
      */
-    private FileCountStream(File file) {
+    private FileCountStreamTernary(File file) {
         super(file);
     }
 
@@ -54,7 +55,7 @@ public class FileCountStream
                        : handleFolder(file,
                                       // A factory that creates a
                                       // filecounters.FileCountStream object.
-                                      FileCountStream::new))
+                                      FileCountStreamTernary::new))
 
             // Sum the sizes of all the files.
             .sum();

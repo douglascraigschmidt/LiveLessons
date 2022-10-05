@@ -6,9 +6,10 @@ import java.util.function.ToLongFunction;
 
 /**
  * This class uses the Java streams framework and direct indexing into
- * an array of two {@link ToLongFunction} objects to compute the size
- * in bytes of a given file, as well as all the files in folders
- * reachable from this file.
+ * an array of two {@link ToLongFunction} objects to count the number
+ * of folders and documents in a (large) recursive folder hierarchy,
+ * as well as calculate the cumulative size in bytes of all the
+ * documents.
  */
 @SuppressWarnings("ConstantConditions")
 public class FileCountStreamIndexing

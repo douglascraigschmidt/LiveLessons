@@ -9,8 +9,9 @@ import static java.util.stream.Collectors.*;
 
 /**
  * This class uses the Java streams framework and a teeing {@link
- * Collector} to compute the size in bytes of a given file, as well as
- * all the files in folders reachable from this file.
+ * Collector} to count the number of folders and documents in a
+ * (large) recursive folder hierarchy, as well as calculate the
+ * cumulative size in bytes of all the documents.
  */
 @SuppressWarnings("ConstantConditions")
 public class FileCountStreamTeeing
