@@ -17,7 +17,8 @@ import static java.util.stream.Collectors.toMap;
  * (including lambda expressions, method references, and
  * sequential/parallel streams) to build a cosine vector {@link Map}
  * from a CSV file containing the cosine values for movies.  It also
- * compares the performance of using a sequential vs. a parallel stream.
+ * compares the performance of using a sequential stream vs. a
+ * parallel stream.
  */
 @SuppressWarnings("ConstantConditions")
 class ex40 {

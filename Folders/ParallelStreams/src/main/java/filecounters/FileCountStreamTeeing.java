@@ -1,3 +1,5 @@
+package filecounters;
+
 import java.io.File;
 import java.util.*;
 import java.util.function.*;
@@ -46,8 +48,7 @@ public class FileCountStreamTeeing
      */
     public FileCountStreamTeeing(File file,
                                  boolean parallel) {
-        super(file);
-        sParallel = parallel;
+        super(file, parallel);
     }
 
     /**
@@ -62,7 +63,7 @@ public class FileCountStreamTeeing
      *         the files in folders reachable from this file
      */
     @Override
-    protected long compute() {
+    public long compute() {
         var list = List
             // Convert file array into a List of files.
             .of(mFile.listFiles());

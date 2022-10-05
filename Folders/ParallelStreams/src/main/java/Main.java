@@ -1,3 +1,7 @@
+import filecounters.AbstractFileCounter;
+import filecounters.FileCountStream;
+import filecounters.FileCountStreamIndexing;
+import filecounters.FileCountStreamTeeing;
 import utils.RunTimer;
 
 import java.io.File;
@@ -93,7 +97,8 @@ class Main {
         throws URISyntaxException {
         runTest(new FileCountStreamTeeing
                 (new File(ClassLoader.getSystemResource("works")
-                          .toURI())),
+                          .toURI()),
+                 parallel),
                 "FileCounterStreamTeeing"
                 + (parallel ? " (parallel)" : " (sequential)"));
     }

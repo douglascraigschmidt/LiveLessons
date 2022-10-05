@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
- * This program implements various ways of computing factorials for
+ * This program implements various ways to compute factorials for
  * BigIntegers to demonstrate the performance of alternative parallel
  * and sequential algorithms, as well as the dangers of sharing
  * unsynchronized mutable state between threads.  It illustrates both

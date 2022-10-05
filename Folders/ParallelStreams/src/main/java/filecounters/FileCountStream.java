@@ -1,6 +1,7 @@
+package filecounters;
+
 import java.io.File;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class uses the Java streams framework and the Java ternary
@@ -15,8 +16,7 @@ public class FileCountStream
      */
     public FileCountStream(File file,
                            boolean parallel) {
-        super(file);
-        sParallel = parallel;
+        super(file, parallel);
     }
 
     /**
@@ -31,7 +31,7 @@ public class FileCountStream
      *         in folders reachable from this file
      */
     @Override
-    protected long compute() {
+    public long compute() {
         var list = List
             // Convert file array into a List of files.
             .of(mFile.listFiles());
@@ -53,7 +53,7 @@ public class FileCountStream
                        // Handle a folder.
                        : handleFolder(file,
                                       // A factory that creates a
-                                      // FileCountStream object.
+                                      // filecounters.FileCountStream object.
                                       FileCountStream::new))
 
             // Sum the sizes of all the files.

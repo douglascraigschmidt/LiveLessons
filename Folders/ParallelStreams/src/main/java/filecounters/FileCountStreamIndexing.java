@@ -1,5 +1,6 @@
+package filecounters;
+
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.ToLongFunction;
 
@@ -32,8 +33,7 @@ public class FileCountStreamIndexing
      */
     public FileCountStreamIndexing(File file,
                                    boolean parallel) {
-        super(file);
-        sParallel = parallel;
+        super(file, parallel);
     }
 
     /**
@@ -48,7 +48,7 @@ public class FileCountStreamIndexing
      *         in folders reachable from this file
      */
     @Override
-    protected long compute() {
+    public long compute() {
         var list = List
             // Convert file array into a List of files.
             .of(mFile.listFiles());

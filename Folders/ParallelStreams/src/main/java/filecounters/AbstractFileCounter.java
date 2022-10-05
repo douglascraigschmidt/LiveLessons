@@ -1,6 +1,7 @@
+package filecounters;
+
 import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -31,17 +32,27 @@ public abstract class AbstractFileCounter {
         new AtomicLong(0);
 
     /**
+     * Constructor initializes the field.
+     */
+    protected AbstractFileCounter(File file) {
+        mFile = file;
+    }
+
+    /**
      * Constructor initializes the fields.
      */
-    AbstractFileCounter(File file) {
+    protected AbstractFileCounter(File file, boolean parallel) {
         mFile = file;
+        sParallel = parallel;
+        sFolderCount.set(0);
+        sDocumentCount.set(0);
     }
 
     /**
      * @return The size in bytes of the file, as well as all
      *         the files in folders reachable from this file
      */
-    protected abstract long compute();
+    public abstract long compute();
 
     /**
      * @return The number of documents counted during the recursive
