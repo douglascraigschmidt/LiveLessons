@@ -1,0 +1,13 @@
+group 'livelessons'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+    implementation 'io.projectreactor:reactor-core:3.4.23'
+}

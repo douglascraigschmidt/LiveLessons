@@ -1,0 +1,101 @@
+CAK-Akron/Canton, OH 
+ALB-Albany, NY 
+ABQ-Albuquerque, NM 
+ABE-Allentown, PA 
+AMA-Amarillo, TX 
+ANC-Anchorage, AK 
+AVL-Asheville, NC 
+ASE-Aspen, CO 
+AHN-Athens, GA 
+ATL-Atlanta, GA 
+AIY-Atlantic City, NJ 
+AUS-Austin, TX 
+BWI-Baltimore, MD 
+BTR-Baton Rouge, LA 
+ABE-Bethlehem, PA 
+BHM-Birmingham, AL 
+BMI-Bloomington, IL 
+BOI-Boise, ID 
+BOS-Boston, MA 
+WBU-Boulder, CO 
+BWG-Bowling Green, KY 
+BZN-Bozeman, MT 
+BTV-Burlington, VT 
+BTM-Butte, MT 
+CLD-Carlsbad, CA 
+CID-Cedar Rapids, IA 
+CMI-Champaign/Urbana, IL 
+CHS-Charleston, SC 
+CLT-Charlotte, NC 
+CHO-Charlottesville, VA 
+CHA-Chattanooga, TN 
+MDW-Chicago, IL (Midway)
+ORD-Chicago, IL (O'Hare)
+CVG-Cincinnati, OH 
+PIE-Clearwater/St Petersburg, FL, USA
+CLE-Cleveland, OH, USA
+CMH-Columbus, OH, USA
+DFW-Dallas/Fort Worth, TX, USA
+DAY-Dayton, OH, USA
+DEN-Denver, CO, USA
+DTW-Detroit, MI, USA
+RDU-Raleigh/Durham, NC, USA
+ELP-El Paso, TX, USA
+FYV-Fayetteville, AR, USA
+FLG-Flagstaff, AZ, USA
+FLL-Fort Lauderdale, FL, USA
+GYY-Gary, IN, USA
+GRB-Green Bay, WI, USA
+GSO-Greensboro, NC, USA
+MDT-Harrisburg, PA, USA
+HOU-Houston, TX (Hobby), USA
+HSV-Huntsville, AL, USA
+IND-Indianapolis, IN, USA
+JAC-Jackson Hole, WY, USA
+OGG-Kahului, HI, USA
+AZO-Kalamazoo, MI, USA
+MCI-Kansas City, MO, USA
+EYW-Key West, FL, USA
+LNS-Lancaster, PA, USA
+LAS-Las Vegas, NV, USA
+LNK-Lincoln, NE, USA
+LHR-London/Heathrow, UK
+LGB-Long Beach, CA, USA
+LAX-Los Angeles, CA, USA
+MSN-Madison, WI, USA
+MIA-Miami, FL, USA
+MSP-Minneapolis, MN, USA
+MOB-Mobile, AL, USA
+MSL-Muscle Shoals, AL, USA
+BNA-Nashville, TN, USA
+MSY-New Orleans, LA, USA
+JFK-New York, NY (Kennedy), USA
+LGA-New York, NY (La Guardia), USA
+EWR-Newark, NJ, USA
+ORF-Norfolk, VA, USA
+OAK-Oakland, CA, USA
+OKC-Oklahoma City, OK, USA
+OMA-Omaha, NE, USA
+SNA-Orange County, CA, USA
+ORL-Orlando, FL (Herndon), USA
+PFN-Panama City, FL, USA
+PHL-Philadelphia, PA, USA
+PHX-Phoenix, AZ, USA
+PIT-Pittsburgh, PA, USA
+PDX-Portland, OR, USA
+PVD-Providence, RI, USA
+RIC-Richmond, VA, USA
+SLC-Salt Lake City, UT, USA
+SAN-San Diego, CA, USA
+SFO-San Francisco, CA, USA
+SJC-San Jose, CA, USA
+SBA-Santa Barbara, CA, USA
+SDL-Scottsdale, AZ, USA
+AVP-Scranton, PA, USA
+SEA-Seattle, WA, USA
+SYR-Syracuse, NY, USA
+TPA-Tampa, FL, USA
+TUS-Tucson, AZ, USA
+IAD-Washington DC (Dulles), USA
+DCA-Washington DC (National), USA
+ICT-Wichita, KS, USA

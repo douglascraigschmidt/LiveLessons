@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ForkJoinTests" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="ex22" />
+    <module name="Example 22" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

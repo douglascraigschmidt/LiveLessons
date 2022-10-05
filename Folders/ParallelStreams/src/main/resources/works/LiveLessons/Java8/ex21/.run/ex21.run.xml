@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ex21" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="ex21" />
+    <module name="ex21" />
+    <option name="PROGRAM_PARAMETERS" value="-d true -m 10 -l 10" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

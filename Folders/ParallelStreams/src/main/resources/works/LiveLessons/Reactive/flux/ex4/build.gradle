@@ -1,0 +1,16 @@
+group 'livelessons'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+java.targetCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.projectreactor:reactor-core:3.4.21'
+    implementation 'junit:junit:4.12'
+}
