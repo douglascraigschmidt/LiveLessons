@@ -43,6 +43,7 @@ class ex40 {
                 .timeRun(() -> vectorMap("dataset.csv", true),
                         "parallel split (final)");
 
+        /*
         results
             // Print the contents of the movie dataset.
             .forEach((title, cosineVector) -> {
@@ -50,7 +51,7 @@ class ex40 {
                                        + title
                                        + "\" cosine vector "
                                        + cosineVector);
-                });
+                }); */
 
         System.out.println("Size of the movie dataset = "
                 + results.size());
@@ -102,7 +103,7 @@ class ex40 {
                 // Put the title and the associated cosine vector in
                 // the map.
                 .map(strings -> new SimpleEntry<>
-                     (strings[0], parseVector(strings[1])))
+                     (strings[0], parseVector(strings[1], parallel)))
 
                 // Trigger intermediate processing and collect the
                 // results into a Map.
@@ -123,11 +124,14 @@ class ex40 {
      *
      * @param movieValues The {@link String} vector of cosine values
      *                    representing a movie
+     * @param parallel If true use a parallel stream, else a
+     *                 sequential stream
      * @return A {@link List} containing the movie cosine values
      */
-    private static List<Double> parseVector(String movieValues) {
-        // Access the vector that's stored in String form.
-        return Pattern
+    private static List<Double> parseVector(String movieValues,
+                                            boolean parallel) {
+        // Create a stream from the vector stored in String form.
+        var stream = Pattern
             // Compile splitter into a regular expression (regex) that
             // splits by the space separating the values.
             .compile(" ")
@@ -137,11 +141,13 @@ class ex40 {
             .splitAsStream(movieValues
                            // Remove leading/trailing brackets and
                            // leading space.
-                           .substring(3, movieValues.length() - 2))
-
+                           .substring(3, movieValues.length() - 2));
+        
+        if (parallel)
             // Convert the stream to a parallel stream.
-            .parallel()
+            stream.parallel();
 
+        return stream
             // Convert each cosine value from String to Double.
             .map(Double::valueOf)
 

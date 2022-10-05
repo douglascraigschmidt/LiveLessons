@@ -1,8 +1,7 @@
-import utils.TriFunction;
-
 import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Abstract super class for the various {@code FileCounter*}
@@ -15,33 +14,27 @@ public abstract class AbstractFileCounter {
     protected final File mFile;
 
     /**
+     * If true use a parallel stream, else use a sequential stream.
+     */
+    protected static boolean sParallel;
+
+    /**
      * Keeps track of the total number of documents encountered.
      */
-    protected final AtomicLong mDocumentCount;
+    protected static final AtomicLong sDocumentCount =
+        new AtomicLong(0);
 
     /**
      * Keeps track of the total number of folders encountered.
      */
-    protected final AtomicLong mFolderCount;
+    protected static final AtomicLong sFolderCount =
+        new AtomicLong(0);
 
     /**
      * Constructor initializes the fields.
      */
     AbstractFileCounter(File file) {
         mFile = file;
-        mDocumentCount = new AtomicLong(0);
-        mFolderCount = new AtomicLong(0);
-    }
-
-    /**
-     * Constructor initializes the fields.
-     */
-    AbstractFileCounter(File file,
-                        AtomicLong documentCount,
-                        AtomicLong folderCount) {
-        mFile = file;
-        mDocumentCount = documentCount;
-        mFolderCount = folderCount;
     }
 
     /**
@@ -54,16 +47,16 @@ public abstract class AbstractFileCounter {
      * @return The number of documents counted during the recursive
      *         traversal
      */
-    public long documentCount() {
-        return mDocumentCount.get();
+    public static long documentCount() {
+        return sDocumentCount.get();
     }
 
     /**
      * @return The number of folders counted during the recursive
      *         traversal
      */
-    public long folderCount() {
-        return mFolderCount.get();
+    public static long folderCount() {
+        return sFolderCount.get();
     }
 
     /**
@@ -74,9 +67,7 @@ public abstract class AbstractFileCounter {
      */
     protected long handleDocument(File document) {
         // Increment the count of documents.
-        mDocumentCount.incrementAndGet();
-
-        // System.out.println("Document thread = " + Thread.currentThread().getId());
+        sDocumentCount.incrementAndGet();
 
         // Return the length of the document.
         return document.length();
@@ -86,28 +77,22 @@ public abstract class AbstractFileCounter {
      * Process a folder.
      *
      * @param folder The folder to process
-     * @param documentCount Count the number of documents
-     * @param folderCount Count the number of folders
      * @param function A factory that returns an object used to
      *                recursively count the number of files in a
      *                (sub)folder
-     * @return A count of the number of bytes in files in a (sub)folder
+     * @return A count of the number of bytes in files in a
+     *         (sub)folder
      */
     protected long handleFolder
         (File folder,
-         AtomicLong documentCount,
-         AtomicLong folderCount,
-         TriFunction<File, AtomicLong, AtomicLong, AbstractFileCounter>
-                 function) {
+         Function<File, AbstractFileCounter> function) {
         // Increment the count of folders.
-        mFolderCount.incrementAndGet();
-
-        // System.out.println("Folder thread = " + Thread.currentThread().getId());
+        sFolderCount.incrementAndGet();
 
         return function
             // Call the factory to create a subclass of
             // AbstractFileCount.
-            .apply(folder, documentCount, folderCount)
+            .apply(folder)
 
             // Recursively count the number of bytes in files in
             // a (sub)folder.

@@ -1,18 +1,17 @@
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
 import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.*;
 
 /**
- * This class uses the Java parallel streams framework and a teeing
- * {@link Collector} to compute the size in bytes of a given file, as
- * well as all the files in folders reachable from this file.
+ * This class uses the Java streams framework and a teeing {@link
+ * Collector} to compute the size in bytes of a given file, as well as
+ * all the files in folders reachable from this file.
  */
 @SuppressWarnings("ConstantConditions")
-public class FileCountParallelStreamTeeing
+public class FileCountStreamTeeing
        extends AbstractFileCounter {
     /**
      * This {@link Collector} handles a document.
@@ -36,9 +35,7 @@ public class FileCountParallelStreamTeeing
             // Accumulator.
             (a, f) -> a[0] += handleFolder
             (f,
-             mDocumentCount,
-             mFolderCount,
-             FileCountParallelStreamTeeing::new),
+             FileCountStreamTeeing::new),
             // Combiner.
             (a, b) -> { a[0] += b[0]; return a; },
             // Finisher.
@@ -47,17 +44,17 @@ public class FileCountParallelStreamTeeing
     /**
      * Constructor initializes the fields.
      */
-    FileCountParallelStreamTeeing(File file) {
+    public FileCountStreamTeeing(File file,
+                                 boolean parallel) {
         super(file);
+        sParallel = parallel;
     }
 
     /**
-     * Constructor initializes the fields (used internally).
+     * Constructor initializes the fields.
      */
-    private FileCountParallelStreamTeeing(File file,
-                                          AtomicLong documentCount,
-                                          AtomicLong folderCount) {
-        super(file, documentCount, folderCount);
+    public FileCountStreamTeeing(File file) {
+        super(file);
     }
 
     /**
@@ -66,12 +63,14 @@ public class FileCountParallelStreamTeeing
      */
     @Override
     protected long compute() {
-        return Arrays
-            // Convert the list of files into a stream of files.
-            .stream(mFile.listFiles())
+        var list = List
+            // Convert file array into a List of files.
+            .of(mFile.listFiles());
 
-            // Convert the sequential stream to a parallel stream.
-            .parallel()
+        return // Create either a parallel or sequential stream.
+            (sParallel
+             ? list.parallelStream()
+             : list.stream())
 
             // Collect the results into a single Long value.
             .collect(// Use the teeing collector to process each entry

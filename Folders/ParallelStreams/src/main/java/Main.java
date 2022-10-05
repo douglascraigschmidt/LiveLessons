@@ -2,7 +2,6 @@ import utils.RunTimer;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.concurrent.*;
 
 /**
  * This example shows how to use various Java parallel Streams
@@ -21,26 +20,26 @@ class Main {
 
         // Run a test that uses Java sequential streams features as a
         // baseline for the parallel streams tests.
-        runFileCounterSequentialStream();
+        runFileCounterStream(false);
 
         // Run a test that uses Java sequential streams features with
         // direct indexing.
-        runFileCounterSequentialStreamIndex();
+        runFileCounterStreamIndex(false);
 
         // Run a test that uses Java sequential streams features with
         // the teeing collector.
-        runFileCounterSequentialStreamTeeing();
+        runFileCounterStreamTeeing(false);
 
         // Run a test that uses Java parallel streams features.
-        runFileCounterParallelStream();
+        runFileCounterStream(true);
 
         // Run a test that uses Java parallel streams features with
         // direct indexing.
-        runFileCounterParallelStreamIndex();
+        runFileCounterStreamIndex(true);
 
         // Run a test that uses Java parallel streams features with
         // the teeing collector.
-        runFileCounterParallelStreamTeeing();
+        runFileCounterStreamTeeing(true);
 
         // Get and print the timing results.
         System.out.println(RunTimer.getTimingResults());
@@ -52,67 +51,51 @@ class Main {
      * Warmup the thread pool.
      */
     private static void warmUpThreadPool() throws URISyntaxException {
-        runTest(new FileCountParallelStream
-                (new File(ClassLoader.getSystemResource("works").toURI())),
+        runTest(new FileCountStream
+                (new File(ClassLoader.getSystemResource("works").toURI()),
+                 true),
                 "warmup");
     }
 
     /**
-     * Run a test that uses the Java sequential streams features as a
-     * baseline for the parallel streams tests.
+     * Run a test that uses either Java sequential or parallel streams
+     * and the Java ternary operator.
      */
-    private static void runFileCounterSequentialStream() throws URISyntaxException {
-        runTest(new FileCountSequentialStream
-                (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterSequentialStream");
-    }
-    /**
-     * Run a test that uses the Java parallel streams features.
-     */
-    private static void runFileCounterParallelStream() throws URISyntaxException {
-        runTest(new FileCountParallelStream
-                (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStream");
+    private static void runFileCounterStream(boolean parallel)
+        throws URISyntaxException {
+        runTest(new FileCountStream
+                (new File(ClassLoader.getSystemResource("works")
+                          .toURI()),
+                 parallel),
+                "FileCounterStream"
+                + (parallel ? " (parallel)" : " (sequential)"));
     }
 
     /**
-     * Run a test that uses Java parallel streams features and direct
-     * indexing.
+     * Run a test that uses either Java sequential and parallel
+     * streams features and direct indexing.
      */
-    private static void runFileCounterParallelStreamIndex() throws URISyntaxException {
-        runTest(new FileCountParallelStreamIndex
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStreamIndex");
+    private static void runFileCounterStreamIndex(boolean parallel)
+        throws URISyntaxException {
+        runTest(new FileCountStreamIndexing
+                (new File(ClassLoader.getSystemResource("works")
+                          .toURI()),
+                 parallel),
+                "FileCounterStreamIndex"
+                + (parallel ? " (parallel)" : " (sequential)"));
     }
 
     /**
-     * Run a test that uses Java sequential streams features and
-     * direct indexing.
+     * Run a test that uses either Java sequential or parallel streams
+     * features and the teeing collector.
      */
-    private static void runFileCounterSequentialStreamIndex() throws URISyntaxException {
-        runTest(new FileCountSequentialStreamIndex
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterSequentialStreamIndex");
-    }
-
-    /**
-     * Run a test that uses Java parallel streams features and the
-     * teeing collector.
-     */
-    private static void runFileCounterParallelStreamTeeing() throws URISyntaxException {
-        runTest(new FileCountParallelStreamTeeing
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterParallelStreamTeeing");
-    }
-
-    /**
-     * Run a test that uses Java sequential streams features and the
-     * teeing collector.
-     */
-    private static void runFileCounterSequentialStreamTeeing() throws URISyntaxException {
-        runTest(new FileCountSequentialStreamTeeing
-                        (new File(ClassLoader.getSystemResource("works").toURI())),
-                "FileCounterSequentialStreamTeeing");
+    private static void runFileCounterStreamTeeing(boolean parallel)
+        throws URISyntaxException {
+        runTest(new FileCountStreamTeeing
+                (new File(ClassLoader.getSystemResource("works")
+                          .toURI())),
+                "FileCounterStreamTeeing"
+                + (parallel ? " (parallel)" : " (sequential)"));
     }
 
     /**
@@ -138,15 +121,15 @@ class Main {
         // Print the results.
         System.out.println(testName
                            + ": "
-                           + (testTask.documentCount()
-                              + testTask.folderCount())
+                           + (AbstractFileCounter.documentCount()
+                              + AbstractFileCounter.folderCount())
                            + " files ("
-                           + testTask.documentCount()
+                           + AbstractFileCounter.documentCount()
                            + " documents and " 
-                           + testTask.folderCount()
+                           + AbstractFileCounter.folderCount()
                            + " folders) contained "
-                           + size // / 1_000_000)
-                           + " bytes");
+                           + size / 1_000_000
+                           + " megabytes");
     }
 }
 

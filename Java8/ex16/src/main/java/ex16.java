@@ -12,8 +12,8 @@ import java.util.stream.LongStream;
  * This program implements various ways of computing factorials for
  * BigIntegers to demonstrate the performance of alternative parallel
  * and sequential algorithms, as well as the dangers of sharing
- * unsynchronized state between threads.  It illustrates both Java
- * sequential/parallel streams and sequential/parallel reactive
+ * unsynchronized mutable state between threads.  It illustrates both
+ * Java sequential/parallel streams and sequential/parallel reactive
  * streams implementations via RxJava and Project Reactor.
  *
  * A conventional Java parallel streams solution would look like this
@@ -393,7 +393,7 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Use the two parameter variant of reduce() to
+                // Use the two-parameter variant of reduce() to
                 // perform a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
@@ -423,7 +423,7 @@ public class ex16 {
                 // Create a BigInteger from the long value.
                 .mapToObj(BigInteger::valueOf)
 
-                // Use the three parameter variant of reduce() to
+                // Use the three-parameter variant of reduce() to
                 // perform a reduction on the elements of this stream
                 // to compute the factorial.  Note that there's no
                 // shared state at all!
