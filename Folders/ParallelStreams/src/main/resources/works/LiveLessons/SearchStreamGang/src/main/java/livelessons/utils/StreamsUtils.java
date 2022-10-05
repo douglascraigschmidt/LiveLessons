@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This utility class contains methods for manipulating various Java 8
+ * This utility class contains methods for manipulating various Java
  * Streams features.
  */
 public class StreamsUtils {
@@ -31,7 +31,7 @@ public class StreamsUtils {
         // Obtain a CompletableFuture that will be complete when all
         // of the futures have completed.
         CompletableFuture<Void> allDoneFuture = CompletableFuture
-            .allOf(futures.toArray(new CompletableFuture[futures.size()]));
+            .allOf(futures.toArray(new CompletableFuture[0]));
 
         // When all the futures have completed return a list of the
         // joined elements.

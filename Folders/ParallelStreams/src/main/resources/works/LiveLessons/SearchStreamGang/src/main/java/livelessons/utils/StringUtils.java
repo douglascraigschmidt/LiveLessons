@@ -1,7 +1,8 @@
 package livelessons.utils;
 
 /**
- * Useful utility methods that aren't included in the Java String class.
+ * Useful utility methods that aren't included in the Java String
+ * class.
  */
 public class StringUtils {
     /**
@@ -13,7 +14,7 @@ public class StringUtils {
     /**
      * Returns the index within this string of the first occurrence of
      * the specified character, starting the search at the specified
-     * index.  If @a caseSensitive is false the case is ignore,
+     * index.  If {@code caseSensitive} is false the case is ignore,
      * otherwise it is honored.
      */
     public static int indexOf(String context,
@@ -49,5 +50,15 @@ public class StringUtils {
         }
 
         return -1;
+    }
+
+    /**
+     * Returns the last segment of the {@code original} string based on
+     * the {@code splitter} character.
+     */
+    public static String lastSegment(String original,
+                                     char splitter) {
+        // Extract and return just the final portion of the test name.
+        return original.substring(original.lastIndexOf(splitter) + 1);
     }
 }

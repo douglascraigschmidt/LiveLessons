@@ -38,7 +38,7 @@ public class Image
      * constructed from.
      */
     private String getFileName() {
-        return NetUtils.getFileNameForUrl(mSourceUrl);
+        return FileAndNetUtils.getFileNameForUrl(mSourceUrl);
     }
 
     /**
@@ -53,14 +53,13 @@ public class Image
                                   getFileName());
         
         // Store the image using try-with-resources
-        
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
             // Write the image to the output file.
             PlatSpec.writeImageFile(outputFile, this);
             return imageFile;
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return null;
         }
     }

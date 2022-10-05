@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Represents the contents of a folder, which can include recursive
  * (sub)folders and/or documents.
@@ -44,17 +46,16 @@ public class Folder
     List<Dirent> mDocuments;
 
     /**
-     * The total number of entries in this recursively structured
-     * folder.
-     */
-    long mSize;
-
-    /**
      * Constructor initializes the fields.
      */
-    Folder() {
+    Folder(Path path) {
+        super(path, 1);
+
+        // Initialize all the fields.
         mSubFolderFutures = new ArrayList<>();
         mDocumentFutures = new ArrayList<>();
+        mSubFolders = new ArrayList<>();
+        mDocuments = new ArrayList<>();
     }
     
     /**
@@ -74,18 +75,12 @@ public class Folder
     }
 
     /**
-     * @return The total number of entries in this recursively
-     * structured folder.
-     */
-    public long size() {
-        return mSize;
-    }
-
-    /**
      * @return A spliterator for this class
      */
     public Spliterator<Dirent> spliterator() {
-        return new FolderSpliterator(this);
+        // Create a spliterator that uses breadth-first search
+        // to traverse the recursive folder structure.
+        return new BFSFolderSpliterator(this);
     }
 
     /**
@@ -105,7 +100,7 @@ public class Folder
 
     /**
      * Factory method that asynchronously creates a folder from the
-     * given @a file.
+     * given {@code file}.
      *
      * @param file The file associated with the folder in the file system
      *
@@ -113,12 +108,13 @@ public class Folder
      *         contents of the folder are available
      */
     public static CompletableFuture<Dirent> fromDirectory(File file) {
+        // Return a future to a document.
         return fromDirectory(file.toPath());
     }
 
     /**
      * Factory method that asynchronously creates a folder from the
-     * given @a file.
+     * given {@code file}.
      *
      * @param rootPath The path of the folder in the file system
      *
@@ -126,92 +122,142 @@ public class Folder
      *         contents of the folder are available
      */
     public static CompletableFuture<Dirent> fromDirectory(Path rootPath) {
-        // Return a future that completes once the folder's contents
-        // are available.
-        return CompletableFuture.supplyAsync(() -> {
-                Function<Path, Stream<Path>> getStream = ExceptionUtils
-                    .rethrowFunction(path
-                                     // List all subfolders and
-                                     // documents in just this folder.
-                                     -> Files.walk(path, 1));
+        // This function creates a stream containing all contents at
+        // the given rootPath.
+        Function<Path, Stream<Path>> getStream = ExceptionUtils
+            // An adapter that simplifies checked exceptions.
+            .rethrowFunction(path -> Files
+                             // Stream all contents in this path.
+                             .walk(path,
+                                   // Limit to just this folder.
+                                   1));
 
-                // Create a stream containing all the contents at the
-                // given rootPath.
-                Stream<Path> pathStream = getStream.apply(rootPath);
+        // Return a future that completes after folder is available.
+        return CompletableFuture
+            // This supplier lambda runs in the common fork-join pool.
+            .supplyAsync(() -> getStream
+                         // Create a stream containing all the
+                         // contents at the given rootPath.
+                         .apply(rootPath)
 
-                // Create a future to the folder containing all the
-                // contents at the given rootPath.
-                return pathStream
-                    // Eliminate rootPath to avoid infinite recursion.
-                    .filter(path -> !path.equals(rootPath))
+                         // Avoid infinite recursion.
+                         .filter(path -> !path.equals(rootPath))
 
-                    // Terminate the stream and create a Folder
-                    // containing all entries in this folder.
-                    .collect(FolderCollector.toFolder());
-            })
-            .thenCompose(folderFuture -> {
-                    // Run the following code after the folder's
-                    // contents are available.
-                    return folderFuture
-                        .thenApply(folder
-                                   -> {
-                                       // Set the path of the folder.
-                                       folder.setPath(rootPath);
-                                       folder.computeSize();
-
-                                       // Return the folder, which is
-                                       // wrapped in a future.
-                                       return folder;
-                                   });
-                });
-    }
-
-    /**
-     * Determine how many subfolders and documents are rooted at this
-     * folder.
-     */
-    private void computeSize() {
-        long folderCount = getSubFolders()
-            // Convert list to a stream.
-            .stream()
-
-            // Get the size of each subfolder.
-            .mapToLong(subFolder -> ((Folder) subFolder).mSize)
-
-            // Sub up the sizes of the subfolders.
-            .sum();
-
-        // Update the field with the correct count.
-        mSize = folderCount 
-            // Count the number of documents in this folder.
-            + (long) getDocuments().size()
-
-            // Add 1 to count this folder.
-            + 1;
+                         // Terminate stream and create a folder with
+                         // all entries in this (sub)folder.
+                         .collect(FolderCollector.toFolder(rootPath)))
+            // This completion stage method "de-nests" the
+            // future-to-future returned by supplyAsync()!
+            .thenCompose(folderFuture -> folderFuture
+                         // Function.identity() and thenApply()/
+                         // thenCompose() de-nests the folder.
+                         .thenApply(Function.identity()));
     }
 
     /*
-     * The methods below are used by the FolderCollector.
+     * The methods below are used by FolderCollector.
      */
 
     /**
-     * Add a new @a entry to the appropriate list of futures.
+     * Add a new {@code entry} to the appropriate list of futures.
      */
     void addEntry(Path entry) {
-        // This adapter simplifies exception handling.
-        Function<Path, CompletableFuture<Dirent>> getFolder = ExceptionUtils
-            // Asynchronously create a folder from a directory file.
-            .rethrowFunction(Folder::fromDirectory);
-
-        // This adapter simplifies exception handling.
-        Function<Path, CompletableFuture<Dirent>> getDocument = ExceptionUtils
-            // Asynchronously create a document from a path.
-            .rethrowFunction(Document::fromPath);
-
         // Add entry to the appropriate list of futures.
-        if (Files.isDirectory(entry))
-            mSubFolderFutures.add(getFolder.apply(entry));
-        else
-            mDocumentFutures.add(getDocument.apply(entry));
+        if (Files.isDirectory(entry)) {
+            // CompletableFuture<Dirent> folderF
+            var subFolderF = Folder
+                // Asynchronously (and recursively) create a future to a
+                // folder from the entry.
+                .fromDirectory(entry)
+
+                // This completion stage method is always called and
+                // doesn't affect the future returned by fromDirectory().
+                .whenComplete((subFolder, ___) -> {
+                    if (subFolder != null)
+                        // Increase the size of this folder
+                        // by the size of the new folder.
+                        addToSize(subFolder.getSize());
+                });
+
+            // Add the future to the folder futures list.
+            mSubFolderFutures.add(subFolderF);
+        } else {
+            var documentF = Document
+                // Asynchronously create a document from the entry
+                .fromPath(entry)
+
+                // This completion stage method is always called and
+                // doesn't affect the future returned by fromDirectory().
+                .whenComplete((document, ___) -> {
+                    if (document != null)
+                        // Count this new document.
+                        addToSize(1);
+                    });
+            
+            mDocumentFutures
+                // Add the future to the document futures list.
+                .add(documentF);
+        }
+    }
+
+    /**
+     * Merge contents of {@code folder} into contents of this folder.
+     *
+     * @param folder The folder to merge from
+     * @return The merged result
+     */
+    Folder merge(Folder folder) {
+        // Update the lists.
+        mSubFolderFutures.addAll(folder.mSubFolderFutures);
+        mDocumentFutures.addAll(folder.mDocumentFutures);
+
+        // Update the size.
+        addToSize(folder.getSize());
+
+        // Return this object.
+        return this;
+    }
+
+    /**
+     * This method is called after all the subfolders and documents
+     * have finished processing asynchronously to update the lists of
+     * subfolders and documents.
+     *
+     * @return The updated folder.
+     */
+    Folder whenComplete(Void v) {
+        // Initialize all the completed subfolders.
+        mSubFolders = collectToList(mSubFolderFutures);
+
+        // Initialize all the completed documents.
+        mDocuments = collectToList(mDocumentFutures);
+
+        // Return this folder.
+        return this;
+    }
+
+    /**
+     * Converts a list of completable futures to dirents into a list
+     * of dirents by joining them, which won't block.
+     *
+     * @param listOfFutures The list of completable futures to dirents
+     *                      to convert
+     * @return A list of dirents
+     */
+    private List<Dirent> collectToList
+            (List<CompletableFuture<Dirent>> listOfFutures) {
+        // Return a list of completed dirents.
+        return listOfFutures
+            // Convert the list into a stream.
+            .stream()
+
+            // Convert the future to a directory entry (join() won't
+            // block since all the futures have completed by this
+            // point).
+            .map(CompletableFuture::join)
+
+            // Trigger intermediate processing and return
+            // a list.
+            .collect(toList());
     }
 }

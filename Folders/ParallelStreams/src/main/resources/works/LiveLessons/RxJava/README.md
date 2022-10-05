@@ -3,14 +3,15 @@ webinars on [Modern Java by
 Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
-. ex1 - This example is currently just a placeholder for random things
-        I'm playing around with for RxJava.
+. ex1 - This example shows how to apply timeouts with the RxJava
+        framework.
   
 . ex2 - This example downloads multiple images from a remote web
-        server via several different mechanisms, including Java
-        parallel streams and RxJava.  It also compares the performance
-        of Java parallel streams and RxJava with and without the
-        ForkJoinPool.ManagedBlocker interface and the Java common
+        server via several different Java concurrency/parallelism
+        frameworks, including the parallel streams, RxJava, and
+        Project Reactor.  It also compares the performance of the Java
+        parallel streams framework with and without the {@code
+        ForkJoinPool.ManagedBlocker} interface and the Java common
         fork-join pool.
 
 . ex3 - This example demonstrates various RxJava mechanisms for
@@ -23,7 +24,3 @@ overview of what's included:
         images in a recursively-defined folder structure using a range
         of RxJava features.  The root folder can either reside locally
         (filesystem-based) or remotely (web-based).
-
-. ex5 -- This example shows how to apply timeouts with the RxJava
-         framework.
-

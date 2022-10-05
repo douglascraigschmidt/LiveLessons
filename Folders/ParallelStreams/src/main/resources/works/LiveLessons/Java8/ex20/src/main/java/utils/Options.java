@@ -76,7 +76,7 @@ public class Options {
     /**
      * Prefix for all the URLs.
      */
-    private static String sURL_PREFIX =
+    private static final String sURL_PREFIX =
         "http://www.dre.vanderbilt.edu/~schmidt/images/";
 
     /**

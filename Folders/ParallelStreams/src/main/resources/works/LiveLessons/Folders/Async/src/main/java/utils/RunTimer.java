@@ -40,7 +40,7 @@ public class RunTimer {
     /**
      * Call @a supplier.get() and time how long it takes to run.
      *
-     * @return The result returned by @a supplier.get()
+     * @return The result returned by {@code supplier.get()}
      */
     public static <U> U timeRun(Supplier<U> supplier,
                                 String testName) {
@@ -74,8 +74,8 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuffer stringBuffer =
-            new StringBuffer();
+        StringBuilder stringBuffer =
+            new StringBuilder();
 
         stringBuffer.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())

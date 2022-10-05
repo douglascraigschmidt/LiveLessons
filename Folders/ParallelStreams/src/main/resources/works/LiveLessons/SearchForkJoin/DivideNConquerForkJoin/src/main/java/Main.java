@@ -2,24 +2,26 @@ import search.IndexAwareSearchWithForkJoinTask;
 import search.SearchResults;
 import search.SearchWithForkJoinTask;
 import utils.Options;
+import utils.RunTimer;
 import utils.TestDataFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.groupingBy;
 import static utils.StreamsUtils.PentaFunction;
 
 /**
  * This example implements an "embarrassingly parallel" program that
- * uses a Java 8 fork-join pool and a "divide and conquer" strategy
- * (i.e., splitting various folders, phrases, and strings in half) to
- * search for phrases in a recursive directory folder containing all
- * the works of Shakespeare.  All parallel processing in this program
- * only uses "classic" Java 7 features (i.e., no Java 8 parallel
- * streams) to demonstrate "raw" fork-join pool programming.
+ * uses a modern Java fork-join pool and a "divide and conquer"
+ * strategy (i.e., splitting various folders, phrases, and strings in
+ * half) to search for phrases in a recursive directory folder
+ * containing all the works of Shakespeare.  All parallel processing
+ * in this program only uses "classic" Java 7 features (i.e., no Java
+ * parallel streams) to demonstrate "raw" fork-join pool programming.
  */
 public class Main {
     /*
@@ -46,22 +48,16 @@ public class Main {
     private static List<String> mPhrasesToFind;
         
     /**
-     * Keep track of which implementation performed the best.
-     */
-    private static Map<Long, String> mResultsMap =
-        new HashMap<>();
-
-    /**
      * Customize the PentaFunction for the SearchWithForkJoinTask
      * hierarchy of classes so we can use constructor references.
      */
     private interface SearchWithForkJoinTaskFactory
-            extends PentaFunction<List<CharSequence>,
-                                  List<String>,
-                                  Boolean,
-                                  Boolean,
-                                  Boolean,
-                                  SearchWithForkJoinTask> {}
+        extends PentaFunction<List<CharSequence>,
+                              List<String>,
+                              Boolean,
+                              Boolean,
+                              Boolean,
+                              SearchWithForkJoinTask> {}
 
     /**
      * This is the main entry point into the program.
@@ -84,7 +80,7 @@ public class Main {
 
         // This constructor reference creates an
         // SearchWithForkJoinTask object.
-        SearchWithForkJoinTaskFactory consRef =
+        SearchWithForkJoinTaskFactory constructorRef =
             SearchWithForkJoinTask::new;
 
         System.out.println("The parallelism in the common fork-join pool is "
@@ -95,22 +91,22 @@ public class Main {
         warmUpForkJoinPool(indexAwareConsRef);
 
         // Run the substring tests.
-        runTest(false, false, false, false, consRef);
-        runTest(false, true, false, false, consRef);
-        runTest(false, false, true, false, consRef);
-        runTest(false, true, true, false, consRef);
-        runTest(true, false, false, false, consRef);
-        runTest(true, true, false, false, consRef);
-        runTest(true, false, true, false, consRef);
-        runTest(true, true, true, false, consRef);
-        runTest(false, false, false, true, consRef);
-        runTest(false, true, false, true, consRef);
-        runTest(false, false, true, true, consRef);
-        runTest(false, true, true, true, consRef);
-        runTest(true, false, false, true, consRef);
-        runTest(true, true, false, true, consRef);
-        runTest(true, false, true, true, consRef);
-        runTest(true, true, true, true, consRef);
+        runTest(false, false, false, false, constructorRef);
+        runTest(false, true, false, false, constructorRef);
+        runTest(false, false, true, false, constructorRef);
+        runTest(false, true, true, false, constructorRef);
+        runTest(true, false, false, false, constructorRef);
+        runTest(true, true, false, false, constructorRef);
+        runTest(true, false, true, false, constructorRef);
+        runTest(true, true, true, false, constructorRef);
+        runTest(false, false, false, true, constructorRef);
+        runTest(false, true, false, true, constructorRef);
+        runTest(false, false, true, true, constructorRef);
+        runTest(false, true, true, true, constructorRef);
+        runTest(true, false, false, true, constructorRef);
+        runTest(true, true, false, true, constructorRef);
+        runTest(true, false, true, true, constructorRef);
+        runTest(true, true, true, true, constructorRef);
 
         // Run the index-aware tests.
         runTest(false, false, false, false, indexAwareConsRef);
@@ -131,44 +127,9 @@ public class Main {
         runTest(true, true, true, true, indexAwareConsRef);
 
         // Print out the search results.
-        printResults();
+        System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Ending SearchStream");
-    }
-
-    /**
-     * Warm up the fork-join pool to account for any instruction/data
-     * caching effects.
-     */
-    private static void warmUpForkJoinPool(SearchWithForkJoinTaskFactory consRef)
-            throws IOException, URISyntaxException {
-        System.out.println("Warming up the fork-join pool");
-
-        // This object is used to search a recursive directory
-        // containing the complete works of William Shakespeare.
-        List<CharSequence> inputList = TestDataFactory
-            .getInput(sSHAKESPEARE_FOLDER, true);
-
-        // Create the appropriate type of object.
-        SearchWithForkJoinTask forkJoinTask =
-            consRef.apply(inputList,
-                          mPhrasesToFind,
-                          true,
-                          true,
-                          true);
-
-        @SuppressWarnings("unused")
-            // Search the input looking for phrases that match.
-            List<List<SearchResults>> listOfListOfSearchResults =
-            ForkJoinPool.commonPool()
-            .invoke(forkJoinTask);
-
-        // Help the GC.
-        //noinspection UnusedAssignment
-        forkJoinTask = null;
-
-        // Run the garbage collector after each test.
-        System.gc();
     }
 
     /**
@@ -180,11 +141,8 @@ public class Main {
                                 boolean parallelPhrases,
                                 boolean parallelWorks,
                                 boolean parallelInput,
-                                SearchWithForkJoinTaskFactory consRef)
-            throws IOException, URISyntaxException {
-        // Record the start time.
-        long startTime = System.nanoTime();
-
+                                SearchWithForkJoinTaskFactory constructorRef)
+        throws IOException, URISyntaxException {
         // This list of CharSequence contains the complete works of
         // William Shakespeare, with one CharSequence for each work.
         List<CharSequence> inputList = TestDataFactory
@@ -193,7 +151,7 @@ public class Main {
 
         // Create the appropriate type of SearchWithForkJoinTask.
         SearchWithForkJoinTask forkJoinTask =
-            consRef.apply(inputList,
+            constructorRef.apply(inputList,
                           mPhrasesToFind,
                           parallelSearching,
                           parallelPhrases,
@@ -216,70 +174,34 @@ public class Main {
         // Indicate which test configuration is running.
         System.out.println("Running test " + testConfig);
 
-        // Use the common fork-join pool to search the input looking
-        // for phrases that match.
-        List<List<SearchResults>> listOfListOfSearchResults =
-            ForkJoinPool.commonPool()
-                        .invoke(forkJoinTask);
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
         // Store the results.
-        storeResults(testConfig,
-                     stopTime,
-                     listOfListOfSearchResults);
+        AtomicReference<List<List<SearchResults>>> results =
+            new AtomicReference<>();
 
-        // Help the GC.
-        //noinspection UnusedAssignment
-        forkJoinTask = null;
+        RunTimer
+            .timeRun(() -> {
+                    results
+                        .set(ForkJoinPool
+                             // Use the common fork-join pool to
+                             // search input for phrases that match.
+                             .commonPool()
+                             .invoke(forkJoinTask));
+                },
+            testConfig);
 
-        // Run the garbage collector after each test.
-        System.gc();
-    }
-
-    /**
-     * Print out the search results.
-     */
-    private static void printResults() {
-        // Print out the contents of the mResultsMap in sorted order.
-        mResultsMap
-            // Get the entrySet for the mResultsMap.
-            .entrySet()
-
-            // Convert the entrySet into a stream.
-            .stream()
-
-            // Sort the stream by the timing results (key).
-            .sorted(Map.Entry.comparingByKey())
-
-            // Print all the entries in the sorted stream.
-            .forEach(entry
-                     -> System.out.println(entry.getValue()));
-    }
-
-    /**
-     * Store the search results.
-     */
-    private static void storeResults(String testConfig,
-                                     long stopTime,
-                                     List<List<SearchResults>> listOfListOfSearchResults) {
-        // Print the number of times each phrase matched the input.
-        mResultsMap.put(stopTime,
-                        "The search returned = "
-                        // Count the number of matches.
-                        + listOfListOfSearchResults.stream()
-                        .mapToInt(list
-                                  -> list.stream().mapToInt(SearchResults::size).sum())
-                        .sum()
-                        + " phrase matches in "
-                        + stopTime
-                        + " milliseconds for "
-                        + testConfig);
+        System.out.println("The search returned = "
+                           + results.get().stream()
+                           .mapToInt(list
+                                     -> list.stream().mapToInt(SearchResults::size).sum())
+                           .sum()
+                           + " phrase matches");
 
         // Print the matching titles.
         if (Options.getInstance().isVerbose())
-            printTitles(listOfListOfSearchResults);
+            printTitles(results.get());
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 
     /**
@@ -309,5 +231,37 @@ public class Main {
                                // Print out the indicates for this key.
                                value.forEach(SearchResults::print);
                            });
+    }
+
+
+    /**
+     * Warm up the fork-join pool to account for any instruction/data
+     * caching effects.
+     */
+    private static void warmUpForkJoinPool(SearchWithForkJoinTaskFactory constructorRef)
+        throws IOException, URISyntaxException {
+        System.out.println("Warming up the fork-join pool");
+
+        // This object is used to search a recursive directory
+        // containing the complete works of William Shakespeare.
+        List<CharSequence> inputList = TestDataFactory
+            .getInput(sSHAKESPEARE_FOLDER, true);
+
+        // Create the appropriate type of object.
+        SearchWithForkJoinTask forkJoinTask = constructorRef
+            .apply(inputList,
+                   mPhrasesToFind,
+                   true,
+                   true,
+                   true);
+
+        ForkJoinPool
+            // Use the common fork-join pool to search input for
+            // phrases that match.
+            .commonPool()
+            .invoke(forkJoinTask);
+
+        // Run the garbage collector after each test.
+        System.gc();
     }
 }

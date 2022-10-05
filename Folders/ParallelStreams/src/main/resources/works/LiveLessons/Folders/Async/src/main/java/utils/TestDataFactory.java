@@ -1,7 +1,6 @@
 package utils;
 
 import folder.Dirent;
-import folder.EntryVisitor;
 import folder.Folder;
 
 import java.io.File;

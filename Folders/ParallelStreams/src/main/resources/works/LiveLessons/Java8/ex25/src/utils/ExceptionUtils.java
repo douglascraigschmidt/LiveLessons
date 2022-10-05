@@ -53,11 +53,15 @@ public final class ExceptionUtils {
         };
     }
 
-    /** uncheck(() -> Class.forName("xxx")); */
-    public static void uncheck(Runnable_WithExceptions t)
-    {
-        try { t.accept(); }
-        catch (Exception exception) { throwAsUnchecked(exception); }
+    /** rethrowRunnable */
+    public static Runnable rethrowRunnable(Runnable_WithExceptions t) {
+        return () -> {
+            try {
+                t.accept();
+            } catch (Exception exception) {
+                throwAsUnchecked(exception);
+            }
+        };
     }
 
     /** uncheck(() -> Class.forName("xxx")); */

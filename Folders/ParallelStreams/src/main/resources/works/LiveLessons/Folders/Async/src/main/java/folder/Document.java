@@ -14,11 +14,16 @@ import java.util.function.Function;
 public class Document 
        extends Dirent {
     /**
+     * Contents of the document.
+     */
+    CharSequence mContents;
+
+    /**
      * Constructor sets the field.
      */
     private Document(CharSequence input,
                      Path path) {
-        super(path);
+        super(path, 1);
         mContents = input;
     }
 
@@ -39,18 +44,18 @@ public class Document
      *         contents of the document are available
      */
     static CompletableFuture<Dirent> fromPath(Path path) {
+        // This function gets all bytes from a file.
+        Function<Path, byte[]> getBytes = ExceptionUtils
+                // This adapter simplifies checked exceptions.
+                .rethrowFunction(Files::readAllBytes);
+
         // Return a future that completes once the document's contents
         // are available.
         return CompletableFuture
-            .supplyAsync(() -> {
-                    Function<Path, byte[]> getBytes = ExceptionUtils
-                        .rethrowFunction(Files::readAllBytes);
-
-                    // Create/return a new document (wrapped in a
-                    // future) containing file contents at the path.
-                    return new Document
-                        (new String(getBytes.apply(path)),
-                         path);
-                });
+            .supplyAsync(() ->
+                         // Create/return a new document (wrapped in a
+                         // future) containing file contents at the path.
+                         new Document(new String(getBytes.apply(path)),
+                                      path));
     }
 }

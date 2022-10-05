@@ -24,6 +24,7 @@ public final class FileUtils {
      * Clears the filter directories.
      */
     public static void deleteAllFiles(Filter[] filters) {
+        try {
         int deletedFiles = 0;
 
         // Delete all the filter directories.
@@ -34,6 +35,9 @@ public final class FileUtils {
 
         System.out.println(deletedFiles
                            + " previously downloaded file(s) deleted");
+        } catch (Exception ex) {
+            // Swallow exceptions.
+        }
     }
 
     /**

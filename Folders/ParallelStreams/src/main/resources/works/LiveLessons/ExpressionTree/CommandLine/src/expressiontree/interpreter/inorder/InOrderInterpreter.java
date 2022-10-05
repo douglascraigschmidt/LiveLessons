@@ -1,24 +1,28 @@
 package expressiontree.interpreter.inorder;
 
 import expressiontree.interpreter.*;
+import expressiontree.interpreter.exprs.BinaryExpr;
+import expressiontree.interpreter.exprs.Delimiter;
+import expressiontree.interpreter.exprs.Expr;
+import expressiontree.interpreter.exprs.NegateExpr;
 import expressiontree.tree.ExpressionTree;
 import expressiontree.tree.ExpressionTreeFactory;
 
 import java.util.Iterator;
 import java.util.Stack;
 
-import static expressiontree.nodes.ComponentNode.*;
+import static expressiontree.composites.ComponentNode.*;
 
 /**
  * Parses incoming expression strings into a parse tree and builds an
  * expression tree from the parse tree.  This class plays the role of
  * the "Interpreter" in the Intepreter pattern, tweaked to use the
- * getPrecedence of operators/operands to guide the creation of the parse
- * tree.  It also uses the Builder pattern to build component nodes in
- * the Composite-based expression tree.
+ * getPrecedence of operators/operands to guide the creation of the
+ * parse tree.  It also uses the Builder pattern to build component
+ * nodes in the Composite-based expression tree.
  */
 public class InOrderInterpreter
-      extends InterpreterImpl {
+       extends InterpreterImpl {
     /**
      * Constructor initializes the super class.
      */
@@ -33,7 +37,7 @@ public class InOrderInterpreter
      * the template method in the Template Method pattern.
      */
     public ExpressionTree interpret(String inputExpression) {
-        Symbol parseTreeRoot =
+        Expr parseTreeRoot =
             buildParseTree(inputExpression);
 
         // If the parseTree has an element in it perform the
@@ -57,7 +61,7 @@ public class InOrderInterpreter
      * the {@code parseTree} prior to generating the @a
      * ExpressionTree.  By default it's a no-op.
      */
-    protected void optimizeParseTree(Symbol parseTree) {
+    protected void optimizeParseTree(Expr parseTree) {
     }
 
     /**
@@ -65,7 +69,7 @@ public class InOrderInterpreter
      * the root symbol.  The Builder pattern is used at each node to
      * create the appropriate subclass of {@code ComponentNode}.
      */
-    private ExpressionTree buildExpressionTree(Symbol parseTree) {
+    private ExpressionTree buildExpressionTree(Expr parseTree) {
         return mExpressionTreeFactory.makeExpressionTree(parseTree.build());
     }
 
@@ -73,24 +77,24 @@ public class InOrderInterpreter
      * @return Return the root of a parse tree corresponding to the
      * {@code inputExpression}.
      */
-    private Symbol buildParseTree(String inputExpression) {
-        Symbol root = null;
+    private Expr buildParseTree(String inputExpression) {
+        Expr root = null;
 
         // This stack handles "reductions".
-        Stack<Symbol> mHandleStack = new Stack<>();
+        Stack<Expr> mHandleStack = new Stack<>();
 
         // This stack keeps track of operator precedence.
-        Stack<Symbol> mOperatorStack = new Stack<>();
+        Stack<Expr> mOperatorStack = new Stack<>();
 
         // The operator stack always starts with a Delimiter symbol.
         mOperatorStack.push(new Delimiter());
 
         // Create an iterator for the inputExpression and iterate
         // through all the symbols.
-        for (Iterator<Symbol> iter = makeIterator(inputExpression);
+        for (Iterator<Expr> iter = makeIterator(inputExpression);
              iter.hasNext(); ) {
             // Get the next Symbol from the user's input expression.
-            Symbol symbol = iter.next();
+            Expr symbol = iter.next();
 
             // Determine the type of symbol.
             int symbolType = symbol.getType();
@@ -102,8 +106,9 @@ public class InOrderInterpreter
                 mHandleStack.push(symbol);
             }
 
-            // If the operator on top of the stack is lower precedence than
-            // the current operator symbol then push the symbol on the stack.
+            // If the operator on top of the stack is lower precedence
+            // than the current operator symbol then push the symbol
+            // on the stack.
             else if (mTopOfStackPrecedence[mOperatorStack.peek().getType()]
                      < mCurrentTokenPrecedence[symbolType])
                 mOperatorStack.push(symbol);
@@ -113,21 +118,22 @@ public class InOrderInterpreter
                 while (mTopOfStackPrecedence[mOperatorStack.peek().getType()]
                        > mCurrentTokenPrecedence[symbolType]) {
                     // Pop the top operator off the stack.
-                    Symbol temp = mOperatorStack.pop();
+                    Expr temp = mOperatorStack.pop();
 
                     // A Negate operator symbol triggers unary reduction.
                     if (temp.getType() == sNEGATION) {
                         // Push the reduction onto the handle stack.
-                        mHandleStack.push(synthesizeNode(temp, mHandleStack.pop()));
+                        mHandleStack.push(synthesizeNode((NegateExpr) temp,
+                                                         mHandleStack.pop()));
                     }
                     // Other symbols trigger a binary reduction.
                     else {
                         // Pop the top two items off the stack.
-                        Symbol rightChild = mHandleStack.pop();
-                        Symbol leftChild = mHandleStack.pop();
+                        Expr rightChild = mHandleStack.pop();
+                        Expr leftChild = mHandleStack.pop();
 
                         // Push the reduction onto the handle stack.
-                        mHandleStack.push(synthesizeNode(temp,
+                        mHandleStack.push(synthesizeNode((BinaryExpr) temp,
                                                          leftChild,
                                                          rightChild));
                     }
@@ -140,7 +146,8 @@ public class InOrderInterpreter
                 if (topSymbolType == sDELIMITER && symbolType == sDELIMITER) {
                     root = mHandleStack.pop();
                 }
-                // Remove a getLeftChild-paren when its matching getRightChild-paren is reached.
+                // Remove a left-paren when its matching right-paren
+                // is reached.
                 else if (topSymbolType == sLPAREN
                          && symbolType == sRPAREN) {
                     mOperatorStack.pop();
@@ -158,34 +165,34 @@ public class InOrderInterpreter
      * @param binaryOperator
      * @param leftChild
      * @param rightChild
-     * @return
+     * @return Symbol
      */
-    private Symbol synthesizeNode(Symbol binaryOperator,
-                                  Symbol leftChild,
-                                  Symbol rightChild) {
-        binaryOperator.mLeft = leftChild;
-        binaryOperator.mRight = rightChild;
+    private Expr synthesizeNode(BinaryExpr binaryOperator,
+                                Expr leftChild,
+                                Expr rightChild) {
+        binaryOperator.mLeftExpr = leftChild;
+        binaryOperator.mRightExpr = rightChild;
         return binaryOperator;
     }
 
     /**
      *
-     * @param unaryOperator
+     * @param negateOperator
      * @param rightChild
-     * @return
+     * @return Symbol
      */
-    private Symbol synthesizeNode(Symbol unaryOperator,
-                                  Symbol rightChild) {
-        unaryOperator.mRight = rightChild;
-        return unaryOperator;
+    private Expr synthesizeNode(NegateExpr negateOperator,
+                                Expr rightChild) {
+        negateOperator.mRightExpr = rightChild;
+        return negateOperator;
     }
 
     /**
      * @return An iterator that traverses all the terminals in {@code
      * inputExpression}.
      */
-    private Iterator<Symbol> makeIterator(String inputExpression) {
-        return new SymbolIterator(this, inputExpression);
+    private Iterator<Expr> makeIterator(String inputExpression) {
+        return new ExprIterator(this, inputExpression);
     }
 }
 

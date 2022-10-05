@@ -1,83 +1,242 @@
-import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
+ * This example shows how to apply timeouts with the RxJava framework.
  */
 public class ex1 {
-    private static Random mRand = new Random();
-
-    private static Observable<Integer> fetch() throws InterruptedException {
-        Thread.sleep(java.lang.Math.abs(mRand.nextInt() % 1000));
-        print("Loading from ");
-        return Observable
-                .just(mRand.nextInt(), mRand.nextInt(), mRand.nextInt());
-    }
-
-    private static void emit(ObservableEmitter<Integer> emitter) throws InterruptedException {
-        for (int count = 0; count < 10; count++) {
-            Thread.sleep(100);
-            print("Emitting... " + count);
-            emitter.onNext(count);
-
-            if (count == 15)
-                throw new RuntimeException("Something went wrong");
-        }
-        emitter.onComplete();
-    }
-
-    private static void process(int value) throws InterruptedException {
-        Thread.sleep(1000);
-        print(value);
-    }
-
-    private static void test2() {
-        Observable
-                .create(ex1::emit)
-                .observeOn(Schedulers.computation(), true, 2)
-                .map(data -> data)
-                .subscribe(ex1::process,
-                           err -> print("ERROR" + err),
-                           () -> print("DONE"));
-
-    }
-    private static Observable<Integer> getValues() {
-        return Observable
-                .fromCallable(ex1::fetch)
-                .flatMap(s -> s)
-                .timeout(1, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io());
-    }
-
-    private static void test1() {
-        Observable<Integer> n1 = getValues();
-        Observable<Integer> n2 = getValues();
-
-        n1
-                .mergeWith(n2)
-                // .first()
-                .observeOn(Schedulers.computation())
-                .subscribe(ex1::print);
-    }
-
-    private static void print(String s) {
-        System.out.println(s + " in thread "+ Thread.currentThread().getName());
-    }
-
-    private static void print(Integer i) {
-        System.out.println("Got: " + i + " in thread " + Thread.currentThread().getName());
-    }
     /**
-     * 
+     * The default exchange rate if a timeout occurs.
      */
-    static public void main(String[] argv) throws InterruptedException {
-        test1();
-        test2();
+    private static final Single<Double> sDEFAULT_RATE_S =
+        Single.just(1.0);
 
-        Thread.sleep(10000);
+    /**
+     * The default exchange rate if a timeout occurs.
+     */
+    private static final Flowable<Double> sDEFAULT_RATE_F =
+        Flowable.just(1.0);
+
+    /**
+     * The number of iterations to run the test.
+     */
+    private static final int sMAX_ITERATIONS = 5;
+
+    /**
+     * The random number generator.
+     */
+    private static final Random sRandom = new Random();
+
+    /**
+     * The Java execution environment requires a static main() entry
+     a     * point method to run the app.
+    */
+    public static void main(String[] args) {
+        // Run the test program.
+        new ex1().run();
+    }
+
+    /**
+     * Run the test program.
+     */
+    private void run() {
+        // Run a test that demonstrates timeouts for RxJava concurrent
+        // Singles.
+        runConcurrentSingles();
+
+        // Run a test that demonstrates timeouts for RxJava
+        // ParallelFlowables.
+        runParallelFlowables();
+    }
+
+    /**
+     * Run a test that demonstrates timeouts for RxJava concurrent
+     * Singles.
+     */
+    private void runConcurrentSingles() {
+        System.out.println("begin runConcurrentSingles()");
+
+        // Iterate multiple times.
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            print("Iteration #" + i);
+
+            Single<Double> priceS = Single
+                // Asynchronously find the best price in US dollars
+                // between London and New York.
+                .fromCallable(() -> findBestPrice("LDN - NYC"))
+
+                // Run computation in the parallel thread pool.
+                .subscribeOn(Schedulers.computation());
+
+            Single<Double> rateS = Single
+                // Asynchronously determine exchange rate between US
+                // dollars and British pounds.
+                .fromCallable(() ->
+                              queryExchangeRateFor("USD:GBP"))
+
+                // If this computation runs for more than 2 seconds
+                // return the default rate.
+                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE_S)
+
+                // Run the computation in the common fork-join pool.
+                .subscribeOn(Schedulers.computation());
+
+            Single
+                // Call the this::convert method reference to convert
+                // the price in dollars to the price in pounds when both
+                // previous singles complete.
+                .zip(priceS, rateS, this::convert)
+
+                // If async processing takes more than 3 seconds a
+                // TimeoutException will be thrown.
+                .timeout(3, TimeUnit.SECONDS)
+
+                // Block until all async processing completes.
+                .blockingSubscribe(amount ->
+                                   System.out.println("The price is: " 
+                                                      + amount 
+                                                      + " GBP"),
+                                   ex ->
+                                   System.out.println("The exception thrown was " 
+                                                      + ex.toString()));
+        }
+
+        System.out.println("end runConcurrentSingles()");
+    }
+
+    /**
+     * Run a test that demonstrates timeouts for RxJava
+     * ParallelFlowables.
+     */
+    private void runParallelFlowables() {
+        System.out.println("begin runParallelFlowables()");
+
+        // Iterate multiple times.
+        for (int i = 0; i < sMAX_ITERATIONS; i++) {
+            print("Iteration #" + i);
+
+            Flowable<Double> priceF = Flowable
+                // Asynchronously find the best price in US dollars
+                // from London to New York.
+                .just("LDN:NYC")
+
+                // Run computation in the parallel thread pool.
+                .parallel().runOn(Schedulers.computation())
+
+                // Find the best price.
+                .map(this::findBestPrice)
+
+                // Convert back to sequential.
+                .sequential();
+
+            Flowable<Double> rateF = Flowable
+                // Asynchronously determine exchange rate from British
+                // pounds to US dollars.
+                .just("GBP:USA")
+
+                // Run computation in the parallel thread pool.
+                .parallel().runOn(Schedulers.computation())
+
+                // Find the exchange rate.
+                .map(this::queryExchangeRateFor)
+
+                // Convert back to sequential.
+                .sequential()
+
+                // If this computation runs for more than 2 seconds
+                // return the default rate.
+                .timeout(2, TimeUnit.SECONDS, sDEFAULT_RATE_F)                    ;
+
+            Flowable
+                // Call this::convert method reference to convert the
+                // price in dollars to the price in pounds when both
+                // previous singles complete.
+                .zip(priceF, rateF, this::convert)
+
+                // If async processing takes more than 3 seconds a
+                // TimeoutException will be thrown.
+                .timeout(3, TimeUnit.SECONDS)
+
+                // Block until all async processing completes.
+                .blockingSubscribe(amount ->
+                                   System.out.println("The price is: " 
+                                                      + amount 
+                                                      + " GBP"),
+                                   ex ->
+                                   System.out.println("The exception thrown was " 
+                                                      + ex.toString()));
+        }
+
+        System.out.println("end runParallelFlowables()");
+    }
+
+    /**
+     * This method simulates a webservice that finds the best price in
+     * US dollars for a given flight leg.
+     */
+    private double findBestPrice(String flightLeg) {
+        // Delay for a random amount of time.
+        randomDelay();
+        
+        // Debugging print.
+        print("Flight leg is "
+              + flightLeg);
+
+        // Simply return a constant.
+        return 888.00;
+    }
+
+    /**
+     * This method simulates a webservice that finds the exchange rate
+     * between a source and destination currency format.
+     */
+    private double queryExchangeRateFor(String sourceAndDestination) {
+        String[] sAndD = sourceAndDestination.split(":");
+
+        // Delay for a random amount of time.
+        randomDelay();
+
+        // Debugging print.
+        print("Rate comparision between " 
+              + sAndD[0]
+              + " and "
+              + sAndD[1]);
+
+        // Simply return a constant.
+        return 1.20;
+    }
+
+    /**
+     * Convert a price in one currency system by multiplying it by the
+     * exchange rate.
+     */
+    private double convert(double price, double rate) {
+        return price * rate;
+    }
+
+    /**
+     * Simulate a random delay between 0.5 and 4.5 seconds.
+     */
+    private static void randomDelay() {
+        int delay = 500 + sRandom.nextInt(4000);
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+           // throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Print the {@code string} together with thread information.
+     */
+    private void print(String string) {
+        System.out.println("Thread["
+                           + Thread.currentThread().getId()
+                           + "]: "
+                           + string);
     }
 }
-

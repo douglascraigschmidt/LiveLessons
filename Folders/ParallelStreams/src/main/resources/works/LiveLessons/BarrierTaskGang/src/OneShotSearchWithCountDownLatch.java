@@ -1,13 +1,11 @@
 import java.util.concurrent.CountDownLatch;
 
 /**
- * @class OneShotSearchWithCountDownLatch
- *
- * @brief Customizes the SearchTaskGangCommon framework to spawn a
- *        Thread for each element in the List of input Strings and
- *        use a CountDownLatch to wait for all the Threads to
- *        finish concurrently searching the input for an array of 
- *        words to find. It only runs for a single iteration cycle.
+ * Customizes the {@link SearchTaskGangCommon} framework to spawn a
+ * thread for each element in the {@link List} of input strings and
+ * uses a {@link CountDownLatch} to wait for all the threads to finish
+ * concurrently searching the input for an array of words to find. It
+ * only runs for a single iteration cycle.
  */
 public class OneShotSearchWithCountDownLatch 
               extends SearchTaskGangCommon {
@@ -22,8 +20,8 @@ public class OneShotSearchWithCountDownLatch
     }
 
     /**
-     * Hook method invoked by initiateTaskGang() to perform custom
-     * initializations before the Threads in the gang are spawned.
+     * Hook method invoked by {@code initiateTaskGang} to perform
+     * custom initializations before threads in the gang are spawned.
      */
     @Override
     protected void initiateHook(int size) {
@@ -41,7 +39,7 @@ public class OneShotSearchWithCountDownLatch
     }
 
     /**
-     * Hook method called when a worker Thread is done.
+     * Hook method called when a worker thread is done.
      */
     @Override
     protected void taskDone(int index) throws IndexOutOfBoundsException {

@@ -102,9 +102,8 @@ public class StreamOfFuturesCollector<T>
      * @return An immutable set of collector characteristics, which in
      * this case is simply UNORDERED
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 

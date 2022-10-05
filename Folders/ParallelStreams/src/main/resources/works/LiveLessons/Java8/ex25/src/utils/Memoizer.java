@@ -44,7 +44,7 @@ public class Memoizer<K, V>
      *
      * @param function The function that produces a value based on a
      *                 key 
-     * @map map The implementation of {@code Map} used to cache a
+     * @param map The implementation of {@code Map} used to cache a
      *          value with its associated key  
      */
     public Memoizer(Function<K, V> function,

@@ -5,12 +5,11 @@ import static java.util.stream.Collectors.toList;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import livelessons.utils.Image;
-import livelessons.utils.StreamsUtils;
 import livelessons.filters.Filter;
-import livelessons.filters.FilterDecoratorWithImage;
 
 /**
  * This implementation strategy customizes ImageStreamGang to use a
@@ -42,7 +41,7 @@ public class ImageStreamSequential
 
             // Use filter() to ignore URLs that are already cached locally,
             // i.e., only download non-cached images.
-            .filter(StreamsUtils.not(this::urlCached))
+            .filter(Predicate.not(this::urlCached))
 
             // Use map() to transform each URL to an image (i.e.,
             // synchronously download each image via its URL).

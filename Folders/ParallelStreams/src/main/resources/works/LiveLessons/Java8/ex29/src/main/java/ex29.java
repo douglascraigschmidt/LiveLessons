@@ -1,12 +1,9 @@
 import utils.BigFraction;
+import utils.HeapSort;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,17 +12,16 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows how to combine the Java sequential streams and
- * completable futures framework to generate and reduce random big
- * fractions.  It also demonstrates the lazy processing of streams.
+ * completable futures frameworks to generate and reduce random {@link
+ * BigFraction} objects concurrently and asynchronously.  It also shows
+ * the lazy processing semantics of the Java streams and completable
+ * futures frameworks.
  */
+@SuppressWarnings("unchecked")
 public class ex29 {
     /**
-     * Logging tag.
-     */
-    private static final String TAG = ex29.class.getName();
-
-    /**
-     * Number of big fractions to process asynchronously in a stream.
+     * Number of {@link BigFraction} objects to process asynchronously
+     * in a stream.
      */
     private static final int sMAX_FRACTIONS = 10;
 
@@ -34,83 +30,120 @@ public class ex29 {
      * point method to run the app.
      */
     public static void main(String[] args) {
-        // Run the test program.
-        new ex29().run();
+        print("Point 0: starting up");
+
+        // Create a List of random BigFractions that are unreduced.
+        List<BigFraction> bigFractions = makeBigFractions();
+
+        printList(bigFractions);
+
+        print("Point 1: after printList()");
+
+        // Obtain a future to a stream of reducing BigFractions.
+        Stream<CompletableFuture<BigFraction>> bigFractionStream =
+            makeBigFractionStream(bigFractions);
+
+        print("Point 2: after first map() in makeBigFractionStream()");
+
+        // Obtain a future to a list of reduced BigFractions when they complete.
+        CompletableFuture<List<BigFraction>> bigFractionsF =
+            makeCompletableFutureStream(bigFractionStream);
+
+        print("Point 3: after collect() in makeCompletableFutureStream()");
+
+        CompletableFuture<Void> results = bigFractionsF
+                // Sort the List in parallel and print the results.
+                .thenCompose(ex29::sortAndPrintListAsync);
+
+        print("Point 4: after thenCompose()");
+
+        // Trigger all the processing and block until it's all done.
+        results.join();
+
+        print("Point 5: after join()");
     }
 
     /**
-     * Run the test program.
+     * @return Return a {@link List} of random unreduced {@link BigFraction}
+     *         objects
      */
-    private void run() {
-        // Create a list of random big fractions that are unreduced.
-        List<BigFraction> bigFractions = Stream
-                // Generate sMAX_FRACTIONS random unreduced BigFractions.
-                .generate(() -> makeBigFraction(new Random(), false))
-                .limit(sMAX_FRACTIONS)
+    private static List<BigFraction> makeBigFractions() {
+        return Stream
+            // Generate an infinite number of random unreduced BigFractions.
+            .generate(() -> makeBigFraction(new Random(), false))
 
-                // Trigger processing and collect into a list.
-                .collect(toList());
+            // Limit the number of BigFractions to sMAX_FRACTIONS.
+            .limit(sMAX_FRACTIONS)
 
-        // Obtain a future to a stream of reduced big fractions.
-        Stream<CompletableFuture<BigFraction>> bigFractionStream = bigFractions
-                // Convert big fractions in list into a sequential stream.
-                .stream()
-
-                // Reduce big fractions asynchronously.
-                .map(this::reduceBigFractionAsync);
-
-        print("Point 1: after first map()");
-
-        // Convert the stream into an array of futures.
-        CompletableFuture<BigFraction>[] futures =
-                bigFractionStream.toArray(CompletableFuture[]::new);
-
-        // Create a future to a stream of reduced big fractions.
-        CompletableFuture<Stream<BigFraction>> streamF = CompletableFuture
-                // Obtain a future that will complete when all futures in
-                // bigFutureStream complete.
-                .allOf(futures)
-
-                // When all futures complete return a future to a stream
-                // of joined big fractions.
-                .thenApply(v -> Arrays
-                        // Convert futures into a stream of futures.
-                        .stream(futures)
-
-                        // join() all futures and yield a stream of big
-                        // fractions (join() never blocks).
-                        .map(CompletableFuture::join));
-
-        print("Point 2: after second map()");
-
-        streamF
-                // Collect the big fractions into a list.
-                .thenApply(stream -> stream
-                        // This call triggers all the processing above.
-                        .collect(getCollectors()))
-
-                // Sort the list in parallel.
-                .thenCompose(this::sortList)
-
-                // Print the list.
-                .thenAccept(this::printList)
-
-                // Block until all the processing is done.
-                .join();
-
-        print("Point 3: after join()");
+            // Trigger processing and collect into a List.
+            .collect(toList());
     }
 
     /**
-     * A factory method that returns a large random BigFraction whose
+     * Return a {@link Stream} of {@link CompletableFuture} objects to
+     * reduced {@link BigFraction} objects.
+     *
+     * @param bigFractions The {@link List} of {@link BigFraction} objects
+     * @return A {@link Stream} of {@link CompletableFuture} objects to
+     *         reduced {@link BigFraction} objects
+     */
+    private static Stream<CompletableFuture<BigFraction>>
+        makeBigFractionStream(List<BigFraction> bigFractions) {
+        return bigFractions
+            // Convert BigFractions in List into a sequential stream.
+            .stream()
+
+            // Reduce BigFractions asynchronously.
+            .map(ex29::reduceBigFractionAsync);
+    }
+
+    /**
+     * Returns a A {@link CompletableFuture} to a {@link List}
+     *          of {@link BigFraction} objects
+     * @param bigFractionStream A {@link Stream} of
+     *                          {@link CompletableFuture<BigFraction>}
+     *                          objects
+     * @return A {@link CompletableFuture} to a {@link List}
+     *         of {@link BigFraction} objects
+     */
+    private static CompletableFuture<List<BigFraction>>
+        makeCompletableFutureStream(Stream<CompletableFuture<BigFraction>>
+                                    bigFractionStream) {
+        // Convert the stream into an array of futures by calling
+        // the toArray() terminal operation.
+        CompletableFuture<BigFraction>[] futures =
+            bigFractionStream.toArray(CompletableFuture[]::new);
+
+        // Return a future to a stream of reduced BigFractions.
+        return CompletableFuture
+            // Obtain a future that will complete when all futures in
+            // bigFutureStream complete.
+            .allOf(futures)
+
+            // When all futures complete return a future to a stream
+            // of joined BigFractions.
+            .thenApply(v -> Stream
+                       // Convert futures array into a stream of futures.
+                       .of(futures)
+
+                       // join() all futures and yield a stream of big
+                       // fractions (join() never blocks).
+                       .map(CompletableFuture::join)
+
+                       // This call triggers all the processing above.
+                       .collect(getListCollector()));
+    }
+
+    /**
+     * A factory method that returns a large random {@link BigFraction} whose
      * creation is performed synchronously.
      *
      * @param random A random number generator
      * @param reduced A flag indicating whether to reduce the fraction or not
-     * @return A large random BigFraction
+     * @return A large random {@link BigFraction}
      */
-    private BigFraction makeBigFraction(Random random,
-                                        boolean reduced) {
+    private static BigFraction makeBigFraction(Random random,
+                                               boolean reduced) {
         // Create a large random big integer.
         BigInteger numerator =
             new BigInteger(150000, random);
@@ -120,92 +153,108 @@ public class ex29 {
         BigInteger denominator =
             numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
 
-        // Return a big fraction.
+        // Return a BigFraction.
         return BigFraction.valueOf(numerator,
                                    denominator,
                                    reduced);
     }
 
     /**
-     * @return A future that when completed will yield the results of
-     * reducing a big fractions asynchronously
+     * @return A {@link CompletableFuture} that when completed yields
+     * the results of reducing a {@link BigFraction} asynchronously
      */
-    private CompletableFuture<BigFraction> reduceBigFractionAsync(BigFraction bigFraction) {
+    private static CompletableFuture<BigFraction>
+        reduceBigFractionAsync(BigFraction bigFraction) {
         return CompletableFuture
-            // Run this action in a common fork-join pool thread to
-            // reduce the big fraction.
+            // Arrange to run this action in a common fork-join pool thread
+            // to reduce the bigFraction.
             .supplyAsync(() -> {
-                    BigFraction bf = BigFraction.reduce(bigFraction);
-                    print("    reduceBigFractionAsync() = " + bf);
-                    return bf;
+                    BigFraction rbf = BigFraction.reduce(bigFraction);
+                    print("    reduceBigFractionAsync() = " + rbf);
+                    return rbf;
                 });
     }
 
     /**
-     * @ return A collector that converts elements in a stream into a
-     * list of big fractions
+     * @return A {@link Collector} that converts elements in a stream
+     *         into a {@link List} of {@link BigFraction} objects
      */
-    private Collector<BigFraction,?, List<BigFraction>> getCollectors() {
-        print("    getCollectors()");
+    private static Collector<BigFraction, ? , List<BigFraction>>
+        getListCollector() {
+        print("    getListCollector()");
         return Collectors.toList();
     }
-
+        
     /**
-     * @return the sorted {@code list}
+     * Sort the {@link List} in parallel using quicksort and heapsort
+     * and then store the results in the {@link StringBuilder}
+     * parameter.
+     *
+     * @return A {@link CompletableFuture} to a sorted {@link List} of
+     *         {@link BigFraction} objects
      */
-    private CompletableFuture<List<BigFraction>> sortList(List<BigFraction> list) {
-        // This implementation uses quick sort to order the list.
+    private static CompletableFuture<Void> sortAndPrintListAsync
+        (List<BigFraction> list) {
+        // This implementation uses quick sort to order list.
         CompletableFuture<List<BigFraction>> quickSortF = CompletableFuture
             // Perform quick sort asynchronously.
             .supplyAsync(() -> quickSort(list));
 
-        // This implementation uses merge sort to order the list.
-        CompletableFuture<List<BigFraction>> mergeSortF = CompletableFuture
-            // Perform merge sort asynchronously.
-            .supplyAsync(() -> mergeSort(list));
+        // This implementation uses heap sort to order list.
+        CompletableFuture<List<BigFraction>> heapSortF = CompletableFuture
+            // Perform heap sort asynchronously.
+            .supplyAsync(() -> heapSort(list));
 
-        // Return result of whichever sort implementation finishes first.
+        // Select the result of whichever sort implementation finishes
+        // first and use it to print the sorted list.
         return quickSortF
-            .applyToEither(mergeSortF,
-                           Function.identity());
+            .acceptEither(heapSortF,
+                          ex29::printList);
     }
 
     /**
-     * Perform a quick sort on the {@code list}
+     * Print the contents of the {@link List}.
+     *
+     * @param list The {@link List}
      */
-    private List<BigFraction> quickSort(List<BigFraction> list) {
-        // Convert the list to an array.
-        BigFraction[] bigFractionArray =
-            list.toArray(new BigFraction[0]);
-
-        // Order the array with quick sort.
-        Arrays.sort(bigFractionArray);
-
-        // Convert the array back to a list.
-        return List.of(bigFractionArray);
-    }
-
-    /*
-     * Perform a merge sort on the {@code list}
-     */
-    private List<BigFraction> mergeSort(List<BigFraction> list) {
-        Collections.sort(list);
-        return list;
-    }
-
-    /**
-     * Print the {@code sortedList}
-     */
-    private void printList(List<BigFraction> sortedList) {
+    private static void printList(List<BigFraction> list) {
         // Print the results as mixed fractions.
-        sortedList
+        list
             .forEach(fraction ->
                      print("     "
                            + fraction.toMixedString()));
     }
 
     /**
-     * Print the {@code string} together with thread information
+     * Perform a quick sort on the {@link List}.
+     *
+     * @return A sorted {@link List}
+     */
+    private static List<BigFraction> quickSort(List<BigFraction> list) {
+        List<BigFraction> copy = new ArrayList<>(list);
+    
+        // Order the list with quick sort.
+        Collections.sort(copy);
+
+        return copy;
+    }
+
+    /*
+     * Perform a heap sort on the {@link List}.
+     *
+     * @return A sorted {@link List}
+     */
+    private static List<BigFraction> heapSort(List<BigFraction> list) {
+        List<BigFraction> copy = new ArrayList<>(list);
+
+        // Order the list with heap sort.
+        HeapSort.sort(copy);
+
+        return copy;
+    }
+
+    /**
+     * Print the {@link String} together with thread information.
      */
     private static void print(String string) {
         System.out.println("Thread["

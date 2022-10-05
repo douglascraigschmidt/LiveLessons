@@ -1,12 +1,10 @@
 import java.util.concurrent.CyclicBarrier;
 
 /**
- * @class CyclicSearchWithCyclicBarrier
- *
- * @brief Customizes the SearchTaskGangCommon framework with a
- *        CyclicBarrier to define a test that continues searching a
- *        fixed number of input Strings via a fixed number of Threads
- *        until there's no more input to process.
+ * Customizes the {@link SearchTaskGangCommon} framework with a {@link
+ * CyclicBarrier} to define a test that continues searching a fixed
+ * number of input strings via a fixed number of threads until there's
+ * no more input to process.
  */
 public class CyclicSearchWithCyclicBarrier 
               extends SearchTaskGangCommonCyclic {
@@ -29,8 +27,9 @@ public class CyclicSearchWithCyclicBarrier
     }
 
     /**
-     * Each Thread in the gang uses a call to CyclicBarrier await() to
-     * wait for all the other Threads to complete their current cycle.
+     * Each thread in the gang uses a call to {@link CyclicBarrier}
+     * {@code await()} to wait for all other threads to complete their
+     * current cycle.
      */
     @Override
     protected void taskDone(int index) throws IndexOutOfBoundsException {
@@ -43,8 +42,8 @@ public class CyclicSearchWithCyclicBarrier
     }
 
     /**
-     * Hook method invoked by initiateTaskGang() to perform custom
-     * initializations before the Threads in the gang are spawned.
+     * Hook method invoked by {@code initiateTaskGang()} to perform
+     * custom initializations before threads in the gang are spawned.
      */
     @Override
     protected void initiateHook(int size) {
@@ -53,16 +52,16 @@ public class CyclicSearchWithCyclicBarrier
         // barrier action gets the next List of input data (if any).
         mCyclicBarrier = new CyclicBarrier
             (size,
-             new Runnable() {
-                 public void run() {
-                     setInput(getNextInput());
-                     if (getInput() != null)
-                         BarrierTaskGangTest.printDebugging
-                             ("@@@@@ Started cycle "
-                              + currentCycle()
-                              + " @@@@@");
-                 }
-             });
+             // Initialize the barrier action.
+             () -> {
+                setInput(getNextInput());
+                if (getInput() != null)
+                    BarrierTaskGangTest.printDebugging
+                        ("@@@@@ Started cycle "
+                         + currentCycle()
+                         + " @@@@@");
+            });
+
         BarrierTaskGangTest.printDebugging
             ("@@@@@ Started cycle 1 with "
              + size

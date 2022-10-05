@@ -1,7 +1,7 @@
 package expressiontree.tree;
 
 import expressiontree.iterators.IteratorFactory;
-import expressiontree.nodes.ComponentNode;
+import expressiontree.composites.ComponentNode;
 import expressiontree.visitors.Visitor;
 
 import java.util.Iterator;

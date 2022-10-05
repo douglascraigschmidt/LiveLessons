@@ -20,8 +20,6 @@ class Main {
     public static void main(String[] args) throws URISyntaxException {
         System.out.println("Starting the file counter program");
 
-        warmUpThreadPool();
-
         // Run a test that uses Java sequential streams features as a
         // baseline for the parallel streams tests.
         runFileCounterStream(false);
@@ -33,6 +31,8 @@ class Main {
         // Run a test that uses Java sequential streams features with
         // the teeing collector.
         runFileCounterStreamTeeing(false);
+
+        warmUpThreadPool();
 
         // Run a test that uses Java parallel streams features.
         runFileCounterStream(true);
