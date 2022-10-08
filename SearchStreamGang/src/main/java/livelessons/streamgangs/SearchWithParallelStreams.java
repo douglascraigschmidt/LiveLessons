@@ -32,10 +32,7 @@ public class SearchWithParallelStreams
     @Override
     protected List<List<SearchResults>> processStream() {
         // Get the list of input strings.
-        List<CharSequence> inputList = getInput();
-
-    	// Process the input strings via a parallel stream.
-        return inputList
+        return getInput()
             // Concurrently process each string in the input list.
             .parallelStream()
 
@@ -45,7 +42,7 @@ public class SearchWithParallelStreams
 
             // Terminate stream and return a list of lists of
             // SearchResults.
-            .collect(toList());
+            .toList();
     }
     
     /**
@@ -62,26 +59,25 @@ public class SearchWithParallelStreams
 
         // Iterate through each phrase we're searching for and try to
         // find it in the inputData.
-        List<SearchResults> results = mPhrasesToFind
+
+        // Return the results.
+        return mPhrasesToFind
             // Convert the list of phrases into a parallel stream.
             .parallelStream()
-            
+
             // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
                                            input,
                                            title,
                                            false))
-            
+
             // Only keep a result that has at least one match.
             .filter(not(SearchResults::isEmpty))
             // Filtering can also be done as
             // .filter(result -> result.size() > 0)
-            
+
             // Terminate stream and return a list of SearchResults.
-            .collect(toList());
-            
-        // Return the results.
-        return results;
+            .toList();
     }
 }
 

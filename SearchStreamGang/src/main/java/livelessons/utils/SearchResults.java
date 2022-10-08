@@ -66,35 +66,13 @@ public class SearchResults {
     /**
      * The List of Result objects that matched the @code mWord.
      */
-    private List<Result> mList;
-
-    /**
-     * Create an empty SearchResults, which is used to shutdown
-     * processing of the BlockingQueue.
-     */
-    public SearchResults() {
-        mList = null;
-    }
+    private final List<Result> mList;
 
     /**
      * Return the list of Results.
      */
     public List<Result> getResultList() {
         return mList;
-    }
-
-    /**
-     * Create a SearchResults with values for the various fields.
-     */
-    public SearchResults(long threadId,
-                         long cycle,
-                         String word,
-                         String title) {
-        mThreadId = threadId;
-        mCycle = cycle;
-        mWord = word;
-        mTitle = title;
-        mList = new ArrayList<>();
     }
 
     /**
@@ -136,13 +114,6 @@ public class SearchResults {
      */
     public String headerToString() {
         return "\"" + mWord + "\" at ";
-    }
-
-    /**
-     * Add a Result.
-     */
-    public void add(int index) {
-        mList.add(new Result(index));
     }
 
     /**

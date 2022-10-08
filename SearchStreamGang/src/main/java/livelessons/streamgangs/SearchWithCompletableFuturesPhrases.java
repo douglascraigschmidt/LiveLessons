@@ -57,7 +57,7 @@ public class SearchWithCompletableFuturesPhrases
                        .filter(list -> list
                                // Convert to a stream.
                                .stream()
-                               
+
                                // Return the size of each search result.
                                .mapToInt(SearchResults::size)
                                
@@ -65,7 +65,7 @@ public class SearchWithCompletableFuturesPhrases
                                .sum() > 0)
 
                        // Terminate stream and return a list of SearchResults.
-                       .collect(toList()))
+                       .toList())
 
             // Wait for all the asynchronous processing to complete.
             .join();

@@ -14,36 +14,35 @@ import static utils.StreamsUtils.not;
 
 /**
  * This class searches for phrases in the works of Shakespeare.  It
- * demonstrates the use of Java 8 functional programming features,
- * such as lambda expressions, method references, functional
- * interfaces, sequential/parallel streams, a fork/join pool, and a
- * spliterator.
+ * demonstrates the use of modern Java functional programming
+ * features, such as lambda expressions, method references, functional
+ * interfaces, sequential/parallel streams, and a spliterator.
  */
 public class SearchWithSpliterator {
     /**
      * The list of strings to search.
      */
-    private List<? extends CharSequence> mInputList;
+    private final List<? extends CharSequence> mInputList;
 
     /**
      * The list of phrases to find.
      */
-    private List<String> mPhrasesToFind;
+    private final List<String> mPhrasesToFind;
 
     /**
      * Indicates whether to run the spliterator concurrently.
      */
-    private boolean mParallelSpliterator;
+    private final boolean mParallelSpliterator;
 
     /**
      * Indicates whether to run the phrases concurrently.
      */
-    private boolean mParallelPhrases;
+    private final boolean mParallelPhrases;
 
     /**
      * Indicates whether to run the input concurrently.
      */
-    private boolean mParallelInput;
+    private final boolean mParallelInput;
 
     /**
      * Construtor initializes the fields.
@@ -64,17 +63,12 @@ public class SearchWithSpliterator {
      * Performs stream processing on the input.
      */
     public List<List<SearchResults>> processStream() {
-        Stream<? extends CharSequence> inputStream = mInputList
-            // Convert the list of input strings into a stream.
-            .stream();
+        return (mParallelInput
+            // Convert the list into a parallel stream.
+            ? mInputList.parallelStream()
+            // Convert the List to a sequential Stream.
+            : mInputList.stream())
 
-        if (mParallelInput)
-            // Convert the stream to a parallel stream.
-            inputStream.parallel();
-
-        // Create a list of SearchResults that indicate which phrases
-        // are found in the list of input strings.
-        return inputStream
             // Process each input string to find all occurrences of
             // the search phrases.
             .map(this::processInput)
@@ -84,7 +78,7 @@ public class SearchWithSpliterator {
 
             // This terminal operation triggers aggregate operation
             // processing and returns a list of list of SearchResults.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -99,16 +93,12 @@ public class SearchWithSpliterator {
         CharSequence input = inputString.subSequence(title.length(),
                                                      inputString.length());
 
-        Stream<String> phraseStream = mPhrasesToFind
-            // Convert the list of phrases to find into a stream.
-            .stream();
+        return (mParallelPhrases
+            // Convert the List into a parallel Stream.
+            ? mPhrasesToFind.parallelStream()
+            // Convert the List to a sequential stream.
+            : mPhrasesToFind.stream())
 
-        if (mParallelPhrases)
-            // Convert the stream to a parallel stream.
-            phraseStream.parallel();
-
-        // Find all occurrences of phrase in the input string.
-        return phraseStream
             // Find all indices where phrase matches the input data.
             .map(phrase -> searchForPhrase(phrase,
                                            input,
@@ -121,7 +111,7 @@ public class SearchWithSpliterator {
             // .filter(result -> result.size() > 0)
 
             // Terminate the stream and trigger the processing.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -143,7 +133,7 @@ public class SearchWithSpliterator {
                     
                 // This terminal operation triggers aggregate
                 // operation processing and returns a list of Results.
-                .collect(toList());
+                .toList();
 
     	// Create/return SearchResults to keep track of relevant info.
         return new SearchResults(Thread.currentThread().getId(),
@@ -159,14 +149,18 @@ public class SearchWithSpliterator {
     private String getTitle(CharSequence input) {
         // Create a Matcher.
         Matcher m = Pattern
-                // Compile a regex that matches only the first line in the input.
+                // Compile a regex that matches only the first line in
+                // the input.
                 .compile("(?m)^.*$")
 
                 // Create a matcher for this pattern.
                 .matcher(input);
 
+        // Return the result.
         return m.find()
+                // If a match occurs return the title.
                 ? m.group()
+                // Return an empty string if there's no match.
                 : "";
     }
 }

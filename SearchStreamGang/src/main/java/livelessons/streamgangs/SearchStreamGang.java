@@ -87,10 +87,8 @@ public abstract class SearchStreamGang
                      // Compute the number of phrase matches.
                      + listOfListOfSearchResults
                      .stream()
-                     .mapToInt(list -> list
-                               .stream()
-                               .mapToInt(SearchResults::size)
-                               .sum())
+                     .flatMap(List::stream)
+                     .mapToInt(SearchResults::size)
                      .sum()
                      + " phrase matches for "
                      + getInput().size() 
@@ -151,7 +149,7 @@ public abstract class SearchStreamGang
 
             // Terminal operation triggers aggregate operation
             // processing and returns a list of Result objects.
-            .collect(toList());
+            .toList(); // .collect(toList());
 
         // Create/return a SearchResults to track the relevant info.
         return new SearchResults(Thread.currentThread().getId(),

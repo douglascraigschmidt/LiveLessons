@@ -19,9 +19,10 @@ my Live Training courses.  Here's an overview of what's included:
   the files.
 
 . ParallelStreams - This example shows how to use various Java
-  parallel Streams framework features to count the number of files in
-  a (large) recursive folder hierarchy, as well as calculate the
-  cumulative sizes of all the files.
+  sequential and parallel streams framework features to count the
+  number of folders and documents in a (large) recursive folder
+  hierarchy, as well as calculate the cumulative size in bytes of all
+  the documents.
 
 . Reactor -- This example shows the use of Project Reactor to process
   entries in a recursively-structured directory folder sequentially

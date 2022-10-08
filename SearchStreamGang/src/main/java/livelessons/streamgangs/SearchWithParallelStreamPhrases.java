@@ -43,7 +43,7 @@ public class SearchWithParallelStreamPhrases
 
             // Terminate the stream and return a list of lists of
             // SearchResults.
-            .collect(toList());
+            .toList();
    }
     
     /**
@@ -80,7 +80,7 @@ public class SearchWithParallelStreamPhrases
             // .filter(result -> result.size() > 0)
 
             // Terminate stream and return a list of SearchResults.
-            .collect(toList());
+            .toList();
     }
 }
 

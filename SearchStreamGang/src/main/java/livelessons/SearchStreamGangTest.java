@@ -23,13 +23,13 @@ public class SearchStreamGangTest {
      */
     enum TestsToRun {
         WARMUP_FORK_JOIN_THREAD_POOL,
-        COMPLETABLE_FUTURES_INPUTS,
-        COMPLETABLE_FUTURES_PHRASES,
         FORK_JOIN,
-        PARALLEL_SPLITERATOR,
         PARALLEL_STREAMS,
+        PARALLEL_SPLITERATOR,
         PARALLEL_STREAM_INPUTS,
         PARALLEL_STREAM_PHRASES,
+        COMPLETABLE_FUTURES_INPUTS,
+        COMPLETABLE_FUTURES_PHRASES,
         REACTOR,
         REACTOR_INPUTS,
         REACTOR_PHRASES,
@@ -107,12 +107,12 @@ public class SearchStreamGangTest {
             .forEach((test, searchStreamGang) -> {
                     System.out.println("Starting " + test);
 
-                    // Execute the test.
-                    searchStreamGang.run();
-
                     // Run the garbage collector to free up memory and
                     // minimize timing perturbations on each test.
                     System.gc();
+
+                    // Execute the test.
+                    searchStreamGang.run();
 
                     System.out.println("Ending " + test);
                 });
@@ -130,67 +130,35 @@ public class SearchStreamGangTest {
         // Initialize sSTRATEGY_MAP.
         for (TestsToRun test : TestsToRun.values()) {
             switch (test) {
-            case WARMUP_FORK_JOIN_THREAD_POOL:
-            case FORK_JOIN:
-                sSTRATEGY_MAP.put(test, new SearchWithForkJoin(phraseList,
-                                                               inputData));
-                break;
-            case SEQUENTIAL_LOOPS:
-                sSTRATEGY_MAP.put(test, new SearchWithSequentialLoops(phraseList,
-                                                                      inputData));
-                break;
-            case SEQUENTIAL_STREAM:
-                sSTRATEGY_MAP.put(test, new SearchWithSequentialStreams(phraseList,
-                                                                        inputData));
-                break;
-                case PARALLEL_SPLITERATOR:
-                sSTRATEGY_MAP.put(test, new SearchWithParallelSpliterator(phraseList,
-                                                                          inputData));
-                break;
-            case PARALLEL_STREAM_INPUTS:
-                sSTRATEGY_MAP.put(test, new SearchWithParallelStreamInputs(phraseList,
-                                                                           inputData));
-                break;
-            case PARALLEL_STREAM_PHRASES:
-                sSTRATEGY_MAP.put(test, new SearchWithParallelStreamPhrases(phraseList,
+                case WARMUP_FORK_JOIN_THREAD_POOL, FORK_JOIN -> sSTRATEGY_MAP.put(test, new SearchWithForkJoin(phraseList, inputData));
+                case SEQUENTIAL_LOOPS -> sSTRATEGY_MAP.put(test, new SearchWithSequentialLoops(phraseList,
+                                                                                               inputData));
+                case SEQUENTIAL_STREAM -> sSTRATEGY_MAP.put(test, new SearchWithSequentialStreams(phraseList,
+                                                                                                  inputData));
+                case PARALLEL_SPLITERATOR -> sSTRATEGY_MAP.put(test, new SearchWithParallelSpliterator(phraseList,
+                                                                                                       inputData));
+                case PARALLEL_STREAM_INPUTS -> sSTRATEGY_MAP.put(test, new SearchWithParallelStreamInputs(phraseList,
+                                                                                                          inputData));
+                case PARALLEL_STREAM_PHRASES -> sSTRATEGY_MAP.put(test, new SearchWithParallelStreamPhrases(phraseList,
+                                                                                                            inputData));
+                case PARALLEL_STREAMS -> sSTRATEGY_MAP.put(test, new SearchWithParallelStreams(phraseList,
+                                                                                               inputData));
+                case COMPLETABLE_FUTURES_PHRASES -> sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesPhrases(phraseList,
+                                                                                                                    inputData));
+                case COMPLETABLE_FUTURES_INPUTS -> sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesInputs(phraseList,
+                                                                                                                  inputData));
+                case REACTOR -> sSTRATEGY_MAP.put(test, new SearchWithReactor(phraseList,
+                                                                              inputData));
+                case REACTOR_INPUTS -> sSTRATEGY_MAP.put(test, new SearchWithReactorInputs(phraseList,
+                                                                                           inputData));
+                case REACTOR_PHRASES -> sSTRATEGY_MAP.put(test, new SearchWithReactorPhrases(phraseList,
+                                                                                             inputData));
+                case RXJAVA -> sSTRATEGY_MAP.put(test, new SearchWithRxJava(phraseList,
                                                                             inputData));
-                break;
-            case PARALLEL_STREAMS:
-                sSTRATEGY_MAP.put(test, new SearchWithParallelStreams(phraseList,
-                                                                      inputData));
-                break;
-            case COMPLETABLE_FUTURES_PHRASES:
-                sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesPhrases(phraseList,
-                                                                                inputData));
-                break;
-            case COMPLETABLE_FUTURES_INPUTS:
-                sSTRATEGY_MAP.put(test, new SearchWithCompletableFuturesInputs(phraseList,
-                                                                               inputData));
-                break;
-           case REACTOR:
-                sSTRATEGY_MAP.put(test, new SearchWithReactor(phraseList,
-                                                              inputData));
-                    break;
-           case REACTOR_INPUTS:
-                sSTRATEGY_MAP.put(test, new SearchWithReactorInputs(phraseList,
-                                                                    inputData));
-                    break;
-           case REACTOR_PHRASES:
-                sSTRATEGY_MAP.put(test, new SearchWithReactorPhrases(phraseList,
-                                                                     inputData));
-                    break;
-            case RXJAVA:
-                sSTRATEGY_MAP.put(test, new SearchWithRxJava(phraseList,
-                                                             inputData));
-                    break;
-            case RXJAVA_INPUTS:
-                sSTRATEGY_MAP.put(test, new SearchWithRxJavaInputs(phraseList,
-                                                                   inputData));
-                break;
-            case RXJAVA_PHRASES:
-                sSTRATEGY_MAP.put(test, new SearchWithRxJavaPhrases(phraseList,
-                                                                    inputData));
-                break;
+                case RXJAVA_INPUTS -> sSTRATEGY_MAP.put(test, new SearchWithRxJavaInputs(phraseList,
+                                                                                         inputData));
+                case RXJAVA_PHRASES -> sSTRATEGY_MAP.put(test, new SearchWithRxJavaPhrases(phraseList,
+                                                                                           inputData));
             }
         }
     }

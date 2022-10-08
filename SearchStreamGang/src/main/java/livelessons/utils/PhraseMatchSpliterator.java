@@ -267,6 +267,6 @@ public class PhraseMatchSpliterator
      */
     @Override
     public int characteristics() {
-        return ORDERED + SIZED + SUBSIZED + NONNULL + IMMUTABLE;
+        return ORDERED + NONNULL + IMMUTABLE;
     }
 }

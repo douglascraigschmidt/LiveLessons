@@ -44,7 +44,7 @@ public class SearchWithParallelStreamInputs
 
             // Terminate the stream and return a list of lists of
             // SearchResults.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -80,7 +80,7 @@ public class SearchWithParallelStreamInputs
 
             // Terminate the stream and return a list of
             // SearchResults.
-            .collect(toList());
+            .toList();
     }
 }
 

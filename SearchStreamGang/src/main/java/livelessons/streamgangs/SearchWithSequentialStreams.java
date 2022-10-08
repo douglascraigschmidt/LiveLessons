@@ -31,10 +31,7 @@ public class SearchWithSequentialStreams
     @Override
     protected List<List<SearchResults>> processStream() {
         // Get the list of input strings.
-        List<CharSequence> inputList = getInput();
-
-        // Process the input strings via a sequential stream.
-        return inputList
+        return getInput()
             // Sequentially process each string in the input list.
             .stream()
 
@@ -44,7 +41,7 @@ public class SearchWithSequentialStreams
 
             // Terminate stream and return a list of lists of
             // SearchResults.
-            .collect(toList());
+            .toList();
     }
     
     /**
@@ -79,7 +76,7 @@ public class SearchWithSequentialStreams
             // .filter(((Predicate<String>) String::isEmpty).negate())
 
             // Terminate stream and return a list of SearchResults.
-            .collect(toList());
+            .toList();
     }
 }
 

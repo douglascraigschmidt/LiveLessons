@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import livelessons.utils.ListOfFuturesCollector;
 import livelessons.utils.SearchResults;
 import livelessons.utils.StreamsUtils;
 
@@ -62,7 +63,7 @@ public class SearchWithCompletableFuturesInputs
                                    .sum() > 0)
 
                            // Terminate stream and return a list of SearchResults.
-                           .collect(toList()))
+                           .toList())
                 
                 // Wait for all the asynchronous processing to complete.
                 .join();
@@ -81,9 +82,7 @@ public class SearchWithCompletableFuturesInputs
             inputSeq.subSequence(title.length(),
                                  inputSeq.length());
 
-        // Convert the list of phrases into a list of CompletableFutures
-        // to SearchResults.
-        List<CompletableFuture<SearchResults>> listOfFutures = mPhrasesToFind
+        return mPhrasesToFind
             // Create a sequential stream of phrases.
             .stream()
 
@@ -96,14 +95,10 @@ public class SearchWithCompletableFuturesInputs
                                                                   title,
                                                                   false)))
 
-            // Terminate stream and return a list of
-            // CompletableFutures.
-            .collect(toList());
-
-        // Return a CompletableFuture to a list of SearchResults that
-        // will be complete when all the CompletableFutures in the
-        // listOfFutures have completed.
-        return StreamsUtils.joinAll(listOfFutures);
+            // Terminate the stream and return a CompletableFuture to a
+            // list of SearchResults that will be complete when all the
+            // CompletableFutures in the listOfFutures have completed.
+            .collect(ListOfFuturesCollector.toFuture());
     }
 }
 

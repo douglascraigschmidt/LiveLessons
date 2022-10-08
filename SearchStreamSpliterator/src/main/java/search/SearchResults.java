@@ -19,7 +19,7 @@ public class SearchResults {
          * The index in the search String where the word that was
          * found.
          */
-        private int mIndex;
+        private final int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search
@@ -68,7 +68,7 @@ public class SearchResults {
     /**
      * The List of Result objects that matched the @code mWord.
      */
-    private List<Result> mList;
+    private final List<Result> mList;
 
     /**
      * Create an empty SearchResults, which is used to shutdown
@@ -198,10 +198,8 @@ public class SearchResults {
     /**
      * Print the results.
      */
-    public SearchResults print() {
+    public void print() {
         if (!isEmpty()) 
             System.out.println(toString());
-
-        return this;
     }
 }

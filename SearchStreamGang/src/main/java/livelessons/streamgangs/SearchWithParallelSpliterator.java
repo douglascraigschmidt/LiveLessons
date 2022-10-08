@@ -43,7 +43,7 @@ public class SearchWithParallelSpliterator
 
             // Terminate the stream and return a list of lists of
             // SearchResults.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -76,7 +76,7 @@ public class SearchWithParallelSpliterator
             // .filter(result -> result.size() > 0)
 
             // Terminate the stream and trigger the processing.
-            .collect(toList());
+            .toList();
     }
 }
 
