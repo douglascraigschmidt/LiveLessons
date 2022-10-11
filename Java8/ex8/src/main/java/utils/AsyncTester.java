@@ -17,7 +17,7 @@ public class AsyncTester {
     /**
      * Keeps track of all the registered tests to run.
      */
-    private static final List<Supplier<CompletableFuture<Void>>> sTests =
+    private final List<Supplier<CompletableFuture<Void>>> sTests =
         new ArrayList<>();
 
     /**
@@ -25,7 +25,7 @@ public class AsyncTester {
      * asynchronously.  Each test must take no parameters and return a
      * {@code Supplier<CompletableFuture<Void>>} result.
      */
-    public static void register(Supplier<CompletableFuture<Void>> test) {
+    public void register(Supplier<CompletableFuture<Void>> test) {
         sTests.add(test);
     }
 
@@ -35,7 +35,7 @@ public class AsyncTester {
      * @return a {@code CompletableFuture<Void>} that will be
      * triggered when all the asynchronously-run tests complete.
      */
-    public static CompletableFuture<Void> runTests() {
+    public CompletableFuture<Void> runTests() {
         return sTests
             // Convert the list into a stream.
             .stream()
