@@ -3,7 +3,7 @@ package example.pingpong.synchronizers;
 import example.pingpong.threads.PingPongThread;
 
 /**
- * This class uses Binary Semaphores (implemented as Java built-in
+ * This class uses binary semaphores (implemented as Java built-in
  * monitor objects) to implement the acquire() and release() hook
  * methods that synchronize the ping/pong algorithm. It plays the role
  * of the "Concrete Class" in the Template Method pattern.

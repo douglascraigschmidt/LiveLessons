@@ -1,8 +1,10 @@
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import utils.ConcurrentHashSet;
 import utils.FuturesCollectorIntStream;
 import utils.Options;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -23,8 +25,8 @@ class ImageCounter {
     /**
      * A cache of unique URIs that have already been processed.
      */
-    private final ConcurrentHashSet<String> mUniqueUris =
-        new ConcurrentHashSet<>();
+    private final KeySetView<String, Boolean> mUniqueUris =
+        ConcurrentHashMap.newKeySet();
 
     /**
      * Stores a completed future with value of 0.
@@ -93,9 +95,9 @@ class ImageCounter {
         }
 
         // Atomically check to see if we've already visited this URL
-        // and add the new url to the hashset so we don't try to
-        // revisit it again unnecessarily.
-        else if (!mUniqueUris.putIfAbsent(pageUri)) {
+        // and add the new url to the hashset to avoid revisiting
+        // it again unnecessarily.
+        else if (!mUniqueUris.add(pageUri)) {
             print(TAG 
                   + "[Depth"
                   + depth

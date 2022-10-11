@@ -131,13 +131,11 @@ public class MainActivity extends Activity {
     private DelayedOutputThread mDelayedOutputThread;
     
     /*
-     * @class DelayedOutputThread
-     *
-     * @brief Defines a HandlerThread that waits 0.5 seconds between
-     *        handling messages so the "ping" and "pong" output is
-     *        visually discernable by the user.
+     * Defines a {@link HandlerThread} that waits 0.5 seconds between
+     * handling messages so the "ping" and "pong" output is visually
+     * discernable by the user.
      */
-    class DelayedOutputThread extends HandlerThread {
+    static class DelayedOutputThread extends HandlerThread {
         /**
          * Handler that's used to post Runnables to the
          * HandlerThread's Looper.
@@ -171,8 +169,8 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Post a Runnable task that uses a CountDownLatch to indicate a
-     * Thread has finished running.
+     * Post a {@link Runnable} task that uses a {@link CountDownLatch}
+     * to indicate a {@link Thread} has finished running.
      */
     public void done(final CountDownLatch exitBarrier) {
         // Post a Runnable task that decrements the CountDownLatch by

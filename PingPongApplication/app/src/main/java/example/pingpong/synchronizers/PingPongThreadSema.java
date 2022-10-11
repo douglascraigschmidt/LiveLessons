@@ -5,9 +5,9 @@ import java.util.concurrent.Semaphore;
 import example.pingpong.threads.PingPongThread;
 
 /**
- * This class uses Java Semaphores to implement the acquire() and
- * release() hook methods that synchronize the ping/pong algorithm. It
- * plays the role of the "Concrete Class" in the Template Method
+ * This class uses Java semaphores to implement the acquire() and
+ * release() hook methods that synchronize the ping/pong algorithm.
+ * It plays the role of the "Concrete Class" in the Template Method
  * pattern.
  */
 public class PingPongThreadSema 

@@ -6,10 +6,8 @@ import example.pingpong.threads.PlayPingPong;
 import example.pingpong.utils.Options;
 
 /**
- * @class MainConsole
- *
- * @brief This class is the main entry point for a Java console
- *        version of the PingPong application.
+ * This class is the main entry point for a Java console version of
+ * the PingPong application.
  */
 public class MainConsole {
     /**

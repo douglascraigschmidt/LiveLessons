@@ -3,10 +3,8 @@ package example.pingpong.utils;
 import example.pingpong.platform.PlatformStrategy;
 
 /**
- * @class Options
- * 
- * @brief This class implements the Singleton pattern to handle
- *        command-line option processing.
+ * This class implements the Singleton pattern to handle command-line
+ * option processing.
  */
 public class Options {
     /** The singleton @a Options instance. */

@@ -6,10 +6,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import example.pingpong.threads.PingPongThread;
 
 /**
- * This class uses Java Conditions and ConditionObjects to implement
- * the acquire() and release() hook methods that synchronize the
- * ping/pong algorithm. It plays the role of the "Concrete Class" in
- * the Template Method pattern.
+ * This class uses Java {@link Condition} and {@link ConditionObject}
+ * objects to implement the acquire() and release() hook methods that
+ * synchronize the ping/pong algorithm. It plays the role of the
+ * "Concrete Class" in the Template Method pattern.
  */
 public class PingPongThreadCond extends PingPongThread {
     /**
