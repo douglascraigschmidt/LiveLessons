@@ -4,6 +4,8 @@ import tests.SingleTriggerTests;
 import tests.ThreadTests;
 import utils.AsyncTester;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * This example shows how to reduce and/or multiply big fractions
  * using a wide range of features in the Java completable futures
@@ -12,7 +14,6 @@ import utils.AsyncTester;
  * This example also shows how to combine the Java completable futures
  * framework with the Java (sequential) streams framework.
  */
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ex8 {
     /**
      * Main entry point into the test program.
