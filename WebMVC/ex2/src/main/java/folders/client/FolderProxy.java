@@ -65,6 +65,7 @@ public class FolderProxy {
      * trigger an {@link InvalidFolderException}.
      */
     public Dirent createRemoteFolderError() {
+        // Intentionally create an invalid root folder.
         var INVALID_ROOT_FOLDER = "/verks";
 
         return WebUtils

@@ -1,6 +1,7 @@
 package folders.client
         ;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
@@ -29,14 +30,11 @@ public class RestTemplateResponseErrorHandler
 
         if (httpResponse.getStatusCode().series() == HttpStatus.Series.SERVER_ERROR) {
             // handle SERVER_ERROR
-            if (httpResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new InvalidFolderException("server error");
-            }
         } else if (httpResponse.getStatusCode()
                    .series() == HttpStatus.Series.CLIENT_ERROR) {
             // handle CLIENT_ERROR
             if (httpResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new InvalidFolderException("client error");
+                throw new InvalidFolderException(httpResponse.getBody());
             }
         }
     }
