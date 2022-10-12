@@ -49,7 +49,7 @@ public class InvalidFolderException
          * Display the received error response in a pretty JSON format
          * similar to how it was received from the server.
          *
-         * @return Formatted JSON string.
+         * @return Formatted JSON string
          */
         public String toString() {
             // Create a String form of the error response.
