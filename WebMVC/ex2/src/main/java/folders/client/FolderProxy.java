@@ -60,6 +60,25 @@ public class FolderProxy {
     private final String mGetDocumentsURI =
         FOLDERS + ROOT_DIR + GET_DOCUMENTS;
 
+    /**
+     * Intentionally provide an invalid root folder to
+     * trigger an {@link InvalidFolderException}.
+     */
+    public Dirent createRemoteFolderError() {
+        var INVALID_ROOT_FOLDER = "/verks";
+
+        return WebUtils
+                // Create and send an HTTP GET request.
+                .makeGetRequest(mRestTemplate,
+                        // Encode the URL.
+                        UriComponentsBuilder
+                                .fromPath(FOLDERS + INVALID_ROOT_FOLDER + CREATE_FOLDER)
+                                .queryParam("concurrent", false)
+                                .build()
+                                .toString(),
+                        // Indicate the return type.
+                        Dirent.class);
+    }
 
     /**
      * Synchronously and remotely create an in-memory folder

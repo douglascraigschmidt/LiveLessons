@@ -76,6 +76,9 @@ public class FolderApplicationTest {
             // Run the remote tests concurrently.
             mFolderClient.runRemoteTests(true);
 
+        // Run the exception tests.
+        mFolderClient.runExceptionTests();
+
         // Print results sorted by decreasing order of efficiency.
         System.out.println(RunTimer.getTimingResults());
 

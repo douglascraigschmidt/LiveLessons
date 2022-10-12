@@ -1,8 +1,8 @@
 package folders.utils;
 
+import folders.common.InvalidFolderException;
+
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.function.Function;
 
 /**
@@ -20,11 +20,16 @@ public class TestDataFactory {
      * directory containing test folder contents.
      */
     public static File getRootFolderFile(String rootFolderName){
+        var url = ClassLoader
+                .getSystemResource(rootFolderName);
+
+        if (url == null)
+            throw new InvalidFolderException(rootFolderName);
+
         Function<String, File> getFile = ExceptionUtils
                 // An adapter that simplifies checked exceptions.
                 .rethrowFunction(name ->
-                                 new File(ClassLoader
-                                          .getSystemResource(name)
+                                 new File(url
                                           .toURI()));
 
         // Open and return the file.

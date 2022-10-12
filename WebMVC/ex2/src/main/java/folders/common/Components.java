@@ -1,5 +1,6 @@
 package folders.common;
 
+import folders.client.RestTemplateResponseErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +26,9 @@ public class Components {
     public RestTemplate getRestTemplate() {
         // Create a new RestTemplate.
         var restTemplate = new RestTemplate();
+
+        restTemplate
+                .setErrorHandler(new RestTemplateResponseErrorHandler());
 
         restTemplate
             // Set the base URL for the RestTemplate.

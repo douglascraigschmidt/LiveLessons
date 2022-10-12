@@ -58,7 +58,7 @@ public class Document
      * @return A {@link Dirent} document containing the file's
      *         contents at the given {@code path}
      */
-    public static Dirent fromPath(File path) {
+    public static Dirent fromDocument(File path) {
         // Create an exception adapter.
         Function<Path, byte[]> getBytes = ExceptionUtils
             // mMake it easier to use a checked exception.

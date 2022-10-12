@@ -171,4 +171,18 @@ public class FolderClient {
 
         Options.print("Ending the remote tests");
     }
+
+    /**
+     * Run tests that evoke exceptions from the server.
+     */
+    public void runExceptionTests() {
+        try {
+            // Get a folder from the remote server.
+            Dirent rootFolder = mFolderProxy
+                .createRemoteFolderError();
+        } catch (Exception exception) {
+            System.out.println("Exception = "
+                                + exception.getMessage());
+        }
+    }
 }

@@ -169,8 +169,8 @@ public final class FolderOps {
         // Return a Dirent containing the initialized folder.
         return Folder
             // Create a folder with all works in the root directory.
-            .fromDirectory(TestDataFactory.getRootFolderFile(rootDir),
-                           parallel);
+            .fromFolder(TestDataFactory.getRootFolderFile(rootDir),
+                        parallel);
     }
 
     /**

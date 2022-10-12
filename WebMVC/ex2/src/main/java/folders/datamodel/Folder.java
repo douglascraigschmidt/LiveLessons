@@ -1,10 +1,11 @@
 package folders.datamodel;
 
+import folders.common.InvalidFolderException;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
@@ -89,10 +90,10 @@ public class Folder
                                       boolean parallel) {
         return entry.isDirectory()
             // Recursively create a folder from the entry.
-            ? Folder.fromDirectory(entry, parallel)
+            ? Folder.fromFolder(entry, parallel)
 
             // Create a document from the entry and return it.
-            : Document.fromPath(entry);
+            : Document.fromDocument(entry);
     }
 
     /**
@@ -105,16 +106,20 @@ public class Folder
      * @return A {@link Dirent} folder containing all contents in the
      *         {@code rootFile}
      */
-    public static Dirent fromDirectory(File rootFile,
-                                       boolean parallel) {
+    public static Dirent fromFolder(File rootFile,
+                                    boolean parallel) {
+        File[] files = rootFile.listFiles();
+
+        if (files == null)
+            throw new InvalidFolderException("invalid folder at "
+                                             + rootFile.getAbsolutePath());
+
         return StreamSupport
             // Create a parallel stream.
             .stream(Arrays
                     // Convert the array of File objects
                     // into a List.
-                    .asList(Objects
-                            .requireNonNull(rootFile
-                                            .listFiles()))
+                    .asList(files)
 
                     // Convert the List into a parallel stream.
                     .spliterator(), parallel)
