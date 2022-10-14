@@ -147,8 +147,8 @@ public abstract class ImageStreamGang
     }
 
     /**
-     * Factory method that retrieves the image associated with the @a
-     * url and creates an Image to encapsulate it.
+     * Factory method that retrieves the image associated with the
+     * {@link URL} and creates an Image to encapsulate it.
      */
     protected Image downloadImage(URL url) {
         return new Image(url,

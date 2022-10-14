@@ -13,13 +13,14 @@ import static utils.BigFractionUtils.*;
  * Tests that showcase {@link CompletableFuture} completion stage
  * methods that trigger after a single future completes.
  */
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public final class SingleTriggerTests {
     /**
      * Test BigFraction reduction using a CompletableFuture and a
      * chain of completion stage "normal" (i.e., non-*Async())
      * methods.
      */
-    public static CompletableFuture<Void> testFractionReduction() {
+public static CompletableFuture<Void> testFractionReduction() {
         StringBuilder sb =
             new StringBuilder(">> Calling testFractionReduction()\n");
 
