@@ -36,8 +36,7 @@ public class ex23 {
      */
     private static final Supplier<Integer> mSupplier = () -> {
         int result = mCounter.incrementAndGet();
-        display("enter Supplier with value "
-                + result);
+        display("enter Supplier with value " + result);
         sleep(1000);
         display("leave Supplier");
         return result;
@@ -48,8 +47,7 @@ public class ex23 {
      * even number is passed to it.
      */
     private static final Function<Integer, Integer> mAction = i -> {
-        display("enter Function with value "
-                + i);
+        display("enter Function with value " + i);
         display("leave Function");
         return (i % 2) == 1 ? i : null;
     };
@@ -59,13 +57,13 @@ public class ex23 {
      */
     public static void main (String[] argv) throws IOException {
         // A list of suppliers that return integers.
-        var suppliers =
-            List.of(mSupplier,
-                    mSupplier,
-                    mSupplier,
-                    mSupplier,
-                    mSupplier,
-                    mSupplier);
+        var suppliers = List
+            .of(mSupplier,
+                mSupplier,
+                mSupplier,
+                mSupplier,
+                mSupplier,
+                mSupplier);
 
         // Run a test that makes multiple blocking join calls on
         // completable futures.
@@ -126,13 +124,14 @@ public class ex23 {
 
         // A future to a stream of integer results.
         CompletableFuture<Stream<Integer>> resultFuture = suppliers
-            // Convert the list of suppliers into a stream of suppliers.
+            // Convert the list of suppliers into a stream of
+            // suppliers.
             .stream()
 
             // Run each supplier asynchronously.
             .map(CompletableFuture::supplyAsync)
 
-            // Apply action to result of the previous completion stage.
+            // Apply action to result of previous completion stage.
             .map(intFuture -> intFuture.thenApply(mAction))
 
             // Trigger intermediate operations and return a future to
@@ -148,9 +147,9 @@ public class ex23 {
                                            .filter(Objects::nonNull)
 
                                            // Trigger intermediate
-                                           // processing and return
-                                           // a list of results.
-                                           .collect(toList())))
+                                           // processing and return a
+                                           // list of results.
+                                           .toList()))
 
             // Block caller until all processing is complete.
             .join();

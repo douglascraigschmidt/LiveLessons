@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ex23" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="ex23" />
-    <module name="Example 23" />
+    <module name="ex23.main" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

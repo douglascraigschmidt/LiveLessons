@@ -42,11 +42,11 @@ public class ex18 {
             ? BigInteger.valueOf(Long.parseLong(args[0]))
             : BigInteger.valueOf(sDEFAULT_N);
 
-        // Test the StreamsUtils.joinAll() method.
+        // Test the StreamsUtils.joinAll() method (warms up the thread pool).
         RunTimer.timeRun(() -> testJoinAll(sFactList, n, false),
                 "testJoinAll()");
 
-        // Test the FuturesCollector.
+        // Test the FuturesCollector (warms up the thread pool).
         RunTimer.timeRun(() -> testFuturesCollector(sFactList, n, false),
                 "testFuturesCollector()");
 
@@ -127,8 +127,9 @@ public class ex18 {
     }
 
     /**
-     * This class demonstrates how the two parameter Java Streams reduce()
-     * operation avoids sharing state between Java threads altogether.
+     * This class demonstrates how the two parameter Java Streams
+     * reduce() operation avoids sharing state between Java threads
+     * altogether.
      */
     private static class ParallelStreamFactorial2 {
         /**
@@ -155,8 +156,9 @@ public class ex18 {
     }
 
     /**
-     * This class demonstrates how the three parameter Java Streams reduce()
-     * operation avoids sharing state between Java threads altogether.
+     * This class demonstrates how the three parameter Java Streams
+     * reduce() operation avoids sharing state between Java threads
+     * altogether.
      */
     private static class ParallelStreamFactorial3 {
         /**
@@ -217,23 +219,22 @@ public class ex18 {
         if (verbose)
             System.out.println("Testing JoinAll");
 
-        List<CompletableFuture<BigInteger>> resultsList = factList
+        var resultsList = factList
             // Convert the list into stream.
             .stream()
             
             // Apply each factorial method asynchronously in the
             // common fork-join pool.
-            .map(func
-                 -> CompletableFuture.supplyAsync(()
-                                                  -> func.apply(n)))
+            .map(func -> CompletableFuture
+                 .supplyAsync(()-> func.apply(n)))
 
             // Trigger intermediate operations and return a list of
             // completable futures.
             .collect(toList());
 
         var results = StreamsUtils
-                // Create a single future that will complete when all
-                // futures in resultsList complete.
+                // Create a single CompletableFuture that completes when all
+                // CompletableFuture objectss in resultsList complete.
                 .joinAll(resultsList)
 
                 // Wait for the single future to complete.
@@ -256,15 +257,14 @@ public class ex18 {
 
         // Create a single completable future to a list of completed
         // BigIntegers.
-        CompletableFuture<List<BigInteger>> resultsFuture = factList
+        var resultsFuture = factList
             // Convert the list into a parallel stream.
             .parallelStream()
             
             // Apply each factorial method asynchronously in the
             // common fork-join pool.
-            .map(func
-                 -> CompletableFuture.supplyAsync(()
-                                                  -> func.apply(n)))
+            .map(func -> CompletableFuture
+                 .supplyAsync(() -> func.apply(n)))
 
             // Trigger intermediate processing and return a single
             // completable future.

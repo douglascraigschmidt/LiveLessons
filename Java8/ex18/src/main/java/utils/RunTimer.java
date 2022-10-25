@@ -1,16 +1,20 @@
 package utils;
 
-import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * This class simplifies the computation of execution times.
+ * This class records how long methods take to execute and prints
+ * the results ordered from fastest to slowest execution times.
  */
 public class RunTimer {
     /**
-     * Keep track of which SearchStreamGang performed the best.
+     * This {@link Map} tracks how long each method took to execute.
      */
-    private static Map<String, Long> mResultsMap = new HashMap<>();
+    private static final Map<String, Long> mResultsMap =
+        new HashMap<>();
 
     /**
      * Keeps track of how long the test has run.
@@ -38,30 +42,37 @@ public class RunTimer {
     }
 
     /**
-     * Call @a supplier.get() and time how long it takes to run.
+     * Record how long it takes to run {@code supplier.get()}.
      *
-     * @return The result returned by @a supplier.get()
+     * @return The result returned by {@code supplier.get()}
      */
     public static <U> U timeRun(Supplier<U> supplier,
                                 String testName) {
         startTiming();
+
+        // Invoke the supplier.
         U result = supplier.get();
+
         stopTiming();
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
                         mExecutionTime);
 
+        // Return the result from the supplier.
         return result;
     }
 
     /**
-     * Call @a runnable.run() and time how long it takes to run.
+     * Record how long it takes to run {@code runnable.run()}.
      */
     public static void timeRun(Runnable runnable,
-                                String testName) {
+                               String testName) {
         startTiming();
+
+        // Invoke the runnable.
         runnable.run();
+
         stopTiming();
 
         // Store the execution times into the results map.
@@ -70,14 +81,14 @@ public class RunTimer {
     }
 
     /**
-     * @return A string containing the timing results for all the test runs
-     * ordered from fastest to slowest.
+     * @return A {@link String} containing the timing results for all
+     *         the test runs ordered from fastest to slowest
      */
     public static String getTimingResults() {
-        StringBuilder stringBuffer =
-            new StringBuilder();
+        // Create a StringBuilder to hold the results.
+        StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuffer.append("\nPrinting ")
+        stringBuilder.append("\nPrinting ")
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest\n");
 
@@ -93,21 +104,21 @@ public class RunTimer {
             // Create a SimpleImmutableEntry containing the timing
             // results (value) followed by the test name (key).
             .map(entry
-                 -> new AbstractMap.SimpleImmutableEntry<>
+                 -> new SimpleImmutableEntry<>
                  (entry.getValue(),
                   entry.getKey()))
 
             // Sort the stream by the timing results (key).
-            .sorted(Comparator.comparing(AbstractMap.SimpleImmutableEntry::getKey))
+            .sorted(Map.Entry.comparingByKey())
 
             // Append the entries in the sorted stream.
-            .forEach(entry -> stringBuffer
-                     .append("")
+            .forEach(entry -> stringBuilder
                      .append(entry.getValue())
                      .append(" executed in ")
                      .append(entry.getKey())
                      .append(" msecs\n"));
 
-        return stringBuffer.toString();
+        // Convert the StringBuilder to a String.
+        return stringBuilder.toString();
     }
 }
