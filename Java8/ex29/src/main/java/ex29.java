@@ -35,6 +35,7 @@ public class ex29 {
         // Create a List of random BigFractions that are unreduced.
         List<BigFraction> bigFractions = makeBigFractions();
 
+        // This call with output the initial List of BigFraction objects.
         printList(bigFractions);
 
         print("Point 1: after printList()");
@@ -43,21 +44,25 @@ public class ex29 {
         Stream<CompletableFuture<BigFraction>> bigFractionStream =
             makeBigFractionStream(bigFractions);
 
+        // No other output will be printed at this point.
         print("Point 2: after first map() in makeBigFractionStream()");
 
         // Obtain a future to a list of reduced BigFractions when they complete.
         CompletableFuture<List<BigFraction>> bigFractionsF =
             makeCompletableFutureStream(bigFractionStream);
 
+        // No other output will be printed at this point.
         print("Point 3: after collect() in makeCompletableFutureStream()");
 
         CompletableFuture<Void> results = bigFractionsF
                 // Sort the List in parallel and print the results.
                 .thenCompose(ex29::sortAndPrintListAsync);
 
+        // No other output will be printed at this point.
         print("Point 4: after thenCompose()");
 
         // Trigger all the processing and block until it's all done.
+        // All the output will be printed at this point.
         results.join();
 
         print("Point 5: after join()");
@@ -76,7 +81,7 @@ public class ex29 {
             .limit(sMAX_FRACTIONS)
 
             // Trigger processing and collect into a List.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -93,13 +98,14 @@ public class ex29 {
             // Convert BigFractions in List into a sequential stream.
             .stream()
 
-            // Reduce BigFractions asynchronously.
+            // Reduce all the BigFraction objects asynchronously.
             .map(ex29::reduceBigFractionAsync);
     }
 
     /**
-     * Returns a A {@link CompletableFuture} to a {@link List}
-     *          of {@link BigFraction} objects
+     * Returns a {@link CompletableFuture} to a {@link List}
+     * of {@link BigFraction} objects.
+     *
      * @param bigFractionStream A {@link Stream} of
      *                          {@link CompletableFuture<BigFraction>}
      *                          objects
@@ -218,8 +224,8 @@ public class ex29 {
      * @param list The {@link List}
      */
     private static void printList(List<BigFraction> list) {
-        // Print the results as mixed fractions.
         list
+        // Print the results as mixed fractions.
             .forEach(fraction ->
                      print("     "
                            + fraction.toMixedString()));

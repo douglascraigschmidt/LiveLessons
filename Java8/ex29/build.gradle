@@ -3,13 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-targetCompatibility = 1.9
-sourceCompatibility = 1.9
-
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-}
