@@ -59,7 +59,7 @@ public class ex29 {
                 .thenCompose(ex29::sortAndPrintListAsync);
 
         // No other output will be printed at this point.
-        print("Point 4: after thenCompose()");
+        print("Point 4: after thenCompose() and before join()");
 
         // Trigger all the processing and block until it's all done.
         // All the output will be printed at this point.
@@ -98,7 +98,7 @@ public class ex29 {
             // Convert BigFractions in List into a sequential stream.
             .stream()
 
-            // Reduce all the BigFraction objects asynchronously.
+            // Reduce each of the BigFraction objects asynchronously.
             .map(ex29::reduceBigFractionAsync);
     }
 
@@ -202,12 +202,12 @@ public class ex29 {
     private static CompletableFuture<Void> sortAndPrintListAsync
         (List<BigFraction> list) {
         // This implementation uses quick sort to order list.
-        CompletableFuture<List<BigFraction>> quickSortF = CompletableFuture
+        var quickSortF = CompletableFuture
             // Perform quick sort asynchronously.
             .supplyAsync(() -> quickSort(list));
 
         // This implementation uses heap sort to order list.
-        CompletableFuture<List<BigFraction>> heapSortF = CompletableFuture
+        var heapSortF = CompletableFuture
             // Perform heap sort asynchronously.
             .supplyAsync(() -> heapSort(list));
 

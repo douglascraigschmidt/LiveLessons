@@ -123,7 +123,7 @@ public class ex23 {
         System.out.println(">>> enter testOneJoin()");
 
         // A future to a stream of integer results.
-        CompletableFuture<Stream<Integer>> resultFuture = suppliers
+        var resultFuture = suppliers
             // Convert the list of suppliers into a stream of
             // suppliers.
             .stream()

@@ -230,14 +230,14 @@ public class ex18 {
 
             // Trigger intermediate operations and return a list of
             // completable futures.
-            .collect(toList());
+            .toList();
 
         var results = StreamsUtils
                 // Create a single CompletableFuture that completes when all
-                // CompletableFuture objectss in resultsList complete.
+                // CompletableFuture objects in resultsList complete.
                 .joinAll(resultsList)
 
-                // Wait for the single future to complete.
+                // Wait for the single CompletableFuture to complete.
                 .join();
 
         // Printout all the results.
@@ -259,7 +259,7 @@ public class ex18 {
         // BigIntegers.
         var resultsFuture = factList
             // Convert the list into a parallel stream.
-            .parallelStream()
+            .stream()
             
             // Apply each factorial method asynchronously in the
             // common fork-join pool.

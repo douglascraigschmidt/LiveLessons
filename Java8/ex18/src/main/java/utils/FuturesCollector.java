@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
  * triggered when all the futures in the stream complete.
  *
  * See
- * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
+ * <a href="http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html">this link</a>
  * for more info.
  */
 public class FuturesCollector<T>
@@ -102,7 +102,7 @@ public class FuturesCollector<T>
      * this case is simply UNORDERED
      */
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 
