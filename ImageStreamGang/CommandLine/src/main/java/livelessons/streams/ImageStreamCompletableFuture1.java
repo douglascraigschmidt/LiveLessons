@@ -14,9 +14,10 @@ import java.util.stream.Stream;
 import static livelessons.utils.StreamOfFuturesCollector.toFuture;
 
 /**
- * This asynchronous implementation strategy customizes the
+ * This asynchronous implementation strategy extends the
  * ImageStreamCompletableFutureBase super class to download, process,
- * and store images asynchronously in a common fork-join thread pool.
+ * and store images asynchronously using the Java completable futures
+ * framework and the Java common fork-join pool.
  */
 public class ImageStreamCompletableFuture1
        extends ImageStreamCompletableFutureBase {

@@ -11,12 +11,13 @@ import livelessons.filters.Filter;
 import livelessons.utils.Image;
 
 /**
- * This implementation strategy customizes ImageStreamGang to use
- * Java's parallel stream framework to download, process, and store
- * images in parallel.  This framework uses Java's common fork-join
- * pool, which has one less than the number of processor cores
- * returned by Runtime.getRuntime().availableProcessors().  The size
- * of this common fork-join pool can be changed dynamically via Java's
+ * This implementation strategy extends the ImageStreamGang super
+ * class to use Java's parallel streams framework to download,
+ * process, and store images in parallel.  This framework uses Java's
+ * common fork-join pool, which has one less than the number of
+ * processor cores returned by
+ * Runtime.getRuntime().availableProcessors().  The size of this
+ * common fork-join pool can be changed dynamically via Java's
  * ManagedBlocker mechanism.
  */
 public class ImageStreamParallel 
@@ -63,7 +64,7 @@ public class ImageStreamParallel
 
             // Terminate the stream and collect the results into list
             // of images.
-            .collect(Collectors.toList());
+            .toList();
 
         System.out.println(TAG
                            + ": processing of "

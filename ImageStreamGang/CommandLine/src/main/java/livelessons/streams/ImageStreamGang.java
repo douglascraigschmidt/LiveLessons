@@ -19,15 +19,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This abstract class customizes the StreamGang framework to use Java
- * 8 functional programming features to download a list of images from
- * remote web servers (or open them in a local resources directory),
- * apply image processing filters to each image, and store the results
- * in files that can be displayed to the user.  ImageStreamGang
- * subclasses must override the initiateStream() hook method to
- * download (or open) and process the images concurrently. This class
- * plays the role of the "Concrete class" in the Template Method
- * pattern.
+ * This abstract class extends the StreamGang super class to use
+ * modern Java functional programming features that download a list of
+ * images from remote web servers (or open them in a local resources
+ * directory), apply image processing filters to each image, and store
+ * the results in files that can be displayed to the user.
+ * ImageStreamGang subclasses must override the initiateStream() hook
+ * method to download (or open) and process the images
+ * concurrently. This class plays the role of the "Concrete class" in
+ * the Template Method pattern.
  */
 public abstract class ImageStreamGang
        extends StreamGang<URL> {

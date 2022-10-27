@@ -53,7 +53,7 @@ public class ImageStreamSequential
 
             // Terminate the stream and collect the results into
             // list of images.
-            .collect(toList());
+            .toList();
 
         System.out.println(TAG
                            + ": processing of "

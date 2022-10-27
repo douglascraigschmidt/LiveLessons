@@ -91,7 +91,7 @@ public class FuturesCollector<T>
                        .map(CompletableFuture::join)
 
                        // Collect the results of type T into a list.
-                       .collect(toList()));
+                       .toList());
     }
 
     /**
