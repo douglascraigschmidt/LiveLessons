@@ -107,10 +107,14 @@ public final class RxJavaTests {
             // Collect the downloaded images into a list.
             .collect(Collectors.toList())
 
+            // Process the list.
+            .doOnSuccess(imageFiles -> Options
+                // Print the # of image files that were downloaded.
+                .printStats(testName, imageFiles.size()))
+
             // Print the statistics for this test run in a blocking
             // manner.
-            .blockingSubscribe(imageFiles -> Options.instance()
-                               .printStats(testName, imageFiles.size()));
+            .blockingGet();
     }
 
     /**
@@ -142,9 +146,13 @@ public final class RxJavaTests {
             // Collect the downloaded images into a list.
             .collect(Collectors.toList())
 
+            // Process the list.
+            .doOnSuccess(imageFiles -> Options
+                // Print the # of image files that were downloaded.
+                .printStats(testName, imageFiles.size()))
+
             // Print the statistics for this test run in a blocking
             // manner.
-            .blockingSubscribe(imageFiles -> Options.instance()
-                               .printStats(testName, imageFiles.size()));
+            .blockingGet();
     }
 }

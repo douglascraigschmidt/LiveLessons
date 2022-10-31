@@ -211,7 +211,7 @@ public class Options {
     /**
      * Display the statistics about the test.
      */
-    public void printStats(String testName,
+    public static void printStats(String testName,
                             int imageCount) {
         if (!testName.equals("warmup"))
             System.out.println(testName
