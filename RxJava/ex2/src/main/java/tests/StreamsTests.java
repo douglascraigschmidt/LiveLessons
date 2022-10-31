@@ -87,7 +87,7 @@ public class StreamsTests {
             .collect(toList());
 
         // Print the statistics for this test run.
-        Options.instance().printStats(testName, imageFiles.size());
+        Options.printStats(testName, imageFiles.size());
     }
 
     /**
@@ -127,6 +127,6 @@ public class StreamsTests {
                          }));
 
         // Print the statistics for this test run.
-        Options.instance().printStats(testName, imageFiles.size());
+        Options.printStats(testName, imageFiles.size());
     }
 }

@@ -137,7 +137,7 @@ public final class ReactorTests {
             .collectList()
 
             // Process the list.
-            .doOnSuccess(imageFiles -> Options.instance()
+            .doOnSuccess(imageFiles -> Options
                          // Print the # of image files that were
                          // downloaded.
                          .printStats(testName, imageFiles.size()))
@@ -194,7 +194,7 @@ public final class ReactorTests {
             .doOnNext(file -> Options.logIdentity(file, "collectList()"))
 
             // Process the list.
-            .doOnSuccess(imageFiles -> Options.instance()
+            .doOnSuccess(imageFiles -> Options
                          // Print the # of image files that were downloaded.
                          .printStats(testName, imageFiles.size()))
 
@@ -240,7 +240,7 @@ public final class ReactorTests {
             .collectList()
 
             // Process the list.
-            .doOnSuccess(imageFiles -> Options.instance()
+            .doOnSuccess(imageFiles -> Options
                          // Print the # of image files that were downloaded.
                          .printStats(testName, imageFiles.size()))
 
@@ -302,7 +302,7 @@ public final class ReactorTests {
             .doOnNext(file -> Options.logIdentity(file, "collectList()"))
 
             // Process the list.
-            .doOnSuccess(imageFiles -> Options.instance()
+            .doOnSuccess(imageFiles -> Options
                          // Print the # of image files that were downloaded.
                          .printStats(testName, imageFiles.size()))
 
