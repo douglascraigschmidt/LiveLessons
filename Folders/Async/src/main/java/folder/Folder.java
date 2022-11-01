@@ -164,7 +164,6 @@ public class Folder
     void addEntry(Path entry) {
         // Add entry to the appropriate list of futures.
         if (Files.isDirectory(entry)) {
-            // CompletableFuture<Dirent> folderF
             var subFolderF = Folder
                 // Asynchronously (and recursively) create a future to a
                 // folder from the entry.

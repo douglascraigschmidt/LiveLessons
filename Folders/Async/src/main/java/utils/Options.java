@@ -1,9 +1,17 @@
 package utils;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * An options singleton.
  */
 public class Options {
+    /**
+     * A completed completable future to nothing.
+     */
+    public static final CompletableFuture<Void> sVoid
+        = CompletableFuture.completedFuture(null);
+
     /**
      * The one and only singleton unique instance.
      */
@@ -82,5 +90,13 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Options usage: \n-p -v");
+    }
+
+    /**
+     * Display {@code string} if the program is run in verbose mode.
+     */
+    public static void display(String string) {
+        if (Options.getInstance().getVerbose())
+            System.out.println(string);
     }
 }

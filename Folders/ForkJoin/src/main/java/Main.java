@@ -18,14 +18,14 @@ class Main {
         System.out.println("Starting the file counter program");
 
         // Warmup the thread pool.
-        warmupThreadPool2();
+        warmupThreadPool1();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java parallel streams features.
         runFileCounterParallelStream();
 
-        // Warmup the thread pool.
-        warmupThreadPool1();
+        // warmup the thread pool.
+        warmupThreadPool2();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.
@@ -75,18 +75,21 @@ class Main {
     }
 
     /**
-     * Warmup the thread pool.
+     * Warmup the thread pool for parallel stream test.
      */
     private static void warmupThreadPool1() throws URISyntaxException {
         runTest(ForkJoinPool.commonPool(),
-                new FileCounterTask
+                new FileCounterParallelStream
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "warmup");
     }
 
+    /**
+     * Warmup the thread pool for the fork-join test.
+     */
     private static void warmupThreadPool2() throws URISyntaxException {
         runTest(ForkJoinPool.commonPool(),
-                new FileCounterParallelStream
+                new FileCounterTask
                         (new File(ClassLoader.getSystemResource("works").toURI())),
                 "warmup");
     }

@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 /**
  * In conjunction with {@code StreamSupport.stream()} and {@code
  * Spliterators.spliterator()} this class creates a sequential or
- * parallel stream of {@code Dirents} from a recursively-structured
+ * parallel stream of {@code Directs} from a recursively-structured
  * directory folder.
  */
 public class BFSFolderSpliterator
