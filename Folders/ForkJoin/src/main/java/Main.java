@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 
 /**
  * This example shows how to use various Java mechanisms (including
- * the Java fork-join pool framework and streams framework) to count
+ * the Java fork-join framework and streams framework) to count
  * the number of files in a (large) recursive folder hierarchy, as
  * well as calculate the cumulative sizes of all the files.
  */
@@ -18,14 +18,14 @@ class Main {
         System.out.println("Starting the file counter program");
 
         // Warmup the thread pool.
-        warmupThreadPool1();
+       warmupThreadPool1();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java parallel streams features.
         runFileCounterParallelStream();
 
         // warmup the thread pool.
-        warmupThreadPool2();
+       warmupThreadPool2();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.

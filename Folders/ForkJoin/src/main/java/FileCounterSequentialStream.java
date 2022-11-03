@@ -48,7 +48,7 @@ public class FileCounterSequentialStream
 
             // Create a list of tasks to fork to process the contents
             // of a folder.
-            List<ForkJoinTask<Long>> forks = Stream
+            var forks = Stream
                 // Convert the list of files into a stream of files.
                 .of(Objects.requireNonNull(mFile.listFiles()))
 

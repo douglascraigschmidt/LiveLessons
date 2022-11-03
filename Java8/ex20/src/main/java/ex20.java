@@ -8,16 +8,11 @@ import java.util.function.Function;
 
 /**
  * This example shows how to combine Java parallel streams with and
- * without the ForkJoinPool.ManagedBlocker interface and the Java
- * common fork-join pool to download and store multiple images from a
- * remote server.
+ * without the {@link ForkJoinPool.ManagedBlocker} interface and the
+ * Java common fork-join pool to download and store multiple images
+ * from a remote server.
  */
 public class ex20 {
-    /**
-     * Logging tag.
-     */
-    private static final String TAG = ex20.class.getName();
-
     /**
      * The Java execution environment requires a static main() entry
      * point method to run the app.
@@ -41,23 +36,23 @@ public class ex20 {
         // Warm up the common fork-join pool.
         warmUpThreadPool();
 
-        // Runs the tests using the Java fork-join
-        // framework's default behavior, which does not add new worker
-        // threads to the pool when blocking occurs.
+        // Runs the tests using the Java fork-join framework's default
+        // behavior, which does not add new worker threads to the pool
+        // when blocking occurs.
         runTest(this::downloadAndStoreImage,
                 "testDefaultDownloadBehavior()");
 
-        // Run the tests using the BlockingTask wrapper
-        // around the Java fork-join framework's ManagedBlocker
-        // mechanism, which adds new worker threads to the pool
-        // adaptively when blocking occurs.
+        // Run the tests using the BlockingTask wrapper around the
+        // Java fork-join framework's ManagedBlocker mechanism, which
+        // adds new worker threads to the pool adaptively when
+        // blocking occurs.
         runTest(this::downloadAndStoreImageMB,
                 "testAdaptiveMBDownloadBehavior()");
 
-        // Run the tests using the BlockingTask wrapper for
-        // the Java fork-join framework's ManagedBlocker mechanism,
-        // which adds new worker threads to the pool adaptively when
-        // blocking occurs.
+        // Run the tests using the BlockingTask wrapper for the Java
+        // fork-join framework's ManagedBlocker mechanism, which adds
+        // new worker threads to the pool adaptively when blocking
+        // occurs.
         runTest(this::downloadAndStoreImageBT,
                 "testAdaptiveBTDownloadBehavior()");
 
@@ -200,9 +195,7 @@ public class ex20 {
     private void printStats(String testName, 
                             int imageCount) {
         if (!testName.equals("warmup"))
-            System.out.println(TAG 
-                               + ": "
-                               + testName
+            System.out.println(testName
                                + " downloaded and stored "
                                + imageCount
                                + " images using "

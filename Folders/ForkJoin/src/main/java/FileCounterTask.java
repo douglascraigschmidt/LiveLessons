@@ -50,7 +50,7 @@ public class FileCounterTask
             // of a folder.
             List<ForkJoinTask<Long>> forks = new ArrayList<>();
 
-            // Loop through each file in the directory.
+            // Use a for-each loop to iterate thru each file in the directory.
             for (File file : Objects.requireNonNull(mFile.listFiles()))
                 // Create a FileCounterTask for each file, fork it,
                 // and add it to the list.
@@ -61,7 +61,7 @@ public class FileCounterTask
             // Accumulator to store the partial sums.
             long sum = 0;
 
-            // Loop through each task.
+            // Use a for-each loop to iterate thru each task.
             for (ForkJoinTask<Long> task : forks)
                 // Join each tasks and increment count accordingly.
                 sum += task.join();
