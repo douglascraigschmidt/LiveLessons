@@ -30,9 +30,9 @@ public class ObservableEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * Test an asynchronous Flux stream consisting of fromIterable(),
-     * flatMap(), reduce(), and a pool of threads to perform
-     * BigFraction reductions and multiplications.
+     * Test an asynchronous {@link Observable} stream consisting of
+     * fromIterable(), flatMap(), reduce(), and a pool of threads to
+     * perform BigFraction reductions and multiplications.
      */
     public static Completable testFractionMultiplications() {
         StringBuffer sb =

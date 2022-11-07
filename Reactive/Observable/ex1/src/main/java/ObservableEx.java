@@ -180,8 +180,8 @@ public class ObservableEx {
             .repeat(4);
 
         o1
-            // Flatten Observable o1 and o2 into a single Flux sequence,
-            // without any transformations.
+            // Flatten Observable o1 and o2 into a single Observable
+            // sequence, without any transformations.
             .mergeWith(o2)
 
             // Log the contents of the computation.
