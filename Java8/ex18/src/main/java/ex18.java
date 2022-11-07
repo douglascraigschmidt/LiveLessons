@@ -11,10 +11,13 @@ import java.util.stream.LongStream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * This program shows how to wait for the results of a stream of
- * completable futures using (1) a custom collector and (2) the
- * StreamsUtils.joinAll() method (which is a wrapper for
- * CompletableFuture.allOf()).
+ * This program integrates the Java streams framework and completable
+ * futures framework to compute factorials for BigIntegers to
+ * demonstrate the performance of alternative parallel and sequential
+ * algorithms that are all run asynchronously.  It also shows how to
+ * handle the results of a stream of completable futures using (1) a
+ * custom collector and (2) the StreamsUtils.joinAll() method (which
+ * is a wrapper for CompletableFuture.allOf()).
  */
 public class ex18 {
     /**
@@ -210,7 +213,7 @@ public class ex18 {
     }
 
     /**
-     * Test the StreamsUtils.joinAll() method.
+     * Test the {@link StreamsUtils.joinAll()} method.
      */
     private static void testJoinAll
         (List<Function<BigInteger, BigInteger>> factList,
@@ -246,7 +249,7 @@ public class ex18 {
     }
 
     /**
-     * Test the FuturesCollector.
+     * Test the {@link FuturesCollector}.
      */
     private static void testFuturesCollector
         (List<Function<BigInteger, BigInteger>> factList,

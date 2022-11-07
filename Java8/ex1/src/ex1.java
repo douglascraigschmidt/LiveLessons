@@ -48,7 +48,9 @@ public class ex1 {
         }
     }
 
-    // The array to sort and print.
+    /**
+     * The array to sort and print.
+     */
     private static final String[] sNameArray = {
             "Barbara",
             "James",
@@ -65,8 +67,11 @@ public class ex1 {
      * This {@link Supplier} makes a copy of an array.
      */
     private static final Supplier<String[]> sArrayCopy =
-            () -> Arrays.copyOf(sNameArray, sNameArray.length);
+        () -> Arrays.copyOf(sNameArray, sNameArray.length);
 
+    /**
+     * This method provides the entry point into this test program.
+     */
     static public void main(String[] argv) throws InterruptedException {
         // First demonstrates the closure example.
         new ClosureExample();

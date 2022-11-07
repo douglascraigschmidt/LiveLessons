@@ -15,8 +15,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This example shows the difference between calling join() on
- * intermediate completable futures (which block and thus degrade
- * performance) vs. simply making one call to join() (and thus
+ * intermediate Java CompletableFuture objects (which block and thus
+ * degrade performance) vs. simply making one call to join() (and thus
  * enhancing greater parallelism).  These tests demonstrate why join()
  * shouldn't be used in a stream pipeline on a CompletableFuture that
  * hasn't completed since it may impede parallelism.
