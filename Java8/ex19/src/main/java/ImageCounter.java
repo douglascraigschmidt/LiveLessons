@@ -119,6 +119,50 @@ class ImageCounter {
     }
 
     /**
+     * Check to ensure that {@code pageUri} does not exceed the max
+     * depth or has already been visited.
+     *
+     * @param pageUri The URL that we're counting at this point
+     * @param depth The current depth of the recursive processing
+     * @return {@code true} if the checks pass, else {@code false}
+     */
+    private boolean passChecks(String pageUri,
+                               int depth) {
+        // Return false if we've reached the depth limit of the
+        // crawling.
+        if (depth > Options.instance().maxDepth()) {
+            print(depth,
+                    ": Exceeded max depth of "
+                            + Options.instance().maxDepth()
+                            + " "
+                            + pageUri);
+            return false;
+        }
+        // Atomically check to see if we've already visited this URL
+        // and add the new url to the hashset and return false to
+        // avoid revisiting it again unnecessarily.
+        else if (!mUniqueUris.add(pageUri)) {
+            print(depth,
+                    ": Already processed "
+                            + pageUri);
+            return false;
+        } else
+            return true;
+    }
+
+    /**
+     * @return A {@link CompletableFuture} to the page at the {@code pageURI}
+     */
+    private CompletableFuture<Document> getStartPage(String pageUri) {
+        return CompletableFuture
+                // Asynchronously get the contents of the page.
+                .supplyAsync(() -> Options
+                        .instance()
+                        .getJSuper()
+                        .getPage(pageUri));
+    }
+
+    /**
      * Performs image counting asynchronously.
      *
      * @param pageFuture A {@link CompletableFuture} that emits a
@@ -179,6 +223,16 @@ class ImageCounter {
     }
 
     /**
+     * @return A collection of IMG SRC URLs in this page.
+     */
+    private Elements getImagesInPage(Document page) {
+        // Return a collection IMG SRC URLs in this page.
+        return page
+                // Select all the image elements in the page.
+                .select("img");
+    }
+
+    /**
      * Asynchronously obtain a {@link CompletableFuture} to the # of
      * images on pages linked from this page.
      *
@@ -202,6 +256,45 @@ class ImageCounter {
                               crawlLinksInPage(page, depth));
     }
 
+
+    /**
+     * Recursively crawl through hyperlinks that are in {@code page}.
+     *
+     * @param page The {@link Document} containing HTML
+     * @param depth The depth of the level of web page traversal
+     * @return A {@link CompletableFuture} that emits how many
+     *         images were in each hyperlink on this page
+     */
+    private CompletableFuture<Integer> crawlLinksInPage(Document page,
+                                                        int depth) {
+        // Return a completable future to a list of counts of the # of
+        // nested hyperlinks in the page.
+        return page
+                // Find all the hyperlinks on this page.
+                .select("a[href]")
+
+                // Convert the hyperlink elements into a stream.
+                .stream()
+
+                // Map each hyperlink to a completable future containing a
+                // count of the number of images found at that hyperlink.
+                .map(hyperLink ->
+                        // Recursively visit all the hyperlinks on this page.
+                        countImagesAsync(Options
+                                        .instance()
+                                        .getJSuper()
+                                        .getHyperLink(hyperLink),
+                                depth))
+
+                // Trigger intermediate operation processing and return a
+                // future to a CompletableFutures<IntStream>.
+                .collect(FuturesCollectorIntStream.toFuture())
+
+                // After all the futures in the stream complete then sum
+                // all the integers in the stream of results.
+                .thenApply(IntStream::sum);
+    }
+
     /**
      * Asynchronously count of the # of images on this page plus the #
      * of images on hyperlinks accessible via this page.
@@ -222,98 +315,6 @@ class ImageCounter {
             // Sum the results when both futures complete.
             .thenCombine(imagesInLinksFuture,
                          Integer::sum);
-    }
-
-    /**
-     * @return A {@link CompletableFuture} to the page at the {@code pageURI}
-     */
-    private CompletableFuture<Document> getStartPage(String pageUri) {
-        return CompletableFuture
-            // Asynchronously get the contents of the page.
-            .supplyAsync(() -> Options
-                         .instance()
-                         .getJSuper()
-                         .getPage(pageUri));
-    }
-
-    /**
-     * @return A collection of IMG SRC URLs in this page.
-     */
-    private Elements getImagesInPage(Document page) {
-        // Return a collection IMG SRC URLs in this page.
-        return page
-            // Select all the image elements in the page.
-            .select("img");
-    }
-
-    /**
-     * Recursively crawl through hyperlinks that are in {@code page}.
-     *
-     * @param page The {@link Document} containing HTML
-     * @param depth The depth of the level of web page traversal
-     * @return A {@link CompletableFuture} that emits how many
-     *         images were in each hyperlink on this page
-     */
-    private CompletableFuture<Integer> crawlLinksInPage(Document page,
-                                                        int depth) {
-        // Return a completable future to a list of counts of the # of
-        // nested hyperlinks in the page.
-        return page
-            // Find all the hyperlinks on this page.
-            .select("a[href]")
-
-            // Convert the hyperlink elements into a stream.
-            .stream()
-
-            // Map each hyperlink to a completable future containing a
-            // count of the number of images found at that hyperlink.
-            .map(hyperLink ->
-                 // Recursively visit all the hyperlinks on this page.
-                 countImagesAsync(Options
-                                  .instance()
-                                  .getJSuper()
-                                  .getHyperLink(hyperLink),
-                                  depth))
-
-            // Trigger intermediate operation processing and return a
-            // future to a CompletableFutures<IntStream>.
-            .collect(FuturesCollectorIntStream.toFuture())
-
-            // After all the futures in the stream complete then sum
-            // all the integers in the stream of results.
-            .thenApply(IntStream::sum);
-    }
-
-    /**
-     * Check to ensure that {@code pageUri} does not exceed the max
-     * depth or has already been visited.
-     *
-     * @param pageUri The URL that we're counting at this point
-     * @param depth The current depth of the recursive processing
-     * @return {@code true} if the checks pass, else {@code false}
-     */
-    private boolean passChecks(String pageUri,
-                               int depth) {
-        // Return false if we've reached the depth limit of the
-        // crawling.
-        if (depth > Options.instance().maxDepth()) {
-            print(depth,
-                  ": Exceeded max depth of "
-                  + Options.instance().maxDepth()
-                  + " "
-                  + pageUri);
-            return false;
-        }
-        // Atomically check to see if we've already visited this URL
-        // and add the new url to the hashset and return false to
-        // avoid revisiting it again unnecessarily.
-        else if (!mUniqueUris.add(pageUri)) {
-            print(depth,
-                  ": Already processed "
-                  + pageUri);
-            return false;
-        } else
-            return true;
     }
 
     /**
