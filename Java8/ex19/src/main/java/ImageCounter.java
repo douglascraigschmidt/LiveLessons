@@ -13,10 +13,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * This class counts the number of images in a recursively-defined
- * folder structure using a range of asynchronous features in the Java
- * completable futures framework.  The root folder can either reside
- * locally (filesystem -based) or remotely (web-based).
+ * This class uses the Java completable futures framework to count the
+ * number of images in a recursively-defined folder structure
+ * asynchronously.  The root folder can either reside locally
+ * (filesystem-based) or remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -58,7 +58,8 @@ class ImageCounter {
                     return 0;
                 })
 
-            // join() blocks until all futures complete!
+            // This one and only call to join() blocks until all async
+            // CompletableFuture processing complete!
             .join();
 
             /*
@@ -133,26 +134,25 @@ class ImageCounter {
         return
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.
-            combineImageCounts(this
-                               // Asynchronously count the # of images
-                               // on this page and return a future to
-                               // the count.
-                               .countImagesInPageAsync(pageFuture)
+            combineCounts(this
+                          // Asynchronously count the # of images on
+                          // this page and return a future to the
+                          // count.
+                          .countImagesInPageAsync(pageFuture)
 
-                               // Log what's happened, regardless of
-                               // whether an exception occurred or
-                               // not.
-                               .whenComplete((totalImages, ex) ->
-                                             logResults(totalImages,
-                                                        ex,
-                                                        pageUri,
-                                                        depth)),
+                          // Log what's happened, regardless of
+                          // whether an exception occurred or not.
+                          .whenComplete((totalImages, ex) ->
+                                        logResults(totalImages,
+                                                   ex,
+                                                   pageUri,
+                                                   depth)),
 
-                               // Asynchronously count the # of images
-                               // in link on this page and returns a
-                               // future to this count.
-                               crawlLinksInPageAsync(pageFuture,
-                                                     depth + 1));
+                          // Asynchronously count the # of images
+                          // linked on this page and return a future
+                          // to this count.
+                          crawlLinksInPageAsync(pageFuture,
+                                                depth + 1));
     }
 
     /**
@@ -184,7 +184,7 @@ class ImageCounter {
      *
      * @param pageFuture A {@link CompletableFuture} to the page
      *                   that's being downloaded
-     * @param depth      The current depth of the recursive processing
+     * @param depth The current depth of the recursive processing
      * @return A {@link CompletableFuture} that emits the # of images
      *         on pages linked from this page
      */
@@ -193,7 +193,6 @@ class ImageCounter {
                               int depth) {
         // Return a CompletableFuture to an Integer containing the #
         // of images processed on pages linked from this page.
-
         return pageFuture
             // Asynchronously/recursively crawl all hyperlinks in a
             // page.
@@ -214,7 +213,7 @@ class ImageCounter {
      * @return A {@link CompletableFuture} that emits the number of
      *         images counted
      */
-    private CompletableFuture<Integer> combineImageCounts
+    private CompletableFuture<Integer> combineCounts
         (CompletableFuture<Integer> imagesInPageFuture,
          CompletableFuture<Integer> imagesInLinksFuture) {
         // Return a completable future to the results of adding the
