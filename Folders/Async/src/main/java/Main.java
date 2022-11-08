@@ -8,15 +8,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static tests.Tests.*;
 import static utils.Options.display;
 import static utils.Options.sVoid;
 import static utils.StreamOfFuturesCollector.toFuture;
 
 /**
- * This example combines the Java completable futures framework with
- * the Java sequential streams framework to process entries in a
- * recursively-structured folder hierarchy concurrently.
+ * This example combines the Java completable futures and sequential
+ * streams framework to process entries in a recursively-structured
+ * folder hierarchy concurrently and asynchronously.
  */
 public class Main {
     /**
@@ -32,18 +31,18 @@ public class Main {
         // Parse the options.
         Options.getInstance().parseArgs(argv);
 
-        // Warmup the thread pool and run the sync tests.
-        runSyncTests();
-
-        // Run the async tests.
+        // Run the tests asynchronously.
         runAsyncTests();
+
+        // Run the tests synchronously.
+        runSyncTests();
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
     }
 
     /**
-     * Run the async tests.
+     * Run the tests asynchronously.
      */
     private static void runAsyncTests() {
         display("Starting runAsyncTests()");
@@ -58,13 +57,14 @@ public class Main {
         // folder, which of course will be very low since the caller
         // doesn't block waiting for the future to complete..
         var rootFolderF =
-            RunTimer.timeRun(() -> createFolder(sWORKS),
+            RunTimer.timeRun(() -> Tests.createFolder(sWORKS),
                              "async createFolder()");
 
         var asyncResults = Stream
-            // The of() factory method creates a stream of futures
-            // based on async calls to the (bi)function lambdas below,
-            // which run concurrently in the common fork-join pool.
+            // The of() factory method creates a stream of
+            // CompletableFuture objects based on async calls to the
+            // (Bi)Function lambdas below, which all run concurrently
+            // in the common fork-join pool.
             .of(runFunctionAsync(rootFolderF,
                                  Tests::countEntries,
                                  "async countEntries()"),
@@ -87,15 +87,19 @@ public class Main {
 
         display("Ending runAsyncTests()");
     }
-    
+
     /**
-     * A factory method that runs {@code func} asynchronously in the
-     * common fork-join pool.
+     * A factory method that runs a {@link Function} asynchronously in
+     * the common fork-join pool.
      *
-     * @param rootFolderF A future to the asynchronously created folder
-     * @param func The function to run in the fork-join pool
-     * @param funcName The name of the function to run in the fork-join pool
-     * @return A future that completes after {@code func} completes
+     * @param rootFolderF A {@link CompletableFuture} to the
+     *                    asynchronously created folder
+     * @param func The {@link Function} to run in the common fork-join
+     *             pool
+     * @param funcName The name of the {@link Function} to run in the
+     *                 common fork-join pool
+     * @return A {@link CompletableFuture} that is triggered after the
+     *         {@link Function} completes
      */
     private static CompletableFuture<Void> runFunctionAsync
         (CompletableFuture<Dirent> rootFolderF,
@@ -104,27 +108,33 @@ public class Main {
         // Run garbage collector to avoid perturbing the tests.
         System.gc();
 
-        // Return a future that completes after func completes.
+        // Return a CompletableFuture that is triggered after the
+        // Function completes.
         return rootFolderF
-            // Completion stage method is invoked when rootFolderF
-            // completes and runs action in the common fork-join pool.
-            .thenComposeAsync(rootFolder ->
+            // This completion stage method is invoked when
+            // rootFolderF completes and runs the (timed) action in
+            // the common fork-join pool.
+            .thenComposeAsync(rootFolder -> RunTimer
                               // Compute time needed to apply func on
-                              // rootFolder in fork-join pool.
-                              RunTimer.timeRun(() ->
-                                               func.apply(rootFolder),
-                                               funcName));
+                              // rootFolder in common fork-join pool.
+                              .timeRun(() ->
+                                       func.apply(rootFolder),
+                                       funcName));
     }
 
     /**
-     * A factory method that runs {@code biFunc} asynchronously in the
-     * common fork-join pool.
+     * A factory method that runs {@link BiFunction} asynchronously in
+     * the common fork-join pool.
      *
-     * @param rootFolderF A future to the asynchronously created folder
-     * @param biFunc The {@link BiFunction} to run in the fork-join pool
-     * @param param The parameter to pass to {@code biFunc}
-     * @param funcName The name of the function to run in the fork-join pool
-     * @return A future that completes after {@code biFunc} completes
+     * @param rootFolderF A {@link CompletableFuture} to the
+     *                    asynchronously created folder
+     * @param biFunc The {@link BiFunction} to run in the common
+     *               fork-join pool
+     * @param param The parameter to pass to {@code BiFunction}
+     * @param funcName The name of the {@link BiFunction} to run in
+     *                 the common fork-join pool
+     * @return A {@link CompletableFuture} that completes after the
+     *         {@code BiFunction} completes
      */
     private static CompletableFuture<Void> runBiFunctionAsync
         (CompletableFuture<Dirent> rootFolderF,
@@ -134,53 +144,62 @@ public class Main {
         // Run garbage collector to avoid perturbing the tests.
         System.gc();
 
-        // Return a future that completes after func completes.
+        // Return a CompletableFuture that completes after the
+        // BiFunction completes.
         return rootFolderF
-            // Completion stage method invoked when rootFolderF
-            // completes and runs action in the common fork-join pool.
-            .thenComposeAsync(rootFolder ->
+            // This Completion stage method is invoked when
+            // rootFolderF completes and runs the action in the common
+            // fork-join pool.
+            .thenComposeAsync(rootFolder -> RunTimer
                               // Compute time needed to apply biFunc
                               // on rootFolder in fork-join pool.
-                              RunTimer.timeRun(() ->
-                                               biFunc.apply(rootFolder,
-                                                            param),
-                                               funcName));
+                              .timeRun(() ->
+                                       biFunc.apply(rootFolder,
+                                                    param),
+                                       funcName));
     }
 
     /**
-     * Warmup the thread pool and run the sync tests.
+     * Run the tests synchronously.
      */
     private static void runSyncTests() {
         display("Starting runSyncTests()");
-        
+
         // Run garbage collector to avoid perturbing the tests.
         System.gc();
 
         // Clever hack.. ;-)
         CompletableFuture<Dirent>[] cff = new CompletableFuture[1];
 
-        // Create a new folder.
-        RunTimer.timeRun(() -> (cff[0] = createFolder(sWORKS)).join(),
-                         "sync createFolder()");
+        RunTimer
+            // Record the time needed to create a new folder.
+            .timeRun(() -> (cff[0] = Tests.createFolder(sWORKS))
+                                          .join(),
+                     "sync createFolder()");
 
-        // Run/time all the following tests synchronously to measure
-        // how long they take to execute.
+        // Run the following tests synchronously (by calling join())
+        // and measure how long they take to execute.
         runFunctionAsync(cff[0],
                          folder -> {
-                             countEntries(folder).join();
+                             Tests.countEntries(folder)
+                                  .join();
                              return sVoid;
                          },
                          "sync countEntries()");
 
         runFunctionAsync(cff[0],
-                         folder -> { countLines(folder).join();
+                         folder -> {
+                             Tests.countLines(folder)
+                                  .join();
                              return sVoid;
                          },
                          "sync countLines()");
 
         runBiFunctionAsync(cff[0],
                            (rootFolder, searchWord) -> {
-                               searchFolders(rootFolder, searchWord).join();
+                               Tests.searchFolders(rootFolder,
+                                                   searchWord)
+                                    .join();
                                return sVoid;
                            },
                            "CompletableFuture",
