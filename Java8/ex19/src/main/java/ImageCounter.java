@@ -1,3 +1,4 @@
+ 
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.FuturesCollectorIntStream;
@@ -9,12 +10,13 @@ import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * This class counts the number of images in a recursively-defined
- * folder structure using a range of asynchronous CompletableFuture
- * features.  The root folder can either reside locally (filesystem
- * -based) or remotely (web-based).
+ * folder structure using a range of asynchronous features in the Java
+ * completable futures framework.  The root folder can either reside
+ * locally (filesystem -based) or remotely (web-based).
  */
 class ImageCounter {
     /**
@@ -48,11 +50,14 @@ class ImageCounter {
             // Handle outcome of previous stage by converting any
             // exceptions into 0 and printing the total # of images.
             .handle((totalImages, ex) -> {
-                    if (totalImages == null)
+                    // Something's gone wrong here!
+                    if (ex != null)
                         totalImages = 0;
+
                     print(TAG + ": " + totalImages
                           + " total image(s) are reachable from "
                           + rootUri);
+
                     return 0;
                 })
 
@@ -95,8 +100,8 @@ class ImageCounter {
         }
 
         // Atomically check to see if we've already visited this URL
-        // and add the new url to the hashset to avoid revisiting
-        // it again unnecessarily.
+        // and add the new url to the hashset to avoid revisiting it
+        // again unnecessarily.
         else if (!mUniqueUris.add(pageUri)) {
             print(TAG 
                   + "[Depth"
@@ -114,6 +119,8 @@ class ImageCounter {
         else 
             return countImagesAsync(pageUri,
                                     depth)
+                // Printout what's happened, regardless of whether an
+                // exception occurred or not.
                 .whenComplete((totalImages, ex) -> {
                         if (totalImages != null)
                             print(TAG
@@ -136,61 +143,108 @@ class ImageCounter {
      *
      * @param pageUri The URL that we're counting at this point
      * @param depth The current depth of the recursive processing
-     * @return A future to the number of images counted
+     * @return A {@link CompletableFuture} to the number of images counted
      */
     private CompletableFuture<Integer> countImagesAsync(String pageUri,
                                                         int depth) {
-        try {
+        return Stream
+            // Use a factory method to create a one-element stream
+            // containing just the pageUri.
+            .of(pageUri)
+
             // Get a future to the page at the root URI.
-            // var is CompletableFuture<Document>
-            CompletableFuture<Document> pageFuture =
-                getStartPage(pageUri);
+            .map(this::getStartPage)
 
-            // Asynchronously count the # of images on this page and
-            // return a future to the count.
-            // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInPageFuture = pageFuture
-                // The getImagesInPage() method runs synchronously, so
-                // call it via thenApplyAsync().
-                .thenApplyAsync(this::getImagesInPage)
+            // Asynchronously process the page.
+            .map(cf ->
+                 // Return a count of the # of images on this page plus the
+                 // # of images on hyperlinks accessible via this page.
+                 combineImageCounts(// Asynchronously count the # of
+                                    // images on this page and return
+                                    // a future to the count.
+                                    countImagesInPageAsync(cf),
 
-                // Count the number of images on this page.
-                .thenApply(List::size);
+                                    // Asynchronously count the # of
+                                    // images in link on this page and
+                                    // returns a future to this count.
+                                    crawlLinksInPageAsync(cf,
+                                                    depth + 1))
 
-            // Asynchronously count the # of images in link on this
-            // page and returns a future to this count.
-            // var is CompletableFuture<Integer>
-            CompletableFuture<Integer> imagesInLinksFuture = pageFuture
-                // The crawlLinksInPage() methods runs synchronously,
-                // so thenComposeAsync() is used to avoid blocking via
-                // "flatMap()" semantics wrt nesting of futures.
-                .thenComposeAsync(page ->
-                                  crawlLinksInPage(page,
-                                                   depth));
+                 // Handle any exception that occurs.
+                 .handle((count, ex) -> {
+                         print("For '" 
+                               + pageUri 
+                               + "': " 
+                               + ex.getMessage());
+                         // Return 0 if an exception happens.
+                         return 0;
+                     }))
 
-            // Return a count of the # of images on this page plus the
-            // # of images on hyperlinks accessible via this page.
-            return combineImageCounts(imagesInPageFuture,
-                                      imagesInLinksFuture);
-        } catch (Exception e) {
-            print("For '" 
-                  + pageUri 
-                  + "': " 
-                  + e.getMessage());
-            // Return 0 if an exception happens.
-            return mZero;
-        }
+            // Use a terminal operation to get the total number of
+            // images from the one-element stream.
+            .findFirst()
+
+            // If something goes wrong return mZero.
+            .orElse(mZero);
+    }
+
+    /**
+     * Asynchronously count all the images in the page associated with
+     * {@code pageFuture} after it is triggered.
+     *
+     * @param pageFuture A {@link CompletableFuture} to the page being
+     *                   downloaded
+     * @return A {@link CompletableFuture} to an {@link Integer}
+     *         containing the # of images on this page
+     */
+    protected CompletableFuture<Integer>
+        countImagesInPageAsync(CompletableFuture<Document> pageFuture) {
+        // Return a CompletableFuture to an Integer containing the #
+        // of images processed on this page.
+        return pageFuture
+            // Asynchronously get the array of image URLs to process
+            // on this page.
+            .thenApplyAsync(this::getImagesInPage)
+
+            // Count the number of images on this page.
+            .thenApply(List::size);
+    }
+
+    /**
+     * Asynchronously obtain a {@link CompletableFuture} to the # of
+     * images on pages linked from this page.
+     *
+     * @param pageFuture A {@link CompletableFuture} to the page
+     *                   that's being downloaded
+     * @param depth      The current depth of the recursive processing
+     * @return A {@link CompletableFuture} to an {@link Integer}
+     *         containing the # of images on pages linked from this
+     *         page
+     */
+    protected CompletableFuture<Integer>
+        crawlLinksInPageAsync(CompletableFuture<Document> pageFuture,
+                              int depth) {
+        // Return a CompletableFuture to an Integer containing the #
+        // of images processed on pages linked from this page.
+
+        return pageFuture
+            // Asynchronously/recursively crawl all hyperlinks in a
+            // page.
+            .thenComposeAsync(page ->
+                              // This method is synchronous, so it's
+                              // called via thenComposeAsync().
+                              crawlLinksInPage(page, depth));
     }
 
     /**
      * Asynchronously count of the # of images on this page plus the #
      * of images on hyperlinks accessible via this page.
      *
-     * @param imagesInPageFuture A future to a count of the # of
-     *                           images on this page
-     * @param imagesInLinksFuture A future to a count of the # of 
-     *                            images in links on this page
-     * @return A future to the number of images counted
+     * @param imagesInPageFuture A {@link CompletableFuture} to a count
+     *                           of the # of images on this page
+     * @param imagesInLinksFuture A {@link CompletableFuture} to a count
+     *                            of the # of images in links on this page
+     * @return A {@link CompletableFuture} to the number of images counted
      */
     private CompletableFuture<Integer> combineImageCounts
         (CompletableFuture<Integer> imagesInPageFuture,
@@ -205,7 +259,7 @@ class ImageCounter {
     }
 
     /**
-     * @return A future to the page at the root URI
+     * @return A {@link CompletableFuture} to the page at the {@code pageURI}
      */
     private CompletableFuture<Document> getStartPage(String pageUri) {
         return CompletableFuture
@@ -227,7 +281,7 @@ class ImageCounter {
     }
 
     /**
-     * Recursively crawl through hyperlinks that are in a @a page.
+     * Recursively crawl through hyperlinks that are in {@code page}.
      *
      * @param page The page containing HTML
      * @param depth The depth of the level of web page traversal
@@ -265,8 +319,8 @@ class ImageCounter {
     }
 
     /**
-     * Conditionally prints the @a string depending on the current
-     * setting of the Options singleton.
+     * Conditionally prints the {@link String} depending on the current
+     * setting of the {@link Options} singleton.
      */
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())
