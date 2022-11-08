@@ -13,9 +13,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * This example shows how to combine the Java sequential streams and
  * completable futures frameworks to generate and reduce random {@link
- * BigFraction} objects concurrently and asynchronously.  It also shows
- * the lazy processing semantics of the Java streams and completable
- * futures frameworks.
+ * BigFraction} objects concurrently and asynchronously.  It also
+ * demonstrates the lazy processing semantics of the Java streams and
+ * completable futures frameworks.
  */
 @SuppressWarnings("unchecked")
 public class ex29 {
