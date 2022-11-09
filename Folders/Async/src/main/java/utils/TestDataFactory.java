@@ -19,7 +19,7 @@ public class TestDataFactory {
 
     /**
      * Return a File object that's used to search a recursive
-     * directory containing the complete works of William Shakespeare.
+     * directory containing many folders and documents.
      */
     public static File getRootFolderFile(String rootFolderName) {
         Function<String, File> getFile = ExceptionUtils
@@ -33,7 +33,7 @@ public class TestDataFactory {
 
     /**
      * Return a folder object that's used to search a recursive
-     * directory containing the complete works of William Shakespeare.
+     * directory containing many folders and documents.
      */
     public static CompletableFuture<Dirent> getRootFolder(String rootFolderName) {
         return Folder.fromDirectory(getRootFolderFile(rootFolderName)

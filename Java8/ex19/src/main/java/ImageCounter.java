@@ -39,8 +39,8 @@ class ImageCounter {
         var rootUri = Options.instance().getRootUri();
 
         this
-            // Perform the image counting starting at the root Uri,
-            // which is given an initial depth count of 1.
+            // Perform asynchronous image counting starting at the
+            // root Uri with an initial depth count of 1.
             .countImagesAsync(rootUri, 1)
 
             // Handle outcome of previous stage by converting any
@@ -62,21 +62,21 @@ class ImageCounter {
             // CompletableFuture processing complete!
             .join();
 
-            /*
-             * Here's another way to handle exceptions:
+        /*
+         * Here's another way to handle exceptions:
 
-            // Handle any exception that occurred by indicating no
-            // images were counted due to the exception.
-            .exceptionally(ex -> 0)
+         // Handle any exception that occurred by indicating no
+         // images were counted due to the exception.
+         .exceptionally(ex -> 0)
 
-            // When the future completes print the total number of images.
-            .thenAccept(totalImages ->
-                        print(1,
-                              ": " 
-                              + totalImages
-                              + " total image(s) are reachable from "
-                              + root Uri))
-            */
+         // When the future completes print the total number of images.
+         .thenAccept(totalImages ->
+         print(1,
+         ": " 
+         + totalImages
+         + " total image(s) are reachable from "
+         + root Uri))
+        */
     }
 
     /**
@@ -97,7 +97,7 @@ class ImageCounter {
 
             // Check to ensure that pageUri does not exceed the max
             // depth or has already been visited.
-            .filter (___ -> passChecks(pageUri, depth))
+            .filter(___ -> passChecks(pageUri, depth))
 
             // Get a CompletableFuture to the Document at pageUri.
             .map(this::getStartPage)
@@ -132,10 +132,10 @@ class ImageCounter {
         // crawling.
         if (depth > Options.instance().maxDepth()) {
             print(depth,
-                    ": Exceeded max depth of "
-                            + Options.instance().maxDepth()
-                            + " "
-                            + pageUri);
+                  ": Exceeded max depth of "
+                  + Options.instance().maxDepth()
+                  + " "
+                  + pageUri);
             return false;
         }
         // Atomically check to see if we've already visited this URL
@@ -143,8 +143,8 @@ class ImageCounter {
         // avoid revisiting it again unnecessarily.
         else if (!mUniqueUris.add(pageUri)) {
             print(depth,
-                    ": Already processed "
-                            + pageUri);
+                  ": Already processed "
+                  + pageUri);
             return false;
         } else
             return true;
@@ -155,11 +155,11 @@ class ImageCounter {
      */
     private CompletableFuture<Document> getStartPage(String pageUri) {
         return CompletableFuture
-                // Asynchronously get the contents of the page.
-                .supplyAsync(() -> Options
-                        .instance()
-                        .getJSuper()
-                        .getPage(pageUri));
+            // Asynchronously get the contents of the page.
+            .supplyAsync(() -> Options
+                         .instance()
+                         .getJSuper()
+                         .getPage(pageUri));
     }
 
     /**
@@ -228,8 +228,8 @@ class ImageCounter {
     private Elements getImagesInPage(Document page) {
         // Return a collection IMG SRC URLs in this page.
         return page
-                // Select all the image elements in the page.
-                .select("img");
+            // Select all the image elements in the page.
+            .select("img");
     }
 
     /**
@@ -270,29 +270,29 @@ class ImageCounter {
         // Return a completable future to a list of counts of the # of
         // nested hyperlinks in the page.
         return page
-                // Find all the hyperlinks on this page.
-                .select("a[href]")
+            // Find all the hyperlinks on this page.
+            .select("a[href]")
 
-                // Convert the hyperlink elements into a stream.
-                .stream()
+            // Convert the hyperlink elements into a stream.
+            .stream()
 
-                // Map each hyperlink to a completable future containing a
-                // count of the number of images found at that hyperlink.
-                .map(hyperLink ->
-                        // Recursively visit all the hyperlinks on this page.
-                        countImagesAsync(Options
-                                        .instance()
-                                        .getJSuper()
-                                        .getHyperLink(hyperLink),
-                                depth))
+            // Map each hyperlink to a completable future containing a
+            // count of the number of images found at that hyperlink.
+            .map(hyperLink ->
+                 // Recursively visit all the hyperlinks on this page.
+                 countImagesAsync(Options
+                                  .instance()
+                                  .getJSuper()
+                                  .getHyperLink(hyperLink),
+                                  depth))
 
-                // Trigger intermediate operation processing and return a
-                // future to a CompletableFutures<IntStream>.
-                .collect(FuturesCollectorIntStream.toFuture())
+            // Trigger intermediate operation processing and return a
+            // future to a CompletableFutures<IntStream>.
+            .collect(FuturesCollectorIntStream.toFuture())
 
-                // After all the futures in the stream complete then sum
-                // all the integers in the stream of results.
-                .thenApply(IntStream::sum);
+            // After all the futures in the stream complete then sum
+            // all the integers in the stream of results.
+            .thenApply(IntStream::sum);
     }
 
     /**

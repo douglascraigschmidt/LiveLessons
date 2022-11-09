@@ -14,7 +14,7 @@ import static utils.StreamOfFuturesCollector.toFuture;
 
 /**
  * This example combines the Java completable futures and sequential
- * streams framework to process entries in a recursively-structured
+ * streams frameworks to process entries in a recursively-structured
  * folder hierarchy concurrently and asynchronously.
  */
 public class Main {

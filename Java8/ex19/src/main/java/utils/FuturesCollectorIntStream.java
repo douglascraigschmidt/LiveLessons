@@ -20,13 +20,13 @@ import java.util.stream.Stream;
  * CompletableFuture<Integer>} objects in the {@link Stream} complete.
  *
  * See
- * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
+ * <a href="http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html">this link</a>
  * for more info.
  */
 public class FuturesCollectorIntStream
       implements Collector<CompletableFuture<Integer>,
-                 List<CompletableFuture<Integer>>,
-                 CompletableFuture<IntStream>> {
+                           List<CompletableFuture<Integer>>,
+                           CompletableFuture<IntStream>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -46,7 +46,8 @@ public class FuturesCollectorIntStream
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<List<CompletableFuture<Integer>>, CompletableFuture<Integer>> accumulator() {
+    public BiConsumer<List<CompletableFuture<Integer>>, CompletableFuture<Integer>>
+        accumulator() {
         return List::add;
     }
 
@@ -75,7 +76,8 @@ public class FuturesCollectorIntStream
      * the final result
      */
     @Override
-    public Function<List<CompletableFuture<Integer>>, CompletableFuture<IntStream>> finisher() {
+    public Function<List<CompletableFuture<Integer>>, CompletableFuture<IntStream>>
+        finisher() {
         return futures
             -> CompletableFuture
             // Use CompletableFuture.allOf() to obtain a
@@ -90,7 +92,7 @@ public class FuturesCollectorIntStream
                        // futures.
                        .stream()
 
-                       // Use map() to join() all completablefutures
+                       // Use map() to join() all completable futures
                        // and yield objects of type T.  Note that
                        // join() should never block.
                        .mapToInt(CompletableFuture::join));

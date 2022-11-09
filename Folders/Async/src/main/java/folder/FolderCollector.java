@@ -86,7 +86,6 @@ public class FolderCollector
         return folder -> {
             // Create an array containing all the futures for
             // subfolders and documents.
-            // CompletableFuture<Dirent>[] var
             var futures =
                 ListAndArrayUtils.concat(folder.mSubFolderFutures,
                                          folder.mDocumentFutures);
