@@ -7,16 +7,15 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
- * In conjunction with {@code StreamSupport.stream()} and {@code
+ * In conjunction with {@link StreamSupport.stream()} and {@link
  * Spliterators.spliterator()} this class creates a sequential or
- * parallel stream of {@code Directs} from a recursively-structured
- * directory folder.
+ * parallel stream of {@link Dirent} objects from a
+ * recursively-structured directory folder.
  */
 public class BFSFolderSpliterator
        extends Spliterators.AbstractSpliterator<Dirent> {
     /**
-     * Iterator traverses the folder contents one directory entry at a
-     * time.
+     * Iterator traverses the folder contents one entry at a time.
      */
     private final Iterator<Dirent> mIterator;
         
@@ -31,12 +30,13 @@ public class BFSFolderSpliterator
     }
 
     /**
-     * Attempt to advance the spliterator by one Dirent.
+     * Attempt to advance the {@link Spliterator} by one {@link
+     * Dirent}.
      */
     public boolean tryAdvance(Consumer<? super Dirent> action) {
-        // If there's a dirent available.
+        // If there's a Dirent available.
         if (mIterator.hasNext()) {
-            // Obtain and accept the current entry.
+            // Obtain and accept the current Dirent.
             action.accept(mIterator.next());
             // Keep going.
             return true;
@@ -46,12 +46,12 @@ public class BFSFolderSpliterator
     }
 
     /**
-     * This iterator traverses each element in the folder.
+     * This iterator traverses each element in the {@link Folder}.
      */
     private static class BFSIterator
-        implements Iterator<Dirent> {
+            implements Iterator<Dirent> {
         /**
-         * The current entry to process.
+         * The current Dirent to process.
          */
         private Dirent mCurrentEntry;
 
@@ -81,15 +81,15 @@ public class BFSFolderSpliterator
 
         /**
          * @return True if the iterator can continue, false if it's at
-         * the end
+         *         the end
          */
         public boolean hasNext() {
             // See if we need to refresh the current entry.
             if (mCurrentEntry == null) {
                 // See if there are any subfolders left to process.
                 if (mFoldersList.size() > 0) {
-                    // If there are subfolders left then pop the one
-                    // at the end and make it the current entry.
+                    // If any subfolders are left then pop the one at
+                    // the end and make it the current entry.
                     mCurrentEntry =
                         mFoldersList.remove(mFoldersList.size() - 1);
 
@@ -113,7 +113,7 @@ public class BFSFolderSpliterator
         }
 
         /**
-         * @return The next unseen entry in the folder
+         * @return The next unseen entry in the {@link Folder}
          */
         public Dirent next() {
             // Store the current entry.

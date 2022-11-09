@@ -14,8 +14,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Implements a custom collector that converts a stream of {@link
- * CompletableFuture<Integer>} objects into a single {@link
+ * Implements a custom {@link Collector} that converts a stream of
+ * {@link CompletableFuture<Integer>} objects into a single {@link
  * CompletableFuture<IntStream>} that is triggered when all the {@link
  * CompletableFuture<Integer>} objects in the {@link Stream} complete.
  *

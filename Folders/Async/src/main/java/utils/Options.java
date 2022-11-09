@@ -7,6 +7,12 @@ import java.util.concurrent.CompletableFuture;
  */
 public class Options {
     /**
+     * The input "works", which is a large recursive folder containing
+     * thousands of subfolders and files.
+     */
+    public static final String sWORKS = "works";
+
+    /**
      * A completed completable future to nothing.
      */
     public static final CompletableFuture<Void> sVoid

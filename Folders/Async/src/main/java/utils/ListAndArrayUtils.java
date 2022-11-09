@@ -87,6 +87,6 @@ public class ListAndArrayUtils {
 
             // Trigger intermediate operations and
             // collect results into a List.
-            .collect(toList());
+            .toList();
     }
 }

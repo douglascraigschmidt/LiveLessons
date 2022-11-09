@@ -269,7 +269,8 @@ public final class FolderOps {
             // Process each document.
             .flatMap(document -> FolderOps
                      // Split the document into lines.
-                     .splitAsFlux(document, "\\r?\\n"))
+                     .splitAsFlux(document,
+                                  "\\r?\\n|\\r")
 
             // Count the number of lines in the document.
             .count();

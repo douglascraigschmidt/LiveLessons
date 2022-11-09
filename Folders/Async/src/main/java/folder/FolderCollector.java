@@ -15,16 +15,16 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Implements a custom collector that converts a stream of Path
- * objects into a completable future to single Folder object that
- * forms the root of a recursive directory structure.
+ * This custom {@link Collector} converts a stream of {@link Path}
+ * objects into a {@link CompletableFuture} to single {@link Folder}
+ * that forms the root of a recursive directory structure.
  */
 public class FolderCollector
       implements Collector<Path,
                            Folder,
                            CompletableFuture<Folder>> {
     /**
-     * Path for the folder.
+     * Path for the {@link Folder}.
      */
     private final Path mPath;
 
@@ -36,11 +36,12 @@ public class FolderCollector
     }
 
     /**
-     * This factory method returns a supplier that creates and returns
-     * a new mutable result container that holds all the documents and
-     * subfolders in the stream.
+     * This factory method returns a {@link Supplier} that creates and
+     * returns a new mutable result container that holds all the
+     * documents and subfolders in the stream.
      *
-     * @return a supplier that returns a new, mutable result container
+     * @return A {@link Supplier} that creates a mutable result
+     *         container
      */
     @Override
     public Supplier<Folder> supplier() {
@@ -48,24 +49,25 @@ public class FolderCollector
     }
     
     /**
-     * This factory method returns a biconsumer that adds a path to
-     * the mutable result container.
+     * This factory method returns a {@link BiConsumer} that adds a
+     * {@link Path} to the mutable result container.
      *
-     * @return a biconsumer that adds a path to the mutable result container
+     * @return A {@link BiConsumer} that adds a {@link Path} to the
+     *         mutable result container
      */
     @Override
     public BiConsumer<Folder, Path> accumulator() {
-        // Return a biconsumer that adds a path to the mutable result
+        // Return a BiConsumer that adds a Path to the mutable result
         // container.
         return Folder::addEntry;
     }
 
     /**
      * This factory method merges the contents of two subfolders into
-     * a single folder.
+     * a single {@link Folder}.
      *
-     * @return a BinaryOperation that merges two subfolders
-     *         into a combined folder result
+     * @return A {link BinaryOperation} that merges two subfolders
+     *         into a combined {@link Folder} result
      */
     @Override
     public BinaryOperator<Folder> combiner() {
@@ -75,11 +77,11 @@ public class FolderCollector
 
     /**
      * Perform the final transformation from the intermediate
-     * accumulation type {@code A} to the final result type {@code R},
-     * which is a Folder object.
+     * accumulation type {@link Folder} to the final result type
+     * {@link CompletableFuture<Folder>}.
      *
-     * @return a function which transforms the intermediate result to
-     * the final result, which is a Folder object
+     * @return A {@link Function} that transforms the intermediate
+     *         result to the final result, which is a {@link Folder}
      */
     @Override
     public Function<Folder, CompletableFuture<Folder>> finisher() {
@@ -91,29 +93,32 @@ public class FolderCollector
                                          folder.mDocumentFutures);
 
             if (futures == null) {
-                // This is an empty folder (i.e., with no subfolders
-                // or documents) so we're done.
+                // This is an empty Folder (i.e., with no subfolders
+                // or documents), so we're done.
                 return CompletableFuture.completedFuture(folder);
             } else {
                 return CompletableFuture
-                    // Create a future that will complete when all the
-                    // other futures have completed.
+                    // Create a CompletableFuture that emits a Folder
+                    // when all the other CompletableFuture objects
+                    // complete.
                     .allOf(Objects.requireNonNull(futures))
 
-                    // Return a future to this folder after first
-                    // initializing its subfolder/document fields.
+                    // Return a CompletableFuture to this Folder after
+                    // first initializing its subfolder/document
+                    // fields.
                     .thenApply(folder::whenComplete);
             }
         };
     }
 
     /**
-     * Returns a {@code Set} of {@code Collector.Characteristics}
-     * indicating the characteristics of this Collector.  This set
-     * should be immutable.
+     * Returns an immutable {@code Set} of {@link
+     * Collector.Characteristics} indicating the characteristics of
+     * this {@link Collector}.
      *
-     * @return An immutable set of collector characteristics, which in
-     * this case is UNORDERED
+     * @return An immutable {@link Set} of {@link
+     * Collector.Characteristics}, which in this case is {@code
+     * UNORDERED}
      */
     @Override
     public Set<Collector.Characteristics> characteristics() {
@@ -124,13 +129,13 @@ public class FolderCollector
     }
 
     /**
-     * This static factory method creates a new FolderCollector.
+     * This static factory method creates a new {@link FolderCollector}.
      *
-     * @return A new FolderCollector
+     * @return A new {@link FolderCollector}
      */
     public static Collector<Path, Folder, CompletableFuture<Folder>> 
         toFolder(Path path) {
-        // Return a new folder collector.        
+        // Return a new FolderCollector.
         return new FolderCollector(path);
     }
 }

@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 
 /**
  * This super class defines the common capabilities provided by a
- * directory entry.  It is inherited by the Folder and Document
- * subclasses.
+ * directory entry.  It is inherited by the {@link Folder} and {@link
+ * Document} subclasses.
  */
 public abstract class Dirent {
     /**
-     * Path of the document.
+     * The {@link Path} of this {@link Dirent}.
      */
     private Path mPath;
 
@@ -28,7 +28,7 @@ public abstract class Dirent {
     }
 
     /**
-     * Constructor initializes the field.
+     * Constructor initializes the fields.
      */
     Dirent(Path path, long size) {
         mPath = path;
@@ -36,21 +36,21 @@ public abstract class Dirent {
     }
 
     /**
-     * @return Name of the dirent
+     * @return Name of the {@link Dirent}
      */
     public String getName() {
         return mPath.getFileName().toString();
     }
 
     /**
-     * Set path of the dirent.
+     * Set {@link Path} of the {@link Dirent}.
      */
     public void setPath(Path path) {
         mPath = path;
     }
 
     /**
-     * @return Path of the dirent
+     * @return {@link Path} of the {@link Dirent}
      */
     public Path getPath() {
         return mPath;
@@ -71,7 +71,7 @@ public abstract class Dirent {
     }
 
     /**
-     * @return The contents of this Dirent
+     * @return The contents of this {@link Dirent}
      */
     public CharSequence getContents() {
         throw new UnsupportedOperationException();
@@ -102,7 +102,7 @@ public abstract class Dirent {
 
     /**
      * @return A sequential stream containing all elements rooted at
-     * this directory entry
+     *         this directory entry
      */
     public Stream<Dirent> stream() {
         throw new UnsupportedOperationException();
@@ -110,7 +110,7 @@ public abstract class Dirent {
 
     /**
      * @return A parallel stream containing all elements rooted at
-     * this directory entry
+     *         this directory entry
      */
     public Stream<Dirent> parallelStream() {
         throw new UnsupportedOperationException();

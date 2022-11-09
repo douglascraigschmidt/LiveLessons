@@ -159,7 +159,7 @@ public class Main {
 
                               // Split the document into lines.
                               .flatMap(document -> splitAsObservable(document,
-                                                                     "\\r?\\n"))
+                                                                     "\\r?\\n|\\r")
 
                               // Count the number of newlines in the document.
                               .count()

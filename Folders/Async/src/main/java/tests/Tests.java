@@ -132,7 +132,7 @@ public final class Tests {
                        // Create a stream from the document around
                        // matches to newlines.
                        splitAsStream(document.getContents(),
-                                     "[\n\r]")
+                                     "\\r?\\n|\\r")
 
                        // Count the number of newlines in the document.
                        .count())

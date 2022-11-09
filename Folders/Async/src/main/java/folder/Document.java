@@ -8,18 +8,18 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
- * Represents the contents of a document, which is stored as a
- * CharSequence of bytes.
+ * Represents the contents of a document, which is stored as a {@link
+ * CharSequence} of bytes.
  */
 public class Document 
        extends Dirent {
     /**
-     * Contents of the document.
+     * Contents of the {@link Document}.
      */
     CharSequence mContents;
 
     /**
-     * Constructor sets the field.
+     * Constructor sets the fields.
      */
     private Document(CharSequence input,
                      Path path) {
@@ -28,7 +28,7 @@ public class Document
     }
 
     /**
-     * @return The contents of this Document
+     * @return The contents of this {@link Document}
      */
     @Override
     public CharSequence getContents() {
@@ -36,12 +36,12 @@ public class Document
     }
 
     /**
-     * Factory method that asynchronously creates a document from the
-     * file at the given @a path.
+     * Factory method that asynchronously creates a {@link Document}
+     * from the file at the given {@link Path}.
      *
-     * @param path The path of the document in the file system
-     * @return A future to the document that will be complete when the
-     *         contents of the document are available
+     * @param path The {@link Path} of the {@link Document} in the file system
+     * @return A {@link CompletableFuture} to the {@link Document}
+     *         emitted when its contents are available
      */
     static CompletableFuture<Dirent> fromPath(Path path) {
         // This function gets all bytes from a file.
@@ -49,12 +49,13 @@ public class Document
                 // This adapter simplifies checked exceptions.
                 .rethrowFunction(Files::readAllBytes);
 
-        // Return a future that completes once the document's contents
-        // are available.
+        // Return a CompletableFuture that completes once the
+        // Document's contents are available.
         return CompletableFuture
             .supplyAsync(() ->
-                         // Create/return a new document (wrapped in a
-                         // future) containing file contents at the path.
+                         // Create/return a new Document (wrapped in a
+                         // CompletableFuture) containing file
+                         // contents at the path.
                          new Document(new String(getBytes.apply(path)),
                                       path));
     }

@@ -55,8 +55,9 @@ public final class FolderTestsParallel {
         // This function counts the # of lines in a dirent.
         Function<Dirent, Mono<Long>> countLines = document -> FolderOps.
             // Split the document into lines.
-            splitAsFlux(document, "\\r?\\n")
-            
+            splitAsFlux(document,
+                        "\\r?\\n|\\r")
+
             // Count # of entries in the stream.
             .count();
 
