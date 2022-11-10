@@ -11,31 +11,31 @@ import java.util.concurrent.TimeUnit;
  * This example demonstrates various RxJava mechanisms for determining
  * if a flow of random big integers are prime numbers or not.  It
  * shows a sequential flow and two different concurrent flows.  It
- * also illustrates the use of a memoizer based on Java's
- * ConcurrentHashMap.
+ * also illustrates the use of a memoizer based on Java's {@link
+ * ConcurrentHashMap}.
  */
 public class ex3 {
     /**
      * Maximum random number value.
      */
-    private static int sMAX_VALUE = 1000000000;
+    private static final int sMAX_VALUE = 1000000000;
 
     /**
      * A memoizer cache that maps candidate primes to their smallest
      * factor (if they aren't prime) or 0 if they are prime.
      */ 
-    private static Map<BigInteger, BigInteger> mPrimeCache
+    private static final Map<BigInteger, BigInteger> mPrimeCache
         = new ConcurrentHashMap<>();
 
     /**
      * Max number of iterations.
      */
-    private static int sMAX_ITERATIONS = 100;
+    private static final int sMAX_ITERATIONS = 100;
 
     /**
      * Duration for sleeping.
      */
-    private static long sSLEEP_DURATION = 100;
+    private static final long sSLEEP_DURATION = 100;
 
     /**
      * The scheduler to use for Observable.interval().
@@ -161,7 +161,7 @@ public class ex3 {
             .map(x -> BigInteger.valueOf(rand.nextInt(sMAX_ITERATIONS) + origin))
 
             // Print the big integer as a debugging aid.
-            .doOnNext(ex3::print)
+            // .doOnNext(ex3::print)
 
             // Only take sMAX_ITERATIONS amount of big integers.
             .take(sMAX_ITERATIONS)
@@ -177,15 +177,15 @@ public class ex3 {
      * This method checks whether the {@code primeCandidate} is prime or not.
      *
      * @param primeCandidate The number to check for the prime factor.
-     * @return a PrimeResult that contains the prime candidate and
-     *         either 0 (if the prime candidate is prime) or the
+     * @return a {@link PrimeResult} that contains the prime candidate
+     *         and either 0 (if the prime candidate is prime) or the
      *         smallest factor (if it's not prime)
      */
     static PrimeResult checkIfPrime(BigInteger primeCandidate) {
         return new PrimeResult
             (primeCandidate,
-             // This atomic "check then act" method serves as
-             // a "memoizer" cache.
+             // This atomic "check then act" method serves as a
+             // "memoizer" cache.
              mPrimeCache
              .computeIfAbsent(primeCandidate,
                               ex3::isPrime));
@@ -217,39 +217,31 @@ public class ex3 {
      * Process the {@code primeTuple} to print whether a number if prime.
      */
     private static void processResult(PrimeResult primeTuple) {
-        if (!primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
+        if (!primeTuple.smallestFactor().equals(BigInteger.ZERO)) {
             print("found a non-prime number with smallest factor "
-                  + primeTuple.mSmallestFactor
+                  + primeTuple.smallestFactor()
                   + " for "
-                  + primeTuple.mPrimeCandidate);
+                  + primeTuple.primeCandidate());
         } else {
             print("found a prime number "
-                  + primeTuple.mPrimeCandidate);
+                  + primeTuple.primeCandidate());
         }
     }
 
     /**
-     * The result returned from checkIfPrime.
+     * Define a Java record that holds the "plain old data" (POD) in a
+     * result returned from checkIfPrime().
      */
-    private static class PrimeResult {
-        /**
-         * Value that was evaluated for primality.
-         */
-        BigInteger mPrimeCandidate;
+    public record PrimeResult(
+                              /*
+                               * Value that was evaluated for primality.
+                               */
+                              BigInteger primeCandidate,
 
-        /**
-         * Result of the isPrime() method.
-         */
-        BigInteger mSmallestFactor;
-
-        /**
-         * Constructor initializes the fields.
-         */
-        public PrimeResult(BigInteger primeCandidate, BigInteger smallestFactor) {
-            mPrimeCandidate = primeCandidate;
-            mSmallestFactor = smallestFactor;
-        }
-    }
+                              /*
+                               * Result of the isPrime() method.
+                               */
+                              BigInteger smallestFactor) {}
 
     /**
      * Print string {@code s} with the thread name appended.
