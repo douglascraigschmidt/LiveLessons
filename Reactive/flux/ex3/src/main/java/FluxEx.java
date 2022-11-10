@@ -126,9 +126,9 @@ public class FluxEx {
             // Process the collected list and return a mono used to
             // synchronize with the AsyncTaskBarrier framework.
             .flatMap(list ->
-                         // Sort and print the results after all sync
-                         // fraction reductions complete.
-                         BigFractionUtils.sortAndPrintList(list, sb));
+                     // Sort and print the results after all sync
+                     // fraction reductions complete.
+                     BigFractionUtils.sortAndPrintList(list, sb));
     }
 
     /**

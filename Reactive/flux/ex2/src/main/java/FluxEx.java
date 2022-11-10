@@ -182,7 +182,8 @@ public class FluxEx {
                        FluxEx.processResult(bigInteger,
                                             sb))
 
-            // Dispose of the "subscriber" thread.
+            // Always dispose of the "subscriber" thread regardless of
+            // what happens.
             .doFinally(___ -> subscriber.dispose())
 
             // Display results after all elements in the flux stream are
@@ -223,7 +224,8 @@ public class FluxEx {
             // aren't prime!
             .filter(sOnlyOdd)
 
-            // Dispose of the "publisher" thread.
+            // Always dispose of the "publisher" thread regardless of
+            // what happens.
             .doFinally(___ -> publisher.dispose())
 
             // Start the processing and emit each random number until
