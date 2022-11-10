@@ -229,10 +229,12 @@ public class ObservableEx {
      */
     static PrimeResult checkIfPrime(BigInteger primeCandidate,
                                     StringBuffer sb) {
+        // Return a record containing the prime candidate and the
+        // result of checking if it's prime.
         return new PrimeResult
             (primeCandidate,
-             // This atomic "check then act" method serves as
-             // a "memoizer" cache.
+             // This atomic "check then act" method serves as a
+             // "memoizer" cache.
              mPrimeCache.computeIfAbsent(primeCandidate,
                                          pc -> (ObservableEx.isPrime(pc, sb))));
     }
@@ -241,22 +243,33 @@ public class ObservableEx {
      * This method provides a brute-force determination of whether
      * number {@code primeCandidate} is prime.  Returns 0 if it is
      * prime or the smallest factor if it is not prime.
+
+     * @param primeCandidate The {@link BigInteger} to check for
+     *                       primality
+     * @return 0 if prime or the smallest factor if not prime
      */
-    static BigInteger isPrime(BigInteger n,
+    static BigInteger isPrime(BigInteger primeCandidate,
                               StringBuffer sb) {
-        print("checking if " + n + " is prime",
+        print("checking if " 
+              + primeCandidate 
+              + " is prime",
               sb);
 
-        // Even numbers can't be prime.
-        if (n.mod(BigInteger.TWO).compareTo(BigInteger.TWO) == 0)
+        // Check if primeCandidate is a multiple of 2.
+        if (primeCandidate.mod(BigInteger.TWO).compareTo(BigInteger.TWO) == 0)
+            // Return smallest factor for non-prime number.
             return BigInteger.TWO;
 
+        // If not, then just check the odds for primality.
         for (BigInteger i = BigInteger.valueOf(3);
-             n.compareTo(i.multiply(i)) >= 0;
+             primeCandidate.compareTo(i.multiply(i)) >= 0;
+             // Skip over even numbers.
              i = i.add(BigInteger.TWO))
-            if (n.mod(i).compareTo(BigInteger.ZERO) == 0)
+            if (primeCandidate.mod(i).compareTo(BigInteger.ZERO) == 0)
+                // primeCandidate was not prime.
                 return i;
-    
+
+        // primeCandidate was prime.    
         return BigInteger.ZERO;
     }
 
@@ -265,40 +278,31 @@ public class ObservableEx {
      */
     private static void processResult(PrimeResult primeTuple,
                                       StringBuffer sb) {
-        if (!primeTuple.mSmallestFactor.equals(BigInteger.ZERO)) {
+        if (!primeTuple.smallestFactor().equals(BigInteger.ZERO)) {
             print("found a non-prime number with smallest factor "
-                  + primeTuple.mSmallestFactor
+                  + primeTuple.smallestFactor()
                   + " for "
-                  + primeTuple.mPrimeCandidate, sb);
+                  + primeTuple.primeCandidate(), sb);
         } else {
             print("found a prime number "
-                  + primeTuple.mPrimeCandidate, sb);
+                  + primeTuple.primeCandidate(), sb);
         }
     }
 
     /**
-     * The result returned from checkIfPrime.
+     * Define a Java record that holds the "plain old data" (POD) in a
+     * result returned from checkIfPrime().
      */
-    private static class PrimeResult {
-        /**
-         * Value that was evaluated for primality.
-         */
-        BigInteger mPrimeCandidate;
+    public record PrimeResult(
+            /*
+             * Value that was evaluated for primality.
+             */
+            BigInteger primeCandidate,
 
-        /**
-         * Result of the isPrime() method.
-         */
-        BigInteger mSmallestFactor;
-
-        /**
-         * Constructor initializes the fields.
-         */
-        public PrimeResult(BigInteger primeCandidate,
-                           BigInteger smallestFactor) {
-            mPrimeCandidate = primeCandidate;
-            mSmallestFactor = smallestFactor;
-        }
-    }
+            /*
+             * Result of the isPrime() method.
+             */
+            BigInteger smallestFactor) {}
 
     /**
      * Print string {@code s} with the thread name appended.

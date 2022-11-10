@@ -179,18 +179,21 @@ public class FluxEx {
 
             // Process each big integer in the "subscriber" thread.
             .doOnNext(bigInteger ->
-                       FluxEx.processResult(bigInteger,
-                                            sb))
-
-            // Always dispose of the "subscriber" thread regardless of
-            // what happens.
-            .doFinally(___ -> subscriber.dispose())
+                      FluxEx.processResult(bigInteger,
+                                           sb))
 
             // Display results after all elements in the flux stream are
-            // processed and return an empty mono to synchronize with
+            // processed successfully.
+            .doOnComplete(() ->
+                          BigFractionUtils.display(sb.toString()))
+
+            // Always dispose of the "subscriber" thread regardless of
+            // what happens in the stream.
+            .doFinally(___ -> subscriber.dispose())
+
+            // Return an empty Mono to synchronize with
             // AsyncTaskBarrier.
-            .then(Mono.fromRunnable(() ->
-                                    BigFractionUtils.display(sb.toString())));
+            .then();
     }
 
     /**
