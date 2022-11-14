@@ -177,7 +177,7 @@ public class ex3 {
      * This method checks whether the {@code primeCandidate} is prime or not.
      *
      * @param primeCandidate The number to check for the prime factor.
-     * @return a {@link PrimeResult} that contains the prime candidate
+     * @return A {@link PrimeResult} that contains the prime candidate
      *         and either 0 (if the prime candidate is prime) or the
      *         smallest factor (if it's not prime)
      */

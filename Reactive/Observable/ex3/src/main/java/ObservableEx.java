@@ -17,10 +17,10 @@ import static utils.BigFractionUtils.*;
  * asynchronously and concurrently using many RxJava Observable
  * operations, including fromArray(), map(), generate(), take(),
  * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
- * subscribeOn(), onErrorReturn(), and Schedulers.computation().  It
- * also shows RxJava Single and Maybe operations, including
- * fromCallable(), flatMapCompletable(), ambArray(), subscribeOn(),
- * ignoreElement(), and doOnSuccess().
+ * subscribeOn(), onErrorReturn(), onErrorResumeNext(), and
+ * Schedulers.computation().  It also shows RxJava Single and Maybe
+ * operations, including fromCallable(), flatMapCompletable(),
+ * ambArray(), subscribeOn(), ignoreElement(), and doOnSuccess().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ObservableEx {
@@ -30,59 +30,11 @@ public class ObservableEx {
     private static final Random sRANDOM = new Random();
 
     /**
-     * Test an asynchronous {@link Observable} stream consisting of
-     * fromIterable(), flatMap(), reduce(), and a pool of threads to
-     * perform BigFraction reductions and multiplications.
+     * Test Observable exception handling via onErrorReturn().
      */
-    public static Completable testFractionMultiplications() {
+    public static Completable testFractionException1() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications()\n");
-
-        // Create an array of reduced BigFraction objects.
-        BigFraction[] bigFractions = {
-            BigFraction.valueOf(1000, 30),
-            BigFraction.valueOf(1000, 40),
-            BigFraction.valueOf(1000, 20),
-            BigFraction.valueOf(1000, 10)
-        };
-
-        // Display the results.
-        Consumer<? super BigFraction> displayResults = result -> {
-            sb.append("    sum of BigFractions = "
-                      + result
-                      + "\n");
-            BigFractionUtils.display(sb.toString());
-        };
-
-        return Observable
-            // Emit a stream of reduced big fractions.
-            .fromArray(bigFractions)
-
-            // Use RxJava's flatMap() concurrency idiom to multiply
-            // these BigFractions asynchronously in a thread pool.
-            .flatMap(bf -> multiplyFractions(bf, Schedulers.computation()))
-
-            // Log the BigFractions.
-            .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
-
-            // Reduce the results into one Maybe<BigFraction>.
-            .reduce(BigFraction::add)
-
-            // Display the results if all goes well.
-            .doOnSuccess(displayResults)
-
-            // Return a Completable to synchronize with the
-            // AsyncTaskBarrier framework.
-            .ignoreElement();
-    }
-
-    /**
-     * Use an asynchronous Observable stream and a pool of threads to
-     * showcase exception handling of BigFraction objects.
-     */
-    public static Completable testFractionExceptions() {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionExceptions()\n");
+            new StringBuffer(">> Calling testFractionException1()\n");
 
         // Create a function to handle an ArithmeticException.
         Function<Throwable,
@@ -136,12 +88,106 @@ public class ObservableEx {
             // Remove any big fractions that are <= 0.
             .filter(fraction -> fraction.compareTo(0) > 0)
 
-            // Collect the non-0 results into an ArrayList.
-            .collectInto(new ArrayList<BigFraction>(), List::add)
+            // Collect the results into a List.
+            .collect(toList())
             
             // Print the List and return a Completable that
             // synchronizes with the AsyncTaskBarrier framework.
-            .flatMapCompletable(list -> BigFractionUtils.printList(list, sb));
+            .flatMapCompletable(list -> BigFractionUtils
+                                .printList(list, sb));
+    }
+
+    /**
+     * Test Observable exception handling via onErrorResumeNext().
+     */
+    public static Completable testFractionException2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionException2()\n");
+
+        // Create a list of denominators, including 0 that will
+        // trigger an ArithmeticException.
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
+
+        // Create a Function lambda to handle an ArithmeticException.
+        Function<Throwable,
+                 Observable<BigFraction>> logExceptionAndReturnEmptyObservable = t -> {
+            // Record the exception message.
+            sb.append("     exception = "
+                      + t.getMessage());
+
+            // Return an empty Observable when an exception occurs.
+            return Observable.empty();
+        };
+
+        return Observable
+            // Generate an Observable stream from the denominators
+            // list.
+            .fromIterable(denominators)
+
+            // Generate a random BigFraction.
+            .map(denominator -> BigFraction
+                 // Throws ArithmeticException if
+                 // denominator is 0.
+                 .valueOf(Math.abs(sRANDOM.nextInt()),
+                          denominator))
+
+            // Catch ArithmeticException and return an empty
+            // Observable, which terminates the stream at that point.
+            .onErrorResumeNext(logExceptionAndReturnEmptyObservable)
+
+            // Collect the non-empty BigFractions into a list.
+            .collect(toList())
+
+            // Print the List and return a Completable that
+            // synchronizes with the AsyncTaskBarrier framework.
+            .flatMapCompletable(list -> BigFractionUtils
+                                .printList(list, sb));
+    }
+
+    /**
+     * Test an asynchronous {@link Observable} stream consisting of
+     * fromIterable(), flatMap(), reduce(), and a pool of threads to
+     * perform BigFraction reductions and multiplications.
+     */
+    public static Completable testFractionMultiplications() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications()\n");
+
+        // Create an array of reduced BigFraction objects.
+        List<BigFraction> bigFractionList = List
+            .of(BigFraction.valueOf(1000, 30),
+                BigFraction.valueOf(1000, 40),
+                BigFraction.valueOf(1000, 20),
+                BigFraction.valueOf(1000, 10));
+
+        // Display the results.
+        Consumer<? super BigFraction> displayResults = result -> {
+            sb.append("    sum of BigFractions = "
+                      + result
+                      + "\n");
+            BigFractionUtils.display(sb.toString());
+        };
+
+        return Observable
+            // Emit a stream of reduced big fractions.
+            .fromIterable(bigFractionList)
+
+            // Use RxJava's flatMap() concurrency idiom to multiply
+            // these BigFractions asynchronously in a thread pool.
+            .flatMap(bf -> multiplyFractions(bf, Schedulers.computation()))
+
+            // Log the BigFractions.
+            .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
+
+            // Reduce the results into one Maybe<BigFraction>.
+            .reduce(BigFraction::add)
+
+            // Display the results if all goes well.
+            .doOnSuccess(displayResults)
+
+            // Return a Completable to synchronize with the
+            // AsyncTaskBarrier framework.
+            .ignoreElement();
     }
 
     /**
@@ -172,8 +218,8 @@ public class ObservableEx {
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.computation()))
 
-            // Collect the results into a List.
-            .collect(toList())
+            // Collect the non-0 results into an ArrayList.
+            .collectInto(new ArrayList<BigFraction>(), List::add)
 
             // Sort and print the List and return a Completable that
             // synchronizes with the AsyncTaskBarrier framework.

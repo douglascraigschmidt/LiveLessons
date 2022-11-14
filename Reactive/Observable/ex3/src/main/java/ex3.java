@@ -5,23 +5,25 @@ import utils.AsyncTaskBarrier;
  * asynchronously and concurrently using many RxJava Observable
  * operations, including fromArray(), map(), generate(), take(),
  * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
- * subscribeOn(), onErrorReturn(), and Schedulers.computation().  It
- * also shows RxJava Single and Maybe operations, including
- * fromCallable(), flatMapCompletable(), ambArray(), subscribeOn(),
- * ignoreElement(), and doOnSuccess().
+ * subscribeOn(), onErrorReturn(), onErrorResumeNext(), and
+ * Schedulers.computation().  It also shows RxJava Single and Maybe
+ * operations, including fromCallable(), flatMapCompletable(),
+ * ambArray(), subscribeOn(), ignoreElement(), and doOnSuccess().
  */
 public class ex3 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
+        // Test Observable exception handling via onErrorReturn().
+        AsyncTaskBarrier.register(ObservableEx::testFractionException1);
+
+        // Test Observable exception handling via onErrorResumeNext().
+        AsyncTaskBarrier.register(ObservableEx::testFractionException2);
+
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction multiplications and additions.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications);
-
-        // Use an asynchronous Observable stream and a pool of threads
-        // to showcase exception handling of BigFraction objects.
-        AsyncTaskBarrier.register(ObservableEx::testFractionExceptions);
 
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction reductions and multiplications.
