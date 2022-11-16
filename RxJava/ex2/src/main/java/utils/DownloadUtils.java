@@ -5,9 +5,15 @@ import java.net.URL;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * This Java utility class ..
+ * This Java utility class defines methods that download images from a
+ * given {@link URL}.
  */
 public class DownloadUtils {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private DownloadUtils() {}
+
     /**
      * Transform the {@code url} to a {@code File} by downloading each
      * image via its URL and storing it to the local file system.

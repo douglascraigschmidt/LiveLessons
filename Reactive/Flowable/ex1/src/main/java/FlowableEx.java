@@ -15,9 +15,11 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using RxJava {@link ParallelFlowable}
- * operations, including fromArray(), parallel(), runOn(), flatMap(),
- * sequential(), reduce(), and Schedulers.computation().
+ * asynchronously and concurrently using RxJava {@link Flowable}
+ * operators, including fromArray() and parallel(), and {@link
+ * ParallelFlowable} operators, including runOn(), flatMap(),
+ * sequential(), and reduce(), as well as the Schedulers.computation()
+ * thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class FlowableEx {
@@ -64,7 +66,7 @@ public class FlowableEx {
             // Log the BigFractions.
             .doOnNext(bf ->
                       logBigFraction(bf, sBigReducedFraction, sb))
-
+s
             // Convert the ParallelFlowable back into a Flowable.
             .sequential()
 

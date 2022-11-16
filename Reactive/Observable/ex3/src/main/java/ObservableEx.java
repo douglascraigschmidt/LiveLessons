@@ -174,10 +174,12 @@ public class ObservableEx {
 
             // Use RxJava's flatMap() concurrency idiom to multiply
             // these BigFractions asynchronously in a thread pool.
-            .flatMap(bf -> multiplyFractions(bf, Schedulers.computation()))
+            .flatMap(bf -> 
+                     multiplyFractions(bf, Schedulers.computation()))
 
             // Log the BigFractions.
-            .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
+            .doOnNext(bf -> 
+                      logBigFraction(bf, sBigReducedFraction, sb))
 
             // Reduce the results into one Maybe<BigFraction>.
             .reduce(BigFraction::add)

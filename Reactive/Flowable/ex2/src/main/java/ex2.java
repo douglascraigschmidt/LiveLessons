@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This example shows how to apply timeouts with the asynchronous
- * {@link Single} class and the {@link ParallelFlowable} class in the
- * RxJava framework.
+ * {@link Single} and {@link ParallelFlowable} classes in the RxJava
+ * framework.
  */
 public class ex2 {
     /**

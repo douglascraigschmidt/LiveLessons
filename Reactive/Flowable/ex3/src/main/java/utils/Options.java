@@ -21,7 +21,7 @@ public class Options {
     private static final String TAG = Options.class.getName();
 
     /** 
-     * The singleton {@link Options} instance.
+     * The singleton {@link Options} instance. 
      */
     private static Options mUniqueInstance = null;
 

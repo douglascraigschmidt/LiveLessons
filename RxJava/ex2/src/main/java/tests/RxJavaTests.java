@@ -5,6 +5,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import utils.ExceptionUtils;
 import utils.FileUtils;
 import utils.Options;
 import utils.RunTimer;
@@ -12,6 +13,7 @@ import utils.RunTimer;
 import java.io.File;
 import java.net.URL;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -75,8 +77,8 @@ public final class RxJavaTests {
 
     /**
      * This method runs the {@code downloadAndStoreImage} function
-     * using the RxJava framework and its flatMap() method for
-     * parallelizing downloads.
+     * using the RxJava framework and its flatMap() method to
+     * parallelize downloads.
      */
     public static void testDownloadFlatMap
         (Function<URL, File> downloadAndStoreImage,
@@ -90,19 +92,19 @@ public final class RxJavaTests {
 
             // Apply the RxJava flatMap() concurrency idiom to process
             // each url in parallel.
-            .flatMap(url -> Observable
-                     // Emit this url.
-                     .fromCallable(() -> url)
+            .flatMap(url -> {
+                return Observable
+                        // Download and store this url.
+                        .fromCallable(() ->
+                                      getFile(downloadAndStoreImage,
+                                              url))
 
-                     // Run the URL concurrently in the given
-                     // scheduler.  The placement of this operation
-                     // can move down in this pipeline without
-                     // affecting the behavior.
-                     .subscribeOn(scheduler)
-
-                     // Transform each url to a file by downloading
-                     // the image.
-                     .map(downloadAndStoreImage))
+                        // Run the URL concurrently in the given
+                        // scheduler.  The placement of this operation
+                        // can move down in this pipeline without
+                        // affecting the behavior.
+                        .subscribeOn(scheduler);
+            })
 
             // Collect the downloaded images into a list.
             .collect(Collectors.toList())
@@ -115,6 +117,28 @@ public final class RxJavaTests {
             // Print the statistics for this test run in a blocking
             // manner.
             .blockingGet();
+    }
+
+    /**
+     * Use the {@link Function} to download and store the {@link File}
+     * at the given {@link URL}.
+     *
+     * @param function The {@link Function} that downloads and
+     *                 stores a {@link File} at the given {@link URL}
+     * @param url The {@link URL} to download and store
+     * @return The {@link File} associated with the {@code url}
+     */
+    private static File getFile(Function<URL, File> function,
+                                URL url) {
+        // Wrap the function with a try/catch block due to quirks
+        // with RxJava.
+        try {
+            // Apply the function to download and store the url
+            // into a File.
+            return function.apply(url);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

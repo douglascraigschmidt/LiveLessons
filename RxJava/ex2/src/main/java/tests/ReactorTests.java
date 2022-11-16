@@ -120,18 +120,15 @@ public final class ReactorTests {
             // Apply the Reactor flatMap() concurrency idiom to
             // process each url in the given scheduler.
             .flatMap(url -> Mono
-                     // Emit this url
-                     .fromCallable(() -> url)
+                     // Download and store this url.
+                     .fromCallable(() ->
+                                   downloadAndStoreImage.apply(url))
 
                      // Run the URL concurrently in the given
                      // scheduler.  The placement of this operation
                      // can move down in this pipeline without
                      // affecting the behavior.
-                     .subscribeOn(scheduler)
-
-                     // Transform each url to a file by downloading
-                     // the image.
-                     .map(downloadAndStoreImage))
+                     .subscribeOn(scheduler))
 
             // Collect the downloaded images into a list.
             .collectList()
@@ -148,8 +145,8 @@ public final class ReactorTests {
 
     /**
      * This method runs the {@code downloadAndStoreImage} function
-     * using the Reactor framework and its flatMap() idiom for
-     * parallelizing downloads.
+     * using the Reactor framework and its flatMap() idiom to
+     * parallelize downloads.
      */
     private static void testDownloadFlatMapLog
         (Function<URL, File> downloadAndStoreImage,
@@ -161,32 +158,27 @@ public final class ReactorTests {
 
             // If subscribeOn() is omitted here the iterable is
             // obtained from the calling thread.
-            // .subscribeOn(scheduler)
+            .subscribeOn(scheduler)
 
-            // You can also get the iterables via a different thread
-            // pool.
-            .subscribeOn(Schedulers.boundedElastic())
-
+            // Log the url.
             .doOnNext(url -> Options.logIdentity(url, "Flux.fromIterable()"))
 
             // Apply the Project Reactor flatMap() concurrency idiom
             // to process each url in the given scheduler.
             .flatMap(url -> Mono
-                     // Emit this url
-                     .from(Mono.fromCallable(() -> url))
+                     // Download and store this url.
+                     .fromCallable(() ->
+                                   downloadAndStoreImage.apply(url))
 
-                     .doOnNext(___ -> Options.logIdentity(url, "Mono.just()"))
+                    // Log the url.
+                     .doOnNext(___ -> Options
+                               .logIdentity(url,
+                                       "map(downLoadAndStoreImage)"))
 
                      // Run URL concurrently in given scheduler.  The
                      // placement of this operation can move down in
                      // this pipeline without affecting the behavior.
-                     .subscribeOn(scheduler)
-
-                     // Transform each url to a file by downloading
-                     // the image.
-                     .map(downloadAndStoreImage)
-
-                     .doOnNext(___ -> Options.logIdentity(url, "map(downLoadAndStoreImage)")))
+                     .subscribeOn(scheduler))
 
             // Collect the downloaded images into a list.
             .collectList()
