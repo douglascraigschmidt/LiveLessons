@@ -9,8 +9,11 @@ import java.util.stream.Collectors;
 
 /**
  * This class shows how to apply RxJava features to perform a range of
- * {@link Flowable} and {@link ParallelFlowable} operators in
- * parallel, including...
+ * {@link Flowable} operators (such as fromIterator(), parallel(), and
+ * collect()), {@link ParallelFlowable} operators (such as runOn(),
+ * map(), and sequential()), and {@link Single} operators (such as
+ * doOnSuccess() and ignoreElement()), as well as the Schedulers.io()
+ * thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class FlowableEx {

@@ -11,4 +11,9 @@ The folders in this directory demonstrate various RxJava Observable
 . ex2 - This example shows how to apply timeouts with the asynchronous
         Single and ParallelFlowable classes in the RxJava framework.
 
-. ex3 - 
+. ex3 - This example shows how to apply RxJava features to perform a
+        range of Flowable operators (such as fromIterator(),
+        parallel(), and collect()), ParallelFlowable operators (such
+        as runOn(), map(), and sequential()), and Single operators
+        (such as doOnSuccess() and ignoreElement()), as well as the
+        Schedulers.io() thread pool.
