@@ -2,13 +2,15 @@ import utils.AsyncTaskBarrier;
 
 /**
  * This example shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using many RxJava Observable
- * operations, including fromArray(), map(), generate(), take(),
- * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
- * subscribeOn(), onErrorReturn(), onErrorResumeNext(), and
- * Schedulers.computation().  It also shows RxJava Single and Maybe
- * operations, including fromCallable(), flatMapCompletable(),
- * ambArray(), subscribeOn(), ignoreElement(), and doOnSuccess().
+ * asynchronously using the RxJava flatMap() concurrency idiom and
+ * many RxJava {@link Observable} operators, including fromArray(),
+ * map(), generate(), take(), flatMap(), fromCallable(), filter(),
+ * reduce(), collectInto(), subscribeOn(), onErrorReturn(),
+ * onErrorResumeNext(), and Schedulers.computation().  It also shows
+ * how these operators can be used together with RxJava {@link Single}
+ * and {@link Maybe} operators, including fromCallable(), ambArray(),
+ * flatMapCompletable(), subscribeOn(), ignoreElement(), and
+ * doOnSuccess().
  */
 public class ex3 {
     /**

@@ -14,13 +14,15 @@ import static utils.BigFractionUtils.*;
 
 /**
  * This class shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using many RxJava Observable
- * operations, including fromArray(), map(), generate(), take(),
- * flatMap(), fromCallable(), filter(), reduce(), collectInto(),
- * subscribeOn(), onErrorReturn(), onErrorResumeNext(), and
- * Schedulers.computation().  It also shows RxJava Single and Maybe
- * operations, including fromCallable(), flatMapCompletable(),
- * ambArray(), subscribeOn(), ignoreElement(), and doOnSuccess().
+ * asynchronously using the RxJava flatMap() concurrency idiom and
+ * many RxJava {@link Observable} operators, including fromArray(),
+ * map(), generate(), take(), flatMap(), fromCallable(), filter(),
+ * reduce(), collectInto(), subscribeOn(), onErrorReturn(),
+ * onErrorResumeNext(), and Schedulers.computation().  It also shows
+ * how these operators can be used together with RxJava {@link Single}
+ * and {@link Maybe} operators, including fromCallable(), ambArray(),
+ * flatMapCompletable(), subscribeOn(), ignoreElement(), and
+ * doOnSuccess().
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class ObservableEx {
@@ -52,8 +54,8 @@ public class ObservableEx {
                 throw t;
         };
 
-        // Create an array of denominators, including 0 that will
-        // trigger an ArithmeticException.
+        // Create an array of denominators, including 0, which
+        // triggers an ArithmeticException.
         Integer[] denominators = new Integer[]{3, 4, 2, 0, 1};
 
         return Observable
@@ -76,16 +78,17 @@ public class ObservableEx {
                      // the computation scheduler.
                      .subscribeOn(Schedulers.computation())
 
-                     // Convert ArithmeticException to 0.
+                     // Convert any ArithmeticException to 0.
                      .onErrorReturn(errorHandler)
 
                      // Log the BigFractions.
-                     .doOnNext(bf -> logBigFraction(bf, sBigReducedFraction, sb))
+                     .doOnNext(bf ->
+                               logBigFraction(bf, sBigReducedFraction, sb))
 
-                     // Perform a multiplication.
+                     // Perform a BigFraction multiplication.
                      .map(bf -> bf.multiply(sBigReducedFraction)))
 
-            // Remove any big fractions that are <= 0.
+            // Remove any BigFraction results that are <= 0.
             .filter(fraction -> fraction.compareTo(0) > 0)
 
             // Collect the results into a List.
@@ -104,13 +107,13 @@ public class ObservableEx {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionException2()\n");
 
-        // Create a list of denominators, including 0 that will
-        // trigger an ArithmeticException.
+        // Create a list of denominators, including 0, which triggers
+        // an ArithmeticException.
         List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
 
         // Create a Function lambda to handle an ArithmeticException.
         Function<Throwable,
-                 Observable<BigFraction>> logExceptionAndReturnEmptyObservable = t -> {
+                 Observable<BigFraction>> logAndReturnEmptyObservable = t -> {
             // Record the exception message.
             sb.append("     exception = "
                       + t.getMessage());
@@ -133,7 +136,7 @@ public class ObservableEx {
 
             // Catch ArithmeticException and return an empty
             // Observable, which terminates the stream at that point.
-            .onErrorResumeNext(logExceptionAndReturnEmptyObservable)
+            .onErrorResumeNext(logAndReturnEmptyObservable)
 
             // Collect the non-empty BigFractions into a list.
             .collect(toList())
@@ -220,21 +223,22 @@ public class ObservableEx {
                      reduceAndMultiplyFraction(unreducedFraction,
                                                Schedulers.computation()))
 
-            // Collect the non-0 results into an ArrayList.
-            .collectInto(new ArrayList<BigFraction>(), List::add)
+            // Collect results into an ArrayList.
+            .collectInto(new ArrayList<BigFraction>(),
+                         List::add)
 
             // Sort and print the List and return a Completable that
             // synchronizes with the AsyncTaskBarrier framework.
-            .flatMapCompletable(list ->
+            .flatMapCompletable(list -> BigFractionUtils.
                                 // Sort/print results after all async
                                 // fraction operations complete.
-                                BigFractionUtils.sortAndPrintList(list, sb));
+                                sortAndPrintList(list, sb));
     }
 
     /**
-     * @return An Observable that's signaled after the {@code unreducedFraction}
-     * is reduced/multiplied asynchronously in background threads from the
-     * given {@code scheduler}.
+     * @return An {@link Observable} that's signaled after the {@code
+     *         unreducedFraction} is reduced/multiplied asynchronously
+     *         in background threads from the given {@code scheduler}
      */
     private static Observable<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
@@ -256,12 +260,13 @@ public class ObservableEx {
     }
 
     /**
-     * @return An Observable that's signaled after the {@code bigFraction}
-     * is multiplied asynchronously in a background thread from the given
-     * {@code scheduler}.
+     * @return An {@link Observable} that's signaled after the {@link
+     *         BigFraction} is multiplied asynchronously in a
+     *         background thread from the given {@code scheduler}
      */
-    private static Observable<BigFraction> multiplyFractions(BigFraction bigFraction,
-                                                             Scheduler scheduler) {
+    private static Observable<BigFraction> multiplyFractions
+        (BigFraction bigFraction,
+         Scheduler scheduler) {
         return Observable
             // Perform multiplication in a background thread.
             .fromCallable(() -> bigFraction

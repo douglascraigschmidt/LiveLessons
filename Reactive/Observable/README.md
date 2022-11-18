@@ -12,13 +12,14 @@ The folders in this directory demonstrate various RxJava Observable
         count(), and various thread pools.
 
 . ex3 - This example shows how to reduce and/or multiply big fractions
-        asynchronously and concurrently using many advanced RxJava
-        Observable operations, including fromIterable(), map(),
-        create(), flatMap(), flatMapCompletable(), fromCallable(),
-        filter(), reduce(), collectInto(), subscribeOn(),
-        onErrorReturn(), and Schedulers.computation().  It also shows
-        advanced RxJava Single and Maybe operations, such as
-        ambArray(), subscribeOn(), and doOnSuccess().
+        asynchronously and concurrently using many RxJava Observable
+        operations, including fromArray(), map(), generate(), take(),
+        flatMap(), fromCallable(), filter(), reduce(), collectInto(),
+        subscribeOn(), onErrorReturn(), onErrorResumeNext(), and
+        Schedulers.computation().  It also shows RxJava Single and
+        Maybe operations, including fromCallable(), ambArray(),
+        flatMapCompletable(), subscribeOn(), ignoreElement(), and
+        doOnSuccess().
 
 . ex4- This example shows how to apply RxJava features asynchronously
        to perform a range of Observable operations, including
