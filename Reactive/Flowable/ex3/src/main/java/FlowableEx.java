@@ -1,66 +1,83 @@
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import utils.DownloadUtils;
-import utils.Options;
+import utils.BigFraction;
+import utils.BigFractionUtils;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static java.util.stream.Collectors.toList;
+import static utils.BigFractionUtils.*;
 
 /**
- * This class shows how to apply RxJava features to download and store
- * images from remote web servers.  In particular, it showcases a
- * range of {@link Flowable} operators (such as fromIterator(),
- * parallel(), and collect()), {@link ParallelFlowable} operators
- * (such as runOn(), map(), and sequential()), and {@link Single}
- * operators (such as doOnSuccess() and ignoreElement()), as well as
- * the Schedulers.io() thread pool.
+ * This class shows how to reduce and/or multiply big fractions
+ * asynchronously and concurrently using RxJava {@link Flowable}
+ * operators, including fromArray() and parallel(), and {@link
+ * ParallelFlowable} operators, including runOn(), flatMap(),
+ * sequential(), and reduce(), as well as the Schedulers.computation()
+ * thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class FlowableEx {
     /**
-     * Use a {@link ParallelFlowable} to download and store images
-     * from remote web servers.
+     * Test a {@link ParallelFlowable} stream consisting of fromArray(),
+     * parallel(), runOf(), flatMap(), reduce(), and a pool of threads
+     * to perform BigFraction multiplications.
      */
-    public static Completable testParallelDownloads() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testParallelDownloads()\n");
+    public static Completable testFractionMultiplications() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications()\n");
 
-        // Add some useful diagnostic output.
-        sb.append("["
-                  + Thread.currentThread().getId()
-                  + "] "
-                  + " Starting parallel processing.\n");
+        // Create an array of reduced BigFraction objects.
+        BigFraction[] bigFractionArray = {
+            BigFraction.valueOf(1000, 30),
+            BigFraction.valueOf(1000, 40),
+            BigFraction.valueOf(1000, 20),
+            BigFraction.valueOf(1000, 10)
+        };
+
+        // Display the results.
+        Consumer<? super BigFraction> displayResults = result -> {
+            sb.append("    sum of BigFractions = "
+                      + result
+                      + "\n");
+            BigFractionUtils.display(sb.toString());
+        };
 
         return Flowable
-            // Convert collection into a flowable.
-            .fromIterable(Options.instance().getUrlList())
+            // Emit a stream of reduced big fractions.
+            .fromArray(bigFractionArray)
 
-            // Create a ParallelFlowable.
+            // Convert the Flowable to a ParallelFlowable.
             .parallel()
 
-            // Run this flow in the I/O thread pool.
-            .runOn(Schedulers.io())
+            // Run subsequent processing in the computation pool.
+            .runOn(Schedulers.computation())
 
-            // Transform each url to a file via downloadAndStoreImage,
-            // which downloads each image from a remote web server and
-            // stores it on the local computer.
-            .map(DownloadUtils::downloadAndStoreImage)
+            // Use RxJava's flatMap() concurrency idiom to multiply
+            // these BigFractions asynchronously in a thread pool.
+            .map(bf -> bf
+                 .multiply(sBigReducedFraction))
 
-            // Merge the values back into a single flowable.
-            .sequential() 
+            // Log the BigFractions.
+            .doOnNext(bf ->
+                      logBigFraction(bf, sBigReducedFraction, sb))
 
-            // Collect the downloaded images into a list.
-            .collect(Collectors.toList())
+            // Convert the ParallelFlowable back into a Flowable.
+            .sequential()
 
-            // Process the list.
-            .doOnSuccess(imageFiles -> Options
-                // Print the # of image files that were downloaded.
-                .printStats("testParallelDownloads", imageFiles.size()))
+            // Reduce the results into one Maybe<BigFraction>.
+            .reduce(BigFraction::add)
+
+            // Display the results if all goes well.
+            .doOnSuccess(displayResults)
 
             // Return a Completable to synchronize with the
             // AsyncTaskBarrier framework.
             .ignoreElement();
     }
-
 }

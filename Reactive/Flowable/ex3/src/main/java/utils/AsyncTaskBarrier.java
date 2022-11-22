@@ -3,12 +3,10 @@ package utils;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.functions.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class asynchronously runs tasks that use the RxJava framework
@@ -50,43 +48,26 @@ public class AsyncTaskBarrier {
     /**
      * Run all the register tasks.
      *
-     * @return a {@code Single<Long>} that is triggered when all the
-     * tasks complete and emits the number of tasks that completed
-     * successfully
+     * @return a {@code Single<Long>} that will be triggered when all
+     * the asynchronously-run tasks complete.
      */
     public static Single<Long> runTasks() {
-        // Keep track of how many exceptions occurred.
-        AtomicLong exceptionCount = new AtomicLong(0);
-
-        // Handle task exceptions by recording and swallowing them.
-        Function<Throwable, Completable> errorHandler = t -> {
-            // Increment the count of exceptions.
-            exceptionCount.getAndIncrement();
-
-            // Just return a completed Completable.
-            return Completable.complete();
-        };
-
         return Observable
-            // Convert the List into an Observable.
+            // Factory method that converts the list into an
+            // Observable.
             .fromIterable(sTasks)
 
-            // Run each task, which can execute asynchronously or
-            // synchronously.
-            .map(s -> 
-                 // Run the task (swallow any exception after first
-                 // recording it).
-                 s.get().onErrorResumeNext(errorHandler))
+            // Run each task, which can execute asynchronously.
+            .map(Supplier::get)
 
-            // Maps each Observable element into a CompletableSource,
-            // subscribe to them, waits until the upstream and all
-            // CompletableSources complete, and then returns a single
-            // Completable.
+            // Map each element of the Observable into
+            // CompletableSources, subscribe to them, and waits until
+            // the upstream and all CompletableSources complete.
             .flatMapCompletable(c -> c)
 
-            // Convert the Completable into a Single that returns the
-            // number of successful tasks when it completes.
-            .toSingle(() -> sTasks.size() - exceptionCount.get());
+            // Convert the returned Completable into a Single that
+            // returns the number of tasks when it completes.
+            .toSingleDefault((long) sTasks.size());
     }
 }
 

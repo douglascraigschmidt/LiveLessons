@@ -1,22 +1,21 @@
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import utils.AsyncTaskBarrier;
 
 /**
- * This example shows how to apply RxJava features to download and
- * store images from remote web servers.  In particular, it showcases
- * a range of {@link Flowable} operators (such as fromIterator(),
- * parallel(), and collect()), {@link ParallelFlowable} operators
- * (such as runOn(), map(), and sequential()), and {@link Single}
- * operators (such as doOnSuccess() and ignoreElement()), as well as
- * the Schedulers.io() thread pool.
+ * This example shows how to reduce and/or multiply big fractions
+ * asynchronously and concurrently using RxJava {@link ParallelFlowable}
+ * operations, including fromArray(), parallel(), runOn(), flatMap(),
+ * sequential(), reduce(), and Schedulers.computation().
  */
 public class ex3 {
     /**
      * Main entry point into the test program.
      */
-    public static void main (String[] argv) throws InterruptedException {
-        // Use a ParallelFlowable to download and store images from
-        // remote web servers.
-        AsyncTaskBarrier.register(FlowableEx::testParallelDownloads);
+    public static void main (String[] argv) {
+        // Use a {@link ParallelFlowable} stream and a pool of threads to
+        // perform BigFraction multiplications and additions in parallel.
+        AsyncTaskBarrier.register(FlowableEx::testFractionMultiplications);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.
