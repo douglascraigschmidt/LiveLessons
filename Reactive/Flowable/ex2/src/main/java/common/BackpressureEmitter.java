@@ -47,7 +47,7 @@ public final class BackpressureEmitter {
         Random random = new Random();
 
         // Emit random integers.
-        return (Emitter<Integer> sink) -> {
+        return (Emitter<Integer> emitter) -> {
             if (sIntegersEmitted++ < count) {
                 // Get the next random number.
                 var item = random.nextInt(maxValue);
@@ -65,9 +65,9 @@ public final class BackpressureEmitter {
                             + " pending");
 
                 // Publish the next item.
-                sink.onNext(item);
+                emitter.onNext(item);
             } else
-                sink.onComplete();
+                emitter.onComplete();
         };
     }
 }

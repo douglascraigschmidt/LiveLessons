@@ -1,14 +1,6 @@
 package utils;
 
-import java.io.File;
-import java.net.URL;
-import java.util.List;
 import java.lang.Integer;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class implements the Singleton pattern to handle command-line
@@ -36,6 +28,11 @@ public class Options {
      * threads if false.
      */
     private boolean mVirtualThreads = true;
+
+    /**
+     * The iteration when a diagnostic should be printed.
+     */
+    private int mPrintDiagnostic = 100;
 
     /**
      * @return The one and only singleton uniqueInstance
@@ -71,28 +68,30 @@ public class Options {
     }
 
     /**
+     * @return True if {@code i} modulus the print diagnostic == 0, else false
+     */
+    public boolean printDiagnostic(int i) {
+        return mDiagnosticsEnabled
+                && (i % mPrintDiagnostic) == 0;
+    }
+
+    /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-n":
-                    mNumberOfElements = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-t":
-                    mVirtualThreads = argv[argc + 1].equals("v");
-                    break;
-                default:
-                    printUsage();
-                    return false;
+                    case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    case "-n" -> mNumberOfElements = Integer.parseInt(argv[argc + 1]);
+                    case "-p" -> mPrintDiagnostic = Integer.parseInt(argv[argc + 1]);
+                    case "-t" -> mVirtualThreads = argv[argc + 1].equals("v");
+                    default -> {
+                        printUsage();
+                        return;
+                    }
                 }
-            return true;
-        } else
-            return false;
+        }
     }
 
     /**
@@ -102,6 +101,7 @@ public class Options {
         System.out.println("Usage: ");
         System.out.println("-d [true|false]");
         System.out.println("-n [numberOfElements]");
+        System.out.println("-p [printDiagnostic]");
         System.out.println("-t [p|v]");
     }
 

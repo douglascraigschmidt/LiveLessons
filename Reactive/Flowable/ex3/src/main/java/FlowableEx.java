@@ -1,32 +1,27 @@
-import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.functions.Consumer;
-import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static java.util.stream.Collectors.toList;
-import static utils.BigFractionUtils.*;
+import static utils.BigFractionUtils.logBigFraction;
+import static utils.BigFractionUtils.sBigReducedFraction;
 
 /**
- * This class shows how to reduce and/or multiply big fractions
+ * This class shows how to multiply and add big fractions
  * asynchronously and concurrently using RxJava {@link Flowable}
  * operators, including fromArray() and parallel(), and {@link
  * ParallelFlowable} operators, including runOn(), flatMap(),
- * sequential(), and reduce(), as well as the Schedulers.computation()
+ * reduce(), and firstElement(), as well as the Schedulers.computation()
  * thread pool.
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class FlowableEx {
     /**
-     * Test a {@link ParallelFlowable} stream consisting of fromArray(),
-     * parallel(), runOf(), flatMap(), reduce(), and a pool of threads
-     * to perform BigFraction multiplications.
+     * Use a {@link ParallelFlowable} stream and a pool of threads to
+     * perform {@link BigFraction} multiplications and additions in parallel.
      */
     public static Completable testFractionMultiplications() {
         StringBuffer sb =
@@ -42,7 +37,9 @@ public class FlowableEx {
 
         // Display the results.
         Consumer<? super BigFraction> displayResults = result -> {
-            sb.append("    sum of BigFractions = "
+            sb.append("["
+                      + Thread.currentThread().getId()
+                      + "] sum of BigFractions = "
                       + result
                       + "\n");
             BigFractionUtils.display(sb.toString());
@@ -58,8 +55,8 @@ public class FlowableEx {
             // Run subsequent processing in the computation pool.
             .runOn(Schedulers.computation())
 
-            // Use RxJava's flatMap() concurrency idiom to multiply
-            // these BigFractions asynchronously in a thread pool.
+            // Use RxJava's ParallelFlowable mechanism to multiply
+            // these BigFraction objects in parallel in a thread pool.
             .map(bf -> bf
                  .multiply(sBigReducedFraction))
 
@@ -67,11 +64,12 @@ public class FlowableEx {
             .doOnNext(bf ->
                       logBigFraction(bf, sBigReducedFraction, sb))
 
-            // Convert the ParallelFlowable back into a Flowable.
-            .sequential()
-
-            // Reduce the results into one Maybe<BigFraction>.
+            // Reduce all values within a 'rail' and across 'rails' via
+            // BigFraction::add into a Flowable sequence with one element.
             .reduce(BigFraction::add)
+
+            // Return a Maybe that emits the one and only element in the Flowable.
+            .firstElement()
 
             // Display the results if all goes well.
             .doOnSuccess(displayResults)

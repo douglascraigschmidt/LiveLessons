@@ -1,15 +1,5 @@
 package utils;
 
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-import java.lang.Integer;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-
 /**
  * This class implements the Singleton pattern to handle command-line
  * option processing.
@@ -19,12 +9,6 @@ public class Options {
      * The singleton {@link Options} instance. 
      */
     private static Options mUniqueInstance = null;
-
-    /**
-     * Controls whether debugging output will be generated (defaults
-     * to false).
-     */
-    private boolean mDiagnosticsEnabled = false;
 
     /**
      * Number of random Integer objects to create.
@@ -48,13 +32,6 @@ public class Options {
     }
 
     /**
-     * @return True if debugging output is generated
-     */
-    public boolean diagnosticsEnabled() {
-        return mDiagnosticsEnabled;
-    }
-
-    /**
      * @return Number of random {@link Integer} objects to create
      */
     public int numberOfElements() {
@@ -72,12 +49,11 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public boolean parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
                 case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     break;
                 case "-n":
                     mNumberOfElements = Integer.parseInt(argv[argc + 1]);

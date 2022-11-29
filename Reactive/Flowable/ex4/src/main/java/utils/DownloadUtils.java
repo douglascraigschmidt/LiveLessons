@@ -21,12 +21,12 @@ public class DownloadUtils {
      * threads will not be expanded when blocking on I/O occurs.
      */
     public static File downloadAndStoreImage(URL url) {
-        return
-                // Perform a blocking image download.
-                downloadImage(url)
+        return DownloadUtils
+            // Perform a blocking image download.
+            .downloadImage(url)
 
-                        // Store the image on the local device.
-                        .store();
+            // Store the image on the local device.
+            .store();
     }
 
     /**

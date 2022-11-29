@@ -180,7 +180,9 @@ public class BigFractionUtils {
     public static void logBigFraction(BigFraction unreducedFraction,
                                       BigFraction reducedFraction,
                                       StringBuffer sb) {
-        sb.append("     "
+        sb.append("["
+                  + Thread.currentThread().getId()
+                  + "] "
                   + unreducedFraction.toMixedString()
                   + " x "
                   + reducedFraction.toMixedString()

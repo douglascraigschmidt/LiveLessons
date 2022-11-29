@@ -1,32 +1,29 @@
+import utils.GCDResult;
+import utils.ListSpliterator;
+import utils.Options;
+import utils.PrimeResult;
+
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.Random;
-
-import utils.ListSpliterator;
-import utils.Options;
-import utils.GCDResult;
-import utils.PrimeResult;
 
 import static java.util.stream.Collectors.toList;
-import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * This example demonstrates Project Loom structured concurrency
+ * This example demonstrates Java Project Loom structured concurrency
  * features, which enables a main task to split into several
- * concurrent sub-tasks that run concurrently to competion before the
+ * concurrent sub-tasks that run concurrently to completion before the
  * main task can complete.  Project Loom supports structured
  * concurrency by enhancing {@link ExecutorService} to support
  * AutoCloseable and updating {@link Executors} to define new static
  * factory methods that support usage in a structured manner.  You'll
- * need to install JDK 18 with Project Loom configured, which you can
- * download from https://jdk.java.net/loom.
+ * need to install JDK 19 with gradle version 7.6 configured.
  */
 public class ex2 {
     /**
@@ -89,7 +86,7 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             primeCheckFutures = executor
                 // submit() starts a virtual thread to check
                 // primalities concurrently.
@@ -121,7 +118,7 @@ public class ex2 {
             .forEach(future -> System.out
                      .println("result = "
                               + rethrowSupplier(future::get).get()));
-    }
+    }                              
 
     /**
      * Check the primality of the {@code integers} param.  This method
@@ -137,7 +134,7 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             return integers
                 // Create a stream of Integers.
                 .stream()
@@ -209,21 +206,23 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
-            return StreamSupport
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            Stream<Integer[]> stream = StreamSupport
                 // Convert the List of Integer objects into a
                 // sequential stream of two-element Integer objects
                 // used to compute the GCD.
-                .stream(new ListSpliterator(integers), false)
+                .stream(new ListSpliterator(integers), false);
+
+            return stream
 
                 // Compute all the GCDs concurrently.
-                .map(params -> 
+                .map((Integer[] params) ->
                      // Use executor to start a virtual thread.
                      computeGCD(params, executor))
 
                 // Trigger intermediate processing and collect results
                 // into a List of Future<GCDResult> objects.
-                .collect(toList());
+                .toList();
         }
     }
 

@@ -65,7 +65,7 @@ public class StructuredConcurrencyTests {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of image URLs.
             for (URL url : urlList)
                 downloadedImages
@@ -102,7 +102,7 @@ public class StructuredConcurrencyTests {
         List<Future<Image>> transformedImages = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of imageFutures.
             for (Future<Image> image : downloadedImages) {
                 transformedImages
@@ -135,7 +135,7 @@ public class StructuredConcurrencyTests {
         List<Future<File>> storedFiles = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors.newVirtualThreadExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of transformed image futures.
             for (Future<Image> image : transformedImages)
                 storedFiles

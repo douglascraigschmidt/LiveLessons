@@ -14,7 +14,8 @@ public final class NonBackpressureEmitter {
     /**
      * Debugging tag used by the logger.
      */
-    private static final String TAG = NonBackpressureEmitter.class.getSimpleName();
+    private static final String TAG =
+        NonBackpressureEmitter.class.getSimpleName();
 
     /**
      * A Java utility class should have a private constructor.
@@ -34,44 +35,41 @@ public final class NonBackpressureEmitter {
     public static FlowableOnSubscribe<Integer>
     makeEmitter(int count,
                 int maxValue,
-                AtomicInteger pendingItemCount) {
+                AtomicInteger pendingItemsCount) {
         Random random = new Random();
 
         // Emit random integers without concern for backpressure.
-        return sink -> {
-            Flowable
-                // Generate a stream of Integer objects from 1 to
-                // count, a la a reactive for loop!
-                .range(1, count)
+        return emitter -> Flowable
+            // Generate a stream of Integer objects from 1 to count, a
+            // la a reactive for loop!
+            .range(1, count)
 
-                // Generate the results.
-                .subscribe(iteration -> {
-                        // Increment the current pending item count.
-                        pendingItemCount.incrementAndGet();
+            // Generate the results.
+            .subscribe(iteration -> {
+                    // Increment the current pending item count.
+                    pendingItemsCount.incrementAndGet();
 
-                        var item = random.nextInt(maxValue);
+                    var item = random.nextInt(maxValue);
 
-                        if (Options.instance().printIteration(iteration))
-                            Options.debug("["
-                                          + iteration
-                                          + "] published "
-                                          + item
-                                          + " with "
-                                          + pendingItemsCount.get()
-                                          + " pending");
+                    if (Options.instance().printIteration(iteration))
+                        Options.debug("["
+                                      + iteration
+                                      + "] published "
+                                      + item
+                                      + " with "
+                                      + pendingItemsCount.get()
+                                      + " pending");
 
-                        // Only publish an item if the sink hasn't been
-                        // cancelled.
-                        if (!sink.isCancelled())
-                            // Publish the next item.
-                            sink.onNext(item);
-                    },
-                    sink::onError,
-                    sink::onComplete)
+                    // Only publish an item if the emitter hasn't been
+                    // cancelled.
+                    if (!emitter.isCancelled())
+                        // Publish the next item.
+                        emitter.onNext(item);
+                },
+                emitter::onError,
+                emitter::onComplete)
 
-                // Dispose of the Flowable when the stream is
-                // finished.
-                .dispose();
-        };
+            // Dispose of the Flowable when the stream is finished.
+            .dispose();
     }
 }

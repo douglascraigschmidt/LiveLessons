@@ -3,6 +3,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.function.IntConsumer;
@@ -19,14 +20,19 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * platform Thread objects in Project Loom, which is exploring and
  * incubating Java VM features and APIs built on top of them for the
  * implementation of lightweight user-mode threads (virtual threads).
- * You'll need to install JDK 18 with Project Loom configured, which
- * you can download from https://jdk.java.net/loom.
+ * You'll need to install JDK 19 with gradle 7.6 configured.
  */
 public class ex1 {
     /**
      * A List of randomly-generated integers.
      */
     private static List<Integer> sRANDOM_INTEGERS;
+
+    /**
+     * Keeps track of the number of iterations.
+     */
+    private static AtomicInteger sIterationCount =
+        new AtomicInteger();
 
     /**
      * Main entry point into the test program.
@@ -37,21 +43,20 @@ public class ex1 {
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Generate the random numbers.
-        generateRandomNumbers();
+        // Generate a List of random integers.
+        sRANDOM_INTEGERS = generateRandomNumbers();
 
-        // Create/start the threads with the given option
-        // to either create virtual or platform threads.
+        // Create/start the threads with the given option to either
+        // create virtual or platform threads.
         startThreads(Options.instance().virtualThreads());
     }
 
     /**
-     * Generate a list of random Integer objects used for prime number
-     * checking.
+     * Generate a {@link List} of random {@link Integer} objects used
+     * to check for primality.
      */
-    private static void generateRandomNumbers() {
-        // Generate a list of random integers.
-        sRANDOM_INTEGERS = new Random()
+    private static List<Integer> generateRandomNumbers() {
+        return new Random()
             // Generate a stream of the given # of large random ints.
             .ints(Options.instance().numberOfElements(),
                   Integer.MAX_VALUE - Options.instance().numberOfElements(),
@@ -62,20 +67,20 @@ public class ex1 {
                    
             // Trigger intermediate operations and collect into a
             // List.
-            .collect(toList());
+            .toList();
     }
 
     /**
-     * Demonstrate how to create and start many threads using Project
-     * Loom.
+     * Demonstrate how to create and start many platform or virtual
+     * Java {@link Thread} objects.
      *
-     * @param virtual If true create a virtual thread, else create a
-     *                platform thread
+     * @param virtual If true create a virtual {@link Thread}, else
+     *                create a platform {@link Thread}
      */
     private static void startThreads(boolean virtual) {
-        // Print out a diagnostic every 1000 ints.
+        // Print out a diagnostic periodically.
         IntConsumer printDiagnostic = i -> {
-            if (i % 1000 == 0)
+            if (Options.instance().printDiagnostic(i))
                 System.out.println(i + " threads started");
         };
 
@@ -97,7 +102,7 @@ public class ex1 {
 
             // Trigger intermediate processing and collect the Thread
             // objects into a List.
-            .collect(toList());
+            .toList();
 
         // Start all the Thread objects.
         threads.forEach(Thread::start);
@@ -109,12 +114,13 @@ public class ex1 {
     /**
      * This factory method creates and returns a new unstarted {@link
      * Thread} (either virtual or platform) that will run the given
-     * {@code runnable} after the {@link Thread} is started.
+     * {@link Runnable} after the {@link Thread} starts.
      *
      * @param runnable The {@link Runnable} to run in the new {@link
      *                 Thread}
      * @param virtual If true the {@link Thread} should be a virtual
-     *        thread, else it should be a platform thread
+     *        {@link Thread}, else it should be a platform {@link
+     *        Thread}
      */
     public static Thread makeThread(Runnable runnable,
                                     boolean virtual) {
@@ -138,7 +144,21 @@ public class ex1 {
      */
     public static Runnable makeRunnable(int integer) {
         // Return a Runnable lambda that checks if integer is prime.
-        return () -> isPrime(integer);
+        return () -> {
+            var result = ex1.isPrime(integer);
+
+            // Periodically print the result of checking for
+            // primality.
+            if (Options.instance()
+                .printDiagnostic(sIterationCount.getAndIncrement())) {
+                if (result == 0)
+                    System.out.println(integer + " is prime");
+                else
+                    System.out.println(integer
+                                       + " is not prime with smallest factor "
+                                       + result);
+            }
+        };
     }
 
     /**
@@ -149,14 +169,21 @@ public class ex1 {
      *         factor if it is not prime
      */
     public static int isPrime(int primeCandidate) {
-        if (primeCandidate > 3)
-            // Use a brute-force algorithm to burn CPU!
-            for (int factor = 2;
-                 factor <= primeCandidate / 2;
-                 ++factor)
-                if (primeCandidate / factor * factor == primeCandidate)
-                    return factor;
+        // Check if primeCandidate is a multiple of 2.
+        if (primeCandidate % 2 == 0)
+            // Return smallest factor for non-prime number.
+            return 2;
 
+        // If not, then just check the odds for primality.
+        for (int factor = 3;
+             factor * factor <= primeCandidate;
+             // Skip over even numbers.
+             factor += 2)
+            if (primeCandidate % factor == 0)
+                // primeCandidate was not prime.
+                return factor;
+
+        // primeCandidate was prime.
         return 0;
     }
 }

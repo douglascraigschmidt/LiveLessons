@@ -3,18 +3,20 @@ import io.reactivex.rxjava3.parallel.ParallelFlowable;
 import utils.AsyncTaskBarrier;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously and concurrently using RxJava {@link ParallelFlowable}
- * operations, including fromArray(), parallel(), runOn(), flatMap(),
- * sequential(), reduce(), and Schedulers.computation().
+ * This example shows how to multiply and add big fractions
+ * asynchronously and concurrently using RxJava {@link Flowable}
+ * operators, including fromArray() and parallel(), and {@link
+ * ParallelFlowable} operators, including runOn(), flatMap(),
+ * reduce(), and firstElement(), as well as the Schedulers.computation()
+ * thread pool.
  */
 public class ex3 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        // Use a {@link ParallelFlowable} stream and a pool of threads to
-        // perform BigFraction multiplications and additions in parallel.
+        // Use a ParallelFlowable stream and a pool of threads to perform
+        // BigFraction multiplications and additions in parallel.
         AsyncTaskBarrier.register(FlowableEx::testFractionMultiplications);
 
         long testCount = AsyncTaskBarrier

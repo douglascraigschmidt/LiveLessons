@@ -1,14 +1,12 @@
 package utils;
 
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.internal.schedulers.IoScheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 import java.io.File;
 import java.net.URL;
-import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class implements the Singleton pattern to handle command-line
@@ -82,7 +80,7 @@ public class Options {
     /**
      * Prefix for all the URLs.
      */
-    private static String sURL_PREFIX =
+    private static final String sURL_PREFIX =
         "http://www.dre.vanderbilt.edu/~schmidt/images/";
 
     /**
@@ -119,47 +117,40 @@ public class Options {
     }
 
     /**
-     * Returns a list of URLs.
+     * @return A {@link Flowable} of {@link URL} objects
      */
-    public List<URL> getUrlList() {
-        return Stream
+    public Flowable<URL> getUrlFlowable() {
+        return Flowable
             // Convert the array of strings into a stream of strings.
-            .of(mDefaultImageNames)
+            .fromArray(mDefaultImageNames)
 
             // Map each string in the list into a list of URLs.
-            .flatMap(this::convertStringToUrls)
+            .flatMap(this::convertStringToFlowable)
 
             // Limit the number of entries generated.
-            .limit(mMAX_SIZE)
-
-            // Create and return a list of a list of URLs.
-            .collect(toList());
+            .take(mMAX_SIZE);
     }
 
     /**
-     * Create a new URL list from a @a stringOfUrls that contains the
-     * sURL_PREFIX list of names separated by commas and add them to
-     * the URL list that's returned.
+     * Create a new {@link Flowable} of {@link URL} objects from a
+     * {@code stringOfUrls} that contains the {@code sURL_PREFIX} names
+     * separated by commas and add them to {@link Flowable} that's returned.
      */
-    private Stream<URL> convertStringToUrls(String stringOfNames) {
+    private Flowable<URL> convertStringToFlowable(String stringOfNames) {
         // Create a Function that returns a new URL object when
         // applied and which converts checked URL exceptions into
         // runtime exceptions.
-        Function<String, URL> urlFactory = 
+        Function<String, URL> urlFactory =
             ExceptionUtils.rethrowFunction(URL::new);
 
-        return Pattern
-            // Create a regular expression for the "," separator.
-            .compile(",")
-
-            // Use regular expression to split stringOfNames into a
-            // Stream<String>.
-            .splitAsStream(stringOfNames)
+        return Flowable
+            // Spit the string into an array based on "," separator.
+            .fromArray(stringOfNames.split(","))
 
             // Concatenate the url prefix with each name.
             .map(name -> sURL_PREFIX + name)
 
-            // Convert each string in the stream to a URL.
+            // Convert each string in the Flowable to a URL.
             .map(urlFactory);
     }
 
@@ -212,13 +203,16 @@ public class Options {
      * Display the statistics about the test.
      */
     public static void printStats(String testName,
-                            int imageCount) {
+                                  int imageCount) {
         if (!testName.equals("warmup"))
-            System.out.println(testName
+            System.out.println("["
+                               + Thread.currentThread().getId()
+                               + "] "
+                               + testName
                                + " downloaded and stored "
                                + imageCount
                                + " images using "
-                               + (ForkJoinPool.commonPool().getPoolSize() + 1)
+                               + (((IoScheduler) Schedulers.io()).size())
                                + " threads in the pool");
     }
 
