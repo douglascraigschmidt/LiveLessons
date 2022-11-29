@@ -33,8 +33,8 @@ public class ListSpliterator
      * Attempts to extract the next pair of {@link Integer} objects
      * from the {@link List}.
      *
-     * @param action Passes back a two-element array of {@link
-     *               Integer} objects
+     * @param action Yields a two-element array of {@link Integer}
+     *               objects
      * @return False if there are no more pairs of {@link Integer}
      *         objects to process, else true
      */

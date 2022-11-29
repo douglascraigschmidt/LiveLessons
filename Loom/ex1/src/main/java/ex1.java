@@ -24,7 +24,7 @@ import static utils.ExceptionUtils.rethrowSupplier;
  */
 public class ex1 {
     /**
-     * A List of randomly-generated integers.
+     * A {@link List} of randomly-generated {@link Integer} objects.
      */
     private static List<Integer> sRANDOM_INTEGERS;
 
@@ -43,12 +43,20 @@ public class ex1 {
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
+        System.out.println("Entering test with "
+                          + Options.instance().numberOfElements()
+                          + (Options.instance().virtualThreads()
+                             ? " virtual" : " platform")
+                           + " threads");
+
         // Generate a List of random integers.
         sRANDOM_INTEGERS = generateRandomNumbers();
 
         // Create/start the threads with the given option to either
         // create virtual or platform threads.
         startThreads(Options.instance().virtualThreads());
+
+        System.out.println("Leaving test");
     }
 
     /**

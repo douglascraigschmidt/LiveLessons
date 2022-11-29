@@ -16,18 +16,19 @@ import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
- * This example demonstrates Java Project Loom structured concurrency
+ * This example demonstrates modern Java structured concurrency
  * features, which enables a main task to split into several
  * concurrent sub-tasks that run concurrently to completion before the
- * main task can complete.  Project Loom supports structured
+ * main task can complete.  Modern Java supports structured
  * concurrency by enhancing {@link ExecutorService} to support
  * AutoCloseable and updating {@link Executors} to define new static
  * factory methods that support usage in a structured manner.  You'll
- * need to install JDK 19 with gradle version 7.6 configured.
+ * need to install JDK 19 with gradle version 7.6 configured to run
+ * this example.
  */
 public class ex2 {
     /**
-     * A List of randomly-generated integers.
+     * A {@link List} of randomly-generated {@link Integer} objects.
      */
     private static List<Integer> sRANDOM_INTEGERS;
 
@@ -36,25 +37,27 @@ public class ex2 {
      */
     public static void main(String[] argv)
         throws ExecutionException, InterruptedException {
+        System.out.println("Entering test");
 
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
         // Generate the random numbers.
-        generateRandomNumbers();
+        sRANDOM_INTEGERS = generateRandomNumbers();
 
         // Demonstrate Project Loom structured concurrency.
         demoStructuredConcurrency();
+
+        System.out.println("Leaving test");
     }
 
     /**
-     * Generate a list of random Integer objects used for prime number
-     * checking.
+     * Generate a {@link List} of random {@link Integer}x objects used
+     * to check primality.
      */
-    private static void generateRandomNumbers() {
-        // Generate a list of random integers.
-        sRANDOM_INTEGERS = new Random()
-
+    private static List<Integer> generateRandomNumbers() {
+        // Generate a List of random Integer objects.
+        return new Random()
             // Generate the given # of large random ints.
             .ints(Options.instance().numberOfElements(),
                   Integer.MAX_VALUE - Options.instance().numberOfElements(),
@@ -64,11 +67,11 @@ public class ex2 {
             .boxed()    
                    
             // Trigger intermediate operations and collect into a List.
-            .collect(toList());
+            .toList();
     }
 
     /**
-     * Demonstrate Project Loom structured concurrency by concurrently
+     * Demonstrate modern Java structured concurrency by concurrently
      * (1) checking the primality of a {@link List} of random numbers
      * and (2) computing the greatest common divisor (GCD) of pairs of
      * these random numbers.
@@ -86,7 +89,8 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor =
+             Executors.newVirtualThreadPerTaskExecutor()) {
             primeCheckFutures = executor
                 // submit() starts a virtual thread to check
                 // primalities concurrently.
@@ -97,13 +101,15 @@ public class ex2 {
                 // concurrently.
                 .submit(() -> computeGCDs(sRANDOM_INTEGERS));
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Don't exit the try-with-resources scope until all
+            // concurrently executing tasks complete.
         } 
 
         display("printing results");
 
-        // The Future.get() calls below don't block since the scope
-        // above won't exit until all tasks complete.
+        // The Future.get() calls below don't block since the
+        // try-with-resources scope above won't exit until all tasks
+        // complete.
 
         // Print the primality results.  
         primeCheckFutures
@@ -136,7 +142,7 @@ public class ex2 {
         // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             return integers
-                // Create a stream of Integers.
+                // Create a stream of Integer objects.
                 .stream()
 
                 // Check the primality of each number concurrently.
@@ -144,9 +150,9 @@ public class ex2 {
                      // Use executor to start a virtual thread.
                      checkPrimality(primeCandidate, executor))
 
-                // Trigger intermediate processing and collect results
-                // into a List of Future<PrimeResult> objects.
-                .collect(toList());
+                // Trigger intermediate processing and collect/return
+                // results in a List of Future<PrimeResult> objects.
+                .toList();
         }
     }
 
@@ -181,14 +187,21 @@ public class ex2 {
      *         factor if it is not prime
      */
     public static int isPrime(int primeCandidate) {
-        if (primeCandidate > 3)
-            // Use a brute-force algorithm to burn CPU!
-            for (int factor = 2;
-                 factor <= primeCandidate / 2;
-                 ++factor)
-                if (primeCandidate / factor * factor == primeCandidate)
-                    return factor;
+        // Check if primeCandidate is a multiple of 2.
+        if (primeCandidate % 2 == 0)
+            // Return smallest factor for non-prime number.
+            return 2;
 
+        // If not, then just check the odds for primality.
+        for (int factor = 3;
+             factor * factor <= primeCandidate;
+             // Skip over even numbers.
+             factor += 2)
+            if (primeCandidate % factor == 0)
+                // primeCandidate was not prime.
+                return factor;
+
+        // primeCandidate was prime.
         return 0;
     }
 
@@ -207,13 +220,11 @@ public class ex2 {
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            Stream<Integer[]> stream = StreamSupport
+            return StreamSupport
                 // Convert the List of Integer objects into a
                 // sequential stream of two-element Integer objects
                 // used to compute the GCD.
-                .stream(new ListSpliterator(integers), false);
-
-            return stream
+                .stream(new ListSpliterator(integers), false)
 
                 // Compute all the GCDs concurrently.
                 .map((Integer[] params) ->
@@ -270,8 +281,8 @@ public class ex2 {
      */
     private static void display(String message) {
         System.out.println("Thread = "
-                               + Thread.currentThread().getId()
-                               + " "
-                               + message);
+                           + Thread.currentThread().getId()
+                           + " "
+                           + message);
     }
 }
