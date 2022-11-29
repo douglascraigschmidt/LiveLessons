@@ -1,7 +1,4 @@
-import utils.GCDResult;
-import utils.ListSpliterator;
-import utils.Options;
-import utils.PrimeResult;
+import utils.*;
 
 import java.util.List;
 import java.util.Random;
@@ -9,11 +6,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowSupplier;
+import static utils.RandomUtils.generateRandomNumbers;
 
 /**
  * This example demonstrates modern Java structured concurrency
@@ -42,32 +38,15 @@ public class ex2 {
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Generate the random numbers.
-        sRANDOM_INTEGERS = generateRandomNumbers();
+        // Generate a List of random numbers.
+        sRANDOM_INTEGERS = RandomUtils
+            .generateRandomNumbers(Options.instance().numberOfElements(),
+                                   Integer.MAX_VALUE);
 
         // Demonstrate Project Loom structured concurrency.
         demoStructuredConcurrency();
 
         System.out.println("Leaving test");
-    }
-
-    /**
-     * Generate a {@link List} of random {@link Integer}x objects used
-     * to check primality.
-     */
-    private static List<Integer> generateRandomNumbers() {
-        // Generate a List of random Integer objects.
-        return new Random()
-            // Generate the given # of large random ints.
-            .ints(Options.instance().numberOfElements(),
-                  Integer.MAX_VALUE - Options.instance().numberOfElements(),
-                  Integer.MAX_VALUE)
-
-            // Convert each primitive int to Integer.
-            .boxed()    
-                   
-            // Trigger intermediate operations and collect into a List.
-            .toList();
     }
 
     /**
@@ -105,7 +84,7 @@ public class ex2 {
             // concurrently executing tasks complete.
         } 
 
-        display("printing results");
+        Options.display("printing results");
 
         // The Future.get() calls below don't block since the
         // try-with-resources scope above won't exit until all tasks
@@ -135,12 +114,14 @@ public class ex2 {
      * @return A {@link List} of {@link Future} objects that return
      *         {@link PrimeResult} objects
      */
-    private static List<Future<PrimeResult>> checkPrimalities(List<Integer> integers) {
+    private static List<Future<PrimeResult>> checkPrimalities
+        (List<Integer> integers) {
         // Create a new scope to execute virtual tasks, which exits
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor =
+             Executors.newVirtualThreadPerTaskExecutor()) {
             return integers
                 // Create a stream of Integer objects.
                 .stream()
@@ -170,39 +151,13 @@ public class ex2 {
             // concurrently.
             .submit(() -> {
                     // Determine if primeCandidate is prime.
-                    int result = isPrime(primeCandidate);
+                    int result = MathUtils.isPrime(primeCandidate);
 
-                    display(primeCandidate + " = " + result);
+                    Options.display(primeCandidate + " = " + result);
 
                     // Create a record to hold the results.
                     return new PrimeResult(primeCandidate, result);
                 });
-    }
-
-    /**
-     * This method checks if number {@code primeCandidate} is prime.
-     *
-     * @param primeCandidate The number to check for primality
-     * @return 0 if {@code primeCandidate} is prime, or the smallest
-     *         factor if it is not prime
-     */
-    public static int isPrime(int primeCandidate) {
-        // Check if primeCandidate is a multiple of 2.
-        if (primeCandidate % 2 == 0)
-            // Return smallest factor for non-prime number.
-            return 2;
-
-        // If not, then just check the odds for primality.
-        for (int factor = 3;
-             factor * factor <= primeCandidate;
-             // Skip over even numbers.
-             factor += 2)
-            if (primeCandidate % factor == 0)
-                // primeCandidate was not prime.
-                return factor;
-
-        // primeCandidate was prime.
-        return 0;
     }
 
     /**
@@ -219,7 +174,8 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor =
+             Executors.newVirtualThreadPerTaskExecutor()) {
             return StreamSupport
                 // Convert the List of Integer objects into a
                 // sequential stream of two-element Integer objects
@@ -248,41 +204,20 @@ public class ex2 {
     private static Future<GCDResult> computeGCD(Integer[] integers,
                                                 ExecutorService executor) {
         return executor
-            // submit() starts a virtual thread to compute GCD
+            // submit() starts a virtual thread to compute the GCD
             // concurrently.
             .submit(() -> {
                     // Compute GCD.
-                    int result = gcd(integers[0], integers[1]);
+                    int result = MathUtils.gcd(integers[0], integers[1]);
 
-                    display(integers[0] + " = " + integers[1] + " = " + result);
+                    Options.display(integers[0]
+                                    + " = "
+                                    + integers[1]
+                                    + " = "
+                                    + result);
 
                     // Create a record to hold the results.
                     return new GCDResult(integers[0], integers[1], result);
                 });
-    }
-
-    /**
-     * Provides a recursive implementation of Euclid's algorithm to
-     * compute the "greatest common divisor" (GCD) of {@code number1}
-     * and {@code number2}.
-     */
-    private static int gcd(int number1, int number2) {
-        // Basis case.
-        if (number2 == 0)
-            return number1;
-        // Recursive call.
-        return gcd(number2,
-                   number1 % number2);
-    }
-
-    /**
-     * Display {@code message} after printing thread id.
-     * @param message The message to display
-     */
-    private static void display(String message) {
-        System.out.println("Thread = "
-                           + Thread.currentThread().getId()
-                           + " "
-                           + message);
     }
 }

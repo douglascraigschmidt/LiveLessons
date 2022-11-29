@@ -81,6 +81,17 @@ public class Options {
     }
 
     /**
+     * Display {@code message} after printing thread id.
+     * @param message The message to display
+     */
+    public static void display(String message) {
+        System.out.println("Thread = "
+                + Thread.currentThread().getId()
+                + " "
+                + message);
+    }
+
+    /**
      * Make the constructor private for a singleton.
      */
     private Options() {

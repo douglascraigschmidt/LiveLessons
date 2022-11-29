@@ -1,19 +1,14 @@
+import utils.MathUtils;
+import utils.Options;
+import utils.RandomUtils;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.function.IntConsumer;
-import java.util.Random;
+import java.util.stream.IntStream;
 
-import utils.RunTimer;
-import utils.Options;
-import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowConsumer;
-import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
  * This example demonstrates how to create, start, and use virtual and
@@ -31,7 +26,7 @@ public class ex1 {
     /**
      * Keeps track of the number of iterations.
      */
-    private static AtomicInteger sIterationCount =
+    private static final AtomicInteger sIterationCount =
         new AtomicInteger();
 
     /**
@@ -50,32 +45,15 @@ public class ex1 {
                            + " threads");
 
         // Generate a List of random integers.
-        sRANDOM_INTEGERS = generateRandomNumbers();
+        sRANDOM_INTEGERS = RandomUtils
+            .generateRandomNumbers(Options.instance().numberOfElements(),
+                                   Integer.MAX_VALUE);
 
         // Create/start the threads with the given option to either
         // create virtual or platform threads.
         startThreads(Options.instance().virtualThreads());
 
         System.out.println("Leaving test");
-    }
-
-    /**
-     * Generate a {@link List} of random {@link Integer} objects used
-     * to check for primality.
-     */
-    private static List<Integer> generateRandomNumbers() {
-        return new Random()
-            // Generate a stream of the given # of large random ints.
-            .ints(Options.instance().numberOfElements(),
-                  Integer.MAX_VALUE - Options.instance().numberOfElements(),
-                  Integer.MAX_VALUE)
-
-            // Convert each primitive int to Integer.
-            .boxed()    
-                   
-            // Trigger intermediate operations and collect into a
-            // List.
-            .toList();
     }
 
     /**
@@ -153,7 +131,8 @@ public class ex1 {
     public static Runnable makeRunnable(int integer) {
         // Return a Runnable lambda that checks if integer is prime.
         return () -> {
-            var result = ex1.isPrime(integer);
+            // Determine if integer is prime or not.
+            var result = MathUtils.isPrime(integer);
 
             // Periodically print the result of checking for
             // primality.
@@ -167,31 +146,5 @@ public class ex1 {
                                        + result);
             }
         };
-    }
-
-    /**
-     * This method checks if number {@code primeCandidate} is prime.
-     *
-     * @param primeCandidate The number to check for primality
-     * @return 0 if {@code primeCandidate} is prime, or the smallest
-     *         factor if it is not prime
-     */
-    public static int isPrime(int primeCandidate) {
-        // Check if primeCandidate is a multiple of 2.
-        if (primeCandidate % 2 == 0)
-            // Return smallest factor for non-prime number.
-            return 2;
-
-        // If not, then just check the odds for primality.
-        for (int factor = 3;
-             factor * factor <= primeCandidate;
-             // Skip over even numbers.
-             factor += 2)
-            if (primeCandidate % factor == 0)
-                // primeCandidate was not prime.
-                return factor;
-
-        // primeCandidate was prime.
-        return 0;
     }
 }
