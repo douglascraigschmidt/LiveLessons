@@ -34,7 +34,7 @@ public class ex22 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        display("Starting ForkJoinTest");
+        display("Entering ForkJoinTest");
 
         // A list of random unreduced BigFractions.
         List<BigFraction> fractionList = Stream
@@ -66,15 +66,14 @@ public class ex22 {
                                   ex22::testApplyAllSplitIndexEx,
                                   ex22::testParallelStream);
 
-        ex22.testApplyAllSplitIndexEx(fractionList, op);
-
-        // Run each test method.
+        // Run each test method.  There's no need to "warm-up the thread pool"
+        // since each test deliberately uses its own thread pool.
         testMethods.forEach(method -> method.apply(fractionList, op));
 
         // Print the results of the tests.
         display(RunTimer.getTimingResults());
 
-        display("Finishing ForkJoinTest");
+        display("Leaving ForkJoinTest");
     }
 
     /**
