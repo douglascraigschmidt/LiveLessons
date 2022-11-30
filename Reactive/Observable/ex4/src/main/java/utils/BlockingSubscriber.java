@@ -105,7 +105,7 @@ public class BlockingSubscriber<T>
     /**
      * Handle an error event.
      *
-     * @param t The exception that occurred
+     * @param t The {@link Throwable} exception that occurred
      */
     @Override
     public void onError(Throwable t) {

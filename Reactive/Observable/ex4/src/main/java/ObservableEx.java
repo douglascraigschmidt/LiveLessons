@@ -101,7 +101,7 @@ public class ObservableEx {
             // Convert Observable to Flowable so subscribe() works
             // with a Subscriber (instead of an Observer, which is all
             // that Observable provides).
-            .toFlowable(BackpressureStrategy.LATEST)
+            .toFlowable(BackpressureStrategy.BUFFER)
 
             // Use subscribe() to initiate all processing and handle
             // results asynchronously.

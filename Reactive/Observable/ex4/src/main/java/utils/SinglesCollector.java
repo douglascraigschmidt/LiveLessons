@@ -10,12 +10,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
 /**
- * Implements a custom collector that converts a stream of RxJava
- * {@link Single} objects into one {@link Single} object that is
- * triggered when all {@link Single} objects in the stream complete.
+ * Implements a custom {@link Collector} that converts a stream of
+ * RxJava {@link Single} objects into one {@link Single} object that
+ * is triggered when all {@link Single} objects in the stream
+ * complete.
  */
 public class SinglesCollector<T>
       implements Collector<Single<T>,
@@ -80,7 +79,7 @@ public class SinglesCollector<T>
                 .map((Object o) -> (T) o)
 
                 // Collect the results together.
-                .collect(toList());
+                .toList();
 
         // Return a new Single that completes when all Single objects
         // in the List complete.
