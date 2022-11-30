@@ -4,7 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ex2" />
     <module name="flowable-ex2.main" />
-    <option name="PROGRAM_PARAMETERS" value="-d true -c 1000 -o D -r 100 -p 100 -b true" />
+    <option name="PROGRAM_PARAMETERS" value="-d true -c 1000 -r 100 -p 100" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

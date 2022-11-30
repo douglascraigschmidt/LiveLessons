@@ -1,6 +1,7 @@
 package utils;
 
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.functions.Action;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -10,7 +11,7 @@ import java.util.function.Consumer;
 import static utils.BigFractionUtils.sVoidC;
 
 /**
- * Define a Subscriber implementation that handles blocking and
+ * Define a generic {@link Subscriber} implementation that handles blocking and
  * backpressure.
  */
 public class BlockingSubscriber<T>
@@ -22,7 +23,7 @@ public class BlockingSubscriber<T>
     final CountDownLatch mLatch;
 
     /**
-     * The consumer to invoke on each value.
+     * The consumer to invoke on each onNext() value.
      */
     private final Consumer<? super T> mConsumer;
 
@@ -34,7 +35,7 @@ public class BlockingSubscriber<T>
     /**
      * The consumer to invoke on complete signal.
      */
-    private final Runnable mCompleteConsumer;
+    private final Action mCompleteAction;
 
     /**
      * The strictly positive number of elements
@@ -46,20 +47,20 @@ public class BlockingSubscriber<T>
      * Pass and store params that will respectively consume all the
      * elements in the sequence, handle errors and react to completion.
      *
-     * @param consumer The consumer to invoke on each value
-     * @param errorConsumer The consumer to invoke on error signal
-     * @param completeConsumer The consumer to invoke on complete signal
+     * @param consumer The {@link Consumer} to invoke on each value
+     * @param errorConsumer The {@link Consumer} to invoke on error signal
+     * @param completeAction The {@link Action} to invoke on complete signal
      * @param n The strictly positive number of elements
      *          to requests to the upstream Publisher
      */
     public BlockingSubscriber(Consumer<? super T> consumer,
                               Consumer<? super Throwable> errorConsumer,
-                              Runnable completeConsumer,
+                              Action completeAction,
                               long n) {
         mLatch = new CountDownLatch(1);
         mConsumer = consumer;
         mErrorConsumer = errorConsumer;
-        mCompleteConsumer = completeConsumer;
+        mCompleteAction = completeAction;
         mN = n;
     }
 
@@ -121,8 +122,12 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onComplete() {
-        // Run the completeConsumer's hook method.
-        mCompleteConsumer.run();
+        // Run the completeAction's hook method.
+        try {
+            mCompleteAction.run();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 
         // Release the latch.
         mLatch.countDown();

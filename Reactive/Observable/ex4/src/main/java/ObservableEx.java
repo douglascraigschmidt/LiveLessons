@@ -77,7 +77,7 @@ public class ObservableEx {
              Long.MAX_VALUE);
 
         Single
-            // Generate a random large BigFraction.
+            // Generate a random large reduced BigFraction.
             .fromCallable(() -> BigFractionUtils
                           .makeBigFraction(sRANDOM, true))
 

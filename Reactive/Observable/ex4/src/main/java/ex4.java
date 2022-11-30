@@ -18,13 +18,15 @@ public class ex4 {
      */
     public static void main (String[] argv) throws InterruptedException {
         // A test of BigFraction multiplication using an asynchronous
-        // Observable stream and a Subscriber implementation.
-        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationsBlockingSubscriber);
+        // Observable stream and a blocking Subscriber implementation.
+        AsyncTaskBarrier
+            .register(ObservableEx::testFractionMultiplicationsBlockingSubscriber);
 
         // Test BigFraction multiplications by combining the Java
         // streams framework with the RxJava framework and the common
         // fork-join pool.
-        AsyncTaskBarrier.register(ObservableEx::testFractionMultiplicationsStreams);
+        AsyncTaskBarrier
+            .register(ObservableEx::testFractionMultiplicationsStreams);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.

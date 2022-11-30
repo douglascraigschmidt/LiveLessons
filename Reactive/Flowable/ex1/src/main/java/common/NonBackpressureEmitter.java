@@ -28,7 +28,7 @@ public final class NonBackpressureEmitter {
      *
      * @param count The number of random Integers to generate
      * @param maxValue The maximum value of the random {@link Integer}s
-     * @param pendingItemCount Count of the number of pending items
+     * @param pendingItemsCount Count of the number of pending items
      * @return A {@link FlowableOnSubscribe} that emits a
      *         {@link Flowable} stream of random integers
      */

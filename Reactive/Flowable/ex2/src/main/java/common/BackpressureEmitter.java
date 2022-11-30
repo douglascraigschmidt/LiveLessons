@@ -9,14 +9,15 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This Java utility class defines a static method that emits random {@link Integer} \
- * objects.
+ * This Java utility class defines a static method that emits random
+ * {@link Integer} objects.
  */
 public final class BackpressureEmitter {
     /**
      * Debugging tag used by the logger.
      */
-    private static final String TAG = BackpressureEmitter.class.getSimpleName();
+    private static final String TAG =
+        BackpressureEmitter.class.getSimpleName();
 
     /**
      * A Java utility class should have a private constructor.

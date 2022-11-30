@@ -80,7 +80,7 @@ public class BigFractionUtils {
     public static Completable sortAndPrintList(List<BigFraction> list,
                                                StringBuffer sb) {
         // Quick sort the list asynchronously.
-        Single<List<BigFraction>> quickSortM = Single
+        Single<List<BigFraction>> quickSortS = Single
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
             .fromCallable(() -> quickSort(list))
@@ -90,7 +90,7 @@ public class BigFractionUtils {
             .subscribeOn(Schedulers.computation());
 
         // Heap sort the list asynchronously.
-        Single<List<BigFraction>> heapSortM =  Single
+        Single<List<BigFraction>> heapSortS =  Single
             // Use the fromCallable() factory method to obtain the
             // results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
@@ -110,10 +110,10 @@ public class BigFractionUtils {
         };
 
         return Single
-            // Use firstWithSignal() to select the result of whichever
+            // Use ambArray() to select the result of whichever
             // sort finishes first and use it to print the sorted
             // list.
-            .ambArray(quickSortM, heapSortM)
+            .ambArray(quickSortS, heapSortS)
 
             // Use doOnSuccess() to display the first sorted list.
             .doOnSuccess(displayList)

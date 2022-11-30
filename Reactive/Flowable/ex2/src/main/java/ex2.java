@@ -59,11 +59,11 @@ public class ex2 {
             // Concurrently check each random # to see if it's prime.
             .flatMap(ex2.checkForPrimality())
 
+            // Dispose of the Subscriber.
+            .doFinally(sDisposables::dispose)
+
             // The blocking subscriber sets the program in motion.
             .blockingSubscribe(sSubscriber);
-
-        // Dispose of the Subscriber.
-        sDisposables.dispose();
 
         Options.print("test complete");
     }
@@ -82,7 +82,7 @@ public class ex2 {
                       // Emit a stream of random integers.
                       .makeEmitter(Options.instance().count(),
                                    Options.instance().maxValue(),
-                              sPendingItemCount))
+                                   sPendingItemCount))
 
             // Handle errors/exceptions gracefully.
             .onErrorResumeNext(error -> {
