@@ -102,7 +102,7 @@ public class ex1 {
      * Thread} (either virtual or platform) that will run the given
      * {@link Runnable} after the {@link Thread} starts.
      *
-     * @param runnable The {@link Runnable} to run in the new {@link
+     * @param runnable The {@link Runnable} to run in a new {@link
      *                 Thread}
      * @param virtual If true the {@link Thread} should be a virtual
      *        {@link Thread}, else it should be a platform {@link

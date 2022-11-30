@@ -1,18 +1,15 @@
 import utils.BigFraction;
 import utils.RunTimer;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static utils.ForkJoinUtils.*;
+import static tests.ForkJoinTests.*;
 
 /**
  * This example shows how to reduce and multiply big fractions using
@@ -48,7 +45,7 @@ public class ex22 {
             .limit(sMAX_FRACTIONS)
 
             // Collect all the BigFractions into an ArrayList.
-            .collect(toList());
+            .toList();
 
         // Define a BigFraction operation to run.
         Function<BigFraction, BigFraction> op = bigFraction -> BigFraction
@@ -68,6 +65,8 @@ public class ex22 {
                                   ex22::testApplyAllSplit,
                                   ex22::testApplyAllSplitIndexEx,
                                   ex22::testParallelStream);
+
+        ex22.testApplyAllSplitIndexEx(fractionList, op);
 
         // Run each test method.
         testMethods.forEach(method -> method.apply(fractionList, op));
@@ -90,12 +89,12 @@ public class ex22 {
                                                boolean reduced) {
         // Create a large random big integer.
         BigInteger numerator =
-                new BigInteger(150000, random);
+            new BigInteger(150000, random);
 
         // Create a denominator that's between 1 to 10 times smaller
         // than the numerator.
         BigInteger denominator =
-                numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
+            numerator.divide(BigInteger.valueOf(random.nextInt(10) + 1));
 
         // Return a big fraction.
         return BigFraction.valueOf(numerator,
@@ -108,18 +107,21 @@ public class ex22 {
      */
     private static Void testApplyAllIter(List<BigFraction> fractionList,
                                          Function<BigFraction, BigFraction> op) {
-        ForkJoinPool fjp = new ForkJoinPool();
+        // Run garbage collector to start in a pristine state.
         System.gc();
 
-        RunTimer
-            // Time the testing of big fraction operations using
-            // applyAllIter().
-            .timeRun(() -> applyAllIter(fractionList, op, fjp),
-                     "testApplyAllIter()");
+        // Use a try-with-resources block to enable autoclose.
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            RunTimer
+                // Time the testing of big fraction operations using
+                // applyAllIter().
+                .timeRun(() -> applyAllIter(fractionList, op, fjp),
+                         "testApplyAllIter()");
 
-        System.out.println("applyAllIter() steal count = " 
-                           + fjp.getStealCount());
-        return null;
+            System.out.println("applyAllIter() steal count = "
+                               + fjp.getStealCount());
+            return null;
+        }
     }
 
     /**
@@ -127,17 +129,20 @@ public class ex22 {
      */
     private static Void testApplyAllSplitIndex(List<BigFraction> fractionList,
                                                Function<BigFraction, BigFraction> op) {
-        ForkJoinPool fjp = new ForkJoinPool();
+        // Run garbage collector to start in a pristine state.
         System.gc();
 
-        RunTimer
-            // Test big fraction operations using applyAllSplitIndex().
-            .timeRun(() -> applyAllSplitIndex(fractionList, op, fjp),
-                     "testApplyAllSplitIndex()");
+        // Use a try-with-resources block to enable autoclose.
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            RunTimer
+                // Test big fraction operations using applyAllSplitIndex().
+                .timeRun(() -> applyAllSplitIndex(fractionList, op, fjp),
+                         "testApplyAllSplitIndex()");
 
-        System.out.println("applyAllSplitIndex() steal count = " 
-                           + fjp.getStealCount());
-        return null;
+            System.out.println("applyAllSplitIndex() steal count = "
+                               + fjp.getStealCount());
+            return null;
+        }
     }
 
     /**
@@ -145,19 +150,23 @@ public class ex22 {
      */
     private static Void testApplyAllSplitIndexEx(List<BigFraction> fractionList,
                                                  Function<BigFraction, BigFraction> op) {
-        ForkJoinPool fjp = new ForkJoinPool();
+        // Run garbage collector to start in a pristine state.
         System.gc();
 
-        BigFraction[] results = new BigFraction[fractionList.size()];
-        RunTimer
-            // Time testing of big fraction operations using
-            // applyAllSplitIndex().
-            .timeRun(() -> applyAllSplitIndexEx(fractionList, op, fjp, results),
+        // Use a try-with-resources block to enable autoclose.
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            BigFraction[] results = new BigFraction[fractionList.size()];
+
+            RunTimer
+                // Time testing of big fraction operations using
+                // applyAllSplitIndex().
+                .timeRun(() -> applyAllSplitIndexEx(fractionList, op, fjp, results),
                          "testApplyAllSplitIndexEx()");
 
-        System.out.println("applyAllSplitIndexEx() steal count = "
-                + fjp.getStealCount());
-        return null;
+            System.out.println("applyAllSplitIndexEx() steal count = "
+                               + fjp.getStealCount());
+            return null;
+        }
     }
 
     /**
@@ -165,18 +174,21 @@ public class ex22 {
      */
     private static Void testApplyAllSplit(List<BigFraction> fractionList,
                                           Function<BigFraction, BigFraction> op) {
-        ForkJoinPool fjp = new ForkJoinPool();
+        // Run garbage collector to start in a pristine state.
         System.gc();
 
-        RunTimer
-            // Time testing of big fraction operations using
-            // applyAllSplit().
-            .timeRun(() -> applyAllSplit(fractionList, op, fjp),
-                     "testApplyAllSplit()");
+        // Use a try-with-resources block to enable autoclose.
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            RunTimer
+                // Time testing of big fraction operations using
+                // applyAllSplit().
+                .timeRun(() -> applyAllSplit(fractionList, op, fjp),
+                         "testApplyAllSplit()");
 
-        System.out.println("applyAllSplit() steal count = "
-                           + fjp.getStealCount());
-        return null;
+            System.out.println("applyAllSplit() steal count = "
+                               + fjp.getStealCount());
+            return null;
+        }
     }
 
     /**
@@ -184,17 +196,20 @@ public class ex22 {
      */
     private static Void testInvokeAll(List<BigFraction> fractionList,
                                       Function<BigFraction, BigFraction> op) {
-        ForkJoinPool fjp1 = new ForkJoinPool();
+        // Run garbage collector to start in a pristine state.
         System.gc();
 
-        RunTimer
-            // Time the testing of big fraction operations using invokeAll().
-            .timeRun(() -> invokeAll(fractionList, op, fjp1),
-                     "testInvokeAll()");
+        // Use a try-with-resources block to enable autoclose.
+        try (ForkJoinPool fjp1 = new ForkJoinPool()) {
+            RunTimer
+                // Time the testing of big fraction operations using invokeAll().
+                .timeRun(() -> invokeAll(fractionList, op, fjp1),
+                         "testInvokeAll()");
 
-        System.out.println("invokeAll() steal count = "
-                           + fjp1.getStealCount());
-        return null;
+            System.out.println("invokeAll() steal count = "
+                               + fjp1.getStealCount());
+            return null;
+        }
     }
 
     /**
@@ -202,15 +217,17 @@ public class ex22 {
      */
     private static Void testParallelStream(List<BigFraction> fractionList,
                                            Function<BigFraction, BigFraction> op) {
+        // Run garbage collector to start in a pristine state.
         System.gc();
+
         RunTimer
             // Time testing of big fraction operations using a
             // parallel stream.
             .timeRun(() -> applyParallelStream(fractionList, op),
-                "testParallelStream()");
+                     "testParallelStream()");
 
         System.out.println("applyParallelStream() steal count = "
-                + ForkJoinPool.commonPool().getStealCount());
+                           + ForkJoinPool.commonPool().getStealCount());
 
         return null;
     }

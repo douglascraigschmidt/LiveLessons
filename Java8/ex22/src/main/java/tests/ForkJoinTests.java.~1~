@@ -1,82 +1,85 @@
-package utils;
+package tests;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.toList;
 import static utils.ExceptionUtils.rethrowFunction;
 
 /**
  * A Java utility class that defines useful helper methods for
  * fork-join operations.
  */
-public final class ForkJoinUtils {
-    private ForkJoinUtils() {}
+public final class ForkJoinTests {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private ForkJoinTests() {}
 
     /**
-     * Apply {@code op} to all items in the {@code list} using
-     * iterative calls to fork-join methods.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} using iterative calls to fork-join methods.
      */
     public static <T> List<T> applyAllIter(List<T> list,
                                            Function<T, T> op,
                                            ForkJoinPool forkJoinPool) {
         // Invoke a new task in the fork-join pool.
         return forkJoinPool.invoke(new RecursiveTask<>() {
-            /**
-             * Entry point into the new task.
-             */
-            protected List<T> compute() {
-                // Create a list to hold the forked tasks.
-                List<ForkJoinTask<T>> forks =
-                    new LinkedList<>();
+                /**
+                 * Entry point into the new task.
+                 */
+                protected List<T> compute() {
+                    // Create a list to hold the forked tasks.
+                    List<ForkJoinTask<T>> forks =
+                        new LinkedList<>();
 
-                // Create a list to hold the joined results.
-                List<T> results =
-                    new LinkedList<>();
+                    // Create a list to hold the joined results.
+                    List<T> results =
+                        new LinkedList<>();
 
-                // Iterate through list, fork all the tasks,
-                // and add them to the forks list.
-                for (T t : list)
-                    // Add each new task to the forks list.
-                    forks.add(new RecursiveTask<T>() {
-                        /**
-                         * Apply the operation.
-                         */
-                        protected T compute() {
-                            return op.apply(t);
-                        }
-                    }
-                    // Fork a new task.
-                    .fork());
+                    // Iterate through list, fork all the tasks,
+                    // and add them to the forks list.
+                    for (T t : list)
+                        // Add each new task to the forks list.
+                        forks.add(new RecursiveTask<T>() {
+                                /**
+                                 * Apply the operation.
+                                 */
+                                protected T compute() {
+                                    return op.apply(t);
+                                }
+                            }
+                            // Fork a new task.
+                            .fork());
 
-                // Join all the results of the forked tasks.
-                for (ForkJoinTask<T> task : forks)
-                    // Add the joined results.
-                    results.add(task.join());
+                    // Join all the results of the forked tasks.
+                    for (var task : forks)
+                        // Add the joined results.
+                        results.add(task.join());
 
-                // Return the results.
-                return results;
-            }
-        });
+                    // Return the results.
+                    return results;
+                }
+            });
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join methods.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} by recursively splitting up calls to fork-join methods.
      */
+    @SuppressWarnings("unchecked")
     public static <T> List<T> applyAllSplitIndex(List<T> list,
                                                  Function<T, T> op,
                                                  ForkJoinPool forkJoinPool) {
-        // Create a new array to hold the results.
+        // Use Java reflection to create a new array to hold the results.
         T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
                                               list.size());
 
         /*
-          This task partitions list recursively and runs each half in
-          a ForkJoinTask.  It uses indices to avoid the overhead of
-          copying.
+         * This task partitions list recursively and runs each half in
+         * a ForkJoinTask.  It uses indices to avoid the overhead of
+         * copying.
          */
         class SplitterTask
               extends RecursiveAction {
@@ -115,9 +118,9 @@ public final class ForkJoinUtils {
                 } else {
                     // Create a new SplitterTask to handle the
                     // left-hand side of the list and fork it.
-                    ForkJoinTask<Void> leftTask =
+                    var leftTask =
                         new SplitterTask(mLo, mLo = mid)
-                            .fork();
+                        .fork();
 
                     // Compute the right-hand side in parallel with
                     // the left-hand side.
@@ -138,20 +141,20 @@ public final class ForkJoinUtils {
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join methods.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} by recursively splitting up calls to fork-join methods.
      */
     public static <T> void applyAllSplitIndexEx(List<T> list,
                                                 Function<T, T> op,
                                                 ForkJoinPool forkJoinPool,
                                                 T[] results) {
         /*
-          This task partitions list recursively and runs each half in
-          a ForkJoinTask.  It uses indices to avoid the overhead of
-          copying.
+         * This task partitions list recursively and runs each half in
+         * a ForkJoinTask.  It uses indices to avoid the overhead of
+         * copying.
          */
         class SplitterTask
-                extends RecursiveAction {
+            extends RecursiveAction {
             /**
              * The lo index in this partition.
              */
@@ -187,9 +190,9 @@ public final class ForkJoinUtils {
                 } else {
                     // Create a new SplitterTask to handle the
                     // left-hand side of the list and fork it.
-                    ForkJoinTask<Void> leftTask =
-                            new SplitterTask(mLo, mLo = mid)
-                                    .fork();
+                    var leftTask =
+                        new SplitterTask(mLo, mLo = mid)
+                        .fork();
 
                     // Compute the right-hand side in parallel with
                     // the left-hand side.
@@ -207,18 +210,18 @@ public final class ForkJoinUtils {
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} by
-     * recursively splitting up calls to fork-join methods.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} by recursively splitting up calls to fork-join methods.
      */
     public static <T> List<T> applyAllSplit(List<T> list,
                                             Function<T, T> op,
                                             ForkJoinPool forkJoinPool) {
         /*
-          This task splits up the list recursively and runs
-          each half in a ForkJoinTask.
+         * This task splits up the list recursively and runs
+         * each half in a ForkJoinTask.
          */
         class SplitterTask
-              extends RecursiveTask<List<T>> {
+            extends RecursiveTask<List<T>> {
             /**
              * A reference to a portion of the original list.
              */
@@ -235,6 +238,7 @@ public final class ForkJoinUtils {
              * Recursively perform the computations in parallel using
              * the fork-join pool.
              */
+            @Override
             protected List<T> compute() {
                 // The base case for the recursion.
                 if (mList.size() <= 1) {
@@ -255,7 +259,7 @@ public final class ForkJoinUtils {
 
                     // Create a new SplitterTask to handle the
                     // left-hand side of the list and fork it.
-                    ForkJoinTask<List<T>> leftTask = 
+                    var leftTask =
                         new SplitterTask(mList.subList(0,
                                                        mid))
                         .fork();
@@ -285,50 +289,51 @@ public final class ForkJoinUtils {
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} using the
-     * fork-join pool invokeAll() method.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} using the {@link ForkJoinPool} {@code invokeAll(){
+     * method.
      */
     public static <T> List<T> invokeAll(List<T> list,
                                         Function<T, T> op,
                                         ForkJoinPool forkJoinPool) {
         // Create a new list of callables.
         List<Callable<T>> tasks =
-                new ArrayList<>();
+            new ArrayList<>();
 
-        // Add all the ops to the list.
+        // Add Callable lambdas that apply all the ops to the List.
         for (T t : list)
             tasks.add(() -> op.apply(t));
 
         // Create a list of elements from the list of futures and
         // return it.
         return forkJoinPool
-                // Call invokeAll() to process all elements in the list.
-                .invokeAll(tasks)
+            // Call invokeAll() to process all elements in the list.
+            .invokeAll(tasks)
 
-                // Convert the list of futures to a stream.
-                .stream()
+            // Convert the list of futures to a stream.
+            .stream()
 
-                // Map the futures to elements.
-                .map(rethrowFunction(Future::get))
+            // Map the futures to elements.
+            .map(rethrowFunction(Future::get))
 
-                // Collect the results into a list.
-                .collect(toList());
+            // Collect the results into a list.
+            .toList();
     }
 
     /**
-     * Apply {@code op} to all items in the {@code list} using the
-     * parallel stream framework.
+     * Apply {@link Function} {@code op} to all items in the {@link
+     * List} using the Java parallel stream framework.
      */
     public static <T> List<T> applyParallelStream(List<T> list,
                                                   Function<T, T> op) {
         return list
-                 // Convert the list to a parallel stream.
-                 .parallelStream()
+            // Convert the list to a parallel stream.
+            .parallelStream()
 
-                 // Apply the op function to each element of the stream.
-                 .map(op)
+            // Apply the op function to each element of the stream.
+            .map(op)
 
-                 // Convert the transformed stream back into a list.
-                 .collect(toList());
+            // Convert the transformed stream back into a list.
+            .toList();
     }
 }
