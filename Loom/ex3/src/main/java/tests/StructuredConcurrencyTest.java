@@ -1,5 +1,6 @@
 package tests;
 
+import jdk.incubator.concurrent.StructuredTaskScope;
 import transforms.Transform;
 import utils.FileAndNetUtils;
 import utils.Image;
@@ -19,27 +20,27 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * Download, transform, and store {@link Image} objects using the Java
  * structured concurrency framework, which uses the {@link Executors}
  * {@code newVirtualThreadPerTaskExecutor()} factory method to create
- * a new virtual thread for each task.
+ * a new virtual thread for each task.  This implementation just applies
+ * Java 7 features, i.e., it doesn't use modern Java features at all.
  */
 public class StructuredConcurrencyTest {
     /**
-     * This method uses Java structure concurrency to run the
-     * test.
+     * This method uses Java structure concurrency to run the test.
      */
     public static void run(String testName) {
         // Call downloadImages() to obtain a List of Future<Image>
         // objects that holds futures to downloaded images.
-        List<Future<Image>> downloadedImages =
+        var downloadedImages =
             downloadImages(Options.instance().getUrlList());
 
         // Call transformImages() to obtain a List of Future<Image>
         // objects that holds the results of transformed images.
-        List<Future<Image>> transformedImages =
+        var transformedImages =
             transformImages(downloadedImages);
 
         // Call storeImages() to obtain a List of Future<File> objects
         // that hold the results of stored images.
-        List<Future<File>> storedImages =
+        var storedImages =
             storeImages(transformedImages);
 
         Options.instance()
@@ -66,7 +67,7 @@ public class StructuredConcurrencyTest {
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
         try (ExecutorService executor = Executors
-                .newVirtualThreadPerTaskExecutor()) {
+             .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of image URLs.
             for (URL url : urlList)
                 downloadedImages
@@ -74,10 +75,10 @@ public class StructuredConcurrencyTest {
                     .add(executor
                          // submit() starts a virtual thread to
                          // download each image.
-                         .submit(() ->
+                         .submit(() -> FileAndNetUtils
                                  // Download each image via its URL
                                  // and store it in a File.
-                                 FileAndNetUtils.downloadImage(url)));
+                                 .downloadImage(url)));
 
             // Scope doesn't exit until all concurrent tasks complete.
         } 
@@ -104,13 +105,16 @@ public class StructuredConcurrencyTest {
 
         // Create a new scope to execute virtual tasks.
         try (ExecutorService executor = Executors
-                .newVirtualThreadPerTaskExecutor()) {
+             .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of imageFutures.
             for (Future<Image> image : downloadedImages) {
                 transformedImages
-                    // ...
+                    // Append the transforming images at the end
+                    // of the List.
                     .addAll(transformImage(executor,
-                                           rethrowSupplier(image::get).get()));
+                                           rethrowSupplier
+                                           (image::get)
+                                           .get()));
             }
 
             // Scope doesn't exit until all concurrent tasks complete.
@@ -136,9 +140,28 @@ public class StructuredConcurrencyTest {
         // images have been stored asynchronously.
         List<Future<File>> storedFiles = new ArrayList<>();
 
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            // Iterate through the List of transformed image futures.
+            for (Future<Image> image : transformedImages)
+                storedFiles
+                    // Add each Future the Future<File> List.
+                    .add(scope
+                             // submit() starts a virtual thread to store
+                             // each image.
+                             .fork(() -> FileAndNetUtils
+                                 // Store each transformed image in a
+                                 // file.
+                                 .storeImage(rethrowSupplier
+                                                 (image::get)
+                                                 .get())));
+
+            // Scope doesn't exit until all concurrent tasks complete.
+        }
+
+        /*
         // Create a new scope to execute virtual tasks.
         try (ExecutorService executor = Executors
-                .newVirtualThreadPerTaskExecutor()) {
+             .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of transformed image futures.
             for (Future<Image> image : transformedImages)
                 storedFiles
@@ -149,11 +172,15 @@ public class StructuredConcurrencyTest {
                          .submit(() -> FileAndNetUtils
                                  // Store each transformed image in a
                                  // file.
-                                 .storeImage(rethrowSupplier(image::get).get())));
+                                 .storeImage(rethrowSupplier
+                                             (image::get)
+                                             .get())));
 
             // Scope doesn't exit until all concurrent tasks complete.
         }
 
+
+         */
         // Return the List of stored images, which have finished
         // storing at this point.
         return storedFiles;
@@ -182,9 +209,9 @@ public class StructuredConcurrencyTest {
                 .add(executor
                      // submit() starts a virtual thread to transform
                      // each image.
-                     .submit(() ->
+                     .submit(() -> transform
                              // Transform each image
-                             transform.transform(image)));
+                             .transform(image)));
 
         // Return the List of transforming images, which may still be
         // transforming at this point.
