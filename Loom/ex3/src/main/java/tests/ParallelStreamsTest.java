@@ -7,14 +7,13 @@ import common.Options;
 
 import java.io.File;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Download, transform, and store {@link Image} objects using the Java
  * parallel streams framework.
  */
-public class ParallelStreamsTests {
+public class ParallelStreamsTest {
     /**
      * This method uses Java parallel streams with reduce()/concat()
      * to run the test.
@@ -34,7 +33,7 @@ public class ParallelStreamsTests {
 
             // Apply transforms to all images, yielding a stream of
             // stream of images.
-            .map(ParallelStreamsTests::transformImage)
+            .map(ParallelStreamsTest::transformImage)
 
             // Convert the stream of stream of images into a stream
             // of images without using flatMap().

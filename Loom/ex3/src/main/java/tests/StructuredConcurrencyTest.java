@@ -21,7 +21,7 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * {@code newVirtualThreadPerTaskExecutor()} factory method to create
  * a new virtual thread for each task.
  */
-public class StructuredConcurrencyTests {
+public class StructuredConcurrencyTest {
     /**
      * This method uses Java structure concurrency to run the
      * test.

@@ -201,9 +201,7 @@ public class Options {
      */
     public void printStats(String testName,
                            int imageCount) {
-        System.out.println(TAG 
-                           + ": "
-                           + testName
+        System.out.println(testName
                            + " downloaded, transformed, and stored "
                            + imageCount
                            + " images");

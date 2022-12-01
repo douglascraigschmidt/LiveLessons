@@ -1,7 +1,8 @@
 import common.Options;
-import tests.CompletableFuturesTests;
-import tests.ParallelStreamsTests;
-import tests.StructuredConcurrencyTests;
+import tests.CompletableFuturesTest;
+import tests.HybridStructuredConcurrencyTest;
+import tests.ParallelStreamsTest;
+import tests.StructuredConcurrencyTest;
 import utils.*;
 
 import java.util.concurrent.*;
@@ -26,20 +27,25 @@ public class ex3 {
         // Initializes the Options singleton.
         Options.instance().parseArgs(argv);
 
-        runTest(ParallelStreamsTests::run,
+        runTest(ParallelStreamsTest::run,
                 "warmup common fork-join pool");
 
         // Runs the tests using the Java parallel streams framework.
-        runTest(ParallelStreamsTests::run,
+        runTest(ParallelStreamsTest::run,
                 "Parallel streams implementation");
 
         // Runs the tests using the Java completable futures framework.
-        runTest(CompletableFuturesTests::run,
+        runTest(CompletableFuturesTest::run,
                 "Completable futures implementation");
 
-        // Runs the tests using the Java framework.
-        runTest(StructuredConcurrencyTests::run,
+        // Runs the tests using the Java structured concurrency framework.
+        runTest(StructuredConcurrencyTest::run,
                 "Structured concurrency implementation");
+
+        // Runs the tests using the Java structured concurrency framework
+        // mixed with Java sequential streams.
+        runTest(HybridStructuredConcurrencyTest::run,
+                "Hybrid structured concurrency implementation");
 
         System.out.println(RunTimer.getTimingResults());
     }

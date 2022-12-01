@@ -7,7 +7,6 @@ import utils.Image;
 import common.Options;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
  * completable futures framework in conjunction with the Java
  * sequential streams framework and the common fork-join framework.
  */
-public class CompletableFuturesTests {
+public class CompletableFuturesTest {
     /**
      * This method uses Java completable futures to run the test.
      */
@@ -39,10 +38,10 @@ public class CompletableFuturesTests {
 
             // Asynchronously apply transforms to each image and
             // flatten the results into a stream.
-            .flatMap(CompletableFuturesTests::applyTransforms)
+            .flatMap(CompletableFuturesTest::applyTransforms)
 
             // Store each image in the stream.
-            .map(CompletableFuturesTests::storeImage)
+            .map(CompletableFuturesTest::storeImage)
 
             // Terminate the stream and collect the results into List
             // of File objects when all async processing completes.
