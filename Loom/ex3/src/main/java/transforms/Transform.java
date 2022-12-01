@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 /**
  * An abstract class that defines an interface for applying
- * transformation operations on an Image. Each Transform has a name
- * and an abstract method whose implementation must be overridden by a
- * subclass.  Plays the role of the "Abstract Class" in the Template
- * Method pattern and the role of the "Component" in the Decorator
- * pattern.
+ * transformation operations on an {@link Image}.  Each {@link
+ * Transform} has a name and an abstract method whose implementation
+ * must be overridden by a subclass.  Plays the role of the "Abstract
+ * Class" in the Template Method pattern and the role of the
+ * "Component" in the Decorator pattern.
  */
 public abstract class Transform {
     /**

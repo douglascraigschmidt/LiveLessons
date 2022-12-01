@@ -4,12 +4,11 @@ import transforms.Transform;
 import utils.FileAndNetUtils;
 import utils.FuturesCollector;
 import utils.Image;
-import utils.Options;
+import common.Options;
 
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -21,9 +20,9 @@ public class CompletableFuturesTests {
     /**
      * This method uses Java completable futures to run the test.
      */
-    public static void run() {
+    public static void run(String testName) {
         // Get the list of files to the downloaded images.
-        CompletableFuture<List<File>> imageFilesFuture = Options.instance()
+        var imageFiles = Options.instance()
             // Get the List of URLs.
             .getUrlList()
 
@@ -47,11 +46,14 @@ public class CompletableFuturesTests {
 
             // Terminate the stream and collect the results into List
             // of File objects when all async processing completes.
-            .collect(FuturesCollector.toFuture());
+            .collect(FuturesCollector.toFuture())
+
+            // Block until all processing is complete.
+            .join();
 
         // Print the statistics for this test run.
-        Options.instance().printStats("Completable futures test",
-                                      imageFilesFuture.join().size());
+        Options.instance().printStats(testName,
+                                      imageFiles.size());
     }
 
     /**

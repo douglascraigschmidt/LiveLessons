@@ -96,7 +96,7 @@ public class FuturesCollector<T>
                         .map(CompletableFuture::join)
 
                         // Collect the results of type T into an array.
-                        .collect(toList()));
+                        .toList());
     }
 
     /**
@@ -107,9 +107,8 @@ public class FuturesCollector<T>
      * @return An immutable set of collector characteristics, which in
      * this case is simply UNORDERED
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 

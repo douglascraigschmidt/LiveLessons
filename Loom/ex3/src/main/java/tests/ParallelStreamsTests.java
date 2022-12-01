@@ -3,7 +3,7 @@ package tests;
 import transforms.Transform;
 import utils.FileAndNetUtils;
 import utils.Image;
-import utils.Options;
+import common.Options;
 
 import java.io.File;
 import java.util.List;
@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Download, transform, and store {@link Image} objects using the
- * Java parallel streams framework.
+ * Download, transform, and store {@link Image} objects using the Java
+ * parallel streams framework.
  */
 public class ParallelStreamsTests {
     /**
      * This method uses Java parallel streams with reduce()/concat()
      * to run the test.
      */
-    public static void run() {
+    public static void run(String testName) {
         // Store the list of downloaded/tranformed images.
         List<File> imageFiles = Options.instance()
             // Get the List of URLs.
@@ -32,11 +32,11 @@ public class ParallelStreamsTests {
             // its URL.
             .map(FileAndNetUtils::downloadImage)
 
-            // Apply transforms to all images, yielding a stream
-            // of streams of images.
+            // Apply transforms to all images, yielding a stream of
+            // stream of images.
             .map(ParallelStreamsTests::transformImage)
 
-            // Convert the stream of streams of images into a stream
+            // Convert the stream of stream of images into a stream
             // of images without using flatMap().
             .reduce(Stream::concat).orElse(Stream.empty())
 
@@ -45,10 +45,10 @@ public class ParallelStreamsTests {
 
             // Terminate the stream and collect the results into list
             // of images.
-            .collect(Collectors.toList());
+            .toList();
 
         // Print the statistics for this test run.
-        Options.instance().printStats("Parallel streams reduce()/concat() test",
+        Options.instance().printStats(testName,
                                       imageFiles.size());
     }
 

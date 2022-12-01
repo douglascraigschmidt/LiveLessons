@@ -1,6 +1,7 @@
-package utils;
+package common;
 
 import transforms.Transform;
+import utils.ExceptionUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -30,7 +31,7 @@ public class Options {
      * The {@link List} of {@link Transform} objects to apply to
      * downloaded images.
      */
-    private List<Transform> mTransforms = List
+    private final List<Transform> mTransforms = List
         .of(Transform.Factory.newTransform(Transform.Type.GRAY_SCALE_TRANSFORM),
             Transform.Factory.newTransform(Transform.Type.TINT_TRANSFORM),
             Transform.Factory.newTransform(Transform.Type.SEPIA_TRANSFORM));
@@ -123,7 +124,7 @@ public class Options {
             .flatMap(this::convertStringToUrls)
 
             // Create and return a list of a list of URLs.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -166,11 +167,9 @@ public class Options {
     public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
-                switch (argv[argc]) {
-                case "-d":
+                if (argv[argc].equals("-d")) {
                     mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                default:
+                } else {
                     printUsage();
                     return;
                 }
@@ -205,7 +204,7 @@ public class Options {
         System.out.println(TAG 
                            + ": "
                            + testName
-                           + " downloaded and stored "
+                           + " downloaded, transformed, and stored "
                            + imageCount
                            + " images");
     }

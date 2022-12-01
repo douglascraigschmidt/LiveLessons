@@ -1,12 +1,12 @@
 package utils;
 
+import common.Options;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.io.File;
-
-import static platspec.PlatSpec.getInputStream;
 
 /**
  * Provides some general utility helper methods for file and network
@@ -44,7 +44,7 @@ public final class FileAndNetUtils {
         
         // Creates an InputStream from the inputUrl from which to read
     	// the image data.
-        try (InputStream istream = getInputStream(url)) {
+        try (InputStream istream = url.openStream()) {
             // While there is unread data from the inputStream,
             // continue writing data to the byte array.
             while ((bytes = istream.read(readBuffer)) > 0) 
@@ -102,8 +102,7 @@ public final class FileAndNetUtils {
             + "_"
             + transformName
             + "."
-            + fileName.substring(fileName.lastIndexOf('_') + 1,
-                                 fileName.length());
+            + fileName.substring(fileName.lastIndexOf('_') + 1);
         return fileName;
     }
 

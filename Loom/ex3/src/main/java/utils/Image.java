@@ -1,7 +1,6 @@
 package utils;
 
-import platspec.ImageBase;
-import platspec.PlatSpec;
+import common.Options;
 import transforms.Transform;
 import transforms.Transforms;
 
@@ -10,8 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static utils.ExceptionUtils.rethrowSupplier;
@@ -22,13 +19,20 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * decoding raw byte arrays into an Image and setting/getting image
  * and file names.
  */
-public class Image 
-       extends ImageBase {
+public class Image {
     /**
      * The source URL from which the result was downloaded.
      */
     private final URL mSourceUrl;
 
+    /**
+     * The Bitmap our Image stores.
+     */
+    public BufferedImage mImage;
+
+    /**
+     * Name of the transform to apply to the {@link Image}.
+     */
     private String mTransformName = "";
 
     /**
@@ -37,9 +41,9 @@ public class Image
      */
     public Image(URL sourceURL,
                  byte[] imageData) {
-        super(rethrowSupplier(() -> ImageIO
-                              .read(new ByteArrayInputStream(imageData)))
-                              .get());
+        // Set the image.
+        mImage = rethrowSupplier(() -> ImageIO
+                                 .read(new ByteArrayInputStream(imageData))).get();
 
         // Set the URL.
         mSourceUrl = sourceURL;
@@ -51,7 +55,7 @@ public class Image
     private Image(BufferedImage bufferedImage,
                   URL sourceURL,
                   String transformName) {
-        super(bufferedImage);
+        mImage = bufferedImage;
         mSourceUrl = sourceURL;
         mTransformName = transformName;
     }
@@ -66,7 +70,7 @@ public class Image
     }
 
     /**
-     *
+     * Apply the transform to the {@link Image}.
      */
     public Image applyTransform(Transform.Type type) {
         BufferedImage originalImage = mImage;
@@ -85,21 +89,22 @@ public class Image
 
         String transformName;
         switch (type) {
-        case GRAY_SCALE_TRANSFORM:
-            Transforms.grayScale(pixels, filteredImage.getColorModel().hasAlpha());
-            transformName = "grayscale";
-            break;
-        case TINT_TRANSFORM:
-            Transforms.tint(pixels, filteredImage.getColorModel().hasAlpha(),
-                            0.0f, 0.0f, 0.9f);
-            transformName = "tint";
-            break;
-        case SEPIA_TRANSFORM:
-            Transforms.sepia(pixels, filteredImage.getColorModel().hasAlpha());
-            transformName = "sepia";
-            break;
-        default:
-            return this;
+            case GRAY_SCALE_TRANSFORM -> {
+                Transforms.grayScale(pixels, filteredImage.getColorModel().hasAlpha());
+                transformName = "grayscale";
+            }
+            case TINT_TRANSFORM -> {
+                Transforms.tint(pixels, filteredImage.getColorModel().hasAlpha(),
+                        0.0f, 0.0f, 0.9f);
+                transformName = "tint";
+            }
+            case SEPIA_TRANSFORM -> {
+                Transforms.sepia(pixels, filteredImage.getColorModel().hasAlpha());
+                transformName = "sepia";
+            }
+            default -> {
+                return this;
+            }
         }
 
         filteredImage
@@ -123,11 +128,19 @@ public class Image
                                   getFileName());
         
         // Store the image using try-with-resources
-        
         try (FileOutputStream outputFile =
              new FileOutputStream(imageFile)) {
             // Write the image to the output file.
-            PlatSpec.writeImageFile(outputFile, this);
+
+            BufferedImage bufferedImage = mImage;
+
+            if (bufferedImage == null)
+                System.out.println("null image");
+            else 
+                ImageIO.write(bufferedImage,
+                              "png",
+                              outputFile);
+
             return imageFile;
         } catch (Exception e) {
             e.printStackTrace();

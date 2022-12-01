@@ -3,7 +3,7 @@ package tests;
 import transforms.Transform;
 import utils.FileAndNetUtils;
 import utils.Image;
-import utils.Options;
+import common.Options;
 
 import java.io.File;
 import java.net.URL;
@@ -18,15 +18,15 @@ import static utils.ExceptionUtils.rethrowSupplier;
 /**
  * Download, transform, and store {@link Image} objects using the Java
  * structured concurrency framework, which uses the {@link Executors}
- * {@code newVirtualThreadExecutor()} factory method to create a new
- * virtual thread for each task.
+ * {@code newVirtualThreadPerTaskExecutor()} factory method to create
+ * a new virtual thread for each task.
  */
 public class StructuredConcurrencyTests {
     /**
-     * This method uses Project Loom structure concurrency to run the
+     * This method uses Java structure concurrency to run the
      * test.
      */
-    public static void run() {
+    public static void run(String testName) {
         // Call downloadImages() to obtain a List of Future<Image>
         // objects that holds futures to downloaded images.
         List<Future<Image>> downloadedImages =
@@ -44,7 +44,7 @@ public class StructuredConcurrencyTests {
 
         Options.instance()
             // Print the statistics for this test run.
-            .printStats("Structured concurrency test",
+            .printStats(testName,
                         storedImages.size());
     }
 
@@ -65,7 +65,8 @@ public class StructuredConcurrencyTests {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor = Executors
+                .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of image URLs.
             for (URL url : urlList)
                 downloadedImages
@@ -102,7 +103,8 @@ public class StructuredConcurrencyTests {
         List<Future<Image>> transformedImages = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor = Executors
+                .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of imageFutures.
             for (Future<Image> image : downloadedImages) {
                 transformedImages
@@ -135,7 +137,8 @@ public class StructuredConcurrencyTests {
         List<Future<File>> storedFiles = new ArrayList<>();
 
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor = Executors
+                .newVirtualThreadPerTaskExecutor()) {
             // Iterate through the List of transformed image futures.
             for (Future<Image> image : transformedImages)
                 storedFiles
