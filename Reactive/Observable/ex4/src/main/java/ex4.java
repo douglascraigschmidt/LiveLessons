@@ -4,13 +4,13 @@ import utils.AsyncTaskBarrier;
  * This example shows how to apply RxJava features asynchronously to
  * perform a range of Observable operations, including fromArray(),
  * fromCallable(), doOnNext(), map(), flatMap(), subscribeOn(),
- * toFlowable(), subscribe(), and a parallel thread pool.  It also
- * shows the Flowable subscribe() operation.  In addition it shows
- * various Single operations, such as zipArray(), ambArray(),
- * subscribeOn(), flatMapObservable(), flatMapCompletable(),
- * ignoreElement(), flatMap(), and a parallel thread pool.  It also
- * shows how to combine the Java Streams framework with the RxJava
- * framework.
+ * toFlowable(), the Flowable subscribe() operator, and the
+ * computation() thread pool.  It also shows the Flowable subscribe()
+ * operation.  In addition it shows various Single operations, such as
+ * zipArray(), ambArray(), subscribeOn(), flatMapObservable(),
+ * flatMapCompletable(), ignoreElement(), flatMap(), and a parallel
+ * thread pool.  It also shows how to combine the Java Streams
+ * framework with the RxJava framework.
  */
 public class ex4 {
     /**

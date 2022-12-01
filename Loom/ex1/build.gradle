@@ -6,6 +6,10 @@ apply plugin: 'java'
 java.targetCompatibility = JavaVersion.VERSION_19
 java.sourceCompatibility = JavaVersion.VERSION_19
 
+compileJava {
+    options.compilerArgs << '--enable-preview'
+}
+
 repositories {
     mavenCentral()
 }
