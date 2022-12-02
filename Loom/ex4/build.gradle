@@ -13,3 +13,7 @@ compileJava {
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    implementation 'io.projectreactor:reactor-core:3.5.0'
+}

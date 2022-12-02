@@ -12,15 +12,14 @@ import static utils.ExceptionUtils.rethrowSupplier;
 import static utils.RandomUtils.generateRandomNumbers;
 
 /**
- * This example demonstrates modern Java structured concurrency
- * features, which enables a main task to split into several
- * concurrent sub-tasks that run concurrently to completion before the
- * main task can complete.  Modern Java supports structured
- * concurrency by enhancing {@link ExecutorService} to support
- * AutoCloseable and updating {@link Executors} to define new static
- * factory methods that support usage in a structured manner.  You'll
- * need to install JDK 19 with gradle version 7.6 configured to run
- * this example.
+ * This example demonstrates Java 19 structured concurrency features,
+ * which enables a main task to split into several concurrent
+ * sub-tasks that run concurrently to completion before the main task
+ * can complete.  Java 19 supports structured concurrency by enhancing
+ * {@link ExecutorService} to support AutoCloseable and updating
+ * {@link Executors} to define new static factory methods that support
+ * usage in a structured manner.  You'll need to install JDK 19 with
+ * gradle version 7.6 configured to run this example.
  */
 public class ex2 {
     /**
@@ -43,7 +42,7 @@ public class ex2 {
             .generateRandomNumbers(Options.instance().numberOfElements(),
                                    Integer.MAX_VALUE);
 
-        // Demonstrate Project Loom structured concurrency.
+        // Demonstrate Java 19 structured concurrency.
         demoStructuredConcurrency();
 
         System.out.println("Leaving test");

@@ -4,13 +4,13 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 
 compileJava {
-    options.compilerArgs << '--enable-preview'
+    options.compilerArgs.addAll(
+            ['--enable-preview',
+             '--add-modules', 'jdk.incubator.concurrent'
+            ])
 }
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation 'io.projectreactor:reactor-core:3.5.0'
-}
