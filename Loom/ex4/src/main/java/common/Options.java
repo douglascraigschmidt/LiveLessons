@@ -201,10 +201,11 @@ public class Options {
      */
     public void printStats(String testName,
                            int imageCount) {
-        System.out.println(testName
-                           + " downloaded, transformed, and stored "
-                           + imageCount
-                           + " images");
+        if (!testName.contains("warmup"))
+            System.out.println(testName
+                               + " downloaded, transformed, and stored "
+                               + imageCount
+                               + " images");
     }
 
     /**

@@ -1,12 +1,14 @@
 package tests;
 
 import transforms.Transform;
+import utils.BlockingTask;
 import utils.FileAndNetUtils;
 import utils.Image;
 import common.Options;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 
 /**
@@ -40,7 +42,7 @@ public class ParallelStreamsTest {
             .reduce(Stream::concat).orElse(Stream.empty())
 
             // Store the images.
-            .map(FileAndNetUtils::storeImage)
+            .map(ParallelStreamsTest::storeImage)
 
             // Terminate the stream and collect the results into list
             // of images.
@@ -49,6 +51,21 @@ public class ParallelStreamsTest {
         // Print the statistics for this test run.
         Options.instance().printStats(testName,
                                       imageFiles.size());
+    }
+
+    /**
+     * Store the {@link Image} via the common fork-join
+     * framework's {@link ForkJoinPool.ManagedBlocker} mechanism.
+     *
+     * @param image The {@link Image} to store
+     * @return A {@link File} containing the {@link Image}
+     */
+    private static File storeImage(Image image) {
+        return BlockingTask
+            // Store the image via the common fork-join
+            // framework's ManagedBlocker mechanism.
+            .callInManagedBlock(() ->FileAndNetUtils
+                               .storeImage(image));
     }
 
     /**

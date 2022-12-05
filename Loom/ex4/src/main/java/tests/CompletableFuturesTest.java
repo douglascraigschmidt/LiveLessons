@@ -1,6 +1,7 @@
 package tests;
 
 import transforms.Transform;
+import utils.BlockingTask;
 import utils.FileAndNetUtils;
 import utils.FuturesCollector;
 import utils.Image;
@@ -65,8 +66,10 @@ public class CompletableFuturesTest {
     private static CompletableFuture<File> storeImage
         (CompletableFuture<Image> imageFuture) {
         return imageFuture
-            // Asynchronous store the image.
-            .thenApplyAsync(Image::store);
+            // Asynchronous store the image via the common fork-join
+            // framework's ManagdBlocker mechanism.
+            .thenApplyAsync(image -> BlockingTask
+                            .callInManagedBlock(image::store));
     }
 
     /**

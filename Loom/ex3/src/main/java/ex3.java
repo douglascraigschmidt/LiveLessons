@@ -14,15 +14,15 @@ import static utils.BigFractionUtils.makeBigFraction;
 import static utils.BigFractionUtils.sBigReducedFraction;
 
 /**
- * This example demonstrates Java 20 structured concurrency features,
- * which enables a main task to split into several concurrent
- * sub-tasks that run concurrently to completion before the main task
- * can complete.  Java 20 supports structured concurrency via the
- * {@link StructuredTaskScope} framework, which supports AutoCloseable
- * and defines several nested classes (such as {@link
- * StructuredTaskScope.ShutdownOnFailure}) that define new factory methods that support
- * usage in a structured manner.  You'll need to install JDK 19 (or
- * beyond) with gradle version 7.6 configured to run this example.
+ * This example demonstrates Java 19 preview structured concurrency
+ * features, which enables a main task to split into several
+ * concurrent sub-tasks that run concurrently to completion before the
+ * main task can complete.  The Java 19 preview supports structured
+ * concurrency via the {@link StructuredTaskScope} class, which
+ * supports AutoCloseable and defines several nested classes (such as
+ * {@link StructuredTaskScope.ShutdownOnFailure}) that supports
+ * structured concurrency.  You'll need to install JDK 19 (or beyond)
+ * with gradle version 7.6 configured to run this example.
  */
 public class ex3 {
     /**

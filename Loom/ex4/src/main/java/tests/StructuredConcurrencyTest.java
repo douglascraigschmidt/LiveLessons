@@ -104,15 +104,12 @@ public class StructuredConcurrencyTest {
             var transformedImages = new ArrayList<Future<Image>>();
 
             // Iterate through the List of imageFutures.
-            for (var imageFuture : downloadedImages) {
+            for (var imageFuture : downloadedImages)
                 transformedImages
                     // Append the transforming images at the end
                     // of the List.
                     .addAll(transformImage(scope,
-                                           rethrowSupplier
-                                           (imageFuture::get)
-                                           .get()));
-            }
+                                             imageFuture.resultNow()));
 
             rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
@@ -151,9 +148,7 @@ public class StructuredConcurrencyTest {
                              .fork(() -> FileAndNetUtils
                                  // Store each transformed image in a
                                  // file.
-                                 .storeImage(rethrowSupplier
-                                                 (imageFuture::get)
-                                                 .get())));
+                                 .storeImage(imageFuture.resultNow())));
 
             rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
