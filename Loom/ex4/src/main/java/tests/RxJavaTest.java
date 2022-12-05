@@ -31,7 +31,7 @@ public class RxJavaTest {
             // Convert Flowable into a ParallelFlowable.
             .parallel()
 
-            // Run computations in the "bounded elastic" thread pool.
+            // Run computations in the "io" thread pool.
             .runOn(Schedulers.io())
 
             // Transform URL to an image by downloading each image via

@@ -16,7 +16,7 @@ import static utils.ExceptionUtils.*;
 
 /**
  * Download, transform, and store {@link Image} objects using the Java
- * structured concurrency framework, which uses the Java 20 {@link
+ * structured concurrency framework, which uses the Java 19 {@link
  * StructuredTaskScope.ShutdownOnFailure} {@code fork()} factory
  * method to create a new virtual thread for each task.  This
  * implementation just applies Java 7 features, i.e., it doesn't use
@@ -69,7 +69,7 @@ public class StructuredConcurrencyTest {
                 downloadedImages
                     // Add each Future the Future<Image> List.
                     .add(scope
-                         // submit() starts a virtual thread to
+                         // fork() starts a virtual thread to
                          // download each image.
                          .fork(() -> FileAndNetUtils
                                // Download each image via its URL
@@ -168,7 +168,7 @@ public class StructuredConcurrencyTest {
      *         {@link Image} objects
      */
     private static List<Future<Image>> transformImage
-        (StructuredTaskScope.ShutdownOnFailure executor,
+        (StructuredTaskScope.ShutdownOnFailure scope,
          Image image) {
 
         // A List of Future<Image> objects that complete when the
@@ -178,7 +178,7 @@ public class StructuredConcurrencyTest {
         // Iterate through the List of Transformed objects.
         for (Transform transform : Options.instance().transforms())
             transformedImageFutures
-                .add(executor
+                .add(scope
                      // submit() starts a virtual thread to transform
                      // each image.
                      .fork(() -> transform

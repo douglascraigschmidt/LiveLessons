@@ -12,8 +12,7 @@ import static utils.ExceptionUtils.rethrowConsumer;
 
 /**
  * This example demonstrates how to create, start, and use virtual and
- * platform Thread objects in Project Loom, which is exploring and
- * incubating Java VM features and APIs built on top of them for the
+ * platform Thread objects in Java 19, which contains an
  * implementation of lightweight user-mode threads (virtual threads).
  * You'll need to install JDK 19 with gradle 7.6 configured.
  */

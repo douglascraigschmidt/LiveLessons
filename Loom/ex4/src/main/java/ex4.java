@@ -81,7 +81,9 @@ public class ex4 {
         // Let the system garbage collect first to ensure pristine conditions.
         System.gc();
 
-        if (!testName.contains("warmup"))
+        if (testName.contains("warmup"))
+            test.accept(testName);
+        else
             // Record how long the test takes to run runTest.
             // Run the test with the designated
             // functions.

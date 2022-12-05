@@ -80,8 +80,6 @@ public class ProjectReactorTest {
             // Run computations in the "bounded elastic" thread pool.
             .runOn(Schedulers.boundedElastic())
 
-            // .peek(i -> System.out.println(Thread.currentThread().getName()))
-
             // Apply each transform to the original image to produce a
             // transformed image.
             .map(transform -> transform.transform(image));

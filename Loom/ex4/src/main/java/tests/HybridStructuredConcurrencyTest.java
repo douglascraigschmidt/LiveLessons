@@ -64,7 +64,7 @@ public class HybridStructuredConcurrencyTest {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor = Executors
+        try (var executor = Executors
              .newVirtualThreadPerTaskExecutor()) {
             // Return a List of Future<Image> objects that have all
             // completed by the time the List is returned.
@@ -85,7 +85,8 @@ public class HybridStructuredConcurrencyTest {
                 // results into a List.
                 .toList();
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent virtual threads
+            // complete.
         }
     }
 
@@ -101,7 +102,7 @@ public class HybridStructuredConcurrencyTest {
     private static List<Future<Image>> transformImages
         (List<Future<Image>> downloadedImages) {
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors
+        try (var executor = Executors
              .newVirtualThreadPerTaskExecutor()) {
             // Return a List of transformed images, which have
             // finished transforming at this point.
@@ -112,15 +113,14 @@ public class HybridStructuredConcurrencyTest {
                 // Map each Image Future to transformed Image Future.
                 .flatMap(imageFuture ->
                          transformImage(executor,
-                                        rethrowSupplier
-                                        (imageFuture::get)
-                                        .get()))
+                                        imageFuture.resultNow()))
 
                 // Trigger intermediate processing and collect the
                 // results into a List.
                 .toList();
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent virtual threads
+            // complete.
         }
     }
 
@@ -136,8 +136,8 @@ public class HybridStructuredConcurrencyTest {
     private static List<Future<File>> storeImages
         (List<Future<Image>> transformedImages) {
         // Create a new scope to execute virtual tasks.
-        try (ExecutorService executor = Executors
-                .newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors
+             .newVirtualThreadPerTaskExecutor()) {
             // Return the List of stored images, which have finished
             // storing at this point.
             return transformedImages
@@ -151,15 +151,15 @@ public class HybridStructuredConcurrencyTest {
                      .submit(() -> FileAndNetUtils
                              // Store each transformed image in a
                              // file.
-                             .storeImage(rethrowSupplier
-                                         (transformedImage::get)
-                                         .get())))
+                             .storeImage(transformedImage
+                                         .resultNow())))
 
                 // Trigger intermediate processing and collect the
                 // results into a List.
                 .toList();
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent virtual threads
+            // complete.
         }
     }
 
@@ -183,7 +183,7 @@ public class HybridStructuredConcurrencyTest {
             // Convert the List to a sequential Stream.
             .stream()
 
-            // Apply each Transform to a create a Future<Image>.
+            // Apply each Transform to create a Future<Image>.
             .map(transform ->executor
                  // submit() starts a virtual thread to transform each
                  // image concurrently.

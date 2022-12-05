@@ -23,27 +23,19 @@ import static utils.RandomUtils.generateRandomNumbers;
  */
 public class ex2 {
     /**
-     * A {@link List} of randomly-generated {@link Integer} objects.
-     */
-    private static List<Integer> sRANDOM_INTEGERS;
-
-    /**
      * Main entry point into the test program.
      */
-    public static void main(String[] argv)
-        throws ExecutionException, InterruptedException {
+    public static void main(String[] argv) {
         System.out.println("Entering test");
 
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Generate a List of random numbers.
-        sRANDOM_INTEGERS = RandomUtils
+        // Demonstrate Java 19 structured concurrency on a
+        // List of random large Integer objects.
+        demoStructuredConcurrency(RandomUtils
             .generateRandomNumbers(Options.instance().numberOfElements(),
-                                   Integer.MAX_VALUE);
-
-        // Demonstrate Java 19 structured concurrency.
-        demoStructuredConcurrency();
+                          Integer.MAX_VALUE));
 
         System.out.println("Leaving test");
     }
@@ -53,9 +45,12 @@ public class ex2 {
      * (1) checking the primality of a {@link List} of random numbers
      * and (2) computing the greatest common divisor (GCD) of pairs of
      * these random numbers.
+     *
+     * @param randomIntegers A {@link List} of random large {@link Integer}
+     *                       objects
      */
-    public static void demoStructuredConcurrency()
-        throws ExecutionException, InterruptedException {
+    public static void demoStructuredConcurrency
+        (List<Integer> randomIntegers) {
 
         // Future to a List holding Future<PrimeResult> objects.
         Future<List<Future<PrimeResult>>> primeCheckFutures;
@@ -72,12 +67,12 @@ public class ex2 {
             primeCheckFutures = executor
                 // submit() starts a virtual thread to check
                 // primalities concurrently.
-                .submit(() -> checkPrimalities(sRANDOM_INTEGERS));
+                .submit(() -> checkPrimalities(randomIntegers));
 
             gcdComputeFutures = executor
                 // submit() starts a virtual thread to compute GCDs
                 // concurrently.
-                .submit(() -> computeGCDs(sRANDOM_INTEGERS));
+                .submit(() -> computeGCDs(randomIntegers));
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing tasks complete.
@@ -91,17 +86,17 @@ public class ex2 {
 
         // Print the primality results.  
         primeCheckFutures
-            .get()
+            .resultNow()
             .forEach(future -> System.out
                      .println("result = "
-                              + rethrowSupplier(future::get).get()));
+                              + future.resultNow()));
 
         // Print the GCD results.
         gcdComputeFutures
-            .get()
+            .resultNow()
             .forEach(future -> System.out
                      .println("result = "
-                              + rethrowSupplier(future::get).get()));
+                              + future.resultNow()));
     }                              
 
     /**

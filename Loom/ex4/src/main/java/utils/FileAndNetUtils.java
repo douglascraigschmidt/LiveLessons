@@ -69,12 +69,8 @@ public final class FileAndNetUtils {
     public static Image downloadImage(URL url) {
         return 
             // Perform a blocking image download.
-            new Image(url, BlockingTask
-                      // This call ensures the common fork/join thread
-                      // pool is expanded to handle the blocking image
-                      // download.
-                      .callInManagedBlock(() -> 
-                                          downloadContent(url)));
+            new Image(url,
+                     downloadContent(url));
     }
     
     /**

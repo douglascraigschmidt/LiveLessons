@@ -8,7 +8,9 @@ import utils.Image;
 import common.Options;
 
 import java.io.File;
+import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 
 /**
@@ -29,20 +31,16 @@ public class CompletableFuturesTest {
             // Convert the List to a sequential stream.
             .stream()
 
-            // Transform URL to a File by downloading each image via
+            // Transform URL to an Image by downloading each image via
             // its URL.
-            .map(url -> CompletableFuture
-                 // Download each image and store it in a file
-                 // asynchronously.
-                 .supplyAsync(() -> FileAndNetUtils
-                              .downloadImage(url)))
+            .map(CompletableFuturesTest::downloadImageAsync)
 
             // Asynchronously apply transforms to each image and
             // flatten the results into a stream.
             .flatMap(CompletableFuturesTest::applyTransforms)
 
-            // Store each image in the stream.
-            .map(CompletableFuturesTest::storeImage)
+            // Store each image in the stream into a File.
+            .map(CompletableFuturesTest::storeImageAsync)
 
             // Terminate the stream and collect the results into List
             // of File objects when all async processing completes.
@@ -57,17 +55,35 @@ public class CompletableFuturesTest {
     }
 
     /**
+     * Transform a {@link URL} to an {@link Image} by downloading the
+     * contents of the {@code url} via the common fork-join
+     * framework's {@link ForkJoinPool.ManagedBlocker} mechanism.
+     *
+     * @param url The {@link URL} of the image to download
+     * @return An {@link Image} containing the image contents
+     */
+    private static CompletableFuture<Image> downloadImageAsync
+       (URL url) {
+        return CompletableFuture
+            // Download each image and store it in a file
+            // asynchronously.
+            .supplyAsync(() -> BlockingTask
+                         .callInManagedBlock(() -> FileAndNetUtils
+                                             .downloadImage(url)));
+    }
+
+    /**
      * Asynchronously store the {@code imageFuture} when it completes and
      * return a {@link File} containing the image.
      *
      * @param imageFuture A {@link CompletableFuture} to an {@link Image}
      * @return A {@link CompletableFuture} to a {@link File}
      */
-    private static CompletableFuture<File> storeImage
+    private static CompletableFuture<File> storeImageAsync
         (CompletableFuture<Image> imageFuture) {
         return imageFuture
             // Asynchronous store the image via the common fork-join
-            // framework's ManagdBlocker mechanism.
+            // framework's ManagedBlocker mechanism.
             .thenApplyAsync(image -> BlockingTask
                             .callInManagedBlock(image::store));
     }
