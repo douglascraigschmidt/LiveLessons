@@ -10,17 +10,17 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static utils.ExceptionUtils.*;
 
 /**
  * Download, transform, and store {@link Image} objects using the Java
- * structured concurrency framework, which uses the Java 19 {@link
- * StructuredTaskScope.ShutdownOnFailure} {@code fork()} factory
- * method to create a new virtual thread for each task.  This
- * implementation just applies Java 7 features, i.e., it doesn't use
- * modern Java features at all.
+ * structured concurrency framework, which uses the {@link Executors}
+ * {@code newVirtualThreadPerTaskExecutor()} factory method to create
+ * a new virtual thread for each task.  This implementation just applies
+ * Java 7 features, i.e., it doesn't use modern Java features at all.
  */
 public class StructuredConcurrencyTest {
     /**
@@ -62,14 +62,15 @@ public class StructuredConcurrencyTest {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // A List of Future<Image> objects that complete when the
             // images have been downloaded asynchronously.
-            var downloadedImages = new ArrayList<Future<Image>>();
+            List<Future<Image>> downloadedImages
+                = new ArrayList<>();
 
             // Iterate through the List of image URLs.
             for (URL url : urlList)
                 downloadedImages
                     // Add each Future the Future<Image> List.
                     .add(scope
-                         // fork() starts a virtual thread to
+                         // submit() starts a virtual thread to
                          // download each image.
                          .fork(() -> FileAndNetUtils
                                // Download each image via its URL
@@ -101,15 +102,19 @@ public class StructuredConcurrencyTest {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // A List of Future<Image> objects that complete when the
             // images have been transformed asynchronously.
-            var transformedImages = new ArrayList<Future<Image>>();
+            List<Future<Image>> transformedImages =
+                new ArrayList<>();
 
             // Iterate through the List of imageFutures.
-            for (var imageFuture : downloadedImages)
+            for (var imageFuture : downloadedImages) {
                 transformedImages
                     // Append the transforming images at the end
                     // of the List.
                     .addAll(transformImage(scope,
-                                             imageFuture.resultNow()));
+                                           rethrowSupplier
+                                           (imageFuture::get)
+                                           .get()));
+            }
 
             rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
@@ -136,7 +141,8 @@ public class StructuredConcurrencyTest {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // A List of Future<File> objects that complete when the
             // images have been stored asynchronously.
-            var storedFiles = new ArrayList<Future<File>>();
+            List<Future<File>> storedFiles =
+                new ArrayList<>();
 
             // Iterate through the List of transformed image futures.
             for (var imageFuture : transformedImages)
@@ -148,7 +154,9 @@ public class StructuredConcurrencyTest {
                              .fork(() -> FileAndNetUtils
                                  // Store each transformed image in a
                                  // file.
-                                 .storeImage(imageFuture.resultNow())));
+                                 .storeImage(rethrowSupplier
+                                                 (imageFuture::get)
+                                                 .get())));
 
             rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
@@ -168,17 +176,18 @@ public class StructuredConcurrencyTest {
      *         {@link Image} objects
      */
     private static List<Future<Image>> transformImage
-        (StructuredTaskScope.ShutdownOnFailure scope,
+        (StructuredTaskScope.ShutdownOnFailure executor,
          Image image) {
 
         // A List of Future<Image> objects that complete when the
         // images have been transformed asynchronously.
-        var transformedImageFutures = new ArrayList<Future<Image>>();
+        List<Future<Image>> transformedImageFutures = 
+            new ArrayList<>();
 
         // Iterate through the List of Transformed objects.
         for (Transform transform : Options.instance().transforms())
             transformedImageFutures
-                .add(scope
+                .add(executor
                      // submit() starts a virtual thread to transform
                      // each image.
                      .fork(() -> transform

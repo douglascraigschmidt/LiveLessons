@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 /**
  * This example compares and contrasts the programming models and
  * performance results of Java parallel streams, completable futures,
- * Project Reactor, and Java structured concurrency when applied to
- * download, transform, and store many images from a remote web
- * server.
+ * Project Reactor, RxJava, and Java structured concurrency when
+ * applied to download, transform, and store many images from a remote
+ * web server.
  */
 public class ex4 {
     /**
