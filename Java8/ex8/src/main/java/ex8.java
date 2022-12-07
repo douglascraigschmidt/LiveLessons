@@ -7,12 +7,13 @@ import utils.AsyncTester;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * using a wide range of features in the Java completable futures
- * framework, including various factory methods, completion stage
- * methods, arbitrary-arity methods, and exception handling methods.
- * This example also shows how to combine the Java completable futures
- * framework with the Java (sequential) streams framework.
+ * This example shows how to reduce and/or multiply {@link
+ * BigFraction} objects using a wide range of features in the Java
+ * completable futures framework, including various factory methods,
+ * completion stage methods, arbitrary-arity methods, and exception
+ * handling methods.  This example also shows how to combine the Java
+ * completable futures framework with the Java (sequential) streams
+ * framework.
  */
 public class ex8 {
     /**

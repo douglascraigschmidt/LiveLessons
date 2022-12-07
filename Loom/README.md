@@ -33,3 +33,10 @@ Here's an overview of what's current included in these examples:
         concurrency when applied to download, transform, and store
         many images from a remote web server.
 
+. ex5 - This example shows how to reduce and/or multiply BigFraction
+        objects via the Java completable futures framework.  It also
+        shows how to customize the Java completable futures framework
+        to use arbitrary Executor objects, including the new
+        Executors.newVirtualThreadPerTaskExecutor() provided in Java
+        19.  You'll need to install JDK 19 (or beyond) with gradle
+        version 7.6 configured to run this example.

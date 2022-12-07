@@ -135,14 +135,14 @@ public class ex44 {
         sMemoizer.getCache().clear();
 
         RunTimer
-                // Record the time needed to perform the computations.
-                .timeRun(() ->
-                                // Use a memoizer to check odd random numbers in
-                                // parallel to determine which are prime and
-                                // which aren't.
-                                checkForPrimesAsync(sRandomNumbers,
-                                        sMemoized),
-                        "checkForPrimesAsync() memoized");
+            // Record the time needed to perform the computations.
+            .timeRun(() ->
+                     // Use a memoizer to check odd random numbers in
+                     // parallel to determine which are prime and
+                     // which aren't.
+                     checkForPrimesAsync(sRandomNumbers,
+                                         sMemoized),
+                     "checkForPrimesAsync() memoized");
 
         // Print the statistics for the async memoized version.
         printStatistics("checkForPrimesAsync() memoized");
@@ -207,7 +207,7 @@ public class ex44 {
 
             // Handle the results after all asynchronous processing completes.
             .thenAccept(stream -> stream
-                       .forEach(ex44::handleResults))
+                        .forEach(ex44::handleResults))
 
             // Wait for all the async computations to complete.
             .join();
@@ -369,11 +369,11 @@ public class ex44 {
      */
     private static void printStatistics(String testName) {
         ex44.display(sPrimeCount
-                    + " prime #'s and "
-                    + sNonDuplicateCount.get()
-                    + " isPrime() calls in "
-                    + testName
-                    + " test");
+                     + " prime #'s and "
+                     + sNonDuplicateCount.get()
+                     + " isPrime() calls in "
+                     + testName
+                     + " test");
     }
 }
 

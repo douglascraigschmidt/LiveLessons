@@ -43,10 +43,10 @@ Here's an overview of what's currently included in these examples:
         (including Supplier and a custom functional interface) can be
         used in conjunction with Java constructor references.
   
-. ex8 - This example shows how to reduce and/or multiply big fractions
-        using a wide range of features in the Java completable futures
-        framework, including many factory methods, completion stage
-        methods, arbitrary-arity methods, and exception handling
+. ex8 - This example shows how to reduce and/or multiply BigFraction
+        objects using a wide range of features in the Java completable
+        futures framework, including many factory methods, completion
+        stage methods, arbitrary-arity methods, and exception handling
         methods.
 
 . ex9 - This example showcases and benchmarks the use of a Java
@@ -237,3 +237,12 @@ Here's an overview of what's currently included in these examples:
          in a stream.  It also demonstrates performance differences
          between forEach() and forEachOrdered() terminal operations
          when applied to accumulate results in a stream.
+         
+. ex44 - This example demonstrates benefits of combining
+         object-oriented and functional programming in modern Java.
+         It uses the Java parallel streams and completable futures
+         frameworks to compose a pipeline of functions (i.e.,
+         aggregate operations) that check sMAX_COUNT positive odd
+         random numbers in parallel to determine which are prime and
+         which aren't.
+         
