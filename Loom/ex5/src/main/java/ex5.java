@@ -6,6 +6,8 @@ import utils.RunTimer;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 
@@ -14,13 +16,13 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sortAndPrintList;
 
 /**
- * This example shows how to reduce and/or multiply BigFraction
- * objects via the Java completable futures framework.  It also shows
- * how to customize the Java completable futures framework to use
- * arbitrary {@link Executor} objects, including the new {@link
- * Executors#newVirtualThreadPerTaskExecutor} provided in Java 19.
- * You'll need to install JDK 19 (or beyond) with gradle version 7.6
- * configured to run this example.
+ * This example shows how to reduce and/or multiply {@link
+ * BigFraction} objects via the Java completable futures framework.
+ * It also shows how to customize the Java completable futures
+ * framework to use arbitrary {@link Executor} objects, including the
+ * new {@link Executors} {@code newVirtualThreadPerTaskExecutor()}
+ * provided in Java 19.  You'll need to install JDK 19 (or beyond)
+ * with gradle version 7.6 configured to run this example.
  */
 public class ex5 {
     /**
@@ -35,7 +37,9 @@ public class ex5 {
         // Run the tests.
         runTests();
 
+        // Print the timing results.
         System.out.println(RunTimer.getTimingResults());
+
         System.out.println("Leaving test");
     }
 

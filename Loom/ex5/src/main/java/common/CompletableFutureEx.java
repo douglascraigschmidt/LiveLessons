@@ -8,14 +8,24 @@ import java.util.function.Supplier;
 
 /**
  * Create a subclass of {@link CompletableFuture} that uses
- * virtual threads by default rather than the common fork-
- * join pool.
+ * virtual threads by default rather than the Java common
+ * fork-join pool.  Users of this class can configure
+ * whatever {@link Executor} they prefer.
  */
 public class CompletableFutureEx<T>
        extends CompletableFuture<T> {
+    /**
+     * Store the default {@link Executor}.
+     */
     private static Executor sEXEC = Executors
         .newVirtualThreadPerTaskExecutor();
 
+    /**
+     * Set the {@link Executor} that's used as the default.
+     *
+     * @param executor The {@link Executor} that's used by default
+     * @return The previous {@link Executor}
+     */
     public static Executor setExecutor(Executor executor) {
         var previousExecutor = sEXEC;
         sEXEC = executor;
@@ -23,8 +33,8 @@ public class CompletableFutureEx<T>
     }
 
     /**
-     * @return An {@link Executors#newVirtualThreadPerTaskExecutor}
-     *         that creates a new virtual thread per task
+     * @return Returns the default {@link Executor} used for async methods
+     * that do not specify an {@link Executor}.
      */
     @Override
     public Executor defaultExecutor() {
