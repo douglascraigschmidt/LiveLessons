@@ -1,4 +1,4 @@
-import common.CompletableFutureEx;
+import utils.CompletableFutureEx;
 import common.Options;
 import utils.BigFraction;
 import utils.BigFractionUtils;
@@ -79,9 +79,10 @@ public class ex5 {
         // Function asynchronously reduces/multiplies a BigFraction.
         Function<BigFraction,
                  CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
-            sUnreducedFraction -> CompletableFutureEx
+            unreducedFraction -> CompletableFutureEx
             // Perform BigFraction reduction asynchronously.
-            .supplyAsync(() -> BigFraction.reduce(sUnreducedFraction))
+            .supplyAsync(() -> BigFraction
+                         .reduce(unreducedFraction))
 
             // Return a CompletableFuture to a BigFraction that's
             // being multiplied asynchronously, which may run for a

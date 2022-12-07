@@ -1,4 +1,4 @@
-package common;
+package utils;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -7,10 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 /**
- * Create a subclass of {@link CompletableFuture} that uses
- * virtual threads by default rather than the Java common
- * fork-join pool.  Users of this class can configure
- * whatever {@link Executor} they prefer.
+ * Customize {@link CompletableFuture} so it uses virtual threads by
+ * default rather than the Java common fork-join pool.  However, users
+ * of this class can configure the {@link Executor} to whatever they
+ * prefer.
  */
 public class CompletableFutureEx<T>
        extends CompletableFuture<T> {
