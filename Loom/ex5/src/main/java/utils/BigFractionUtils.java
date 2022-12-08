@@ -74,7 +74,7 @@ public final class BigFractionUtils {
      */
     public static CompletableFuture<Void> sortAndPrintList
         (List<BigFraction> list,
-         StringBuilder sb) {
+         StringBuffer sb) {
         // This implementation uses quick sort to order the list.
         CompletableFuture<List<BigFraction>> quickSortF = CompletableFutureEx
             // Perform quick sort asynchronously.

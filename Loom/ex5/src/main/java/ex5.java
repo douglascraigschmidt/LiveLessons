@@ -16,13 +16,14 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sortAndPrintList;
 
 /**
- * This example shows how to reduce and/or multiply {@link
- * BigFraction} objects via the Java completable futures framework.
- * It also shows how to customize the Java completable futures
- * framework to use arbitrary {@link Executor} objects, including the
- * new {@link Executors} {@code newVirtualThreadPerTaskExecutor()}
- * provided in Java 19.  You'll need to install JDK 19 (or beyond)
- * with gradle version 7.6 configured to run this example.
+ * This example shows how to reduce and multiply {@link BigFraction}
+ * objects concurrently via a subclass of the Java {@link
+ * CompletableFuture} superclass.  In particular, it shows how to
+ * customize the Java completable futures framework to use arbitrary
+ * {@link Executor} objects, including the new {@link Executors}
+ * {@code newVirtualThreadPerTaskExecutor()} provided in Java 19.
+ * You'll need to install JDK 19 (or beyond) with gradle version 7.6
+ * (or beyond) configured to run this example.
  */
 public class ex5 {
     /**
@@ -73,8 +74,8 @@ public class ex5 {
      */
     public static CompletableFuture<Void> testFractionMultiplications
         (List<BigFraction> bigFractionList) {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testFractionMultiplications()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications()\n");
 
         // Function asynchronously reduces/multiplies a BigFraction.
         Function<BigFraction,

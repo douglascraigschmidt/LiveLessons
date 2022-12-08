@@ -23,8 +23,8 @@ import java.util.stream.Stream;
  */
 public class ListOfFuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                 List<CompletableFuture<T>>,
-                 CompletableFuture<List<T>>> {
+                           List<CompletableFuture<T>>,
+                           CompletableFuture<List<T>>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the

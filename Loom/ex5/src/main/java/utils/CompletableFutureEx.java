@@ -47,7 +47,7 @@ public class CompletableFutureEx<T>
      *         {@link CompletionStage} method
      */
     @Override
-    public <U> CompletableFuture<U> newIncompleteFuture() {
+    public <T> CompletableFuture<T> newIncompleteFuture() {
         return new CompletableFutureEx<>();
     }
 
@@ -60,8 +60,8 @@ public class CompletableFutureEx<T>
      *                 complete the returned {@link CompletableFuture}
      * @return The new {@link CompletableFuture}
      */
-    public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
-        return new CompletableFutureEx<U>()
+    public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
+        return new CompletableFutureEx<T>()
             // Completes this CompletableFuture with the result of the
             // given supplier invoked from a virtual thread using the
             // default executor.
