@@ -1,10 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="primechecker.server.PrimeCheckApplication" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="ALTERNATIVE_JRE_PATH" value="openjdk-18" />
+  <configuration default="false" name="PrimeCheckApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/Library/Java/JavaVirtualMachines/openjdk-19/Contents/Home" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="primechecker.server.PrimeCheckApplication" />
     <module name="ex1.main" />
     <option name="PROGRAM_PARAMETERS" value="-d true" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="primechecker.*" />
