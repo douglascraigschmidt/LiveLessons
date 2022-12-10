@@ -24,6 +24,21 @@ compileJava {
             ])
 }
 
+tasks.withType(JavaCompile).all {
+    options.compilerArgs += ['--enable-preview',
+                             '--add-modules', 'jdk.incubator.concurrent']
+}
+
+tasks.withType(Test).all {
+    jvmArgs += '--enable-preview'
+    jvmArgs += '--add-modules'
+    jvmArgs += 'jdk.incubator.concurrent'
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs += '--enable-preview'
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.junit.jupiter:junit-jupiter'

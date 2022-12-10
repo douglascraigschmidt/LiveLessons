@@ -8,6 +8,7 @@ import primechecker.server.PrimeCheckController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static primechecker.utils.WebUtils.futuresToIntegers;
@@ -50,6 +51,7 @@ public class PrimeCheckClient {
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
                                              boolean parallel) {
+/*
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Create a List of Future<Integer> to hold the results.
             var results = new ArrayList<Future<Integer>>();
@@ -73,6 +75,30 @@ public class PrimeCheckClient {
         } catch (Exception ignored) {
             return Collections.emptyList();
         }
+
+ */
+
+        // Create a List of Future<Integer> to hold the results.
+        var results = new ArrayList<Future<Integer>>();
+
+        try (var executors = parallel
+             ? Executors.newVirtualThreadPerTaskExecutor()
+             : Executors.newSingleThreadExecutor()) {
+            // Iterate through all the random BigFraction objects.
+            for (var primeCandidate : primeCandidates)
+                results
+                        // Add the Future<Integer> to the ist.
+                        .add(executors
+                                // Fork a new virtual thread to check the
+                                // primeCandidate for primality.
+                                .submit(() -> mPrimeCheckProxy
+                                        .checkIfPrime(primeCandidate)));
+        } catch (Exception ex) {
+            System.out.println("EXCEPTION" + ex.getMessage());
+            return Collections.emptyList();
+        }
+        // Convert the List<Future<Integer>> to a List<Integer>.
+        return futuresToIntegers(results);
     }
 
     /**

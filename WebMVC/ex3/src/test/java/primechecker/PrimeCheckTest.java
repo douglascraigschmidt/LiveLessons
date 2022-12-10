@@ -66,6 +66,7 @@ public class PrimeCheckTest {
         List<Integer> randomIntegers = generateRandomNumbers();
 
         assert (testClient != null);
+
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClient::testIndividualCalls,

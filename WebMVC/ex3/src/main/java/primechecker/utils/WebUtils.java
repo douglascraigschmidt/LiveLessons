@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * A Java utility class that provides helper methods for dealing with
  * Spring web programming.
@@ -97,6 +99,6 @@ public final class WebUtils {
         return results
             .stream()
             .map(Future::resultNow)
-            .toList();
+            .collect(toList());
     }
 }
