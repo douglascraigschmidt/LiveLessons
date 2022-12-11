@@ -24,22 +24,24 @@ compileJava {
             ])
 }
 
-tasks.withType(JavaCompile).all {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['--enable-preview',
                              '--add-modules', 'jdk.incubator.concurrent']
 }
 
-tasks.withType(Test).all {
+tasks.withType(Test).configureEach {
     jvmArgs += '--enable-preview'
     jvmArgs += '--add-modules'
     jvmArgs += 'jdk.incubator.concurrent'
 }
 
-tasks.withType(JavaExec) {
+tasks.withType(JavaExec).configureEach {
     jvmArgs += '--enable-preview'
 }
 
 dependencies {
+    implementation 'org.apache.httpcomponents:httpcore:4.4.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -49,7 +51,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-
-
-

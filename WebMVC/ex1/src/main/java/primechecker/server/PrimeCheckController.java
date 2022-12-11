@@ -2,7 +2,7 @@ package primechecker.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import primechecker.utils.Options;
+import primechecker.common.Options;
 
 import java.net.http.HttpResponse;
 import java.util.List;

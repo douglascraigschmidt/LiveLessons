@@ -3,7 +3,9 @@
     <ExternalSystemSettings>
       <option name="env">
         <map>
+          <entry key="COUNT" value="100" />
           <entry key="JAVA_TOOL_OPTIONS" value="--enable-preview" />
+          <entry key="POOL_CONNECTIONS" value="true" />
         </map>
       </option>
       <option name="executionName" />

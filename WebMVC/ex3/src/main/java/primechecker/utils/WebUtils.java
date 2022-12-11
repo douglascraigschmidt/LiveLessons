@@ -90,15 +90,22 @@ public final class WebUtils {
     }
 
     /**
+     * Convert a {@link List} of {@link Future<Integer>} objects to
+     * a {@link List} of {@link Integer} objects.
      *
-     * @param results
-     * @return
+     * @param list The {@link List} of {@link Future<Integer>} objects
+     * @return A {@link List} of {@link Integer} objects
      */
     public static List<Integer> futuresToIntegers
-            (ArrayList<Future<Integer>> results) {
-        return results
+            (ArrayList<Future<Integer>> list) {
+        return list
+            // Convert the List to a Stream.
             .stream()
+
+            // Map the Future<Integer> to Integer.
             .map(Future::resultNow)
-            .collect(toList());
+
+            // Convert the Stream to a List.
+            .toList();
     }
 }

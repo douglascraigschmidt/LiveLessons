@@ -1,4 +1,4 @@
-package primechecker.utils;
+package primechecker.common;
 
 import ch.qos.logback.classic.Level;
 import org.slf4j.LoggerFactory;
@@ -24,12 +24,12 @@ public class Options {
      * Controls whether debugging output will be generated (defaults
      * to false).
      */
-    private boolean mDiagnosticsEnabled = false;
+    private boolean mDebugging = false;
 
     /**
-     * Controls whether backpressure is enabled (defaults to true).
+     * Controls whether connections will be pooled.
      */
-    private boolean mBackPressureEnabled = true;
+    private boolean mPoolConnections = true;
 
     /**
      * Controls how many longs are generated.
@@ -40,22 +40,6 @@ public class Options {
      * Controls the max value of the random numbers.
      */
     private int mMaxValue = Integer.MAX_VALUE;
-
-    /**
-     * Controls whether logging is enabled
-     */
-    private boolean mLoggingEnabled;
-
-    /**
-     * True if the producer and consumer should run in parallel, else
-     * false.
-     */
-    private boolean mParallel = true;
-
-    /**
-     * The parallelism level if mParallel is true.  Defaults to 1.
-     */
-    private int mParallelism = 1;
 
     /**
      * Method to return the one and only singleton uniqueInstance.
@@ -70,30 +54,22 @@ public class Options {
     /**
      * @return True if debugging output is printed, else false.
      */
-    public boolean diagnosticsEnabled() {
-        return mDiagnosticsEnabled;
-    }
-
-    /**
-     * @return True the producer and consumer should run in parallel,
-     * else false.
-     */
-    public boolean parallel() {
-        return mParallel;
-    }
-
-    /**
-     * @return The parallelism level.
-     */
-    public int parallelism() {
-        return mParallelism;
+    public boolean getDebug() {
+        return mDebugging;
     }
 
     /**
      * @return The number of integers to generate.
      */
-    public int count() {
+    public int getCount() {
         return mCount;
+    }
+
+    /**
+     * Set the number of integers to generate.
+     */
+    public void setCount(int count) {
+        mCount = count;
     }
 
     /**
@@ -104,18 +80,11 @@ public class Options {
     }
 
     /**
-     * @return True if logging is enabled, else false.
-     */
-    public boolean loggingEnabled() {
-        return mLoggingEnabled;
-    }
-
-    /**
      * Print the debug string with thread information included if
      * diagnostics are enabled.
      */
     public static void debug(String string) {
-        if (sInstance.mDiagnosticsEnabled)
+        if (sInstance.mDebugging)
             System.out.println("[" +
                     Thread.currentThread().getName()
                     + "] "
@@ -127,7 +96,7 @@ public class Options {
      * diagnostics are enabled.
      */
     public static void debug(String tag, String string) {
-        if (sInstance.mDiagnosticsEnabled)
+        if (sInstance.mDebugging)
             Options.debug(string);
     }
 
@@ -148,28 +117,19 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
-                        break;
-                case "-c":
-                    mCount = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-m":
-                    mMaxValue = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-p":
-                    mParallel = argv[argc + 1].equals("true");
-                    break;
-                case "-P":
-                    mParallelism = Integer.parseInt(argv[argc + 1]);
-                    break;
-                default:
-                    printUsage();
-                    return;
+                    case "-d" -> mDebugging = argv[argc + 1].equals("true");
+                    case "-c" -> mCount = Integer.parseInt(argv[argc + 1]);
+                    case "-m" -> mMaxValue = Integer.parseInt(argv[argc + 1]);
+                    default -> {
+                        printUsage();
+                        return;
+                    }
                 }
+
+            var count = System.getenv("COUNT");
+            if (count != null)
+                setCount(Integer.parseInt(count));
+
             if (mMaxValue - mCount <= 0)
                 throw new IllegalArgumentException("maxValue - count must be greater than 0");
         }
@@ -209,10 +169,7 @@ public class Options {
         System.out.println("Usage: ");
         System.out.println("-c [n] "
                            + "-d [true|false] "
-                           + "-l [true|false] "
-                           + "-m [maxValue] "
-                           + "-p [true|false]"
-                           + "-P [parallelism]");
+                           + "-m [maxValue] ");
     }
 
     /**

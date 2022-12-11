@@ -2,19 +2,10 @@ package primechecker.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import primechecker.common.Constants;
 import primechecker.server.PrimeCheckController;
-import primechecker.utils.Options;
-import primechecker.utils.WebUtils;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
-import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
-import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous

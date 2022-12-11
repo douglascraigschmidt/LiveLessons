@@ -5,16 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import primechecker.client.PrimeCheckClient;
+import primechecker.common.Options;
 import primechecker.server.PrimeCheckApplication;
 import primechecker.server.PrimeCheckController;
-import primechecker.common.Options;
+import primechecker.utils.RandomUtils;
 import primechecker.utils.RunTimer;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiFunction;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This program tests the {@link PrimeCheckClient} and its ability to
@@ -62,8 +60,10 @@ public class PrimeCheckTest {
 
         Options.instance().parseArgs(mArgv);
 
-        // Generate a list of random numbers.
-        List<Integer> randomIntegers = generateRandomNumbers();
+        // Generate a List of random Integer objects.
+        List<Integer> randomIntegers = RandomUtils
+            .generateRandomNumbers(Options.instance().getCount(),
+                                   Options.instance().maxValue());
 
         assert (testClient != null);
 
@@ -102,28 +102,6 @@ public class PrimeCheckTest {
     }
 
     /**
-     * Generate a {@link List} of random {@link Integer} objects used
-     * for prime number checking.
-     *
-     * @return A {@link List} of random {@link Integer} objects
-     */
-    private List<Integer> generateRandomNumbers() {
-        // Generate and return a List of random Integer objects.
-        return new Random()
-                // Generate the given # of large random ints.
-                .ints(Options.instance().count(),
-                        Integer.MAX_VALUE - Options.instance().count(),
-                        Integer.MAX_VALUE)
-
-                // Convert each primitive int to Integer.
-                .boxed()
-
-                // Trigger intermediate operations and collect into a
-                // List.
-                .collect(toList());
-    }
-
-    /**
      * Time {@code testName} using the given {@code test}.
      *
      * @param test            A {@link BiFunction} that performs the test
@@ -140,7 +118,10 @@ public class PrimeCheckTest {
         Options.print("Starting "
                 + testName
                 + " with count = "
-                + Options.instance().count());
+                + Options.instance().getCount());
+
+        // Garbage collect to leave memory in a pristine state.
+        System.gc();
 
         var results = RunTimer
                 // Time how long this test takes to run.
@@ -149,6 +130,7 @@ public class PrimeCheckTest {
                          test.apply(primeCandidates, parallel),
                          testName);
 
+        // System.out.println("results.size() = " + results.size());
         // Display the results.
         Options.displayResults(primeCandidates, results);
     }

@@ -18,7 +18,7 @@ import static primechecker.utils.WebUtils.futuresToIntegers;
  * remote method invocations on the {@link PrimeCheckController} web
  * service to determine the primality of large integers.  These
  * invocations can be made individually or in bulk, as well as be make
- * sequentially or in parallel using Java Streams.
+ * sequentially or in parallel using Java structured concurrency.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -44,14 +44,64 @@ public class PrimeCheckClient {
      *
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
-     * @param parallel True if using parallel streams, else false
+     * @param parallel True if using parallelism, else false
      * @return A {@link List} of {@link Integer} objects indicating
      *         the primality of the corresponding {@code primeCandidates}
      *         elements
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
                                              boolean parallel) {
-/*
+        if (parallel)
+            return testIndividualCallsParallel(primeCandidates);
+        else 
+            return testIndividualCallsSequential(primeCandidates);
+    }
+
+    /**
+     * Send individual HTTP GET requests to the server sequentially to
+     * check if a the {@code primeCandidates} {@link List} of {@link
+     * Integer} objects are prime or not.
+     *
+     * @param primeCandidates A {@link List} of {@link Integer}
+     *                        objects to check for primality
+     * @return A {@link List} of {@link Integer} objects indicating
+     *         the primality of the corresponding {@code primeCandidates}
+     *         elements
+     */
+    private List<Integer> testIndividualCallsSequential
+        (List<Integer> primeCandidates) {
+        try {
+            // Create a List of Integer to hold the results.
+            var results = new ArrayList<Integer>();
+
+            // Iterate through all the random BigFraction objects.
+            for (var primeCandidate : primeCandidates)
+                results
+                    // Add the Integer to the List.
+                    .add(mPrimeCheckProxy.checkIfPrime(primeCandidate));
+
+            // Return the results.
+            return results;
+        } catch (Exception exception) {
+            // Return an empty List if an exception occurs.
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Send individual HTTP GET requests to the server in parallel to
+     * check if a the {@code primeCandidates} {@link List} of {@link
+     * Integer} objects are prime or not.
+     *
+     * @param primeCandidates A {@link List} of {@link Integer}
+     *                        objects to check for primality
+     * @return A {@link List} of {@link Integer} objects indicating
+     *         the primality of the corresponding {@code primeCandidates}
+     *         elements
+     */
+    private List<Integer> testIndividualCallsParallel
+        (List<Integer> primeCandidates) {
+        /*
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Create a List of Future<Integer> to hold the results.
             var results = new ArrayList<Future<Integer>>();
@@ -59,7 +109,7 @@ public class PrimeCheckClient {
             // Iterate through all the random BigFraction objects.
             for (var primeCandidate : primeCandidates)
                 results
-                    // Add the Future<Integer> to the ist.
+                    // Add the Future<Integer> to the List.
                     .add(scope
                             // Fork a new virtual thread to check the
                             // primeCandidate for primality.
@@ -70,34 +120,38 @@ public class PrimeCheckClient {
             // finish or the task scope to shut down.
             scope.join();
 
-            // Convert the List<Future<Integer>> to a List<Integer>.
+            // Throw an exception if a remote call fails.
+            scope.throwIfFailed();
+
+            // Convert the List<Future<Integer>> to a List<Integer>
+            // and return it.
             return futuresToIntegers(results);
         } catch (Exception ignored) {
+            // Return an empty List if an exception occurs.
             return Collections.emptyList();
         }
-
- */
+         */
 
         // Create a List of Future<Integer> to hold the results.
         var results = new ArrayList<Future<Integer>>();
 
-        try (var executors = parallel
-             ? Executors.newVirtualThreadPerTaskExecutor()
-             : Executors.newSingleThreadExecutor()) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             // Iterate through all the random BigFraction objects.
             for (var primeCandidate : primeCandidates)
                 results
-                        // Add the Future<Integer> to the ist.
-                        .add(executors
+                        // Add the Future<Integer> to the List.
+                        .add(executor
                                 // Fork a new virtual thread to check the
                                 // primeCandidate for primality.
                                 .submit(() -> mPrimeCheckProxy
                                         .checkIfPrime(primeCandidate)));
-        } catch (Exception ex) {
-            System.out.println("EXCEPTION" + ex.getMessage());
+        } catch (Exception ignored) {
+            // Return an empty List if an exception occurs.
             return Collections.emptyList();
         }
-        // Convert the List<Future<Integer>> to a List<Integer>.
+
+        // Convert the List<Future<Integer>> to a List<Integer>
+        // and return it.
         return futuresToIntegers(results);
     }
 
@@ -108,7 +162,7 @@ public class PrimeCheckClient {
      *
      * @param primeCandidates A {@link List} of {@link Integer}
      *                        objects to check for primality
-     * @param parallel True if using parallel streams, else false
+     * @param parallel True if using parallelism, else false
      * @return A {@link List} of {@link Integer} objects indicating
      *         the primality of the corresponding {@code primeCandidates}
      *         elements

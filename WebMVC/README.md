@@ -16,3 +16,8 @@ Here's an overview of what's currently included in these examples:
         also shows how to encode/decode complex objects that use
         inheritance relationships and transmits them between
         processes.
+
+. ex3 - This example shows how WebMVC can be used to send and receive
+        HTTP GET requests via Java structured concurrency.  These
+        requests are mapped to methods that determine the primality of
+        large Integer objects.

@@ -17,7 +17,7 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * primality of large random {@link Integer} objects.  These methods
  * can be passed either individual prime candidates or a {@link List}
  * of prime candidates and process these candidates using a sequential
- * or parallel stream in response to client directives.
+ * or parallel programming in response to client directives.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the

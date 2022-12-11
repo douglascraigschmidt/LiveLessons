@@ -1,7 +1,7 @@
 package primechecker.server;
 
 import org.springframework.stereotype.Service;
-import primechecker.utils.Options;
+import primechecker.common.Options;
 
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class PrimeCheckService {
             .collect(toList());
 
         // Conditionally display the results.
-        if (Options.instance().diagnosticsEnabled())
+        if (Options.instance().getDebug())
             Options.displayResults(primeCandidates, results);
 
         // Return the results.

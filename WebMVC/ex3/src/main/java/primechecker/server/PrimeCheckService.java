@@ -1,24 +1,22 @@
 package primechecker.server;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
 import org.springframework.stereotype.Service;
 import primechecker.common.Options;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static java.util.stream.Collectors.toList;
 import static primechecker.utils.WebUtils.futuresToIntegers;
 
 /**
  * This class defines implementation methods that are called by the
  * {@link PrimeCheckController}. These implementation methods check
  * the primality of one or more {@link Integer} objects using the Java
- * Streams framework.  A sequential or parallel stream is used based
- * on parameters passed by clients.
+ * Streams framework.  A {@code newSingleThreadedExecutor} or a {@code
+ * newVirtualThreadPerTaskExecutor} is used based on parameters passed
+ * by clients.
  *
  * This class is annotated as a Spring {@code @Service}, which
  * indicates this class implements "business logic" and enables the
@@ -91,7 +89,7 @@ public class PrimeCheckService {
         var response = futuresToIntegers(results);
 
         // Conditionally display the results.
-        if (Options.instance().diagnosticsEnabled())
+        if (Options.instance().getDebug())
             Options.displayResults(primeCandidates, response);
             
         return response;
