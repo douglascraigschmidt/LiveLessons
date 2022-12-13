@@ -28,7 +28,7 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * identified by the {@code @RestController} annotation below.
  *
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@link PrimeCheckController}.  GET
+ * requests onto methods in the {@link PCServerController}.  GET
  * requests invoked from any HTTP web client (e.g., a web browser or
  * client app) or command-line utility (e.g., Curl or Postman).
  *
@@ -37,13 +37,13 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * back within the body of an {@link HttpResponse} object.
  */
 @RestController
-public class PrimeCheckController {
+public class PCServerController {
     /**
-     * This auto-wired field connects the {@link PrimeCheckController}
-     * to the {@link PrimeCheckService}.
+     * This auto-wired field connects the {@link PCServerController}
+     * to the {@link PCServerService}.
      */
     @Autowired
-    PrimeCheckService mService;
+    PCServerService mService;
 
     /**
      * Checks the {@code primeCandidate} param for primality,
@@ -59,12 +59,14 @@ public class PrimeCheckController {
      * it's not prime
      */
     @GetMapping(CHECK_IF_PRIME)
-    public int checkIfPrime(@RequestParam int primeCandidate) {
+    public int checkIfPrime(@RequestParam int strategy,
+                            @RequestParam int primeCandidate) {
         Options.debug("checkIfPrime()");
 
         return mService
                 // Forward to the service.
-                .checkIfPrime(primeCandidate);
+                .checkIfPrime(strategy,
+                              primeCandidate);
     }
 
     /**
@@ -87,13 +89,15 @@ public class PrimeCheckController {
      */
     @GetMapping(CHECK_IF_PRIME_LIST)
     public List<Integer> checkIfPrimeList
-    (@RequestParam List<Integer> primeCandidates,
-     Boolean parallel) {
+    (@RequestParam int strategy,
+     @RequestParam List<Integer> primeCandidates,
+     @RequestParam Boolean parallel) {
         Options.debug("checkIfPrimeList()");
 
         return mService
                 // Forward to the service.
-                .checkIfPrimeList(primeCandidates,
-                        parallel);
+                .checkIfPrimeList(strategy,
+                            primeCandidates,
+                                   parallel);
     }
 }

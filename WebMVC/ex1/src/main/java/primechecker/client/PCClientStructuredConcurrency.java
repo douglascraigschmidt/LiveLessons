@@ -3,19 +3,19 @@ package primechecker.client;
 import jdk.incubator.concurrent.StructuredTaskScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import primechecker.server.PrimeCheckController;
+import primechecker.server.PCServerController;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static primechecker.utils.WebUtils.futuresToIntegers;
+import static primechecker.common.Constants.Strategies.STRUCTURED_CONCURRENCY;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
- * remote method invocations on the {@link PrimeCheckController} web
+ * remote method invocations on the {@link PCServerController} web
  * service to determine the primality of large integers.  These
  * invocations can be made individually or in bulk, as well as be make
  * sequentially or in parallel using Java structured concurrency.
@@ -28,14 +28,14 @@ import static primechecker.utils.WebUtils.futuresToIntegers;
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
-public class PrimeCheckClient {
+public class PCClientStructuredConcurrency {
     /**
-     * This auto-wired field connects the {@link PrimeCheckClient} to
-     * the {@link PrimeCheckProxy} that performs HTTP requests
+     * This auto-wired field connects the {@link PCClientStructuredConcurrency} to
+     * the {@link PCProxy} that performs HTTP requests
      * synchronously.
      */
     @Autowired
-    private PrimeCheckProxy mPrimeCheckProxy;
+    private PCProxy mPrimeCheckProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -78,7 +78,9 @@ public class PrimeCheckClient {
             for (var primeCandidate : primeCandidates)
                 results
                     // Add the Integer to the List.
-                    .add(mPrimeCheckProxy.checkIfPrime(primeCandidate));
+                    .add(mPrimeCheckProxy
+                         .checkIfPrime(STRUCTURED_CONCURRENCY,
+                                       primeCandidate));
 
             // Return the results.
             return results;
@@ -101,7 +103,7 @@ public class PrimeCheckClient {
      */
     private List<Integer> testIndividualCallsParallel
         (List<Integer> primeCandidates) {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Create a List of Future<Integer> to hold the results.
             var results = new ArrayList<Future<Integer>>();
 
@@ -113,7 +115,8 @@ public class PrimeCheckClient {
                          // Fork a new virtual thread to check the
                          // primeCandidate for primality.
                          .fork(() -> mPrimeCheckProxy
-                               .checkIfPrime(primeCandidate)));
+                               .checkIfPrime(STRUCTURED_CONCURRENCY,
+                                             primeCandidate)));
 
             // This barrier synchronizer waits for all threads to
             // finish or the task scope to shut down.
@@ -125,7 +128,10 @@ public class PrimeCheckClient {
             // Convert the List<Future<Integer>> to a List<Integer>
             // and return it.
             return futuresToIntegers(results);
-        } catch (Exception ignored) {
+        } catch (Exception exception) {
+            System.out.println("Exception: "
+                               + exception.getMessage());
+
             // Return an empty List if an exception occurs.
             return Collections.emptyList();
         }        
@@ -147,6 +153,8 @@ public class PrimeCheckClient {
                                       boolean parallel) {
         return mPrimeCheckProxy
             // Forward to the proxy.
-            .checkIfPrimeList(primeCandidates, parallel);
+            .checkIfPrimeList(STRUCTURED_CONCURRENCY,
+                              primeCandidates,
+                              parallel);
     }
 }

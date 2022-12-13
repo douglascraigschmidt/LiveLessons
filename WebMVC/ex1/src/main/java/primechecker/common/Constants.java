@@ -13,4 +13,10 @@ public class Constants {
         public static final String CHECK_IF_PRIME = "/checkIfPrime";
         public static final String CHECK_IF_PRIME_LIST = "/checkIfPrimeList";
     }
+
+    public static class Strategies {
+        public static final int STRUCTURED_CONCURRENCY = 0;
+        public static final int PARALLEL_STREAM = 1;
+        public static final int COMPLETABLE_FUTURE = 2;
+    }
 }

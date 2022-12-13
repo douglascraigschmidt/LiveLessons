@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import primechecker.server.PrimeCheckApplication;
-import primechecker.server.PrimeCheckController;
+import primechecker.server.PCServerApplication;
+import primechecker.server.PCServerController;
 import primechecker.utils.WebUtils;
 
 import java.util.List;
@@ -14,13 +14,13 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
- * This class is a proxy to the {@link PrimeCheckApplication} service
- * and the {@link PrimeCheckController}.
+ * This class is a proxy to the {@link PCServerApplication} service
+ * and the {@link PCServerController}.
  */
 @Component
-public class PrimeCheckProxy {
+public class PCProxy {
     /**
-     * This auto-wired field connects the {@link PrimeCheckClient} to
+     * This auto-wired field connects the {@link PCClientParallelStream} to
      * the {@link RestTemplate} that performs HTTP requests
      * synchronously.
      */
@@ -37,7 +37,8 @@ public class PrimeCheckProxy {
      *         primeCandidate} is prime and its smallest factor if
      *         it's not prime
      */
-    public Integer checkIfPrime(int primeCandidate) {
+    public Integer checkIfPrime(int strategy,
+                                int primeCandidate) {
         return WebUtils
             // Create and send a GET request to the server to check if
             // the primeCandidate is prime or not.
@@ -45,6 +46,7 @@ public class PrimeCheckProxy {
                             // Create the encoded URL.
                             UriComponentsBuilder
                             .fromPath(CHECK_IF_PRIME)
+                            .queryParam("strategy", strategy)
                             .queryParam("primeCandidate", primeCandidate)
                             .build()
                             .toString(),
@@ -67,8 +69,10 @@ public class PrimeCheckProxy {
      *         corresponding element in {@code primeCandidate} is
      *         prime or its smallest factor if it's not prime
      */
-    public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
-                                          Boolean parallel) {
+    public List<Integer> checkIfPrimeList
+        (int strategy,
+         List<Integer> primeCandidates,
+         Boolean parallel) {
         return WebUtils
             // Create and send a GET request to the server to
             // check if the Integer objects in primeCandidates
@@ -77,6 +81,7 @@ public class PrimeCheckProxy {
                                 // Create the encoded URL.
                                 UriComponentsBuilder
                                 .fromPath(CHECK_IF_PRIME_LIST)
+                                .queryParam("strategy", strategy)
                                 .queryParam("primeCandidates",
                                             WebUtils
                                             // Convert the List to a String.

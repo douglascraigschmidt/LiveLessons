@@ -3,7 +3,7 @@ package tests;
 import transforms.Transform;
 import utils.BlockingTask;
 import utils.FileAndNetUtils;
-import utils.FuturesCollector;
+import common.FuturesCollector;
 import utils.Image;
 import common.Options;
 

@@ -2,14 +2,15 @@ package primechecker.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import primechecker.server.PrimeCheckController;
+import primechecker.server.PCServerController;
+import static primechecker.common.Constants.Strategies.PARALLEL_STREAM;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
- * remote method invocations on the {@link PrimeCheckController} web
+ * remote method invocations on the {@link PCServerController} web
  * service to determine the primality of large integers.  These
  * invocations can be made individually or in bulk, as well as be make
  * sequentially or in parallel using Java Streams.
@@ -20,16 +21,15 @@ import java.util.stream.StreamSupport;
  * inject the specified dependencies into them without having to write
  * any explicit code.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @Component
-public class PrimeCheckClient {
+public class PCClientParallelStream {
     /**
-     * This auto-wired field connects the {@link PrimeCheckClient} to
-     * the {@link PrimeCheckProxy} that performs HTTP requests
+     * This auto-wired field connects the {@link PCClientParallelStream} to
+     * the {@link PCProxy} that performs HTTP requests
      * synchronously.
      */
     @Autowired
-    private PrimeCheckProxy mPrimeCheckProxy;
+    private PCProxy mPrimeCheckProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -50,7 +50,9 @@ public class PrimeCheckClient {
             .stream(primeCandidates.spliterator(), parallel)
 
             // Forward each prime candidate to the proxy.
-            .map(mPrimeCheckProxy::checkIfPrime)
+            .map(primeCandidate -> mPrimeCheckProxy
+                 .checkIfPrime(PARALLEL_STREAM,
+                               primeCandidate))
 
             // Trigger the intermediate operations and collect the
             // results into a List.
@@ -73,6 +75,8 @@ public class PrimeCheckClient {
                                       boolean parallel) {
         return mPrimeCheckProxy
             // Forward to the proxy.
-            .checkIfPrimeList(primeCandidates, parallel);
+            .checkIfPrimeList(PARALLEL_STREAM,
+                              primeCandidates,
+                              parallel);
     }
 }

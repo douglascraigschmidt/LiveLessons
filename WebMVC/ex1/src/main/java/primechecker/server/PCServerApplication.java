@@ -18,10 +18,10 @@ import primechecker.common.Options;
  */
 @SpringBootApplication
 @ComponentScan("primechecker")
-public class PrimeCheckApplication {
+public class PCServerApplication {
     /**
      * A static main() entry point is needed to run the {@link
-     * PrimeCheckApplication} server app.
+     * PCServerApplication} server app.
      */
     public static void main(String[] argv) {
         // Parse the options.
@@ -29,6 +29,6 @@ public class PrimeCheckApplication {
 
         SpringApplication
                 // Launch the ServerApplication within Spring WebMVC.
-                .run(PrimeCheckApplication.class, argv);
+                .run(PCServerApplication.class, argv);
     }
 }

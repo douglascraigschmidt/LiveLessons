@@ -4,8 +4,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 /**
@@ -83,5 +85,25 @@ public final class WebUtils {
             // Trigger intermediate operations and convert each String
             // in the Stream into a single comma-separated String.
             .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Convert a {@link List} of {@link Future<Integer>} objects to
+     * a {@link List} of {@link Integer} objects.
+     *
+     * @param list The {@link List} of {@link Future<Integer>} objects
+     * @return A {@link List} of {@link Integer} objects
+     */
+    public static List<Integer> futuresToIntegers
+            (ArrayList<Future<Integer>> list) {
+        return list
+            // Convert the List to a Stream.
+            .stream()
+
+            // Map the Future<Integer> to Integer.
+            .map(Future::resultNow)
+
+            // Convert the Stream to a List.
+            .toList();
     }
 }

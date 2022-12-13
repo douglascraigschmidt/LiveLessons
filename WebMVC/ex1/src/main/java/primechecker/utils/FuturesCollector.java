@@ -1,6 +1,4 @@
-package utils;
-
-import static java.util.stream.Collectors.toList;
+package primechecker.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +10,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Implements a custom collector that converts a stream of
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
  * triggered when all the futures in the stream complete.
  * <p>
  * See
- * http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html
+ * <a href="http://www.nurkiewicz.com/2013/05/java-8-completablefuture-in-action.html">this link</a>
  * for more info.
  */
 public class FuturesCollector<T> 

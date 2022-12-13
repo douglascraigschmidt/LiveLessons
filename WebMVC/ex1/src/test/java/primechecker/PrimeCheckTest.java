@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import primechecker.client.PrimeCheckClient;
+import primechecker.client.PCClientCompletableFuture;
+import primechecker.client.PCClientParallelStream;
+import primechecker.client.PCClientStructuredConcurrency;
 import primechecker.common.Options;
-import primechecker.server.PrimeCheckApplication;
-import primechecker.server.PrimeCheckController;
+import primechecker.server.PCServerApplication;
+import primechecker.server.PCServerController;
 import primechecker.utils.RandomUtils;
 import primechecker.utils.RunTimer;
 
@@ -15,20 +17,20 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * This program tests the {@link PrimeCheckClient} and its ability to
- * communicate with the {@link PrimeCheckController} via Spring WebMVC
+ * This program tests the {@link PCClientParallelStream} and its ability to
+ * communicate with the {@link PCServerController} via Spring WebMVC
  * features.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
- * {@link PrimeCheckApplication}) and use that to start a Spring
+ * {@link PCServerApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  *
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootConfiguration
-@SpringBootTest(classes = PrimeCheckApplication.class,
+@SpringBootTest(classes = PCServerApplication.class,
                 webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class PrimeCheckTest {
     /**
@@ -36,10 +38,16 @@ public class PrimeCheckTest {
      * PrimeCheckClient}.  The {@code @Autowired} annotation ensures
      * this field is initialized via Spring dependency injection,
      * where an object receives another object it depends on (e.g., by
-     * creating a {@link PrimeCheckClient}).
+     * creating a {@link PCClientParallelStream}).
      */
     @Autowired
-    private PrimeCheckClient testClient;
+    private PCClientParallelStream testClientPS;
+
+    @Autowired
+    private PCClientCompletableFuture testClientCF;
+
+    @Autowired
+    private PCClientStructuredConcurrency testClientSC;
 
     /**
      * Emulate the "command-line" arguments for the tests.
@@ -65,35 +73,91 @@ public class PrimeCheckTest {
             .generateRandomNumbers(Options.instance().getCount(),
                                    Options.instance().maxValue());
 
-        assert (testClient != null);
+        assert (testClientPS != null);
 
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
-        timeTest(testClient::testIndividualCalls,
+        timeTest(testClientPS::testIndividualCalls,
                 randomIntegers,
                 false,
-                "individualCallsSequential");
+                "individualCallsSequentialPS");
 
         // Test sending individual HTTP GET requests to the server in
         // parallel to check if an Integer is prime or not.
-        timeTest(testClient::testIndividualCalls,
+        timeTest(testClientPS::testIndividualCalls,
                 randomIntegers,
                 true,
-                "individualCallsParallel");
+                "individualCallsParallelPS");
 
         // Test sending a List in one HTTP GET request to the server,
         // which sequentially checks List elements for primality.
-        timeTest(testClient::testListCall,
+        timeTest(testClientPS::testListCall,
                 randomIntegers,
                 false,
-                "listCallSequential");
+                "listCallSequentialPS");
 
         // Test sending a List in one HTTP GET request to the server,
         // which check List elements for primality in parallel.
-        timeTest(testClient::testListCall,
+        timeTest(testClientPS::testListCall,
                 randomIntegers,
                 true,
-                "listCallParallel");
+                "listCallParallelPS");
+
+        // Test sending individual HTTP GET requests to the server
+        // sequentially to check if an Integer is prime or not
+        timeTest(testClientCF::testIndividualCalls,
+                randomIntegers,
+                false,
+                "individualCallsSequentialCF");
+
+        // Test sending individual HTTP GET requests to the server in
+        // parallel to check if an Integer is prime or not.
+        timeTest(testClientCF::testIndividualCalls,
+                randomIntegers,
+                true,
+                "individualCallsParallelCF");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which sequentially checks List elements for primality.
+        timeTest(testClientCF::testListCall,
+                randomIntegers,
+                false,
+                "listCallSequentialCF");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which check List elements for primality in parallel.
+        timeTest(testClientCF::testListCall,
+                randomIntegers,
+                true,
+                "listCallParallelCF");
+
+        // Test sending individual HTTP GET requests to the server
+        // sequentially to check if an Integer is prime or not
+        timeTest(testClientSC::testIndividualCalls,
+                randomIntegers,
+                false,
+                "individualCallsSequentialSC");
+
+        // Test sending individual HTTP GET requests to the server in
+        // parallel to check if an Integer is prime or not.
+        timeTest(testClientSC::testIndividualCalls,
+                randomIntegers,
+                true,
+                "individualCallsParallelSC");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which sequentially checks List elements for primality.
+        timeTest(testClientSC::testListCall,
+                randomIntegers,
+                false,
+                "listCallSequentialSC");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which check List elements for primality in parallel.
+        timeTest(testClientSC::testListCall,
+                randomIntegers,
+                true,
+                "listCallParallelSC");
 
         // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());
