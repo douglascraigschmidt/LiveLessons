@@ -13,10 +13,11 @@ import static primechecker.utils.PrimeUtils.isPrime;
 
 /**
  * This class defines implementation methods that are called by the
- * {@link PCServerController}. These implementation methods check
- * the primality of one or more {@link Integer} objects using the Java
- * Streams framework.  A sequential or parallel stream is used based
- * on parameters passed by clients.
+ * {@link PCServerController}. These implementation methods check the
+ * primality of one or more {@link Integer} objects using the Java
+ * parallel streams framework, Java completable futures framework, and
+ * the Java structured concurrency framework.  Sequential or parallel
+ * programming is used based on parameters passed by clients.
  *
  * This class is annotated as a Spring {@code @Service}, which
  * indicates this class implements "business logic" and enables the
