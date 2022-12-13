@@ -26,6 +26,10 @@ import static primechecker.utils.PrimeUtils.isPrime;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Service
 public class PCServerService {
+    /**
+     * This array contains concrete strategies that define methods
+     * that are implemented to check for primality.
+     */
     PCAbstractStrategy[] mStrategy = {
         new PCStructuredConcurrencyStrategy(),
         new PCParallelStreamStrategy(),
@@ -44,18 +48,10 @@ public class PCServerService {
      */
     public Integer checkIfPrime(Integer strategy,
                                 Integer primeCandidate) {
-        // Determine primality.
-        var result = isPrime(primeCandidate);
-
-        // Conditional print the result.
-        Options.debug("Result for "
-                      + primeCandidate
-                      + " = "
-                      + result);
-
-        // Return 0 if primeCandidate was prime and its smallest
-        // factor if it's not prime.
-        return result;
+        return mStrategy[strategy]
+            // Index into the appropriate strategy and check the
+            // primality of the primeCandidate.
+            .checkIfPrime(primeCandidate);
     }
 
     /**
@@ -77,6 +73,8 @@ public class PCServerService {
                                           List<Integer> primeCandidates,
                                           Boolean parallel) {
         return mStrategy[strategy]
+            // Index into the appropriate strategy and check the
+            // primality of the primeCandidates.
             .checkIfPrimeList(primeCandidates,
                               parallel);
     }

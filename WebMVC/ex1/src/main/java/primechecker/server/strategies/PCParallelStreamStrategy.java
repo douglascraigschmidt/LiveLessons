@@ -7,6 +7,10 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * This strategy uses the Java parallel streams framework to check all
+ * the elements in a {@link List} for primality.
+ */
 public class PCParallelStreamStrategy
        implements PCAbstractStrategy {
     /**

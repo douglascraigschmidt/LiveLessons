@@ -6,6 +6,10 @@ import java.util.List;
 
 import static primechecker.utils.PrimeUtils.isPrime;
 
+/**
+ * This interface defines methods that are implemented to check for
+ * primality.
+ */
 public interface PCAbstractStrategy {
     /**
      * Checks the {@code primeCandidate} param for primality,

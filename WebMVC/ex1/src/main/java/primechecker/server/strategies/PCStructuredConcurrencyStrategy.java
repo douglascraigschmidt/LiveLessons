@@ -10,13 +10,17 @@ import java.util.concurrent.Future;
 import static primechecker.utils.PrimeUtils.isPrime;
 import static primechecker.utils.WebUtils.futuresToIntegers;
 
+/**
+ * This strategy uses the Java structured concurrency framework to
+ * check all the elements in a {@link List} for primality.
+ */
 public class PCStructuredConcurrencyStrategy
        implements PCAbstractStrategy {
     /**
-     * Checks all the elements in the {@code primeCandidates} {@link
-     * List} param for primality and return a corresponding {@link
-     * List} whose results indicate 0 if an element is prime or the
-     * smallest factor if it's not.
+     * Use Java structured concurrency to check all the elements in
+     * the {@code primeCandidates} {@link List} param for primality
+     * and return a corresponding {@link List} whose results indicate
+     * 0 if an element is prime or the smallest factor if it's not.
      *
      * @param primeCandidates The {@link List} of {@link Integer}
      *                        objects to check for primality
@@ -33,6 +37,9 @@ public class PCStructuredConcurrencyStrategy
         // Create a List of Future<Integer> to hold the results.
         var results = new ArrayList<Future<Integer>>();
 
+        // Use the try-with-resources block to create an Executor
+        // that's either the virtual thread-per-task Executor or a
+        // single-threaded Executor.
         try (var scope = parallel
              ? Executors.newVirtualThreadPerTaskExecutor()
              : Executors.newSingleThreadExecutor()) {
@@ -57,6 +64,7 @@ public class PCStructuredConcurrencyStrategy
         if (Options.instance().getDebug())
             Options.displayResults(primeCandidates, response);
             
+        // Return the response.
         return response;
     }
 }
