@@ -1,6 +1,6 @@
 This director contains examples of Java's structured concurrency
-features.  They require recent versions of the JDK, such as JDK 19 or
-later, as well as gradle 7.6 or later.
+features.  They require recent versions of the JDK, such as JDK 19 (or
+later), as well as gradle 7.6 (or later).
 
 Here's an overview of what's current included in these examples:
 
@@ -38,5 +38,4 @@ Here's an overview of what's current included in these examples:
         shows how to customize the Java completable futures framework
         to use arbitrary Executor objects, including the new
         Executors.newVirtualThreadPerTaskExecutor() provided in Java
-        19.  You'll need to install JDK 19 (or beyond) with gradle
-        version 7.6 configured to run this example.
+        19.

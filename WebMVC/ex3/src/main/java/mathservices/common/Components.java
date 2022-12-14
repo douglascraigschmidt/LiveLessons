@@ -1,33 +1,28 @@
-package primechecker.common;
+package mathservices.common;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static primechecker.common.Constants.SERVER_BASE_URL;
-
 /**
- * This class contains {@code Bean} annotated methods that can be
- * injected into client and server classes using the {@code @Autowired}
- * annotation.
+ * This class contains factory methods.
  */
-@Component
 public class Components {
     /**
      * This factory method returns a new {@link RestTemplate}, which
      * enables a client to perform HTTP requests synchronously.
      *
+     * @param serverBaseUrl The hostname and port number for the
+     *                      microservice
      * @return A new {@link RestTemplate}
      */
-    @Bean
-    public RestTemplate getRestTemplate() {
+    public static RestTemplate getRestTemplate(String serverBaseUrl) {
         RestTemplate restTemplate;
 
         var poolConnections = System.getenv("POOL_CONNECTIONS");
@@ -60,7 +55,7 @@ public class Components {
 
         restTemplate
             // Set the base URL for the RestTemplate.
-            .setUriTemplateHandler(new DefaultUriBuilderFactory(SERVER_BASE_URL));
+            .setUriTemplateHandler(new DefaultUriBuilderFactory(serverBaseUrl));
 
         // Return restTemplate.
         return restTemplate;

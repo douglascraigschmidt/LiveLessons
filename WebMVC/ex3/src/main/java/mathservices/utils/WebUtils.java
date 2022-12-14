@@ -1,11 +1,13 @@
-package primechecker.utils;
+package mathservices.utils;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 /**
@@ -83,5 +85,25 @@ public final class WebUtils {
             // Trigger intermediate operations and convert each String
             // in the Stream into a single comma-separated String.
             .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Convert a {@link List} of {@link Future<Integer>} objects to
+     * a {@link List} of {@link Integer} objects.
+     *
+     * @param list The {@link List} of {@code Future<T>} objects
+     * @return A {@link List} of {@code T} objects
+     */
+    public static <T> List<T> convertFutures
+            (List<Future<T>> list) {
+        return list
+            // Convert the List to a Stream.
+            .stream()
+
+            // Map the Future<Integer> to Integer.
+            .map(Future::resultNow)
+
+            // Convert the Stream to a List.
+            .toList();
     }
 }

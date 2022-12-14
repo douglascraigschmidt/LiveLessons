@@ -1,16 +1,13 @@
 package utils;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
-
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.concurrent.Future;
 
-@SuppressWarnings("unchecked")
 public final class BigFractionUtils {
     /**
      * Number of big fractions to process asynchronously in a stream.
@@ -81,12 +78,12 @@ public final class BigFractionUtils {
      */
     public static void sortAndPrintList(List<Future<BigFraction>> list) {
         // This implementation uses quick sort to order the list.
-        var quickSortF = CompletableFuture
+        var quickSortF = CompletableFutureEx
             // Perform quick sort asynchronously.
             .supplyAsync(() -> quickSort(list));
 
         // This implementation uses heap sort to order the list.
-        var heapSortF = CompletableFuture
+        var heapSortF = CompletableFutureEx
             // Perform heap sort asynchronously.
             .supplyAsync(() -> heapSort(list));
 

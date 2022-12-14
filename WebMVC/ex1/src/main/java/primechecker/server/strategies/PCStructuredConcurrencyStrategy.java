@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static primechecker.utils.PrimeUtils.isPrime;
-import static primechecker.utils.WebUtils.futuresToIntegers;
+import static primechecker.utils.FutureUtils.futures2Objects;
 
 /**
  * This strategy uses the Java structured concurrency framework to
@@ -58,7 +58,7 @@ public class PCStructuredConcurrencyStrategy
         }
 
         // Convert the List<Future<Integer>> to a List<Integer>.
-        var response = futuresToIntegers(results);
+        var response = futures2Objects(results);
 
         // Conditionally display the results.
         if (Options.instance().getDebug())

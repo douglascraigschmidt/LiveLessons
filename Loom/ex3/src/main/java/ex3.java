@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static utils.BigFractionUtils.makeBigFraction;
 import static utils.BigFractionUtils.sBigReducedFraction;
+import static utils.RandomUtils.generateRandomBigFractions;
 
 /**
  * This example demonstrates Java 19 preview structured concurrency
@@ -39,25 +40,6 @@ public class ex3 {
         demoStructuredConcurrency(Options.instance().numberOfElements());
 
         System.out.println("Leaving test");
-    }
-
-    /**
-     * @return A {@link List} of {@code count}random and unreduced
-     * {@link BigFraction} objects
-     */
-    private static List<BigFraction> generateRandomBigFractions(int count) {
-        return Stream
-            // Generate an infinite stream of random and unreduced BigFraction
-            // objects.
-            .generate(() ->
-                      makeBigFraction(new Random(), false))
-
-            // Limit the size of the stream to 'count' items.
-            .limit(count)
-
-            // Trigger intermediate processing and collect the results
-            // into a List.
-            .toList();
     }
 
     /**
@@ -90,12 +72,17 @@ public class ex3 {
             // task scope to shut down.
             scope.join();
 
+            // Throw any exception that may have occurred.
+            scope.throwIfFailed();
+
             // Sort and print the results.
             BigFractionUtils.sortAndPrintList(results);
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing virtual threads complete.
-        } catch (Exception ignored) {}
+        } catch (Exception exception) {
+            System.out.println("Exception: " + exception.getMessage());
+        }
     }
 
     /**
@@ -114,5 +101,4 @@ public class ex3 {
             .reduce(bf1)
             .multiply(bf2);
     }
-
 }

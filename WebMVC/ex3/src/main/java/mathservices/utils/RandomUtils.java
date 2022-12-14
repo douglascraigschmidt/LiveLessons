@@ -1,4 +1,4 @@
-package utils;
+package mathservices.utils;
 
 import java.util.List;
 import java.util.Random;
@@ -13,11 +13,10 @@ public final class RandomUtils {
     private RandomUtils() {}
 
     /**
-     * Generate a {@link List} of {@code count} random {@link Integer}
-     * objects up to {@code maxValue} used to check primality.
+     * Generate a {@link List} of random {@link Integer} objects used
+     * to check primality.
      */
-    public static List<Integer> generateRandomIntegers(int count,
-                                                       int maxValue) {
+    public static List<Integer> generateRandomIntegers(int count, int maxValue) {
         // Generate a List of random Integer objects.
         return new Random()
             // Generate the given # of large random ints.

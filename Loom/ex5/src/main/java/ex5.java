@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 
-import static common.ListOfFuturesCollector.toFuture;
+import static utils.FuturesCollector.toFuture;
 import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.BigFractionUtils.sortAndPrintList;
 
