@@ -3,6 +3,7 @@ package mathservices.server.primality;
 import mathservices.common.GCDResult;
 import mathservices.common.Options;
 import mathservices.common.PrimeResult;
+import mathservices.server.gcd.GCDController;
 import mathservices.utils.MathUtils;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static mathservices.utils.WebUtils.convertFutures;
+import static mathservices.utils.FutureUtils.convertFutures;
 
 /**
  * This class defines implementation methods that are called by the
@@ -33,8 +34,7 @@ public class PrimalityService {
      *
      * @param primeCandidates The {@link List} of {@link Integer} objects
      *                        to check for primality
-     * @return A {@link List} of {@link Future} objects that return
-     *         {@link PrimeResult} objects
+     * @return A {@link List} of {@link PrimeResult} objects
      */
     public List<PrimeResult> checkPrimalities
         (List<Integer> primeCandidates) {
@@ -61,8 +61,8 @@ public class PrimalityService {
                 .toList();
         }
 
-        // Convert the List of Future<PrimeResult> to a List of
-        // PrimeResult.
+        // Convert the List of Future<PrimeResult> objects to a List
+        // of PrimeResult objects.
         return convertFutures(results);
     }
 

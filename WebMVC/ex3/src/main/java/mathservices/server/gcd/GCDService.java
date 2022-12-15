@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.stream.StreamSupport;
 
-import static mathservices.utils.WebUtils.convertFutures;
+import static mathservices.utils.FutureUtils.convertFutures;
 
 /**
  * This class defines implementation methods that are called by the
@@ -64,7 +64,8 @@ public class GCDService {
             // Throw an Exception upon failure of any tasks.
             scope.throwIfFailed();
 
-            // Convert results.
+            // Convert the List of Future<GCDResult> objects to a List
+            // of GCDResult objects.
             return convertFutures(results);
         } catch (Exception exception) {
             System.out.println("Exception: " + exception.getMessage());

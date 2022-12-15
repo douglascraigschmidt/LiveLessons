@@ -12,6 +12,6 @@ public class Constants {
      */
     public static class EndPoint {
         public static final String COMPUTE_GCD_LIST = "/computeGCDList";
-        public static final String CHECK_PRIMALITIES = "/checkIfPrimeList";
+        public static final String CHECK_PRIMALITY_LIST = "/checkPrimalityList";
     }
 }

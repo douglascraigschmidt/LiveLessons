@@ -11,7 +11,7 @@ import mathservices.utils.WebUtils;
 import java.util.List;
 
 import static mathservices.common.Components.getRestTemplate;
-import static mathservices.common.Constants.EndPoint.CHECK_PRIMALITIES;
+import static mathservices.common.Constants.EndPoint.CHECK_PRIMALITY_LIST;
 import static mathservices.common.Constants.PRIMALITY_MICROSERVICE_BASE_URL;
 
 /**
@@ -46,7 +46,7 @@ public class PrimalityProxy {
             .makeGetRequestList(mRestTemplate,
                                 // Create the encoded URL.
                                 UriComponentsBuilder
-                                .fromPath(CHECK_PRIMALITIES)
+                                .fromPath(CHECK_PRIMALITY_LIST)
                                 .queryParam("primeCandidates",
                                             WebUtils
                                             // Convert List to String.

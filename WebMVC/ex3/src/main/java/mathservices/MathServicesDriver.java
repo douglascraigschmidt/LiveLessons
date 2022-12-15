@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 /**
- * This program tests the {@link MathServicesClient} and its ability
- * to communicate with the {@link GCDController} and {@link
- * PrimalityController} via Spring WebMVC features.
+ * This program demonstrate Java's structured concurrency frameworks
+ * by (1) checking the primality of a {@link List} of random {@link
+ * Integer} objects and (2) computing the greatest common divisor
+ * (GCD) of pairs of these {@link Integer} objects using Spring WebMVC
+ * microservices.
  */
 public class MathServicesDriver {
     /**
@@ -43,10 +45,11 @@ public class MathServicesDriver {
     }
 
     /**
-     * Demonstrate modern Java structured concurrency by concurrently
-     * (1) checking the primality of a {@link List} of random numbers
-     * and (2) computing the greatest common divisor (GCD) of pairs of
-     * these random numbers.
+     * Demonstrate Java's structured concurrency frameworks by (1)
+     * checking the primality of a {@link List} of random {@link
+     * Integer} objects and (2) computing the greatest common divisor
+     * (GCD) of pairs of these {@link Integer} objects using Spring
+     * WebMVC microservices.
      *
      * @param randomIntegers A {@link List} of random large {@link
      *                       Integer} objects

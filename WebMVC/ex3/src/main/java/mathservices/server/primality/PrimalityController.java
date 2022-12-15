@@ -56,7 +56,7 @@ public class PrimalityController {
      *                        objects to check for primality
      * @return An {@link List} of {@link PrimeResult} objects
      */
-    @GetMapping(CHECK_PRIMALITIES)
+    @GetMapping(CHECK_PRIMALITY_LIST)
     public List<PrimeResult> checkPrimalities
     (@RequestParam List<Integer> primeCandidates) {
         Options.debug("checkPrimalities()");
