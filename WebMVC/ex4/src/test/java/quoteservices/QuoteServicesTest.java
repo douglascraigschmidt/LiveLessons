@@ -32,8 +32,8 @@ import static quoteservices.utils.RandomUtils.makeRandomIndices;
  */
 @SpringBootConfiguration
 @SpringBootTest(classes = {ZippyApplication.class,
-                           HandeyApplication.class},
-                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+                           HandeyApplication.class})
+        // webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class QuoteServicesTest {
     /**
      * This object connects {@link QuoteServicesTest} to the {@code
@@ -43,7 +43,7 @@ public class QuoteServicesTest {
      * a {@link QuoteClient}).
      */
     @Autowired
-    private QuoteClient testClient;
+    private QuoteClient quoteClient;
 
     /**
      * Emulate the "command-line" arguments for the tests.
@@ -59,7 +59,7 @@ public class QuoteServicesTest {
      * Run all the tests and print the results.
      */
     @Test
-    public void runTests() {
+    public void test() {
         System.out.println("Entering runTests()");
 
         Options.instance().parseArgs(mArgv);
@@ -81,21 +81,18 @@ public class QuoteServicesTest {
         // test program works fine until I uncomment the test for
         // second microservice below, in which case things go awry!
 
-        /*
         // Future to a List holding Future<QuoteResult> objects.
-        List<ZippyQuote> zippyQuotes = testClient
+        List<ZippyQuote> zippyQuotes = quoteClient
             .getZippyQuotes(makeRandomIndices(4, 10));
-
 
         // Print the zippy quote results.
         zippyQuotes
             .forEach(zippyQuote -> System.out
                      .println("result = "
                               + zippyQuote));
-         */
 
         // Future to a List holding Future<QuoteResult> objects.
-        List<HandeyQuote> handeyQuotes = testClient
+        List<HandeyQuote> handeyQuotes = quoteClient
             .getHandeyQuotes(makeRandomIndices(4, 10));
 
         // Print the handey quote results.
