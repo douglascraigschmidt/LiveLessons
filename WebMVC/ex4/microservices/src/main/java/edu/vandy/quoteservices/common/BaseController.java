@@ -42,8 +42,8 @@ public abstract class BaseController<T> {
      */
     @GetMapping({"/", "actuator/info"})
     public ResponseEntity<String> info() {
-        // Indicate the request succeeded.
-        // and return the application name.
+        // Indicate the request succeeded and return the application
+        // name.
         return ResponseEntity
             .ok(applicationContext.getId() + " is alive\n");
     }

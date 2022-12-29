@@ -12,10 +12,10 @@ import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
 import static edu.vandy.quoteservices.utils.RandomUtils.makeRandomIndices;
 
 /**
- * This program tests the {@link QuoteClient} and its ability to use
- * Spring WebMVC features to communicate with the various {@code
- * ZippyController} and {@code HandeyController} via the API {@code
- * Gateway}.
+ * This program demonstrates the ability to use Spring WebMVC features
+ * so a client (i.e., {@link QuoteClient}) can interact with various
+ * microservices (i.e., {@code ZippyController} and {@code
+ * HandeyController}) via an API {@code Gateway}.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, e.g.,
