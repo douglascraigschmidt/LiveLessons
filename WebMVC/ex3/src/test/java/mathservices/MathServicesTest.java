@@ -31,7 +31,7 @@ import java.util.concurrent.Future;
  * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootConfiguration
-@SpringBootTest(classes = {GCDApplication.class, PrimalityApplication.class},
+@SpringBootTest(classes = {MathServicesClient.class},
                 webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class MathServicesTest {
     /**

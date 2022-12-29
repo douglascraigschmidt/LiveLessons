@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="MicroServices" type="Multirun" separateTabs="false" reuseTabsWithFailures="false" startOneByOne="true" markFailedProcess="true" hideSuccessProcess="false" delayTime="0.0">
-    <runConfiguration name="PrimalityApplication" type="Spring Boot" />
     <runConfiguration name="GCDApplication" type="Spring Boot" />
+    <runConfiguration name="PrimalityApplication" type="Spring Boot" />
     <method v="2" />
   </configuration>
 </component>

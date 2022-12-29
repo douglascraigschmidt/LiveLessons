@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import static primechecker.utils.WebUtils.futuresToIntegers;
 import static primechecker.common.Constants.Strategies.STRUCTURED_CONCURRENCY;
+import static primechecker.utils.FutureUtils.futures2Objects;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
@@ -127,7 +127,7 @@ public class PCClientStructuredConcurrency {
 
             // Convert the List<Future<Integer>> to a List<Integer>
             // and return it.
-            return futuresToIntegers(results);
+            return futures2Objects(results);
         } catch (Exception exception) {
             System.out.println("Exception: "
                                + exception.getMessage());

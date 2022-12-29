@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PrimalityApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="ex3.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="mathservices.server.primality.PrimalityApplication" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="mathservices.server.primality.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

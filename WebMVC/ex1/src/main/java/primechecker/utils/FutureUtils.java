@@ -2,6 +2,7 @@ package primechecker.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Future;
 
 /**
@@ -28,6 +29,9 @@ public final class FutureUtils {
 
             // Map the Future<Integer> to Integer.
             .map(Future::resultNow)
+
+            // Remove any nulls.
+            .filter(Objects::nonNull)
 
             // Convert the Stream to a List.
             .toList();
