@@ -1,0 +1,25 @@
+# disable eureka by default
+eureka:
+  client:
+    enabled: true
+
+# 2 microservice configurations.
+
+---
+server:
+  port: 9100
+spring:
+  application:
+    name: handey
+  config:
+    activate:
+      on-profile: handey
+---
+server:
+  port: 9101
+spring:
+  application:
+    name: zippy
+  config:
+    activate:
+      on-profile: zippy

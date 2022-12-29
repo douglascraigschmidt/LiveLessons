@@ -1,0 +1,10 @@
+eureka:
+  register-with-eureka: false
+  client:
+    enabled: true
+
+spring:
+  cloud:
+    eureka:
+      enabled: true
+

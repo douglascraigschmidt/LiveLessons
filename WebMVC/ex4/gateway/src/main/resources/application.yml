@@ -1,0 +1,44 @@
+# Application port.
+server:
+  port: 9080
+
+# Application name.
+spring:
+  profiles:
+    active: path
+  application:
+    name: gateway
+  main:
+    web-application-type: reactive
+#  cloud:
+#    gateway:
+#      globalcors:
+#        '[/**]':
+#          allowedOrigins: "http://localhost:3000"
+#          allowedHeaders: "*"
+#          allowedMethods:
+#            - GET
+#            - POST
+
+# I think this never worked - it was supposed to be under the spring: label.
+#  cloud:
+#    gateway:
+#      default-filters:
+#        - name: ResponseFilterFactory
+
+#    globalcors:
+#      '[/**]':
+#        allowedOrigins: "http://localhost:3000"
+#        allowedHeaders: "*"
+#        allowedMethods:
+#          - GET
+#          - POST
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+# disable eureka by default
+eureka:
+  client:
+    enabled: true
