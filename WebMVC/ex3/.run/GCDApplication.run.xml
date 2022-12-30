@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PrimalityApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <configuration default="false" name="GCDApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <module name="edu.vandy.mathservices.ex3.server.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.mathservices.microservices.primality.PrimalityApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.mathservices.microservices.gcd.GCDApplication" />
     <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="edu.vandy.mathservices.microservices.primality.*" />
+        <option name="PATTERN" value="edu.vandy.mathservices.microservices.gcd.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

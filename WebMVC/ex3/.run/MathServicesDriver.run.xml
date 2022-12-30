@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MathServicesDriver" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="edu.vandy.mathservices.ex3.client.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.mathservices.MathServicesDriver" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="edu.vandy.mathservices.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
