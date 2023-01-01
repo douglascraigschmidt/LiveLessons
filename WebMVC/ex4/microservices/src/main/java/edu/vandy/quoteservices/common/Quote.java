@@ -4,6 +4,8 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import javax.persistence.*;
+
 /**
  * This class stores quotes.
  *
@@ -18,10 +20,14 @@ import lombok.Value;
 @Value
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
+@Entity // For Jpa
+@Table(name = "QUOTE")
 public class Quote {
     /**
      * ID # of the quote.
      */
+    @Id
+    @Column(name = "id", nullable = false)
     public int quoteId;
 
     /**

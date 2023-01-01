@@ -13,8 +13,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * This class contains a {@code Bean} annotation that can be injected into
- * classes using the Spring {@code @Autowired} annotation.
+ * This class contains a {@code Bean} annotation that can be injected
+ * into classes using the Spring {@code @Autowired} annotation.
  */
 @Component
 @PropertySource(

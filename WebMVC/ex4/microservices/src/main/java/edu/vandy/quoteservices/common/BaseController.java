@@ -25,7 +25,6 @@ public abstract class BaseController<T> {
     ApplicationContext applicationContext;
 
     // The service to delegate requests.
-    // @@ Monte, where does this service field get set?
     @Autowired
     BaseService<T> service;
 

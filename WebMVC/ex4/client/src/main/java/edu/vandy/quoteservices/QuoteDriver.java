@@ -63,6 +63,7 @@ public class QuoteDriver
     @Override
     public void run(String... args) {
             System.out.println("Entering QuoteDriver main()");
+
             // Get the Zippy quotes.
             Options.display("Printing Zippy quote results");
 
@@ -70,10 +71,12 @@ public class QuoteDriver
             var zippyQuotes = quoteClient
                 .getAllQuotes(ZIPPY);
 
+            /*
             zippyQuotes = quoteClient
                 .getQuotes(ZIPPY,
                            makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
                                              zippyQuotes.size()));
+             */
 
             // Print the Zippy quote results.
             zippyQuotes

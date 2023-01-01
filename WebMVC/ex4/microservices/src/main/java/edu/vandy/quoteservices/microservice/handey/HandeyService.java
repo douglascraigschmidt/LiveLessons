@@ -3,8 +3,6 @@ package edu.vandy.quoteservices.microservice.handey;
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,11 +29,10 @@ import static edu.vandy.quoteservices.common.Constants.HANDEY_QUOTES;
 public class HandeyService 
        extends BaseService<List<Quote>> {
     /**
-     * Constructor initializes the field.
+     * An in-memory {@link List} of all the quotes.
      */
-    HandeyService() {
-        mQuotes = getInput(HANDEY_QUOTES);
-    }
+    private final List<Quote> mQuotes =
+        getInput(HANDEY_QUOTES);
 
     /**
      * @return A {@link List} of all {@link Quote} objects

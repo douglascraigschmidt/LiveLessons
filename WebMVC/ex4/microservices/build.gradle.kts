@@ -1,9 +1,6 @@
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.decapitalizeAsciiOnly
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
-import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -12,6 +9,9 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework:spring-test:5.3.22")
+    runtimeOnly("com.h2database:h2")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("commons-dbcp:commons-dbcp:1.4")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation(project(mapOf("path" to ":gateway")))
 }

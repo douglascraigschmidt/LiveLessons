@@ -1,10 +1,12 @@
 package edu.vandy.quoteservices.microservice.zippy;
 
-import edu.vandy.quoteservices.common.BaseController;
-import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -17,34 +19,23 @@ import java.util.regex.Pattern;
 import static edu.vandy.quoteservices.common.Constants.ZIPPY_QUOTES;
 
 /**
- * This class defines implementation methods that are called by the
- * {@link BaseController}, which serves as the main "front-end" app
- * gateway entry point for remote clients that want to receive movie
- * recommendations.
- *
- * This class implements the abstract methods in {@link BaseService}
- * using the Java sequential streams framework.
- *
- * This class is annotated as a Spring {@code @Service}, which enables
- * the automatic detection and wiring of dependent implementation
- * classes via classpath scanning. It also includes its name in the
- * {@code @Service} annotation below so that it can be identified as a
- * service.
+ * This class contains a {@code Bean} annotation that can be injected
+ * into classes using the Spring {@code @Autowired} annotation.
  */
-@Service
-public class ZippyService
-       extends BaseService<List<Quote>> {
-    /**
-     * Spring-injected repository.
-     */
+@Component
+@Configuration
+@PropertySource("classpath:application.yml")
+public class ZippyComponents {
     @Autowired
     private ZippyRepository mRepository;
 
-    ZippyService() {
-        // getInput(ZIPPY_QUOTES);
-    }
-
-    public void getInput(String filePath) {
+    /**
+     * @return Return a {@link List} of {@link Quote} objects
+     *         that were stored in the file zippy-quotes.txt
+     */
+    @Bean("getInput")
+    public List<Quote> getInput
+        (@Value("${app.dataset}") final String filePath) {
         System.out.println("zippy.getInput() " + filePath);
 
         try {
@@ -86,33 +77,11 @@ public class ZippyService
             System.out.println("DATABASE: successfully loaded " 
                                + list.size() 
                                + " quotes.");
+
+            return list;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-    }
-
-    /**
-     * @return A {@link List} of all {@link Quote} objects
-     */
-    public List<Quote> getAllQuotes() {
-        System.out.println("ZippyService.getAllQuotes()");
-        var list = mRepository
-            // Forward to the repository.
-            .findAll();
-
-        System.out.println("number of quotes = " + list.size());
-
-        return list;
-    }
-
-    /**
-     * Get a {@link List} that contains the requested quotes.
-     *
-     * @param quoteIds A {@link List} containing the given random
-     *                 {@code quoteIds}
-     * @return A {@link List} of all requested {@link Quote} objects
-     */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
-        return null;
     }
 }

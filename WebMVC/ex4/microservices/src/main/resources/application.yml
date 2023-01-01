@@ -3,6 +3,11 @@ eureka:
   client:
     enabled: true
 
+#
+# The preconfigured set of movie cosine vectors.
+app:
+  dataset: zippy/zippy-quotes.txt
+
 # 2 microservice configurations.
 
 ---
@@ -14,6 +19,7 @@ spring:
   config:
     activate:
       on-profile: handey
+
 ---
 server:
   port: 9101
@@ -23,3 +29,22 @@ spring:
   config:
     activate:
       on-profile: zippy
+  datasource:
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      jdbc:
+        time_zone: UTC
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    properties:
+      hibernate:
+        show_sql: false
+  h2:
+    console:
+      settings:
+        web-allow-others: true
+      enabled: true
