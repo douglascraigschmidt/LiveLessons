@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -30,11 +31,11 @@ public class ZippyComponents {
     private ZippyRepository mRepository;
 
     /**
-     * @return Return a {@link List} of {@link Quote} objects
+     * @return Return a {@link Map} of {@link Quote} objects
      *         that were stored in the file zippy-quotes.txt
      */
-    @Bean("getInput")
-    public List<Quote> getInput
+    @Bean
+    public Map<Integer, String> quoteMap
         (@Value("${app.dataset}") final String filePath) {
         System.out.println("zippy.getInput() " + filePath);
 
@@ -78,7 +79,7 @@ public class ZippyComponents {
                                + list.size() 
                                + " quotes.");
 
-            return list;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -28,10 +28,12 @@ public class Quote {
      */
     @Id
     @Column(name = "id", nullable = false)
-    public int quoteId;
+    // public int quoteId;
+    public Integer quoteId;
 
     /**
      * A quote.
      */
+    @Column(columnDefinition="LONGTEXT")
     public String quote;
 }

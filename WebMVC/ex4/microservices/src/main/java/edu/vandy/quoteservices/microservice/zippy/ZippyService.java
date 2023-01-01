@@ -40,7 +40,10 @@ public class ZippyService
     @Autowired
     private ZippyRepository mRepository;
 
+    private boolean mInitialized;
+
     ZippyService() {
+        System.out.println("ZippyService constructor");
         // getInput(ZIPPY_QUOTES);
     }
 
@@ -96,6 +99,11 @@ public class ZippyService
      */
     public List<Quote> getAllQuotes() {
         System.out.println("ZippyService.getAllQuotes()");
+
+        if (!mInitialized) {
+            getInput(ZIPPY_QUOTES);
+        }
+
         var list = mRepository
             // Forward to the repository.
             .findAll();
