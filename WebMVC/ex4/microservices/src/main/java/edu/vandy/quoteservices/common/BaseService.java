@@ -17,6 +17,11 @@ import java.util.List;
  */
 public abstract class BaseService<T> {
     /**
+     * An in-memory {@link List} of all the quotes.
+     */
+    protected List<Quote> mQuotes;
+
+    /**
      * @return A {@link List} of all {@link Quote} objects
      */
     public abstract T getAllQuotes();

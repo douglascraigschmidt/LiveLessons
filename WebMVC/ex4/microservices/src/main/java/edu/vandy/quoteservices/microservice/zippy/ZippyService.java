@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static edu.vandy.quoteservices.common.Components.getInput;
+import static edu.vandy.quoteservices.common.Constants.ZIPPY_QUOTES;
+
 /**
  * This class defines implementation methods that are called by the
  * {@link BaseController}, which serves as the main "front-end" app
@@ -25,18 +28,15 @@ import java.util.List;
  * service.
  */
 @Service
-public class ZippyService {
+public class ZippyService
+       extends BaseService<List<Quote>> {
     /**
-     * An in-memory {@link List} of all the quotes.  The
-     * {@code @Autowired} annotation ensures this field is initialized
-     * via Spring's dependency injection facilities, where an object
-     * receives other objects that it depends on, i.e., the {@link
-     * List} of {@link Quote}.
+     * Constructor initializes the field.
      */
-    @Autowired
-    @Qualifier("zippyQuoteList")
-    public List<Quote> mQuotes;
-    
+    ZippyService() {
+        mQuotes = getInput(ZIPPY_QUOTES);
+    }
+
     /**
      * @return A {@link List} of all {@link Quote} objects
      */

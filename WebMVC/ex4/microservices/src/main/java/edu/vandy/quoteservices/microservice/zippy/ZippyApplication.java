@@ -22,7 +22,6 @@ import org.springframework.context.annotation.ComponentScan;
     Components.class})
 public class ZippyApplication
        extends BaseApplication {
-
     /**
      * The static main() entry point runs this Spring application.
      */

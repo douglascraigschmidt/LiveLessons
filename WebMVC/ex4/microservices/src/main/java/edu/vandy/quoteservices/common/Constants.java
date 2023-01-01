@@ -5,8 +5,8 @@ package edu.vandy.quoteservices.common;
  * microservices.
  */
 public class Constants {
-    public static final String GATEWAY_BASE_URL = "http://localhost:8080";
-    public static final int GATEWAY_PORT = 8080;
+    public static final String HANDEY_QUOTES = "handey/handey-quotes.txt";
+    public static final String ZIPPY_QUOTES = "zippy/zippy-quotes.txt";
 
     /**
      * All supported HTTP request endpoints.

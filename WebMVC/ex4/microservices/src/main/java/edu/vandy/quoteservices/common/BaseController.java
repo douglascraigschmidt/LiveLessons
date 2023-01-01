@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -66,7 +67,7 @@ public abstract class BaseController<T> {
      * @return A {@link List} of all requested {@link Quote} objects
      */
     @GetMapping(GET_QUOTES)
-    T getQuotes(List<Integer> quoteIds) {
+    T getQuotes(@RequestParam List<Integer> quoteIds) {
         return getService()
             // Forward request to the service.
             .getQuotes(quoteIds);
