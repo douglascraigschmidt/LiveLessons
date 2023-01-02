@@ -64,19 +64,23 @@ public class QuoteDriver
     public void run(String... args) {
             System.out.println("Entering QuoteDriver main()");
 
-            // Get the Zippy quotes.
-            Options.display("Printing Zippy quote results");
-
             // Future to a List holding all Quote objects.
             var zippyQuotes = quoteClient
                 .getAllQuotes(ZIPPY);
 
-            /*
+            var size = zippyQuotes.size();
+
             zippyQuotes = quoteClient
                 .getQuotes(ZIPPY,
                            makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
                                              zippyQuotes.size()));
-             */
+
+            // Get the Handey quotes.
+            Options.display("Printing "
+                + zippyQuotes.size()
+                + " Zippy quote results out of "
+                + size
+                + " quotes:");
 
             // Print the Zippy quote results.
             zippyQuotes
@@ -84,18 +88,23 @@ public class QuoteDriver
                          .println("result = "
                                   + zippyQuote));
 
-            // Get the Handey quotes.
-            Options.display("Printing Handey quote results");
-
             // List holding all the Handey Quote objects.
             var handeyQuotes = quoteClient
                 .getAllQuotes(HANDEY);
+
+            size = handeyQuotes.size();
 
             // List holding random Handey Quote objects.
             handeyQuotes = quoteClient
                 .getQuotes(HANDEY,
                            makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                             handeyQuotes.size()));
+                                             size));
+            // Get the Handey quotes.
+            Options.display("Printing "
+                            + handeyQuotes.size()
+                            + " Handey quote results out of "
+                            + size
+                            + " quotes:");
 
             // Print the Handey quote results.
             handeyQuotes

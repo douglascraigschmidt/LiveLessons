@@ -78,6 +78,7 @@ public class ZippyService
 
                 // Create a new ZippyQuote.
                 .map(quote ->
+                     // new Quote(String.valueOf(idCount.incrementAndGet()),
                      new Quote(idCount.incrementAndGet(),
                                quote.stripLeading()))
                 
@@ -121,6 +122,17 @@ public class ZippyService
      * @return A {@link List} of all requested {@link Quote} objects
      */
     public List<Quote> getQuotes(List<Integer> quoteIds) {
-        return null;
+        System.out.println("ZippyService.getQuotes()");
+
+        if (!mInitialized) {
+            getInput(ZIPPY_QUOTES);
+        }
+
+        var list = mRepository
+            .findAllById(quoteIds);
+
+        System.out.println("number of quotes = " + list.size());
+
+        return list;
     }
 }

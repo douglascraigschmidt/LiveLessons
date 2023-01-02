@@ -67,6 +67,7 @@ public class ZippyComponents {
 
                 // Create a new ZippyQuote.
                 .map(quote ->
+                     // new Quote(String.valueOf(idCount.incrementAndGet()),
                      new Quote(idCount.incrementAndGet(),
                                quote.stripLeading()))
                 

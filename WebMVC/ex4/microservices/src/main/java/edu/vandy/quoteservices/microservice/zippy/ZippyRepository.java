@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ZippyRepository
-       extends JpaRepository<Quote, String> {
+       extends JpaRepository<Quote, Integer> {
 }

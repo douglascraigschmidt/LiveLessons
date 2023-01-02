@@ -30,6 +30,7 @@ public class Quote {
     @Column(name = "id", nullable = false)
     // public int quoteId;
     public Integer quoteId;
+    // public String quoteId;
 
     /**
      * A quote.
