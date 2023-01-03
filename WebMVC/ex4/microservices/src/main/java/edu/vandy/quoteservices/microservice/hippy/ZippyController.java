@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice.zippy;
+package edu.vandy.quoteservices.microservice.hippy;
 
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.Quote;

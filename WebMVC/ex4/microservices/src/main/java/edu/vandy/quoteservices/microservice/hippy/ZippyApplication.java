@@ -1,10 +1,9 @@
-package edu.vandy.quoteservices.microservice.zippy;
+package edu.vandy.quoteservices.microservice.hippy;
 
 import edu.vandy.quoteservices.common.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**

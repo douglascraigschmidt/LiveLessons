@@ -1,43 +1,31 @@
-package edu.vandy.quoteservices.microservice.zippy;
+package edu.vandy.quoteservices.handeymicroservice;
 
-import edu.vandy.quoteservices.common.Quote;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static edu.vandy.quoteservices.common.Constants.ZIPPY_QUOTES;
+import edu.vandy.quoteservices.handeymicroservice.model.Quote;
 
 /**
  * This class contains a {@code Bean} annotation that can be injected
  * into classes using the Spring {@code @Autowired} annotation.
  */
 @Component
-@Configuration
-@PropertySource("classpath:application.yml")
-public class ZippyComponents {
-    @Autowired
-    private ZippyRepository mRepository;
-
+public class Components {
     /**
-     * @return Return a {@link Map} of {@link Quote} objects
-     *         that were stored in the file zippy-quotes.txt
+     * @return A {@link List} of {@link Quote} objects that were
+     *         stored in the {@code filePath}
      */
     @Bean
-    public Map<Integer, String> quoteMap
-        (@Value("${app.dataset}") final String filePath) {
-        System.out.println("zippy.getInput() " + filePath);
+    public static List<Quote> getQuotes() {
+        System.out.println("getQuotes()");
 
         try {
             // Although AtomicInteger is overkill we use it to
@@ -46,15 +34,15 @@ public class ZippyComponents {
 
             // Convert the filename into a pathname.
             URI uri = ClassLoader
-                .getSystemResource(filePath)
+                .getSystemResource("handey-quotes.txt")
                 .toURI();
 
             // Open the file and get all the bytes.
             CharSequence bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
-            // Get a List of Zippy objects.
-            var list = Pattern
+            // Return a List of ZippyQuote objects.
+            return Pattern
                 // Compile splitter into a regular expression (regex).
                 .compile("@")
 
@@ -67,20 +55,11 @@ public class ZippyComponents {
 
                 // Create a new ZippyQuote.
                 .map(quote ->
-                     // new Quote(String.valueOf(idCount.incrementAndGet()),
                      new Quote(idCount.incrementAndGet(),
                                quote.stripLeading()))
                 
                 // Collect results into a list of ZippyQuote objects.
                 .toList();
-
-            mRepository.saveAll(list);
-
-            System.out.println("DATABASE: successfully loaded " 
-                               + list.size() 
-                               + " quotes.");
-
-            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

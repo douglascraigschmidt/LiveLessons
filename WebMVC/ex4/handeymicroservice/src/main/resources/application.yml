@@ -1,0 +1,12 @@
+# Application port.
+server:
+  port: 9102
+
+# Registers Application with Eureka.
+eureka:
+  client:
+    enabled: true
+
+spring:
+  application:
+    name: handey

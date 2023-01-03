@@ -6,7 +6,8 @@ pluginManagement {
 }
 
 include(":eureka")
+include(":zippymicroservice")
+include(":handeymicroservice")
 include(":gateway")
-include(":microservices")
 include(":client")
 

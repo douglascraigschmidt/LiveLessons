@@ -25,7 +25,7 @@ public class Quote {
     /**
      * ID # of the quote.
      */
-    public int quoteId;
+    public Integer id;
 
     /**
      * A quote.

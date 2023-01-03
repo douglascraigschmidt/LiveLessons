@@ -2,8 +2,8 @@
   <configuration default="false" name="RunMicroservices" type="Multirun" separateTabs="false" reuseTabsWithFailures="false" startOneByOne="true" markFailedProcess="true" hideSuccessProcess="false" delayTime="5.0">
     <runConfiguration name="EurekaApplication" type="Spring Boot" />
     <runConfiguration name="GatewayApplication" type="Spring Boot" />
-    <runConfiguration name="HandeyApplication" type="Spring Boot" />
     <runConfiguration name="ZippyApplication" type="Spring Boot" />
+    <runConfiguration name="HandeyApplication" type="Spring Boot" />
     <method v="2" />
   </configuration>
 </component>

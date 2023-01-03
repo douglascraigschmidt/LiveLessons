@@ -85,8 +85,10 @@ public class QuoteDriver
             // Print the Zippy quote results.
             zippyQuotes
                 .forEach(zippyQuote -> System.out
-                         .println("result = "
-                                  + zippyQuote));
+                         .println("id = "
+                                  + zippyQuote.id
+                                  + " quote = "
+                                  + zippyQuote.quote));
 
             // List holding all the Handey Quote objects.
             var handeyQuotes = quoteClient
