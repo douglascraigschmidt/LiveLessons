@@ -1,11 +1,11 @@
-package edu.vandy.quoteservices.client;
+package edu.vandy.berraquotes.client;
 
-import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.berraquotes.model.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import edu.vandy.quoteservices.utils.WebUtils;
+import edu.vandy.berraquotes.utils.WebUtils;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_QUOTES;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
 
 /**
- * This class is a proxy to the {@code GatewayApplication} API gateway
- * and its {@code GatewayController}.
+ * This class is a proxy to the {@code BerraApplication} microservice
+ * and its {@code BerraController}.
  */
 @Component
-public class QuoteProxy {
+public class BerraProxy {
     /**
      * This field connects the {@link QuoteProxy} to the {@link
      * RestTemplate} that performs HTTP requests synchronously.
@@ -34,13 +34,12 @@ public class QuoteProxy {
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes(String service,
-                                 List<Integer> quoteIds) {
+    public List<Quote> getQuotes(List<Integer> quoteIds) {
         // Create the encoded URL.
         var url = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
-            .fromPath(service + "/" + GET_QUOTES)
+            .fromPath(GET_QUOTES)
 
             // Create the query param, which encodes the quote ids.
             .queryParam(QUOTE_IDS_PARAM,
@@ -68,7 +67,7 @@ public class QuoteProxy {
         var url = UriComponentsBuilder
             // Create the path for the GET_ALL_QUOTES request,
             // including the 'service'.
-            .fromPath(service + "/" + GET_ALL_QUOTES)
+            .fromPath(GET_ALL_QUOTES)
 
             // Build the URI.
             .build()

@@ -64,7 +64,7 @@ public class QuoteDriver
     public void run(String... args) {
             System.out.println("Entering QuoteDriver main()");
 
-            // Future to a List holding all Quote objects.
+            // List holding all Quote objects.
             var zippyQuotes = quoteClient
                 .getAllQuotes(ZIPPY);
 
