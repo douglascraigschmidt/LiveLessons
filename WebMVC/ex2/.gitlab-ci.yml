@@ -1,0 +1,75 @@
+# This file is a template, and might need editing before it works on your project.
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml
+
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+
+image: gradle:jdk11
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+before_script:
+  - GRADLE_USER_HOME="$(pwd)/.gradle"
+  - export GRADLE_USER_HOME
+
+stages:
+  - build
+  - test
+  - docker
+  - deploy
+  
+build:
+  stage: build
+  script: ./gradlew --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+test:
+  stage: test
+  script: ./gradlew check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+
+docker:
+  stage: docker
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_NAME: recommender-microservices
+    IMAGE_TAG:  1.0.0
+  before_script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+  script:
+    - echo "DOCKER STAGE WORKS!"
+#    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+#    - docker push $IMAGE_NAME:$IMAGE_TAG
+
+deploy:
+  stage: deploy
+  before_script:
+    - chmod 400 $DIGITAL_OCEAN_SSH_KEY
+  script:
+    - echo "DEPLOY STAGE WORKS!"
+#    - ssh -o StrictHostKeyChecking=no -i $DIGITAL_OCEAN_SSH_KEY root@165.227.32.204 "
+#        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD &&
+#        docker ps -aq | xargs docker stop | xargs docker rm &&
+#        docker run -d -p 8080:8080 $IMAGE_NAME:$IMAGE_TAG"
