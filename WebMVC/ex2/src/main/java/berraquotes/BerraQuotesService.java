@@ -7,10 +7,10 @@ import java.util.List;
 
 /**
  * This class defines implementation methods that are called by the
- * {@link BerraController} to return quotes from Yogi Berra.
+ * {@link BerraQuotesController} to return quotes from Yogi Berra.
  *
  * This class implements the abstract methods in {@link
- * BerraService} using the Java sequential streams framework.
+ * BerraQuotesService} using the Java sequential streams framework.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
@@ -19,7 +19,7 @@ import java.util.List;
  * service.
  */
 @Service
-public class BerraService {
+public class BerraQuotesService {
     /**
      * An in-memory {@link List} of all the quotes.
      */

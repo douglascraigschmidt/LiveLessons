@@ -18,13 +18,13 @@ import java.util.List;
  * any explicit code.
  */
 @Component
-public class BerraClient {
+public class BerraQuotesClient {
     /**
-     * This auto-wired field connects the {@link BerraClient} to the
-     * {@link BerraProxy} that performs HTTP requests synchronously.
+     * This auto-wired field connects the {@link BerraQuotesClient} to the
+     * {@link BerraQuotesProxy} that performs HTTP requests synchronously.
      */
     @Autowired
-    private BerraProxy mQuoteProxy;
+    private BerraQuotesProxy mQuoteProxy;
 
     /**
      * Get a {@link List} that contains the requested quotes.

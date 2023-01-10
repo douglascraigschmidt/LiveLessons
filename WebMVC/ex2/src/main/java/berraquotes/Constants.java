@@ -14,6 +14,7 @@ public class Constants {
         public static final String GET_ALL_QUOTES = "all-quotes";
         public static final String GET_QUOTES = "quotes";
         public static final String GET_SEARCH = "search-quote";
+        public static final String SEARCH_QUERY = "/{query}";
 
         /**
          * Supported HTTP request parameters identifiers.

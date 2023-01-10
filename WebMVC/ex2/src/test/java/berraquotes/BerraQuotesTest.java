@@ -1,6 +1,6 @@
 package berraquotes;
 
-import berraquotes.client.BerraClient;
+import berraquotes.client.BerraQuotesClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -9,28 +9,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static berraquotes.utils.RandomUtils.makeRandomIndices;
 
 /**
- * This program tests the {@link BerraClient} and its ability to
- * communicate with the {@link BerraController} via Spring WebMVC
+ * This program tests the {@link BerraQuotesClient} and its ability to
+ * communicate with the {@link BerraQuotesController} via Spring WebMVC
  * features.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
- * {@link BerraApplication}) and use that to start a Spring
+ * {@link BerraQuotesApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  *
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootConfiguration
-@SpringBootTest(classes = BerraApplication.class,
+@SpringBootTest(classes = BerraQuotesApplication.class,
                 webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class BerraTest {
+public class BerraQuotesTest {
     /**
-     * This auto-wired field connects the {@link BerraTest} to the
-     * {@link BerraClient}.
+     * This auto-wired field connects the {@link BerraQuotesTest} to the
+     * {@link BerraQuotesClient}.
      */
     @Autowired
-    private BerraClient testClient;
+    private BerraQuotesClient testClient;
 
     /**
      * Number of quotes to request.

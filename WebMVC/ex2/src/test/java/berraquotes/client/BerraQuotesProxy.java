@@ -17,9 +17,9 @@ import static berraquotes.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
  * and its {@code BerraController}.
  */
 @Component
-public class BerraProxy {
+public class BerraQuotesProxy {
     /**
-     * This field connects the {@link BerraProxy} to the {@link
+     * This field connects the {@link BerraQuotesProxy} to the {@link
      * RestTemplate} that performs HTTP requests synchronously.
      */
     @Autowired

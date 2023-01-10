@@ -26,7 +26,7 @@ import static berraquotes.Constants.EndPoint.*;
  * identified by the {@code @RestController} annotation below.
  *
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@link BerraController}.  GET requests
+ * requests onto methods in the {@link BerraQuotesController}.  GET requests
  * invoked from any HTTP web client (e.g., a web browser or client
  * app) or command-line utility (e.g., Curl or Postman).
  *
@@ -35,7 +35,7 @@ import static berraquotes.Constants.EndPoint.*;
  * back within the body of an {@link HttpResponse} object.
  */
 @RestController
-public class BerraController {
+public class BerraQuotesController {
     /**
      * Defines a central read-only context.
      */
@@ -43,10 +43,10 @@ public class BerraController {
     ApplicationContext applicationContext;
 
     /**
-     * Spring injected {@link BerraService}.
+     * Spring injected {@link BerraQuotesService}.
      */
     @Autowired
-    private BerraService service;
+    private BerraQuotesService service;
 
     /**
      * A request for testing Eureka connection.
@@ -92,7 +92,7 @@ public class BerraController {
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
-    @GetMapping(GET_SEARCH + "/{query}")
+    @GetMapping(GET_SEARCH + SEARCH_QUERY)
     public List<Quote> search(@PathVariable String query) {
         return service
             // Forward to the service.
