@@ -1,10 +1,9 @@
-package berraquotes;
+package berraquotes.client;
 
 import berraquotes.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import berraquotes.utils.WebUtils;
 
@@ -12,7 +11,6 @@ import java.util.List;
 
 import static berraquotes.Constants.EndPoint.*;
 import static berraquotes.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
-import static berraquotes.Constants.SERVER_BASE_URL;
 
 /**
  * This class is a proxy to the {@code BerraApplication} microservice

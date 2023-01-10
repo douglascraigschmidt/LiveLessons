@@ -1,4 +1,4 @@
-package berraquotes;
+package berraquotes.client;
 
 import berraquotes.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
