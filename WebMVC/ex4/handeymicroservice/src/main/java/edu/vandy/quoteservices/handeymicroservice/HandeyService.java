@@ -8,9 +8,7 @@ import java.util.List;
 
 /**
  * This class defines implementation methods that are called by the
- * {@link HandeyController}, which serves as the main "front-end"
- * app gateway entry point for remote clients that want to receive
- * movie recommendations.
+ * {@link HandeyController} to return quotes from Jack Handey.
  *
  * This class implements the abstract methods in {@link
  * HandeyService} using the Java sequential streams framework.

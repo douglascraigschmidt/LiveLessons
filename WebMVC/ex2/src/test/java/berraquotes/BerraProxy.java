@@ -1,17 +1,18 @@
-package edu.vandy.berraquotes.client;
+package berraquotes;
 
-import edu.vandy.berraquotes.model.Quote;
+import berraquotes.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
-import edu.vandy.berraquotes.utils.WebUtils;
+import berraquotes.utils.WebUtils;
 
 import java.util.List;
 
-import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_ALL_QUOTES;
-import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_QUOTES;
-import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
+import static berraquotes.Constants.EndPoint.*;
+import static berraquotes.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
+import static berraquotes.Constants.SERVER_BASE_URL;
 
 /**
  * This class is a proxy to the {@code BerraApplication} microservice
@@ -20,7 +21,7 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.QUOTE_IDS
 @Component
 public class BerraProxy {
     /**
-     * This field connects the {@link QuoteProxy} to the {@link
+     * This field connects the {@link BerraProxy} to the {@link
      * RestTemplate} that performs HTTP requests synchronously.
      */
     @Autowired
@@ -29,7 +30,7 @@ public class BerraProxy {
     /**
      * Get a {@link List} that contains the requested quotes.
      *
-     * @param quoteIds A {@link List} containing the given random
+     * @param quoteIds A {@link List} containing the given
      *                 {@code quoteIds}
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
@@ -62,7 +63,11 @@ public class BerraProxy {
                                 Quote[].class);
     }
 
-    public List<Quote> getAllQuotes(String service) {
+    /**
+     * @return An {@link List} containing all {@link
+     *         Quote} objects
+     */
+    public List<Quote> getAllQuotes() {
         // Create the encoded URL.
         var url = UriComponentsBuilder
             // Create the path for the GET_ALL_QUOTES request,
@@ -82,5 +87,30 @@ public class BerraProxy {
                                 url,
                                 // Return type is a Quote array.
                                 Quote[].class);
+    }
+
+    /**
+     * Get a {@link List} that contains quotes that match the {@code query}.
+     *
+     * @param query A {@link String} to search for
+     * @return An {@link List} containing matching {@link
+     *         Quote} objects
+     */
+    public List<Quote> searchQuotes(String query) {
+        var url = UriComponentsBuilder
+            .fromPath(GET_SEARCH
+                      + "/"
+                      + query)
+            .build()
+            .toUriString();
+
+        return WebUtils
+            // Create and send a GET request to the server.
+            .makeGetRequestList(mRestTemplate,
+                                url,
+                                // Return type is a Quote array.
+                                Quote[].class);
+
+
     }
 }

@@ -33,7 +33,7 @@ public class PCClientCompletableFuture {
      * synchronously.
      */
     @Autowired
-    private PCProxy mPrimeCheckProxy;
+    private PCProxy mPCProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -55,7 +55,7 @@ public class PCClientCompletableFuture {
             return primeCandidates
                     .stream()
                     .map(primeCandidate -> CompletableFuture
-                            .supplyAsync(() -> mPrimeCheckProxy
+                            .supplyAsync(() -> mPCProxy
                                          .checkIfPrime(COMPLETABLE_FUTURE,
                                                        primeCandidate),
                                     executor))
@@ -78,7 +78,7 @@ public class PCClientCompletableFuture {
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
-        return mPrimeCheckProxy
+        return mPCProxy
             // Forward to the proxy.
             .checkIfPrimeList(COMPLETABLE_FUTURE,
                               primeCandidates,

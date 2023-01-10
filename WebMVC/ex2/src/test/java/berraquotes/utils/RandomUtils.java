@@ -1,4 +1,4 @@
-package edu.vandy.berraquotes.utils;
+package berraquotes.utils;
 
 import java.util.List;
 import java.util.Random;

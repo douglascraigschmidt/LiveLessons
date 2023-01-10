@@ -1,9 +1,13 @@
-package edu.vandy.berraquotes;
+package berraquotes;
 
+import berraquotes.BerraApplication;
+import berraquotes.BerraController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static berraquotes.utils.RandomUtils.makeRandomIndices;
 
 /**
  * This program tests the {@link BerraClient} and its ability to
@@ -12,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
- * {@link MoviesApplication}) and use that to start a Spring
+ * {@link BerraApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  *
  * The {@code @SpringBootConfiguration} annotation indicates that a
@@ -30,6 +34,12 @@ public class BerraTest {
     private BerraClient testClient;
 
     /**
+     * Number of quotes to request.
+     */
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int sNUMBER_OF_QUOTES_REQUESTED = 5;
+
+    /**
      * Run all the tests.
      */
     @Test
@@ -38,17 +48,16 @@ public class BerraTest {
 
         // List holding all Quote objects.
         var berraQuotes = testClient
-            .getAllQuotes(BERRA);
+            .getAllQuotes();
 
         var size = berraQuotes.size();
 
-        berraQuotes = quoteClient
-            .getQuotes(BERRA,
-                       makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
+        berraQuotes = testClient
+            .getQuotes(makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
                                          berraQuotes.size()));
 
         // Get the Berra quotes.
-        Options.display("Printing "
+        System.out.println("Printing "
                         + berraQuotes.size()
                         + " Berra quote results out of "
                         + size
@@ -58,9 +67,24 @@ public class BerraTest {
         berraQuotes
             .forEach(berraQuote -> System.out
                      .println("id = "
-                              + berraQuote.id
+                              + berraQuote.id()
                               + " quote = "
-                              + berraQuote.quote));
+                              + berraQuote.quote()));
+
+        berraQuotes = testClient
+            .searchQuotes("Baseball");
+
+        System.out.println("Printing "
+                           + berraQuotes.size()
+                           + " Berra quote containing the word \"Baseball\"");
+
+        // Print the Berra quote results.
+        berraQuotes
+                .forEach(berraQuote -> System.out
+                        .println("id = "
+                                + berraQuote.id()
+                                + " quote = "
+                                + berraQuote.quote()));
 
         System.out.println("Leaving the BerraTest");
     }                              

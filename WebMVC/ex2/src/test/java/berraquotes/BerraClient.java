@@ -1,5 +1,6 @@
-package edu.vandy.berraquotes.client;
+package berraquotes;
 
+import berraquotes.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,17 +20,19 @@ import java.util.List;
 @Component
 public class BerraClient {
     /**
-     * This auto-wired field connects the {@link QuoteClient} to the
-     * {@link QuoteProxy} that performs HTTP requests synchronously.
+     * This auto-wired field connects the {@link BerraClient} to the
+     * {@link BerraProxy} that performs HTTP requests synchronously.
      */
     @Autowired
-    private QuoteProxy mQuoteProxy; 
+    private BerraProxy mQuoteProxy;
 
     /**
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * GET_QUOTES} endpoint to this method.
+     * Get a {@link List} that contains the requested quotes.
      *
-     * @return An {@link List} of {@link Quote} objects
+     * @param quoteIds A {@link List} containing the given
+     *                 {@code quoteIds}
+     * @return An {@link List} containing the requested {@link
+     *         Quote} objects
      */
     public List<Quote> getQuotes(List<Integer> quoteIds) {
         return mQuoteProxy
@@ -38,14 +41,25 @@ public class BerraClient {
     }
 
     /**
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * GET_ALL_QUOTES} endpoint to this method.
-     *
-     * @return An {@link List} of {@link Quote} objects
+     * @return An {@link List} containing all {@link
+     *         Quote} objects
      */
     public List<Quote> getAllQuotes() {
         return mQuoteProxy
             // Forward to the proxy.
             .getAllQuotes();
+    }
+
+    /**
+     * Get a {@link List} that contains quotes that match the {@code query}.
+     *
+     * @param query A {@link String} to search for
+     * @return An {@link List} containing matching {@link
+     *         Quote} objects
+     */
+    public List<Quote> searchQuotes(String query) {
+        return mQuoteProxy
+                // Forward to the proxy.
+                .searchQuotes(query);
     }
 }

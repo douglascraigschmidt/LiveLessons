@@ -1,7 +1,0 @@
-# Application port.
-server:
-  port: 9102
-
-spring:
-  application:
-    name: berra

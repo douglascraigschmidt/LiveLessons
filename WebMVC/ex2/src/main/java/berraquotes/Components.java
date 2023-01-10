@@ -1,8 +1,9 @@
-package edu.vandy.berraquotes;
+package berraquotes;
 
-import edu.vandy.berraquotes.model.Quote;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -12,18 +13,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static berraquotes.Constants.SERVER_BASE_URL;
+
 /**
  * This class contains a {@code Bean} annotation that can be injected
  * into classes using the Spring {@code @Autowired} annotation.
  */
-@Component
+@Configuration
 public class Components {
     /**
      * @return A {@link List} of {@link Quote} objects that were
      *         stored in the {@code filePath}
      */
     @Bean
-    public static List<Quote> getQuotes() {
+    public List<Quote> getQuotes() {
         System.out.println("getQuotes()");
 
         try {
@@ -63,5 +66,23 @@ public class Components {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * This factory method returns a new {@link RestTemplate}, which
+     * enables a client to perform HTTP requests synchronously.
+     *
+     * @return A new {@link RestTemplate}
+     */
+    @Bean
+    public RestTemplate getRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate
+                // Set the base URL for the RestTemplate.
+                .setUriTemplateHandler(new DefaultUriBuilderFactory(SERVER_BASE_URL));
+
+        // Return restTemplate.
+        return restTemplate;
     }
 }

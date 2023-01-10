@@ -61,14 +61,14 @@ public class PCServerController {
      * it's not prime
      */
     @GetMapping(CHECK_IF_PRIME)
-    public int checkIfPrime(@RequestParam int strategy,
-                            @RequestParam int primeCandidate) {
+    public int checkIfPrime(Integer strategy,
+                            Integer primeCandidate) {
         Options.debug("checkIfPrime()");
 
         return mService
-                // Forward to the service.
-                .checkIfPrime(strategy,
-                              primeCandidate);
+            // Forward to the service.
+            .checkIfPrime(strategy,
+                          primeCandidate);
     }
 
     /**
@@ -91,15 +91,15 @@ public class PCServerController {
      */
     @GetMapping(CHECK_IF_PRIME_LIST)
     public List<Integer> checkIfPrimeList
-    (@RequestParam int strategy,
-     @RequestParam List<Integer> primeCandidates,
-     @RequestParam Boolean parallel) {
+        (Integer strategy,
+         @RequestParam List<Integer> primeCandidates,
+         Boolean parallel) {
         Options.debug("checkIfPrimeList()");
 
         return mService
-                // Forward to the service.
-                .checkIfPrimeList(strategy,
-                            primeCandidates,
-                                   parallel);
+            // Forward to the service.
+            .checkIfPrimeList(strategy,
+                              primeCandidates,
+                              parallel);
     }
 }

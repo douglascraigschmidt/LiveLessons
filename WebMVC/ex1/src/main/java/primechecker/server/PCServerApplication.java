@@ -28,7 +28,7 @@ public class PCServerApplication {
         Options.instance().parseArgs(argv);
 
         SpringApplication
-                // Launch the ServerApplication within Spring WebMVC.
-                .run(PCServerApplication.class, argv);
+            // Launch the ServerApplication within Spring WebMVC.
+            .run(PCServerApplication.class, argv);
     }
 }

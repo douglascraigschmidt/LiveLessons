@@ -29,7 +29,7 @@ public class PCClientParallelStream {
      * synchronously.
      */
     @Autowired
-    private PCProxy mPrimeCheckProxy;
+    private PCProxy mPCProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -50,7 +50,7 @@ public class PCClientParallelStream {
             .stream(primeCandidates.spliterator(), parallel)
 
             // Forward each prime candidate to the proxy.
-            .map(primeCandidate -> mPrimeCheckProxy
+            .map(primeCandidate -> mPCProxy
                  .checkIfPrime(PARALLEL_STREAM,
                                primeCandidate))
 
@@ -73,7 +73,7 @@ public class PCClientParallelStream {
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
-        return mPrimeCheckProxy
+        return mPCProxy
             // Forward to the proxy.
             .checkIfPrimeList(PARALLEL_STREAM,
                               primeCandidates,

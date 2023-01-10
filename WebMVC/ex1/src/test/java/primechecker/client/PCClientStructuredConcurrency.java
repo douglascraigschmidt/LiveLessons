@@ -35,7 +35,7 @@ public class PCClientStructuredConcurrency {
      * synchronously.
      */
     @Autowired
-    private PCProxy mPrimeCheckProxy;
+    private PCProxy mPCProxy;
 
     /**
      * Send individual HTTP GET requests to the server to check if a
@@ -78,7 +78,7 @@ public class PCClientStructuredConcurrency {
             for (var primeCandidate : primeCandidates)
                 results
                     // Add the Integer to the List.
-                    .add(mPrimeCheckProxy
+                    .add(mPCProxy
                          .checkIfPrime(STRUCTURED_CONCURRENCY,
                                        primeCandidate));
 
@@ -114,7 +114,7 @@ public class PCClientStructuredConcurrency {
                     .add(scope
                          // Fork a new virtual thread to check the
                          // primeCandidate for primality.
-                         .fork(() -> mPrimeCheckProxy
+                         .fork(() -> mPCProxy
                                .checkIfPrime(STRUCTURED_CONCURRENCY,
                                              primeCandidate)));
 
@@ -151,7 +151,7 @@ public class PCClientStructuredConcurrency {
      */
     public List<Integer> testListCall(List<Integer> primeCandidates,
                                       boolean parallel) {
-        return mPrimeCheckProxy
+        return mPCProxy
             // Forward to the proxy.
             .checkIfPrimeList(STRUCTURED_CONCURRENCY,
                               primeCandidates,

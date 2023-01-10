@@ -1,6 +1,5 @@
-package edu.vandy.berraquotes;
+package berraquotes;
 
-import edu.vandy.berraquotes.model.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,9 +7,7 @@ import java.util.List;
 
 /**
  * This class defines implementation methods that are called by the
- * {@link BerraController}, which serves as the main "front-end"
- * app gateway entry point for remote clients that want to receive
- * movie recommendations.
+ * {@link BerraController} to return quotes from Yogi Berra.
  *
  * This class implements the abstract methods in {@link
  * BerraService} using the Java sequential streams framework.
@@ -27,7 +24,7 @@ public class BerraService {
      * An in-memory {@link List} of all the quotes.
      */
     @Autowired
-    List<Quote> mQuotes; // = Components.getQuotes();
+    List<Quote> mQuotes;
 
     /**
      * @return A {@link List} of all {@link Quote} objects
@@ -53,6 +50,30 @@ public class BerraService {
 
             // Trigger intermediate operations and collect the results
             // into a List.
+            .toList();
+    }
+
+    /**
+     * Search for Berra quotes containing the given query {@link
+     * String}.
+     *
+     * @param query The search query
+     * @return A {@link List} of {@link Quote} objects containing the
+     *         query
+     */
+    public List<Quote> search(String query) {
+         // Locate all quotes whose 'quote' matches the 'query' and
+         // return them as a List of Quote objects.
+
+        return mQuotes
+            // Convert the List to a Stream.
+            .stream()
+
+            // Locate all the matches.
+            .filter(quote -> quote.quote().toLowerCase()
+                    .contains(query.toLowerCase()))
+
+            // Convert the Stream to a List.
             .toList();
     }
 }

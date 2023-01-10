@@ -14,8 +14,7 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 
 /**
- * This class is a proxy to the {@link PCServerApplication} service
- * and the {@link PCServerController}.
+ * This class is a proxy to the {@link PCServerController}.
  */
 @Component
 public class PCProxy {
@@ -39,17 +38,20 @@ public class PCProxy {
      */
     public Integer checkIfPrime(int strategy,
                                 int primeCandidate) {
+        // Create the encoded URL.
+        var url = UriComponentsBuilder
+                .fromPath(CHECK_IF_PRIME)
+                .queryParam("strategy", strategy)
+                .queryParam("primeCandidate", primeCandidate)
+                .build()
+                .toUriString();
+
         return WebUtils
             // Create and send a GET request to the server to check if
             // the primeCandidate is prime or not.
             .makeGetRequest(mRestTemplate,
-                            // Create the encoded URL.
-                            UriComponentsBuilder
-                            .fromPath(CHECK_IF_PRIME)
-                            .queryParam("strategy", strategy)
-                            .queryParam("primeCandidate", primeCandidate)
-                            .build()
-                            .toString(),
+                            // Pass the encoded URL.
+                            url,
                             // The return type is an Integer.
                             Integer.class);
     }
@@ -73,22 +75,24 @@ public class PCProxy {
         (int strategy,
          List<Integer> primeCandidates,
          Boolean parallel) {
+        // Create the encoded URL.
+        var url = UriComponentsBuilder
+                .fromPath(CHECK_IF_PRIME_LIST)
+                .queryParam("strategy", strategy)
+                .queryParam("primeCandidates",
+                        WebUtils
+                                // Convert the List to a String.
+                                .list2String(primeCandidates))
+                .queryParam("parallel", parallel)
+                .build()
+                .toUriString();
+
         return WebUtils
             // Create and send a GET request to the server to
             // check if the Integer objects in primeCandidates
             // are prime or not.
             .makeGetRequestList(mRestTemplate,
-                                // Create the encoded URL.
-                                UriComponentsBuilder
-                                .fromPath(CHECK_IF_PRIME_LIST)
-                                .queryParam("strategy", strategy)
-                                .queryParam("primeCandidates",
-                                            WebUtils
-                                            // Convert the List to a String.
-                                            .list2String(primeCandidates))
-                                .queryParam("parallel", parallel)
-                                .build()
-                                .toString(),
+                                url,
                                 // The return type is an array of Integer objects.
                                 Integer[].class);
     }
