@@ -1,4 +1,4 @@
-package berraquotes;
+package berraquotes.common;
 
 /**
  * This class centralizes all constants used by the Berra

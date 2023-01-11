@@ -1,4 +1,4 @@
-package berraquotes;
+package berraquotes.common;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static berraquotes.Constants.SERVER_BASE_URL;
+import static berraquotes.common.Constants.SERVER_BASE_URL;
 
 /**
  * This class contains a {@code Bean} annotation that can be injected

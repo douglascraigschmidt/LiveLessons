@@ -1,6 +1,6 @@
 package berraquotes.client;
 
-import berraquotes.Quote;
+import berraquotes.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -9,18 +9,19 @@ import berraquotes.utils.WebUtils;
 
 import java.util.List;
 
-import static berraquotes.Constants.EndPoint.*;
-import static berraquotes.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
+import static berraquotes.common.Constants.EndPoint.*;
+import static berraquotes.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
 
 /**
- * This class is a proxy to the {@code BerraApplication} microservice
- * and its {@code BerraController}.
+ * This class is a proxy to the {@code BerraQuotesApplication}
+ * microservice and its {@code BerraQuotesController}.
  */
 @Component
 public class BerraQuotesProxy {
     /**
-     * This field connects the {@link BerraQuotesProxy} to the {@link
-     * RestTemplate} that performs HTTP requests synchronously.
+     * This field connects the {@link BerraQuotesProxy} to the
+     * {@link RestTemplate} that performs HTTP requests
+     * synchronously.
      */
     @Autowired
     private RestTemplate mRestTemplate;

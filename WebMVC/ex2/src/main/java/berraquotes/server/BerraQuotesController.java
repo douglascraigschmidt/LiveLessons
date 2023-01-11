@@ -1,5 +1,6 @@
-package berraquotes;
+package berraquotes.server;
 
+import berraquotes.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import static berraquotes.Constants.EndPoint.*;
+import static berraquotes.common.Constants.EndPoint.*;
 
 /**
  * This Spring controller demonstrates how WebMVC can be used to

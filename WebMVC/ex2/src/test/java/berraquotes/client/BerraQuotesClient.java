@@ -1,6 +1,6 @@
 package berraquotes.client;
 
-import berraquotes.Quote;
+import berraquotes.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * This client uses Spring WebMVC features to perform synchronous
  * remote method invocations on the {@code BerraQuoteController}
- * microservice to request random quotes.
+ * microservice to request Yogi Berra quotes.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -52,7 +52,8 @@ public class BerraQuotesClient {
     }
 
     /**
-     * Get a {@link List} that contains quotes that match the {@code query}.
+     * Get a {@link List} that contains quotes that match the
+     * {@code query}.
      *
      * @param query A {@link String} to search for
      * @return An {@link List} containing matching {@link

@@ -1,6 +1,8 @@
 package berraquotes;
 
 import berraquotes.client.BerraQuotesClient;
+import berraquotes.server.BerraQuotesApplication;
+import berraquotes.server.BerraQuotesController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;

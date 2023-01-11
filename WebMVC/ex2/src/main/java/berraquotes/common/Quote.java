@@ -1,4 +1,4 @@
-package berraquotes;
+package berraquotes.common;
 
 /**
  * A Quote "POJO" exchanged between client and microservice.
