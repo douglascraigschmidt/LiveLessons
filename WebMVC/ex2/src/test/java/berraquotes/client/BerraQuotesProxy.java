@@ -31,7 +31,7 @@ public class BerraQuotesProxy {
      *         Quote} objects
      */
     public List<Quote> getAllQuotes() {
-        // Create the encoded URL.
+        // Create the encoded URI.
         var uri = UriComponentsBuilder
             // Create the path for the GET_ALL_QUOTES request,
             // including the 'service'.
@@ -61,7 +61,7 @@ public class BerraQuotesProxy {
      *         Quote} objects
      */
     public List<Quote> getQuotes(List<Integer> quoteIds) {
-        // Create the encoded URL.
+        // Create the encoded URI.
         var uri = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
@@ -96,6 +96,7 @@ public class BerraQuotesProxy {
      *         Quote} objects
      */
     public List<Quote> searchQuotes(String query) {
+        // Create the encoded URI.
         var uri = UriComponentsBuilder
             .fromPath(GET_SEARCH
                       + "/"

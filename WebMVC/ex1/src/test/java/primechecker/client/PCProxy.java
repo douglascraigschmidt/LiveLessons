@@ -38,8 +38,8 @@ public class PCProxy {
      */
     public Integer checkIfPrime(int strategy,
                                 int primeCandidate) {
-        // Create the encoded URL.
-        var url = UriComponentsBuilder
+        // Create the encoded URI.
+        var uri = UriComponentsBuilder
                 .fromPath(CHECK_IF_PRIME)
                 .queryParam("strategy", strategy)
                 .queryParam("primeCandidate", primeCandidate)
@@ -51,7 +51,7 @@ public class PCProxy {
             // the primeCandidate is prime or not.
             .makeGetRequest(mRestTemplate,
                             // Pass the encoded URL.
-                            url,
+                            uri,
                             // The return type is an Integer.
                             Integer.class);
     }
@@ -75,8 +75,8 @@ public class PCProxy {
         (int strategy,
          List<Integer> primeCandidates,
          Boolean parallel) {
-        // Create the encoded URL.
-        var url = UriComponentsBuilder
+        // Create the encoded URI.
+        var uri = UriComponentsBuilder
                 .fromPath(CHECK_IF_PRIME_LIST)
                 .queryParam("strategy", strategy)
                 .queryParam("primeCandidates",
@@ -92,7 +92,7 @@ public class PCProxy {
             // check if the Integer objects in primeCandidates
             // are prime or not.
             .makeGetRequestList(mRestTemplate,
-                                url,
+                                uri,
                                 // The return type is an array of Integer objects.
                                 Integer[].class);
     }
