@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * This client uses Spring WebMVC features to perform synchronous
- * remote method invocations on the {@code ZippyController} and {@code
- * HandeyController} web services to request random quotes.
+ * remote method invocations on the {@code BerraQuoteController}
+ * microservice to request random quotes.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -20,11 +20,22 @@ import java.util.List;
 @Component
 public class BerraQuotesClient {
     /**
-     * This auto-wired field connects the {@link BerraQuotesClient} to the
-     * {@link BerraQuotesProxy} that performs HTTP requests synchronously.
+     * This auto-wired field connects the {@link BerraQuotesClient} to
+     * the {@link BerraQuotesProxy} that performs HTTP requests
+     * synchronously.
      */
     @Autowired
     private BerraQuotesProxy mQuoteProxy;
+
+    /**
+     * @return An {@link List} containing all {@link
+     *         Quote} objects
+     */
+    public List<Quote> getAllQuotes() {
+        return mQuoteProxy
+            // Forward to the proxy.
+            .getAllQuotes();
+    }
 
     /**
      * Get a {@link List} that contains the requested quotes.
@@ -41,16 +52,6 @@ public class BerraQuotesClient {
     }
 
     /**
-     * @return An {@link List} containing all {@link
-     *         Quote} objects
-     */
-    public List<Quote> getAllQuotes() {
-        return mQuoteProxy
-            // Forward to the proxy.
-            .getAllQuotes();
-    }
-
-    /**
      * Get a {@link List} that contains quotes that match the {@code query}.
      *
      * @param query A {@link String} to search for
@@ -59,7 +60,7 @@ public class BerraQuotesClient {
      */
     public List<Quote> searchQuotes(String query) {
         return mQuoteProxy
-                // Forward to the proxy.
-                .searchQuotes(query);
+            // Forward to the proxy.
+            .searchQuotes(query);
     }
 }

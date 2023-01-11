@@ -25,6 +25,33 @@ public class BerraQuotesProxy {
     @Autowired
     private RestTemplate mRestTemplate;
 
+
+    /**
+     * @return An {@link List} containing all {@link
+     *         Quote} objects
+     */
+    public List<Quote> getAllQuotes() {
+        // Create the encoded URL.
+        var uri = UriComponentsBuilder
+            // Create the path for the GET_ALL_QUOTES request,
+            // including the 'service'.
+            .fromPath(GET_ALL_QUOTES)
+
+            // Build the URI.
+            .build()
+
+            // Convert the URI to a String.
+            .toUriString();
+
+        return WebUtils
+            // Create and send a GET request to the server.
+            .makeGetRequestList(mRestTemplate,
+                                // Pass the encoded URL.
+                                uri,
+                                // Return type is a Quote array.
+                                Quote[].class);
+    }
+
     /**
      * Get a {@link List} that contains the requested quotes.
      *
@@ -35,7 +62,7 @@ public class BerraQuotesProxy {
      */
     public List<Quote> getQuotes(List<Integer> quoteIds) {
         // Create the encoded URL.
-        var url = UriComponentsBuilder
+        var uri = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
             .fromPath(GET_QUOTES)
@@ -56,33 +83,7 @@ public class BerraQuotesProxy {
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,
                                 // Pass the encoded URL.
-                                url,
-                                // Return type is a Quote array.
-                                Quote[].class);
-    }
-
-    /**
-     * @return An {@link List} containing all {@link
-     *         Quote} objects
-     */
-    public List<Quote> getAllQuotes() {
-        // Create the encoded URL.
-        var url = UriComponentsBuilder
-            // Create the path for the GET_ALL_QUOTES request,
-            // including the 'service'.
-            .fromPath(GET_ALL_QUOTES)
-
-            // Build the URI.
-            .build()
-
-            // Convert the URI to a String.
-            .toUriString();
-
-        return WebUtils
-            // Create and send a GET request to the server.
-            .makeGetRequestList(mRestTemplate,
-                                // Pass the encoded URL.
-                                url,
+                                uri,
                                 // Return type is a Quote array.
                                 Quote[].class);
     }
@@ -95,7 +96,7 @@ public class BerraQuotesProxy {
      *         Quote} objects
      */
     public List<Quote> searchQuotes(String query) {
-        var url = UriComponentsBuilder
+        var uri = UriComponentsBuilder
             .fromPath(GET_SEARCH
                       + "/"
                       + query)
@@ -105,7 +106,7 @@ public class BerraQuotesProxy {
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,
-                                url,
+                                uri,
                                 // Return type is a Quote array.
                                 Quote[].class);
 

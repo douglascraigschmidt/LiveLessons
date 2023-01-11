@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import static berraquotes.Constants.EndPoint.*;
@@ -26,13 +27,13 @@ import static berraquotes.Constants.EndPoint.*;
  * identified by the {@code @RestController} annotation below.
  *
  * WebMVC uses the {@code @GetMapping} annotation to map HTTP GET
- * requests onto methods in the {@link BerraQuotesController}.  GET requests
- * invoked from any HTTP web client (e.g., a web browser or client
- * app) or command-line utility (e.g., Curl or Postman).
+ * requests onto methods in the {@link BerraQuotesController}.  GET
+ * requests invoked from any HTTP web client (e.g., a web browser or
+ * client app) or command-line utility (e.g., Curl or Postman).
  *
  * The {@code @RestController} annotation also tells a controller that
- * the object returned is automatically serialized into JSON and passed
- * back within the body of an {@link HttpResponse} object.
+ * the object returned is automatically serialized into JSON and
+ * passed back within the body of an {@link HttpResponse} object.
  */
 @RestController
 public class BerraQuotesController {

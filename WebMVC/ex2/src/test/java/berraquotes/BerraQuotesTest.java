@@ -57,10 +57,10 @@ public class BerraQuotesTest {
 
         // Get the Berra quotes.
         System.out.println("Printing "
-                        + berraQuotes.size()
-                        + " Berra quote results out of "
-                        + size
-                        + " quotes:");
+                           + berraQuotes.size()
+                           + " Berra quote results out of "
+                           + size
+                           + " quotes:");
 
         // Print the Berra quote results.
         berraQuotes
@@ -79,11 +79,11 @@ public class BerraQuotesTest {
 
         // Print the Berra quote results.
         berraQuotes
-                .forEach(berraQuote -> System.out
-                        .println("id = "
-                                + berraQuote.id()
-                                + " quote = "
-                                + berraQuote.quote()));
+            .forEach(berraQuote -> System.out
+                     .println("id = "
+                              + berraQuote.id()
+                              + " quote = "
+                              + berraQuote.quote()));
 
         System.out.println("Leaving the BerraTest");
     }                              

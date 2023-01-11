@@ -62,8 +62,8 @@ public class BerraQuotesService {
      *         query
      */
     public List<Quote> search(String query) {
-         // Locate all quotes whose 'quote' matches the 'query' and
-         // return them as a List of Quote objects.
+        // Locate all quotes whose 'quote' matches the 'query' and
+        // return them as a List of Quote objects.
 
         return mQuotes
             // Convert the List to a Stream.

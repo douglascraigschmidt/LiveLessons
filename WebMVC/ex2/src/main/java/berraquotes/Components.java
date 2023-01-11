@@ -55,12 +55,12 @@ public class Components {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
-                // Create a new ZippyQuote.
+                // Create a new Quote.
                 .map(quote ->
                      new Quote(idCount.incrementAndGet(),
                                quote.stripLeading()))
                 
-                // Collect results into a list of ZippyQuote objects.
+                // Collect results into a list of Quote objects.
                 .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,8 +79,9 @@ public class Components {
         RestTemplate restTemplate = new RestTemplate();
 
         restTemplate
-                // Set the base URL for the RestTemplate.
-                .setUriTemplateHandler(new DefaultUriBuilderFactory(SERVER_BASE_URL));
+            // Set the base URL for the RestTemplate.
+            .setUriTemplateHandler
+            (new DefaultUriBuilderFactory(SERVER_BASE_URL));
 
         // Return restTemplate.
         return restTemplate;

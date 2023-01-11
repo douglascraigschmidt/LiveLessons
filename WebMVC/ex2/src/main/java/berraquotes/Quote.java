@@ -1,16 +1,16 @@
 package berraquotes;
 
 /**
- * A Quote "POJO".
+ * A Quote "POJO" exchanged between client and microservice.
  */
 public record Quote (
     /*
-     * The movie name.
+     * The Quote id.
      */
     Integer id,
 
     /*
-     * The encoding of the movie properties.
+     * The Quote contents.
      */
      String quote) {
 }
