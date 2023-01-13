@@ -45,7 +45,8 @@ public class ex1 {
 
         // Generate a List of random integers.
         sRANDOM_INTEGERS = RandomUtils
-            .generateRandomNumbers(Options.instance().numberOfElements(),
+            .generateRandomNumbers(Options.instance()
+                                   .numberOfElements(),
                                    Integer.MAX_VALUE);
 
         // Create/start the threads with the given option to either

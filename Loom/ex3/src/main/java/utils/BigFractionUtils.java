@@ -2,13 +2,23 @@ package utils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static jdk.incubator.concurrent.StructuredTaskScope.*;
+
+/**
+ * This Java utility class contains static methods and fields useful
+ * for processing {@link BigFraction} objects.
+ */
 public final class BigFractionUtils {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private BigFractionUtils() {}
+
     /**
      * Number of big fractions to process asynchronously in a stream.
      */
@@ -24,7 +34,7 @@ public final class BigFractionUtils {
     public static final String sBI2 = "188027234133482196";
 
     /**
-     * Create a new unreduced big fraction.
+     * Create a new unreduced {@link BigFraction}.
      */
     public static final BigFraction sUnreducedFraction =
         BigFraction.valueOf(new BigInteger(sBI1),
@@ -39,7 +49,7 @@ public final class BigFractionUtils {
         CompletableFuture.completedFuture(null);
 
     /**
-     * A big reduced fraction constant.
+     * A reduced {@link BigFraction} fraction constant.
      */
     public static final BigFraction sBigReducedFraction =
         BigFraction.valueOf(new BigInteger(sBI1),
@@ -51,7 +61,8 @@ public final class BigFractionUtils {
      * BigFraction} whose creation is performed synchronously.
      *
      * @param random A random number generator
-     * @param reduced A flag indicating whether to reduce the fraction or not
+     * @param reduced A flag indicating whether to reduce the fraction
+     *                or not
      * @return A large random {@link BigFraction}
      */
     public static BigFraction makeBigFraction(Random random,
@@ -77,41 +88,48 @@ public final class BigFractionUtils {
      * parameter.
      */
     public static void sortAndPrintList(List<Future<BigFraction>> list) {
-        // This implementation uses quick sort to order the list.
-        var quickSortF = CompletableFutureEx
-            // Perform quick sort asynchronously.
-            .supplyAsync(() -> quickSort(list));
+        try (var scope =
+             new ShutdownOnSuccess<List<BigFraction>>()) {
+            // This implementation uses quick sort to order the list.
+            var quickSortF = scope
+                // Perform quick sort asynchronously.
+                .fork(() -> quickSort(FutureUtils
+                                      // Convert List<Future> to List.
+                                      .futures2Objects(list)));
 
-        // This implementation uses heap sort to order the list.
-        var heapSortF = CompletableFutureEx
-            // Perform heap sort asynchronously.
-            .supplyAsync(() -> heapSort(list));
+            // This implementation uses heap sort to order the list.
+            var heapSortF = scope
+                // Perform heap sort asynchronously.
+                .fork(() -> 
+                      heapSort(FutureUtils
+                               // Convert List<Future> to List.
+                               .futures2Objects(list)));
 
-        // Select the result of whichever sort implementation finishes
-        // first and use it to print the sorted list.
-        quickSortF
-            .acceptEither(heapSortF,
-                          sortedList -> {
-                              // Print the results as mixed fractions.
-                              sortedList
-                                  .forEach(fraction -> System.out
-                                           .println(fraction
-                                                   .resultNow()
-                                                   .toMixedString()));
-                          })
-                .join();
+            // This barrier synchronizer waits for all threads to
+            // finish or the task scope to shut down.
+            scope.join();
+
+            // Select the result of whichever sort implementation
+            // finishes first and use it to print the sorted list.
+            scope
+                .result()
+                .forEach(fraction -> System.out
+                         .println(fraction.toMixedString()));
+        } catch (Exception exception) {
+            System.out.println("Exception: " 
+                               + exception.getMessage());
+        }
     }
 
     /**
      * Perform a quick sort on the {@code list}.
      */
     private static <T> List<T> quickSort
-       (List<T> list) {
+        (List<T> list) {
         List<T> copy = new ArrayList<>(list);
     
         // Order the list with quick sort.
-        copy.sort(Comparator
-                  .comparing(o -> ((Future<BigFraction>) o).resultNow()));
+        copy.sort(null);
 
         return copy;
     }
@@ -119,13 +137,12 @@ public final class BigFractionUtils {
     /*
      * Perform a heap sort on the {@code list}.
      */
-    private static <T> List<T> heapSort
+    private static <T extends Comparable<? super T>> List<T> heapSort
         (List<T> list) {
         List<T> copy = new ArrayList<>(list);
 
         // Order the list with heap sort.
-        HeapSort.sort(copy,Comparator
-                .comparing(o -> ((Future<BigFraction>) o).resultNow()));
+        HeapSort.sort(copy);
 
         return copy;
     }
@@ -135,7 +152,7 @@ public final class BigFractionUtils {
      */
     public static void display(String string) {
         System.out.println("["
-                           + Thread.currentThread().getId()
+                           + Thread.currentThread().threadId()
                            + "] "
                            + string);
     }
