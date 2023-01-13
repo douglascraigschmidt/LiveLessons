@@ -15,10 +15,10 @@ Here's an overview of what's currently included in these examples:
         quotes from Yogi Berra in various ways.
 
 . ex3 - This example demonstrate Java's structured concurrency
-        frameworks by (1) checking the primality of a List of random
-        Integer objects and (2) computing the greatest common divisor
-        (GCD) of pairs of these Integer objects using Spring WebMVC
-        microservices.
+        frameworks using two Spring WebMVC microservices that (1)
+        check the primality of a List of random Integer objects and
+        (2) compute the greatest common divisor (GCD) of pairs of
+        these Integer objects.
 
 . ex4 - This example demonstrates the ability to use Spring WebMVC
         features so a client can interact with the various

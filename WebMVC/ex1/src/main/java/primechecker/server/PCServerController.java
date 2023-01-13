@@ -1,6 +1,8 @@
 package primechecker.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import primechecker.common.Options;
 
@@ -41,11 +43,32 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
 @RestController
 public class PCServerController {
     /**
+     * Application context is to return application in "/" endpoint.
+     */
+    @Autowired
+    ApplicationContext applicationContext;
+
+    /**
      * This auto-wired field connects the {@link PCServerController}
      * to the {@link PCServerService}.
      */
     @Autowired
     PCServerService mService;
+
+    /**
+     * A request for testing Eureka connection.
+     *
+     * @return The application name.
+     */
+    @GetMapping({"/", "/actuator/info"})
+    ResponseEntity<String> info() {
+        // Indicate the request succeeded.  and return the application
+        // name.
+        return ResponseEntity
+            .ok(applicationContext.getId()
+                + " is alive and running on "
+                + Thread.currentThread());
+    }
 
     /**
      * Checks the {@code primeCandidate} param for primality,
