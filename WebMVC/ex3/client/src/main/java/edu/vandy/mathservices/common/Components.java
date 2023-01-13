@@ -26,7 +26,8 @@ public class Components {
      *                      microservice
      * @return A new {@link RestTemplate}
      */
-    public static RestTemplate getRestTemplate(String serverBaseUrl) {
+    @Bean
+    public RestTemplate getRestTemplate() {
         RestTemplate restTemplate;
 
         var poolConnections = System.getenv("POOL_CONNECTIONS");
@@ -56,12 +57,6 @@ public class Components {
         } else {
             restTemplate = new RestTemplate();
         }
-
-        restTemplate
-            // Set the base URL for the RestTemplate.
-            .setUriTemplateHandler(new DefaultUriBuilderFactory(serverBaseUrl));
-
-        // Return restTemplate.
         return restTemplate;
     }
 }

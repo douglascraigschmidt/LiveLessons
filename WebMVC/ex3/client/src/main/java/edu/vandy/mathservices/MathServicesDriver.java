@@ -100,7 +100,6 @@ public class MathServicesDriver
                 .fork(() -> testClient
                       .computeGCDs(randomIntegers));
 
-
             // Barrier synchronizer waits for both tasks to complete.
             scope.join();
 

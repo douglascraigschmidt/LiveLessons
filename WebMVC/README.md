@@ -4,13 +4,15 @@ server over HTTP.
 
 Here's an overview of what's currently included in these examples:
 
-. ex1 - This example shows how WebMVC can be used to send and receive
-        HTTP GET requests via the Java parallel streams framework, the
-        completable futures framework, and the Java structured
-        concurrency frameworks.  These requests are mapped to methods
-        that determine the primality of large Integer objects.
+. ex1 - This example shows how Spring WebMVC can be used to send and
+        receive HTTP GET requests via the Java parallel streams
+        framework, the completable futures framework, and the Java
+        structured concurrency frameworks.  These requests are mapped
+        to methods that determine the primality of large Integer
+        objects.
 
-. ex2 - 
+. ex2 - This example shows how Spring WebMVC can be used to obtain
+        quotes from Yogi Berra in various ways.
 
 . ex3 - This example demonstrate Java's structured concurrency
         frameworks by (1) checking the primality of a List of random

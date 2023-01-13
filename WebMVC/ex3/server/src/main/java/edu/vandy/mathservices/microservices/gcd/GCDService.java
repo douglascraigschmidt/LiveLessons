@@ -82,6 +82,7 @@ public class GCDService {
      * @param scope {@link StructuredTaskScope.ShutdownOnFailure} to perform the task
      * @return A {@link Future} that emits a {@link GCDResult}
      */
+
     private static Future<GCDResult> computeGCD
        (Integer[] integers,
         StructuredTaskScope.ShutdownOnFailure scope) {
