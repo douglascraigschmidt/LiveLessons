@@ -144,9 +144,9 @@ public class Options {
      * @param message The message to display
      */
     public static void display(String message) {
-        System.out.println("Thread = "
+        System.out.println("["
                            + Thread.currentThread().threadId()
-                           + " "
+                           + "] "
                            + message);
     }
 

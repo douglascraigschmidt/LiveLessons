@@ -2,10 +2,14 @@ package edu.vandy.quoteservices;
 
 import edu.vandy.quoteservices.client.QuoteClient;
 import edu.vandy.quoteservices.common.Options;
+import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.quoteservices.utils.RunTimer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.List;
 
 import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
 import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
@@ -31,7 +35,7 @@ public class QuoteDriver
     /**
      * Number of quotes requested.
      */
-    private final static int sNUMBER_OF_QUOTES_REQUESTED = 5;
+    private final static int sNUMBER_OF_QUOTES_REQUESTED = 10;
 
     /**
      * This object connects {@link QuoteDriver} to the {@code
@@ -62,59 +66,74 @@ public class QuoteDriver
      */
     @Override
     public void run(String... args) {
-            System.out.println("Entering QuoteDriver main()");
+        System.out.println("Entering QuoteDriver main()");
 
-            // List holding all Quote objects.
-            var zippyQuotes = quoteClient
-                .getAllQuotes(ZIPPY);
+        // Record how long it takes to get the Zippy quotes.
+        timeZippyQuotes();
 
-            var size = zippyQuotes.size();
+        // Record how long it takes to get the Handey quotes.
+        timeHandeyQuotes();
 
-            zippyQuotes = quoteClient
-                .getQuotes(ZIPPY,
-                           makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                             zippyQuotes.size()));
+        System.out.println(RunTimer.getTimingResults());
+        System.out.println("Leaving QuoteDriver main()");
+        System.exit(1);
+    }
 
-            // Get the Handey quotes.
-            Options.display("Printing "
-                + zippyQuotes.size()
-                + " Zippy quote results out of "
-                + size
-                + " quotes:");
+    /**
+     * Record how long it takes to get the Zippy quotes.
+     */
+    private void timeZippyQuotes() {
+        var zippyQuotes = RunTimer
+            .timeRun(() -> runQuotes(ZIPPY, false),
+                     "Sequential Zippy quotes");
 
-            // Print the Zippy quote results.
-            zippyQuotes
-                .forEach(zippyQuote -> System.out
-                         .println("id = "
-                                  + zippyQuote.id
-                                  + " quote = "
-                                  + zippyQuote.quote));
+        // Get the Zippy quotes.
+        Options.display("Printing "
+                        + zippyQuotes.size()
+                        + " Zippy quote results:");
 
-            // List holding all the Handey Quote objects.
-            var handeyQuotes = quoteClient
-                .getAllQuotes(HANDEY);
+        // Print the Zippy quote results.
+        zippyQuotes
+            .forEach(zippyQuote -> System.out
+                     .println("id = "
+                              + zippyQuote.id
+                              + " quote = "
+                              + zippyQuote.quote));
+    }
 
-            size = handeyQuotes.size();
+    /**
+     * Record how long it takes to get the Handey quotes.
+     */
+    private void timeHandeyQuotes() {
+        var handeyQuotes = RunTimer
+            .timeRun(() -> runQuotes(HANDEY, false),
+                     "Sequential Handey quotes");
 
-            // List holding random Handey Quote objects.
-            handeyQuotes = quoteClient
-                .getQuotes(HANDEY,
-                           makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                             size));
-            // Get the Handey quotes.
-            Options.display("Printing "
-                            + handeyQuotes.size()
-                            + " Handey quote results out of "
-                            + size
-                            + " quotes:");
+        // Get the Handey quotes.
+        Options.display("Printing "
+                        + handeyQuotes.size()
+                        + " Handey quote results:");
 
-            // Print the Handey quote results.
-            handeyQuotes
-                .forEach(handeyQuote -> System.out
-                         .println("result = "
-                                  + handeyQuote));
+        // Print the Handey quote results.
+        handeyQuotes
+            .forEach(handeyQuote -> System.out
+                     .println("result = "
+                              + handeyQuote));
+    }
 
-            System.out.println("Leaving QuoteDriver main()");
-            System.exit(1);
-        }
+    /**
+     * Factors out common code for calling each microservice.
+     */
+    private List<Quote> runQuotes(String quoter,
+                                  boolean parallel) {
+        // List holding all Quote objects.
+        var quotes = quoteClient
+            .getAllQuotes(quoter);
+
+        // Return the selected quotes.
+        return quoteClient
+            .getQuotes(quoter,
+                       makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
+                                         quotes.size()));
+    }
 }

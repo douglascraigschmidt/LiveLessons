@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class defines implementation methods that are called by the
@@ -54,14 +55,20 @@ public class ZippyService {
     public List<Quote> getQuotes(List<Integer> quoteIds) {
         System.out.println("ZippyService.getQuotes()");
 
-        var list = repository
-            .findAllById(quoteIds);
+        return quoteIds
+            .parallelStream()
+            .map(id -> repository
+                 .findById(id).orElseThrow())
+            // .reduce(Stream::concat).orElse(Stream.empty())
+            .toList();
 
-        System.out.println("number of quotes = " + list.size());
+            // var list = repository .findAllById(quoteIds);
+            
+            /*
+              System.out.println("number of quotes = " + list.size());
 
-        list.forEach(quote ->
-                      System.out.println("id = " + quote.id + " quote = " + quote.quote));
-
-        return list;
+              list.forEach(quote ->
+              System.out.println("id = " + quote.id + " quote = " + quote.quote));
+            */
     }
 }

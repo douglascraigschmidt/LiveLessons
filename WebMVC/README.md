@@ -21,8 +21,9 @@ Here's an overview of what's currently included in these examples:
         these Integer objects.
 
 . ex4 - This example demonstrates the ability to use Spring WebMVC
-        features so a client can interact with the various
-        microservices via an API Gateway.
+        features so a client uses an API gateway to interact with two
+        microservices that provide quotes from Zippy th' Pinhead and
+        Jack Handey.
 
 . ex5 - This example shows the use of Spring WebMVC to apply Java
         sequential and parallel streams to process entries in a
