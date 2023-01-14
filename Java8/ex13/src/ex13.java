@@ -1,6 +1,10 @@
 import java.util.List;
 import java.util.Spliterator;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * This example shows several examples of using Java Spliterators and
@@ -29,6 +33,7 @@ public class ex13 {
         showStream(bardQuote);
         showParallelStream(bardQuote);
         showStreamSupport(bardQuote);
+        showRegexSearch(bardQuote);
     }
 
     /**
@@ -119,6 +124,37 @@ public class ex13 {
 
             // Print out each element of the stream.
             .forEach(ex13::display);
+    }
+
+    /**
+     * Show how the Java regular expression methods can be used to
+     * search a String for certain words.
+     */
+    private static void showRegexSearch(List<String> quote) {
+        System.out.println("\n\n++Showing Java regular expression methods:");
+
+        var quoteString = quote
+            .stream()
+            .collect(joining(""));
+
+        String word = "be";
+
+        Pattern regex = Pattern
+                .compile("\\b"
+                + word
+                + "\\b",
+                Pattern.CASE_INSENSITIVE);
+
+        Matcher matcher = regex.matcher(quoteString);
+
+        while (matcher.find()) {
+            System.out.println("found \""
+                               + word
+                               + "\" at location "
+                               + matcher.start());
+        }
+
+        System.out.println(quoteString);
     }
 
     /**

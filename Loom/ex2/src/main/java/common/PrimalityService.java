@@ -9,7 +9,8 @@ import java.util.concurrent.Future;
 
 /**
  * This Java utility class defines methods for checking whether a
- * {@link List} of {@link Integer} objects are prime.
+ * {@link List} of {@link Integer} objects are prime using Java
+ * structure concurrency and the Java streams framework.
  */
 public class PrimalityService {
     /**
