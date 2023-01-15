@@ -4,6 +4,10 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.StreamSupport;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -147,17 +151,19 @@ public class ex13 {
         // The word to search for.
         String word = "be";
 
+        String regex = "\\b"
+            + word
+            + ".*(true|false)"
+            + "\\b";
+
         // Compile the regular expression.
-        Pattern regex = Pattern
-                .compile("\\b"
-                + word
-                + ".*(true|false)"
-                + "\\b",
+        Pattern pattern = Pattern
+                .compile(regex,
                 Pattern.CASE_INSENSITIVE);
 
         // Create a Matcher that associates the regex with
         // the quoteString.
-        Matcher matcher = regex.matcher(quoteString);
+        Matcher matcher = pattern.matcher(quoteString);
 
         // Keep looping as long as there's a match.
         while (matcher.find()) {
@@ -168,6 +174,26 @@ public class ex13 {
                                // Print where the match occurred.
                                + matcher.start());
         }
+
+        // Encode the regex so it can be
+        // passed as a URL.
+        var encodedRegex = URLEncoder
+            .encode(regex,
+                    StandardCharsets.UTF_8);
+
+        // Decode the encoded regex so it can be
+        // used as a String.
+        var decodedRegex = URLDecoder
+            .decode(encodedRegex,
+                    StandardCharsets.UTF_8);
+
+        // Print the results.
+        System.out.println("Original regex = "
+                + regex);
+        System.out.println("Encoded regex = "
+                           + encodedRegex);
+        System.out.println("Decoded regex = "
+                           + decodedRegex);
     }
 
     /**
