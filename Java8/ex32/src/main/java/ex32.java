@@ -1,11 +1,11 @@
 import io.reactivex.rxjava3.core.Observable;
 
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static utils.RandomUtils.getRandomInts;
 
 /**
  * This example shows several techniques for concatenating a {@link
@@ -82,29 +82,14 @@ public class ex32 {
      */
     static public void main(String[] argv) throws InterruptedException {
         // Create a List of random Integers.
-        List<String> list = getRandomInts(sMAX_INTs);
+        var list = getRandomInts(sMAX_INTs,
+                                          sLOWER_BOUND,
+                                          sUPPER_BOUND);
 
         // Perform all the concatenations.
         System.out.println(concatRxJava(list, sMAX_CONCAT));
         System.out.println(concatStream1(list, sMAX_CONCAT));
         System.out.println(concatStream2(list, sMAX_CONCAT));
-    }
-
-    /**
-     * @return {@code numberOfInts} random {@link Integer} objects
-     */
-    private static List<String> getRandomInts(long numberOfInts) {
-        return new Random()
-                // Create a Stream of random ints.
-                .ints(numberOfInts,
-                        sLOWER_BOUND,
-                        sUPPER_BOUND)
-
-                // Convert the ints to String objects.
-                .mapToObj(String::valueOf)
-
-                // Conver the Stream to a List.
-                .toList();
     }
 }
 
