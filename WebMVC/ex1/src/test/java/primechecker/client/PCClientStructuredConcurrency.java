@@ -104,19 +104,22 @@ public class PCClientStructuredConcurrency {
     private List<Integer> testIndividualCallsParallel
         (List<Integer> primeCandidates) {
     try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            // Create a List of Future<Integer> to hold the results.
-            var results = new ArrayList<Future<Integer>>();
+            // Get a List that contains the results of checking all
+            // the primeCandidates for primality.
+            var results = primeCandidates
+                // Convert the List to a Stream.
+                .stream()
 
-            // Iterate through all the random BigFraction objects.
-            for (var primeCandidate : primeCandidates)
-                results
-                    // Add the Future<Integer> to the List.
-                    .add(scope
-                         // Fork a new virtual thread to check the
-                         // primeCandidate for primality.
-                         .fork(() -> mPCProxy
-                               .checkIfPrime(STRUCTURED_CONCURRENCY,
-                                             primeCandidate)));
+                // Check each primeCandidates for primality.
+                .map(primeCandidate -> scope
+                     // Fork a new virtual thread to check the
+                     // primeCandidate for primality.
+                     .fork(() -> mPCProxy
+                           .checkIfPrime(STRUCTURED_CONCURRENCY,
+                                         primeCandidate)))
+                                             
+                // Convert the result into a List.
+                .toList();
 
             // This barrier synchronizer waits for all threads to
             // finish or the task scope to shut down.
