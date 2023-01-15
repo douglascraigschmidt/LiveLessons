@@ -1,24 +1,25 @@
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 /**
- * This example shows several techniques for concatenating a
- * {@link List} of {@link String} together multiple times
- * via Java Streams and RxJava.
+ * This example shows several techniques for concatenating a {@link
+ * List} of {@link String} together multiple times via Java Streams
+ * and RxJava.
  */
 public class ex32 {
     /**
      * The number of times to concatenate.
      */
     private static final int sMAX_CONCAT = 3;
+    private static final long sMAX_INTs = 5;
+    private static final int sLOWER_BOUND = 1;
+    private static final int sUPPER_BOUND = 10;
 
     /**
      * Use the RxJava repeat() method to concatenate the contents of
@@ -80,13 +81,30 @@ public class ex32 {
      * Main entry point into the test program.
      */
     static public void main(String[] argv) throws InterruptedException {
-        // Create a List.
-        List<String> list = Arrays.asList("1", "2", "3");
+        // Create a List of random Integers.
+        List<String> list = getRandomInts(sMAX_INTs);
 
         // Perform all the concatenations.
         System.out.println(concatRxJava(list, sMAX_CONCAT));
         System.out.println(concatStream1(list, sMAX_CONCAT));
         System.out.println(concatStream2(list, sMAX_CONCAT));
+    }
+
+    /**
+     * @return {@code numberOfInts} random {@link Integer} objects
+     */
+    private static List<String> getRandomInts(long numberOfInts) {
+        return new Random()
+                // Create a Stream of random ints.
+                .ints(numberOfInts,
+                        sLOWER_BOUND,
+                        sUPPER_BOUND)
+
+                // Convert the ints to String objects.
+                .mapToObj(String::valueOf)
+
+                // Conver the Stream to a List.
+                .toList();
     }
 }
 
