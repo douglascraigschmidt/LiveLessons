@@ -133,28 +133,41 @@ public class ex13 {
     private static void showRegexSearch(List<String> quote) {
         System.out.println("\n\n++Showing Java regular expression methods:");
 
+        // Convert the List into a String.
         var quoteString = quote
+            // Convert the List to a Stream.
             .stream()
+
+            // Convert the Stream into a single String.
             .collect(joining(""));
 
+        // Print the quoteString.
+        System.out.println(quoteString);
+
+        // The word to search for.
         String word = "be";
 
+        // Compile the regular expression.
         Pattern regex = Pattern
                 .compile("\\b"
                 + word
+                + ".*(true|false)"
                 + "\\b",
                 Pattern.CASE_INSENSITIVE);
 
+        // Create a Matcher that associates the regex with
+        // the quoteString.
         Matcher matcher = regex.matcher(quoteString);
 
+        // Keep looping as long as there's a match.
         while (matcher.find()) {
             System.out.println("found \""
-                               + word
+                               // Print the match
+                               + matcher.group()
                                + "\" at location "
+                               // Print where the match occurred.
                                + matcher.start());
         }
-
-        System.out.println(quoteString);
     }
 
     /**
