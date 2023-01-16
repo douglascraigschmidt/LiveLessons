@@ -79,10 +79,8 @@ public class PCProxy {
         var uri = UriComponentsBuilder
                 .fromPath(CHECK_IF_PRIME_LIST)
                 .queryParam("strategy", strategy)
-                .queryParam("primeCandidates",
-                        WebUtils
-                                // Convert the List to a String.
-                                .list2String(primeCandidates))
+                .queryParam("primeCandidates", WebUtils
+                        .list2String(primeCandidates))
                 .queryParam("parallel", parallel)
                 .build()
                 .toUriString();
