@@ -137,42 +137,53 @@ public class ex13 {
     private static void showRegexSearch(List<String> quote) {
         System.out.println("\n\n++Showing Java regular expression methods:");
 
-        // Convert the List into a String.
-        var quoteString = quote
-            // Convert the List to a Stream.
-            .stream()
-
-            // Convert the Stream into a single String.
-            .collect(joining(""));
-
-        // Print the quoteString.
-        System.out.println(quoteString);
-
         // The word to search for.
         String word = "be";
 
+        // The regular expression to compile, which matches the phrase
+        // "be" followed by either "true" or "false".
         String regex = "\\b"
             + word
             + ".*(true|false)"
             + "\\b";
 
-        // Compile the regular expression.
-        Pattern pattern = Pattern
+        // Make sure the phrase "be" appears in the 'quote' param.
+        if (quote
+            // Convert List to a Stream.
+            .stream()
+            // Return true if there's any match of 'be' in the Stream.
+            .anyMatch(string -> string
+                      .toLowerCase().contains(word))) {
+
+            // Convert the List into a String.
+            var quoteString = quote
+                // Convert the List to a Stream.
+                .stream()
+
+                // Convert the Stream into a single String.
+                .collect(joining(""));
+
+            // Print the quoteString.
+            System.out.println(quoteString);
+
+            // Compile the regular expression.
+            Pattern pattern = Pattern
                 .compile(regex,
-                Pattern.CASE_INSENSITIVE);
+                         Pattern.CASE_INSENSITIVE);
 
-        // Create a Matcher that associates the regex with
-        // the quoteString.
-        Matcher matcher = pattern.matcher(quoteString);
+            // Create a Matcher that associates the regex with
+            // the quoteString.
+            Matcher matcher = pattern.matcher(quoteString);
 
-        // Keep looping as long as there's a match.
-        while (matcher.find()) {
-            System.out.println("found \""
-                               // Print the match
-                               + matcher.group()
-                               + "\" at location "
-                               // Print where the match occurred.
-                               + matcher.start());
+            // Keep looping as long as there's a match.
+            while (matcher.find()) {
+                System.out.println("found \""
+                                   // Print the match
+                                   + matcher.group()
+                                   + "\" at location "
+                                   // Print where the match occurred.
+                                   + matcher.start());
+            }
         }
 
         // Encode the regex so it can be
@@ -189,7 +200,7 @@ public class ex13 {
 
         // Print the results.
         System.out.println("Original regex = "
-                + regex);
+                           + regex);
         System.out.println("Encoded regex = "
                            + encodedRegex);
         System.out.println("Decoded regex = "
