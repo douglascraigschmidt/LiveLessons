@@ -67,7 +67,7 @@ public class ex1 {
         // Print out a diagnostic periodically.
         IntConsumer printDiagnostic = i -> {
             if (Options.instance().printDiagnostic(i))
-                System.out.println(i + " threads started");
+                Options.display(i + " threads started");
         };
 
         // Create a List of many Thread objects.
@@ -139,11 +139,11 @@ public class ex1 {
             if (Options.instance()
                 .printDiagnostic(sIterationCount.getAndIncrement())) {
                 if (result == 0)
-                    System.out.println(integer + " is prime");
+                    Options.display(integer + " is prime");
                 else
-                    System.out.println(integer
-                                       + " is not prime with smallest factor "
-                                       + result);
+                    Options.display(integer
+                                    + " is not prime with smallest factor "
+                                    + result);
             }
         };
     }
