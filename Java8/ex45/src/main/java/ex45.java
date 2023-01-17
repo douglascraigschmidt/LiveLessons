@@ -150,9 +150,9 @@ public class ex45 {
                                           + "\" ["
 
                                           // Print match location.
-                                          + matchResult.start())
-                                          
-                                          + "]");
+                                          + matchResult.start()
+
+                                          + "]"));
 
                 });
     }
