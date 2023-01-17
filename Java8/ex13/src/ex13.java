@@ -1,14 +1,6 @@
 import java.util.List;
 import java.util.Spliterator;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.stream.StreamSupport;
-
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * This example shows several examples of using Java Spliterators and
@@ -128,83 +120,6 @@ public class ex13 {
 
             // Print out each element of the stream.
             .forEach(ex13::display);
-    }
-
-    /**
-     * Show how the Java regular expression methods can be used to
-     * search a String for certain words.
-     */
-    private static void showRegexSearch(List<String> quote) {
-        System.out.println("\n\n++Showing Java regular expression methods:");
-
-        // The word to search for.
-        String word = "be";
-
-        // The regular expression to compile, which matches the phrase
-        // "be" followed by either "true" or "false".
-        String regex = "\\b"
-            + word
-            + ".*(true|false)"
-            + "\\b";
-
-        // Make sure the phrase "be" appears in the 'quote' param.
-        if (quote
-            // Convert List to a Stream.
-            .stream()
-            // Return true if there's any match of 'be' in the Stream.
-            .anyMatch(string -> string
-                      .toLowerCase().contains(word))) {
-
-            // Convert the List into a String.
-            var quoteString = quote
-                // Convert the List to a Stream.
-                .stream()
-
-                // Convert the Stream into a single String.
-                .collect(joining(""));
-
-            // Print the quoteString.
-            System.out.println(quoteString);
-
-            // Compile the regular expression.
-            Pattern pattern = Pattern
-                .compile(regex,
-                         Pattern.CASE_INSENSITIVE);
-
-            // Create a Matcher that associates the regex with
-            // the quoteString.
-            Matcher matcher = pattern.matcher(quoteString);
-
-            // Keep looping as long as there's a match.
-            while (matcher.find()) {
-                System.out.println("found \""
-                                   // Print the match
-                                   + matcher.group()
-                                   + "\" at location "
-                                   // Print where the match occurred.
-                                   + matcher.start());
-            }
-        }
-
-        // Encode the regex so it can be
-        // passed as a URL.
-        var encodedRegex = URLEncoder
-            .encode(regex,
-                    StandardCharsets.UTF_8);
-
-        // Decode the encoded regex so it can be
-        // used as a String.
-        var decodedRegex = URLDecoder
-            .decode(encodedRegex,
-                    StandardCharsets.UTF_8);
-
-        // Print the results.
-        System.out.println("Original regex = "
-                           + regex);
-        System.out.println("Encoded regex = "
-                           + encodedRegex);
-        System.out.println("Decoded regex = "
-                           + decodedRegex);
     }
 
     /**
