@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.joining;
  * for {@code word}.  It also show how to encode and decode a regular
  * expression string so it can be sent and received as part of a URL.
  */
-public class ex46 {
+public class ex45 {
     /**
      * The complete works of William Shakespeare.
      */
@@ -150,9 +150,9 @@ public class ex46 {
                                           + "\" ["
 
                                           // Print match location.
-                                          + matchResult.start()
+                                          + matchResult.start())
                                           
-                                          + "]"));
+                                          + "]");
 
                 });
     }
