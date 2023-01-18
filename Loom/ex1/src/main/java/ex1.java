@@ -71,7 +71,7 @@ public class ex1 {
         };
 
         // Create a List of many Thread objects.
-        List<Thread> threads = IntStream
+        var threads = IntStream
             // Generate stream containing a range of ints.
             .rangeClosed(1, Options.instance().numberOfElements())
 

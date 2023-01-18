@@ -12,8 +12,8 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * This example shows how the Java regular expression methods can be
- * used to search the complete works of Shakespeare ({@code bardWorks}
- * for {@code word}.  It also show how to encode and decode a regular
+ * used to search the complete works of Shakespeare ({@code bardWorks})
+ * for {@code word}.  It also shows how to encode and decode a regular
  * expression string so it can be sent and received as part of a URL.
  */
 public class ex45 {
@@ -37,7 +37,7 @@ public class ex45 {
         assert bardWords != null;
 
         // Search the works of Shakespeare for a certain word/phrase.
-        processBardWorks(bardWords, "be");
+        processBardWorks(bardWords, "be ");
     }
 
     /**
@@ -47,7 +47,7 @@ public class ex45 {
      */
     private static void processBardWorks(List<String> bardWorks,
                                          String word) {
-        // Create a List of Shakepeare works containing 'word'.
+        // Create a List of Shakespeare works containing 'word'.
         var bardWorksMatchingWord = bardWorks
             // Convert List to a Stream.
             .stream()
@@ -129,14 +129,14 @@ public class ex45 {
                     // Get the title of the work.
                     String title = getTitle(work);
 
-                    // Create a Matcher that associates the regex with
-                    // the quoteString.
-                    Matcher matcher = pattern.matcher(work);
-
                     // Print the title of the work.
                     System.out.println(title);
 
-                    matcher
+                    // Create a Matcher that associates the regex with
+                    // the quoteString.
+                    pattern
+                        .matcher(work)
+
                         // Create a Stream of matches.
                         .results()
 

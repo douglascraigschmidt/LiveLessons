@@ -26,7 +26,6 @@ public class BerraQuotesProxy {
     @Autowired
     private RestTemplate mRestTemplate;
 
-
     /**
      * @return An {@link List} containing all {@link
      *         Quote} objects

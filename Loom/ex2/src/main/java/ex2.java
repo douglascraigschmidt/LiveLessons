@@ -64,7 +64,7 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor =
+        try (var executor =
              Executors.newVirtualThreadPerTaskExecutor()) {
             primeCheckFutures = executor
                 // submit() starts a virtual thread to check

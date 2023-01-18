@@ -33,7 +33,7 @@ public class PrimalityService {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor =
+        try (var executor =
              Executors.newVirtualThreadPerTaskExecutor()) {
             return integers
                 // Create a stream of Integer objects.

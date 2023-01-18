@@ -4,7 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ex1" />
     <module name="ex1.main" />
-    <option name="PROGRAM_PARAMETERS" value="-d true -p 1000000 -t v -n 20000000" />
+    <option name="PROGRAM_PARAMETERS" value="-d true -p 1000000 -t p -n 20000000" />
     <option name="VM_PARAMETERS" value="--enable-preview" />
     <method v="2">
       <option name="Make" enabled="true" />
