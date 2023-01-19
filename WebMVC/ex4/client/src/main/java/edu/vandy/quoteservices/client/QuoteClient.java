@@ -21,7 +21,7 @@ import java.util.List;
 public class QuoteClient {
     /**
      * This auto-wired field connects the {@link QuoteClient} to the
-     * {@link QuoteProxy} that performs HTTP requests synchronously.
+     * {@link QuoteClient} that performs HTTP requests synchronously.
      */
     @Autowired
     private QuoteProxy mQuoteProxy; 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GatewayController {
     /**
-     *
+     * Application id is returned for this single endpoint.
      */
     @Autowired
     ApplicationContext applicationContext;

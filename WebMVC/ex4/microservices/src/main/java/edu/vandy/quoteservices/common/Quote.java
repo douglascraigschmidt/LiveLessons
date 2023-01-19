@@ -1,10 +1,9 @@
 package edu.vandy.quoteservices.common;
 
+import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-
-import javax.persistence.*;
 
 /**
  * This class stores quotes.
@@ -27,14 +26,11 @@ public class Quote {
      * ID # of the quote.
      */
     @Id
-    @Column(name = "id", nullable = false)
-    // public int quoteId;
-    public Integer quoteId;
-    // public String quoteId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     /**
      * A quote.
      */
-    @Column(columnDefinition="LONGTEXT")
     public String quote;
 }

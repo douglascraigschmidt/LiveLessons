@@ -1,9 +1,12 @@
 package edu.vandy.quoteservices.common;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -11,12 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static edu.vandy.quoteservices.common.Constants.GATEWAY_BASE_URL;
-
 /**
  * This class contains a {@code Bean} annotation that can be injected
  * into classes using the Spring {@code @Autowired} annotation.
-*/
+ */
 @Component
 public class Components {
     /**
@@ -32,24 +33,32 @@ public class Components {
         var poolConnections = System.getenv("POOL_CONNECTIONS");
 
         // Check to see if connection pooling has been requested.
-        if (poolConnections != null
-            && poolConnections.equals("true")) {
+        if (poolConnections != null && poolConnections.equals("true")) {
             PoolingHttpClientConnectionManager connectionManager =
-                new PoolingHttpClientConnectionManager();
-
-            connectionManager.setMaxTotal(100);
-            connectionManager.setDefaultMaxPerRoute(20);
+                PoolingHttpClientConnectionManagerBuilder
+                    .create()
+                    .setMaxConnTotal(100)
+                    .setMaxConnPerRoute(20)
+                    .setDefaultSocketConfig(
+                        SocketConfig
+                            .custom()
+                            .setSoTimeout(Timeout.ofSeconds(5))
+                            .build())
+                    .build();
 
             RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectionRequestTimeout(5000) // timeout to get connection from pool
-                .setSocketTimeout(5000) // standard connection timeout
-                .setConnectTimeout(5000) // standard connection timeout
+                .setConnectionRequestTimeout(Timeout.ofSeconds(5)) // timeout
+                // to get connection from pool
+                .setConnectTimeout(Timeout.ofSeconds(5)) // standard
+                // connection timeout
                 .build();
 
-            HttpClient httpClient = HttpClientBuilder.create()
+            CloseableHttpClient httpClient = HttpClientBuilder
+                .create()
                 .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig).build();
+                .setDefaultRequestConfig(requestConfig)
+                .build();
 
             ClientHttpRequestFactory requestFactory =
                 new HttpComponentsClientHttpRequestFactory(httpClient);
@@ -61,7 +70,7 @@ public class Components {
 
         restTemplate
             // Set the base URL for the RestTemplate.
-            .setUriTemplateHandler(new DefaultUriBuilderFactory(GATEWAY_BASE_URL));
+            .setUriTemplateHandler(new DefaultUriBuilderFactory(Constants.GATEWAY_BASE_URL));
 
         // Return restTemplate.
         return restTemplate;

@@ -1,18 +1,21 @@
-# disable eureka by default
+# Common Eureka client properties
 eureka:
+  instance:
+    prefer-ip-address: true
   client:
     enabled: true
-
-#
-# The preconfigured set of movie cosine vectors.
-app:
-  dataset: zippy/zippy-quotes.txt
-
-# 2 microservice configurations.
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
 
 ---
+
+# Handy microservice profile.
+
 server:
   port: 9100
+
 spring:
   application:
     name: handey
@@ -20,29 +23,42 @@ spring:
     activate:
       on-profile: handey
 
+app:
+  dataset: handey/handey-quotes.txt
 ---
+
+# Zippy microservice profile.
+
 server:
   port: 9101
+
 spring:
   application:
     name: zippy
   config:
     activate:
       on-profile: zippy
+  # Common Database properties
   datasource:
     driverClassName: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:h2:mem:zippy;DB_CLOSE_ON_EXIT=TRUE
+  sql:
+    init:
+      platform: h2
+      username: sa
+      password:
+      mode: always
+      data-locations: classpath:zippy/data.sql
+      schema-locations: classpath:zippy/schema.sql
+  # Use JPA database.
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
-      jdbc:
-        time_zone: UTC
+      ddl-auto: none
     database-platform: org.hibernate.dialect.H2Dialect
-    show-sql: false
-    properties:
-      hibernate:
-        show_sql: false
+    show-sql: true
+
+  # Allow use of H2 console at localhost:port/h2-console for debugging.
   h2:
     console:
       settings:

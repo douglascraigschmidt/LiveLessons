@@ -1,6 +1,6 @@
 # Application port.
 server:
-  port: 9080
+  port: 8080
 
 # Application name.
 spring:
@@ -10,29 +10,6 @@ spring:
     name: gateway
   main:
     web-application-type: reactive
-#  cloud:
-#    gateway:
-#      globalcors:
-#        '[/**]':
-#          allowedOrigins: "http://localhost:3000"
-#          allowedHeaders: "*"
-#          allowedMethods:
-#            - GET
-#            - POST
-
-# I think this never worked - it was supposed to be under the spring: label.
-#  cloud:
-#    gateway:
-#      default-filters:
-#        - name: ResponseFilterFactory
-
-#    globalcors:
-#      '[/**]':
-#        allowedOrigins: "http://localhost:3000"
-#        allowedHeaders: "*"
-#        allowedMethods:
-#          - GET
-#          - POST
 
 logging:
   level:

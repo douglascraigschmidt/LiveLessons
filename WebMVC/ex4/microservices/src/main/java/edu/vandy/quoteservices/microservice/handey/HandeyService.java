@@ -3,12 +3,10 @@ package edu.vandy.quoteservices.microservice.handey;
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import static edu.vandy.quoteservices.common.Components.getInput;
-import static edu.vandy.quoteservices.common.Constants.HANDEY_QUOTES;
 
 /**
  * This class defines implementation methods that are called by the
@@ -26,13 +24,13 @@ import static edu.vandy.quoteservices.common.Constants.HANDEY_QUOTES;
  * service.
  */
 @Service
-public class HandeyService 
-       extends BaseService<List<Quote>> {
+public class HandeyService
+    extends BaseService<List<Quote>> {
     /**
      * An in-memory {@link List} of all the quotes.
      */
-    private final List<Quote> mQuotes =
-        getInput(HANDEY_QUOTES);
+    @Autowired
+    private List<Quote> mQuotes;
 
     /**
      * @return A {@link List} of all {@link Quote} objects
@@ -48,13 +46,13 @@ public class HandeyService
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
+    public List<Quote> getQuotes(List<Long> quoteIds) {
         return quoteIds
             // Convert the List to a Stream.
             .stream()
 
             // Get the Handey quote associated with the quoteId.
-            .map(quoteId -> mQuotes.get(quoteId - 1))
+            .map(quoteId -> mQuotes.get(quoteId.intValue()))
 
             // Trigger intermediate operations and collect the results
             // into a List.

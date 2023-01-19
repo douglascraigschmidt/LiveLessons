@@ -6,7 +6,7 @@ package edu.vandy.quoteservices.common;
  */
 public class Constants {
     // The Gateway's hostname and IP address.
-    public static final String GATEWAY_BASE_URL = "http://localhost:9080";
+    public static final String GATEWAY_BASE_URL = "http://localhost:8080";
 
     /**
      * All supported HTTP request endpoints.

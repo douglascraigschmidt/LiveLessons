@@ -3,6 +3,7 @@ package edu.vandy.quoteservices.common;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import static java.util.Collections.singletonMap;
 
@@ -13,6 +14,9 @@ import static java.util.Collections.singletonMap;
  * gateway application.
  */
 @Configuration
+@PropertySource(
+    value = "classpath:/application.yml",
+    factory = YamlPropertySourceFactory.class)
 public class BaseApplication {
     /**
      * Helper method that builds Spring Boot application using the

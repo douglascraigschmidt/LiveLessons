@@ -66,7 +66,7 @@ public abstract class BaseController<T> {
      * @return A {@link List} of all requested {@link Quote} objects
      */
     @GetMapping(GET_QUOTES)
-    T getQuotes(@RequestParam List<Integer> quoteIds) {
+    T getQuotes(@RequestParam List<Long> quoteIds) {
         return getService()
             // Forward request to the service.
             .getQuotes(quoteIds);

@@ -1,11 +1,11 @@
 package edu.vandy.quoteservices.client;
 
 import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.quoteservices.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import edu.vandy.quoteservices.utils.WebUtils;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class QuoteProxy {
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @return An {@link List} containing the requested {@link
-     *         Quote} objects
+     * Quote} objects
      */
     public List<Quote> getQuotes(String service,
                                  List<Integer> quoteIds) {
@@ -43,10 +43,11 @@ public class QuoteProxy {
             .fromPath(service + "/" + GET_QUOTES)
 
             // Create the query param, which encodes the quote ids.
-            .queryParam(QUOTE_IDS_PARAM,
-                        WebUtils
-                        // Convert List to String.
-                        .list2String(quoteIds))
+            .queryParam(
+                QUOTE_IDS_PARAM,
+                WebUtils
+                    // Convert List to String.
+                    .list2String(quoteIds))
 
             // Build the URI.
             .build()
@@ -56,11 +57,12 @@ public class QuoteProxy {
 
         return WebUtils
             // Create and send a GET request to the server.
-            .makeGetRequestList(mRestTemplate,
-                                // Pass the encoded URL.
-                                url,
-                                // Return type is a Quote array.
-                                Quote[].class);
+            .makeGetRequestList(
+                mRestTemplate,
+                // Pass the encoded URL.
+                url,
+                // Return type is a Quote array.
+                Quote[].class);
     }
 
     public List<Quote> getAllQuotes(String service) {
@@ -78,10 +80,11 @@ public class QuoteProxy {
 
         return WebUtils
             // Create and send a GET request to the server.
-            .makeGetRequestList(mRestTemplate,
-                                // Pass the encoded URL.
-                                url,
-                                // Return type is a Quote array.
-                                Quote[].class);
+            .makeGetRequestList(
+                mRestTemplate,
+                // Pass the encoded URL.
+                url,
+                // Return type is a Quote array.
+                Quote[].class);
     }
 }

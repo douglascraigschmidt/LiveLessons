@@ -28,5 +28,5 @@ public abstract class BaseService<T> {
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public abstract T getQuotes(List<Integer> quoteIds);
+    public abstract T getQuotes(List<Long> quoteIds);
 }
