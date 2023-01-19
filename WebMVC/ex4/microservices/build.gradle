@@ -1,0 +1,26 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'commons-dbcp:commons-dbcp:1.4'
+    runtimeOnly 'com.h2database:h2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.withType(JavaCompile).each {
+    it.options.compilerArgs.addAll([
+            '--enable-preview',
+            '--add-modules', 'jdk.incubator.concurrent'
+    ])
+}
+
+tasks.withType(Test).each {
+    it.jvmArgs(
+            '--enable-preview',
+            '--add-modules', 'jdk.incubator.concurrent'
+    )
+}

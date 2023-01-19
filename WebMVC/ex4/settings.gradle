@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+include ':eureka'
+include ':microservices'
+include ':gateway'
+include ':client'
+
