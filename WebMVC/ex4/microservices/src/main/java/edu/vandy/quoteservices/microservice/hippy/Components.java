@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -41,7 +42,7 @@ public class Components {
         try {
             // Although AtomicInteger is overkill we use it to
             // simplify incrementing the ID in the stream below.
-            AtomicInteger idCount = new AtomicInteger(0);
+            AtomicLong idCount = new AtomicLong(0);
 
             // Convert the filename into a pathname.
             URI uri = ClassLoader
