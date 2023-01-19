@@ -18,7 +18,6 @@ import org.springframework.context.annotation.PropertySources;
  * directives for use with {@code @Configuration} classes.
  */
 @SpringBootApplication
-//@ComponentScan("mathservices")
 @PropertySources({
         @PropertySource("classpath:/primality/primalitymicroservice.properties")
 })

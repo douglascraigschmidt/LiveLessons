@@ -15,15 +15,16 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.RandomUtils.generateRandomBigFractions;
 
 /**
- * This example demonstrates Java 19 preview structured concurrency
+ * This example demonstrates Java 19 Java structured concurrency
  * features, which enables a main task to split into several
  * concurrent sub-tasks that run concurrently to completion before the
- * main task can complete.  The Java 19 preview supports structured
- * concurrency via the {@link StructuredTaskScope} class, which
- * supports AutoCloseable and defines several nested classes (such as
- * {@link StructuredTaskScope.ShutdownOnFailure}) that supports
- * structured concurrency.  You'll need to install JDK 19 (or beyond)
- * with gradle version 7.6 configured to run this example.
+ * main task can complete.  Java 19 supports structured concurrency
+ * via the {@link StructuredTaskScope} class, which supports
+ * AutoCloseable and defines several nested classes (such as {@link
+ * StructuredTaskScope.ShutdownOnFailure} and {@link
+ * StructuredTaskScope.ShutdownOnSuccess}) that supports structured
+ * concurrency.  You'll need to install JDK 19 (or beyond) with gradle
+ * version 7.6 configured to run this example.
  */
 public class ex3 {
     /**
@@ -36,25 +37,26 @@ public class ex3 {
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Demonstrate Java 20 structured concurrency.
+        // Demonstrate Java structured concurrency.
         demoStructuredConcurrency(Options.instance().numberOfElements());
 
         System.out.println("Leaving test");
     }
 
     /**
-     * Demonstrates Java 20 structured concurrency features by generating
-     * {@code count} random and unreduced {@link BigFraction} objects and
-     * then concurrently reducing and multiplying them with a large constant
-     * {@link BigFraction}.
+     * Demonstrates Java structured concurrency features by generating
+     * {@code count} random and unreduced {@link BigFraction} objects
+     * and then concurrently reducing and multiplying them with a
+     * large constant {@link BigFraction}.
      *
-     * @param count The number of random and unreduced {@link BigFraction}
-     *              objects to generate
+     * @param count The number of random and unreduced {@link
+     *              BigFraction} objects to generate
      */
     public static void demoStructuredConcurrency(int count) {
         // Create a new scope to execute virtual threads.
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            // Create a List of Future<BigFraction> to hold the results.
+            // Create a List of Future<BigFraction> to hold the
+            // results.
             var results = new ArrayList<Future<BigFraction>>();
 
             // Iterate through all the random BigFraction objects.
@@ -62,14 +64,14 @@ public class ex3 {
                 results
                     // Add the Future<BigFraction> to the ist.
                     .add(scope
-                            // Fork a new virtual thread to reduce and multiply the
-                            // BigFraction concurrently.
-                            .fork(() ->
-                                    reduceAndMultiply(bigFraction,
-                                                      sBigReducedFraction)));
+                         // Fork a new virtual thread to reduce and
+                         // multiply the BigFraction concurrently.
+                         .fork(() ->
+                               reduceAndMultiply(bigFraction,
+                                                 sBigReducedFraction)));
 
-            // This barrier synchronizer waits for all threads to finish or the
-            // task scope to shut down.
+            // This barrier synchronizer waits for all threads to
+            // finish or the task scope to shut down.
             scope.join();
 
             // Throw any exception that may have occurred.
@@ -86,8 +88,8 @@ public class ex3 {
     }
 
     /**
-     * Return the result of reducing {@link BigFraction} {@code bf1} and
-     * multiplying it with {@link BigFraction} {@code bf2}.
+     * Return the result of reducing {@link BigFraction} {@code bf1}
+     * and multiplying it with {@link BigFraction} {@code bf2}.
      *
      * @param bf1 The {@link BigFraction} to reduce and then multiply with
      *            {@code bf2}
@@ -98,7 +100,10 @@ public class ex3 {
     private static BigFraction reduceAndMultiply(BigFraction bf1,
                                                  BigFraction bf2) {
         return BigFraction
+            // Reduce bf1.
             .reduce(bf1)
+            
+            // Multiple bf1 and bf2.
             .multiply(bf2);
     }
 }

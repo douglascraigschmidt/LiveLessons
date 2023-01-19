@@ -54,7 +54,7 @@ public class PhraseMatchSpliterator
         // Transform the phrase parameter to a regular expression.
         mPhrase = phrase;
         
-        // Create a regex that will match the phrase across lines.
+        // Create a regex from the 'phrase'.
         String regexPhrase = 
             // Start phase with a word boundary.
             "\\b"

@@ -1,0 +1,22 @@
+package utils;
+
+class RandomUtils {
+    /**
+     * @return {@code numberOfInts} random {@link Integer} objects
+     */
+    private static List<String> getRandomInts(long numberOfInts,
+                                              int lowerBound,
+                                              int upperBound) {
+        return new Random()
+            // Create a Stream of random ints.
+            .ints(numberOfInts,
+                  lowerBound,
+                  upperBound)
+
+            // Convert the ints to String objects.
+            .mapToObj(String::valueOf)
+
+            // Conver the Stream to a List.
+            .toList();
+    }
+}

@@ -10,7 +10,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * This Java utility class defines methods for computing the Greatest
- * Common Divisor (GCD) of {@link List} of {@link Integer} objects.
+ * Common Divisor (GCD) of {@link List} of {@link Integer} objects using
+ * Java structured concurrency and the Java streams framework.
  */
 public class GCDService {
     /**
@@ -33,8 +34,8 @@ public class GCDService {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor =
-             Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors
+             .newVirtualThreadPerTaskExecutor()) {
             return StreamSupport
                 // Convert the List of Integer objects into a
                 // sequential stream of two-element Integer objects

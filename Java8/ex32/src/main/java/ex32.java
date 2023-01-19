@@ -1,23 +1,25 @@
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static utils.RandomUtils.getRandomInts;
 
 /**
- * This example shows several techniques for concatenating a list of
- * strings together multiple times via Java Streams and RxJava.
+ * This example shows several techniques for concatenating a {@link
+ * List} of {@link String} together multiple times via Java Streams
+ * and RxJava.
  */
 public class ex32 {
     /**
      * The number of times to concatenate.
      */
-    private static int sMAX_CONCAT = 3;
+    private static final int sMAX_CONCAT = 3;
+    private static final long sMAX_INTs = 5;
+    private static final int sLOWER_BOUND = 1;
+    private static final int sUPPER_BOUND = 10;
 
     /**
      * Use the RxJava repeat() method to concatenate the contents of
@@ -47,12 +49,12 @@ public class ex32 {
         Stream<String> s = Stream.empty();
 
         while (--n >= 0)
-            // Concatenate the contents of the list to the end of the
-            // stream n times.
+            // Concatenate the contents of the List to the
+            // end of the Stream n times.
             s = Stream.concat(s, list.stream());
 
-        // Collect the results into a list and return it.
-        return s.collect(toList());
+        // Collect the results into a List and return it.
+        return s.toList();
     }
 
     /**
@@ -67,22 +69,24 @@ public class ex32 {
             // Repeatedly emit the list 'n' times.
             .mapToObj(__ -> list)
 
-            // Flatmap the stream of lists of strings into a stream of
-            // strings.
+            // Flatmap the Stream of List of String objects
+            // into a single Stream of String objects.
             .flatMap(List::stream)
 
-            // Collect the results into a list of strings.
-            .collect(toList());
+            // Collect the results into a List of Strings.
+            .toList();
     }
 
     /**
      * Main entry point into the test program.
      */
     static public void main(String[] argv) throws InterruptedException {
-        // Create a list.
-        List<String> list = Arrays.asList("1", "2", "3");
+        // Create a List of random Integers.
+        var list = getRandomInts(sMAX_INTs,
+                                          sLOWER_BOUND,
+                                          sUPPER_BOUND);
 
-        // Generate all the concatenations.
+        // Perform all the concatenations.
         System.out.println(concatRxJava(list, sMAX_CONCAT));
         System.out.println(concatStream1(list, sMAX_CONCAT));
         System.out.println(concatStream2(list, sMAX_CONCAT));

@@ -4,6 +4,7 @@ import primechecker.common.Options;
 import primechecker.utils.PrimeUtils;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -31,22 +32,18 @@ public class PCParallelStreamStrategy
     @Override
     public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
                                           Boolean parallel) {
-        var stream = primeCandidates
-            // Create a (sequential) stream.
-            .stream();
+        var results = StreamSupport
+            // Conditionally convert the List to either a parallel or
+            // sequential stream.
+            .stream(primeCandidates.spliterator(), parallel)
 
-        // Conditionally convert the sequential stream to a parallel
-        // stream.
-        if (parallel)
-            stream.parallel();
-
-        var results = stream
             // Call the isPrime() method on each Integer in the
             // stream.
             .map(PrimeUtils::isPrime)
 
-            // Trigger intermediate operations and collect into a List.
-            .collect(toList());
+            // Trigger intermediate operations and collect into a
+            // List.
+            .toList();
 
         // Conditionally display the results.
         if (Options.instance().getDebug())

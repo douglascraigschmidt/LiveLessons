@@ -246,3 +246,10 @@ Here's an overview of what's currently included in these examples:
          random numbers in parallel to determine which are prime and
          which aren't.
          
+. ex45 - 
+
+. ex46 - This example shows how the Java regular expression methods
+         can be used to search the complete works of Shakespeare
+         bardWorks for word.  It also show how to encode and decode a
+         regular expression string so it can be sent and received as
+         part of a URL.

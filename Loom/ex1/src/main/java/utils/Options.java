@@ -110,4 +110,15 @@ public class Options {
      */
     private Options() {
     }
+
+    /**
+     * Print the {@link String} param after first prepending
+     * it with the calling thread name.
+     */
+    public static void display(String string) {
+        System.out.println("["
+                           + Thread.currentThread()
+                           + "] "
+                           + string);
+    }
 }

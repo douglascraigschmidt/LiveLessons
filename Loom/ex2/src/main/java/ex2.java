@@ -13,14 +13,15 @@ import static common.GCDService.computeGCDs;
 import static common.PrimalityService.checkPrimalities;
 
 /**
- * This example demonstrates Java 19 structured concurrency features,
+ * This example demonstrates Java structured concurrency features,
  * which enable a main task to split into several concurrent sub-tasks
  * that run concurrently to completion before the main task can
- * complete.  Java 19 supports structured concurrency by enhancing
+ * complete.  Java now supports structured concurrency by enhancing
  * {@link ExecutorService} to support AutoCloseable and updating
  * {@link Executors} to define new static factory methods that support
- * usage in a structured manner.  You'll need to install JDK 19 with
- * gradle version 7.6 configured to run this example.
+ * usage in a structured manner.  You'll need to install JDK 19 (or
+ * higher) with gradle version 7.6 (or higher) configured to run
+ * this example.
  */
 public class ex2 {
     /**
@@ -63,7 +64,7 @@ public class ex2 {
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor =
+        try (var executor =
              Executors.newVirtualThreadPerTaskExecutor()) {
             primeCheckFutures = executor
                 // submit() starts a virtual thread to check

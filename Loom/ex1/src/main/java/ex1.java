@@ -45,7 +45,8 @@ public class ex1 {
 
         // Generate a List of random integers.
         sRANDOM_INTEGERS = RandomUtils
-            .generateRandomNumbers(Options.instance().numberOfElements(),
+            .generateRandomNumbers(Options.instance()
+                                   .numberOfElements(),
                                    Integer.MAX_VALUE);
 
         // Create/start the threads with the given option to either
@@ -66,11 +67,11 @@ public class ex1 {
         // Print out a diagnostic periodically.
         IntConsumer printDiagnostic = i -> {
             if (Options.instance().printDiagnostic(i))
-                System.out.println(i + " threads started");
+                Options.display(i + " threads started");
         };
 
         // Create a List of many Thread objects.
-        List<Thread> threads = IntStream
+        var threads = IntStream
             // Generate stream containing a range of ints.
             .rangeClosed(1, Options.instance().numberOfElements())
 
@@ -138,11 +139,11 @@ public class ex1 {
             if (Options.instance()
                 .printDiagnostic(sIterationCount.getAndIncrement())) {
                 if (result == 0)
-                    System.out.println(integer + " is prime");
+                    Options.display(integer + " is prime");
                 else
-                    System.out.println(integer
-                                       + " is not prime with smallest factor "
-                                       + result);
+                    Options.display(integer
+                                    + " is not prime with smallest factor "
+                                    + result);
             }
         };
     }

@@ -66,7 +66,7 @@ public class ex14 {
                         TestDataFactory.getInput(sSHAKESPEARE_DATA_FILE,
                                                  // Split input into "words" by
                                                  // ignoring whitespace.
-                                sSPLIT_WORDS,
+                                                 sSPLIT_WORDS,
                                                  limit);
 
                     // Create a LinkedList from the ArrayList.

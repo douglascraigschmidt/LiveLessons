@@ -14,8 +14,8 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_QUOTES;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
 
 /**
- * This class is a proxy to the {@code GatewayApplication} service
- * and the {@code GatewayController}.
+ * This class is a proxy to the {@code GatewayApplication} API gateway
+ * and its {@code GatewayController}.
  */
 @Component
 public class QuoteProxy {
