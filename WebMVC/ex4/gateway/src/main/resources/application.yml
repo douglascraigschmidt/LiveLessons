@@ -15,7 +15,11 @@ logging:
   level:
     org.springframework.web: DEBUG
 
-# disable eureka by default
+# Registers Gateway Application with Eureka.
 eureka:
   client:
     enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
