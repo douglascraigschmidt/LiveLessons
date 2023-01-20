@@ -39,13 +39,9 @@ public class ZippyService
     public List<Quote> getAllQuotes() {
         System.out.println("ZippyService.getAllQuotes()");
 
-        var list = mRepository
+        return mRepository
             // Forward to the repository.
             .findAll();
-
-        System.out.println("number of quotes = " + list.size());
-
-        return list;
     }
 
     /**
@@ -58,11 +54,8 @@ public class ZippyService
     public List<Quote> getQuotes(List<Long> quoteIds) {
         System.out.println("ZippyService.getQuotes()");
 
-        var list = mRepository
+        return mRepository
+            // Forward to the repository.
             .findAllById(quoteIds);
-
-        System.out.println("number of quotes = " + list.size());
-
-        return list;
     }
 }

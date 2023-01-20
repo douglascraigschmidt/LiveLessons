@@ -12,8 +12,8 @@ import java.util.List;
  *
  * The {@code @RestController} annotation is a specialization of
  * {@code @Component} and is automatically detected through classpath
- * scanning.  It adds the {@code @Controller} and
- * {@code @ResponseBody} annotations. It also converts responses to
+ * scanning.  It adds the {@code @Controller} and {@code
+ * @ResponseBody} annotations. It also converts responses to
  * JSON or XML.
  */
 @RestController
