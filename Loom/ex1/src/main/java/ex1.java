@@ -67,7 +67,7 @@ public class ex1 {
         // Print out a diagnostic periodically.
         IntConsumer printDiagnostic = i -> {
             if (Options.instance().printDiagnostic(i))
-                Options.display(i + " threads started");
+                Options.display(i + " threads created");
         };
 
         // Create a List of many Thread objects.

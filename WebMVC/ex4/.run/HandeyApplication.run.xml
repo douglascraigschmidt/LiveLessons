@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="HandeyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="ex4.handeymicroservice.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.handeymicroservice.HandeyApplication" />
+    <module name="ex4.microservices.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservice.handey.HandeyApplication" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="edu.vandy.quoteservices.microservice.handey.*" />

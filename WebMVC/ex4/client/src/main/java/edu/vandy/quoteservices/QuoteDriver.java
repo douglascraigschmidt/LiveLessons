@@ -75,6 +75,7 @@ public class QuoteDriver
         timeHandeyQuotes();
 
         System.out.println(RunTimer.getTimingResults());
+
         System.out.println("Leaving QuoteDriver main()");
         System.exit(1);
     }
@@ -117,8 +118,10 @@ public class QuoteDriver
         // Print the Handey quote results.
         handeyQuotes
             .forEach(handeyQuote -> System.out
-                     .println("result = "
-                              + handeyQuote));
+                     .println("id = "
+                              + handeyQuote.id
+                              + " quote "
+                              + handeyQuote.quote));
     }
 
     /**
