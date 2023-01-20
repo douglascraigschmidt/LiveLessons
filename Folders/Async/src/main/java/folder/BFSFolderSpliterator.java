@@ -3,12 +3,14 @@ package folder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 
 /**
- * In conjunction with {@link StreamSupport.stream()} and {@link
- * Spliterators.spliterator()} this class creates a sequential or
+ * In conjunction with {@link StreamSupport#stream} and {@link
+ * Spliterators#spliterator} this class creates a sequential or
  * parallel stream of {@link Dirent} objects from a
  * recursively-structured directory folder.
  */

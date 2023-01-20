@@ -79,7 +79,7 @@ public class Folder
     }
 
     /**
-     * @return A {@link spliterator} for this {@link Folder}
+     * @return A {@link Spliterator} for this {@link Folder}
      */
     public Spliterator<Dirent> spliterator() {
         // Create a spliterator that uses breadth-first search to
