@@ -6,8 +6,11 @@ import edu.vandy.quoteservices.common.Quote;
 import edu.vandy.quoteservices.common.QuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * This class defines implementation methods that are called by the
@@ -57,5 +60,35 @@ public class ZippyService
         return mRepository
             // Forward to the repository.
             .findAllById(quoteIds);
+    }
+
+    /**
+     * Search for quotes containing the given {@link String} queries
+     *
+     * @param queries The search queries
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
+     * @return A {@code List} of quotes containing {@link Quote}
+     *         objects matching the given {@code queries}
+     */
+    public List<Quote> search(List<String> queries,
+                              Boolean parallel) {
+        // Use a Java sequential stream and the JPA to locate all
+        // movies whose 'id' matches the List of 'queries' and return
+        // them as a List of Movie objects.
+        return StreamSupport
+            // Convert the List to a Stream.
+            .stream(queries.spliterator(), parallel)
+
+            // Flatten the Stream of Streams into a Stream.
+            .flatMap(query ->  mRepository
+                     // Find all Quote rows in the database that
+                     // match the 'query'.
+                     .findByQuoteContainingIgnoreCase(query)
+                     // Convert List to a Stream.
+                     .stream())
+
+            // Convert the Stream to a List.
+            .toList();
     }
 }

@@ -69,10 +69,13 @@ public class QuoteDriver
         System.out.println("Entering QuoteDriver main()");
 
         // Record how long it takes to get the Zippy quotes.
-        timeZippyQuotes();
+        timeZippyQuotes(false);
+        timeZippyQuotes(false);
+        timeZippyQuotes(true);
+        timeZippyQuotes(true);
 
         // Record how long it takes to get the Handey quotes.
-        timeHandeyQuotes();
+       // timeHandeyQuotes(false);
 
         System.out.println(RunTimer.getTimingResults());
 
@@ -82,11 +85,15 @@ public class QuoteDriver
 
     /**
      * Record how long it takes to get the Zippy quotes.
+     *
+     * @param parallel Run the queries in parallel if true, else run sequentially
      */
-    private void timeZippyQuotes() {
+    private void timeZippyQuotes(boolean parallel) {
+        String type = parallel ? "Parallel " : "Sequential ";
+
         var zippyQuotes = RunTimer
-            .timeRun(() -> runQuotes(ZIPPY, false),
-                     "Sequential Zippy quotes");
+            .timeRun(() -> runQuotes(ZIPPY, parallel),
+                     type + "Zippy quotes");
 
         // Get the Zippy quotes.
         Options.display("Printing "
@@ -100,14 +107,42 @@ public class QuoteDriver
                               + zippyQuote.id
                               + " quote = "
                               + zippyQuote.quote));
+
+        // Make a List of common Zippy words.
+        var quoteList = List
+            .of("yow",
+                "pinhead",
+                "waffle",
+                "laund",
+                "school",
+                "fun",
+                "light",
+                "presiden",
+                "vase");
+
+        zippyQuotes = RunTimer
+            .timeRun(() -> quoteClient
+                     .searchQuotes(ZIPPY,
+                                   quoteList,
+                                   parallel),
+                     type + "Zippy searches");
+
+        zippyQuotes
+            .forEach(zippyQuote -> System.out
+                     .println("id = "
+                              + zippyQuote.id
+                              + " quote "
+                              + zippyQuote.quote));
     }
 
     /**
      * Record how long it takes to get the Handey quotes.
+     *
+     * @param parallel Run the queries in parallel if true, else run sequentially
      */
-    private void timeHandeyQuotes() {
+    private void timeHandeyQuotes(boolean parallel) {
         var handeyQuotes = RunTimer
-            .timeRun(() -> runQuotes(HANDEY, false),
+            .timeRun(() -> runQuotes(HANDEY, parallel),
                      "Sequential Handey quotes");
 
         // Get the Handey quotes.
@@ -116,6 +151,18 @@ public class QuoteDriver
                         + " Handey quote results:");
 
         // Print the Handey quote results.
+        handeyQuotes
+            .forEach(handeyQuote -> System.out
+                     .println("id = "
+                              + handeyQuote.id
+                              + " quote "
+                              + handeyQuote.quote));
+
+        handeyQuotes = quoteClient
+            .searchQuotes(HANDEY,
+                          List.of("dad"),
+                          parallel);
+
         handeyQuotes
             .forEach(handeyQuote -> System.out
                      .println("id = "

@@ -18,5 +18,5 @@ import java.util.List;
  */
 @RestController
 public class ZippyController
-       extends BaseController<List<Quote>> {
+    extends BaseController<List<Quote>> {
 }

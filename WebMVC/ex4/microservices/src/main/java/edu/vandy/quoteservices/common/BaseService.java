@@ -26,7 +26,18 @@ public abstract class BaseService<T> {
      *
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
-     * @return A {@link List} of all requested {@link Quote} objects
+     * @return A {@code T} of all requested {@link Quote} objects
      */
     public abstract T getQuotes(List<Long> quoteIds);
+
+    /**
+     * Search for quotes containing the given {@link String} queries.
+     *
+     * @param queries The search queries
+     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @return A {@code T} of quotes containing the given {@code
+     *         queries}
+     */
+    public abstract T search(List<String> queries,
+                             Boolean parallel);
 }

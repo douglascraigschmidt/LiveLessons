@@ -28,9 +28,27 @@ public class QuoteClient {
 
     /**
      * Spring WebMVC maps HTTP GET requests sent to the {@code
+     * GET_ALL_QUOTES} endpoint to this method.
+     *
+     * @param service The service that will perform the request
+     * @return An {@link List} containing all the {@link Quote}
+     *         objects
+     */
+    public List<Quote> getAllQuotes(String service) {
+        return mQuoteProxy
+            // Forward to the proxy.
+            .getAllQuotes(service);
+    }
+
+    /**
+     * Spring WebMVC maps HTTP GET requests sent to the {@code
      * GET_QUOTES} endpoint to this method.
      *
-     * @return An {@link List} of {@link Quote} objects
+     * @param service The service that will perform the request
+     * @param quoteIds A {@link List} containing the given random
+     *                 {@code quoteIds}
+     * @return An {@link List} containing the requested {@link
+     *         Quote} objects
      */
     public List<Quote> getQuotes(String service,
                                  List<Integer> quoteIds) {
@@ -41,13 +59,19 @@ public class QuoteClient {
 
     /**
      * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * GET_ALL_QUOTES} endpoint to this method.
+     * SEARCH_QUOTES} endpoint to this method.
      *
-     * @return An {@link List} of {@link Quote} objects
+     * @param service The service that will perform the request
+     * @param queries The {@link List} of queries to search for
+     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @return An {@link List} of {@link Quote} objects that
+     *         contain any {@code queries}
      */
-    public List<Quote> getAllQuotes(String service) {
+    public List<Quote> searchQuotes(String service,
+                                    List<String> queries,
+                                    Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getAllQuotes(service);
+            .searchQuotes(service, queries, parallel);
     }
 }
