@@ -62,28 +62,32 @@ public class HandeyService
 
     /**
      * Search for quotes containing the given {@link String} queries
+     * and return a {@link List} of matching {@link Quote} objects.
      *
      * @param queries The search queries
-     * @param parallel Run the queries in parallel if true, else run sequentially
-     * @return A {@code List} of quotes containing {@link Quote} objects
-     *         matching the given {@code queries}
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
+     * @return A {@code List} of quotes containing {@link Quote}
+     *         objects matching the given {@code queries}
      */
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
         return StreamSupport
-                .stream(mQuotes.spliterator(), parallel)
-                // Convert the List to a Stream.
+            // Convert the List to a sequential or parallel Stream.
+            .stream(mQuotes.spliterator(), parallel)
 
-                // Locate all the matches.
-                .filter(quote -> StreamSupport
-                        .stream(queries.spliterator(), parallel)
-                        // Convert the List to a Stream.
+            // Locate all the matches.
+            .filter(quote -> StreamSupport
+                    // Convert the List to a sequential or parallel
+                    // Stream.
+                    .stream(queries.spliterator(), parallel)
 
-                        // Return any matches.
-                        .anyMatch(query -> quote.quote.toLowerCase()
-                                .contains(query.toLowerCase())))
+                    // Return any matches.
+                    .anyMatch(query -> quote.quote
+                              .toLowerCase()
+                              .contains(query.toLowerCase())))
 
-                // Convert the Stream to a List.
-                .toList();
+            // Convert the Stream to a List.
+            .toList();
     }
 }

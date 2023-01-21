@@ -64,6 +64,7 @@ public class ZippyService
 
     /**
      * Search for quotes containing the given {@link String} queries
+     * and return a {@link List} of matching {@link Quote} objects.
      *
      * @param queries The search queries
      * @param parallel Run the queries in parallel if true, else run
@@ -73,18 +74,19 @@ public class ZippyService
      */
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
-        // Use a Java sequential stream and the JPA to locate all
-        // movies whose 'id' matches the List of 'queries' and return
-        // them as a List of Movie objects.
+        // Use a Java sequential or parallel stream and the JPA to
+        // locate all movies whose 'id' matches the List of 'queries'
+        // and return them as a List of Movie objects.
         return StreamSupport
             // Convert the List to a Stream.
             .stream(queries.spliterator(), parallel)
 
             // Flatten the Stream of Streams into a Stream.
             .flatMap(query ->  mRepository
-                     // Find all Quote rows in the database that
-                     // match the 'query'.
+                     // Find all Quote rows in the database that match
+                     // the 'query'.
                      .findByQuoteContainingIgnoreCase(query)
+
                      // Convert List to a Stream.
                      .stream())
 

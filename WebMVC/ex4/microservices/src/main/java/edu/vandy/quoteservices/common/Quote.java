@@ -32,5 +32,6 @@ public class Quote {
     /**
      * A quote.
      */
+    @Column(name = "quote", nullable = false)
     public String quote;
 }

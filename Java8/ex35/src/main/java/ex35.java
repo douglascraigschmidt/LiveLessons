@@ -4,6 +4,7 @@ import utils.RunTimer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -145,7 +146,7 @@ public class ex35 {
                   .display("outer thread id for iteration "
                            + iteration
                            + " = "
-                           + Thread.currentThread().getId()));
+                           + Thread.currentThread().threadId()));
     }
 
     /**
@@ -161,7 +162,7 @@ public class ex35 {
      */
     private static Stream<Integer> innerStream(Integer innerCount) {
         // Store the outer thread id.
-        long outerThreadId = Thread.currentThread().getId();
+        long outerThreadId = Thread.currentThread().threadId();
 
         // Create an AtomicInteger that counts the number of integers
         // processed by each thread.
@@ -220,7 +221,7 @@ public class ex35 {
         // thread id in the map.
         var value = threadMap
             // If it's the first time in make an initial value of 1.
-            .putIfAbsent(Thread.currentThread().getId(),
+            .putIfAbsent(Thread.currentThread().threadId(),
                          new AtomicInteger(1));
 
         // If it's not the first time in increment the AtomicInteger

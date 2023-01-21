@@ -77,6 +77,7 @@ public abstract class BaseController<T> {
 
     /**
      * Search for quotes containing the given {@link String} queries
+     * and return a {@link T} of matches.
      *
      * @param queries The search queries
      * @param parallel Run the queries in parallel if true, else run sequentially

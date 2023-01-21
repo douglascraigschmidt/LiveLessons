@@ -31,7 +31,8 @@ public abstract class BaseService<T> {
     public abstract T getQuotes(List<Long> quoteIds);
 
     /**
-     * Search for quotes containing the given {@link String} queries.
+     * Search for quotes containing the given {@link String} queries
+     * and return a {@link T} of matches.
      *
      * @param queries The search queries
      * @param parallel Run the queries in parallel if true, else run sequentially
