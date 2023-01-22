@@ -149,7 +149,7 @@ public final class FolderTests {
             .flatMap(document -> FolderTestsUtils
                      // Split the document into lines.
                      .splitAsFlux(document,
-                                  "\\r?\\n|\\r")
+                                  "\\r?\\n|\\r"))
 
             // Count the number of lines in the document.
             .count();
