@@ -20,15 +20,13 @@ import static berraquotes.common.Constants.SERVER_BASE_URL;
  * into classes using the Spring {@code @Autowired} annotation.
  */
 @Configuration
-public class Components {
+public class ServerBeans {
     /**
      * @return A {@link List} of {@link Quote} objects that were
      *         stored in the {@code filePath}
      */
     @Bean
     public List<Quote> getQuotes() {
-        System.out.println("getQuotes()");
-
         try {
             // Although AtomicInteger is overkill we use it to
             // simplify incrementing the ID in the stream below.
@@ -57,7 +55,7 @@ public class Components {
 
                 // Create a new Quote.
                 .map(quote ->
-                     new Quote(idCount.incrementAndGet(),
+                     new Quote(idCount.getAndIncrement(),
                                quote.stripLeading()))
                 
                 // Collect results into a list of Quote objects.
@@ -66,24 +64,5 @@ public class Components {
             e.printStackTrace();
             return null;
         }
-    }
-
-    /**
-     * This factory method returns a new {@link RestTemplate}, which
-     * enables a client to perform HTTP requests synchronously.
-     *
-     * @return A new {@link RestTemplate}
-     */
-    @Bean
-    public RestTemplate getRestTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-
-        restTemplate
-            // Set the base URL for the RestTemplate.
-            .setUriTemplateHandler
-            (new DefaultUriBuilderFactory(SERVER_BASE_URL));
-
-        // Return restTemplate.
-        return restTemplate;
     }
 }

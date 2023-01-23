@@ -2,6 +2,9 @@ package berraquotes.server;
 
 import berraquotes.common.Quote;
 import berraquotes.server.strategies.BQAbstractStrategy;
+import berraquotes.server.strategies.BQParallelStreamStrategy;
+import berraquotes.server.strategies.BQStructuredConcurrencyStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,12 +25,20 @@ import java.util.List;
 @Service
 public class BerraQuotesService {
     /**
-     * This array contains concrete strategies whose methods
-     * are implemented to check for primality.
+     * An in-memory {@link List} of all the quotes.
+     */
+    @Autowired
+    protected List<Quote> mQuotes;
+
+    /**
+     * This array contains concrete strategies whose methods are
+     * implemented to provide Berra quotes.  The order of these
+     * strategies matter in this array.
      */
     BQAbstractStrategy[] mStrategy = {
         new BQStructuredConcurrencyStrategy(),
-        new berraquotes.server.BQParallelStreamStrategy()
+        new BQParallelStreamStrategy(),
+        new BQParallelStreamStrategy()
     };
 
     /**
@@ -37,7 +48,7 @@ public class BerraQuotesService {
      */
     public List<Quote> getAllQuotes(Integer strategy) {
         return mStrategy[strategy]
-            .getAllQuotes();
+            .getAllQuotes(mQuotes);
     }
 
     /**
@@ -53,7 +64,7 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               String query) {
         return mStrategy[strategy]
-            .search(query);
+            .search(mQuotes, query);
     }
 
     /**
@@ -68,7 +79,7 @@ public class BerraQuotesService {
     public List<Quote> getQuotes(Integer strategy,
                                  List<Integer> quoteIds) {
         return mStrategy[strategy]
-            .getQuotes(quoteIds);
+            .getQuotes(mQuotes, quoteIds);
     }
 
     /**
@@ -84,6 +95,6 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               List<String> queries) {
         return mStrategy[strategy]
-            .search(queries);
+            .search(mQuotes, queries);
     }
 }

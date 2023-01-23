@@ -3,7 +3,6 @@ package berraquotes.server;
 import berraquotes.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,49 +41,75 @@ public class BerraQuotesController {
      * Defines a central read-only context.
      */
     @Autowired
-    ApplicationContext applicationContext;
+    ApplicationContext mApplicationContext;
 
     /**
      * Spring injected {@link BerraQuotesService}.
      */
     @Autowired
-    private BerraQuotesService service;
+    private BerraQuotesService mService;
 
     /**
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
      * @return A {@link List} of all {@link Quote} objects
      */
     @GetMapping(GET_ALL_QUOTES)
-    public List<Quote> getAllQuotes() {
-        return service
+    public List<Quote> getAllQuotes(Integer strategy) {
+        return mService
             // Forward request to the service.
-            .getAllQuotes();
+            .getAllQuotes(strategy);
     }
 
     /**
      * Get a {@link List} that contains the requested quotes.
      *
+     * @param strategy Which implementation strategy to forward the
+     *                request to
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
     @GetMapping(GET_QUOTES)
-    List<Quote> getQuotes(@RequestParam List<Integer> quoteIds) {
-        return service
+    List<Quote> getQuotes(Integer strategy,
+                          @RequestParam List<Integer> quoteIds) {
+        return mService
             // Forward request to the service.
-            .getQuotes(quoteIds);
+            .getQuotes(strategy, quoteIds);
     }
 
     /**
      * Search for quotes containing the given query {@link String}.
      *
+     * @param strategy Which implementation strategy to forward the
+     *                request to
      * @param query The search query
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
     @GetMapping(GET_SEARCH + SEARCH_QUERY)
-    public List<Quote> search(@PathVariable String query) {
-        return service
+    public List<Quote> search(Integer strategy,
+                              @PathVariable String query) {
+        return mService
             // Forward to the service.
-            .search(query);
+            .search(strategy, query);
+    }
+
+    /**
+     * Search for quotes containing the given {@link String} queries
+     * and return a {@link List} of matching {@link Quote} objects.
+     *
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
+     * @param queries The search queries
+     * @return A {@code List} of quotes containing {@link Quote}
+     *         objects matching the given {@code queries}
+     */
+    @GetMapping(GET_SEARCHES)
+    public List<Quote> search(Integer strategy,
+                              @RequestParam List<String> queries) {
+        return mService
+            // Forward to the service.
+            .search(strategy, queries);
     }
 }

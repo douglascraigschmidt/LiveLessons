@@ -27,15 +27,19 @@ public class BerraQuotesProxy {
     private RestTemplate mRestTemplate;
 
     /**
+     * @param strategy The quote checking strategy to use
      * @return An {@link List} containing all {@link
      *         Quote} objects
      */
-    public List<Quote> getAllQuotes() {
+    public List<Quote> getAllQuotes(int strategy) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
             // Create the path for the GET_ALL_QUOTES request,
             // including the 'service'.
             .fromPath(GET_ALL_QUOTES)
+
+            // Include the strategy.
+            .queryParam("strategy", strategy)
 
             // Build the URI.
             .build()
@@ -55,17 +59,22 @@ public class BerraQuotesProxy {
     /**
      * Get a {@link List} that contains the requested quotes.
      *
+     * @param strategy The quote checking strategy to use
      * @param quoteIds A {@link List} containing the given
      *                 {@code quoteIds}
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
+    public List<Quote> getQuotes(int strategy,
+                                 List<Integer> quoteIds) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
             .fromPath(GET_QUOTES)
+
+            // Include the strategy.
+            .queryParam("strategy", strategy)
 
             // Create the query param, which encodes the quote ids.
             .queryParam(QUOTE_IDS_PARAM,
@@ -89,18 +98,23 @@ public class BerraQuotesProxy {
     }
 
     /**
-     * Get a {@link List} that contains quotes that match the {@code query}.
+     * Get a {@link List} that contains quotes that match the {@code
+     * query}.
      *
+     * @param strategy The quote checking strategy to use
      * @param query A {@link String} to search for
      * @return An {@link List} containing matching {@link
      *         Quote} objects
      */
-    public List<Quote> searchQuotes(String query) {
+    public List<Quote> searchQuotes(int strategy, String query) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
             .fromPath(GET_SEARCH
                       + "/"
                       + query)
+
+            // Include the strategy.
+            .queryParam("strategy", strategy)
             .build()
             .toUriString();
 
@@ -110,7 +124,37 @@ public class BerraQuotesProxy {
                                 uri,
                                 // Return type is a Quote array.
                                 Quote[].class);
+    }
 
+    /**
+     * Get a {@link List} that contains quotes that match the
+     * {@code queries}.
+     *
+     * @param strategy The quote checking strategy to use
+     * @param queries A {@link List} of {@link String} queries to
+     *        search for
+     * @return An {@link List} containing matching {@link
+     *         Quote} objects
+     */
+    public List<Quote> searchQuotes(int strategy, List<String> queries) {
+        // Create the encoded URI.
+        var uri = UriComponentsBuilder
+            .fromPath(GET_SEARCHES)
 
+            // Include the strategy.
+            .queryParam("strategy", strategy)
+
+            .queryParam("queries", WebUtils
+                        .list2String(queries))
+
+            .build()
+            .toUriString();
+
+        return WebUtils
+            // Create and send a GET request to the server.
+            .makeGetRequestList(mRestTemplate,
+                                uri,
+                                // Return type is a Quote array.
+                                Quote[].class);
     }
 }

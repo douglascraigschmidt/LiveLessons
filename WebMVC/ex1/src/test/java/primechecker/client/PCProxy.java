@@ -30,6 +30,7 @@ public class PCProxy {
      * Checks the {@code primeCandidate} param for primality,
      * returning 0 if it's prime or the smallest factor if it's not.
      *
+     * @param strategy The primality checking strategy to use 
      * @param primeCandidate The {@link Integer} to check for
      *                       primality
      * @return An {@link Integer} that is 0 if the {@code
@@ -62,6 +63,7 @@ public class PCProxy {
      * List} whose results indicate 0 if an element is prime or the
      * smallest factor if it's not.
      *
+     * @param strategy The primality checking strategy to use 
      * @param primeCandidates The {@link List} of {@link Integer}
      *                        objects to check for primality
      * @param parallel True if primality checking should run in

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
+ * This strategy uses the Java parallel streams framework to provide
+ * Berra quotes.
  */
 public class BQParallelStreamStrategy
        extends BQAbstractStrategy {
@@ -18,13 +20,14 @@ public class BQParallelStreamStrategy
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
+    public List<Quote> getQuotes(List<Quote> quotes,
+                                 List<Integer> quoteIds) {
         return quoteIds
             // Convert the List to a parallel Stream.
             .parallelStream()
 
-            // Get the Handey quote associated with the quoteId.
-            .map(quoteId -> mQuotes.get(quoteId - 1))
+            // Get the quote associated with the quoteId.
+            .map(quotes::get)
 
             // Trigger intermediate operations and collect the results
             // into a List.
@@ -39,11 +42,12 @@ public class BQParallelStreamStrategy
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
-    public List<Quote> search(String query) {
+    public List<Quote> search(List<Quote> quotes,
+                              String query) {
         // Locate all quotes whose 'quote' matches the 'query' and
         // return them as a List of Quote objects.
 
-        return mQuotes
+        return quotes
             // Convert the List to a Stream.
             .parallelStream()
 
@@ -63,8 +67,8 @@ public class BQParallelStreamStrategy
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
-    public List<Quote> search(List<String> queries) {
-        return mQuotes
+    public List<Quote> search(List<Quote> quotes, List<String> queries) {
+        return quotes
             // Convert the List to a Stream.
             .parallelStream()
 

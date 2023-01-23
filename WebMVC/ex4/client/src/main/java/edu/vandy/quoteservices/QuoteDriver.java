@@ -176,47 +176,6 @@ public class QuoteDriver
     }
 
     /**
-     * Record how long it takes to get the Berra quotes.
-     *
-     * @param parallel Run the queries in parallel if true, else run
-     *                 sequentially
-     */
-    private void timeBerraQuotes(boolean parallel) {
-        String type = parallel ? "Parallel " : "Sequential ";
-
-        var berraQuotes = RunTimer
-            .timeRun(() -> runQuotes(BERRA, parallel),
-                     type + "Berra quotes");
-
-        // Get the Berra quotes.
-        Options.display("Printing "
-                        + berraQuotes.size()
-                        + " "
-                        + type
-                        + "Berra quote results:");
-
-        // Print the Berra quote results.
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id
-                              + " quote "
-                              + berraQuote.quote));
-
-        berraQuotes = quoteClient
-            .searchQuotes(BERRA,
-                          List.of("baseball", "game", "Little League"),
-                          parallel);
-
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id
-                              + " quote "
-                              + berraQuote.quote));
-    }
-
-    /**
      * Factors out common code for calling each microservice.
      */
     private List<Quote> runQuotes(String quoter,

@@ -1,6 +1,7 @@
 package berraquotes;
 
 import berraquotes.client.BerraQuotesClient;
+import berraquotes.common.Quote;
 import berraquotes.server.BerraQuotesApplication;
 import berraquotes.server.BerraQuotesController;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+
+import berraquotes.utils.RunTimer;
+
+import static berraquotes.common.Constants.Strategies.*;
 import static berraquotes.utils.RandomUtils.makeRandomIndices;
 
 /**
@@ -32,13 +38,13 @@ public class BerraQuotesTest {
      * {@link BerraQuotesClient}.
      */
     @Autowired
-    private BerraQuotesClient testClient;
+    private BerraQuotesClient quoteClient;
 
     /**
      * Number of quotes to request.
      */
     @SuppressWarnings("FieldCanBeLocal")
-    private final int sNUMBER_OF_QUOTES_REQUESTED = 5;
+    private final int sQUOTE_COUNT = 5;
 
     /**
      * Run all the tests.
@@ -47,105 +53,91 @@ public class BerraQuotesTest {
     public void runTests() {
         System.out.println("Entering the BerraTest");
 
-        // List holding all Quote objects.
-        var berraQuotes = testClient
-            .getAllQuotes();
+        timeBerraQuotes(STRUCTURED_CONCURRENCY,
+                        "Structured Concurrency");
+        timeBerraQuotes(STRUCTURED_CONCURRENCY,
+                "Structured Concurrency");
+        timeBerraQuotes(PARALLEL_STREAMS,
+                        "Parallel Streams");
+        timeBerraQuotes(PARALLEL_STREAMS_REGEX,
+                        "Parallel Streams Regex");
 
-        var size = berraQuotes.size();
-
-        berraQuotes = testClient
-            .getQuotes(makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                         berraQuotes.size()));
-
-        // Get the Berra quotes.
-        System.out.println("Printing "
-                           + berraQuotes.size()
-                           + " Berra quote results out of "
-                           + size
-                           + " quotes:");
-
-        // Print the Berra quote results.
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id()
-                              + " quote = "
-                              + berraQuote.quote()));
-
-        berraQuotes = testClient
-            .searchQuotes("Baseball");
-
-        System.out.println("Printing "
-                           + berraQuotes.size()
-                           + " Berra quote containing the word \"Baseball\"");
-
-        // Print the Berra quote results.
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id()
-                              + " quote = "
-                              + berraQuote.quote()));
-
+        System.out.println(RunTimer.getTimingResults());
         System.out.println("Leaving the BerraTest");
     }                              
 
     /**
      * Record how long it takes to get the Berra quotes.
      *
-     * @param parallel Run the queries in parallel if true, else run
-     *                 sequentially
+     * @param strategy The quote checking strategy to use
      */
-    private void timeBerraQuotes(boolean parallel) {
-        String type = parallel ? "Parallel " : "Sequential ";
-
+    private void timeBerraQuotes(int strategy,
+                                 String strategyName) {
+        // Get the Berra quotes and record how much time was spent on
+        // this.
         var berraQuotes = RunTimer
-            .timeRun(() -> runQuotes(BERRA, parallel),
-                     type + "Berra quotes");
+            .timeRun(() -> runQuotes(strategy),
+                     strategyName + " Berra quotes");
 
-        // Get the Berra quotes.
-        Options.display("Printing "
-                        + berraQuotes.size()
-                        + " "
-                        + type
-                        + "Berra quote results:");
+        printResults(berraQuotes,
+                     strategyName
+                     + " Berra quote results");
 
-        // Print the Berra quote results.
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id
-                              + " quote "
-                              + berraQuote.quote));
+        berraQuotes = RunTimer
+            .timeRun(() -> runSearches(strategy),
+                     strategyName + " Berra searches");
 
-        berraQuotes = quoteClient
-            .searchQuotes(BERRA,
-                          List.of("baseball", "game", "Little League"),
-                          parallel);
 
-        berraQuotes
-            .forEach(berraQuote -> System.out
-                     .println("id = "
-                              + berraQuote.id
-                              + " quote "
-                              + berraQuote.quote));
+        printResults(berraQuotes,
+                     strategyName
+                     + " Berra search results");
     }
 
     /**
-     * Factors out common code for calling each microservice.
+     * Factors out common code for get quotes from the microservice
+     * implementation identified by the {@code strategy}.
      */
-    private List<Quote> runQuotes(String quoter,
-                                  boolean parallel) {
+    private List<Quote> runQuotes(int strategy) {
         // List holding all Quote objects.
         var quotes = quoteClient
-            .getAllQuotes(quoter);
+            .getAllQuotes(strategy);
+
+        // Generate random indicates.
+        var quoteIds = makeRandomIndices
+            (sQUOTE_COUNT,
+             quotes.size());
 
         // Return the selected quotes.
         return quoteClient
-            .getQuotes(quoter,
-                       makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                         quotes.size()),
-                       parallel);
+            .getQuotes(strategy,
+                       quoteIds);
+    }
+
+    /**
+     * Factors out common code for running searches from the
+     * microservice implementation identified by the {@code strategy}.
+     */
+    private List<Quote> runSearches(int strategy) {
+        return quoteClient
+            .searchQuotes(strategy,
+                          List.of("baseball",
+                                  "game",
+                                  "Little League"));
+    }
+
+    private void printResults(List<Quote> quotes,
+                              String testName) {
+        System.out.println("Printing "
+                           + quotes.size()
+                           + " "
+                           + testName);
+                           
+        quotes
+            .forEach(quote -> System.out
+                     .println("id = "
+                              + quote.id()
+                              + " quote "
+                              + quote.quote()));
     }
 }
     

@@ -76,14 +76,18 @@ public class StructuredConcurrencyTest {
                                // Download each image via its URL
                                // and store it in an Image object.
                                .downloadImage(url)));
-
-            rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
+            scope.join();
+
+            // Handle any exception that has occurred.
+            scope.throwIfFailed();
 
             // Return the List of downloaded images, which have
             // finished downloading at this point.
             return downloadedImages;
-        } 
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     /**
@@ -114,13 +118,18 @@ public class StructuredConcurrencyTest {
                                            imageFuture.resultNow()));
             }
 
-            rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
+            scope.join();
+
+            // Handle any exception that has occurred.
+            scope.throwIfFailed();
 
             // Return the List of transformed images, which have
             // finished transforming at this point.
             return transformedImages;
-        } 
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     /**
@@ -154,12 +163,17 @@ public class StructuredConcurrencyTest {
                                  // file.
                                  .storeImage(imageFuture.resultNow())));
 
-            rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
+            scope.join();
+
+            // Handle any exception that has occurred.
+            scope.throwIfFailed();
 
             // Return the List of stored images, which have finished
             // storing at this point.
             return storedFiles;
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 

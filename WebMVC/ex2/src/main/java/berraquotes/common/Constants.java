@@ -13,7 +13,8 @@ public class Constants {
     public static class EndPoint {
         public static final String GET_ALL_QUOTES = "all_quotes";
         public static final String GET_QUOTES = "quotes";
-        public static final String GET_SEARCH = "search-quote";
+        public static final String GET_SEARCH = "search_quote";
+        public static final String GET_SEARCHES = "search_quotes";
         public static final String SEARCH_QUERY = "/{query}";
 
         /**
@@ -22,5 +23,11 @@ public class Constants {
         public static class Params {
             public static final String QUOTE_IDS_PARAM = "quoteIds";
         }
+    }
+
+    public static class Strategies {
+        public static final int STRUCTURED_CONCURRENCY = 0;
+        public static final int PARALLEL_STREAMS = 1;
+        public static final int PARALLEL_STREAMS_REGEX = 2;
     }
 }

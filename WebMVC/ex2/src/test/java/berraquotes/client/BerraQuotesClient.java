@@ -28,40 +28,59 @@ public class BerraQuotesClient {
     private BerraQuotesProxy mQuoteProxy;
 
     /**
+     * @param strategy The quote checking strategy to use
      * @return An {@link List} containing all {@link
      *         Quote} objects
      */
-    public List<Quote> getAllQuotes() {
+    public List<Quote> getAllQuotes(int strategy) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getAllQuotes();
+            .getAllQuotes(strategy);
     }
 
     /**
      * Get a {@link List} that contains the requested quotes.
      *
+     * @param strategy The quote checking strategy to use
      * @param quoteIds A {@link List} containing the given
      *                 {@code quoteIds}
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
+    public List<Quote> getQuotes(int strategy, List<Integer> quoteIds) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getQuotes(quoteIds);
+            .getQuotes(strategy, quoteIds);
     }
 
     /**
      * Get a {@link List} that contains quotes that match the
      * {@code query}.
      *
+     * @param strategy The quote checking strategy to use
      * @param query A {@link String} to search for
      * @return An {@link List} containing matching {@link
      *         Quote} objects
      */
-    public List<Quote> searchQuotes(String query) {
+    public List<Quote> searchQuotes(int strategy, String query) {
         return mQuoteProxy
             // Forward to the proxy.
-            .searchQuotes(query);
+            .searchQuotes(strategy, query);
+    }
+
+    /**
+     * Get a {@link List} that contains quotes that match the
+     * {@code queries}.
+     *
+     * @param strategy The quote checking strategy to use
+     * @param queries A {@link List} of {@link String} queries to
+     *        search for
+     * @return An {@link List} containing matching {@link
+     *         Quote} objects
+     */
+    public List<Quote> searchQuotes(int strategy, List<String> queries) {
+        return mQuoteProxy
+            // Forward to the proxy.
+            .searchQuotes(strategy, queries);
     }
 }
