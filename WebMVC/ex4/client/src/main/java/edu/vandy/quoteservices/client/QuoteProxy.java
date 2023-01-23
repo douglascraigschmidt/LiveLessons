@@ -66,7 +66,8 @@ public class QuoteProxy {
      *         Quote} objects
      */
     public List<Quote> getQuotes(String service,
-                                 List<Integer> quoteIds) {
+                                 List<Integer> quoteIds,
+                                 Boolean parallel) {
         // Create the encoded URL.
         var url = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
@@ -74,10 +75,10 @@ public class QuoteProxy {
             .fromPath(service + "/" + GET_QUOTES)
 
             // Create the query param, which encodes the quote ids.
-            .queryParam(QUOTE_IDS_PARAM,
-                        WebUtils
+            .queryParam(QUOTE_IDS_PARAM, WebUtils
                         // Convert List to String.
                         .list2String(quoteIds))
+            .queryParam("parallel", parallel)
 
             // Build the URI.
             .build()

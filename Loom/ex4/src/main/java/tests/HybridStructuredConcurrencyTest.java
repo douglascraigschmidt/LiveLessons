@@ -13,8 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-import static utils.ExceptionUtils.rethrowSupplier;
-
 /**
  * Download, transform, and store {@link Image} objects using the Java
  * structured concurrency framework, which uses the Java 19 {@link
@@ -78,7 +76,7 @@ public class HybridStructuredConcurrencyTest {
                      // download each image.
                      .submit(() -> FileAndNetUtils
                              // Download each image via its URL and
-                             // store it in a File.
+                             // store it in an Image object.
                              .downloadImage(url)))
 
                 // Trigger intermediate processing and collect the

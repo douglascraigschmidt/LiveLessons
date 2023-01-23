@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.joining;
 /**
  * This example shows how the Java regular expression methods can be
  * used to search the complete works of Shakespeare ({@code bardWorks})
- * for {@code word}.  It also shows how to encode and decode a regular
+ * particular phrases.  It also shows how to encode and decode a regular
  * expression string so it can be sent and received as part of a URL.
  */
 public class ex45 {
@@ -29,15 +29,15 @@ public class ex45 {
     static public void main(String[] argv) {
         // Create a List of String objects containing the complete
         // works of Shakespeare.
-        List<String> bardWords = TestDataFactory
+        List<String> bardWorks = TestDataFactory
             .getInput(sSHAKESPEARE_DATA_FILE,
                       // Split input into "works".
                       "@");
 
-        assert bardWords != null;
+        assert bardWorks != null;
 
         // Search the works of Shakespeare for a certain word/phrase.
-        processBardWorks(bardWords, "be ");
+        processBardWorks(bardWorks, "be ");
     }
 
     /**
@@ -143,17 +143,12 @@ public class ex45 {
                         // Print each match.
                         .forEach(matchResult -> System.out
                                  .println("\""
-
                                           // Print the match.
                                           + matchResult.group()
-
                                           + "\" ["
-
                                           // Print match location.
                                           + matchResult.start()
-
                                           + "]"));
-
                 });
     }
 

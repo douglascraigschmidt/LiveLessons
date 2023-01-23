@@ -51,19 +51,6 @@ public class BerraQuotesController {
     private BerraQuotesService service;
 
     /**
-     * A request for testing Eureka connection.
-     *
-     * @return The application name
-     */
-    @GetMapping({"/", "actuator/info"})
-    public ResponseEntity<String> info() {
-        // Indicate the request succeeded and return the application
-        // name.
-        return ResponseEntity
-            .ok(applicationContext.getId() + " is alive\n");
-    }
-
-    /**
      * @return A {@link List} of all {@link Quote} objects
      */
     @GetMapping(GET_ALL_QUOTES)

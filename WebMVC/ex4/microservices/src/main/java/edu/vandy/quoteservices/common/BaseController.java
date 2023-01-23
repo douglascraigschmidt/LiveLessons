@@ -66,13 +66,16 @@ public abstract class BaseController<T> {
      *
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      * @return A {@code T} containing the requested quotes
      */
     @GetMapping(GET_QUOTES)
-    T getQuotes(@RequestParam List<Long> quoteIds) {
+    T getQuotes(@RequestParam List<Long> quoteIds,
+                Boolean parallel) {
         return getService()
             // Forward request to the service.
-            .getQuotes(quoteIds);
+            .getQuotes(quoteIds, parallel);
     }
 
     /**
@@ -80,7 +83,8 @@ public abstract class BaseController<T> {
      * and return a {@link T} of matches.
      *
      * @param queries The search queries
-     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      * @return A {@code T} containing the queries
      */
     @GetMapping(GET_SEARCHES)

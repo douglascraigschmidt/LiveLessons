@@ -1,7 +1,7 @@
 package berraquotes.server;
 
 import berraquotes.common.Quote;
-import org.springframework.beans.factory.annotation.Autowired;
+import berraquotes.server.strategies.BQAbstractStrategy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,59 +22,68 @@ import java.util.List;
 @Service
 public class BerraQuotesService {
     /**
-     * An in-memory {@link List} of all the quotes.
+     * This array contains concrete strategies whose methods
+     * are implemented to check for primality.
      */
-    @Autowired
-    List<Quote> mQuotes;
+    BQAbstractStrategy[] mStrategy = {
+        new BQStructuredConcurrencyStrategy(),
+        new berraquotes.server.BQParallelStreamStrategy()
+    };
 
     /**
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
      * @return A {@link List} of all {@link Quote} objects
      */
-    public List<Quote> getAllQuotes() {
-        return mQuotes;
-    }
-
-    /**
-     * Get a {@link List} that contains the requested quotes.
-     *
-     * @param quoteIds A {@link List} containing the given random
-     *                 {@code quoteIds}
-     * @return A {@link List} of all requested {@link Quote} objects
-     */
-    public List<Quote> getQuotes(List<Integer> quoteIds) {
-        return quoteIds
-            // Convert the List to a Stream.
-            .stream()
-
-            // Get the Handey quote associated with the quoteId.
-            .map(quoteId -> mQuotes.get(quoteId - 1))
-
-            // Trigger intermediate operations and collect the results
-            // into a List.
-            .toList();
+    public List<Quote> getAllQuotes(Integer strategy) {
+        return mStrategy[strategy]
+            .getAllQuotes();
     }
 
     /**
      * Search for Berra quotes containing the given query {@link
      * String}.
      *
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
      * @param query The search query
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
-    public List<Quote> search(String query) {
-        // Locate all quotes whose 'quote' matches the 'query' and
-        // return them as a List of Quote objects.
+    public List<Quote> search(Integer strategy,
+                              String query) {
+        return mStrategy[strategy]
+            .search(query);
+    }
 
-        return mQuotes
-            // Convert the List to a Stream.
-            .stream()
+    /**
+     * Get a {@link List} that contains the requested quotes.
+     *
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
+     * @param quoteIds A {@link List} containing the given random
+     *                 {@code quoteIds}
+     * @return A {@link List} of all requested {@link Quote} objects
+     */
+    public List<Quote> getQuotes(Integer strategy,
+                                 List<Integer> quoteIds) {
+        return mStrategy[strategy]
+            .getQuotes(quoteIds);
+    }
 
-            // Locate all the matches.
-            .filter(quote -> quote.quote().toLowerCase()
-                    .contains(query.toLowerCase()))
-
-            // Convert the Stream to a List.
-            .toList();
+    /**
+     * Search for quotes containing the given {@link String} queries
+     * and return a {@link List} of matching {@link Quote} objects.
+     *
+     * @param strategy Which implementation strategy to forward the
+     *                 request to
+     * @param queries The search queries
+     * @return A {@code List} of quotes containing {@link Quote}
+     *         objects matching the given {@code queries}
+     */
+    public List<Quote> search(Integer strategy,
+                              List<String> queries) {
+        return mStrategy[strategy]
+            .search(queries);
     }
 }

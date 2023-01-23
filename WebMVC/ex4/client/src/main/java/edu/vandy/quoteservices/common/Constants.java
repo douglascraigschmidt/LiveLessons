@@ -30,5 +30,6 @@ public class Constants {
     public static class Service {
         public static final String ZIPPY = "zippy";
         public static final String HANDEY = "handey";
+        public static final String BERRA = "berra";
     }
 }

@@ -89,5 +89,63 @@ public class BerraQuotesTest {
 
         System.out.println("Leaving the BerraTest");
     }                              
+
+    /**
+     * Record how long it takes to get the Berra quotes.
+     *
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
+     */
+    private void timeBerraQuotes(boolean parallel) {
+        String type = parallel ? "Parallel " : "Sequential ";
+
+        var berraQuotes = RunTimer
+            .timeRun(() -> runQuotes(BERRA, parallel),
+                     type + "Berra quotes");
+
+        // Get the Berra quotes.
+        Options.display("Printing "
+                        + berraQuotes.size()
+                        + " "
+                        + type
+                        + "Berra quote results:");
+
+        // Print the Berra quote results.
+        berraQuotes
+            .forEach(berraQuote -> System.out
+                     .println("id = "
+                              + berraQuote.id
+                              + " quote "
+                              + berraQuote.quote));
+
+        berraQuotes = quoteClient
+            .searchQuotes(BERRA,
+                          List.of("baseball", "game", "Little League"),
+                          parallel);
+
+        berraQuotes
+            .forEach(berraQuote -> System.out
+                     .println("id = "
+                              + berraQuote.id
+                              + " quote "
+                              + berraQuote.quote));
+    }
+
+    /**
+     * Factors out common code for calling each microservice.
+     */
+    private List<Quote> runQuotes(String quoter,
+                                  boolean parallel) {
+        // List holding all Quote objects.
+        var quotes = quoteClient
+            .getAllQuotes(quoter);
+
+        // Return the selected quotes.
+        return quoteClient
+            .getQuotes(quoter,
+                       makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
+                                         quotes.size()),
+                       parallel);
+    }
 }
     

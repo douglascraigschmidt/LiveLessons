@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
  * recommendations.
  *
  * This class implements the abstract methods in {@link BaseService}
- * using the Java sequential streams framework.
+ * using the Java streams framework.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
@@ -45,12 +45,15 @@ public class HandeyService
      *
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Long> quoteIds) {
-        return quoteIds
-            // Convert the List to a Stream.
-            .stream()
+    public List<Quote> getQuotes(List<Long> quoteIds,
+                                 Boolean parallel) {
+        return StreamSupport
+            // Convert the List to a parallel or sequential Stream.
+            .stream(quoteIds.spliterator(), parallel)
 
             // Get the Handey quote associated with the quoteId.
             .map(quoteId -> mQuotes.get(quoteId.intValue()))

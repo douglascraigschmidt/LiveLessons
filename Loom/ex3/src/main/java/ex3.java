@@ -24,7 +24,7 @@ import static utils.RandomUtils.generateRandomBigFractions;
  * StructuredTaskScope.ShutdownOnFailure} and {@link
  * StructuredTaskScope.ShutdownOnSuccess}) that supports structured
  * concurrency.  You'll need to install JDK 19 (or beyond) with gradle
- * version 7.6 configured to run this example.
+ * version 7.6 (or beyond) configured to run this example.
  */
 public class ex3 {
     /**
@@ -83,7 +83,8 @@ public class ex3 {
             // Don't exit the try-with-resources scope until all
             // concurrently executing virtual threads complete.
         } catch (Exception exception) {
-            System.out.println("Exception: " + exception.getMessage());
+            System.out.println("Exception: " 
+                               + exception.getMessage());
         }
     }
 
@@ -91,9 +92,9 @@ public class ex3 {
      * Return the result of reducing {@link BigFraction} {@code bf1}
      * and multiplying it with {@link BigFraction} {@code bf2}.
      *
-     * @param bf1 The {@link BigFraction} to reduce and then multiply with
-     *            {@code bf2}
-     * @param bf1 The {@link BigFraction} to multiply with {@code bf1}
+     * @param bf1 The {@link BigFraction} to reduce and then multiply
+     *            with {@code bf2}
+     * @param bf2 The {@link BigFraction} to multiply with {@code bf1}
      * @return The results of reducing {@code bf1} and then
      *         multiplying it with {@code bf2}
      */

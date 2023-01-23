@@ -47,14 +47,19 @@ public class QuoteClient {
      * @param service The service that will perform the request
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
     public List<Quote> getQuotes(String service,
-                                 List<Integer> quoteIds) {
+                                 List<Integer> quoteIds,
+                                 Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getQuotes(service, quoteIds);
+            .getQuotes(service, 
+                       quoteIds,
+                       parallel);
     }
 
     /**
@@ -63,7 +68,8 @@ public class QuoteClient {
      *
      * @param service The service that will perform the request
      * @param queries The {@link List} of queries to search for
-     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      * @return An {@link List} of {@link Quote} objects that
      *         contain any {@code queries}
      */

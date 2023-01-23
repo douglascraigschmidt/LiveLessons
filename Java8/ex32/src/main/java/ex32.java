@@ -9,7 +9,7 @@ import static utils.RandomUtils.getRandomInts;
 
 /**
  * This example shows several techniques for concatenating a {@link
- * List} of {@link String} together multiple times via Java Streams
+ * List} of {@link String} objects together multiple times via Java Streams
  * and RxJava.
  */
 public class ex32 {
@@ -58,15 +58,16 @@ public class ex32 {
     }
 
     /**
-     * Use the Java Stream concat() method to concatenate the contents
-     * of {@code list} together {@code n} times.
+     * Use the Java Stream mapToObj(), flatMap() methods to concatenate the
+     * contents of {@code list} together {@code n} times.
      */
     static List<String> concatStream2(List<String> list, int n) {
         return IntStream
             // Create a stream of integers of size n.
             .rangeClosed(1, n)
 
-            // Repeatedly emit the list 'n' times.
+            // Repeatedly emit the list 'n' times, yielding
+            // a Stream of List of String objects.
             .mapToObj(__ -> list)
 
             // Flatmap the Stream of List of String objects

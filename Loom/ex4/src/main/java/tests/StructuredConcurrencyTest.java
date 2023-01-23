@@ -74,7 +74,7 @@ public class StructuredConcurrencyTest {
                          // download each image.
                          .fork(() -> FileAndNetUtils
                                // Download each image via its URL
-                               // and store it in a File.
+                               // and store it in an Image object.
                                .downloadImage(url)));
 
             rethrowRunnable(scope::join);
@@ -111,9 +111,7 @@ public class StructuredConcurrencyTest {
                     // Append the transforming images at the end
                     // of the List.
                     .addAll(transformImage(scope,
-                                           rethrowSupplier
-                                           (imageFuture::get)
-                                           .get()));
+                                           imageFuture.resultNow()));
             }
 
             rethrowRunnable(scope::join);
@@ -154,9 +152,7 @@ public class StructuredConcurrencyTest {
                              .fork(() -> FileAndNetUtils
                                  // Store each transformed image in a
                                  // file.
-                                 .storeImage(rethrowSupplier
-                                                 (imageFuture::get)
-                                                 .get())));
+                                 .storeImage(imageFuture.resultNow())));
 
             rethrowRunnable(scope::join);
             // Scope doesn't exit until all concurrent tasks complete.
@@ -176,7 +172,7 @@ public class StructuredConcurrencyTest {
      *         {@link Image} objects
      */
     private static List<Future<Image>> transformImage
-        (StructuredTaskScope.ShutdownOnFailure executor,
+        (StructuredTaskScope.ShutdownOnFailure scope,
          Image image) {
 
         // A List of Future<Image> objects that complete when the
@@ -187,7 +183,7 @@ public class StructuredConcurrencyTest {
         // Iterate through the List of Transformed objects.
         for (Transform transform : Options.instance().transforms())
             transformedImageFutures
-                .add(executor
+                .add(scope
                      // submit() starts a virtual thread to transform
                      // each image.
                      .fork(() -> transform

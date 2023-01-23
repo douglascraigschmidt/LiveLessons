@@ -17,14 +17,14 @@ Here's an overview of what's current included in these examples:
         AutoCloseable and updating Executors to define new static
         factory methods that support usage in a structured manner.
 
-. ex3 - This example demonstrates Java 19 preview structured
-        concurrency features, which enables a main task to split into
-        several concurrent sub-tasks that run concurrently to
-        completion before the main task can complete.  The Java 19
-        preview supports structured concurrency via the
-        StructuredTaskScope class, which supports AutoCloseable and
-        defines several nested classes (such as
-        StructuredTaskScope.ShutdownOnFailure) that supports
+. ex3 - This example demonstrates Java 19 Java structured concurrency
+        features, which enables a main task to split into several
+        concurrent sub-tasks that run concurrently to completion
+        before the main task can complete.  Java 19 supports
+        structured concurrency via the StructuredTaskScope class,
+        which supports AutoCloseable and defines several nested
+        classes (such as StructuredTaskScope.ShutdownOnFailure and
+        StructuredTaskScope.ShutdownOnSuccess) that supports
         structured concurrency.
 
 . ex4 - This example compares and contrasts the programming models and

@@ -11,8 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 
-import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
-import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
+import static edu.vandy.quoteservices.common.Constants.Service.*;
 import static edu.vandy.quoteservices.utils.RandomUtils.makeRandomIndices;
 
 /**
@@ -70,12 +69,11 @@ public class QuoteDriver
 
         // Record how long it takes to get the Zippy quotes.
         timeZippyQuotes(false);
-        timeZippyQuotes(false);
-        timeZippyQuotes(true);
         timeZippyQuotes(true);
 
         // Record how long it takes to get the Handey quotes.
-       // timeHandeyQuotes(false);
+        timeHandeyQuotes(false);
+        timeHandeyQuotes(true);
 
         System.out.println(RunTimer.getTimingResults());
 
@@ -98,7 +96,9 @@ public class QuoteDriver
         // Get the Zippy quotes.
         Options.display("Printing "
                         + zippyQuotes.size()
-                        + " Zippy quote results:");
+                        + " "
+                        + type
+                        + "Zippy quote results:");
 
         // Print the Zippy quote results.
         zippyQuotes
@@ -141,14 +141,18 @@ public class QuoteDriver
      * @param parallel Run the queries in parallel if true, else run sequentially
      */
     private void timeHandeyQuotes(boolean parallel) {
+        String type = parallel ? "Parallel " : "Sequential ";
+
         var handeyQuotes = RunTimer
             .timeRun(() -> runQuotes(HANDEY, parallel),
-                     "Sequential Handey quotes");
+                     type + "Handey quotes");
 
         // Get the Handey quotes.
         Options.display("Printing "
                         + handeyQuotes.size()
-                        + " Handey quote results:");
+                        + " "
+                        + type
+                        + "Handey quote results:");
 
         // Print the Handey quote results.
         handeyQuotes
@@ -172,6 +176,47 @@ public class QuoteDriver
     }
 
     /**
+     * Record how long it takes to get the Berra quotes.
+     *
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
+     */
+    private void timeBerraQuotes(boolean parallel) {
+        String type = parallel ? "Parallel " : "Sequential ";
+
+        var berraQuotes = RunTimer
+            .timeRun(() -> runQuotes(BERRA, parallel),
+                     type + "Berra quotes");
+
+        // Get the Berra quotes.
+        Options.display("Printing "
+                        + berraQuotes.size()
+                        + " "
+                        + type
+                        + "Berra quote results:");
+
+        // Print the Berra quote results.
+        berraQuotes
+            .forEach(berraQuote -> System.out
+                     .println("id = "
+                              + berraQuote.id
+                              + " quote "
+                              + berraQuote.quote));
+
+        berraQuotes = quoteClient
+            .searchQuotes(BERRA,
+                          List.of("baseball", "game", "Little League"),
+                          parallel);
+
+        berraQuotes
+            .forEach(berraQuote -> System.out
+                     .println("id = "
+                              + berraQuote.id
+                              + " quote "
+                              + berraQuote.quote));
+    }
+
+    /**
      * Factors out common code for calling each microservice.
      */
     private List<Quote> runQuotes(String quoter,
@@ -184,6 +229,7 @@ public class QuoteDriver
         return quoteClient
             .getQuotes(quoter,
                        makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                         quotes.size()));
+                                         quotes.size()),
+                       parallel);
     }
 }

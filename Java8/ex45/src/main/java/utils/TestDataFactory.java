@@ -45,7 +45,7 @@ public class TestDataFactory {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
                 
-                // Collect the results into a List of String object.
+                // Collect the results into a List of String objects.
                 .toList();
         } catch (Exception e) {
             e.printStackTrace();

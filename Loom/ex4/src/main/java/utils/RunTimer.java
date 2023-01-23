@@ -66,7 +66,7 @@ public class RunTimer {
 
         // Store the execution times into the results map.
         mResultsMap.put(testName,
-                mExecutionTime);
+                        mExecutionTime);
     }
 
     /**
