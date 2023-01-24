@@ -13,8 +13,7 @@ import static java.util.stream.Collectors.joining;
 /**
  * This example shows how the Java regular expression methods can be
  * used to search the complete works of Shakespeare ({@code bardWorks})
- * particular phrases.  It also shows how to encode and decode a regular
- * expression string so it can be sent and received as part of a URL.
+ * particular phrases.
  */
 public class ex45 {
     /**
@@ -37,7 +36,7 @@ public class ex45 {
         assert bardWorks != null;
 
         // Search the works of Shakespeare for a certain word/phrase.
-        processBardWorks(bardWorks, "be ");
+        processBardWorks(bardWorks, "be");
     }
 
     /**
@@ -78,39 +77,9 @@ public class ex45 {
             .compile(regex,
                      Pattern.CASE_INSENSITIVE);
 
-        // Show how to encode and decode a regular expression string
-        // so it can be sent and received as part of a URL.
-        showEncodingAndDecoding(regex);
-
         // Show the portions of the works of Shakespeare that match
         // the pattern.
         showRegexMatches(bardWorksMatchingWord, pattern);
-    }
-
-    /**
-     * Show how to encode and decode a regular expression string so it
-     * can be sent and received as part of a URL.
-     * 
-     * @param regex The regular expression to encode and decode.
-     */
-    private static void showEncodingAndDecoding(String regex) {
-        // Encode the regex so it can be passed as a URL.
-        var encodedRegex = URLEncoder
-            .encode(regex,
-                    StandardCharsets.UTF_8);
-
-        // Decode the encoded regex so it can be used as a String.
-        var decodedRegex = URLDecoder
-            .decode(encodedRegex,
-                    StandardCharsets.UTF_8);
-
-        // Print the results of encoding and decoding.
-        System.out.println("Original regex = "
-                           + regex);
-        System.out.println("Encoded regex = "
-                           + encodedRegex);
-        System.out.println("Decoded regex = "
-                           + decodedRegex);
     }
 
     /**
@@ -121,8 +90,9 @@ public class ex45 {
      *                              a search word       
      * @param pattern The compiled regular expression to search for
      */
-    private static void showRegexMatches(List<String> bardWorksMatchingWord,
-                                         Pattern pattern) {
+    private static void showRegexMatches
+        (List<String> bardWorksMatchingWord,
+         Pattern pattern) {
         bardWorksMatchingWord
             // Process each work in the Stream.
             .forEach(work -> {
