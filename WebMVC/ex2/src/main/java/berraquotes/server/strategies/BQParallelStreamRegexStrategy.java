@@ -21,8 +21,7 @@ public class BQParallelStreamRegexStrategy
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
-    public List<Quote> search(List<Quote> quotes,
-                              List<String> queries) {
+    public List<Quote> search(List<String> queries) {
         // Combine the 'queries' List into a lowercase String and
         // convert into a regex of style
         // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
@@ -45,7 +44,7 @@ public class BQParallelStreamRegexStrategy
             // End of regex.
             .replace("]",".*)");
 
-        return quotes
+        return mQuotes
             // Convert the List to a Stream.
             .parallelStream()
 

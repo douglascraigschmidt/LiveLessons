@@ -20,14 +20,13 @@ public class BQParallelStreamStrategy
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Quote> quotes,
-                                 List<Integer> quoteIds) {
+    public List<Quote> getQuotes(List<Integer> quoteIds) {
         return quoteIds
             // Convert the List to a parallel Stream.
             .parallelStream()
 
             // Get the quote associated with the quoteId.
-            .map(quotes::get)
+            .map(mQuotes::get)
 
             // Trigger intermediate operations and collect the results
             // into a List.
@@ -42,13 +41,12 @@ public class BQParallelStreamStrategy
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
-    public List<Quote> search(List<Quote> quotes,
-                              String query) {
+    public List<Quote> search(String query) {
         // Locate all quotes whose 'quote' matches the 'query' and
         // return them as a List of Quote objects.
         System.out.println("query = " + query);
 
-        return quotes
+        return mQuotes
             // Convert the List to a Stream.
             .parallelStream()
 
@@ -68,8 +66,8 @@ public class BQParallelStreamStrategy
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
-    public List<Quote> search(List<Quote> quotes, List<String> queries) {
-        return quotes
+    public List<Quote> search(List<String> queries) {
+        return mQuotes
             // Convert the List to a Stream.
             .parallelStream()
 

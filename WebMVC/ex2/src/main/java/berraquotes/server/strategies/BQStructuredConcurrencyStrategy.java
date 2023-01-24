@@ -26,13 +26,11 @@ public class BQStructuredConcurrencyStrategy
     /**
      * Get a {@link List} that contains the requested quotes.
      *
-     * @param quotes The {@link List} of {@link Quote} objects
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Quote> quotes,
-                                 List<Integer> quoteIds) {
+    public List<Quote> getQuotes(List<Integer> quoteIds) {
         try (var scope =
              // Create a new StructuredTaskScope that shuts down on
              // failure.
@@ -46,7 +44,7 @@ public class BQStructuredConcurrencyStrategy
                 // Asynchronously determine if the quote matches any
                 // of the search queries.
                 .map(quoteId ->
-                     scope.fork(() -> quotes
+                     scope.fork(() -> mQuotes
                                 // Get the quote associated with the
                                 // quoteId.
                                 .get(quoteId)))
@@ -100,14 +98,12 @@ public class BQStructuredConcurrencyStrategy
      * query} and return a {@link List} of matching {@link Quote}
      * objects.
      *
-     * @param quotes The {@link List} of {@link Quote} objects
      * @param query The search query
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code query}
      */
     @Override
-    public List<Quote> search(List<Quote> quotes,
-                              String query) {
+    public List<Quote> search(String query) {
         try (var scope =
              // Create a new StructuredTaskScope that shuts down on
              // failure.
@@ -116,7 +112,7 @@ public class BQStructuredConcurrencyStrategy
             // processed in parallel.
             var results = BQStructuredConcurrencyStrategy
                 // Split the List into a sublist.
-                .getBatches(quotes,
+                .getBatches(mQuotes,
                             sBATCH_SIZE)
 
                 // Asynchronously determine if the quote matches any
@@ -147,13 +143,11 @@ public class BQStructuredConcurrencyStrategy
      * queries} and return a {@link List} of matching {@link Quote}
      * objects.
      *
-     * @param quotes The {@link List} of {@link Quote} objects
      * @param queries The search queries
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
-    public List<Quote> search(List<Quote> quotes,
-                              List<String> queries) {
+    public List<Quote> search(List<String> queries) {
         // Use Java structured concurrency to locate all quotes whose
         // 'quote' field matches the List of 'queries' and return them
         // as a List of Quote objects.
@@ -165,7 +159,7 @@ public class BQStructuredConcurrencyStrategy
             // Get a List of Futures to List<Quote> objects that
             // are being processed in parallel.
             var results =
-                getFutureList(quotes,
+                getFutureList(mQuotes,
                               queries,
                               scope);
 

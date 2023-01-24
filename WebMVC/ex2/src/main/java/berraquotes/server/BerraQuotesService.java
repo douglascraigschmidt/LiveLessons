@@ -27,12 +27,6 @@ import java.util.List;
 @Service
 public class BerraQuotesService {
     /**
-     * An in-memory {@link List} of all the quotes.
-     */
-    @Autowired
-    protected List<Quote> mQuotes;
-
-    /**
      * This array contains concrete strategies whose methods are
      * implemented to provide Berra quotes.  The order of these
      * strategies matter in this array.
@@ -50,7 +44,7 @@ public class BerraQuotesService {
      */
     public List<Quote> getAllQuotes(Integer strategy) {
         return mStrategy[strategy]
-            .getAllQuotes(mQuotes);
+            .getAllQuotes();
     }
 
     /**
@@ -66,8 +60,7 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               String query) {
         return mStrategy[strategy]
-            .search(mQuotes,
-                    URLDecoder.decode(query,
+            .search(URLDecoder.decode(query,
                                      StandardCharsets.UTF_8));
     }
 
@@ -83,7 +76,7 @@ public class BerraQuotesService {
     public List<Quote> getQuotes(Integer strategy,
                                  List<Integer> quoteIds) {
         return mStrategy[strategy]
-            .getQuotes(mQuotes, quoteIds);
+            .getQuotes(quoteIds);
     }
 
     /**
@@ -99,6 +92,6 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               List<String> queries) {
         return mStrategy[strategy]
-            .search(mQuotes, queries);
+            .search(queries);
     }
 }

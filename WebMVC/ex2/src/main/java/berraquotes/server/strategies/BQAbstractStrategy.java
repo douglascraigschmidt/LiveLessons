@@ -11,12 +11,20 @@ import java.util.List;
  * This abstract class defines methods used by various Berra quote
  * implementation strategies.
  */
+@Component
 public abstract class BQAbstractStrategy {
+    /**
+     * An in-memory {@link List} of all the quotes.
+     */
+    @Autowired
+    protected List<Quote> mQuotes;
+
     /**
      * @return A {@link List} of all {@link Quote} objects
      */
-    public List<Quote> getAllQuotes(List<Quote> quotes) {
-        return quotes;
+    public List<Quote> getAllQuotes() {
+        System.out.println("mQuotes.size = " + mQuotes.size());
+        return mQuotes;
     }
 
     /**
@@ -26,8 +34,7 @@ public abstract class BQAbstractStrategy {
      *                 {@code quoteIds}
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public abstract List<Quote> getQuotes(List<Quote> quotes,
-                                          List<Integer> quoteIds);
+    public abstract List<Quote> getQuotes(List<Integer> quoteIds);
 
     /**
      * Search for Berra quotes containing the given query {@link
@@ -37,8 +44,7 @@ public abstract class BQAbstractStrategy {
      * @return A {@link List} of {@link Quote} objects containing the
      *         query
      */
-    public abstract List<Quote> search(List<Quote> quotes,
-                                       String query);
+    public abstract List<Quote> search(String query);
 
     /**
      * Search for quotes containing the given {@link String} queries
@@ -48,6 +54,5 @@ public abstract class BQAbstractStrategy {
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
-    public abstract List<Quote> search(List<Quote> quotes,
-                                       List<String> queries);
+    public abstract List<Quote> search(List<String> queries);
 }
