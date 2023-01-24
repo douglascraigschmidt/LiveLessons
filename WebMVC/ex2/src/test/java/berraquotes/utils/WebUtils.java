@@ -4,6 +4,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -103,11 +105,47 @@ public final class WebUtils {
             // Convert the List elements into a Stream.
             .stream()
 
-            // Convert each Stream element into a String.
+            // Convert T to String.
             .map(Object::toString)
 
             // Trigger intermediate operations and convert each String
             // in the Stream into a single comma-separated String.
             .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Encode the {@code queries {@link List} so it can be
+     * passed correctly via HTTP.
+     *
+     * @param queries The {@link List} to encode
+     * @return The encoded {@link List}
+     */
+    public static List<String> encodeQueries(List<String> queries) {
+        return queries
+            // Convert List to a Stream.
+            .stream()
+
+            // Encode each String in the Stream.
+            .map(query -> URLEncoder
+                 .encode(query,
+                         StandardCharsets.UTF_8))
+
+            // Convert the Stream back to a List.
+            .toList();
+    }
+
+    /**
+     * Encode the {@code query} {@link String} so it can be
+     * passed correctly via HTTP.
+     *
+     * @param query The {@link String} to encode
+     * @return The encoded {@link String}
+     */
+    public static String encodeQuery(String query) {
+        return URLEncoder
+            // Encode the query so it can be passed
+            // correctly via HTTP.
+            .encode(query,
+                    StandardCharsets.UTF_8);
     }
 }

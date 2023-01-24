@@ -6,8 +6,11 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * This strategy uses the Java structured concurrency framework to
@@ -66,6 +69,18 @@ public class BQStructuredConcurrencyStrategy
         }
     }
 
+    public static <T> Stream<List<T>> getBatches(List<T> list,
+                                                 int batchSize) {
+        return IntStream
+                .iterate(0,
+                        i -> i < list.size(),
+                        i -> i + batchSize)
+                .mapToObj(i -> list
+                        .subList(i, Math
+                                .min(i + batchSize,
+                                     list.size())));
+    }
+
     /**
      * Search for quotes containing the given {@link String} {@code
      * query} and return a {@link List} of matching {@link Quote}
@@ -79,7 +94,44 @@ public class BQStructuredConcurrencyStrategy
     @Override
     public List<Quote> search(List<Quote> quotes,
                               String query) {
-        return search(quotes, List.of(query));
+        try (var scope =
+                     // Create a new StructuredTaskScope that shuts down on
+                     // failure.
+                     new StructuredTaskScope.ShutdownOnFailure()) {
+            // Get a List of Futures to Quote objects that are being
+            // processed in parallel.
+            var results = BQStructuredConcurrencyStrategy
+                    .getBatches(quotes,
+                            10)
+
+                    // Asynchronously determine if the quote matches any of
+                    // the search queries.
+                    .map(batch -> scope
+                         .fork(() -> findMatch(query, batch)))
+
+                    // Convert the Stream to a List.
+                    .toList();
+
+            // Perform a barrier synchronization that waits for all
+            // the tasks to complete.
+            scope.join();
+
+            // Throw an Exception upon failure of any tasks.
+            scope.throwIfFailed();
+
+            // Return a List of Quote objects.
+            return FutureUtils
+                    // Convert the List of Future<Quote> objects to
+                    // a Stream of Quote objects.
+                    .futures2Stream(results)
+
+                    .flatMap(List::stream)
+
+                    // Convert the Stream to a List.
+                    .toList();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**
@@ -136,13 +188,13 @@ public class BQStructuredConcurrencyStrategy
      *         match or an empty {@link Optional} if there's no match
      */
     @NotNull
-    private List<Future<Optional<Quote>>> getFutureList
+    private List<Future<List<Quote>>> getFutureList
         (List<Quote> quotes,
          List<String> queries,
          StructuredTaskScope.ShutdownOnFailure scope) {
-        return quotes
-            // Convert the List to a Stream.
-            .stream()
+        return BQStructuredConcurrencyStrategy
+                .getBatches(quotes,
+                        10)
 
             // Asynchronously determine if the quote matches any of
             // the search queries.
@@ -165,14 +217,14 @@ public class BQStructuredConcurrencyStrategy
      */
     @NotNull
     private List<Quote> getQuoteList
-        (List<Future<Optional<Quote>>> results) {
+        (List<Future<List<Quote>>> results) {
         return FutureUtils
             // Convert the List of Future<Optional<Quote>> objects to
             // a Stream of Optional<Quote> objects.
             .futures2Stream(results)
 
             // Eliminate empty Optional objects.
-            .flatMap(Optional::stream)
+            .flatMap(List::stream)
 
             // Convert the Stream to a List.
             .toList();
@@ -182,7 +234,8 @@ public class BQStructuredConcurrencyStrategy
      * Asynchronously determine if the {@code quote} matches with the
      * {@link List} of {@code queries}.
      *
-     * @param quote The {@link Quote} to match against
+     * @param quotes The {@link List} of {@link Quote} objects
+     *               to match against
      * @param queries The search queries
      * @param scope The {@link StructuredTaskScope} used to {@code
      *              fork()} a virtual thread
@@ -190,35 +243,35 @@ public class BQStructuredConcurrencyStrategy
      *         {@link Quote} if there's a match or an empty {@link
      *         Optional} if there's no match
      */
-    private Future<Optional<Quote>> findMatchAsync(Quote quote,
+    private Future<List<Quote>> findMatchAsync(List<Quote> quotes,
                                                    List<String> queries,
                                                    StructuredTaskScope.ShutdownOnFailure scope) {
         return scope
             // Create a virtual thread.
-            .fork(() -> Optional
-                  // Create an empty Optional if there's no match,
-                  // else the Optional contains the movie that
-                  // matches.
-                  .ofNullable(queries
+            .fork(() -> queries
                               // Convert the List to a Stream.
                               .stream()
                               // Determine if there's any match.
-                              .anyMatch(query ->
+                              .map(query ->
                                         findMatch(query,
-                                                  quote.quote()))
-                              ? quote
-                              : null));
-
+                                                  quotes))
+                    .flatMap(List::stream)
+                    .toList());
     }
 
     /**
      * Find a match between the {@code query} and the {@code quote}.
      *
      * @param query The query 
-     * @param quote The quote to match with
+     * @param quotes The {@link List} of {@link Quote} objects
+     *               to match with
      * @return True if there's a match, else false
      */
-    private boolean findMatch(String query, String quote) {
-        return quote.toLowerCase().contains(query.toLowerCase());
+    private List<Quote> findMatch(String query, List<Quote> quotes) {
+        return quotes
+            .stream()
+            .filter(quote -> quote.quote().toLowerCase()
+                    .contains(query.toLowerCase()))
+            .toList();
     }
 }

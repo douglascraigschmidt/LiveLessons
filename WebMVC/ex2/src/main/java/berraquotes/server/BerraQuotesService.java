@@ -7,6 +7,8 @@ import berraquotes.server.strategies.BQStructuredConcurrencyStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -64,7 +66,9 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               String query) {
         return mStrategy[strategy]
-            .search(mQuotes, query);
+            .search(mQuotes,
+                    URLDecoder.decode(query,
+                                     StandardCharsets.UTF_8));
     }
 
     /**

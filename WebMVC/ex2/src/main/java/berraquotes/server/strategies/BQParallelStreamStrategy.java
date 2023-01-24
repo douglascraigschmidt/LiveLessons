@@ -46,6 +46,7 @@ public class BQParallelStreamStrategy
                               String query) {
         // Locate all quotes whose 'quote' matches the 'query' and
         // return them as a List of Quote objects.
+        System.out.println("query = " + query);
 
         return quotes
             // Convert the List to a Stream.

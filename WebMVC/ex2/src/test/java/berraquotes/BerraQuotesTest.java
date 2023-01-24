@@ -10,6 +10,8 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import berraquotes.utils.RunTimer;
 
@@ -56,7 +58,7 @@ public class BerraQuotesTest {
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
                         "Structured Concurrency");
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
-                "Structured Concurrency");
+                        "Structured Concurrency");
         timeBerraQuotes(PARALLEL_STREAMS,
                         "Parallel Streams");
         timeBerraQuotes(PARALLEL_STREAMS_REGEX,
@@ -118,11 +120,17 @@ public class BerraQuotesTest {
      * microservice implementation identified by the {@code strategy}.
      */
     private List<Quote> runSearches(int strategy) {
-        return quoteClient
-            .searchQuotes(strategy,
-                          List.of("baseball",
-                                  "game",
-                                  "Little League"));
+        return Stream
+            .of(quoteClient
+                .searchQuotes(strategy,
+                              "hit"),
+                quoteClient
+                .searchQuotes(strategy,
+                              List.of("baseball",
+                                      "game",
+                                      "Little League")))
+            .flatMap(List::stream)
+            .toList();
     }
 
     private void printResults(List<Quote> quotes,

@@ -37,15 +37,14 @@ public class BerraQuotesProxy {
             // Create the path for the GET_ALL_QUOTES request,
             // including the 'service'.
             .fromPath(GET_ALL_QUOTES)
-
             // Include the strategy.
             .queryParam("strategy", strategy)
-
             // Build the URI.
             .build()
-
             // Convert the URI to a String.
             .toUriString();
+
+        System.out.println("uri = " + uri);
 
         return WebUtils
             // Create and send a GET request to the server.
@@ -72,21 +71,19 @@ public class BerraQuotesProxy {
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
             .fromPath(GET_QUOTES)
-
             // Include the strategy.
             .queryParam("strategy", strategy)
-
             // Create the query param, which encodes the quote ids.
             .queryParam(QUOTE_IDS_PARAM,
                         WebUtils
                         // Convert List to String.
                         .list2String(quoteIds))
-
             // Build the URI.
             .build()
-
             // Convert the URI to a String.
             .toUriString();
+
+        System.out.println("uri = " + uri);
 
         return WebUtils
             // Create and send a GET request to the server.
@@ -106,17 +103,19 @@ public class BerraQuotesProxy {
      * @return An {@link List} containing matching {@link
      *         Quote} objects
      */
-    public List<Quote> searchQuotes(int strategy, String query) {
+    public List<Quote> searchQuotes(int strategy,
+                                    String query) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
             .fromPath(GET_SEARCH
                       + "/"
-                      + query)
-
+                      + WebUtils.encodeQuery(query))
             // Include the strategy.
             .queryParam("strategy", strategy)
             .build()
             .toUriString();
+
+        System.out.println("uri = " + uri);
 
         return WebUtils
             // Create and send a GET request to the server.
@@ -136,19 +135,20 @@ public class BerraQuotesProxy {
      * @return An {@link List} containing matching {@link
      *         Quote} objects
      */
-    public List<Quote> searchQuotes(int strategy, List<String> queries) {
+    public List<Quote> searchQuotes(int strategy,
+                                    List<String> queries) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
             .fromPath(GET_SEARCHES)
-
             // Include the strategy.
             .queryParam("strategy", strategy)
-
+            // Encode the List of queries into the URI.
             .queryParam("queries", WebUtils
                         .list2String(queries))
-
             .build()
             .toUriString();
+
+        System.out.println("uri = " + uri);
 
         return WebUtils
             // Create and send a GET request to the server.
