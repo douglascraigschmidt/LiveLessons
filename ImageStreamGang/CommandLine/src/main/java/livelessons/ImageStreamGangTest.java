@@ -133,12 +133,12 @@ public class ImageStreamGangTest {
                 return new ImageStreamRxJava2(filters,
                                               urlIterator);
         case REACTOR1:
-                return new ImageStreamRxJava2(filters,
-                                              urlIterator);
+                return new ImageStreamReactor1(filters,
+                                               urlIterator);
 
         case REACTOR2:
-                return new ImageStreamRxJava2(filters,
-                                              urlIterator);
+                return new ImageStreamReactor2(filters,
+                                               urlIterator);
         }
         return null;
     }
