@@ -3,11 +3,11 @@ package berraquotes.server.strategies;
 import berraquotes.common.Quote;
 import berraquotes.utils.FutureUtils;
 import jdk.incubator.concurrent.StructuredTaskScope;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -24,6 +24,15 @@ public class BQStructuredConcurrencyStrategy
     private static final int sBATCH_SIZE = 10;
 
     /**
+     * @return A {@link List} of all {@link Quote} objects
+     */
+    public List<Quote> getAllQuotes() {
+        System.out.println("mQuotes " + mQuotes);
+
+        return mQuotes;
+    }
+
+     /**
      * Get a {@link List} that contains the requested quotes.
      *
      * @param quoteIds A {@link List} containing the given random

@@ -27,7 +27,7 @@ public class Quote {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    public Integer id;
 
     /**
      * A quote.

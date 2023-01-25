@@ -24,11 +24,6 @@ import java.util.regex.Pattern;
     factory = YamlPropertySourceFactory.class)
 public class Components {
     /**
-     * Quote id used in lambda call.
-     */
-    long id = 0;
-
-    /**
      * @return Return a {@link List} of {@link Quote} objects
      * that stored in a file in the project resources.
      */
@@ -37,8 +32,8 @@ public class Components {
         @Value("${app.dataset}") final String filePath
     ) {
         try {
-            // Although AtomicInteger is overkill we use it to
-            // simplify incrementing the ID in the stream below.
+            // Used to increment the count of id's in the
+            // lambda expression below.
             AtomicInteger idCount = new AtomicInteger(0);
 
             // Convert the filename into a pathname.
@@ -51,7 +46,9 @@ public class Components {
                 new String(Files.readAllBytes(Paths.get(uri)));
 
             // Return a List of ZippyQuote objects.
-            List<Quote> quotes = Pattern
+
+            // Return the quotes.
+            return Pattern
                 // Compile splitter into a regular expression (regex).
                 .compile("@")
 
@@ -64,13 +61,11 @@ public class Components {
 
                 // Create a new ZippyQuote.
                 .map(quote ->
-                         new Quote(++id, quote.stripLeading()))
+                         new Quote(idCount.getAndIncrement(),
+                                 quote.stripLeading()))
 
                 // Collect results into a list of ZippyQuote objects.
                 .toList();
-
-            // Return the quotes.
-            return quotes;
         }
         catch (Exception e) {
             e.printStackTrace();

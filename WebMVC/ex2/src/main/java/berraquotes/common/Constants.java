@@ -29,5 +29,6 @@ public class Constants {
         public static final int STRUCTURED_CONCURRENCY = 0;
         public static final int PARALLEL_STREAMS = 1;
         public static final int PARALLEL_STREAMS_REGEX = 2;
+        public static final int SEQUENTIAL_STREAMS = 3;
     }
 }

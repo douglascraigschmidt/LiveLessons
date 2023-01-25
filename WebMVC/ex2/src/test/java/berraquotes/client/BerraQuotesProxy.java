@@ -44,8 +44,6 @@ public class BerraQuotesProxy {
             // Convert the URI to a String.
             .toUriString();
 
-        System.out.println("uri = " + uri);
-
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,
@@ -83,8 +81,6 @@ public class BerraQuotesProxy {
             // Convert the URI to a String.
             .toUriString();
 
-        System.out.println("uri = " + uri);
-
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,
@@ -114,8 +110,6 @@ public class BerraQuotesProxy {
             .queryParam("strategy", strategy)
             .build()
             .toUriString();
-
-        System.out.println("uri = " + uri);
 
         return WebUtils
             // Create and send a GET request to the server.
@@ -147,9 +141,7 @@ public class BerraQuotesProxy {
                         .list2String(queries))
             .build()
             .toUriString();
-
-        System.out.println("uri = " + uri);
-
+        
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,

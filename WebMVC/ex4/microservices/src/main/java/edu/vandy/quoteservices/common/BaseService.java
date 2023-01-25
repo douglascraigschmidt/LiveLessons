@@ -30,7 +30,7 @@ public abstract class BaseService<T> {
      *                 sequentially
      * @return A {@code T} of all requested {@link Quote} objects
      */
-    public abstract T getQuotes(List<Long> quoteIds,
+    public abstract T getQuotes(List<Integer> quoteIds,
                                 Boolean parallel);
 
     /**

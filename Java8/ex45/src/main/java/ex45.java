@@ -125,7 +125,7 @@ public class ex45 {
     /**
      * Return the title portion of the {@code input}.
      */
-    public static String getTitle(String input) {
+    public static String getTitle(String work) {
         // Create a Matcher.
         Matcher m = Pattern
             // Compile a regex that matches only the first line in the
@@ -133,14 +133,14 @@ public class ex45 {
             .compile("(?m)^.*$")
 
             // Create a matcher for this pattern.
-            .matcher(input);
+            .matcher(work);
 
-        // Find/return the first line in the string.
+        // Find/return the first line in the String.
         return m.find()
             // Return the title string if there's a match.
             ? m.group()
 
-            // Return an empty string if there's no match.
+            // Return an empty String if there's no match.
             : "";
     }
 }

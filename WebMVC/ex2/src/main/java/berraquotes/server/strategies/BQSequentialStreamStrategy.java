@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * This strategy uses the Java parallel streams framework to provide
+ * This strategy uses the Java sequential streams framework to provide
  * Berra quotes.
  */
-public class BQParallelStreamStrategy
+public class BQSequentialStreamStrategy
        extends BQAbstractStrategy {
     /**
      * Get a {@link List} that contains the requested quotes.
@@ -21,8 +21,8 @@ public class BQParallelStreamStrategy
      */
     public List<Quote> getQuotes(List<Integer> quoteIds) {
         return quoteIds
-            // Convert the List to a parallel Stream.
-            .parallelStream()
+            // Convert the List to a Stream.
+            .stream()
 
             // Get the quote associated with the quoteId.
             .map(mQuotes::get)
@@ -45,8 +45,8 @@ public class BQParallelStreamStrategy
         // return them as a List of Quote objects.
 
         return mQuotes
-            // Convert the List to a parallel Stream.
-            .parallelStream()
+            // Convert the List to a Stream.
+            .stream()
 
             // Locate all the matches.
             .filter(quote -> quote.quote().toLowerCase()
@@ -66,12 +66,12 @@ public class BQParallelStreamStrategy
      */
     public List<Quote> search(List<String> queries) {
         return mQuotes
-            // Convert the List to a parallel Stream.
-            .parallelStream()
+            // Convert the List to a Stream.
+            .stream()
 
             .filter(quote -> queries
-                    // Convert the List to a parallel Stream.
-                    .parallelStream()
+                    // Convert the List to a Stream.
+                    .stream()
 
                     // Locate any matches.
                     .anyMatch(query -> quote.quote().toLowerCase()

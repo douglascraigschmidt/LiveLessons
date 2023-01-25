@@ -56,7 +56,7 @@ public class ZippyService
      *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Long> quoteIds,
+    public List<Quote> getQuotes(List<Integer> quoteIds,
                                  Boolean parallel) {
         System.out.println("ZippyService.getQuotes()");
 

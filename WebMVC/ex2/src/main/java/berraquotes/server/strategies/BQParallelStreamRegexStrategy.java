@@ -1,9 +1,6 @@
 package berraquotes.server.strategies;
 
 import berraquotes.common.Quote;
-import berraquotes.server.strategies.BQAbstractStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

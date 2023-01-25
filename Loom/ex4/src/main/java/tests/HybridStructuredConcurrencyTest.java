@@ -84,7 +84,7 @@ public class HybridStructuredConcurrencyTest {
                 .toList();
 
             // Scope doesn't exit until all concurrent virtual threads
-            // complete.
+            // complete or an exception occurs.
         }
     }
 
@@ -118,7 +118,7 @@ public class HybridStructuredConcurrencyTest {
                 .toList();
 
             // Scope doesn't exit until all concurrent virtual threads
-            // complete.
+            // complete or an exception occurs.
         }
     }
 
@@ -157,7 +157,7 @@ public class HybridStructuredConcurrencyTest {
                 .toList();
 
             // Scope doesn't exit until all concurrent virtual threads
-            // complete.
+            // complete or an exception occurs.
         }
     }
 

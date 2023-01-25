@@ -25,8 +25,8 @@ public class ServerBeans {
      * @return A {@link List} of {@link Quote} objects that were
      *         stored in the {@code filePath}
      */
-    @Bean
-    public List<Quote> getQuotes() {
+    // @Bean
+    static public List<Quote> getQuotes() {
         try {
             // Although AtomicInteger is overkill we use it to
             // simplify incrementing the ID in the stream below.

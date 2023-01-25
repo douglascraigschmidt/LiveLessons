@@ -1,29 +1,25 @@
 package berraquotes.server.strategies;
 
 import berraquotes.common.Quote;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import berraquotes.common.ServerBeans;
 
 /**
  * This abstract class defines methods used by various Berra quote
  * implementation strategies.
  */
-@Component
 public abstract class BQAbstractStrategy {
     /**
-     * An in-memory {@link List} of all the quotes.
+     * Initialize the List of {link Quote} objects.
      */
-    @Autowired
-    protected List<Quote> mQuotes;
+    List<Quote> mQuotes = ServerBeans.getQuotes();
 
     /**
      * @return A {@link List} of all {@link Quote} objects
      */
     public List<Quote> getAllQuotes() {
-        System.out.println("mQuotes.size = " + mQuotes.size());
         return mQuotes;
     }
 

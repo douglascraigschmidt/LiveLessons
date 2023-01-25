@@ -88,22 +88,20 @@ public final class BigFractionUtils {
      * parameter.
      */
     public static void sortAndPrintList(List<Future<BigFraction>> list) {
-        try (var scope =
-             new ShutdownOnSuccess<List<BigFraction>>()) {
+        try (var scope = new ShutdownOnSuccess<List<BigFraction>>()) {
             // This implementation uses quick sort to order the list.
             var quickSortF = scope
                 // Perform quick sort asynchronously.
                 .fork(() -> quickSort(FutureUtils
-                                      // Convert List<Future> to List.
-                                      .futures2Objects(list)));
+                                          // Convert List<Future> to List.
+                                          .futures2Objects(list)));
 
             // This implementation uses heap sort to order the list.
             var heapSortF = scope
                 // Perform heap sort asynchronously.
-                .fork(() -> 
-                      heapSort(FutureUtils
-                               // Convert List<Future> to List.
-                               .futures2Objects(list)));
+                .fork(() -> heapSort(FutureUtils
+                                         // Convert List<Future> to List.
+                                         .futures2Objects(list)));
 
             // This barrier synchronizer waits for all threads to
             // finish or the task scope to shut down.

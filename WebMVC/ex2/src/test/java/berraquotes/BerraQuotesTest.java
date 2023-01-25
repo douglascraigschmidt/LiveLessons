@@ -63,6 +63,8 @@ public class BerraQuotesTest {
                         "Parallel Streams");
         timeBerraQuotes(PARALLEL_STREAMS_REGEX,
                         "Parallel Streams Regex");
+        timeBerraQuotes(SEQUENTIAL_STREAMS,
+                        "Sequential Streams");
 
         System.out.println(RunTimer.getTimingResults());
         System.out.println("Leaving the BerraTest");

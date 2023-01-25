@@ -28,7 +28,7 @@ public final class RandomUtils {
             // Convert the ints to String objects.
             .mapToObj(String::valueOf)
 
-            // Conver the Stream to a List.
+            // Convert the Stream to a List.
             .toList();
     }
 }

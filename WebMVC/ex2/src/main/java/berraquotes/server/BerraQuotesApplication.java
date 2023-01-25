@@ -24,8 +24,7 @@ public class BerraQuotesApplication {
      */
     public static void main(String[] args) {
         // Launch this application.
-        SpringApplication app = new SpringApplicationBuilder(BerraQuotesApplication.class).build();
-        app.setLazyInitialization(true);
-        app.run(args);
+        SpringApplication.run(BerraQuotesApplication.class,
+                        args);
     }
 }

@@ -9,8 +9,8 @@ import static utils.RandomUtils.getRandomInts;
 
 /**
  * This example shows several techniques for concatenating a {@link
- * List} of {@link String} objects together multiple times via Java Streams
- * and RxJava.
+ * List} of {@link String} objects together multiple times via Java
+ * Streams and RxJava.
  */
 public class ex32 {
     /**
@@ -66,10 +66,10 @@ public class ex32 {
 
             // Repeatedly emit the list 'n' times, yielding a Stream
             // of List of String objects.
-            .mapToObj(__ -> list)
+            .mapToObj(___ -> list)
 
-            // Flatmap the Stream of List of String objects into a
-            // single Stream of String objects.
+            // Flatten the Stream of List of String objects into
+            // a single Stream of String objects.
             .flatMap(List::stream)
 
             // Collect the results into a List of Strings.

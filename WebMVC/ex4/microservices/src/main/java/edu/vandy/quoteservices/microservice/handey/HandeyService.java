@@ -49,14 +49,14 @@ public class HandeyService
      *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Long> quoteIds,
+    public List<Quote> getQuotes(List<Integer> quoteIds,
                                  Boolean parallel) {
         return StreamSupport
             // Convert the List to a parallel or sequential Stream.
             .stream(quoteIds.spliterator(), parallel)
 
             // Get the Handey quote associated with the quoteId.
-            .map(quoteId -> mQuotes.get(quoteId.intValue()))
+            .map(mQuotes::get)
 
             // Trigger intermediate operations and collect the results
             // into a List.

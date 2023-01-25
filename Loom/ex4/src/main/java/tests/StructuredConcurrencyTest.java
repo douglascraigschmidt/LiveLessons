@@ -17,8 +17,8 @@ import static utils.ExceptionUtils.*;
 
 /**
  * Download, transform, and store {@link Image} objects using the Java
- * structured concurrency framework, which uses the {@link Executors}
- * {@code newVirtualThreadPerTaskExecutor()} factory method to create
+ * structured concurrency framework, which uses the {@link StructuredTaskScope}
+ * {@code ShutdownOnFailure()} factory method to create
  * a new virtual thread for each task.  This implementation just applies
  * Java 7 features, i.e., it doesn't use modern Java features at all.
  */
@@ -76,7 +76,9 @@ public class StructuredConcurrencyTest {
                                // Download each image via its URL
                                // and store it in an Image object.
                                .downloadImage(url)));
-            // Scope doesn't exit until all concurrent tasks complete.
+
+            // Scope doesn't exit until all concurrent tasks complete
+            // or an exception occurs.
             scope.join();
 
             // Handle any exception that has occurred.
@@ -118,7 +120,8 @@ public class StructuredConcurrencyTest {
                                            imageFuture.resultNow()));
             }
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent tasks complete
+            // or an exception is thrown.
             scope.join();
 
             // Handle any exception that has occurred.
@@ -163,14 +166,15 @@ public class StructuredConcurrencyTest {
                                  // file.
                                  .storeImage(imageFuture.resultNow())));
 
-            // Scope doesn't exit until all concurrent tasks complete.
+            // Scope doesn't exit until all concurrent tasks complete
+            // or an exception is thrown.
             scope.join();
 
             // Handle any exception that has occurred.
             scope.throwIfFailed();
 
-            // Return the List of stored images, which have finished
-            // storing at this point.
+            // Return the List of stored images (as File objects),
+            // which have finished storing at this point.
             return storedFiles;
         } catch (Exception exception) {
             throw new RuntimeException(exception);

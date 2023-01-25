@@ -78,7 +78,8 @@ public class ex4 {
      */
     private static void runTest(Consumer<String> test,
                                 String testName) {
-        // Let the system garbage collect first to ensure pristine conditions.
+        // Let the system garbage collect first to ensure pristine
+        // conditions.
         System.gc();
 
         if (testName.contains("warmup"))

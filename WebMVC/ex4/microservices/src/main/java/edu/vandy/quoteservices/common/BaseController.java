@@ -71,7 +71,7 @@ public abstract class BaseController<T> {
      * @return A {@code T} containing the requested quotes
      */
     @GetMapping(GET_QUOTES)
-    T getQuotes(@RequestParam List<Long> quoteIds,
+    T getQuotes(@RequestParam List<Integer> quoteIds,
                 Boolean parallel) {
         return getService()
             // Forward request to the service.

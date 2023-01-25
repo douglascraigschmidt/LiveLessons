@@ -1,10 +1,7 @@
 package berraquotes.server;
 
 import berraquotes.common.Quote;
-import berraquotes.server.strategies.BQAbstractStrategy;
-import berraquotes.server.strategies.BQParallelStreamStrategy;
-import berraquotes.server.strategies.BQStructuredConcurrencyStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
+import berraquotes.server.strategies.*;
 import org.springframework.stereotype.Service;
 
 import java.net.URLDecoder;
@@ -32,9 +29,10 @@ public class BerraQuotesService {
      * strategies matter in this array.
      */
     BQAbstractStrategy[] mStrategy = {
-        new BQStructuredConcurrencyStrategy(),
-        new BQParallelStreamStrategy(),
-        new BQParallelStreamStrategy()
+            new BQStructuredConcurrencyStrategy(),
+            new BQParallelStreamStrategy(),
+            new BQParallelStreamRegexStrategy(),
+            new BQSequentialStreamStrategy()
     };
 
     /**
