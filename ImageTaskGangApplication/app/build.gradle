@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'example.imagetaskgang'
-    compileSdk 32
+    compileSdk 26
 
     defaultConfig {
         applicationId "example.imagetaskgang"
         minSdk 24
-        targetSdk 32
+        targetSdk 26
         versionCode 1
         versionName "1.0"
 
@@ -26,13 +26,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    buildFeatures {
-        viewBinding true
-    }
 }
 
 dependencies {
-
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:support-annotations:26.1.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

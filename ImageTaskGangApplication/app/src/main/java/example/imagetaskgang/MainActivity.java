@@ -25,7 +25,7 @@ import android.widget.Toast;
  * @brief Main Activity for the Android version of the ImageTaskGang
  *        application.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends MainActivityBase {
     /**
      * A LinearLayout where each element is an AutoCompleteTextview
      * that holds a comma-separated list of URLs to download.
