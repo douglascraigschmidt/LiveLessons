@@ -1,5 +1,5 @@
+import jdk.incubator.concurrent.StructuredTaskScope;
 import utils.ShutdownOnNonNullSuccess;
-import utils.Options;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -37,9 +37,6 @@ public class ex5 {
     public static void main(String[] argv)
         throws ExecutionException, InterruptedException {
         System.out.println("Entering test");
-
-        // Initialize any command-line options.
-        Options.instance().parseArgs(argv);
 
         // Demonstrate how apply a custom Java StructuredTaskScope.
         demoCustomStructuredTaskScope();

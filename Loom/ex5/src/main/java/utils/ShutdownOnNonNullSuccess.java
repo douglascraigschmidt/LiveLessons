@@ -28,7 +28,8 @@ public class ShutdownOnNonNullSuccess<T>
      * threads.
      */
     public ShutdownOnNonNullSuccess() {
-        super(null, Thread.ofVirtual().factory());
+        super(null,
+              Thread.ofVirtual().factory());
     }
 
     /**
