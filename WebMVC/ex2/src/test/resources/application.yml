@@ -1,5 +1,0 @@
-logging:
-  level:
-    org.springframework.web: OFF
-    root: OFF
-    org.hibernate: OFF
