@@ -37,8 +37,8 @@ import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
  * client app) or command-line utility (e.g., Curl or Postman).
  *
  * The {@code @RestController} annotation also tells a controller that
- * the object returned is automatically serialized into JSON and passed
- * back within the body of an {@link HttpResponse} object.
+ * the object returned is automatically serialized into JSON and
+ * passed back within the body of an {@link HttpResponse} object.
  */
 @RestController
 public class PCServerController {

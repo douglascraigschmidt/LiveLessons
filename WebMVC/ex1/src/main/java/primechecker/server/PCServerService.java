@@ -1,15 +1,12 @@
 package primechecker.server;
 
 import org.springframework.stereotype.Service;
-import primechecker.common.Options;
 import primechecker.server.strategies.PCAbstractStrategy;
 import primechecker.server.strategies.PCCompletableFutureStrategy;
 import primechecker.server.strategies.PCParallelStreamStrategy;
 import primechecker.server.strategies.PCStructuredConcurrencyStrategy;
 
 import java.util.List;
-
-import static primechecker.utils.PrimeUtils.isPrime;
 
 /**
  * This class defines implementation methods that are called by the
@@ -24,7 +21,6 @@ import static primechecker.utils.PrimeUtils.isPrime;
  * auto-detection and wiring of dependent implementation classes via
  * classpath scanning.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @Service
 public class PCServerService {
     /**

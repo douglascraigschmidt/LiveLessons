@@ -141,7 +141,7 @@ public class BerraQuotesProxy {
                         .list2String(queries))
             .build()
             .toUriString();
-        
+
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,

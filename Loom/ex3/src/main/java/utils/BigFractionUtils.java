@@ -90,14 +90,14 @@ public final class BigFractionUtils {
     public static void sortAndPrintList(List<Future<BigFraction>> list) {
         try (var scope = new ShutdownOnSuccess<List<BigFraction>>()) {
             // This implementation uses quick sort to order the list.
-            var quickSortF = scope
+            scope
                 // Perform quick sort asynchronously.
                 .fork(() -> quickSort(FutureUtils
                                           // Convert List<Future> to List.
                                           .futures2Objects(list)));
 
             // This implementation uses heap sort to order the list.
-            var heapSortF = scope
+            scope
                 // Perform heap sort asynchronously.
                 .fork(() -> heapSort(FutureUtils
                                          // Convert List<Future> to List.

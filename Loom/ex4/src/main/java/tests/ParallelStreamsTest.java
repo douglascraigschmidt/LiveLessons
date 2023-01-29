@@ -64,8 +64,8 @@ public class ParallelStreamsTest {
      */
     private static Image downloadImage(URL url) {
         return BlockingTask
-           .callInManagedBlock(() ->
-                               FileAndNetUtils.downloadImage(url));
+           .callInManagedBlock(() -> FileAndNetUtils
+                               .downloadImage(url));
     }
 
     /**
