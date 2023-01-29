@@ -54,7 +54,7 @@ public class BerraQuotesTest {
     @Test
     public void runTests() {
         System.out.println("Entering the BerraTest");
-        
+
         timeBerraQuotes(PARALLEL_STREAMS_REGEX,
                 "Parallel Streams Regex");
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
