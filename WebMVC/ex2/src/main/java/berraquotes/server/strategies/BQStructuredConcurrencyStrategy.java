@@ -3,8 +3,6 @@ package berraquotes.server.strategies;
 import berraquotes.common.Quote;
 import berraquotes.utils.FutureUtils;
 import jdk.incubator.concurrent.StructuredTaskScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -27,8 +25,7 @@ public class BQStructuredConcurrencyStrategy
      * @return A {@link List} of all {@link Quote} objects
      */
     public List<Quote> getAllQuotes() {
-        System.out.println("mQuotes " + mQuotes);
-
+        // Return the List of all Berra quotes.
         return mQuotes;
     }
 
@@ -113,6 +110,9 @@ public class BQStructuredConcurrencyStrategy
      */
     @Override
     public List<Quote> search(String query) {
+        // Convert the 'query' into a regular expression.
+
+        var regexQuery = makeRegex(List.of(query));
         try (var scope =
              // Create a new StructuredTaskScope that shuts down on
              // failure.
@@ -128,7 +128,8 @@ public class BQStructuredConcurrencyStrategy
                 // of the search queries.
                 .map(batch -> scope
                      .fork(() ->
-                           findMatch(query, batch)))
+                           findMatchTask(regexQuery,
+                                   batch)))
 
                 // Convert the Stream to a List.
                 .toList();
@@ -157,6 +158,9 @@ public class BQStructuredConcurrencyStrategy
      *         objects matching the given {@code queries}
      */
     public List<Quote> search(List<String> queries) {
+        // Combine the 'queries' List into a regular expression.
+        String regexQueries = makeRegex(queries);
+
         // Use Java structured concurrency to locate all quotes whose
         // 'quote' field matches the List of 'queries' and return them
         // as a List of Quote objects.
@@ -169,7 +173,7 @@ public class BQStructuredConcurrencyStrategy
             // are being processed in parallel.
             var results =
                 getFutureList(mQuotes,
-                              queries,
+                              regexQueries,
                               scope);
 
             // Perform a barrier synchronization that waits for all
@@ -187,11 +191,46 @@ public class BQStructuredConcurrencyStrategy
     }
 
     /**
+     * Convert the {@link List} of {@link String} objects containing
+     * the queries into a single regular expression {@link String}.
+     *
+     * @param queries The {@link List} of queries
+     * @return A {@link String} that encodes the {@code queries} in
+     *         regular expression form
+     */
+    private static String makeRegex(List<String> queries) {
+        // Combine the 'queries' List into a lowercase String and
+        // convert into a regex of style
+        // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
+        var result = queries
+                // toString() returns the values as a comma-separated
+                // string enclosed in square brackets.
+                .toString()
+
+                // Lowercase for matching purposes.
+                .toLowerCase()
+
+                // Start of regex.
+                .replace("[", "(.*")
+
+                // Separators between queries previous operations added in
+                // a space with each comma.
+                .replace(", ", ".*)|(.*")
+
+                // End of regex.
+                .replace("]", ".*)");
+
+        System.out.println("regexQueries = " + result);
+        return result;
+    }
+
+    /**
      * Asynchronously determine which {@link Quote} {@link String}
      * match any of the {@code queries}.
      *
      * @param quotes The {@link List} of {@link Quote} objects
-     * @param queries The queries to search for
+     * @param regexQueries The queries to search for in regular
+     *                     expression form
      * @param scope The {@link StructuredTaskScope} used to {@code
      *              fork()} a virtual thread
      * @return A {@link List} of {@link Future} objects containing a
@@ -201,7 +240,7 @@ public class BQStructuredConcurrencyStrategy
     @NotNull
     private List<Future<List<Quote>>> getFutureList
         (List<Quote> quotes,
-         List<String> queries,
+         String regexQueries,
          StructuredTaskScope.ShutdownOnFailure scope) {
         return BQStructuredConcurrencyStrategy
             // Split the List into a sublist.
@@ -211,32 +250,7 @@ public class BQStructuredConcurrencyStrategy
             // Asynchronously determine if the quote matches any of
             // the search queries.
             .map(quoteBatch ->
-                 findMatchAsync(quoteBatch, queries, scope))
-
-            // Convert the Stream to a List.
-            .toList();
-    }
-
-    /**
-     * Get a {@link List} of {@link Quote} objects that matched at
-     * least one query.
-     *
-     * @param results A {@link List} of {@link Future} objects
-     *                containing a {@link List} with {@link
-     *                Quote} objects if there's a match or an
-     *                empty {@link List} if there's no match
-     * @return A {@link List} of {@link Quote} objects
-     */
-    @NotNull
-    private List<Quote> getQuoteList
-        (List<Future<List<Quote>>> results) {
-        return FutureUtils
-            // Convert the List of Future<Optional<Quote>> objects to
-            // a Stream of Optional<Quote> objects.
-            .futures2Stream(results)
-
-            // Eliminate empty Optional objects.
-            .flatMap(List::stream)
+                 findMatchAsync(quoteBatch, regexQueries, scope))
 
             // Convert the Stream to a List.
             .toList();
@@ -248,7 +262,8 @@ public class BQStructuredConcurrencyStrategy
      *
      * @param quotes The {@link List} of {@link Quote} objects
      *               to match against
-     * @param queries The search queries
+     * @param regexQueries The queries to search for in regular
+     *                     expression form
      * @param scope The {@link StructuredTaskScope} used to {@code
      *              fork()} a virtual thread
      * @return A {@link Future} to an {@link List} containing any
@@ -257,19 +272,18 @@ public class BQStructuredConcurrencyStrategy
      */
     private Future<List<Quote>> findMatchAsync
         (List<Quote> quotes,
-         List<String> queries,
+         String regexQueries,
          StructuredTaskScope.ShutdownOnFailure scope) {
         return scope
             // Create a virtual thread.
-            .fork(() -> queries
-                  // Convert the List to a Stream.
-                  .stream()
+            .fork(() -> Stream
+                  .of(regexQueries)
 
                   // Determine if there's any match of the 'query' in
                   // the sublist of quotes.
-                  .map(query ->
-                       findMatch(query,
-                                 quotes))
+                  .map(___ ->
+                       findMatchTask(regexQueries,
+                                     quotes))
 
                   // Flatten the Stream of List<Quote> objects to a
                   // Stream of Quote objects.
@@ -280,24 +294,52 @@ public class BQStructuredConcurrencyStrategy
     }
 
     /**
-     * Find a match between the {@code query} and the {@code quote}.
+     * Find a match between the {@code regexQuery} and the {@code
+     * quotes}.
      *
-     * @param query The query 
+     * @param regexQueries The query in regular expression form
      * @param quotes The {@link List} of {@link Quote} objects
      *               to match with
      * @return True if there's a match, else false
      */
-    private List<Quote> findMatch(String query,
-                                  List<Quote> quotes) {
+    private List<Quote> findMatchTask(String regexQueries,
+                                      List<Quote> quotes) {
         return quotes
             // Convert the List to a Stream.
             .stream()
 
             // Keep any Quote that matches the query.
             .filter(quote -> quote.quote().toLowerCase()
-                    .contains(query.toLowerCase()))
+                    // Execute the regex portion of the filter.
+                    .matches(regexQueries))
 
             // Convert the List to a Stream.
             .toList();
+    }
+
+
+    /**
+     * Get a {@link List} of {@link Quote} objects that matched at
+     * least one query.
+     *
+     * @param results A {@link List} of {@link Future} objects
+     *                containing a {@link List} with {@link Quote}
+     *                objects if there's a match or an empty {@link
+     *                List} if there's no match
+     * @return A {@link List} of {@link Quote} objects
+     */
+    @NotNull
+    private List<Quote> getQuoteList
+    (List<Future<List<Quote>>> results) {
+        return FutureUtils
+                // Convert the List of Future<Optional<Quote>> objects to
+                // a Stream of Optional<Quote> objects.
+                .futures2Stream(results)
+
+                // Eliminate empty Optional objects.
+                .flatMap(List::stream)
+
+                // Convert the Stream to a List.
+                .toList();
     }
 }

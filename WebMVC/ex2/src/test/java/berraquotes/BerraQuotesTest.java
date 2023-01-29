@@ -58,9 +58,11 @@ public class BerraQuotesTest {
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
                         "Structured Concurrency");
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
-                        "Structured Concurrency");
+                "Structured Concurrency");
         timeBerraQuotes(PARALLEL_STREAMS,
                         "Parallel Streams");
+        timeBerraQuotes(PARALLEL_STREAMS,
+                "Parallel Streams");
         timeBerraQuotes(PARALLEL_STREAMS_REGEX,
                         "Parallel Streams Regex");
         timeBerraQuotes(SEQUENTIAL_STREAMS,
@@ -83,18 +85,31 @@ public class BerraQuotesTest {
             .timeRun(() -> runQuotes(strategy),
                      strategyName + " Berra quotes");
 
-        printResults(berraQuotes,
-                     strategyName
-                     + " Berra quote results");
+
+        System.out.println(strategyName
+                           + (berraQuotes.size() == 5
+                            ? " successfully"
+                            : " unsuccessfully")
+                           + " received expected 5 Berra quote results");
 
         berraQuotes = RunTimer
             .timeRun(() -> runSearches(strategy),
                      strategyName + " Berra searches");
 
+        System.out.println(strategyName
+                + (berraQuotes.size() == 30
+                ? " successfully"
+                : " unsuccessfully")
+                + " received expected "
+                + berraQuotes.size()
+                + " Berra search results");
 
+        /*
         printResults(berraQuotes,
                      strategyName
                      + " Berra search results");
+
+         */
     }
 
     /**
@@ -130,7 +145,12 @@ public class BerraQuotesTest {
                 .searchQuotes(strategy,
                               List.of("baseball",
                                       "game",
-                                      "Little League")))
+                                      "Little League",
+                                      "good",
+                                      "you",
+                                      "wrong",
+                                      "gonna",
+                                      "people")))
             .flatMap(List::stream)
             .toList();
     }

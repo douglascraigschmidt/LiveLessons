@@ -23,7 +23,7 @@ public class BQParallelStreamRegexStrategy
         // convert into a regex of style
         // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
 
-        String regex = queries
+        String regexQueries = queries
             // toString() returns the values as a comma-separated
             // string enclosed in square brackets.
             .toString()
@@ -49,7 +49,7 @@ public class BQParallelStreamRegexStrategy
             .filter(quote -> quote.quote()
                     .toLowerCase()
                     // Execute the regex portion of the filter.
-                    .matches(regex))
+                    .matches(regexQueries))
 
             // Convert the Stream to a List.
             .toList();
