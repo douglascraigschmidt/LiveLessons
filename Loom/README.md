@@ -33,7 +33,12 @@ Here's an overview of what's current included in these examples:
         concurrency when applied to download, transform, and store
         many images from a remote web server.
 
-. ex5 - This example shows how to reduce and/or multiply BigFraction
+. ex5 - This example demonstrates how to create a custom
+        StructuredTaskScope that's used to capture the result of the
+        first subtask to complete successfully (i.e., identify a prime
+        number without returning a null).
+
+. ex6 - This example shows how to reduce and/or multiply BigFraction
         objects via the Java completable futures framework.  It also
         shows how to customize the Java completable futures framework
         to use arbitrary Executor objects, including the new

@@ -7,6 +7,7 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ public class BQStructuredConcurrencyStrategy
     /**
      * Max size of each batch.
      */
-    private static final int sBATCH_SIZE = 10;
+    private static final int sBATCH_SIZE = 1;
 
     /**
      * @return A {@link List} of all {@link Quote} objects
@@ -76,30 +77,6 @@ public class BQStructuredConcurrencyStrategy
     }
 
     /**
-     * Convert the {@link List} parameter into a {@link Stream} of
-     * sublists, each of which has at most {@code batchSize} elements.
-     *
-     * @param list The {@link List} to split into batches
-     * @param batchSize The maximum size of each batch
-     * @return A {@link Stream} of sublists, each of which has
-     *         at most {@code batchSize} elements
-     */
-    public static <T> Stream<List<T>> getBatches(List<T> list,
-                                                 int batchSize) {
-        return IntStream
-            // Create an iterator that will traverse the List.
-            .iterate(0,
-                     i -> i < list.size(),
-                     i -> i + batchSize)
-            // Split the original List into sublists, each of
-            // which has at most batchSize elements.
-            .mapToObj(i -> list
-                      .subList(i, Math
-                               .min(i + batchSize,
-                                    list.size())));
-    }
-
-    /**
      * Search for quotes containing the given {@link String} {@code
      * query} and return a {@link List} of matching {@link Quote}
      * objects.
@@ -111,8 +88,8 @@ public class BQStructuredConcurrencyStrategy
     @Override
     public List<Quote> search(String query) {
         // Convert the 'query' into a regular expression.
-
         var regexQuery = makeRegex(List.of(query));
+
         try (var scope =
              // Create a new StructuredTaskScope that shuts down on
              // failure.
@@ -124,12 +101,13 @@ public class BQStructuredConcurrencyStrategy
                 .getBatches(mQuotes,
                             sBATCH_SIZE)
 
-                // Asynchronously determine if the quote matches any
-                // of the search queries.
+                // Concurrently determine if the quote matches any of
+                // the search queries.
                 .map(batch -> scope
-                     .fork(() ->
-                           findMatchTask(regexQuery,
-                                   batch)))
+                     .fork(() -> findMatchTask(regexQuery,
+                                               batch)
+                           // Convert the Stream to List.
+                           .toList()))
 
                 // Convert the Stream to a List.
                 .toList();
@@ -225,6 +203,31 @@ public class BQStructuredConcurrencyStrategy
     }
 
     /**
+     * Convert the {@link List} parameter into a {@link Stream} of
+     * sublists, each of which has at most {@code batchSize} elements.
+     *
+     * @param list The {@link List} to split into batches
+     * @param batchSize The maximum size of each batch
+     * @return A {@link Stream} of sublists, each of which has
+     *         at most {@code batchSize} elements
+     */
+    private static <T> Stream<List<T>> getBatches(List<T> list,
+                                                  int batchSize) {
+        return IntStream
+                // Create an iterator that will traverse the List.
+                .iterate(0,
+                        i -> i < list.size(),
+                        i -> i + batchSize)
+
+                // Split the original List into sublists, each of
+                // which has at most batchSize elements.
+                .mapToObj(i -> list
+                        .subList(i, Math
+                                .min(i + batchSize,
+                                        list.size())));
+    }
+
+    /**
      * Asynchronously determine which {@link Quote} {@link String}
      * match any of the {@code queries}.
      *
@@ -243,7 +246,7 @@ public class BQStructuredConcurrencyStrategy
          String regexQueries,
          StructuredTaskScope.ShutdownOnFailure scope) {
         return BQStructuredConcurrencyStrategy
-            // Split the List into a sublist.
+            // Split the List into a sublist of "batches".
             .getBatches(quotes,
                         sBATCH_SIZE)
 
@@ -276,18 +279,16 @@ public class BQStructuredConcurrencyStrategy
          StructuredTaskScope.ShutdownOnFailure scope) {
         return scope
             // Create a virtual thread.
-            .fork(() -> Stream
-                  .of(regexQueries)
+            .fork(() -> // Flatten the Stream of Stream<Quote> objects to a
+                    // Stream of Quote objects.
+                    Stream
+                          .of(regexQueries)
 
-                  // Determine if there's any match of the 'query' in
-                  // the sublist of quotes.
-                  .map(___ ->
-                       findMatchTask(regexQueries,
-                                     quotes))
-
-                  // Flatten the Stream of List<Quote> objects to a
-                  // Stream of Quote objects.
-                  .flatMap(List::stream)
+                          // Determine if there's any match of the 'query' in
+                          // the sublist of quotes.
+                          .flatMap(___ ->
+                               findMatchTask(regexQueries,
+                                             quotes))
 
                   // Convert the Stream to a List.
                   .toList());
@@ -302,7 +303,7 @@ public class BQStructuredConcurrencyStrategy
      *               to match with
      * @return True if there's a match, else false
      */
-    private List<Quote> findMatchTask(String regexQueries,
+    private Stream<Quote> findMatchTask(String regexQueries,
                                       List<Quote> quotes) {
         return quotes
             // Convert the List to a Stream.
@@ -311,10 +312,7 @@ public class BQStructuredConcurrencyStrategy
             // Keep any Quote that matches the query.
             .filter(quote -> quote.quote().toLowerCase()
                     // Execute the regex portion of the filter.
-                    .matches(regexQueries))
-
-            // Convert the List to a Stream.
-            .toList();
+                    .matches(regexQueries));
     }
 
 

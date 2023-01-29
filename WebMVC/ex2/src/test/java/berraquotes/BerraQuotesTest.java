@@ -36,8 +36,8 @@ import static berraquotes.utils.RandomUtils.makeRandomIndices;
                 webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class BerraQuotesTest {
     /**
-     * This auto-wired field connects the {@link BerraQuotesTest} to the
-     * {@link BerraQuotesClient}.
+     * This auto-wired field connects the {@link BerraQuotesTest} to
+     * the {@link BerraQuotesClient}.
      */
     @Autowired
     private BerraQuotesClient quoteClient;
@@ -55,14 +55,16 @@ public class BerraQuotesTest {
     public void runTests() {
         System.out.println("Entering the BerraTest");
 
+        timeBerraQuotes(SEQUENTIAL_STREAMS,
+                "Sequential Streams");
+        timeBerraQuotes(PARALLEL_STREAMS,
+                        "Parallel Streams");
         timeBerraQuotes(PARALLEL_STREAMS_REGEX,
-                "Parallel Streams Regex");
+                        "Parallel Streams Regex");
         timeBerraQuotes(STRUCTURED_CONCURRENCY,
                         "Structured Concurrency");
         timeBerraQuotes(PARALLEL_STREAMS,
                         "Parallel Streams");
-        timeBerraQuotes(SEQUENTIAL_STREAMS,
-                        "Sequential Streams");
 
         System.out.println(RunTimer.getTimingResults());
         System.out.println("Leaving the BerraTest");
@@ -84,28 +86,39 @@ public class BerraQuotesTest {
 
         System.out.println(strategyName
                            + (berraQuotes.size() == 5
-                            ? " successfully"
-                            : " unsuccessfully")
+                              ? " successfully"
+                              : " unsuccessfully")
                            + " received expected 5 Berra quote results");
 
         berraQuotes = RunTimer
-            .timeRun(() -> runSearches(strategy),
-                     strategyName + " Berra searches");
+            .timeRun(() -> runSearches(strategy, true),
+                     strategyName + " valid Berra searches");
 
         System.out.println(strategyName
-                + (berraQuotes.size() == 30
-                ? " successfully"
-                : " unsuccessfully")
-                + " received expected "
-                + berraQuotes.size()
-                + " Berra search results");
+                           + (berraQuotes.size() == 30
+                              ? " successfully"
+                              : " unsuccessfully")
+                           + " received expected "
+                           + berraQuotes.size()
+                           + " valid Berra search results");
 
-        /*
+        berraQuotes = RunTimer
+            .timeRun(() -> runSearches(strategy, false),
+                     strategyName + " invalid Berra searches");
+
+        System.out.println(strategyName
+                           + (berraQuotes.size() == 0
+                              ? " successfully"
+                              : " unsuccessfully")
+                           + " received expected "
+                           + berraQuotes.size()
+                           + " invalid Berra search results");
+
         printResults(berraQuotes,
                      strategyName
                      + " Berra search results");
 
-         */
+
     }
 
     /**
@@ -132,25 +145,53 @@ public class BerraQuotesTest {
      * Factors out common code for running searches from the
      * microservice implementation identified by the {@code strategy}.
      */
-    private List<Quote> runSearches(int strategy) {
+    private List<Quote> runSearches(int strategy,
+                                    boolean expectedResults) {
+        var search = expectedResults
+            ? List.of("hit")
+            : List.of("kick");
+
+        var searches = expectedResults
+            ? List.of("baseball",
+                      "game",
+                      "Little League",
+                      "good",
+                      "you",
+                      "wrong",
+                      "gonna",
+                      "people")
+            : List.of("pro football",
+                      "pro soccer",
+                      "pro basketball",
+                      "pro tennis",
+                      "pro volleyball",
+                      "kung fu",
+                      "powerlifting",
+                      "ping pong");
+
         return Stream
+            // Create a two-element Stream.
             .of(quoteClient
                 .searchQuotes(strategy,
-                              "hit"),
+                              search),
                 quoteClient
                 .searchQuotes(strategy,
-                              List.of("baseball",
-                                      "game",
-                                      "Little League",
-                                      "good",
-                                      "you",
-                                      "wrong",
-                                      "gonna",
-                                      "people")))
+                              searches))
+
+            // Run the Stream in parallel.
+            .parallel()
+
+            // Flatten the Stream of List<String> objects into a
+            // single Stream of String Objects.
             .flatMap(List::stream)
+
+            // Convert the Stream to a List.
             .toList();
     }
 
+    /**
+     * Print the results.
+     */
     private void printResults(List<Quote> quotes,
                               String testName) {
         System.out.println("Printing "
@@ -159,6 +200,7 @@ public class BerraQuotesTest {
                            + testName);
                            
         quotes
+            // Print each result.
             .forEach(quote -> System.out
                      .println("id = "
                               + quote.id()

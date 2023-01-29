@@ -1,6 +1,3 @@
-group 'livelessons'
-version '1.0-SNAPSHOT'
-
 apply plugin: 'java'
 
 compileJava {
@@ -9,8 +6,3 @@ compileJava {
              '--add-modules', 'jdk.incubator.concurrent'
             ])
 }
-
-repositories {
-    mavenCentral()
-}
-

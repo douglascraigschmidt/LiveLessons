@@ -1,118 +1,90 @@
-import utils.CompletableFutureEx;
-import common.Options;
-import utils.BigFraction;
-import utils.BigFractionUtils;
-import utils.RunTimer;
+import utils.ShutdownOnNonNullSuccess;
+import utils.Options;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Function;
+import java.util.concurrent.ExecutionException;
 
-import static utils.FuturesCollector.toFuture;
-import static utils.BigFractionUtils.sBigReducedFraction;
-import static utils.BigFractionUtils.sortAndPrintList;
+import static utils.PrimeUtils.isPrime;
 
 /**
- * This example shows how to reduce and multiply {@link BigFraction}
- * objects concurrently via a subclass of the Java {@link
- * CompletableFuture} superclass.  In particular, it shows how to
- * customize the Java completable futures framework to use arbitrary
- * {@link Executor} objects, including the new {@link Executors}
- * {@code newVirtualThreadPerTaskExecutor()} provided in Java 19.
- * You'll need to install JDK 19 (or beyond) with gradle version 7.6
- * (or beyond) configured to run this example.
+ * This example demonstrates how to create a custom {@link
+ * StructuredTaskScope} that's used to capture the result of the first
+ * subtask to complete successfully (i.e., identify a prime number
+ * without returning a {@code null}).  You'll need to install JDK 19
+ * (or beyond) with gradle version 7.6 (or beyond) configured to run
+ * this example.
  */
 public class ex5 {
     /**
-     * The main entry point into this program.
+     * Create a {@link List} of large numbers, both prime and
+     * non-prime.
      */
-    static public void main(String[] argv) throws Exception {
+    private static final List<Long> sNumbers = List
+        .of(3968514575694708773L,
+            5667979166914025678L,
+            5667979166914025677L,
+            5667979166914025676L,
+            5180857017854625096L,
+            5180857017854625097L,
+            7231103070891537647L,
+            7231103070891537644L,
+            6381999300585923437L,
+            6381999300585923438L);
+
+    /**
+     * Main entry point into the test program.
+     */
+    public static void main(String[] argv)
+        throws ExecutionException, InterruptedException {
         System.out.println("Entering test");
 
-        // Parse the command-line arguments.
+        // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Run the tests.
-        runTests();
-
-        // Print the timing results.
-        System.out.println(RunTimer.getTimingResults());
+        // Demonstrate how apply a custom Java StructuredTaskScope.
+        demoCustomStructuredTaskScope();
 
         System.out.println("Leaving test");
     }
 
     /**
-     * Run all the tests.
+     * Demonstrate how to create a custom {@link StructuredTaskScope}
+     * that's used to capture the result of the first subtask to
+     * complete successfully (i.e., identify a prime number without
+     * returning a {@code null}).
      */
-    private static void runTests() {
-        // Generate a List of random unreduced BigFraction objects.
-        var list = BigFractionUtils
-                .generateRandomBigFractions(Options.instance().getCount(),
-                        false);
+    public static void demoCustomStructuredTaskScope() {
+        // Create a new scope to execute virtual threads.
+        try (var scope = new ShutdownOnNonNullSuccess<Long>()) {
+            sNumbers
+                // Concurrently check whether the numbers are prime or
+                // not.
+                .forEach(number -> scope
+                         // Create a virtual threa.
+                         .fork(() ->
+                               // If number is prime yield it,
+                               // otherwise yield null.
+                               isPrime(number) == 0
+                               ? number : null));
 
-        // Run a test using the default virtual threads Executor.
-        RunTimer.timeRun(() ->
-                        testFractionMultiplications(list).join(),
-                "CompletableFutureEx with virtual threads");
+            // Perform a barrier synchronization that waits for the
+            // first successful computation to find a prime number or
+            // all of them to fail.
+            scope.join();
 
-        // Run a test using the common fork-join pool executor.
-        CompletableFutureEx.setExecutor(ForkJoinPool.commonPool());
+            var result = scope.result();
 
-        RunTimer.timeRun(() ->
-                        testFractionMultiplications(list).join(),
-                "CompletableFutureEx with common fork-join pool");
-    }
+            if (result != null)
+                // Print the first prime number (or null
+                System.out.println("First prime result = " + result);
+            else
+                System.out.println("No prime results found");
 
-    /**
-     * Test BigFraction reductions and multiplications using a stream
-     * of CompletableFutures and a chain of completion stage methods
-     * involving supplyAsync(), thenComposeAsync(), and
-     * acceptEither().
-     */
-    public static CompletableFuture<Void> testFractionMultiplications
-        (List<BigFraction> bigFractionList) {
-        StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications()\n");
-
-        // Function asynchronously reduces/multiplies a BigFraction.
-        Function<BigFraction,
-                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
-            unreducedFraction -> CompletableFutureEx
-            // Perform BigFraction reduction asynchronously.
-            .supplyAsync(() -> BigFraction
-                         .reduce(unreducedFraction))
-
-            // Return a CompletableFuture to a BigFraction that's
-            // being multiplied asynchronously, which may run for a
-            // while.
-            .thenApplyAsync(reducedFraction -> reducedFraction
-                            .multiply(sBigReducedFraction));
-
-        sb.append("     Printing sorted results:");
-
-        // Return a CompletableFuture to a List of sorted random
-        // BigFraction objects that were reduced and multiplied
-        // concurrently.
-        return bigFractionList
-            // Convert the List into a Stream.
-            .stream()
-
-            // Reduce and multiply each BigFraction asynchronously.
-            .map(reduceAndMultiplyFraction)
-
-            // Trigger intermediate operation processing and return a
-            // future to a List of BigFraction objects that are being
-            // reduced and multiplied asynchronously.
-            .collect(toFuture())
-
-            // After all the BigFraction reductions have completed
-            // asynchronously sort and print the results.
-            .thenCompose(list ->
-                         sortAndPrintList(list,
-                                          sb));
+            // Don't exit the try-with-resources scope until all
+            // concurrently executing virtual threads complete.
+        } catch (Exception exception) {
+            System.out.println("Exception: " 
+                               + exception.getMessage());
+        }
     }
 }
-
