@@ -25,7 +25,7 @@ import static utils.BigFractionUtils.sortAndPrintList;
  * You'll need to install JDK 19 (or beyond) with gradle version 7.6
  * (or beyond) configured to run this example.
  */
-public class ex5 {
+public class ex6 {
     /**
      * The main entry point into this program.
      */
@@ -50,20 +50,20 @@ public class ex5 {
     private static void runTests() {
         // Generate a List of random unreduced BigFraction objects.
         var list = BigFractionUtils
-                .generateRandomBigFractions(Options.instance().getCount(),
-                        false);
+            .generateRandomBigFractions(Options.instance().getCount(),
+                                        false);
 
         // Run a test using the default virtual threads Executor.
         RunTimer.timeRun(() ->
-                        testFractionMultiplications(list).join(),
-                "CompletableFutureEx with virtual threads");
+                         testFractionMultiplications(list).join(),
+                         "CompletableFutureEx with virtual threads");
 
         // Run a test using the common fork-join pool executor.
         CompletableFutureEx.setExecutor(ForkJoinPool.commonPool());
 
         RunTimer.timeRun(() ->
-                        testFractionMultiplications(list).join(),
-                "CompletableFutureEx with common fork-join pool");
+                         testFractionMultiplications(list).join(),
+                         "CompletableFutureEx with common fork-join pool");
     }
 
     /**
@@ -79,7 +79,7 @@ public class ex5 {
 
         // Function asynchronously reduces/multiplies a BigFraction.
         Function<BigFraction,
-                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+            CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFutureEx
             // Perform BigFraction reduction asynchronously.
             .supplyAsync(() -> BigFraction

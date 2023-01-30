@@ -33,8 +33,8 @@ public class CompletableFutureEx<T>
     }
 
     /**
-     * @return Returns the default {@link Executor} used for async methods
-     * that do not specify an {@link Executor}.
+     * @return Returns the default {@link Executor} used for async
+     *         methods that do not specify an {@link Executor}
      */
     @Override
     public Executor defaultExecutor() {
