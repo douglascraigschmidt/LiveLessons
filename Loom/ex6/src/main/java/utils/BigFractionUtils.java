@@ -76,12 +76,12 @@ public final class BigFractionUtils {
         (List<BigFraction> list,
          StringBuffer sb) {
         // This implementation uses quick sort to order the list.
-        CompletableFuture<List<BigFraction>> quickSortF = CompletableFutureEx
+        var quickSortF = CompletableFutureEx
             // Perform quick sort asynchronously.
             .supplyAsync(() -> quickSort(list));
 
         // This implementation uses heap sort to order the list.
-        CompletableFuture<List<BigFraction>> heapSortF = CompletableFutureEx
+        var heapSortF = CompletableFutureEx
             // Perform heap sort asynchronously.
             .supplyAsync(() -> heapSort(list));
 
@@ -107,7 +107,7 @@ public final class BigFractionUtils {
      * Perform a quick sort on the {@code list}.
      */
     private static List<BigFraction> quickSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
+        var copy = new ArrayList<>(list);
     
         // Order the list with quick sort.
         Collections.sort(copy);
@@ -119,7 +119,7 @@ public final class BigFractionUtils {
      * Perform a heap sort on the {@code list}.
      */
     private static List<BigFraction> heapSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
+        var copy = new ArrayList<>(list);
 
         // Order the list with heap sort.
         HeapSort.sort(copy);

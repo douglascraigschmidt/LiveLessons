@@ -27,11 +27,12 @@ public class FuturesCollector<T>
                            List<CompletableFuture<T>>,
                            CompletableFuture<List<T>>> {
     /**
-     * A function that creates and returns a new mutable result
-     * container that will hold all the CompletableFutures in the
-     * stream.
+     * A method that creates and returns a new mutable result
+     * container that will hold all the {@link CompletableFuture}
+     * objects in the stream.
      *
-     * @return a function which returns a new, mutable result container
+     * @return A {@link Supplier} that returns a new, mutable result
+     *         container
      */
     @Override
     public Supplier<List<CompletableFuture<T>>> supplier() {
@@ -39,23 +40,25 @@ public class FuturesCollector<T>
     }
 
     /**
-     * A function that folds a CompletableFuture into the mutable
-     * result container.
+     * A method that folds a {@link CompletableFuture} into the
+     * mutable result container.
      *
-     * @return a function which folds a value into a mutable result container
+     * @return A {@link BiConsumer} that folds a value into a mutable
+     *         result container
      */
     @Override
-    public BiConsumer<List<CompletableFuture<T>>, CompletableFuture<T>> accumulator() {
+    public BiConsumer<List<CompletableFuture<T>>,
+                      CompletableFuture<T>> accumulator() {
         return List::add;
     }
 
     /**
-     * A function that accepts two partial results and merges them.
-     * The combiner function may fold state from one argument into the
+     * A method that accepts two partial results and merges them.  The
+     * {@code combiner()} may fold state from one argument into the
      * other and return that, or may return a new result container.
      *
-     * @return a function which combines two partial results into a combined
-     * result
+     * @return A {@link BinaryOperator} that combines two partial
+     *         results into a combined result
      */
     @Override
     public BinaryOperator<List<CompletableFuture<T>>> combiner() {
@@ -70,8 +73,8 @@ public class FuturesCollector<T>
      * Perform the final transformation from the intermediate
      * accumulation type {@code A} to the final result type {@code R}.
      *
-     * @return a function which transforms the intermediate result to
-     * the final result
+     * @return a {@link Function} that transforms the intermediate
+     *         result to the final result
      */
     @Override
     public Function<List<CompletableFuture<T>>,
@@ -104,8 +107,8 @@ public class FuturesCollector<T>
      * indicating the characteristics of this Collector.  This set
      * should be immutable.
      *
-     * @return An immutable set of collector characteristics, which in
-     * this case is simply UNORDERED
+     * @return An {@link Set} of collector characteristics, which in
+     *         this case is simply UNORDERED
      */
     @Override
     public Set<Characteristics> characteristics() {
@@ -113,9 +116,10 @@ public class FuturesCollector<T>
     }
 
     /**
-     * This static factory method creates a new StreamOfFuturesCollector.
+     * This static factory method creates a new {@link
+     * FuturesCollector}.
      *
-     * @return A new StreamOfFuturesCollector()
+     * @return A new {@link FuturesCollector}
      */
     public static <T> Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>>
         toFuture() {
