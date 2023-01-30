@@ -69,6 +69,7 @@ public class BQParallelStreamStrategy
             // Convert the List to a parallel Stream.
             .parallelStream()
 
+            // Keep all quotes that match the queries.
             .filter(quote -> queries
                     // Convert the List to a parallel Stream.
                     .parallelStream()

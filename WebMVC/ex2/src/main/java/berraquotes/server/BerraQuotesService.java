@@ -26,7 +26,8 @@ public class BerraQuotesService {
     /**
      * This array contains concrete strategies whose methods are
      * implemented to provide Berra quotes.  The order of these
-     * strategies matter in this array.
+     * strategies matter in this array since clients will provide
+     * these indices in their HTTP requests.
      */
     BQAbstractStrategy[] mStrategy = {
             new BQStructuredConcurrencyStrategy(),
@@ -42,6 +43,7 @@ public class BerraQuotesService {
      */
     public List<Quote> getAllQuotes(Integer strategy) {
         return mStrategy[strategy]
+            // Forward to the given implementation strategy.
             .getAllQuotes();
     }
 
@@ -58,6 +60,8 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               String query) {
         return mStrategy[strategy]
+            // Forward to the given implementation strategy after
+            // first decoding the query.
             .search(URLDecoder.decode(query,
                                      StandardCharsets.UTF_8));
     }
@@ -74,6 +78,7 @@ public class BerraQuotesService {
     public List<Quote> getQuotes(Integer strategy,
                                  List<Integer> quoteIds) {
         return mStrategy[strategy]
+            // Forward to the given implementation strategy.
             .getQuotes(quoteIds);
     }
 
@@ -90,6 +95,7 @@ public class BerraQuotesService {
     public List<Quote> search(Integer strategy,
                               List<String> queries) {
         return mStrategy[strategy]
+            // Forward to the given implementation strategy.
             .search(queries);
     }
 }

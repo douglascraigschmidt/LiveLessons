@@ -7,7 +7,6 @@ import jdk.incubator.concurrent.StructuredTaskScope;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -20,7 +19,22 @@ public class BQStructuredConcurrencyStrategy
     /**
      * Max size of each batch.
      */
-    private static final int sBATCH_SIZE = 1;
+    private static int sBATCH_SIZE = 10;
+
+    /**
+     * The constructor checks to see if {@code sBATCH_SIZE}
+     * has been defined as an environment variable.
+     */
+    public BQStructuredConcurrencyStrategy() {
+        // Check to see if the batch size has been defined
+        // in an environment variable.
+        var batchSize = System.getenv("BATCH_SIZE");
+
+        // If the batch size has been defined as an environment
+        // variable then update sBATCH_SIZE.
+        if (batchSize != null)
+            sBATCH_SIZE = Integer.parseInt(batchSize);
+    }
 
     /**
      * @return A {@link List} of all {@link Quote} objects
@@ -30,7 +44,7 @@ public class BQStructuredConcurrencyStrategy
         return mQuotes;
     }
 
-     /**
+    /**
      * Get a {@link List} that contains the requested quotes.
      *
      * @param quoteIds A {@link List} containing the given random
@@ -181,22 +195,22 @@ public class BQStructuredConcurrencyStrategy
         // convert into a regex of style
         // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
         var result = queries
-                // toString() returns the values as a comma-separated
-                // string enclosed in square brackets.
-                .toString()
+            // toString() returns the values as a comma-separated
+            // string enclosed in square brackets.
+            .toString()
 
-                // Lowercase for matching purposes.
-                .toLowerCase()
+            // Lowercase for matching purposes.
+            .toLowerCase()
 
-                // Start of regex.
-                .replace("[", "(.*")
+            // Start of regex.
+            .replace("[", "(.*")
 
-                // Separators between queries previous operations added in
-                // a space with each comma.
-                .replace(", ", ".*)|(.*")
+            // Separators between queries previous operations added in
+            // a space with each comma.
+            .replace(", ", ".*)|(.*")
 
-                // End of regex.
-                .replace("]", ".*)");
+            // End of regex.
+            .replace("]", ".*)");
 
         System.out.println("regexQueries = " + result);
         return result;
@@ -214,17 +228,17 @@ public class BQStructuredConcurrencyStrategy
     private static <T> Stream<List<T>> getBatches(List<T> list,
                                                   int batchSize) {
         return IntStream
-                // Create an iterator that will traverse the List.
-                .iterate(0,
-                        i -> i < list.size(),
-                        i -> i + batchSize)
+            // Create an iterator that will traverse the List.
+            .iterate(0,
+                     i -> i < list.size(),
+                     i -> i + batchSize)
 
-                // Split the original List into sublists, each of
-                // which has at most batchSize elements.
-                .mapToObj(i -> list
-                        .subList(i, Math
-                                .min(i + batchSize,
-                                        list.size())));
+            // Split the original List into sublists, each of
+            // which has at most batchSize elements.
+            .mapToObj(i -> list
+                      .subList(i, Math
+                               .min(i + batchSize,
+                                    list.size())));
     }
 
     /**
@@ -278,17 +292,17 @@ public class BQStructuredConcurrencyStrategy
          String regexQueries,
          StructuredTaskScope.ShutdownOnFailure scope) {
         return scope
-            // Create a virtual thread.
-            .fork(() -> // Flatten the Stream of Stream<Quote> objects to a
-                    // Stream of Quote objects.
-                    Stream
-                          .of(regexQueries)
+            // Create a virtual thread to perform matches
+            // concurrently.
+            .fork(() -> Stream
+                  // Convert the String to a Stream.
+                  .of(regexQueries)
 
-                          // Determine if there's any match of the 'query' in
-                          // the sublist of quotes.
-                          .flatMap(___ ->
-                               findMatchTask(regexQueries,
-                                             quotes))
+                  // Determine if the 'regexQuery' matches any quote
+                  // in the List of Quote objects.
+                  .flatMap(___ ->
+                           findMatchTask(regexQueries,
+                                         quotes))
 
                   // Convert the Stream to a List.
                   .toList());
@@ -301,10 +315,11 @@ public class BQStructuredConcurrencyStrategy
      * @param regexQueries The query in regular expression form
      * @param quotes The {@link List} of {@link Quote} objects
      *               to match with
-     * @return True if there's a match, else false
+     * @return A {@link Stream} of {@link Quote} objects that match
+     *         any of the {@code regexQueries}
      */
     private Stream<Quote> findMatchTask(String regexQueries,
-                                      List<Quote> quotes) {
+                                        List<Quote> quotes) {
         return quotes
             // Convert the List to a Stream.
             .stream()
@@ -324,20 +339,21 @@ public class BQStructuredConcurrencyStrategy
      *                containing a {@link List} with {@link Quote}
      *                objects if there's a match or an empty {@link
      *                List} if there's no match
-     * @return A {@link List} of {@link Quote} objects
+     * @return A {@link List} of matching {@link Quote} objects
      */
     @NotNull
     private List<Quote> getQuoteList
-    (List<Future<List<Quote>>> results) {
+        (List<Future<List<Quote>>> results) {
         return FutureUtils
-                // Convert the List of Future<Optional<Quote>> objects to
-                // a Stream of Optional<Quote> objects.
-                .futures2Stream(results)
+            // Convert the List of Future<List<Quote>> objects to a
+            // Stream of List<Quote> objects.
+            .futures2Stream(results)
 
-                // Eliminate empty Optional objects.
-                .flatMap(List::stream)
+            // Flatten the Stream of List<Quote> objects into a Stream
+            // of Quote objects and eliminate empty List objects.
+            .flatMap(List::stream)
 
-                // Convert the Stream to a List.
-                .toList();
+            // Convert the Stream to a List.
+            .toList();
     }
 }

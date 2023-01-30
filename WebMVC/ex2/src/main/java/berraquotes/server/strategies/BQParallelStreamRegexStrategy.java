@@ -45,7 +45,7 @@ public class BQParallelStreamRegexStrategy
             // Convert the List to a Stream.
             .parallelStream()
 
-            // Keep all quotes that match the regex.
+             // Keep all quotes that match the regex queres.
             .filter(quote -> quote.quote()
                     .toLowerCase()
                     // Execute the regex portion of the filter.
