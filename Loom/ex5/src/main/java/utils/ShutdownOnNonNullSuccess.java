@@ -43,7 +43,7 @@ public class ShutdownOnNonNullSuccess<T>
         Future.State state = future.state();
         if (state == Future.State.RUNNING) {
             throw new IllegalArgumentException("Task is not completed");
-        } else if (future.state() == Future.State.SUCCESS) {
+        } else if (state == Future.State.SUCCESS) {
             // Get the result of the Future.
             T result = future.resultNow();
 

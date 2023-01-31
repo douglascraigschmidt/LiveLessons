@@ -120,12 +120,9 @@ public class StructuredConcurrencyTest {
                                            imageFuture.resultNow()));
             }
 
-            // Scope doesn't exit until all concurrent tasks complete
-            // or an exception is thrown.
-            scope.join();
-
-            // Handle any exception that has occurred.
-            scope.throwIfFailed();
+            // Wait until all concurrent tasks complete successfully
+            // or throw the exception if one occurs.
+            scope.join().throwIfFailed();
 
             // Return the List of transformed images, which have
             // finished transforming at this point.

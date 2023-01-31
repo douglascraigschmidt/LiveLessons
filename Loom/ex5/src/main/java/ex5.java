@@ -57,7 +57,7 @@ public class ex5 {
                 // Concurrently check whether the numbers are prime or
                 // not.
                 .forEach(number -> scope
-                         // Create a virtual threa.
+                         // Create a virtual thread.
                          .fork(() ->
                                // If number is prime yield it,
                                // otherwise yield null.
@@ -69,10 +69,11 @@ public class ex5 {
             // all of them to fail.
             scope.join();
 
+            // Get the result of the computation.
             var result = scope.result();
 
             if (result != null)
-                // Print the first prime number (or null
+                // Print the first prime number (or null).
                 System.out.println("First prime result = " + result);
             else
                 System.out.println("No prime results found");

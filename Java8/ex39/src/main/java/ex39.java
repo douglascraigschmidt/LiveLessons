@@ -2,16 +2,20 @@ import atomiclongs.*;
 import utils.ExceptionUtils;
 import utils.RunTimer;
 
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * This program demonstrates various ways to implement an "AtomicLong"
- * class, including using Java StampedLock, ReentrantReadWriteLock,
- * synchronized statements, and VarHandle.
+ * class, including using Java {@link StampedLock}, {@link
+ * ReentrantReadWriteLock}, synchronized statements, and {@link
+ * VarHandle}.
  */
 class ex39 {
     /**

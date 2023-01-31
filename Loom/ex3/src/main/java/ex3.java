@@ -71,11 +71,8 @@ public class ex3 {
                                                  sBigReducedFraction)));
 
             // This barrier synchronizer waits for all threads to
-            // finish or the task scope to shut down.
-            scope.join();
-
-            // Throw any exception that may have occurred.
-            scope.throwIfFailed();
+            // finish or throw any exception that occurred.
+            scope.join().throwIfFailed();
 
             // Sort and print the results.
             BigFractionUtils.sortAndPrintList(results);
