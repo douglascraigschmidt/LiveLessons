@@ -8,21 +8,29 @@ import java.lang.invoke.VarHandle;
 
 /**
  * This class emulates a "compare and swap"-style spin-lock with
- * non-recursive semantics using the Java VarHandle class.
+ * non-recursive semantics using the Java {@link VarHandle} class.
  */
 public class NonReentrantSpinLock
        implements Lock {
     /**
-     * The VarHandle used to access the 'value' field below.
+     * The {@link VarHandle} used to access the 'value' field below.
      */
     private static final VarHandle VALUE;
 
+    /**
+     * This block of code is run prior to any instance of the {@link
+     * NonReentrantSpinLock} being created.
+     */
     static {
         try {
+            // Get a {@link Lookup} object that can be used to reflect
+            // on NonReentrantSpinLock objects.
             MethodHandles.Lookup l = MethodHandles.lookup();
+
             // Initialize the VarHandle via reflection.
             VALUE = l.findVarHandle(NonReentrantSpinLock.class,
-                               "value", int.class);
+                                    "value",
+                                    int.class);
         } catch (ReflectiveOperationException e) {
             throw new Error(e);
         }
@@ -47,7 +55,7 @@ public class NonReentrantSpinLock
     }
 
     /**
-     * Acquire the lock non-interruptibly. If the lock is not
+     * Acquire the lock non-interruptibly.  If the lock is not
      * available then the current thread spins until the lock has been
      * acquired.
      */
@@ -67,7 +75,7 @@ public class NonReentrantSpinLock
     }
 
     /**
-     * Acquire the lock interruptibly. If the lock is not available
+     * Acquire the lock interruptibly.  If the lock is not available
      * then the current thread spins until the lock has been acquired.
      */
     @Override
@@ -91,19 +99,28 @@ public class NonReentrantSpinLock
     @Override
     public void unlock() {
         // Atomically release the lock that's currently held by the
-        // owner. If the lock is not held by the owner, then throw an
+        // owner.  If the lock is not held by the owner, then throw an
         // IllegalMonitorStateException.
         if ((int) VALUE.getAndSet(this, 0) != 1)
-            throw new IllegalMonitorStateException("Unlock called when not locked");
+            throw new IllegalMonitorStateException
+                ("Unlock called when not locked");
     }
 
+    /**
+     * @throw {@link UnsupportedOperationException}
+     */
     @Override
     public boolean tryLock(long time, TimeUnit unit) {
-        throw new UnsupportedOperationException("Timed tryLock() method not implemented");
+        throw new UnsupportedOperationException
+            ("Timed tryLock() method not implemented");
     }
 
+    /**
+     * @throw {@link UnsupportedOperationException}
+     */    
     @Override
     public Condition newCondition() {
-        throw new UnsupportedOperationException("newCondition() method not implemented");
+        throw new UnsupportedOperationException
+            ("newCondition() method not implemented");
     }
 }

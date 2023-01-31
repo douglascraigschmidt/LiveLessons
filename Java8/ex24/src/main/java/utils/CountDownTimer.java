@@ -38,7 +38,7 @@ public abstract class CountDownTimer {
     /**
      * Millis since epoch when alarm should stop.
      */
-    private final long mMillisInFuture;
+    protected final long mMillisInFuture;
 
     /**
      * The interval in millis that the user receives callbacks
@@ -76,12 +76,12 @@ public abstract class CountDownTimer {
     private final Lock mLock;
 
     /**
-     * @param lock The lock used to synchronize access to the object.
+     * @param lock The lock used to synchronize access to the object
      * @param millisInFuture The number of millis in the future from the call
      *   to {@link #start()} until the countdown is done and {@link #onFinish()}
-     *   is called.
+     *   is called
      * @param countDownInterval The interval along the way to receive
-     *   {@link #onTick(long)} callbacks.
+     *   {@link #onTick(long)} callbacks
      */
     public CountDownTimer(Lock lock,
                           long millisInFuture,
