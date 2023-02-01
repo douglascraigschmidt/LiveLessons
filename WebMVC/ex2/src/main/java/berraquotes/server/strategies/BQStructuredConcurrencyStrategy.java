@@ -74,11 +74,9 @@ public class BQStructuredConcurrencyStrategy
                 .toList();
 
             // Perform a barrier synchronization that waits for all
-            // the tasks to complete.
-            scope.join();
-
-            // Throw an Exception upon failure of any tasks.
-            scope.throwIfFailed();
+            // the tasks to complete successfully and then throws
+            // any exception that may have occurred.
+            scope.join().throwIfFailed();
 
             // Return a List of Quote objects.
             return FutureUtils

@@ -103,7 +103,7 @@ public class PCClientStructuredConcurrency {
      */
     private List<Integer> testIndividualCallsParallel
         (List<Integer> primeCandidates) {
-    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Get a List that contains the results of checking all
             // the primeCandidates for primality.
             var results = primeCandidates
@@ -122,12 +122,10 @@ public class PCClientStructuredConcurrency {
                 .toList();
 
             // This barrier synchronizer waits for all threads to
-            // finish or the task scope to shut down.
-            scope.join();
-
-            // Throw an exception if a remote call fails.
-            scope.throwIfFailed();
-
+            // finish or the task scope to shut down and throw an
+            // exception if a failure occurred.
+            scope.join().throwIfFailed();
+            
             // Convert the List<Future<Integer>> to a List<Integer>
             // and return it.
             return futures2Objects(results);

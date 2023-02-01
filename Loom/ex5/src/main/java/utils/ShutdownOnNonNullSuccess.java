@@ -57,6 +57,19 @@ public class ShutdownOnNonNullSuccess<T>
     }
 
     /**
+     * {@inheritDoc}
+     * @return this task scope
+     * @throws IllegalStateException {@inheritDoc}
+     * @throws WrongThreadException {@inheritDoc}
+     */
+    @Override
+    public ShutdownOnNonNullSuccess<T> join()
+        throws InterruptedException {
+        super.join();
+        return this;
+    }
+
+    /**
      * @return The first computation to match or null if there are no
      *         matches
      */
