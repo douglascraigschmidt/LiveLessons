@@ -29,7 +29,6 @@ public class ex13 {
         showStream(bardQuote);
         showParallelStream(bardQuote);
         showStreamSupport(bardQuote);
-        showRegexSearch(bardQuote);
     }
 
     /**
