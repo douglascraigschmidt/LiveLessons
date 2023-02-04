@@ -2,6 +2,10 @@ package tests;
 
 import utils.Utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeMap;
 import java.util.stream.Collector;
 
 import static java.util.function.Function.identity;

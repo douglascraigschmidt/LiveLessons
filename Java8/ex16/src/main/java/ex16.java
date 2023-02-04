@@ -74,7 +74,7 @@ public class ex16 {
                 n);
 
         runTest("BuggyFactorial2",
-                BuggyFactorial1::factorial,
+                BuggyFactorial2::factorial,
                 n);
 
         runTest("SynchronizedParallelFactorial",

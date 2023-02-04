@@ -3,6 +3,7 @@ import tests.MultiTriggerTests;
 import tests.SingleTriggerTests;
 import tests.ThreadTests;
 import utils.AsyncTester;
+import utils.BigFraction;
 
 import java.util.concurrent.CompletableFuture;
 
