@@ -213,7 +213,7 @@ public class ex18 {
     }
 
     /**
-     * Test the {@link StreamsUtils.joinAll()} method.
+     * Test the {@link StreamsUtils#joinAll} method.
      */
     private static void testJoinAll
         (List<Function<BigInteger, BigInteger>> factList,
