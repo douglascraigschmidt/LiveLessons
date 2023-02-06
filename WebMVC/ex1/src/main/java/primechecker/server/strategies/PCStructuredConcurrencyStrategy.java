@@ -52,6 +52,7 @@ public class PCStructuredConcurrencyStrategy
                          // primeCandidate for primality.
                          .submit(() -> isPrime(primeCandidate)));
 
+            // This scope will not be exited until all the tasks complete.
         } catch (Exception exception) {
             System.out.println("Exception: "
                                + exception.getMessage());

@@ -1,10 +1,7 @@
 package primechecker.server;
 
 import org.springframework.stereotype.Service;
-import primechecker.server.strategies.PCAbstractStrategy;
-import primechecker.server.strategies.PCCompletableFutureStrategy;
-import primechecker.server.strategies.PCParallelStreamStrategy;
-import primechecker.server.strategies.PCStructuredConcurrencyStrategy;
+import primechecker.server.strategies.*;
 
 import java.util.List;
 
@@ -24,13 +21,15 @@ import java.util.List;
 @Service
 public class PCServerService {
     /**
-     * This array contains concrete strategies whose methods
-     * are implemented to check for primality.
+     * This array contains concrete strategies whose methods are
+     * implemented to check for primality.  The order in which these
+     * objects are assigned to the array slots matters.
      */
     PCAbstractStrategy[] mStrategy = {
         new PCStructuredConcurrencyStrategy(),
         new PCParallelStreamStrategy(),
-        new PCCompletableFutureStrategy()
+        new PCCompletableFutureStrategy(),
+        new PCCompletableFutureExStrategy()
     };
 
     /**

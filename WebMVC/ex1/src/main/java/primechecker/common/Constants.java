@@ -18,5 +18,6 @@ public class Constants {
         public static final int STRUCTURED_CONCURRENCY = 0;
         public static final int PARALLEL_STREAM = 1;
         public static final int COMPLETABLE_FUTURE = 2;
+        public static final int COMPLETABLE_FUTURE_EX = 3;
     }
 }

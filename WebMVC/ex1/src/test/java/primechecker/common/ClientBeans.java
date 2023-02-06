@@ -19,7 +19,7 @@ import static primechecker.common.Constants.SERVER_BASE_URL;
  * annotation.
  */
 @Component
-public class Components {
+public class ClientBeans {
     /**
      * This factory method returns a new {@link RestTemplate}, which
      * enables a client to perform HTTP requests synchronously.

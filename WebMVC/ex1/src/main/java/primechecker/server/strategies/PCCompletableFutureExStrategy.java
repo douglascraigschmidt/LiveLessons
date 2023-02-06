@@ -4,17 +4,18 @@ import primechecker.common.Options;
 import primechecker.utils.FuturesCollector;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
+import primechecker.utils.CompletableFutureEx;
 import static primechecker.utils.PrimeUtils.isPrime;
 
 /*
- * This strategy uses the Java completable futures framework to check
- * all the elements in a {@link List} for primality.
+ * This strategy uses a customization of the Java completable futures
+ * framework that uses virtual threads to check all the elements in a
+ * {@link List} for primality.
  */
-public class PCCompletableFutureStrategy
+public class PCCompletableFutureExStrategy
        implements PCAbstractStrategy {
     /**
      * Checks all the elements in the {@code primeCandidates} {@link
@@ -34,31 +35,27 @@ public class PCCompletableFutureStrategy
     @Override
     public List<Integer> checkIfPrimeList(List<Integer> primeCandidates,
                                           Boolean parallel) {
-        // Use the try-with-resources block to create an Executor
-        // that's either the common fork-join pool or a
-        // single-threaded Executor.
         try (var executor = parallel
-             ? ForkJoinPool.commonPool()
-             : Executors.newSingleThreadExecutor()) {
-
+                ? Executors.newVirtualThreadPerTaskExecutor()
+                : Executors.newSingleThreadExecutor()) {
             var results = primeCandidates
-                // Convert the List into a Stream.
-                .stream()
+                    // Convert the List into a Stream.
+                    .stream()
 
-                // Asynchronously check each primeCandidate for
-                // primality.
-                .map(primeCandidate -> CompletableFuture
-                     .supplyAsync(() -> isPrime(primeCandidate),
-                                  executor))
+                    // Asynchronously check each primeCandidate for
+                    // primality.
+                    .map(primeCandidate -> CompletableFutureEx
+                            .supplyAsync(() -> isPrime(primeCandidate),
+                                         executor))
 
-                // Trigger intermediate operations and create a
-                // CompletableFuture that triggers when all the
-                // asynchronous calls complete.
-                .collect(FuturesCollector.toFuture())
+                    // Trigger intermediate operations and create a
+                    // CompletableFuture that triggers when all the
+                    // asynchronous calls complete.
+                    .collect(FuturesCollector.toFuture())
 
-                // Block until all the asynchronous processing
-                // completes.
-                .join();
+                    // Block until all the asynchronous processing
+                    // completes.
+                    .join();
 
             // Conditionally display the results.
             if (Options.instance().getDebug())

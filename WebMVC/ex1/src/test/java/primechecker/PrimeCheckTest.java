@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import primechecker.client.PCClientCompletableFuture;
+import primechecker.client.PCClientCompletableFutureEx;
 import primechecker.client.PCClientParallelStream;
 import primechecker.client.PCClientStructuredConcurrency;
 import primechecker.common.Options;
@@ -44,10 +45,13 @@ public class PrimeCheckTest {
     private PCClientParallelStream testClientPS;
 
     @Autowired
+    private PCClientStructuredConcurrency testClientSC;
+
+    @Autowired
     private PCClientCompletableFuture testClientCF;
 
     @Autowired
-    private PCClientStructuredConcurrency testClientSC;
+    private PCClientCompletableFutureEx testClientCFEx;
 
     /**
      * Emulate the "command-line" arguments for the tests.
@@ -116,6 +120,34 @@ public class PrimeCheckTest {
                 randomIntegers,
                 true,
                 "individualCallsParallelCF");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which sequentially checks List elements for primality.
+        timeTest(testClientCFEx::testListCall,
+                randomIntegers,
+                false,
+                "listCallSequentialCFEx");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which check List elements for primality in parallel.
+        timeTest(testClientCFEx::testListCall,
+                randomIntegers,
+                true,
+                "listCallParallelCFEx");
+
+        // Test sending individual HTTP GET requests to the server
+        // sequentially to check if an Integer is prime or not
+        timeTest(testClientCFEx::testIndividualCalls,
+                randomIntegers,
+                false,
+                "individualCallsSequentialCFEx");
+
+        // Test sending individual HTTP GET requests to the server in
+        // parallel to check if an Integer is prime or not.
+        timeTest(testClientCFEx::testIndividualCalls,
+                randomIntegers,
+                true,
+                "individualCallsParallelCFEx");
 
         // Test sending a List in one HTTP GET request to the server,
         // which sequentially checks List elements for primality.

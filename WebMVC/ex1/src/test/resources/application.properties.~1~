@@ -1,0 +1,3 @@
+logging.level.root=OFF
+logging.level.org.springframework.web=OFF
+logging.level.org.hibernate=OFF

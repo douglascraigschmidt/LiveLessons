@@ -3,6 +3,7 @@ package primechecker.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import primechecker.server.PCServerController;
+import primechecker.utils.CompletableFutureEx;
 import primechecker.utils.FuturesCollector;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 import static primechecker.common.Constants.Strategies.COMPLETABLE_FUTURE;
+import static primechecker.common.Constants.Strategies.COMPLETABLE_FUTURE_EX;
 import static primechecker.utils.FuturesCollector.toFuture;
 
 /**
@@ -18,8 +20,9 @@ import static primechecker.utils.FuturesCollector.toFuture;
  * remote method invocations on the {@link PCServerController} web
  * service to determine the primality of large integers.  These
  * invocations can be made individually or in bulk, as well as be make
- * sequentially or in parallel using Java the completable future
- * framework.
+ * sequentially or in parallel using a customized implementation of
+ * the Java completable future framework that uses virtual threads to
+ * execute tasks.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -28,7 +31,7 @@ import static primechecker.utils.FuturesCollector.toFuture;
  * any explicit code.
  */
 @Component
-public class PCClientCompletableFuture {
+public class PCClientCompletableFutureEx {
     /**
      * This auto-wired field connects the {@link
      * PCClientCompletableFuture} to the {@link PCProxy} that performs
@@ -51,34 +54,31 @@ public class PCClientCompletableFuture {
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
                                              boolean parallel)  {
-        // Use the try-with-resources block to create an Executor
-        // that's either the common fork-join pool or a
-        // single-threaded Executor.
-        try (var executor = parallel
-             ? ForkJoinPool.commonPool()
-             : Executors.newSingleThreadExecutor()) {
-            return primeCandidates
-                // Convert the List into a Stream.
-                .stream()
+        if (!parallel)
+            CompletableFutureEx
+                // Switch to a single-threaded executor.
+                .setExecutor(Executors.newSingleThreadExecutor());
 
-                // Asynchronously perform a remote method invocation
-                // to check each primeCandidate for primality.
-                .map(primeCandidate -> CompletableFuture
-                     .supplyAsync(() -> mPCProxy
-                                  // Forward to the proxy.
-                                  .checkIfPrime(COMPLETABLE_FUTURE,
-                                                primeCandidate),
-                                  executor))
+        return primeCandidates
+            // Convert the List into a Stream.
+            .stream()
 
-                // Trigger intermediate operations and create a
-                // CompletableFuture that triggers when all the
-                // asynchronous calls complete.
-                .collect(FuturesCollector.toFuture())
+            // Asynchronously perform a remote method invocation
+            // to check each primeCandidate for primality.
+            .map(primeCandidate -> CompletableFutureEx
+                 .supplyAsync(() -> mPCProxy
+                              // Forward to the proxy.
+                              .checkIfPrime(COMPLETABLE_FUTURE_EX,
+                                            primeCandidate)))
 
-                // Block until all the asynchronous processing
-                // completes.
-                .join();
-        }
+            // Trigger intermediate operations and create a
+            // CompletableFuture that triggers when all the
+            // asynchronous calls complete.
+            .collect(FuturesCollector.toFuture())
+
+            // Block until all the asynchronous processing
+            // completes.
+            .join();
     }
 
     /**
@@ -97,7 +97,7 @@ public class PCClientCompletableFuture {
                                       boolean parallel) {
         return mPCProxy
             // Forward to the proxy.
-            .checkIfPrimeList(COMPLETABLE_FUTURE,
+            .checkIfPrimeList(COMPLETABLE_FUTURE_EX,
                               primeCandidates,
                               parallel);
     }

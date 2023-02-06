@@ -1,9 +1,6 @@
-package utils;
+package primechecker.utils;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
@@ -65,6 +62,28 @@ public class CompletableFutureEx<T>
             // Completes this CompletableFuture with the result of the
             // given supplier invoked using the default executor.
             .completeAsync(supplier);
+    }
+
+    /**
+     * Returns a new {@link CompletableFutureEx} that is asynchronously
+     * completed by a task running with the value obtained by calling
+     * the given {@link Supplier} using the default {@link Executor}.
+     *
+     * @param supplier A {@link Supplier} returning the value to be used
+     *                 to complete the returned {@link CompletableFuture}
+     * @param executor The {@link Executor} to set as the default
+     * @return The new {@link CompletableFuture}
+     */
+    public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier,
+                                                       Executor executor) {
+        // Set the default Executor if it's different from the current
+        // value.
+        if (executor != sEXEC)
+            setExecutor(executor);
+        return new CompletableFutureEx<T>()
+                // Completes this CompletableFuture with the result of the
+                // given supplier invoked using the default executor.
+                .completeAsync(supplier);
     }
 }
 
