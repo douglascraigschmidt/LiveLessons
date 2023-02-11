@@ -109,7 +109,7 @@ public class BQStructuredConcurrencyStrategy
             // Get a List of Futures to Quote objects that are being
             // processed in parallel.
             var results = BQStructuredConcurrencyStrategy
-                // Split the List into a sublist.
+                // Split the List into a sublist and returns the sublist as a stream.
                 .getBatches(mQuotes,
                             sBATCH_SIZE)
 

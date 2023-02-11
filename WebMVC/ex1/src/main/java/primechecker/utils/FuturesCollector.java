@@ -72,7 +72,8 @@ public class FuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<List<CompletableFuture<T>>, CompletableFuture<List<T>>> finisher() {
+    public Function<List<CompletableFuture<T>>,
+                    CompletableFuture<List<T>>> finisher() {
         return futures
                 -> CompletableFuture
                 // Use CompletableFuture.allOf() to obtain a

@@ -79,6 +79,7 @@ public class PrimeCheckTest {
 
         assert (testClientPS != null);
 
+        /*
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClientPS::testIndividualCalls,
@@ -107,6 +108,14 @@ public class PrimeCheckTest {
                 true,
                 "listCallParallelPS");
 
+         */
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which sequentially checks List elements for primality.
+        timeTest(testClientCF::testListCall,
+                randomIntegers,
+                false,
+                "listCallSequentialCF");
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClientCF::testIndividualCalls,
@@ -120,6 +129,13 @@ public class PrimeCheckTest {
                 randomIntegers,
                 true,
                 "individualCallsParallelCF");
+
+        // Test sending a List in one HTTP GET request to the server,
+        // which check List elements for primality in parallel.
+        timeTest(testClientCF::testListCall,
+                randomIntegers,
+                true,
+                "listCallParallelCF");
 
         // Test sending a List in one HTTP GET request to the server,
         // which sequentially checks List elements for primality.
@@ -149,20 +165,7 @@ public class PrimeCheckTest {
                 true,
                 "individualCallsParallelCFEx");
 
-        // Test sending a List in one HTTP GET request to the server,
-        // which sequentially checks List elements for primality.
-        timeTest(testClientCF::testListCall,
-                randomIntegers,
-                false,
-                "listCallSequentialCF");
-
-        // Test sending a List in one HTTP GET request to the server,
-        // which check List elements for primality in parallel.
-        timeTest(testClientCF::testListCall,
-                randomIntegers,
-                true,
-                "listCallParallelCF");
-
+        /*
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClientSC::testIndividualCalls,
@@ -190,6 +193,8 @@ public class PrimeCheckTest {
                 randomIntegers,
                 true,
                 "listCallParallelSC");
+
+         */
 
         // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());

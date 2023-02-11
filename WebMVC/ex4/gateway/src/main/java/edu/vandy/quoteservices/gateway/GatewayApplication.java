@@ -13,19 +13,28 @@ import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 
 /**
- * @@ Monte, what does this class do?
+ * Defines an API gateway that uses routes to forward requests to
+ * downstream microservices.
+ * 
+ * The {@code @SpringBootApplication} annotation enables apps to use
+ * autoconfiguration, component scan, and to define extra
+ * configurations on their "application" class.
+ *
+ * The {@code @Configuration} annotation tells Spring container that 
+ * there is one or more beans that needs to be dealt with at runtime.
  */
 @SpringBootApplication
 @Configuration
 public class GatewayApplication {
     /**
-     *
+     * Create a {@link Logger} to show {@link GatewayProperties}.
      */
-    private static final Logger logger =
+    private static final Logger mLogger =
         LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     /**
-     * @@ Monte, what is the field used for?
+     * Spring {@link GatewayProperties} used to track what
+     * microservices have been registered with this gateway.
      */
     @Autowired
     private GatewayProperties props;
@@ -35,16 +44,17 @@ public class GatewayApplication {
      */
     public static void main(String[] args) {
         // Launch this application.
-        SpringApplication.run(GatewayApplication.class, args);
+        SpringApplication.run(GatewayApplication.class, 
+                              args);
     }
 
     /**
-     * Runs after application has been constructed and displays
-     * the current Gateway properties that shows all gateway
+     * Runs after application has been constructed and displays the
+     * current {@link GatewayProperties} that shows all gateway
      * routing paths.
      */
     @PostConstruct
     public void init() {
-        logger.info(Objects.toString(props));
+        mLogger.info(Objects.toString(props));
     }
 }

@@ -2,7 +2,9 @@ package edu.vandy.mathservices.microservices.primality;
 
 import edu.vandy.mathservices.common.Options;
 import edu.vandy.mathservices.common.PrimeResult;
+import edu.vandy.mathservices.microservices.gcd.GCDController;
 import edu.vandy.mathservices.utils.MathUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,31 +39,49 @@ public class PrimalityService {
     public List<PrimeResult> checkPrimalities
         (List<Integer> primeCandidates) {
         // Create a List to hold the results.
-        List<Future<PrimeResult>> results = new ArrayList<>();
+        List<Future<PrimeResult>> results;
 
         // Create a new scope to execute virtual tasks, which exits
         // only after all tasks complete by using the new AutoClosable
         // feature of ExecutorService in conjunction with a
         // try-with-resources block.
-        try (ExecutorService executor =
-             Executors.newVirtualThreadPerTaskExecutor()) {
-            results = primeCandidates
-                // Create a stream of Integer objects.
-                .stream()
-
-                // Check the primality of each number concurrently.
-                .map(primeCandidate ->
-                     // Use executor to start a virtual thread.
-                     checkPrimality(primeCandidate, executor))
-
-                // Trigger intermediate processing and collect/return
-                // results in a List of Future<PrimeResult> objects.
-                .toList();
+        try (var executor = Executors
+             .newVirtualThreadPerTaskExecutor()) {
+            results = getFutures(primeCandidates, executor);
+            // The block doesn't exit until all tasks are done.
         }
 
         // Convert the List of Future<PrimeResult> objects to a List
         // of PrimeResult objects.
         return convertFutures(results);
+    }
+
+    /**
+     * Get a {@link List} of {@link Future<PrimeResult>} objects
+     * corresponding to the {@link List} of {@code primeCandidates}.
+     *
+     * @param primeCandidates The {@link List} of {@link Integer} objects
+     *                        used as input to the primality computations
+     * @param executor The {@link ExecutorService} used to fork
+     *                 virtual {@link Thread} objects
+     * @return A {@link List} of {@link Future<PrimeResult>} objects
+     */
+    @NotNull
+    private static List<Future<PrimeResult>> getFutures
+        (List<Integer> primeCandidates,
+         ExecutorService executor) {
+        return primeCandidates
+            // Create a stream of Integer objects.
+            .stream()
+
+            // Check the primality of each number concurrently.
+            .map(primeCandidate ->
+                 // Use executor to start a virtual thread.
+                 checkPrimality(primeCandidate, executor))
+
+            // Trigger intermediate processing and collect/return
+            // results in a List of Future<PrimeResult> objects.
+            .toList();
     }
 
     /**

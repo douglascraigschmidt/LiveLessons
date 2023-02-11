@@ -4,6 +4,7 @@ import edu.vandy.mathservices.common.Options;
 import edu.vandy.mathservices.utils.MathUtils;
 import jdk.incubator.concurrent.StructuredTaskScope;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import static edu.vandy.mathservices.utils.FutureUtils.convertFutures;
 @Service
 public class GCDService {
     /**
-     * Compute the GCD of the {@code integers} param.
+     * Concurrently compute the GCD of the {@code integers} param.
      *
      * @param integers The {@link List} of {@link Integer} objects
      *                 upon which to compute the GCD
@@ -43,27 +44,13 @@ public class GCDService {
         // try-with-resources block.
         try (var scope =
              new StructuredTaskScope.ShutdownOnFailure()) {
-            // Create a List to hold the results.
-            var results = StreamSupport
-                // Convert the List of Integer objects into a
-                // sequential stream of two-element Integer objects
-                // used to compute the GCD.
-                .stream(new ListSpliterator(integers), false)
+            // Get the results.
+            var results =
+                getFutures(integers, scope);
 
-                // Compute all the GCDs concurrently.
-                .map((Integer[] params) ->
-                     // Use executor to start a virtual thread.
-                     computeGCD(params, scope))
-
-                // Trigger intermediate processing and collect results
-                // into a List of Future<GCDResult> objects.
-                .toList();
-
-            // Barrier synchronizer that waits for all the tasks to complete.
-            scope.join();
-
-            // Throw an Exception upon failure of any tasks.
-            scope.throwIfFailed();
+            // This barrier synchronizer waits for tasks to complete
+            // successfully or throw an Exception upon failure.
+            scope.join().throwIfFailed();
 
             // Convert the List of Future<GCDResult> objects to a List
             // of GCDResult objects.
@@ -72,6 +59,37 @@ public class GCDService {
             System.out.println("Exception: " + exception.getMessage());
             throw new RuntimeException(exception);
         }
+    }
+
+    /**
+     * Get a {@link List} of {@link Future<GCDResult>} objects
+     * corresponding to the {@link List} of {@code integers}.
+     *
+     * @param integers The {@link List} of {@link Integer} objects
+     *                 used as input to the GCD computations
+     * @param scope The {@link StructuredTaskScope.ShutdownOnFailure}
+     *              used to fork virtual {@link Thread} objects
+     * @return A {@link List} of {@link Future<GCDResult>} objects
+     */
+    @NotNull
+    private static List<Future<GCDResult>> getFutures
+        (List<Integer> integers,
+         StructuredTaskScope.ShutdownOnFailure scope) {
+        return StreamSupport
+            // Convert the List of Integer objects into a
+            // sequential stream of two-element Integer objects
+            // used to compute the GCD.
+            .stream(new ListSpliterator(integers),
+                    false)
+
+            // Compute all the GCDs concurrently.
+            .map((Integer[] params) ->
+                 // Use executor to start a virtual thread.
+                 computeGCD(params, scope))
+
+            // Trigger intermediate processing and collect results
+            // into a List of Future<GCDResult> objects.
+            .toList();
     }
 
     /**
@@ -84,8 +102,8 @@ public class GCDService {
      */
 
     private static Future<GCDResult> computeGCD
-       (Integer[] integers,
-        StructuredTaskScope.ShutdownOnFailure scope) {
+        (Integer[] integers,
+         StructuredTaskScope.ShutdownOnFailure scope) {
         return scope
             // submit() starts a virtual thread to compute the GCD
             // concurrently.

@@ -53,6 +53,8 @@ public class PrimalityProxy {
             .build()
             .toUriString();
 
+        System.out.println ("URI = " + uri);
+
         return WebUtils
             // Create and send a GET request to the server to check if
             // the Integer objects in primeCandidates are prime or

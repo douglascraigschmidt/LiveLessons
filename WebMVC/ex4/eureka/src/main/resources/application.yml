@@ -1,3 +1,5 @@
+# The port number listened on by the Eureka discovery service.
+
 server:
   port: 8761
 spring:

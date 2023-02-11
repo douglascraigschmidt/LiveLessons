@@ -40,7 +40,7 @@ public class PCCompletableFutureStrategy
         try (var executor = parallel
              ? ForkJoinPool.commonPool()
              : Executors.newSingleThreadExecutor()) {
-
+            // Obtain the List of results from determining primality.
             var results = primeCandidates
                 // Convert the List into a Stream.
                 .stream()

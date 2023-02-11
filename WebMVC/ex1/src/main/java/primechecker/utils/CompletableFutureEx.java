@@ -80,6 +80,7 @@ public class CompletableFutureEx<T>
         // value.
         if (executor != sEXEC)
             setExecutor(executor);
+        
         return new CompletableFutureEx<T>()
                 // Completes this CompletableFuture with the result of the
                 // given supplier invoked using the default executor.

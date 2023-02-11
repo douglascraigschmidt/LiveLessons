@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice.handey;
+package edu.vandy.quoteservices.microservices.handey;
 
 import edu.vandy.quoteservices.common.BaseApplication;
 import edu.vandy.quoteservices.common.Components;

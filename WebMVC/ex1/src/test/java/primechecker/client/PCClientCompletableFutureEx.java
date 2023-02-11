@@ -53,32 +53,32 @@ public class PCClientCompletableFutureEx {
      *         elements
      */
     public List<Integer> testIndividualCalls(List<Integer> primeCandidates,
-                                             boolean parallel)  {
-        if (!parallel)
-            CompletableFutureEx
-                // Switch to a single-threaded executor.
-                .setExecutor(Executors.newSingleThreadExecutor());
+                                             boolean parallel) {
+        try (var executor = parallel
+             ? Executors.newVirtualThreadPerTaskExecutor()
+             : Executors.newSingleThreadExecutor()) {
+            return primeCandidates
+                // Convert the List into a Stream.
+                .stream()
 
-        return primeCandidates
-            // Convert the List into a Stream.
-            .stream()
+                // Asynchronously perform a remote method invocation
+                // to check each primeCandidate for primality.
+                .map(primeCandidate -> CompletableFutureEx
+                     .supplyAsync(() -> mPCProxy
+                                  // Forward to the proxy.
+                                  .checkIfPrime(COMPLETABLE_FUTURE_EX,
+                                                primeCandidate),
+                                  executor))
 
-            // Asynchronously perform a remote method invocation
-            // to check each primeCandidate for primality.
-            .map(primeCandidate -> CompletableFutureEx
-                 .supplyAsync(() -> mPCProxy
-                              // Forward to the proxy.
-                              .checkIfPrime(COMPLETABLE_FUTURE_EX,
-                                            primeCandidate)))
+                // Trigger intermediate operations and create a
+                // CompletableFuture that triggers when all the
+                // asynchronous calls complete.
+                .collect(FuturesCollector.toFuture())
 
-            // Trigger intermediate operations and create a
-            // CompletableFuture that triggers when all the
-            // asynchronous calls complete.
-            .collect(FuturesCollector.toFuture())
-
-            // Block until all the asynchronous processing
-            // completes.
-            .join();
+                // Block until all the asynchronous processing
+                // completes.
+                .join();
+        }
     }
 
     /**

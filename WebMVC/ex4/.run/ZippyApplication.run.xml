@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ZippyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <module name="ex4.microservices.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservice.zippy.ZippyApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservices.zippy.ZippyApplication" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="edu.vandy.quoteservices.microservice.zippy.*" />
+        <option name="PATTERN" value="edu.vandy.quoteservices.microservices.zippy.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

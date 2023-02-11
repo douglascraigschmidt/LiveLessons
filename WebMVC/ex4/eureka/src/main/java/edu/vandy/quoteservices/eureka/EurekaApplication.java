@@ -5,9 +5,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 /**
- * Eureka is a REST (Representational State Transfer) based service that is
- * primarily used in the AWS cloud for locating services for the purpose of load
- * balancing and fail-over of middle-tier servers.
+ * Eureka is a REST (Representational State Transfer)-based discovery
+ * service used to locate microservices.
+ *
+ * Eureka can also be used for load balancing and handling fail-over
+ * of middle-tier servers.
+ *
+ * The {@code @SpringBootApplication} annotation enables apps to use
+ * autoconfiguration, component scan, and to define extra
+ * configurations on their "application" class.
+ *
+ * The {@code @EnableEurekaServer} annotation makes a Spring Boot
+ * application act as a Eureka Server.
  */
 @SpringBootApplication
 @EnableEurekaServer

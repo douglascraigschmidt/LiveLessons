@@ -1,15 +1,12 @@
-package edu.vandy.quoteservices.microservice.zippy;
+package edu.vandy.quoteservices.microservices.handey;
 
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.common.QuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -19,7 +16,7 @@ import java.util.stream.StreamSupport;
  * recommendations.
  *
  * This class implements the abstract methods in {@link BaseService}
- * using the Java sequential streams framework.
+ * using the Java streams framework.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
@@ -28,23 +25,19 @@ import java.util.stream.StreamSupport;
  * service.
  */
 @Service
-public class ZippyService
-       extends BaseService<List<Quote>> {
+public class HandeyService
+    extends BaseService<List<Quote>> {
     /**
-     * Spring-injected repository that contains all quotes.
+     * An in-memory {@link List} of all the quotes.
      */
     @Autowired
-    private QuoteRepository mRepository;
+    private List<Quote> mQuotes;
 
     /**
      * @return A {@link List} of all {@link Quote} objects
      */
     public List<Quote> getAllQuotes() {
-        System.out.println("ZippyService.getAllQuotes()");
-
-        return mRepository
-            // Forward to the repository.
-            .findAll();
+        return mQuotes;
     }
 
     /**
@@ -58,11 +51,16 @@ public class ZippyService
      */
     public List<Quote> getQuotes(List<Integer> quoteIds,
                                  Boolean parallel) {
-        System.out.println("ZippyService.getQuotes()");
+        return StreamSupport
+            // Convert the List to a parallel or sequential Stream.
+            .stream(quoteIds.spliterator(), parallel)
 
-        return mRepository
-            // Forward to the repository.
-            .findAllById(quoteIds);
+            // Get the Handey quote associated with the quoteId.
+            .map(mQuotes::get)
+
+            // Trigger intermediate operations and collect the results
+            // into a List.
+            .toList();
     }
 
     /**
@@ -77,21 +75,20 @@ public class ZippyService
      */
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
-        // Use a Java sequential or parallel stream and the JPA to
-        // locate all movies whose 'id' matches the List of 'queries'
-        // and return them as a List of Movie objects.
         return StreamSupport
-            // Convert the List to a Stream.
-            .stream(queries.spliterator(), parallel)
+            // Convert the List to a sequential or parallel Stream.
+            .stream(mQuotes.spliterator(), parallel)
 
-            // Flatten the Stream of Streams into a Stream.
-            .flatMap(query ->  mRepository
-                     // Find all Quote rows in the database that match
-                     // the 'query'.
-                     .findByQuoteContainingIgnoreCase(query)
+            // Locate all the matches.
+            .filter(quote -> StreamSupport
+                    // Convert the List to a sequential or parallel
+                    // Stream.
+                    .stream(queries.spliterator(), parallel)
 
-                     // Convert List to a Stream.
-                     .stream())
+                    // Return any matches.
+                    .anyMatch(query -> quote.quote
+                              .toLowerCase()
+                              .contains(query.toLowerCase())))
 
             // Convert the Stream to a List.
             .toList();
