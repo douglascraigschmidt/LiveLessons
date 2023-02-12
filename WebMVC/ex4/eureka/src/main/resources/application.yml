@@ -1,4 +1,5 @@
-# The port number listened on by the Eureka discovery service.
+# Define the port number listened on by the Eureka discovery service
+# and other properties.
 
 server:
   port: 8761

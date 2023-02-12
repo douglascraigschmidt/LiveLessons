@@ -13,7 +13,7 @@ public class ListSpliterator
     /**
      * The {@link List} of {@link Integer} objects to process.
      */
-    private final List<Integer> mInts;
+    private final List<Integer> mIntegers;
 
     /**
      * The start of the next pair of {@link Integer} objects in the
@@ -24,9 +24,9 @@ public class ListSpliterator
     /**
      * The constructor initializes the field.
      */
-    public ListSpliterator(List<Integer> mInts) {
+    public ListSpliterator(List<Integer> integers) {
         super(0, 0);
-        this.mInts = mInts;
+        mIntegers = integers;
     }
 
     /**
@@ -40,15 +40,17 @@ public class ListSpliterator
      */
     @Override
     public boolean tryAdvance(Consumer<? super Integer[]> action) {
-        // Return false and terminate the spliterator if all elements
-        // have been processed.
-        if (mIndex >= mInts.size())
+        // Return false if all elements have been processed, which
+        // terminates the spliterator .
+        if (mIndex >= mIntegers.size())
             return false;
         else {
             // Create a new two-element array of Integer objects and
             // return it via the action Consumer.
-            action.accept(new Integer[]{mInts.get(mIndex),
-                                        mInts.get(mIndex + 1)});
+            action.accept(new Integer[] {
+                            mIntegers.get(mIndex),
+                            mIntegers.get(mIndex + 1)
+                          });
 
             // Split over the two elements that were just processed.
             mIndex += 2;

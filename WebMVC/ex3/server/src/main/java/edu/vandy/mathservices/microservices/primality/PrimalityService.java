@@ -19,7 +19,7 @@ import static edu.vandy.mathservices.utils.FutureUtils.convertFutures;
  * This class defines implementation methods that are called by the
  * {@link GCDController}. These implementation methods check the
  * primality of one or more {@link Integer} objects using the Java
- * structured concurrency framework via a {@code
+ * structured concurrency framework via the {@link Executors} {@code
  * newVirtualThreadPerTaskExecutor}.
  *
  * This class is annotated as a Spring {@code @Service}, which
