@@ -22,8 +22,6 @@ public class Components {
      * This factory method returns a new {@link RestTemplate}, which
      * enables a client to perform HTTP requests synchronously.
      *
-     * @param serverBaseUrl The hostname and port number for the
-     *                      microservice
      * @return A new {@link RestTemplate}
      */
     @Bean

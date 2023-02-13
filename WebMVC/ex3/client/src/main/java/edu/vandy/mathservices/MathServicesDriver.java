@@ -100,11 +100,9 @@ public class MathServicesDriver
                 .fork(() -> testClient
                       .computeGCDs(randomIntegers));
 
-            // Barrier synchronizer waits for both tasks to complete.
-            scope.join();
-
-            // Throw an Exception on failure.
-            scope.throwIfFailed();
+            // Barrier synchronizer waits for both tasks to complete
+            // or throw an exception that occurred.
+            scope.join().throwIfFailed();
 
             Options.display("printing results");
 
