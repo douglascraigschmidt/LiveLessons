@@ -100,7 +100,10 @@ public class PrimalityService {
                     // Determine if primeCandidate is prime.
                     int result = MathUtils.isPrime(primeCandidate);
 
-                    Options.display(primeCandidate + " = " + result);
+                    Options.display("primality of "
+                                    + primeCandidate
+                                    + " = "
+                                    + result);
 
                     // Create a record to hold the results.
                     return new PrimeResult(primeCandidate, result);

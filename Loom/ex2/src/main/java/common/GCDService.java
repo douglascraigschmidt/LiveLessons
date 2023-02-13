@@ -38,14 +38,14 @@ public class GCDService {
              .newVirtualThreadPerTaskExecutor()) {
             return StreamSupport
                 // Convert the List of Integer objects into a
-                // sequential stream of two-element Integer objects
-                // used to compute the GCD.
+                // sequential stream of GCDParam objects used to
+                // compute the GCD.
                 .stream(new ListSpliterator(integers), false)
 
                 // Compute all the GCDs concurrently.
-                .map((Integer[] params) ->
+                .map(param ->
                      // Use executor to start a virtual thread.
-                     computeGCD(params, executor))
+                     computeGCD(param, executor))
 
                 // Trigger intermediate processing and collect results
                 // into a List of Future<GCDResult> objects.
@@ -54,30 +54,31 @@ public class GCDService {
     }
 
     /**
-     * Compute the GCD of the two-element array {@code integers}.
+     * Compute the GCD of the {@link GCDParam}.
      *
-     * @param integers A two-element array containing the numbers to
+     * @param integers A {@link GCDParam} containing the numbers to
      *                 compute the GCD
      * @param executor {@link ExecutorService} to perform the task
      * @return A {@link Future} that emits a {@link GCDResult}
      */
-    private static Future<GCDResult> computeGCD(Integer[] integers,
+    private static Future<GCDResult> computeGCD(GCDParam param,
                                                 ExecutorService executor) {
         return executor
             // submit() starts a virtual thread to compute the GCD
             // concurrently.
             .submit(() -> {
-                    // Compute GCD.
-                    int result = MathUtils.gcd(integers[0], integers[1]);
+                    // Compute the GCD.
+                    int result = MathUtils.gcd(param.int1(), param.int2());
 
-                    Options.display(integers[0]
-                                    + " = "
-                                    + integers[1]
+                    Options.display("GCD of "
+                                    + param.int1()
+                                    + " & "
+                                    + param.int2()
                                     + " = "
                                     + result);
 
-                    // Create a record to hold the results.
-                    return new GCDResult(integers[0], integers[1], result);
+                    // Create a GCDResult record to hold the results.
+                    return new GCDResult(param, result);
                 });
     }
 }

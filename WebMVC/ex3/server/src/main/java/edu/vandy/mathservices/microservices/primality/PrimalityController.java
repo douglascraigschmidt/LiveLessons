@@ -60,8 +60,6 @@ public class PrimalityController {
     @GetMapping(CHECK_PRIMALITY_LIST)
     public List<PrimeResult> checkPrimalities
     (@RequestParam List<Integer> primeCandidates) {
-        Options.debug("checkPrimalities()");
-
         return mService
             // Forward to the service.
             .checkPrimalities(primeCandidates);

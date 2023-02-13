@@ -21,7 +21,8 @@ import java.util.concurrent.Future;
  * by (1) checking the primality of a {@link List} of random {@link
  * Integer} objects and (2) computing the greatest common divisor
  * (GCD) of pairs of these {@link Integer} objects using Spring WebMVC
- * microservices.
+ * microservices.  Java version 19 (or greater) and Gradle version 7.6
+ * (or greater) must be installed to run this program.
  */
 @SpringBootApplication
 public class MathServicesDriver 
@@ -57,7 +58,7 @@ public class MathServicesDriver
             // Parse any command-line arguments.
             Options.instance().parseArgs(args);
 
-            // Demonstrate Java 19 structured concurrency on a List of
+            // Demonstrate Java structured concurrency on a List of
             // random large Integer objects.
             runTests(RandomUtils
                      .generateRandomIntegers(Options.instance()

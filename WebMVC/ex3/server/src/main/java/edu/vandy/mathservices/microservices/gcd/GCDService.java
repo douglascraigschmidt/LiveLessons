@@ -1,5 +1,6 @@
 package edu.vandy.mathservices.microservices.gcd;
 
+import edu.vandy.mathservices.common.GCDParam;
 import edu.vandy.mathservices.common.Options;
 import edu.vandy.mathservices.utils.MathUtils;
 import jdk.incubator.concurrent.StructuredTaskScope;
@@ -38,9 +39,8 @@ public class GCDService {
      */
     public List<GCDResult> computeGCDs(List<Integer> integers) {
         return StreamSupport
-            // Convert the List of Integer objects into a
-            // parallel stream of two-element Integer objects
-            // used to compute the GCD.
+            // Convert the List of Integer objects into a parallel
+            // stream of GCDParam objects used to compute the GCD.
             .stream(new ListSpliterator(integers),
                     true)
 
@@ -53,25 +53,28 @@ public class GCDService {
     }
 
     /**
-     * Compute the GCD of the two-element array {@code integers}.
+     * Compute the GCD of the {@link GCDParam}.
      *
-     * @param integers A two-element array containing the numbers to
-     *                 compute the GCD
+     * @param param A {@link GCDParam} containing the numbers used to
+     *              compute the GCD
      * @return A {@link GCDResult}
      */
 
-    private static GCDResult computeGCD
-        (Integer[] integers) {
-        // Compute the GCD.
-        int result = MathUtils.gcd(integers[0], integers[1]);
+    private static GCDResult computeGCD(GCDParam param) {
+        int result = MathUtils
+            // Compute the GCD.
+            .gcd(param.int1(),
+                 param.int2());
 
-        Options.display(integers[0]
-                        + " = "
-                        + integers[1]
+        Options.display("GCD of "
+                        + param.int1()
+                        + " & "
+                        + param.int2()
                         + " = "
                         + result);
 
-        // Create a record to hold the results.
-        return new GCDResult(integers[0], integers[1], result);
+        // Create a GCDResult record to hold the results.
+        return new GCDResult(param,
+                             result);
     }
 }

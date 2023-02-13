@@ -6,10 +6,10 @@ import java.util.List;
 
 /**
  * This class converts a {@link List} of {@link Integer} objects into
- * a stream of two-element {@link Integer} arrays.
+ * a stream of {@link GCDParam} objects.
  */
 public class ListSpliterator
-       extends Spliterators.AbstractSpliterator<Integer[]> {
+       extends Spliterators.AbstractSpliterator<GCDParam> {
     /**
      * The {@link List} of {@link Integer} objects to process.
      */
@@ -33,13 +33,12 @@ public class ListSpliterator
      * Attempts to extract the next pair of {@link Integer} objects
      * from the {@link List}.
      *
-     * @param action Yields a two-element array of {@link Integer}
-     *               objects
+     * @param action Yields a {@link GCDParam}
      * @return False if there are no more pairs of {@link Integer}
      *         objects to process, else true
      */
     @Override
-    public boolean tryAdvance(Consumer<? super Integer[]> action) {
+    public boolean tryAdvance(Consumer<? super GCDParam> action) {
         // Return false if all elements have been processed, which
         // terminates the spliterator .
         if (mIndex >= mIntegers.size())
@@ -47,10 +46,8 @@ public class ListSpliterator
         else {
             // Create a new two-element array of Integer objects and
             // return it via the action Consumer.
-            action.accept(new Integer[] {
-                            mIntegers.get(mIndex),
-                            mIntegers.get(mIndex + 1)
-                          });
+            action.accept(new GCDParam(mIntegers.get(mIndex),
+                                       mIntegers.get(mIndex + 1)));
 
             // Split over the two elements that were just processed.
             mIndex += 2;

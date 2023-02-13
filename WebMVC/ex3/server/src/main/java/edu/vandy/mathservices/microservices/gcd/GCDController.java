@@ -56,8 +56,6 @@ public class GCDController {
     @GetMapping(COMPUTE_GCD_LIST)
     public List<GCDResult> computeGCDs
         (@RequestParam List<Integer> integers) {
-        Options.debug("computeGCDs()");
-
         return mService
                 // Forward to the service.
                 .computeGCDs(integers);
