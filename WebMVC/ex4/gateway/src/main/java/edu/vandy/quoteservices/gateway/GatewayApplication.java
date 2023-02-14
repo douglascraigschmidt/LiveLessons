@@ -55,6 +55,7 @@ public class GatewayApplication {
      */
     @PostConstruct
     public void init() {
+        mLogger.info("Printing current gateway properties:");
         mLogger.info(Objects.toString(props));
     }
 }

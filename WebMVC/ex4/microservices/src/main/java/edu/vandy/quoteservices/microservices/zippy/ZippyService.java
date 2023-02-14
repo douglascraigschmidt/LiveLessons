@@ -13,8 +13,8 @@ import java.util.stream.StreamSupport;
 /**
  * This class defines implementation methods that are called by the
  * {@link BaseController}, which serves as the main "front-end" app
- * gateway entry point for remote clients that want to receive movie
- * recommendations.
+ * gateway entry point for remote clients that want to receive Zippy
+ * quotes.
  *
  * This class implements the abstract methods in {@link BaseService}
  * using the Java sequential streams framework.

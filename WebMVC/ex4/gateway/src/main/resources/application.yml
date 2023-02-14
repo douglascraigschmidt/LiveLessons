@@ -11,10 +11,6 @@ spring:
   main:
     web-application-type: reactive
 
-logging:
-  level:
-    org.springframework.web: DEBUG
-
 # Registers Gateway Application with Eureka.
 eureka:
   client:
@@ -23,3 +19,7 @@ eureka:
     fetch-registry: true
     service-url:
       default-zone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.web: DEBUG

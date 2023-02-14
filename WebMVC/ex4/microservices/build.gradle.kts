@@ -9,6 +9,7 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework:spring-test:5.3.22")
+    implementation("io.projectreactor:reactor-core:3.5.3")
     runtimeOnly("com.h2database:h2")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("commons-dbcp:commons-dbcp:1.4")
