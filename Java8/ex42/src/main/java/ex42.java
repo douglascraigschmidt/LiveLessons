@@ -1,5 +1,7 @@
 import utils.Options;
 
+import java.util.stream.Collector;
+
 /**
  * This example shows how to count the number of images in a
  * recursively-defined folder structure using the Java sequential
