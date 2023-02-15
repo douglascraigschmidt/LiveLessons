@@ -6,14 +6,10 @@ import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.StreamSupport;
 
 /**
  * This class defines implementation methods that are called by the
@@ -96,6 +92,9 @@ public class HandeyService
      */
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
+        // Convert the 'query' into a regular expression.
+        var regexQuery = makeRegex(queries);
+
         // Determine the appropriate Scheduler.
         var scheduler = parallel
             ? Schedulers.parallel()
@@ -114,7 +113,7 @@ public class HandeyService
             // Only keep movies who title matches any of the
             // 'queries'.
             .filter(quote ->
-                    findAnyMatch(quote, queries))
+                    findAnyMatch(quote, regexQuery))
             
             // Convert ParallelFlux to a Flux.
             .sequential()
@@ -131,32 +130,54 @@ public class HandeyService
     }
 
     /**
+     * Convert the {@link List} of {@link String} objects containing
+     * the queries into a single regular expression {@link String}.
+     *
+     * @param queries The {@link List} of queries
+     * @return A {@link String} that encodes the {@code queries} in
+     *         regular expression form
+     */
+    private static String makeRegex(List<String> queries) {
+        // Combine the 'queries' List into a lowercase String and
+        // convert into a regex of style
+        // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
+        var result = queries
+            // toString() returns the values as a comma-separated
+            // string enclosed in square brackets.
+            .toString()
+
+            // Lowercase for matching purposes.
+            .toLowerCase()
+
+            // Start of regex.
+            .replace("[", "(.*")
+
+            // Separators between queries previous operations added in
+            // a space with each comma.
+            .replace(", ", ".*)|(.*")
+
+            // End of regex.
+            .replace("]", ".*)");
+
+        System.out.println("regexQueries = " + result);
+        return result;
+    }
+
+    /**
      * Determine if {@code quote} contain any of the {@code queries}.
      *
      * @param quote The requested quote
-     * @param queries The {@link List} of queries to match with
+     * @param regexQueries The queries to search for in regular
+     *                     expression form
      * @return True if there's any match, else false
      */
-    private boolean findAnyMatch(Quote quote,
-                                 List<String> queries) {
-        // Determine if a match occurred.
-        var matched = Flux
-            // Convert List to a Flux.
-            .fromIterable(queries)
-
-            // Emit a single boolean true if any of the values of this
-            // Flux sequence are contained in the Quote.
-            .any(query -> Objects
-                 .requireNonNull(quote.quote)
-                 .toLowerCase()
-                 .contains(query.toLowerCase()))
-
-            // Execute a blocking call outside the current worker's
-            // pool.
-            .share()
-
-            // Block until all async processing is finished.
-            .block();
+    private Boolean findAnyMatch(Quote quote,
+                                 String regexQueries) {
+        var matched = Objects
+                .requireNonNull(quote.quote)
+                .toLowerCase()
+            // Execute the regex portion of the filter.
+            .matches(regexQueries);
 
         System.out.println("[" + Thread.currentThread() + "] "
                            + quote
@@ -167,4 +188,5 @@ public class HandeyService
         // Return the result.
         return matched;
     }
+
 }

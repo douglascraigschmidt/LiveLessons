@@ -162,10 +162,20 @@ public class QuoteDriver
                               + " quote "
                               + handeyQuote.quote));
 
-        handeyQuotes = quoteClient
-            .searchQuotes(HANDEY,
-                          List.of("dad"),
-                          parallel);
+        // Make a List of common Handey words.
+        var quoteList = List
+            .of("dad",
+                "man",
+                "gold",
+                "stuff",
+                "cry");
+
+        handeyQuotes = RunTimer
+            .timeRun(() -> quoteClient
+                     .searchQuotes(HANDEY,
+                                   quoteList,
+                                   parallel),
+                     type + "Handey searches");
 
         handeyQuotes
             .forEach(handeyQuote -> System.out

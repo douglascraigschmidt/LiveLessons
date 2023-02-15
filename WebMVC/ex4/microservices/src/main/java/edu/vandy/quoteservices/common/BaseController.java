@@ -26,13 +26,13 @@ public abstract class BaseController<T> {
 
     // The service to delegate requests.
     @Autowired
-    BaseService<T> service;
+    BaseService<T> mService;
 
     /**
      * @return The {@link BaseService} encapsulated by the controller
      */
     public BaseService<T> getService() {
-        return service;
+        return mService;
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class BaseController<T> {
     @Transactional(readOnly = true)
     public T search(@RequestParam List<String> queries,
                     Boolean parallel) {
-        return service
+        return getService()
             // Forward to the service.
             .search(queries, parallel);
     }
