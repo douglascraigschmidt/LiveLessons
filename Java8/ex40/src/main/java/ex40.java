@@ -1,5 +1,6 @@
 import utils.RunTimer;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -69,9 +70,10 @@ class ex40 {
      */
     public static Map<String, List<Double>> vectorMap(final String dataset,
                                                       boolean parallel) {
-        return loadCSVFile(ex40.class
-                           .getResource("/" + dataset)
-                           .getFile(),
+        return loadCSVFile(new File(ex40.class
+                           .getResource(dataset)
+                           .getFile())
+                           .getAbsolutePath(),
                            parallel);
     }
 
