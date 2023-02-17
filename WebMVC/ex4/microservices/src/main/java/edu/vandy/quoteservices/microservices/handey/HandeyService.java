@@ -10,8 +10,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import static edu.vandy.quoteservices.utils.RegexUtils.makeRegex;
 
 /**
  * This class defines implementation methods that are called by the
@@ -128,36 +128,6 @@ public class HandeyService
 
             // Block until all async processing is finished.
             .block();
-    }
-
-    /**
-     * Convert the {@link List} of {@link String} objects containing
-     * the queries into a single regular expression {@link String}.
-     *
-     * @param queries The {@link List} of queries
-     * @return A {@link String} that encodes the {@code queries} in
-     *         regular expression form
-     */
-    private static String makeRegex(List<String> queries) {
-        // Combine the 'queries' List into a lowercase String and
-        // convert into a regex of the following style:
-        // (\Qquery_1\E.*)|(\Qquery_2\E.*)...(\Qquery_n\Q.*)
-        var regexString = queries
-            // Convert the List to a Stream.
-            .stream()
-
-            // Map each string to a regular expression fragment that
-            // matches the string followed by any number of characters.
-            .map(str -> Pattern.quote(str.toLowerCase()) + ".*")
-
-            // Insert the "|" delimiter between queries.
-            .collect(Collectors.joining("|"));
-
-        // Create a non-capturing group that groups the keywords
-        // together.
-        return ".*(?:"
-            + regexString
-            + ")";
     }
 
     /**

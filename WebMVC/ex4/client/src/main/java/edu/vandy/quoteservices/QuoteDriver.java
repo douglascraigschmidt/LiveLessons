@@ -93,20 +93,12 @@ public class QuoteDriver
             .timeRun(() -> runQuotes(ZIPPY, parallel),
                      type + "Zippy quotes");
 
-        // Get the Zippy quotes.
-        Options.display("Printing "
-                        + zippyQuotes.size()
-                        + " "
-                        + type
-                        + "Zippy quote results:");
-
         // Print the Zippy quote results.
-        zippyQuotes
-            .forEach(zippyQuote -> System.out
-                     .println("id = "
-                              + zippyQuote.id
-                              + " quote = "
-                              + zippyQuote.quote));
+        Options.display(type + "Zippy quotes"
+                        + (zippyQuotes.size() == 10
+                           ? " successfully"
+                           : " unsuccessfully")
+                        + " received expected 10 results");
 
         // Make a List of common Zippy words.
         var quoteList = List
@@ -127,18 +119,18 @@ public class QuoteDriver
                                    parallel),
                      type + "Zippy searches");
 
-        zippyQuotes
-            .forEach(zippyQuote -> System.out
-                     .println("id = "
-                              + zippyQuote.id
-                              + " quote "
-                              + zippyQuote.quote));
+        Options.display(type + "Zippy searches"
+                        + (zippyQuotes.size() == 111
+                           ? " successfully"
+                           : " unsuccessfully")
+                        + " received expected 111 results");
     }
 
     /**
      * Record how long it takes to get the Handey quotes.
      *
-     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @param parallel Run the queries in parallel if true, else run
+     *                 sequentially
      */
     private void timeHandeyQuotes(boolean parallel) {
         String type = parallel ? "Parallel " : "Sequential ";
@@ -147,20 +139,12 @@ public class QuoteDriver
             .timeRun(() -> runQuotes(HANDEY, parallel),
                      type + "Handey quotes");
 
-        // Get the Handey quotes.
-        Options.display("Printing "
-                        + handeyQuotes.size()
-                        + " "
-                        + type
-                        + "Handey quote results:");
-
         // Print the Handey quote results.
-        handeyQuotes
-            .forEach(handeyQuote -> System.out
-                     .println("id = "
-                              + handeyQuote.id
-                              + " quote "
-                              + handeyQuote.quote));
+        Options.display(type + "Handey quotes"
+                        + (handeyQuotes.size() == 10
+                           ? " successfully"
+                           : " unsuccessfully")
+                        + " received expected 10 results");
 
         // Make a List of common Handey words.
         var quoteList = List
@@ -178,12 +162,12 @@ public class QuoteDriver
                                    parallel),
                      type + "Handey searches");
 
-        handeyQuotes
-            .forEach(handeyQuote -> System.out
-                     .println("id = "
-                              + handeyQuote.id
-                              + " quote "
-                              + handeyQuote.quote));
+        // Print the Handey quote results.
+        Options.display(type + "Handey searches"
+                        + (handeyQuotes.size() == 14
+                           ? " successfully"
+                           : " unsuccessfully")
+                        + " received expected 14 results");
     }
 
     /**

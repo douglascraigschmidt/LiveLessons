@@ -4,6 +4,8 @@ import berraquotes.common.Quote;
 
 import java.util.List;
 
+import static berraquotes.utils.RegexUtils.makeRegex;
+
 /**
  * This strategy uses the Java parallel streams framework and regular
  * expression matching to provide Berra quotes.
@@ -23,23 +25,7 @@ public class BQParallelStreamRegexStrategy
         // convert into a regex of style
         // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
 
-        String regexQueries = queries
-            // toString() returns the values as a comma-separated
-            // string enclosed in square brackets.
-            .toString()
-
-            // Lowercase for matching purposes.
-            .toLowerCase()
-
-            // Start of regex.
-            .replace("[","(.*")
-
-            // Separators between queries previous operations added in
-            // a space with each comma.
-            .replace(", ",".*)|(.*")
-
-            // End of regex.
-            .replace("]",".*)");
+        String regexQueries = makeRegex(queries);
 
         return mQuotes
             // Convert the List to a Stream.

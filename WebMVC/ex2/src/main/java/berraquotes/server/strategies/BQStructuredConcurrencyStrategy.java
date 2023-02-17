@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static berraquotes.utils.RegexUtils.makeRegex;
+
 /**
  * This strategy uses the Java structured concurrency framework to
  * provide Berra quotes.
@@ -178,40 +180,6 @@ public class BQStructuredConcurrencyStrategy
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    /**
-     * Convert the {@link List} of {@link String} objects containing
-     * the queries into a single regular expression {@link String}.
-     *
-     * @param queries The {@link List} of queries
-     * @return A {@link String} that encodes the {@code queries} in
-     *         regular expression form
-     */
-    private static String makeRegex(List<String> queries) {
-        // Combine the 'queries' List into a lowercase String and
-        // convert into a regex of style
-        // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
-        var result = queries
-            // toString() returns the values as a comma-separated
-            // string enclosed in square brackets.
-            .toString()
-
-            // Lowercase for matching purposes.
-            .toLowerCase()
-
-            // Start of regex.
-            .replace("[", "(.*")
-
-            // Separators between queries previous operations added in
-            // a space with each comma.
-            .replace(", ", ".*)|(.*")
-
-            // End of regex.
-            .replace("]", ".*)");
-
-        System.out.println("regexQueries = " + result);
-        return result;
     }
 
     /**
