@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utils.RegexUtils.getFirstLine;
+import static utils.RegexUtils.makeRegex;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -30,7 +32,6 @@ public class ex45 {
         // Test the makeRegex() method.
         testRegexList();
 
-        /*
         // Create a List of String objects containing the complete
         // works of Shakespeare.
         List<String> bardWorks = TestDataFactory
@@ -42,17 +43,15 @@ public class ex45 {
 
         // Search the works of Shakespeare for a certain word/phrase.
         processBardWorks(bardWorks, "be");
-
-         */
     }
 
     /**
      * Test the makeRegex() method.
      */
     private static void testRegexList() {
-        var quote = "The quick fox jumps \nover the lazy dog.";
+        var quote = "The quick fox jumps \nover the lazy concatentate.";
         var regexString =
-            makeRegex(List.of("Cat", "Dog", "Mouse", "Fox"));
+            makeRegex(List.of("Cat", "Dog", "Mouse", "sox"));
 
         if (quote.toLowerCase().matches("(?s)" + regexString))
             System.out.println("matches");
@@ -118,7 +117,7 @@ public class ex45 {
             // Process each work in the Stream.
             .forEach(work -> {
                     // Get the title of the work.
-                    String title = getTitle(work);
+                    String title = getFirstLine(work);
 
                     // Print the title of the work.
                     System.out.println(title);
@@ -141,48 +140,5 @@ public class ex45 {
                                           + matchResult.start()
                                           + "]"));
                 });
-    }
-
-    /**
-     * Return the title portion of the {@code input}.
-     */
-    public static String getTitle(String work) {
-        // Create a Matcher.
-        Matcher m = Pattern
-            // Compile a regex that matches only the first line in the
-            // input.
-            .compile("(?m)^.*$")
-
-            // Create a matcher for this pattern.
-            .matcher(work);
-
-        // Find/return the first line in the String.
-        return m.find()
-            // Return the title string if there's a match.
-            ? m.group()
-
-            // Return an empty String if there's no match.
-            : "";
-    }
-
-    /**
-     * Convert the {@link List} of {@link String} objects containing
-     * the queries into a single regular expression {@link String}.
-     *
-     * @param queries The {@link List} of queries
-     * @return A {@link String} that encodes the {@code queries} in
-     *         regular expression form
-     */
-    private static String makeRegex(List<String> queries) {
-        // Combine the 'queries' List into a lowercase String and
-        // convert into a regex of style...
-        var regex = ".*(?:"
-            + queries
-            .stream()
-            .map(str -> Pattern.quote(str.toLowerCase()) + ".*")
-            .collect(Collectors.joining("|"))
-            + ")";
-        System.out.println("regex = " + regex);
-        return regex;
     }
 }

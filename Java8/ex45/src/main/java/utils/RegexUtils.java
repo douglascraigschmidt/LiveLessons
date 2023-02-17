@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.utils;
+package utils;
 
 import java.util.List;
 import java.util.regex.Matcher;
