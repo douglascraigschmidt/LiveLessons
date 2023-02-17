@@ -56,8 +56,8 @@ public class GCDService {
     /**
      * Compute the GCD of the {@link GCDParam}.
      *
-     * @param integers A {@link GCDParam} containing the numbers to
-     *                 compute the GCD
+     * @param param A {@link GCDParam} containing the numbers to
+     *              compute the GCD
      * @param executor {@link ExecutorService} to perform the task
      * @return A {@link Future} that emits a {@link GCDResult}
      */
