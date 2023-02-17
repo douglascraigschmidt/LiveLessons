@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -26,6 +27,10 @@ public class ex45 {
      * Main entry point into the program.
      */
     static public void main(String[] argv) {
+        // Test the makeRegex() method.
+        testRegexList();
+
+        /*
         // Create a List of String objects containing the complete
         // works of Shakespeare.
         List<String> bardWorks = TestDataFactory
@@ -37,6 +42,22 @@ public class ex45 {
 
         // Search the works of Shakespeare for a certain word/phrase.
         processBardWorks(bardWorks, "be");
+
+         */
+    }
+
+    /**
+     * Test the makeRegex() method.
+     */
+    private static void testRegexList() {
+        var quote = "The quick fox jumps \nover the lazy dog.";
+        var regexString =
+            makeRegex(List.of("Cat", "Dog", "Mouse", "Fox"));
+
+        if (quote.toLowerCase().matches("(?s)" + regexString))
+            System.out.println("matches");
+        else
+            System.out.println("no matches");
     }
 
     /**
@@ -142,5 +163,26 @@ public class ex45 {
 
             // Return an empty String if there's no match.
             : "";
+    }
+
+    /**
+     * Convert the {@link List} of {@link String} objects containing
+     * the queries into a single regular expression {@link String}.
+     *
+     * @param queries The {@link List} of queries
+     * @return A {@link String} that encodes the {@code queries} in
+     *         regular expression form
+     */
+    private static String makeRegex(List<String> queries) {
+        // Combine the 'queries' List into a lowercase String and
+        // convert into a regex of style...
+        var regex = ".*(?:"
+            + queries
+            .stream()
+            .map(str -> Pattern.quote(str.toLowerCase()) + ".*")
+            .collect(Collectors.joining("|"))
+            + ")";
+        System.out.println("regex = " + regex);
+        return regex;
     }
 }

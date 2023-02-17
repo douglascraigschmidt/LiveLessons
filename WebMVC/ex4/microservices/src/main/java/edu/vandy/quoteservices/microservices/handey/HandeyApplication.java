@@ -23,7 +23,8 @@ public class HandeyApplication extends BaseApplication {
      * The static main() entry point runs this Spring application.
      */
     public static void main(String[] args) {
-        // Call BaseClass helper to build and run this application.
+        // Call BaseApplication helper method to build and run this
+        // microservice.
         run(HandeyApplication.class, args);
     }
 }

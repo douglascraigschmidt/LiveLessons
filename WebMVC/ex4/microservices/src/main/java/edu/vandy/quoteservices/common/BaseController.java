@@ -88,7 +88,6 @@ public abstract class BaseController<T> {
      * @return A {@code T} containing the queries
      */
     @GetMapping(GET_SEARCHES)
-    @Transactional(readOnly = true)
     public T search(@RequestParam List<String> queries,
                     Boolean parallel) {
         return getService()

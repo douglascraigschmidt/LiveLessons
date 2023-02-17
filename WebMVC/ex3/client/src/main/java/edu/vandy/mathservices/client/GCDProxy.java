@@ -38,7 +38,7 @@ public class GCDProxy {
     public List<GCDResult> computeGCDs
         (List<Integer> integers) {
         // Create the encoded URI.
-        var uri = UriComponentsBuilder
+        var url = UriComponentsBuilder
             .newInstance()
             .scheme("http")
             .port(GCD_MICROSERVICE_PORT)
@@ -55,7 +55,7 @@ public class GCDProxy {
             // Create and send a GET request to the server to compute
             // the GCDs of the integers.
             .makeGetRequestList(mRestTemplate,
-                                uri,
+                                url,
                                 // Return type is a GCDResult array.
                                 GCDResult[].class);
     }

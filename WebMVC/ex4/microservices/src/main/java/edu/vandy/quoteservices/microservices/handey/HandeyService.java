@@ -10,6 +10,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class defines implementation methods that are called by the
@@ -53,19 +55,17 @@ public class HandeyService
      */
     public List<Quote> getQuotes(List<Integer> quoteIds,
                                  Boolean parallel) {
-        var numberOfThreads = parallel
-            ? Runtime.getRuntime().availableProcessors()
-            : 1;
-
         return Flux
             // Convert List to a Flux.
             .fromIterable(quoteIds)
 
             // Convert Flux to a ParallelFlux.
-            .parallel(numberOfThreads)
+            .parallel()
 
-            // Run on the parallel Scheduler.
-            .runOn(Schedulers.parallel())
+            // Run on the appropriate Scheduler.
+            .runOn(parallel
+                    ? Schedulers.parallel()
+                    : Schedulers.single())
 
             // Get the Handey quote associated with the quoteId.
             .map(mQuotes::get)
@@ -75,6 +75,10 @@ public class HandeyService
 
             // Collect the results into a List.
             .collectList()
+
+            // Execute a blocking call outside the current worker's
+            // pool.
+            .share()
 
             // Block until all async processing is finished.
             .block();
@@ -95,11 +99,6 @@ public class HandeyService
         // Convert the 'query' into a regular expression.
         var regexQuery = makeRegex(queries);
 
-        // Determine the appropriate Scheduler.
-        var scheduler = parallel
-            ? Schedulers.parallel()
-            : Schedulers.single();
-
         return Flux
             // Convert List to a Flux.
             .fromIterable(mQuotes)
@@ -107,8 +106,10 @@ public class HandeyService
             // Convert Flux to a ParallelFlux.
             .parallel()
             
-            // Perform processing on 'scheduler'.
-            .runOn(scheduler)
+            // Perform processing on appropriate Scheduler.
+            .runOn(parallel
+                    ? Schedulers.parallel()
+                    : Schedulers.single())
 
             // Only keep movies who title matches any of the
             // 'queries'.
@@ -139,28 +140,18 @@ public class HandeyService
      */
     private static String makeRegex(List<String> queries) {
         // Combine the 'queries' List into a lowercase String and
-        // convert into a regex of style
-        // (.*{query_1}.*)|(.*{query_2}.*)...(.*{query_n}.*)
-        var result = queries
-            // toString() returns the values as a comma-separated
-            // string enclosed in square brackets.
-            .toString()
+        // convert into a regex of the following style:
+        // (\Qquery_1\E.*)|(\Qquery_2\E.*)...(\Qquery_n\Q.*)
+        var regexString = queries
+            .stream()
+            .map(str -> Pattern.quote(str.toLowerCase()) + ".*")
+            .collect(Collectors.joining("|"));
 
-            // Lowercase for matching purposes.
-            .toLowerCase()
-
-            // Start of regex.
-            .replace("[", "(.*")
-
-            // Separators between queries previous operations added in
-            // a space with each comma.
-            .replace(", ", ".*)|(.*")
-
-            // End of regex.
-            .replace("]", ".*)");
-
-        System.out.println("regexQueries = " + result);
-        return result;
+        // Create a non-capturing group that groups the keywords
+        // together.
+        return ".*(?:"
+            + regexString
+            + ")";
     }
 
     /**
@@ -176,11 +167,13 @@ public class HandeyService
         var matched = Objects
                 .requireNonNull(quote.quote)
                 .toLowerCase()
-            // Execute the regex portion of the filter.
-            .matches(regexQueries);
+            // Execute the regex portion of the filter, the "(?s)"
+            // enables the 'DOTALL' flag that allows the '.' character
+            // to match the newline character '\n'.
+            .matches("(?s)" + regexQueries);
 
         System.out.println("[" + Thread.currentThread() + "] "
-                           + quote
+                           + quote.quote
                            + (Boolean.TRUE.equals(matched)
                               ? " matched"
                               : " did not match"));

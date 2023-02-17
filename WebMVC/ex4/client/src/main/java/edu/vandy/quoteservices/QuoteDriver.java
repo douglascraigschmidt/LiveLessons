@@ -164,10 +164,11 @@ public class QuoteDriver
 
         // Make a List of common Handey words.
         var quoteList = List
-            .of("dad",
+            .of("Dad",
                 "man",
                 "gold",
                 "stuff",
+                "poor",
                 "cry");
 
         handeyQuotes = RunTimer

@@ -31,7 +31,7 @@ public class ListSpliterator
 
     /**
      * Attempts to extract the next pair of {@link Integer} objects
-     * from the {@link List}.
+     * from the {@link List} and return them as a {@link GCDParam}.
      *
      * @param action Yields a {@link GCDParam}
      * @return False if there are no more pairs of {@link Integer}
@@ -49,7 +49,7 @@ public class ListSpliterator
             action.accept(new GCDParam(mIntegers.get(mIndex),
                                        mIntegers.get(mIndex + 1)));
 
-            // Split over the two elements that were just processed.
+            // Skip over the two elements that were just processed.
             mIndex += 2;
             
             // Keep going.

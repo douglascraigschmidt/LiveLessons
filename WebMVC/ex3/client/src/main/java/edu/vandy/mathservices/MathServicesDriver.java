@@ -38,9 +38,6 @@ public class MathServicesDriver
      * The main entry point into the Spring applicaition.
      */
     public static void main(String[] args) {
-        // Process any command-line arguments.
-        Options.instance().parseArgs(args);
-
         // Run the Spring application.
         SpringApplication.run(MathServicesDriver.class, args);
     }
@@ -53,7 +50,7 @@ public class MathServicesDriver
      */
     @Override
     public void run(String... args) {
-            System.out.println("Entering MathServicesDriver main()");
+            System.out.println("Entering MathServicesDriver run()");
 
             // Parse any command-line arguments.
             Options.instance().parseArgs(args);
@@ -80,22 +77,22 @@ public class MathServicesDriver
      */
     public void runTests(List<Integer> randomIntegers) {
         // Future to a List holding PrimeResult objects.
-        Future<List<PrimeResult>> primeCheckFutures = null;
+        Future<List<PrimeResult>> primeCheckFuture = null;
 
         // Future to a List holding GCDResult objects.
-        Future<List<GCDResult>> gcdComputeFutures = null;
+        Future<List<GCDResult>> gcdComputeFuture = null;
 
         // Create a new scope to execute virtual Thread-based tasks,
         // which exits only after all tasks complete.
         try (var scope =
              new StructuredTaskScope.ShutdownOnFailure()) {
-            primeCheckFutures = scope
+            primeCheckFuture = scope
                 // fork() starts a virtual thread to check primalities
                 // concurrently.
                 .fork(() -> testClient
                       .checkPrimalities(randomIntegers));
 
-            gcdComputeFutures = scope
+            gcdComputeFuture = scope
                 // fork() starts a virtual thread to compute GCDs
                 // concurrently.
                 .fork(() -> testClient
@@ -112,14 +109,14 @@ public class MathServicesDriver
             // tasks complete.
 
             // Print the primality results.
-            primeCheckFutures
+            primeCheckFuture
                 .resultNow()
                 .forEach(primeResult -> System.out
                          .println("result = "
                                   + primeResult));
 
             // Print the GCD results.
-            gcdComputeFutures
+            gcdComputeFuture
                 .resultNow()
                 .forEach(gcdResult -> System.out
                          .println("result = "
@@ -130,6 +127,7 @@ public class MathServicesDriver
         } catch (Exception exception) {
             System.out.println("Exception: "
                                + exception.getMessage());
+            System.exit(1);
         }
         System.exit(0);
     }                              

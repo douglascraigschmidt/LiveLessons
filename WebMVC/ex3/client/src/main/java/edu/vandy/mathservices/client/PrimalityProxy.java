@@ -40,7 +40,7 @@ public class PrimalityProxy {
     public List<PrimeResult> checkPrimalities
         (List<Integer> primeCandidates) {
         // Create the encoded URL.
-        var uri = UriComponentsBuilder
+        var url = UriComponentsBuilder
             .newInstance()
             .scheme("http")
             .port(PRIMALITY_MICROSERVICE_PORT)
@@ -53,14 +53,14 @@ public class PrimalityProxy {
             .build()
             .toUriString();
 
-        System.out.println ("URI = " + uri);
+        System.out.println ("URI = " + url);
 
         return WebUtils
             // Create and send a GET request to the server to check if
             // the Integer objects in primeCandidates are prime or
             // not.
             .makeGetRequestList(mRestTemplate,
-                                uri,
+                                url,
                                 // Return type is a PrimeResult array.
                                 PrimeResult[].class);
     }

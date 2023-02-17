@@ -19,7 +19,7 @@ import static java.util.Collections.singletonMap;
     factory = YamlPropertySourceFactory.class)
 public class BaseApplication {
     /**
-     * Helper method that builds Spring Boot application using the
+     * Helper method that builds a Spring Boot application using the
      * passed {@link Class} parameter and also sets the application
      * name to the package name of the passed {@link Class} parameter.
      *
@@ -27,8 +27,8 @@ public class BaseApplication {
      * @param args  Command line arguments
      */
     public static void run(Class<?> clazz, String[] args) {
-        String name = getName(clazz);
-        SpringApplication app = new SpringApplicationBuilder(clazz)
+        var name = getName(clazz);
+        var app = new SpringApplicationBuilder(clazz)
             .properties(singletonMap("spring.application.name", name))
             .build();
         app.setAdditionalProfiles(name);
