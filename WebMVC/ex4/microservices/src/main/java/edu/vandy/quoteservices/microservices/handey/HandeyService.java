@@ -143,8 +143,14 @@ public class HandeyService
         // convert into a regex of the following style:
         // (\Qquery_1\E.*)|(\Qquery_2\E.*)...(\Qquery_n\Q.*)
         var regexString = queries
+            // Convert the List to a Stream.
             .stream()
+
+            // Map each string to a regular expression fragment that
+            // matches the string followed by any number of characters.
             .map(str -> Pattern.quote(str.toLowerCase()) + ".*")
+
+            // Insert the "|" delimiter between queries.
             .collect(Collectors.joining("|"));
 
         // Create a non-capturing group that groups the keywords
