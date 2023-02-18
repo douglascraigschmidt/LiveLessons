@@ -77,7 +77,7 @@ public final class FolderOps {
             .flatMap(document -> FolderOps
                      // Split the document into lines.
                      .splitAsStream(document,
-                                    "\\r?\\n|\\r")
+                                    "\\r?\\n|\\r"))
 
             // Count the total number of strings.
             .count();
