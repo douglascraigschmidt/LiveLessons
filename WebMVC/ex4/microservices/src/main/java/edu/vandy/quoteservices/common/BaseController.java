@@ -3,9 +3,9 @@ package edu.vandy.quoteservices.common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -56,6 +56,7 @@ public abstract class BaseController<T> {
      */
     @GetMapping(GET_ALL_QUOTES)
     public T getAllQuotes() {
+        System.out.println("getAllQuotes()");
         return getService()
             // Forward request to the service.
             .getAllQuotes();
@@ -70,8 +71,8 @@ public abstract class BaseController<T> {
      *                 sequentially
      * @return A {@code T} containing the requested quotes
      */
-    @GetMapping(GET_QUOTES)
-    T getQuotes(@RequestParam List<Integer> quoteIds,
+    @PostMapping(POST_QUOTES)
+    T getQuotes(@RequestBody List<Integer> quoteIds,
                 Boolean parallel) {
         return getService()
             // Forward request to the service.
@@ -87,8 +88,8 @@ public abstract class BaseController<T> {
      *                 sequentially
      * @return A {@code T} containing the queries
      */
-    @GetMapping(GET_SEARCHES)
-    public T search(@RequestParam List<String> queries,
+    @PostMapping(POST_SEARCHES)
+    public T search(@RequestBody List<String> queries,
                     Boolean parallel) {
         return getService()
             // Forward to the service.

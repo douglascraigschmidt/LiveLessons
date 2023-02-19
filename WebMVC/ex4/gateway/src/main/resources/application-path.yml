@@ -24,6 +24,6 @@ spring:
         - id: zippy
           uri: http://localhost:9101
           predicates:
-            - Path= /zippy/**
+              - Path= /zippy/**
           filters:
             - StripPrefix=1 # ...

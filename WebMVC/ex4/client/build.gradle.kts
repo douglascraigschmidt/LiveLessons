@@ -12,6 +12,8 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.boot:spring-boot-test-autoconfigure:2.7.3")
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation("org.springframework:spring-test:5.3.22")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation(project(mapOf("path" to ":gateway")))

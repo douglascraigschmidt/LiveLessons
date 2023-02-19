@@ -24,27 +24,27 @@ public class QuoteClient {
      * {@link QuoteClient} that performs HTTP requests synchronously.
      */
     @Autowired
-    private QuoteProxy mQuoteProxy; 
+    private QuoteProxy mQuoteProxy;
 
     /**
      * Spring WebMVC maps HTTP GET requests sent to the {@code
      * GET_ALL_QUOTES} endpoint to this method.
      *
-     * @param service The service that will perform the request
+     * @param routename The service that will perform the request
      * @return An {@link List} containing all the {@link Quote}
      *         objects
      */
-    public List<Quote> getAllQuotes(String service) {
+    public List<Quote> getAllQuotes(String routename) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getAllQuotes(service);
+            .getAllQuotes(routename);
     }
 
     /**
      * Spring WebMVC maps HTTP GET requests sent to the {@code
      * GET_QUOTES} endpoint to this method.
      *
-     * @param service The service that will perform the request
+     * @param routename The service that will perform the request
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @param parallel Run the queries in parallel if true, else run
@@ -52,12 +52,12 @@ public class QuoteClient {
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes(String service,
+    public List<Quote> getQuotes(String routename,
                                  List<Integer> quoteIds,
                                  Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getQuotes(service, 
+            .getQuotes(routename,
                        quoteIds,
                        parallel);
     }
@@ -66,18 +66,18 @@ public class QuoteClient {
      * Spring WebMVC maps HTTP GET requests sent to the {@code
      * SEARCH_QUOTES} endpoint to this method.
      *
-     * @param service The service that will perform the request
+     * @param routename The service that will perform the request
      * @param queries The {@link List} of queries to search for
      * @param parallel Run the queries in parallel if true, else run
      *                 sequentially
      * @return An {@link List} of {@link Quote} objects that
      *         contain any {@code queries}
      */
-    public List<Quote> searchQuotes(String service,
+    public List<Quote> searchQuotes(String routename,
                                     List<String> queries,
                                     Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .searchQuotes(service, queries, parallel);
+            .search(routename, queries, parallel);
     }
 }

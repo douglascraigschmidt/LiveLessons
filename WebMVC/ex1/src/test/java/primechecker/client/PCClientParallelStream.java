@@ -29,7 +29,6 @@ public class PCClientParallelStream {
      * synchronously.
      */
     @Autowired
-    // private PCRetroProxy mPCProxy;
     private PCProxy mPCProxy;
 
     /**

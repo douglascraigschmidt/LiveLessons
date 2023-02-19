@@ -44,9 +44,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

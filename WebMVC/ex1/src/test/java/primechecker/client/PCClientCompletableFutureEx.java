@@ -38,7 +38,6 @@ public class PCClientCompletableFutureEx {
      * HTTP requests synchronously.
      */
     @Autowired
-    // private PCRetroProxy mPCProxy;
     private PCProxy mPCProxy;
 
     /**
