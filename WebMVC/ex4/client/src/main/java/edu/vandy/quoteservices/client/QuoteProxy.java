@@ -13,6 +13,7 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_SEARCHES;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_ALL_QUOTES;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.GET_QUOTES;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
+import static edu.vandy.quoteservices.common.Constants.EndPoint.Params.PARALLEL;
 
 /**
  * This class is a proxy to the {@code GatewayApplication} API gateway
@@ -69,7 +70,7 @@ public class QuoteProxy {
                                  List<Integer> quoteIds,
                                  Boolean parallel) {
         // Create the encoded URL.
-        var url = UriComponentsBuilder
+        var uri = UriComponentsBuilder
             // Create the path for the GET_QUOTES request, including
             // the 'service'.
             .fromPath(service + "/" + GET_QUOTES)
@@ -78,7 +79,7 @@ public class QuoteProxy {
             .queryParam(QUOTE_IDS_PARAM, WebUtils
                         // Convert List to String.
                         .list2String(quoteIds))
-            .queryParam("parallel", parallel)
+            .queryParam(PARALLEL, parallel)
 
             // Build the URI.
             .build()
@@ -86,11 +87,13 @@ public class QuoteProxy {
             // Convert the URI to a String.
             .toUriString();
 
+        System.out.println("uri = " + uri);
+
         return WebUtils
             // Create and send a GET request to the server.
             .makeGetRequestList(mRestTemplate,
-                                // Pass the encoded URL.
-                                url,
+                                // Pass the encoded URI.
+                                uri,
                                 // Return type is a Quote array.
                                 Quote[].class);
     }

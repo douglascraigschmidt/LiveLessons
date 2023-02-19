@@ -28,45 +28,7 @@ public class Components {
      */
     @Bean
     public RestTemplate getRestTemplate() {
-        RestTemplate restTemplate;
-
-        var poolConnections = System.getenv("POOL_CONNECTIONS");
-
-        // Check to see if connection pooling has been requested.
-        if (poolConnections != null && poolConnections.equals("true")) {
-            PoolingHttpClientConnectionManager connectionManager =
-                PoolingHttpClientConnectionManagerBuilder
-                    .create()
-                    .setMaxConnTotal(100)
-                    .setMaxConnPerRoute(20)
-                    .setDefaultSocketConfig(
-                        SocketConfig
-                            .custom()
-                            .setSoTimeout(Timeout.ofSeconds(5))
-                            .build())
-                    .build();
-
-            RequestConfig requestConfig = RequestConfig
-                .custom()
-                .setConnectionRequestTimeout(Timeout.ofSeconds(5)) // timeout
-                // to get connection from pool
-                .setConnectTimeout(Timeout.ofSeconds(5)) // standard
-                // connection timeout
-                .build();
-
-            CloseableHttpClient httpClient = HttpClientBuilder
-                .create()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-
-            ClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory(httpClient);
-
-            restTemplate = new RestTemplate(requestFactory);
-        } else {
-            restTemplate = new RestTemplate();
-        }
+        RestTemplate restTemplate = new RestTemplate();
 
         restTemplate
             // Set the base URL for the RestTemplate.

@@ -49,7 +49,7 @@ public class ex45 {
      * Test the makeRegex() method.
      */
     private static void testRegexList() {
-        var quote = "The quick fox jumps \nover the lazy concatentate.";
+        var quote = "The quick fox jumps over \nthe lazy concatentate.";
         var regexString =
             makeRegex(List.of("Cat", "Dog", "Mouse", "sox"));
 
