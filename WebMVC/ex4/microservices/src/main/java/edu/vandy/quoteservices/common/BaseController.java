@@ -72,11 +72,11 @@ public abstract class BaseController<T> {
      * @return A {@code T} containing the requested quotes
      */
     @PostMapping(POST_QUOTES)
-    T getQuotes(@RequestBody List<Integer> quoteIds,
-                Boolean parallel) {
+    T postQuotes(@RequestBody List<Integer> quoteIds,
+                 Boolean parallel) {
         return getService()
             // Forward request to the service.
-            .getQuotes(quoteIds, parallel);
+            .postQuotes(quoteIds, parallel);
     }
 
     /**

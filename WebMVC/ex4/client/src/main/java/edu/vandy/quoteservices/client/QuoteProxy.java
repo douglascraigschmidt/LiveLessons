@@ -20,25 +20,26 @@ public class QuoteProxy {
      * GatewayApplication} RESTful microservice.
      */
     @Autowired
-    QuoteAPI quoteAPI;
+    QuoteAPI mQuoteAPI;
 
     /**
      * Get a {@link List} containing the requested quotes.
      *
-     * @param routename The microservice that performs the request
+     * @param route The microservice that performs the request
      * @return An {@link List} containing all the {@link Quote}
      *         objects
      */
-    public List<Quote> getAllQuotes(String routename) {
+    public List<Quote> getAllQuotes(String route) {
         try {
             // Execute the getAllQuotes() retrofit API method.
-            var response = quoteAPI
-                .getAllQuotes(routename).execute();
+            var response = mQuoteAPI
+                .getAllQuotes(route).execute();
 
             // Determine whether this method succeeded or failed.
             if (response.isSuccessful())
                 return response.body();
             else {
+                assert response.errorBody() != null;
                 System.out.println(response.errorBody().string());
 
                 return null;
@@ -51,7 +52,7 @@ public class QuoteProxy {
     /**
      * Get a {@link List} containing the requested quotes.
      *
-     * @param routename The microservice that performs the request
+     * @param route The microservice that performs the request
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @param parallel Get the {@code quoteIds} in parallel if true,
@@ -60,13 +61,13 @@ public class QuoteProxy {
      *         Quote} objects
      */
     public List<Quote> getQuotes
-        (String routename,
+        (String route,
          List<Integer> quoteIds,
          Boolean parallel) {
         try {
             // Execute the getQuotes() retrofit API method.
-            var response = quoteAPI
-                .getQuotes(routename,
+            var response = mQuoteAPI
+                .getQuotes(route,
                            quoteIds,
                            parallel).execute();
 
@@ -74,6 +75,7 @@ public class QuoteProxy {
             if (response.isSuccessful())
                 return response.body();
             else {
+                assert response.errorBody() != null;
                 System.out.println(response.errorBody().string());
 
                 return null;
@@ -87,7 +89,7 @@ public class QuoteProxy {
      * Search for quotes containing the given {@link List} of {@code
      * queries}.
      *
-     * @param routename The microservice that performs the request
+     * @param route The microservice that performs the request
      * @param queries The {@link List} of {@code queries} to search
      *                for
      * @param parallel Search for the {@code queries} in parallel if
@@ -96,13 +98,13 @@ public class QuoteProxy {
      *         queries
      */
     public List<Quote> search
-        (String routename,
+        (String route,
          List<String> queries,
          Boolean parallel) {
         try {
             // Execute the search() retrofit API method.
-            var response = quoteAPI
-                .search(routename,
+            var response = mQuoteAPI
+                .search(route,
                         queries,
                         parallel).execute();
 
@@ -110,6 +112,7 @@ public class QuoteProxy {
             if (response.isSuccessful())
                 return response.body();
             else {
+                assert response.errorBody() != null;
                 System.out.println(response.errorBody().string());
 
                 return null;

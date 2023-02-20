@@ -19,7 +19,7 @@ import lombok.Value;
 @Value
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@Entity // For Jpa
+@Entity // For JPA
 @Table(name = "QUOTE")
 public class Quote {
     /**

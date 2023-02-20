@@ -98,11 +98,14 @@ public class QuoteDriver
                         + (zippyQuotes.size() == 10
                            ? " successfully"
                            : " unsuccessfully")
-                        + " received expected 10 results");
+                        + " received "
+                        + zippyQuotes.size()
+                        + " of 10 expected results");
 
         // Make a List of common Zippy words.
         var quoteList = List
             .of("yow",
+                "yet",
                 "pinhead",
                 "waffle",
                 "laund",
@@ -120,10 +123,12 @@ public class QuoteDriver
                      type + "Zippy searches");
 
         Options.display(type + "Zippy searches"
-                        + (zippyQuotes.size() == 111
+                        + (zippyQuotes.size() == 114
                            ? " successfully"
                            : " unsuccessfully")
-                        + " received expected 111 results");
+                        + " received "
+                        + zippyQuotes.size()
+                        + " of 114 expected results");
     }
 
     /**
@@ -144,7 +149,9 @@ public class QuoteDriver
                         + (handeyQuotes.size() == 10
                            ? " successfully"
                            : " unsuccessfully")
-                        + " received expected 10 results");
+                        + " received "
+                        + handeyQuotes.size()
+                        + " of 10 expected results");
 
         // Make a List of common Handey words.
         var quoteList = List
@@ -167,7 +174,9 @@ public class QuoteDriver
                         + (handeyQuotes.size() == 14
                            ? " successfully"
                            : " unsuccessfully")
-                        + " received expected 14 results");
+                        + " received "
+                        + handeyQuotes.size()
+                        + " of 14 expected results");
     }
 
     /**

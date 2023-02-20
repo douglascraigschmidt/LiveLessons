@@ -27,7 +27,7 @@ import java.util.stream.StreamSupport;
  */
 @Service
 public class ZippyService
-       extends BaseService<List<Quote>> {
+       implements BaseService<List<Quote>> {
     /**
      * Spring-injected repository that contains all quotes.
      */
@@ -54,8 +54,8 @@ public class ZippyService
      *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds,
-                                 Boolean parallel) {
+    public List<Quote> postQuotes(List<Integer> quoteIds,
+                                  Boolean parallel) {
         System.out.println("ZippyService.getQuotes()");
 
         return mRepository
@@ -90,6 +90,9 @@ public class ZippyService
 
                      // Convert List to a Stream.
                      .stream())
+
+            // Ensure duplicate Zippy quotes aren't returned.
+            .distinct()
 
             // Convert the Stream to a List.
             .toList();

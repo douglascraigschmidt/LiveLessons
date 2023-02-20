@@ -10,7 +10,7 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
 
 /**
  * This interface provides the contract for the RESTful {@link
- * Basecontroller} API being consumed by defining the HTTP GET and
+ * BaseController} API being consumed by defining the HTTP GET and
  * POST methods that can be used to interact with the API, along with
  * the expected request and response parameters for each method.
  *
@@ -25,7 +25,8 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
  */
 public interface QuoteAPI {
     /**
-     * Get a {@link List} containing the requested quotes.
+     * Get a {@link List} containing the requested {@link Quote}
+     * objects.
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
@@ -38,7 +39,8 @@ public interface QuoteAPI {
     Call<List<Quote>> getAllQuotes(@Path("routename") String routename);
 
     /**
-     * Get a {@link List} containing the requested quotes.
+     * Get a {@link List} containing the requested {@link Quote}
+     * objects.
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
@@ -54,10 +56,9 @@ public interface QuoteAPI {
      *         an error message on failure.
      */
     @POST("{routename}" + "/" + POST_QUOTES)
-    Call<List<Quote>> getQuotes(
-        @Path("routename") String routename,
-        @Body List<Integer> quoteIds,
-        @Query("parallel") Boolean parallel);
+    Call<List<Quote>> getQuotes(@Path("routename") String routename,
+                                @Body List<Integer> quoteIds,
+                                @Query("parallel") Boolean parallel);
 
     /**
      * Search for quotes containing the given {@link List} of {@code
@@ -77,8 +78,7 @@ public interface QuoteAPI {
      *         an error message on failure.
      */
     @POST("{routename}" + "/" + POST_SEARCHES)
-    Call<List<Quote>> search(
-        @Path("routename") String routename,
-        @Body List<String> queries,
-        @Query("parallel") Boolean parallel);
+    Call<List<Quote>> search(@Path("routename") String routename,
+                             @Body List<String> queries,
+                             @Query("parallel") Boolean parallel);
 }

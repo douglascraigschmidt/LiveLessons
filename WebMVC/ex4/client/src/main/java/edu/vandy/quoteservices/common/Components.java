@@ -17,24 +17,6 @@ import static edu.vandy.quoteservices.common.Constants.GATEWAY_BASE_URL;
 @Component
 public class Components {
     /**
-     * This factory method returns a new {@link RestTemplate}, which
-     * enables a client to perform HTTP requests synchronously.
-     *
-     * @return A new {@link RestTemplate}
-     */
-    @Bean
-    public RestTemplate getRestTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-
-        restTemplate
-            // Set the base URL for the RestTemplate.
-            .setUriTemplateHandler(new DefaultUriBuilderFactory(Constants.GATEWAY_BASE_URL));
-
-        // Return restTemplate.
-        return restTemplate;
-    }
-
-    /**
      * Create an instance of the {@link QuoteAPI} Retrofit client,
      * which is then used to making HTTP requests to the {@code
      * GatewayApplication} RESTful microservice.

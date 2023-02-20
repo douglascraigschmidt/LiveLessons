@@ -30,7 +30,7 @@ import static edu.vandy.quoteservices.utils.RegexUtils.makeRegex;
  */
 @Service
 public class HandeyService
-       extends BaseService<List<Quote>> {
+       implements BaseService<List<Quote>> {
     /**
      * An in-memory {@link List} of all the quotes.
      */
@@ -53,8 +53,8 @@ public class HandeyService
      *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
-    public List<Quote> getQuotes(List<Integer> quoteIds,
-                                 Boolean parallel) {
+    public List<Quote> postQuotes(List<Integer> quoteIds,
+                                  Boolean parallel) {
         return Flux
             // Convert List to a Flux.
             .fromIterable(quoteIds)
