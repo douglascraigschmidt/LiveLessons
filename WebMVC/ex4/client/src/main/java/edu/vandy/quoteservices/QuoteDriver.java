@@ -190,7 +190,7 @@ public class QuoteDriver
 
         // Return the selected quotes.
         return quoteClient
-            .getQuotes(quoter,
+            .postQuotes(quoter,
                        makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
                                          quotes.size()),
                        parallel);

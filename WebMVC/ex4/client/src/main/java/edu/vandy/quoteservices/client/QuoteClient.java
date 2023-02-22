@@ -52,12 +52,12 @@ public class QuoteClient {
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes(String routename,
-                                 List<Integer> quoteIds,
-                                 Boolean parallel) {
+    public List<Quote> postQuotes(String routename,
+                                  List<Integer> quoteIds,
+                                  Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .getQuotes(routename,
+            .postQuotes(routename,
                        quoteIds,
                        parallel);
     }

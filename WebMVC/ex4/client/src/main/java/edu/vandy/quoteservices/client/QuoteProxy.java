@@ -60,14 +60,14 @@ public class QuoteProxy {
      * @return An {@link List} containing the requested {@link
      *         Quote} objects
      */
-    public List<Quote> getQuotes
+    public List<Quote> postQuotes
         (String route,
          List<Integer> quoteIds,
          Boolean parallel) {
         try {
             // Execute the getQuotes() retrofit API method.
             var response = mQuoteAPI
-                .getQuotes(route,
+                .postQuotes(route,
                            quoteIds,
                            parallel).execute();
 

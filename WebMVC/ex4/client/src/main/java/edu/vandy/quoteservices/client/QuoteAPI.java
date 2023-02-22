@@ -9,7 +9,7 @@ import java.util.List;
 import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
 
 /**
- * This interface provides the contract for the RESTful {@link
+ * This interface provides the contract for the RESTful {@base
  * BaseController} API being consumed by defining the HTTP GET and
  * POST methods that can be used to interact with the API, along with
  * the expected request and response parameters for each method.
@@ -56,9 +56,9 @@ public interface QuoteAPI {
      *         an error message on failure.
      */
     @POST("{routename}" + "/" + POST_QUOTES)
-    Call<List<Quote>> getQuotes(@Path("routename") String routename,
-                                @Body List<Integer> quoteIds,
-                                @Query("parallel") Boolean parallel);
+    Call<List<Quote>> postQuotes(@Path("routename") String routename,
+                                 @Body List<Integer> quoteIds,
+                                 @Query("parallel") Boolean parallel);
 
     /**
      * Search for quotes containing the given {@link List} of {@code
