@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.List;
 
+import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
+
 /**
  * This class is a proxy to the {@code GatewayApplication} API gateway
  * and its {@code GatewayController} that use an automatically-generated
@@ -86,8 +88,8 @@ public class QuoteProxy {
     }
 
     /**
-     * Search for quotes containing the given {@link List} of {@code
-     * queries}.
+     * Search for quotes containing any of the given {@link List} of
+     * {@code queries}.
      *
      * @param route The microservice that performs the request
      * @param queries The {@link List} of {@code queries} to search
@@ -107,6 +109,37 @@ public class QuoteProxy {
                 .search(route,
                         queries,
                         parallel).execute();
+
+            // Determine whether this method succeeded or failed.
+            if (response.isSuccessful())
+                return response.body();
+            else {
+                assert response.errorBody() != null;
+                System.out.println(response.errorBody().string());
+
+                return null;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Search the Zippy microservice for quotes containing all the
+     * given {@link List} of {@code queries} using a custom SQL method.
+     *
+     * @param queries The {@link List} of {@code queries} to search
+     *                for
+     * @return A {@link List} of {@link Quote} objects that match the
+     *         queries
+     */
+    public List<Quote> searchEx
+        (List<String> queries) {
+        try {
+            // Execute the searchEx() retrofit API method.
+            var response = mQuoteAPI
+                .searchEx(ZIPPY,
+                          queries).execute();
 
             // Determine whether this method succeeded or failed.
             if (response.isSuccessful())

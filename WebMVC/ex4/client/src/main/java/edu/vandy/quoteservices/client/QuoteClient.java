@@ -27,8 +27,7 @@ public class QuoteClient {
     private QuoteProxy mQuoteProxy;
 
     /**
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * GET_ALL_QUOTES} endpoint to this method.
+     * Get a {@link List} containing the requested quotes.
      *
      * @param routename The service that will perform the request
      * @return An {@link List} containing all the {@link Quote}
@@ -41,8 +40,7 @@ public class QuoteClient {
     }
 
     /**
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * GET_QUOTES} endpoint to this method.
+     * Get a {@link List} containing the requested quotes.
      *
      * @param routename The service that will perform the request
      * @param quoteIds A {@link List} containing the given random
@@ -63,8 +61,8 @@ public class QuoteClient {
     }
 
     /**
-     * Spring WebMVC maps HTTP GET requests sent to the {@code
-     * SEARCH_QUOTES} endpoint to this method.
+     * Search for quotes containing any {@code queries} in the
+     * given {@link List} of {@code queries}.
      *
      * @param routename The service that will perform the request
      * @param queries The {@link List} of queries to search for
@@ -79,5 +77,20 @@ public class QuoteClient {
         return mQuoteProxy
             // Forward to the proxy.
             .search(routename, queries, parallel);
+    }
+
+    /**
+     * Search for quotes containing all {@code queries} in the given
+     * {@link List} of {@code queries} on the Zippy microservice
+     * using a custom SQL method.
+     *
+     * @param queries The {@link List} of queries to search for
+     * @return An {@link List} of {@link Quote} objects that
+     *         contain all {@code queries}
+     */
+    public List<Quote> searchQuotesEx(List<String> queries) {
+        return mQuoteProxy
+            // Forward to the proxy.
+            .searchEx(queries);
     }
 }

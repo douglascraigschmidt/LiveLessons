@@ -11,7 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 
-import static edu.vandy.quoteservices.common.Constants.Service.*;
+import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
+import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
 import static edu.vandy.quoteservices.utils.RandomUtils.makeRandomIndices;
 
 /**
@@ -78,7 +79,7 @@ public class QuoteDriver
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Leaving QuoteDriver main()");
-        System.exit(1);
+        System.exit(0);
     }
 
     /**
@@ -102,8 +103,9 @@ public class QuoteDriver
                         + zippyQuotes.size()
                         + " of 10 expected results");
 
-        // Make a List of common Zippy words.
-        var quoteList = List
+        // Make a List of common Zippy words that are used to search
+        // for any matches.
+        var quoteOrList = List
             .of("yow",
                 "yet",
                 "pinhead",
@@ -118,7 +120,7 @@ public class QuoteDriver
         zippyQuotes = RunTimer
             .timeRun(() -> quoteClient
                      .searchQuotes(ZIPPY,
-                                   quoteList,
+                                   quoteOrList,
                                    parallel),
                      type + "Zippy searches");
 
@@ -129,6 +131,25 @@ public class QuoteDriver
                         + " received "
                         + zippyQuotes.size()
                         + " of 114 expected results");
+
+        // Make a List of common Zippy words that are used to search
+        // for all matches.
+        var quoteAndList = List
+                .of("yow",
+                        "yet");
+        
+        zippyQuotes = RunTimer
+            .timeRun(() -> quoteClient
+                     .searchQuotesEx(quoteAndList),
+                     "Zippy searches (extended)");
+
+        Options.display("Zippy searches (extended)"
+                        + (zippyQuotes.size() == 6
+                           ? " successfully"
+                           : " unsuccessfully")
+                        + " received "
+                        + zippyQuotes.size()
+                        + " of 6 expected results");
     }
 
     /**

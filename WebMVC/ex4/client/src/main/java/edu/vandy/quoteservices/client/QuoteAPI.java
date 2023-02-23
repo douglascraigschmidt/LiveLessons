@@ -30,10 +30,10 @@ public interface QuoteAPI {
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
-     *                  the {@code Path} annotation.
+     *                  the {@code Path} annotation
      * @return An {@link Call} object that yields a {@link List}
      *         containing all the {@link Quote} objects on success and
-     *         an error message on failure.
+     *         an error message on failure
      */
     @GET("{routename}" + "/" + GET_ALL_QUOTES)
     Call<List<Quote>> getAllQuotes(@Path("routename") String routename);
@@ -44,16 +44,16 @@ public interface QuoteAPI {
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
-     *                  the {@code Path} annotation.
+     *                  the {@code Path} annotation
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}, which is passed in the body
-     *                 of the {@code POST} request.
+     *                 of the {@code POST} request
      * @param parallel Get the {@code quoteIds} in parallel if true,
      *                 else run sequentially, which is passed as part
-     *                 of the URL.
+     *                 of the URL
      * @return A {@link Call} object that yields a {@link List}
-     *         containing all the {@link Quote} objects on success and
-     *         an error message on failure.
+     *         containing the {@link Quote} objects on success and
+     *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_QUOTES)
     Call<List<Quote>> postQuotes(@Path("routename") String routename,
@@ -61,24 +61,42 @@ public interface QuoteAPI {
                                  @Query("parallel") Boolean parallel);
 
     /**
-     * Search for quotes containing the given {@link List} of {@code
-     * queries}.
+     * Search for quotes containing any of the given {@link List} of
+     * {@code queries}.
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
-     *                  the {@code Path} annotation.
+     *                  the {@code Path} annotation
      * @param queries The {@link List} of {@code queries} to search
      *                for, which is passed in the body of the {@code
-     *                POST} request.
+     *                POST} request
      * @param parallel Search for the {@code queries} in parallel if
      *                 true, else run sequentially, which is passed
-     *                 as part of the URL.
+     *                 as part of the URL
      * @return A {@link Call} object that yields a {@link List}
      *         containing all the {@link Quote} objects on success and
-     *         an error message on failure.
+     *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_SEARCHES)
     Call<List<Quote>> search(@Path("routename") String routename,
                              @Body List<String> queries,
                              @Query("parallel") Boolean parallel);
+
+    /**
+     * Search for quotes containing all the given {@link List} of
+     * {@code queries} using a custom SQL query.
+     *
+     * @param routename The microservice that performs the request,
+     *                  which is dynamically inserted into the URI via
+     *                  the {@code Path} annotation
+     * @param queries The {@link List} of {@code queries} to search
+     *                for, which is passed in the body of the {@code
+     *                POST} request
+     * @return A {@link Call} object that yields a {@link List}
+     *         containing the {@link Quote} objects on success and
+     *         an error message on failure
+     */
+    @POST("{routename}" + "/" + POST_SEARCHES_EX)
+    Call<List<Quote>> searchEx(@Path("routename") String routename,
+                               @Body List<String> queries);
 }

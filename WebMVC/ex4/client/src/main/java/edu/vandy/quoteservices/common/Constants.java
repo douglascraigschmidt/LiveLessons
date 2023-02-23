@@ -15,14 +15,7 @@ public class Constants {
         public static final String GET_ALL_QUOTES = "allQuotes";
         public static final String POST_QUOTES = "quotes";
         public static final String POST_SEARCHES = "searchQuotes";
-
-        /**
-         * Supported HTTP request parameters identifiers.
-         */
-        public static class Params {
-            public static final String QUOTE_IDS_PARAM = "quoteIds";
-            public static final String PARALLEL = "parallel";
-        }
+        public static final String POST_SEARCHES_EX = "searchQuotesEx";
     }
 
     /**

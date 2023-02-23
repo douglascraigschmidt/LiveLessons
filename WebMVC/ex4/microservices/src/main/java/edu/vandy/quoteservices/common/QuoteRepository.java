@@ -16,7 +16,8 @@ import java.util.stream.Stream;
  */
 @Repository
 public interface QuoteRepository
-       extends JpaRepository<Quote, Integer> {
+       extends JpaRepository<Quote, Integer>,
+               MultipleQueriesRepository {
     /**
      * Find all {@link Quote} rows in the database that contain the
      * {@code query} {@link String} (ignoring case).
@@ -26,4 +27,6 @@ public interface QuoteRepository
      *         {@code query}
      */
     List<Quote> findByQuoteContainingIgnoreCase(String query);
+
+
 }
