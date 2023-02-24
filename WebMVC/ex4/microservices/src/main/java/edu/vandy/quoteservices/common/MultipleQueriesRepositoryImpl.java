@@ -55,7 +55,7 @@ public class MultipleQueriesRepositoryImpl
         var idExpression
             = cb.lower(quote.get("quote"));
 
-        var orPredicate = queries
+        var andPredicate = queries
             // Convert the List to a Stream.
             .stream()
 
@@ -77,8 +77,8 @@ public class MultipleQueriesRepositoryImpl
             .createQuery(cq
                          // Add the orPredicate to the CriteriaQuery
                          // "where" clause, which returns the quote if
-                         // it matches all of the specified queries.
-                         .where(orPredicate))
+                         // it matches all the specified queries.
+                         .where(andPredicate))
 
             // Execute the JPQL query and return the List of matching
             // Quote objects.
