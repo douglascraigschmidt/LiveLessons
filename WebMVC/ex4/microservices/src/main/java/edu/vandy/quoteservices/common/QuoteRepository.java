@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * A persistent repository that contains information about {@link
@@ -17,7 +16,7 @@ import java.util.stream.Stream;
 @Repository
 public interface QuoteRepository
        extends JpaRepository<Quote, Integer>,
-               MultipleQueriesRepository {
+        MultiQueryRepository {
     /**
      * Find all {@link Quote} rows in the database that contain the
      * {@code query} {@link String} (ignoring case).

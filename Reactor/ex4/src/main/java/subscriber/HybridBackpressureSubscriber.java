@@ -1,3 +1,5 @@
+package subscriber;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
@@ -47,7 +49,7 @@ public class HybridBackpressureSubscriber
     /**
      * Constructor initializes the field.
      */
-    HybridBackpressureSubscriber() {
+    public HybridBackpressureSubscriber() {
         // Initially false.
         mIsDisposed = false;
 

@@ -7,7 +7,7 @@ import java.util.List;
  * {@link Quote} objects in the database containing at least one of
  * the {@code queries} (ignoring case).
  */
-public interface MultipleQueriesRepository {
+public interface MultiQueryRepository {
     /**
      * Find a {@link List} of {@link Quote} objects in the database
      * containing at least one of the {@code queries} (ignoring case).

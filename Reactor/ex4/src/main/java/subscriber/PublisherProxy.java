@@ -1,3 +1,5 @@
+package subscriber;
+
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
@@ -7,7 +9,7 @@ import utils.Options;
 /**
  * This class serves as a proxy to the Publisher micro-service.
  */
-class PublisherProxy {
+public class PublisherProxy {
     /**
      * The URI that creates the random number generator.
      */

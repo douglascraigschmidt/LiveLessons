@@ -14,8 +14,8 @@ import java.util.List;
  * {@link Quote} objects in the database containing at least one of
  * the {@code queries} (ignoring case).
  */
-public class MultipleQueriesRepositoryImpl
-       implements MultipleQueriesRepository {
+public class MultiQueryRepositoryImpl
+       implements MultiQueryRepository {
     /**
      * This field represents a session with the database, providing
      * the main API for performing CRUD (Create, Read, Update, Delete)

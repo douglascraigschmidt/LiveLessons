@@ -1,11 +1,13 @@
 package publisher;
 
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.Options;
+import utils.RandomUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +20,8 @@ import static java.util.stream.Collectors.toList;
  * This publisher generates a flux stream from a micro-service that's
  * connected to the subscriber via WebFlux mechanisms.
  */
-public class Publisher {
+@Service
+public class PublisherService {
     /**
      * Debugging tag used by the logger.
      */
@@ -27,7 +30,7 @@ public class Publisher {
     /**
      * A list of randomly-generated integers.
      */
-    private final List<Integer> mRandomIntegers;
+    private List<Integer> mRandomIntegers;
 
     /**
      * The thread pool used to run the publisher.
@@ -40,20 +43,12 @@ public class Publisher {
      * @param count The number of random integers to generate
      * @param maxValue The max value of the random integers
      */
-    public Publisher(int count, int maxValue) {
+    public void create(int count, int maxValue) {
         // Generate a list of random integers.
-        mRandomIntegers = new Random()
-            // Generate "count" random ints.
-            .ints(count,
-                  // Try to generate duplicates.
-                  maxValue - count, 
-                  maxValue)
-
-            // Convert each primitive int to Integer.
-            .boxed()    
-                   
-            // Trigger intermediate operations and collect into list.
-            .collect(toList());
+        mRandomIntegers = RandomUtils
+            .generateRandomNumbers(count,
+                                   // Try to generate duplicates.
+                                   maxValue);
     }
 
     /**
@@ -61,7 +56,7 @@ public class Publisher {
      *
      * @return Return a flux that publishes random numbers
      */
-    public Flux<Integer> publish(Boolean backpressureEnabled) {
+    public Flux<Integer> start(Boolean backpressureEnabled) {
         // Run the publisher in a single thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
@@ -107,7 +102,6 @@ public class Publisher {
                         if (iterator.hasNext()) {
                             // Get the next item.
                             Integer item = iterator.next();
-
 
                             Options.debug(TAG,
                                           "published item: "
@@ -164,7 +158,7 @@ public class Publisher {
      *
      * @return An empty mono.
      */
-    public Mono<Void> dispose() {
+    public Mono<Void> stop() {
         // Shutdown the publisher's scheduler.
         mPublisherScheduler.dispose();
 

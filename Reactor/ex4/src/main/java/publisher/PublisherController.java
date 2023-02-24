@@ -1,7 +1,7 @@
-package publisher.controller;
+package publisher;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import publisher.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +30,8 @@ public class PublisherController {
     /**
      * The publisher that performs the HTTP requests.
      */
-    Publisher mPublisher;
+    @Autowired
+    PublisherService mService;
 
     /**
      * This method initializes the publisher.
@@ -38,13 +39,15 @@ public class PublisherController {
      * WebFlux maps HTTP POST requests sent to the /_create endpoint to
      * this method.
      *
+     * @param count The number of {@link Integer} objects to generate
+     * @param maxValue The maximum value of the generated {@link Integer} objects
      * @return An empty mono.
      */
     @PostMapping("/_create")
-    public Mono<Void> createPublisher(@RequestParam int count,
-                                      @RequestParam int maxValue) {
+    public Mono<Void> create(@RequestParam int count,
+                             @RequestParam int maxValue) {
         // Create a new publisher.
-        mPublisher = new Publisher(count, maxValue);
+        mService.create(count, maxValue);
 
         // Return an empty mono.
         return Mono.empty();
@@ -57,12 +60,13 @@ public class PublisherController {
      * WebFlux maps HTTP GET requests sent to the /_start endpoint to
      * this method.
      *
-     * @return A flux stream of random integers.
+     * @param backpressureEnabled True if backpressure is enabled, else false
+     * @return A flux stream of random integers
      */
     @GetMapping("/_start")
-    public Flux<Integer> startPublishing(@RequestParam Boolean backpressureEnabled) {
-        // Forward to the publish() method.
-        return mPublisher.publish(backpressureEnabled);
+    public Flux<Integer> start(@RequestParam Boolean backpressureEnabled) {
+        // Forward to the service.
+        return mService.start(backpressureEnabled);
     }
 
     /**
@@ -75,8 +79,8 @@ public class PublisherController {
      * @return An empty mono.
      */
     @DeleteMapping("/_stop")
-    public Mono<Void> stopPublishing() {
-        // Forward to the dispose() method.
-        return mPublisher.dispose();
+    public Mono<Void> stop() {
+        // Forward to the service.
+        return mService.stop();
     }
 }

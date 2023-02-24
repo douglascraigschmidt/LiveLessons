@@ -1,3 +1,5 @@
+package common;
+
 /**
  * A tuple containing the result of a prime check.
  */
@@ -8,7 +10,7 @@ public class Result {
     int mPrimeCandidate;
 
     /**
-     * Result of the isPrime() method.
+     * common.Result of the isPrime() method.
      */
     int mSmallestFactor;
 
