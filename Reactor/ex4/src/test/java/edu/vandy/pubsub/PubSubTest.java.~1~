@@ -1,16 +1,16 @@
-import common.Result;
+package edu.vandy.pubsub;
+
+import edu.vandy.pubsub.common.Options;
+import edu.vandy.pubsub.common.Result;
+import edu.vandy.pubsub.subscriber.HybridBackpressureSubscriber;
+import edu.vandy.pubsub.subscriber.PublisherProxy;
+import edu.vandy.pubsub.utils.Memoizer;
+import edu.vandy.pubsub.utils.ReactorUtils;
+import edu.vandy.pubsub.utils.RunTimer;
 import reactor.core.Disposable;
-import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import subscriber.HybridBackpressureSubscriber;
-import subscriber.PublisherProxy;
-import utils.Memoizer;
-import utils.Options;
-import utils.ReactorUtils;
-import utils.RunTimer;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -35,66 +35,82 @@ import static java.util.stream.Collectors.toMap;
  * of memoizers (e.g., untimed and timed) based on Java
  * ConcurrentHashMap.  In addition, it demonstrates the use of slicing
  * with the Flux takeWhile() and skipWhile() operations.
+ *
+ * The {@code @SpringBootTest} annotation tells Spring to look for a
+ * main configuration class (a {@code @SpringBootApplication}, e.g.,
+ * {@code ZippyApplication}) and use that to start a Spring
+ * application context to serve as the target of the tests.
+ *
+ * The {@code @SpringBootConfiguration} annotation indicates that a
+ * class provides a Spring Boot application {@code @Configuration}.
  */
-public class ex4 {
+@SpringBootConfiguration
+@SpringBootTest(classes = PublisherApplication.class,
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+public class PubSubTest {
     /**
      * Debugging tag used by the logger.
      */
-    private final String TAG = getClass().getSimpleName();
+    private final String TAG =
+        getClass().getSimpleName();
 
     /**
      * Count # of calls to isPrime() to determine caching benefits.
      */
-    private final AtomicInteger mPrimeCheckCounter;
+    private final AtomicInteger mPrimeCheckCounter =
+        new AtomicInteger(0);
 
     /**
      * The scheduler used to locally publish random integers received
-     * from the Publisher micro-service.
+     * from the Publisher microservice.
      */
-    private final Scheduler mPublisherScheduler;
+    private Scheduler mPublisherScheduler;
 
     /**
      * The scheduler used to consume random integers by checking if
      * they are prime or not.
      */
-    private final Scheduler mSubscriberScheduler;
+    private Scheduler mSubscriberScheduler;
 
     /**
      * A subscriber that applies hybrid push/pull backpressure.
      */
-    private final HybridBackpressureSubscriber mSubscriber;
+    private HybridBackpressureSubscriber mSubscriber;
 
     /**
      * Track all disposables to dispose them all at once.
      */
-    private final Disposable.Composite mDisposables;
+    private Disposable.Composite mDisposables;
 
     /**
      * Create a proxy to the publisher.
      */
-    final PublisherProxy mPublisherProxy;
+    // @Autowired
+    PublisherProxy mPublisherProxy = new PublisherProxy();
 
     /**
-     * Main entry point into the test program.
+     * Emulate the "command-line" arguments for the tests.
      */
-    static public void main(String[] argv) {
-        // Create an instance to test.
-        ex4 test = new ex4(argv);
-
-        // Run the tests.
-        test.run();
-    }
+    private final String[] mArgv = new String[]{
+            "-d",
+            "false", // Disable debugging messages.
+            "-c",
+            "50" // Generate and test 50 random large Integer objects.
+    };
 
     /**
-     * Constructor initializes the fields.
+     * The main entry point into the Spring applicaition.
      */
-    ex4(String[] argv) {
-        // Parse the command-line arguments.
-        Options.instance().parseArgs(argv);
+    
+    @Test
+    public void runTests() {
+        // Run the Spring application.
+        System.out.println("Entering PubSubDriver main()");
 
-        // Initialize this count to 0.
-        mPrimeCheckCounter = new AtomicInteger(0);
+        // Process any command-line arguments.
+        Options.instance().parseArgs(mArgv);
 
+/*
         // Run the publisher in a single thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
@@ -108,10 +124,6 @@ public class ex4 {
             // Run everything in the publisher scheduler.
             : mPublisherScheduler;
 
-        // Create a new publisher proxy, which initializes the list of
-        // random integers for this test.
-        mPublisherProxy = new PublisherProxy();
-
         // This subscriber implements hybrid push/pull backpressure.
         mSubscriber = new HybridBackpressureSubscriber();
 
@@ -120,10 +132,18 @@ public class ex4 {
             .composite(mPublisherScheduler,
                        mSubscriberScheduler,
                        mSubscriber);
+
+        // Run the tests and print the results.
+        run();
+
+ */
+
+        System.out.println("Leaving PubSubDriver run()");
+        System.exit(0);
     }
 
     /**
-     * Run all the tests and print the results.
+     * Run the tests and print the results.
      */
     private void run() {
         Memoizer<Integer, Integer> memoizer =
@@ -190,7 +210,7 @@ public class ex4 {
 
         // Create a remote publisher that runs on its own scheduler.
         Flux<Integer> publisher = mPublisherProxy
-            .startPublishing(mPublisherScheduler);
+            .start(Options.instance().backPressureEnabled());
 
         // This function determines if a random # is prime or not.
         Function<Integer, Flux<Result>> determinePrimality = number -> Flux
@@ -225,7 +245,7 @@ public class ex4 {
         Options.print(makeExitString(testName, primeChecker));
 
         // Stop publishing.
-        mPublisherProxy.stopPublishing();
+        mPublisherProxy.stop();
 
         // Return prime checker (which may update during the test).
         return primeChecker;

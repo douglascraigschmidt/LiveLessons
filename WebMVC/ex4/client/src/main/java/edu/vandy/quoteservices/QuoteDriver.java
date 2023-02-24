@@ -66,7 +66,7 @@ public class QuoteDriver
      */
     @Override
     public void run(String... args) {
-        System.out.println("Entering QuoteDriver main()");
+        System.out.println("Entering QuoteDriver run()");
 
         // Record how long it takes to get the Zippy quotes.
         timeZippyQuotes(false);
@@ -78,7 +78,7 @@ public class QuoteDriver
 
         System.out.println(RunTimer.getTimingResults());
 
-        System.out.println("Leaving QuoteDriver main()");
+        System.out.println("Leaving QuoteDriver run()");
         System.exit(0);
     }
 

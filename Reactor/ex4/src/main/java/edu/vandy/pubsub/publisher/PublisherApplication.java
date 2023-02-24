@@ -1,14 +1,16 @@
-package publisher;
+package edu.vandy.pubsub.publisher;
 
+import edu.vandy.pubsub.common.Options;
 import org.springframework.boot.SpringApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import utils.Options;
 
 /**
  * This class provides the entry point into the Spring WebFlux-based
  * version of the Publisher example.
  */
 @SpringBootApplication
+@ComponentScan("edu.vandy.pubsub")
 public class PublisherApplication {
     /**
      * A static main() entry point is needed to run the

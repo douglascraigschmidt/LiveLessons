@@ -1,23 +1,21 @@
-package publisher;
+package edu.vandy.pubsub.publisher;
 
+import edu.vandy.pubsub.utils.RandomUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import utils.Options;
-import utils.RandomUtils;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
-import static java.util.stream.Collectors.toList;
+import edu.vandy.pubsub.common.Options;
 
 /**
- * This publisher generates a flux stream from a micro-service that's
+ * This publisher generates a flux stream from a microservice that's
  * connected to the subscriber via WebFlux mechanisms.
  */
 @Service

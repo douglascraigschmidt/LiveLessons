@@ -1,4 +1,4 @@
-package utils;
+package edu.vandy.pubsub.utils;
 
 /**
  * Atomically increments and decrements an internal count, calling an

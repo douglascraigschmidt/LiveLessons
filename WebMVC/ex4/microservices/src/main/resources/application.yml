@@ -1,3 +1,8 @@
+# Enable bean overriding.
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
 # Common Eureka client properties
 eureka:
   instance:

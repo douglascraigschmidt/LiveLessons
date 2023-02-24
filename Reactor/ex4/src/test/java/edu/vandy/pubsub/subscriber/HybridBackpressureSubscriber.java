@@ -1,13 +1,13 @@
-package subscriber;
+package edu.vandy.pubsub.subscriber;
 
+import edu.vandy.pubsub.common.Options;
+import edu.vandy.pubsub.common.Result;
+import edu.vandy.pubsub.utils.ExceptionUtils;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
-import utils.ExceptionUtils;
-import utils.Options;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A Flux subscriber that implements hybrid push/pull backpressure.
@@ -96,12 +96,12 @@ public class HybridBackpressureSubscriber
     @Override
     public void onNext(Result result) {
         // Print the results of prime number checking
-        if (result.mSmallestFactor != 0) {
-            Options.debug(TAG, result.mPrimeCandidate
+        if (result.smallestFactor != 0) {
+            Options.debug(TAG, result.primeCandidate
                           + " is not prime with smallest factor "
-                          + result.mSmallestFactor);
+                          + result.smallestFactor);
         } else {
-            Options.debug(TAG, result.mPrimeCandidate
+            Options.debug(TAG, result.primeCandidate
             + " is prime");
         }
 

@@ -1,7 +1,8 @@
-package utils;
+package edu.vandy.pubsub.utils;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * This Java utility class contains static methods that generate random numbers.
@@ -28,6 +29,6 @@ public final class RandomUtils {
             .boxed()    
                    
             // Trigger intermediate operations and collect into a List.
-            .toList();
+            .collect(Collectors.toList());
     }
 }

@@ -1,4 +1,6 @@
-package utils;
+package edu.vandy.pubsub.utils;
+
+import edu.vandy.pubsub.common.Options;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -117,7 +119,7 @@ public class TimedMemoizerEx<K, V>
      * Track the # of entries in mCache so mPurgeEntries can be
      * properly scheduled and cancelled.
      */
-    private final ThresholdCrosser mCacheCount = 
+    private final ThresholdCrosser mCacheCount =
         new ThresholdCrosser(0);
 
     /**

@@ -1,4 +1,4 @@
-package utils;
+package edu.vandy.pubsub.utils;
 
 import java.util.*;
 import java.util.function.Supplier;

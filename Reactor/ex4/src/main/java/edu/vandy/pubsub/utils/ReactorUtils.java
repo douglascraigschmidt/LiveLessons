@@ -1,4 +1,4 @@
-package utils;
+package edu.vandy.pubsub.utils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
