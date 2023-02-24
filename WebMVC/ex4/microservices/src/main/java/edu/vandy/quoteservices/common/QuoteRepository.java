@@ -27,6 +27,4 @@ public interface QuoteRepository
      *         {@code query}
      */
     List<Quote> findByQuoteContainingIgnoreCase(String query);
-
-
 }
