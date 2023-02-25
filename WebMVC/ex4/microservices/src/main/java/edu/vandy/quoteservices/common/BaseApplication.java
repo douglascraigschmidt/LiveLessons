@@ -1,14 +1,14 @@
 package edu.vandy.quoteservices.common;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 
 import java.util.concurrent.Executors;
 
@@ -58,7 +58,6 @@ public class BaseApplication {
         // Return the last part of the package name.
         return pkg.substring(pkg.lastIndexOf('.') + 1);
     }
-
 
     /**
      * Configure the use of Java virtual threads to handle all

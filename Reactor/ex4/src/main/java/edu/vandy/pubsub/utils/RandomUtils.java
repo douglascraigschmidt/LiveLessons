@@ -29,6 +29,6 @@ public final class RandomUtils {
             .boxed()    
                    
             // Trigger intermediate operations and collect into a List.
-            .collect(Collectors.toList());
+            .toList();
     }
 }

@@ -96,12 +96,12 @@ public class HybridBackpressureSubscriber
     @Override
     public void onNext(Result result) {
         // Print the results of prime number checking
-        if (result.smallestFactor != 0) {
-            Options.debug(TAG, result.primeCandidate
+        if (result.smallestFactor() != 0) {
+            Options.debug(TAG, result.primeCandidate()
                           + " is not prime with smallest factor "
-                          + result.smallestFactor);
+                          + result.smallestFactor());
         } else {
-            Options.debug(TAG, result.primeCandidate
+            Options.debug(TAG, result.primeCandidate()
             + " is prime");
         }
 

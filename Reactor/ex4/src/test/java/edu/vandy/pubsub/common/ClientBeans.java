@@ -28,7 +28,6 @@ public class ClientBeans {
      */
     @Bean
     public PublisherAPI getPublisherAPI() {
-        System.out.println("getPublisherAPI()");
         // Create a Retrofit instance with a Reactor adapter and a
         // Jackson converter.
         return new Retrofit

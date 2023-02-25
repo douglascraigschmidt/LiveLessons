@@ -35,6 +35,30 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
 }
 
+compileJava {
+    options.compilerArgs.addAll(
+            ['--enable-preview',
+             '--add-modules', 'jdk.incubator.concurrent'
+            ])
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['--enable-preview',
+                             '--add-modules', 'jdk.incubator.concurrent']
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+    jvmArgs += '--add-modules'
+    jvmArgs += 'jdk.incubator.concurrent'
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '--enable-preview'
+}
+
 test {
     useJUnitPlatform()
 }
+sourceCompatibility = JavaVersion.VERSION_19
+targetCompatibility = JavaVersion.VERSION_19
