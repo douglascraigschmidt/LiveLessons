@@ -1,8 +1,7 @@
 package edu.vandy.pubsub;
 
-import edu.vandy.pubsub.common.Options;
-import edu.vandy.pubsub.common.Result;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -23,8 +22,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+
+import edu.vandy.pubsub.common.Options;
+import edu.vandy.pubsub.common.Result;
+import edu.vandy.pubsub.utils.PrimeUtils;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toList;
@@ -51,6 +53,7 @@ import static java.util.stream.Collectors.toMap;
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
+@SuppressWarnings("ALL")
 @SpringBootConfiguration
 @SpringBootTest(classes = PublisherApplication.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -60,12 +63,6 @@ public class PubSubTest {
      */
     private final String TAG =
         getClass().getSimpleName();
-
-    /**
-     * Count # of calls to isPrime() to determine caching benefits.
-     */
-    private final AtomicInteger mPrimeCheckCounter =
-        new AtomicInteger(0);
 
     /**
      * The scheduler used to locally publish random integers received
@@ -90,10 +87,10 @@ public class PubSubTest {
     private Disposable.Composite mDisposables;
 
     /**
-     * Create a proxy to the publisher.
+     * Automatically inject a proxy to the {@link Publisher}.
      */
-    // @Autowired
-    PublisherProxy mPublisherProxy = new PublisherProxy();
+    @Autowired
+    PublisherProxy mPublisherProxy;
 
     /**
      * Emulate the "command-line" arguments for the tests.
@@ -108,7 +105,6 @@ public class PubSubTest {
     /**
      * The main entry point into the Spring applicaition.
      */
-    
     @Test
     public void runTests() {
         // Run the Spring application.
@@ -150,7 +146,7 @@ public class PubSubTest {
      */
     private void run() {
         Memoizer<Integer, Integer> memoizer =
-            Options.makeMemoizer(this::isPrime);
+            Options.makeMemoizer(PrimeUtils::isPrime);
 
         // Create and time prime checking with a memoizer.
         timeTest(memoizer,
@@ -163,7 +159,7 @@ public class PubSubTest {
         memoizer.shutdown();
 
         // Create and time prime checking without a memoizer.
-        timeTest(this::isPrime,
+        timeTest(PrimeUtils::isPrime,
                  "test without memoizer");
 
         // Dispose of all schedulers and subscribers.
@@ -209,7 +205,7 @@ public class PubSubTest {
                       + Options.instance().count());
 
         // Reset the counters.
-        mPrimeCheckCounter.set(0);
+        PrimeUtils.sPrimeCheckCounter.set(0);
 
         // Create a remote publisher that runs on its own scheduler.
         Flux<Integer> publisher = mPublisherProxy
@@ -223,7 +219,8 @@ public class PubSubTest {
             .publishOn(mSubscriberScheduler)
 
             // Check if the # is prime.
-            .map(__ -> checkIfPrime(number, primeChecker));
+            .map(__ -> PrimeUtils
+                 .checkIfPrime(number, primeChecker));
 
         // Run the main flux pipeline.
         publisher
@@ -255,50 +252,6 @@ public class PubSubTest {
     }
 
     /**
-     * Check if {@code primeCandidate} is prime or not.
-     *
-     * @param primeCandidate The number to check if it's prime
-     * @param primeChecker A function that checks if number is prime
-     * @return A {@code common.Result} object that contains the original
-     * {@code primeCandidate} and either 0 if it's prime or its
-     * smallest factor if it's not prime.
-     */
-    private Result checkIfPrime(Integer primeCandidate,
-                                Function<Integer, Integer> primeChecker) {
-        // Return a tuple containing the prime candidate and the
-        // result of checking if it's prime.
-        return new Result(primeCandidate,
-                          primeChecker.apply(primeCandidate));
-    }
-
-    /**
-     * This method provides a brute-force determination of whether
-     * number {@code primeCandidate} is prime.  Returns 0 if it is
-     * prime, or the smallest factor if it is not prime.
-     */
-    private Integer isPrime(Integer primeCandidate) {
-        // Increment the counter to indicate a prime candidate wasn't
-        // already in the cache.
-        mPrimeCheckCounter.incrementAndGet();
-
-        int n = primeCandidate;
-
-        if (n > 3)
-            // This algorithm is intentionally inefficient to burn
-            // lots of CPU time!
-            for (int factor = 2;
-                 factor <= n / 2;
-                 ++factor)
-                if (Thread.interrupted()) {
-                    // Options.debug(" Prime checker thread interrupted");
-                    break;
-                } else if (n / factor * factor == n)
-                    return factor;
-
-        return 0;
-    }
-
-    /**
      * Demonstrate how to slice by applying the Project Reactor Flux
      * {@code skipWhile()} and {@code takeWhile()} operations to the
      * {@code map} parameter.
@@ -313,61 +266,10 @@ public class PubSubTest {
                       + " elements sorted by value = \n" + sortedMap);
 
         // Print out the prime #'s using takeWhile().
-        printPrimes(sortedMap);
+        PrimeUtils.printPrimes(sortedMap);
 
         // Print out the non-prime #'s using skipWhile().
-        printNonPrimes(sortedMap);
-    }
-    
-    /**
-     * Print out the prime numbers in the {@code sortedMap}.
-     */
-    private void printPrimes(Map<Integer, Integer> sortedMap) {
-        // Create a list of prime integers.
-        List<Integer> primes = Flux
-            // Convert EntrySet of the map into a flux stream.
-            .fromIterable(sortedMap.entrySet())
-            
-            // Slice the stream using a predicate that stops after a
-            // non-prime # (i.e., getValue() != 0) is reached.
-            .takeWhile(entry -> entry.getValue() == 0)
-
-            // Map the EntrySet into just the key.
-            .map(Map.Entry::getKey)
-
-            // Collect the results into a list.
-            .collect(toList())
-
-            // Block until processing is done.
-            .block();
-
-        // Print out the list of primes.
-        Options.print("primes =\n" + primes);
-    }
-
-    /**
-     * Print out the non-prime numbers and their factors in the {@code
-     * sortedMap}.
-     */
-    private void printNonPrimes(Map<Integer, Integer> sortedMap) {
-        // Create a list of non-prime integers and their factors.
-        List<Map.Entry<Integer, Integer>> nonPrimes = Flux
-            // Convert EntrySet of the map into a flux stream.
-            .fromIterable(sortedMap.entrySet())
-
-            // Slice the stream using a predicate that skips over the
-            // non-prime #'s (i.e., getValue() == 0);
-            .skipWhile(entry -> entry.getValue() == 0)
-
-            // Collect the results into a list.
-            .collect(toList())
-            
-            // Block until processing is done.
-            .block();
-
-        // Print out the list of primes.
-        Options.print("non-prime numbers and their factors =\n"
-                      + nonPrimes);
+        PrimeUtils.printNonPrimes(sortedMap);
     }
 
     /**
@@ -399,7 +301,6 @@ public class PubSubTest {
             .block();
     }
 
-
     /**
      * Create and return the proper exit string based on various conditions.
      * @return The proper exit string.
@@ -409,7 +310,7 @@ public class PubSubTest {
         String prefix = "Leaving "
                 + testName
                 + " with "
-                + mPrimeCheckCounter.get()
+                + PrimeUtils.sPrimeCheckCounter.get()
                 + " prime checks ";
 
         if (Options.instance().overflowStrategy() == FluxSink.OverflowStrategy.DROP
@@ -418,7 +319,7 @@ public class PubSubTest {
         else if (primeChecker instanceof Memoizer)
             return prefix
                     + "(" + (Options.instance().count()
-                    - mPrimeCheckCounter.get())
+                             - PrimeUtils.sPrimeCheckCounter.get())
                     + " duplicates)";
         else
             return prefix;
