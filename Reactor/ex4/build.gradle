@@ -1,36 +1,36 @@
 plugins {
-    id "org.springframework.boot" version "3.0.1" apply true
-    id "io.spring.dependency-management" version "1.1.0"
-    id 'java'
+	id 'org.springframework.boot' version '2.3.7.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
 }
 
 group = 'edu.vandy.pubsub'
 version = '0.0.1-SNAPSHOT'
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'org.springframework:spring-jdbc:5.3.14'
-    implementation 'com.jakewharton.retrofit:retrofit2-reactor-adapter:2.1.0'
-    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.12.7'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
+	implementation 'org.springframework:spring-jdbc:5.3.14'
+	implementation 'com.jakewharton.retrofit:retrofit2-reactor-adapter:2.1.0'
+	implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.12.7'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
