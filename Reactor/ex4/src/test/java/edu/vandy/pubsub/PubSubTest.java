@@ -1,6 +1,7 @@
 package edu.vandy.pubsub;
 
 import edu.vandy.pubsub.common.Result;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -14,7 +15,8 @@ import edu.vandy.pubsub.utils.ReactorUtils;
 import edu.vandy.pubsub.utils.RunTimer;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.FluxSink.OverflowStrategy;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.core.Disposables;
@@ -39,13 +41,14 @@ import static java.util.stream.Collectors.toMap;
  * threads in a different process and consumes this stream of
  * integers.  This program also measures the performance of checking
  * these random numbers for primality with and without various types
- * of memoizers (e.g., untimed and timed) based on Java
- * ConcurrentHashMap.  In addition, it demonstrates the use of slicing
- * with the Flux takeWhile() and skipWhile() operations.
+ * of memoizers (e.g., untimed and timed) based on Java {@link
+ * ConcurrentHashMap}.  In addition, it demonstrates the use of
+ * slicing with the {@link Flux} {@code takeWhile()} and {@code
+ * skipWhile()} operations.
  *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, e.g.,
- * {@code ZippyApplication}) and use that to start a Spring
+ * {@code PublisherApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
  *
  * The {@code @SpringBootConfiguration} annotation indicates that a
@@ -64,9 +67,10 @@ public class PubSubTest {
 
     /**
      * The scheduler used to locally publish random integers received
-     * from the Publisher microservice.
+     * from the Publisher microservice in a single thread.
      */
-    private Scheduler mPublisherScheduler;
+    private Scheduler mPublisherScheduler = Schedulers
+        .newParallel("publisher", 1);
 
     /**
      * The scheduler used to consume random integers by checking if
@@ -77,7 +81,8 @@ public class PubSubTest {
     /**
      * A subscriber that applies hybrid push/pull backpressure.
      */
-    private HybridBackpressureSubscriber mSubscriber;
+    private HybridBackpressureSubscriber mSubscriber =
+        new HybridBackpressureSubscriber();
 
     /**
      * Track all disposables to dispose them all at once.
@@ -94,12 +99,12 @@ public class PubSubTest {
      * Emulate the "command-line" arguments for the tests.
      */
     private final String[] mArgv = new String[]{
-            "-d",
-            "true", // Enable/disable debugging messages.
-            // "-T",
-            // "PubSubTest,HybridBackpressureSubscriber",
-            "-c",
-            "50" // Generate and test 50 random large Integer objects.
+        "-d",
+        "true", // Enable/disable debugging messages.
+        // "-T",
+        // "HybridBackpressureSubscriber",
+        "-c",
+        "200" // Generate and test 200 random large Integer objects.
     };
 
     /**
@@ -113,21 +118,15 @@ public class PubSubTest {
         // Process any command-line arguments.
         Options.instance().parseArgs(mArgv);
 
-        // Run the publisher in a single thread.
-        mPublisherScheduler = Schedulers
-            .newParallel("publisher", 1);
-
         // Maybe run the subscriber in a different single thread.
         mSubscriberScheduler = Options.instance().parallel()
-            // Choose a different scheduler if we're running in parallel.
+            // Choose a different scheduler if we're running in
+            // parallel.
             ? Schedulers.newParallel("subscriber",
                                      Options.instance().parallelism())
 
             // Run everything in the publisher scheduler.
             : mPublisherScheduler;
-
-        // This subscriber implements hybrid push/pull backpressure.
-        mSubscriber = new HybridBackpressureSubscriber();
 
         // Track all disposables to dispose them all at once.
         mDisposables = Disposables
@@ -145,6 +144,7 @@ public class PubSubTest {
      * Run the tests and print the results.
      */
     private void run() {
+        // Create a Memoizer.
         Memoizer<Integer, Integer> memoizer =
             Options.makeMemoizer(PrimeUtils::isPrime);
 
@@ -153,7 +153,8 @@ public class PubSubTest {
                  "test with memoizer");
 
         // Get a copy of the memoizer's map.
-        Map<Integer, Integer> memoizerCopy = memoizer.getCache();
+        Map<Integer, Integer> memoizerCopy = memoizer
+            .getCache();
 
         // Shutdown the memoizer.
         memoizer.shutdown();
@@ -175,8 +176,9 @@ public class PubSubTest {
     /**
      * Time {@code testName} using the given {@code hashMap}.
      *
-     * @param primeChecker The prime checker used evaluate prime candidates.
-     * @param testName The name of the test.
+     * @param primeChecker The prime checker used evaluate prime
+     *                     candidates.
+     * @param testName The name of the test
      */
     private void timeTest(Function<Integer, Integer> primeChecker,
                           String testName) {
@@ -191,10 +193,12 @@ public class PubSubTest {
     /**
      * Run the prime number test.
      * 
-     * @param primeChecker A function that maps candidate primes to their
-     * smallest factor (if they aren't prime) or 0 if they are prime
+     * @param primeChecker A function that maps candidate primes to
+     *                     their smallest factor (if they aren't
+     *                     prime) or 0 if they are prime
      * @param testName Name of the test
-     * @return The prime checker (which may be updated during the test).
+     * @return The prime checker (which may be updated during the
+     *         test)
      */
     private Function<Integer, Integer> runTest
         (Function<Integer, Integer> primeChecker,
@@ -208,24 +212,11 @@ public class PubSubTest {
         PrimeUtils.sPrimeCheckCounter.set(0);
 
         // Create a remote publisher that runs on its own scheduler.
-        Flux<Integer> publisher = mPublisherProxy
+        mPublisherProxy
             .start(Options.instance().count(),
-                    Options.instance().maxValue(),
-                    Options.instance().backPressureEnabled());
+                   Options.instance().maxValue(),
+                   Options.instance().backPressureEnabled())
 
-        // This Function determines if a random # is prime or not.
-        Function<Integer, Flux<Result>> determinePrimality = number -> Flux
-            .just(number)
-
-            // Subscriber may run in different thread(s).
-            .publishOn(mSubscriberScheduler)
-
-            // Check if the # is prime.
-            .map(__ -> PrimeUtils
-                 .checkIfPrime(number, primeChecker));
-
-        // Run the main flux pipeline.
-        publisher
             // Enable transformation at instantiation time.
             .transform(ReactorUtils
                        // Conditionally enable logging.
@@ -233,7 +224,7 @@ public class PubSubTest {
 
             // Use the flatMap() idiom to concurrently (maybe) check
             // each random # to see if it's prime.
-            .flatMap(determinePrimality)
+            .flatMap(determinePrimality(primeChecker))
 
             // The subscriber starts all the wheels in motion!
             .subscribe(mSubscriber);
@@ -254,38 +245,73 @@ public class PubSubTest {
     }
 
     /**
-     * Demonstrate how to slice by applying the Project Reactor Flux
-     * {@code skipWhile()} and {@code takeWhile()} operations to the
-     * {@code map} parameter.
+     * Return a {@link Function} that determines if a random # is
+     * prime or not.
+     *
+     * @param primeChecker A {@link Function} that checks for
+     *                     primality
+     * @return A {@link Function} that determines if a random # is
+     *         prime or not
      */
-    private void demonstrateSlicing(Map<Integer, Integer> map) {
-        // Sort the map by its values.
-        Map<Integer, Integer> sortedMap = sortMap(map, comparingByValue());
+    @NotNull
+    private Function<Integer, Mono<Result>> determinePrimality
+        (Function<Integer, Integer> primeChecker) {
+        // Return a Function that determines if a random # is prime or
+        // not.
+        return number -> Mono
+            // Emit the number from a Mono.
+            .fromCallable(() -> number)
 
-        // Print out the entire contents of the sorted map.
-        Options.print("map with "
-                      + sortedMap.size()
-                      + " elements sorted by value = \n" + sortedMap);
+            // Subscriber may run in different thread(s).
+            .publishOn(mSubscriberScheduler)
 
-        // Print out the prime #'s using takeWhile().
-        PrimeUtils.printPrimes(sortedMap);
-
-        // Print out the non-prime #'s using skipWhile().
-        PrimeUtils.printNonPrimes(sortedMap);
+            // Check if the # is prime.
+            .map(__ -> PrimeUtils
+                 .checkIfPrime(number,
+                               primeChecker));
     }
 
     /**
-     * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
-     * @param map The map to sort
-     * @param comparator The comparator to compare map entries.
-     * @return The sorted map
+     * Demonstrate how to slice by applying the Project Reactor Flux
+     * {@code skipWhile()} and {@code takeWhile()} operations to the
+     * {@code map} parameter
+     *
+     * @param map The {@link Map} to sort
      */
-    private Map<Integer, Integer> sortMap
+    private void demonstrateSlicing(Map<Integer, Integer> map) {
+        this
+            // Sort the map by its values.
+            .sortMap(map, comparingByValue())
+
+            // Print out the entire contents of the sorted map.
+            .doOnNext(sortedMap -> {
+                    Options.print("map with "
+                                  + sortedMap.size()
+                                  + " elements sorted by value = \n"
+                                  + sortedMap);
+
+                    // Print out the prime #'s using takeWhile().
+                    PrimeUtils.printPrimes(sortedMap);
+
+                    // Print out the non-prime #'s using skipWhile().
+                    PrimeUtils.printNonPrimes(sortedMap);
+                });
+    }
+
+    /**
+     * Sort {@code map} via the {@code comparator} and {@code
+     * LinkedHashMap}.
+     *
+     * @param map The map to sort
+     * @param comparator The comparator to compare map entries
+     * @return A {@link Mono} that emits a sorted {@link Map}
+     */
+    private Mono<Map<Integer, Integer>> sortMap
         (Map<Integer, Integer> map,
          Comparator<Map.Entry<Integer, Integer>> comparator) {
-        // Create a map that's sorted by the value in map.
+        // Create a Map that's sorted by the value in Map.
         return Flux
-            // Convert EntrySet of the map into a flux stream.
+            // Convert EntrySet of the Map into a flux stream.
             .fromIterable(map.entrySet())
 
             // Sort the elements in the stream using the comparator.
@@ -297,32 +323,32 @@ public class PubSubTest {
             .collect(toMap(Map.Entry::getKey,
                            Map.Entry::getValue,
                            (e1, e2) -> e2,
-                           LinkedHashMap::new))
-
-            // Block until processing is done.
-            .block();
+                           LinkedHashMap::new));
     }
 
     /**
-     * Create and return the proper exit string based on various conditions.
-     * @return The proper exit string.
+     * Create and return the proper exit string based on various
+     * conditions.
+     *
+     * @return The proper exit {@link String}
      */
     private String makeExitString(String testName,
                                   Function<Integer, Integer> primeChecker) {
         String prefix = "Leaving "
-                + testName
-                + " with "
-                + PrimeUtils.sPrimeCheckCounter.get()
-                + " prime checks ";
+            + testName
+            + " with "
+            + PrimeUtils.sPrimeCheckCounter.get()
+            + " prime checks ";
 
-        if (Options.instance().overflowStrategy() == FluxSink.OverflowStrategy.DROP
-                || Options.instance().overflowStrategy() == FluxSink.OverflowStrategy.LATEST)
+        if (Options.instance().overflowStrategy() == OverflowStrategy.DROP
+            || Options.instance().overflowStrategy() == OverflowStrategy.LATEST)
             return prefix;
         else if (primeChecker instanceof Memoizer)
             return prefix
-                    + "(" + (Options.instance().count()
-                             - PrimeUtils.sPrimeCheckCounter.get())
-                    + " duplicates)";
+                + "(" 
+                + (Options.instance().count()
+                   - PrimeUtils.sPrimeCheckCounter.get())
+                + " duplicates)";
         else
             return prefix;
     }
