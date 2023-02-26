@@ -32,11 +32,13 @@ public class PublisherService {
 
     /**
      * Publish a stream of {@code count} random {@link Integer}
-     * objects within the range of {@code maxValue} - {@code count}
-     * to {@code maxValue}.
+     * objects within the range of {@code maxValue} - {@code count} to
+     * {@code maxValue}.
      *
-     * @param count The number of random {@link Integer} objects to generate
-     * @param maxValue The max value of the random {@link Integer} objects
+     * @param count The number of random {@link Integer} objects to
+     *              generate
+     * @param maxValue The max value of the random {@link Integer}
+     *                 objects
      * @return Return a {@link Flux} that publishes {@code count}
      *         random {@link Integer} objects
      */
@@ -46,11 +48,12 @@ public class PublisherService {
         var randomIntegers = RandomUtils
             .generateRandomNumbers(count, maxValue);
 
-        // Run the publisher in a single thread.
+        // Run the publisher in a single Thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
 
-        // This consumer emits a flux stream of random integers.
+        // This consumer emits a flux stream of random Integer
+        // objects.
         return Flux
             // Emit a flux stream of random integers.
             .create(backpressureEnabled
@@ -111,9 +114,11 @@ public class PublisherService {
      * A factory method that's used to emit a flux stream of random
      * integers without concern for backpressure.
      *
-     * @param iterator Iterator containing the random integers
-     * @return A consumer to a flux sink that emits a flux stream
-     *         of random integers without concern for backpressure
+     * @param iterator An {@link Iterator} containing the random
+     *                 integers
+     * @return A {@link Consumer} to a {@link Flux} sink that emits a
+     *         stream of random {@link Integer} without concern for
+     *         backpressure
      */
     private Consumer<FluxSink<Integer>>
         makeNonBackpressureEmitter(Iterator<Integer> iterator) {
@@ -128,7 +133,8 @@ public class PublisherService {
                               "published item: "
                               + item);
 
-                // Only publish an item if the sink hasn't been cancelled.
+                // Only publish an item if the sink hasn't been
+                // cancelled.
                 if (!sink.isCancelled())
                     // Publish the next item.
                     sink.next(item);
@@ -140,9 +146,9 @@ public class PublisherService {
     }
 
     /**
-     * Stop generating the stream of random integers.
+     * Stop generating the stream of random {@link Integer} objects.
      *
-     * @return An empty mono.
+     * @return An empty {@link Mono}
      */
     public Mono<Void> stop() {
         // Shutdown the publisher's scheduler.

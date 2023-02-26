@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 /**
  * This class provides the entry point into the Spring WebFlux-based
- * version of the Publisher example.
+ * version of the Publisher microservice.
  */
 @SpringBootApplication
 @ComponentScan("edu.vandy.pubsub")

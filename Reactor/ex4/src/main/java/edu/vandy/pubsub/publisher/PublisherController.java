@@ -37,16 +37,21 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
 
         /**
          * Publish a stream of {@code count} random {@link Integer}
-         * objects within the range of {@code maxValue} - {@code count}
-         * to {@code maxValue}.
+         * objects within the range of {@code maxValue} - {@code
+         * count} to {@code maxValue}.
          *
-         * @param count The number of random {@link Integer} objects to generate
-         * @param maxValue The max value of the random {@link Integer} objects
+         * WebFlux maps HTTP GET requests sent to the {@code
+         * GET_START} endpoint to this method.
+         *
+         * @param count The number of random {@link Integer} objects
+         *              to generate
+         * @param maxValue The max value of the random {@link Integer}
+         *                 objects
          * @return Return a {@link Flux} that publishes {@code count}
          *         random {@link Integer} objects
          *
          */
-        @GetMapping(value = GET_START /*, produces = MediaType.APPLICATION_NDJSON_VALUE */)
+        @GetMapping(value = GET_START)
         public Flux<Integer> start(Integer count,
                                    Integer maxValue,
                                    Boolean backpressureEnabled) {
@@ -61,10 +66,10 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
          * This method stops publishing the flux stream of random
          * integers.
          *
-         * WebFlux maps HTTP DELETE requests sent to the /_stop endpoint
-         * to this method.
+         * WebFlux maps HTTP DELETE requests sent to the {@code
+         * DELETE_STOP} endpoint to this method.
          *
-         * @return An empty {@link Mono}.
+         * @return An empty {@link Mono}
          */
         @DeleteMapping(DELETE_STOP)
         public Mono<Void> stop() {
