@@ -1,13 +1,14 @@
 package edu.vandy.pubsub.subscriber;
 
 import edu.vandy.pubsub.common.Options;
-import edu.vandy.pubsub.common.Result;
 import edu.vandy.pubsub.utils.ExceptionUtils;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 
 import java.util.concurrent.CountDownLatch;
+
+import edu.vandy.pubsub.common.Result;
 
 /**
  * A Flux subscriber that implements hybrid push/pull backpressure.
@@ -128,7 +129,7 @@ public class HybridBackpressureSubscriber
      */
     @Override
     public void onError(Throwable t) { 
-        Options.print("failure " + t); 
+        Options.print("Failure " + t);
 
         // Release the latch since we're done.
         mLatch.countDown();
@@ -140,7 +141,7 @@ public class HybridBackpressureSubscriber
      */
     @Override
     public void onComplete() {
-        Options.print("completed");
+        Options.print("Completed");
 
         // Release the latch since we're done.
         mLatch.countDown();

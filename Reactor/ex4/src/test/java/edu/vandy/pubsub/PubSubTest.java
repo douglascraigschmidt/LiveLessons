@@ -1,5 +1,6 @@
 package edu.vandy.pubsub;
 
+import edu.vandy.pubsub.common.Result;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -20,16 +21,13 @@ import reactor.core.Disposables;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import edu.vandy.pubsub.common.Options;
-import edu.vandy.pubsub.common.Result;
 import edu.vandy.pubsub.utils.PrimeUtils;
 
 import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -56,7 +54,7 @@ import static java.util.stream.Collectors.toMap;
 @SuppressWarnings("ALL")
 @SpringBootConfiguration
 @SpringBootTest(classes = PublisherApplication.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class PubSubTest {
     /**
      * Debugging tag used by the logger.
@@ -97,7 +95,9 @@ public class PubSubTest {
      */
     private final String[] mArgv = new String[]{
             "-d",
-            "false", // Disable debugging messages.
+            "true", // Enable/disable debugging messages.
+            // "-T",
+            // "PubSubTest,HybridBackpressureSubscriber",
             "-c",
             "50" // Generate and test 50 random large Integer objects.
     };
@@ -209,9 +209,11 @@ public class PubSubTest {
 
         // Create a remote publisher that runs on its own scheduler.
         Flux<Integer> publisher = mPublisherProxy
-            .start(Options.instance().backPressureEnabled());
+            .start(Options.instance().count(),
+                    Options.instance().maxValue(),
+                    Options.instance().backPressureEnabled());
 
-        // This function determines if a random # is prime or not.
+        // This Function determines if a random # is prime or not.
         Function<Integer, Flux<Result>> determinePrimality = number -> Flux
             .just(number)
 

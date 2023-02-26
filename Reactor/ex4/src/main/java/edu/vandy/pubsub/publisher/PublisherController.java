@@ -9,9 +9,9 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
 
 /**
  * This Spring controller demonstrates how WebFlux can be used to
- * handle HTTP GET, POST, and DELETE requests via asynchronous
+ * handle HTTP GET and DELETE requests via asynchronous
  * reactive programming.  These requests are mapped to methods that
- * create, start, and stop generating random integers.
+ * start and stop generating random integers.
  *
  * In Spring's approach to building RESTful web services, HTTP
  * requests are handled by a controller that defines the
@@ -35,39 +35,25 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
         PublisherService mService;
 
         /**
-         * This method initializes the publisher.
+         * Publish a stream of {@code count} random {@link Integer}
+         * objects within the range of {@code maxValue} - {@code count}
+         * to {@code maxValue}.
          *
-         * WebFlux maps HTTP POST requests sent to the /_create endpoint to
-         * this method.
+         * @param count The number of random {@link Integer} objects to generate
+         * @param maxValue The max value of the random {@link Integer} objects
+         * @return Return a {@link Flux} that publishes {@code count}
+         *         random {@link Integer} objects
          *
-         * @param count The number of {@link Integer} objects to generate
-         * @param maxValue The maximum value of the generated {@link Integer} objects
-         * @return An empty {@link Mono}.
-         */
-        @PostMapping(POST_CREATE)
-        public Mono<Void> create(@RequestParam int count,
-                                 @RequestParam int maxValue) {
-            // Create a new publisher.
-            mService.create(count, maxValue);
-
-            // Return an empty mono.
-            return Mono.empty();
-        }
-
-        /**
-         * This method starts publishing the flux stream of random
-         * integers.
-         *
-         * WebFlux maps HTTP GET requests sent to the /_start endpoint to
-         * this method.
-         *
-         * @param backpressureEnabled True if backpressure is enabled, else false
-         * @return A {@link Flux} stream of random {@link Integer} objects
          */
         @GetMapping(GET_START)
-        public Flux<Integer> start(@RequestParam Boolean backpressureEnabled) {
-            // Forward to the service.
-            return mService.start(backpressureEnabled);
+        public Flux<Integer> start(Integer count,
+                                   Integer maxValue,
+                                   Boolean backpressureEnabled) {
+            return mService
+                // Forward to the service.
+                .start(count,
+                       maxValue,
+                       backpressureEnabled);
         }
 
         /**

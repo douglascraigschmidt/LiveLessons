@@ -1,13 +1,24 @@
 package edu.vandy.pubsub.subscriber;
 
 import edu.vandy.pubsub.common.ClientBeans;
+import edu.vandy.pubsub.publisher.PublisherApplication;
+
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static edu.vandy.pubsub.common.Constants.EndPoint.DELETE_STOP;
+import static edu.vandy.pubsub.common.Constants.SERVER_BASE_URL;
+import static edu.vandy.pubsub.common.Constants.EndPoint.GET_START;
+
 /**
- * This class serves as a proxy to the Publisher microservice.
+ * This class serves as a proxy to the {@link PublisherApplication}
+ * microservice.
  */
 @Component
 public class PublisherProxy {
@@ -17,35 +28,70 @@ public class PublisherProxy {
     @Autowired
     private PublisherAPI mApi;
 
+    //final RestTemplate mRestTemplate = new RestTemplate();
+
     /**
-     * Initialize the publisher to emit a stream of random {@link
-     * Integer} objects.
-     *
-     * @param count The number of {@link Integer} objects to create
-     * @param maxValue The maximum value of the {@link Integer}
-     *                 objects
-     * @return A {@link Mono} that emits {@link Void} when the call is
-     *         done
+     * The WebClient provides the means to access the APIGateway
+     * microservice.
      */
-    public Mono<Void> create(int count,
-                             int maxValue) {
-        return mApi
-            // Forward to the API.
-            .create(count, maxValue);
-    }
+    /*
+    final WebClient mApi = WebClient
+            // Start building.
+            .builder()
+
+            // The URL where the server is running.
+            .baseUrl(SERVER_BASE_URL)
+
+            // Build the webclient.
+            .build();
+
+     */
 
     /**
      * Start publishing a stream of random numbers.
-     *
+     * @param count The number of {@link Integer} objects to create
+     * @param maxValue The maximum value of the {@link Integer}
+     *                 objects
      * @param backpressureEnabled True if backpressure enabled, else
      *                            false
      * @return A {@link Flux} that publishes random {@link Integer}
      *         objects
      */
-    public Flux<Integer> start(boolean backpressureEnabled) {
+    public Flux<Integer> start(int count,
+                               int maxValue,
+                               boolean backpressureEnabled) {
+        /*
+        var uri = UriComponentsBuilder
+                .fromPath(GET_START)
+                .queryParam("count",
+                        count)
+                .queryParam("maxValue",
+                        maxValue)
+                .queryParam("backpressureEnabled",
+                        backpressureEnabled)
+                .build()
+                .toUriString();
+
+        System.out.println(uri);
+
+        return mApi
+            // Create an HTTP GET request.
+            .get()
+
+            // Add the uri to the baseUrl.
+            .uri(uri)
+
+            // Retrieve the response.
+            .retrieve()
+            
+            .bodyToFlux(Integer.class);
+        */
+
         return mApi
             // Forward to the API.
-            .start(backpressureEnabled);
+            .start(count,
+                   maxValue,
+                   backpressureEnabled);
     }
 
     /**
@@ -55,6 +101,20 @@ public class PublisherProxy {
      *         done
      */
     public Mono<Void> stop() {
+        /*
+        return mApi
+                // Create an HTTP POST request.
+                .delete()
+
+                // Add the uri to the baseUrl.
+                .uri(DELETE_STOP)
+
+                // Retrieve the response.
+                .retrieve()
+
+                .bodyToMono(Void.class);
+*/
+
         return mApi
             // Forward to the API.
             .stop();

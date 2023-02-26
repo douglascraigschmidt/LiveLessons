@@ -28,29 +28,21 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
  */
 public interface PublisherAPI {
     /**
-     * Initialize the publisher to emit a stream of random {@link
-     * Integer} objects.
+     * Start publishing a stream of random numbers.
      *
      * @param count The number of {@link Integer} objects to create
      * @param maxValue The maximum value of the {@link Integer}
      *                 objects
-     * @return A {@link Mono} that emits {@link Void} when the call is
-     *         done
-     */
-    @POST(POST_CREATE)
-    Mono<Void> create(@Query("count") int count,
-                      @Query("maxValue") int maxValue);
-
-    /**
-     * Start publishing a stream of random numbers.
-     *
      * @param backpressureEnabled True if backpressure enabled, else
      *                            false
      * @return A {@link Flux} that publishes random {@link Integer}
      *         objects
      */
     @GET(GET_START)
-    Flux<Integer> start(@Query("backpressureEnabled") boolean backpressureEnabled);
+    Flux<Integer> start(@Query("count") int count,
+                        @Query("maxValue") int maxValue,
+                        @Query("backpressureEnabled") boolean backpressureEnabled);
+
 
     /**
      * Stop publishing a stream of random numbers.

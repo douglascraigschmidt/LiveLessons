@@ -9,3 +9,4 @@ public record Result(
 
     // common.Result of the isPrime() method.
     int smallestFactor) {}
+

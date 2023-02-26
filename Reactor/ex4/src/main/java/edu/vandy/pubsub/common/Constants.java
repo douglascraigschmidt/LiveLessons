@@ -7,7 +7,6 @@ public class Constants {
      * All supported HTTP request endpoints.
      */
     public static class EndPoint {
-        public static final String POST_CREATE = "create";
         public static final String GET_START = "start";
         public static final String DELETE_STOP = "stop";
     }

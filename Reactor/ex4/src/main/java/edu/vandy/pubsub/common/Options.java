@@ -182,16 +182,14 @@ public class Options {
      */
     public static Memoizer<Integer, Integer> makeMemoizer
         (Function<Integer, Integer> function) {
-        switch(instance().mMemoizerStrategy) {
-        case 'U': return new UntimedMemoizer<>(function);
-        case 'T': return new TimedMemoizer<>
-                (function,
-                 instance().mTimeout);
-        case 'X': return new TimedMemoizerEx<>
-                (function,
-                 instance().mTimeout);
-        default: throw new IllegalArgumentException("given memoizer type unknown");
-        }
+        return switch (instance().mMemoizerStrategy) {
+        case 'U' -> new UntimedMemoizer<>(function);
+        case 'T' -> new TimedMemoizer<>
+            (function,instance().mTimeout);
+        case 'X' -> new TimedMemoizerEx<>
+            (function,instance().mTimeout);
+        default -> throw new IllegalArgumentException("given memoizer type unknown");
+        };
     }
 
     /**
@@ -201,9 +199,9 @@ public class Options {
     public static void debug(String string) {
         if (sInstance.mDiagnosticsEnabled)
             System.out.println("[" +
-                    Thread.currentThread().getName()
-                    + "] "
-                    + string);
+                               Thread.currentThread().getName()
+                               + "] "
+                               + string);
     }
 
     /**
@@ -233,49 +231,30 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-b":
-                    mBackPressureEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
-                        break;
-                case "-c":
-                    mCount = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-m":
-                    mMaxValue = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-M":
-                    mMemoizerStrategy = argv[argc + 1].charAt(0);
-                    break;
-                case "-o":
-                    mOverflowStrategy = argv[argc + 1].charAt(0);
-                    break;
-                case "-p":
-                    mParallel = argv[argc + 1].equals("true");
-                    break;
-                case "-P":
-                    mParallelism = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-t":
-                    mTimeout = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-T":
-                    mTagsList = Pattern
-                        .compile(",")
-                        .splitAsStream(argv[argc + 1])
-                        .collect(toList());
-                    break;
-                default:
-                    printUsage();
-                    return;
+                    case "-b" -> mBackPressureEnabled = argv[argc + 1].equals("true");
+                    case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    case "-l" -> mLoggingEnabled = argv[argc + 1].equals("true");
+                    case "-c" -> mCount = Integer.parseInt(argv[argc + 1]);
+                    case "-m" -> mMaxValue = Integer.parseInt(argv[argc + 1]);
+                    case "-M" -> mMemoizerStrategy = argv[argc + 1].charAt(0);
+                    case "-o" -> mOverflowStrategy = argv[argc + 1].charAt(0);
+                    case "-p" -> mParallel = argv[argc + 1].equals("true");
+                    case "-P" -> mParallelism = Integer.parseInt(argv[argc + 1]);
+                    case "-t" -> mTimeout = Integer.parseInt(argv[argc + 1]);
+                    case "-T" -> mTagsList = Pattern
+                            .compile(",")
+                            .splitAsStream(argv[argc + 1])
+                            .collect(toList());
+                    default -> {
+                        printUsage();
+                        return;
+                    }
                 }
+
             if (mMaxValue - mCount <= 0)
                 throw new IllegalArgumentException("maxValue - count must be greater than 0");
         }
+
     }
 
     /**

@@ -26,35 +26,26 @@ public class PublisherService {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * A list of randomly-generated integers.
-     */
-    private List<Integer> mRandomIntegers;
-
-    /**
      * The thread pool used to run the publisher.
      */
     private Scheduler mPublisherScheduler;
 
     /**
-     * Constructor initializes the list of random integers.
+     * Publish a stream of {@code count} random {@link Integer}
+     * objects within the range of {@code maxValue} - {@code count}
+     * to {@code maxValue}.
      *
-     * @param count The number of random integers to generate
-     * @param maxValue The max value of the random integers
+     * @param count The number of random {@link Integer} objects to generate
+     * @param maxValue The max value of the random {@link Integer} objects
+     * @return Return a {@link Flux} that publishes {@code count}
+     *         random {@link Integer} objects
      */
-    public void create(int count, int maxValue) {
-        // Generate a list of random integers.
-        mRandomIntegers = RandomUtils
-            .generateRandomNumbers(count,
-                                   // Try to generate duplicates.
-                                   maxValue);
-    }
+    public Flux<Integer> start(int count,
+                               int maxValue,
+                               Boolean backpressureEnabled) {
+        var randomIntegers = RandomUtils
+            .generateRandomNumbers(count, maxValue);
 
-    /**
-     * Publish a stream of random numbers.
-     *
-     * @return Return a flux that publishes random numbers
-     */
-    public Flux<Integer> start(Boolean backpressureEnabled) {
         // Run the publisher in a single thread.
         mPublisherScheduler = Schedulers
             .newParallel("publisher", 1);
@@ -64,9 +55,9 @@ public class PublisherService {
             // Emit a flux stream of random integers.
             .create(backpressureEnabled
                     // Emit integers using backpressure.
-                    ? makeBackpressureEmitter(mRandomIntegers.iterator())
+                    ? makeBackpressureEmitter(randomIntegers.iterator())
                     // Emit integers not using backpressure.
-                    : makeNonBackpressureEmitter(mRandomIntegers.iterator()),
+                    : makeNonBackpressureEmitter(randomIntegers.iterator()),
                     // Set the overflow strategy.
                     Options.instance().overflowStrategy())
 
@@ -128,10 +119,7 @@ public class PublisherService {
         makeNonBackpressureEmitter(Iterator<Integer> iterator) {
         // Create an emitter that just blasts out random integers.
         return sink -> {
-            Options.debug(TAG, "Request size = "
-                          + mRandomIntegers.size());
-
-            // Keep going if iterator's not done.
+            // Keep going if the iterator is not done.
             while (iterator.hasNext()) {
                 // Get the next item.
                 Integer item = iterator.next();

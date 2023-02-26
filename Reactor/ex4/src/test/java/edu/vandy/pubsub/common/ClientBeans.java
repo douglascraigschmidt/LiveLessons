@@ -1,10 +1,11 @@
 package edu.vandy.pubsub.common;
 
+import org.springframework.context.annotation.Configuration;
+
 import edu.vandy.pubsub.subscriber.PublisherAPI;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import com.jakewharton.retrofit2.adapter.reactor.ReactorCallAdapterFactory;
 
 import static edu.vandy.pubsub.common.Constants.SERVER_BASE_URL;
@@ -29,7 +30,7 @@ public class ClientBeans {
     @Bean
     public PublisherAPI getPublisherAPI() {
         // Create a Retrofit instance with a Reactor adapter and a
-        // Jackson converter.
+        // Gson converter.
         return new Retrofit
             // Create a new Retrofit instance.
             .Builder()
@@ -37,11 +38,13 @@ public class ClientBeans {
             // Provide the base URL for the server.
             .baseUrl(SERVER_BASE_URL)
 
+            // Add a converter factory to the Retrofit client that
+            // converts the raw JSON response data from the
+            // GatewayApplication microservice into Java objects.
+            .addConverterFactory(GsonConverterFactory.create())
+
             // Add a ReactorCallAdapterFactory to handle reactive calls.
             .addCallAdapterFactory(ReactorCallAdapterFactory.create())
-
-            // Add a JacksonConverterFactory to handle JSON serialization.
-            .addConverterFactory(JacksonConverterFactory.create())
 
             // Build the Retrofit instance.
             .build()
