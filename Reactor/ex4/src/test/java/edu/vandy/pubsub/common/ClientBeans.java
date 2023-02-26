@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 
 import edu.vandy.pubsub.subscriber.PublisherAPI;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import com.jakewharton.retrofit2.adapter.reactor.ReactorCallAdapterFactory;
@@ -16,6 +17,14 @@ import static edu.vandy.pubsub.common.Constants.SERVER_BASE_URL;
  */
 @Configuration
 public class ClientBeans {
+    /**
+     * @return A {@link RestTemplate} instance
+     */
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+
     /**
      * Creates a new instance of the Retrofit object with the base URL
      * for the server, and uses it to create an implementation of the

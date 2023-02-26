@@ -25,16 +25,18 @@ public class PublisherProxy {
     /**
      * Automatically inject a {@link PublisherAPI} instance.
      */
+    /*
     @Autowired
     private PublisherAPI mApi;
+    */
 
-    //final RestTemplate mRestTemplate = new RestTemplate();
+    @Autowired
+    RestTemplate mRestTemplate;
 
     /**
      * The WebClient provides the means to access the APIGateway
      * microservice.
      */
-    /*
     final WebClient mApi = WebClient
             // Start building.
             .builder()
@@ -44,8 +46,6 @@ public class PublisherProxy {
 
             // Build the webclient.
             .build();
-
-     */
 
     /**
      * Start publishing a stream of random numbers.
@@ -60,19 +60,25 @@ public class PublisherProxy {
     public Flux<Integer> start(int count,
                                int maxValue,
                                boolean backpressureEnabled) {
-        /*
         var uri = UriComponentsBuilder
-                .fromPath(GET_START)
-                .queryParam("count",
-                        count)
-                .queryParam("maxValue",
-                        maxValue)
-                .queryParam("backpressureEnabled",
-                        backpressureEnabled)
-                .build()
-                .toUriString();
+            // Add the base path.
+            .fromPath(GET_START)
 
-        System.out.println(uri);
+            // Add query parameters.
+            .queryParam("count",
+                        count)
+            .queryParam("maxValue",
+                        maxValue)
+            .queryParam("backpressureEnabled",
+                        backpressureEnabled)
+
+            // Create a UriComponents object.
+            .build()
+
+            // Convert to a Uri string.
+            .toUriString();
+
+        // System.out.println(uri);
 
         return mApi
             // Create an HTTP GET request.
@@ -84,14 +90,16 @@ public class PublisherProxy {
             // Retrieve the response.
             .retrieve()
             
+            // Convert to a Flux.
             .bodyToFlux(Integer.class);
-        */
 
-        return mApi
-            // Forward to the API.
-            .start(count,
-                   maxValue,
-                   backpressureEnabled);
+        /*
+          return mApi
+          // Forward to the API.
+          .start(count,
+          maxValue,
+          backpressureEnabled);
+        */
     }
 
     /**
@@ -101,7 +109,6 @@ public class PublisherProxy {
      *         done
      */
     public Mono<Void> stop() {
-        /*
         return mApi
                 // Create an HTTP POST request.
                 .delete()
@@ -113,10 +120,11 @@ public class PublisherProxy {
                 .retrieve()
 
                 .bodyToMono(Void.class);
-*/
 
+        /*
         return mApi
             // Forward to the API.
             .stop();
+        */
     }
 }

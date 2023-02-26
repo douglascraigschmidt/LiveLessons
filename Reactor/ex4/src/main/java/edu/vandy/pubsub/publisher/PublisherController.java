@@ -1,6 +1,7 @@
 package edu.vandy.pubsub.publisher;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,7 +46,7 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
          *         random {@link Integer} objects
          *
          */
-        @GetMapping(GET_START)
+        @GetMapping(value = GET_START, produces = MediaType.APPLICATION_NDJSON_VALUE)
         public Flux<Integer> start(Integer count,
                                    Integer maxValue,
                                    Boolean backpressureEnabled) {
