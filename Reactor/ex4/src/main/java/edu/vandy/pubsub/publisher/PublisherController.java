@@ -46,7 +46,7 @@ import static edu.vandy.pubsub.common.Constants.EndPoint.*;
          *         random {@link Integer} objects
          *
          */
-        @GetMapping(value = GET_START, produces = MediaType.APPLICATION_NDJSON_VALUE)
+        @GetMapping(value = GET_START /*, produces = MediaType.APPLICATION_NDJSON_VALUE */)
         public Flux<Integer> start(Integer count,
                                    Integer maxValue,
                                    Boolean backpressureEnabled) {

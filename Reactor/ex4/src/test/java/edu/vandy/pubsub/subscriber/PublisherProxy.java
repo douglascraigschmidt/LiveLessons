@@ -26,8 +26,8 @@ public class PublisherProxy {
      * Automatically inject a {@link PublisherAPI} instance.
      */
     /*
-    @Autowired
-    private PublisherAPI mApi;
+      @Autowired
+      private PublisherAPI mApi;
     */
 
     @Autowired
@@ -38,17 +38,18 @@ public class PublisherProxy {
      * microservice.
      */
     final WebClient mApi = WebClient
-            // Start building.
-            .builder()
+        // Start building.
+        .builder()
 
-            // The URL where the server is running.
-            .baseUrl(SERVER_BASE_URL)
+        // The URL where the server is running.
+        .baseUrl(SERVER_BASE_URL)
 
-            // Build the webclient.
-            .build();
+        // Build the webclient.
+        .build();
 
     /**
      * Start publishing a stream of random numbers.
+     *
      * @param count The number of {@link Integer} objects to create
      * @param maxValue The maximum value of the {@link Integer}
      *                 objects
@@ -110,21 +111,21 @@ public class PublisherProxy {
      */
     public Mono<Void> stop() {
         return mApi
-                // Create an HTTP POST request.
-                .delete()
+            // Create an HTTP POST request.
+            .delete()
 
-                // Add the uri to the baseUrl.
-                .uri(DELETE_STOP)
+            // Add the uri to the baseUrl.
+            .uri(DELETE_STOP)
 
-                // Retrieve the response.
-                .retrieve()
+            // Retrieve the response.
+            .retrieve()
 
-                .bodyToMono(Void.class);
+            .bodyToMono(Void.class);
 
         /*
-        return mApi
-            // Forward to the API.
-            .stop();
+          return mApi
+          // Forward to the API.
+          .stop();
         */
     }
 }

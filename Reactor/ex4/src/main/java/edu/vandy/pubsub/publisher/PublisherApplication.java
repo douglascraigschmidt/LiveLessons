@@ -35,17 +35,17 @@ public class PublisherApplication {
     /**
      * Configure the use of Java virtual threads to handle all
      * incoming HTTP requests.
-
+     */
     @Bean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
     public AsyncTaskExecutor asyncTaskExecutor() {
         return new TaskExecutorAdapter(Executors
                 .newVirtualThreadPerTaskExecutor());
     }
 
-
+    /**
      * Customize the ProtocolHandler on the TomCat Connector to
      * use Java virtual threads to handle all incoming HTTP requests.
-
+     */
     @Bean
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
         return protocolHandler -> {
@@ -53,5 +53,4 @@ public class PublisherApplication {
                     .setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         };
     }
-    */
 }
