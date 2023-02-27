@@ -3,7 +3,6 @@ package edu.vandy.quoteservices.microservices.zippy;
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.common.QuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,7 @@ public class ZippyService
      * Spring-injected repository that contains all quotes.
      */
     @Autowired
-    private QuoteRepository mRepository;
+    private JPAQuoteRepository mRepository;
 
     /**
      * @return A {@link List} of all {@link Quote} objects
@@ -76,8 +75,8 @@ public class ZippyService
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
         // Use a Java sequential or parallel stream and the JPA to
-        // locate all movies whose 'id' matches the List of 'queries'
-        // and return them as a List of Movie objects.
+        // locate all quotes whose 'id' matches the List of 'queries'
+        // and return them as a List of Quote objects.
         return StreamSupport
             // Convert the List to a Stream.
             .stream(queries.spliterator(), parallel)

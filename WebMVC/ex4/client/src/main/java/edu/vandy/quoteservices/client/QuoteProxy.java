@@ -18,8 +18,8 @@ import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
 public class QuoteProxy {
     /**
      * Create an instance of the {@link QuoteAPI} Retrofit client,
-     * which is then used to making HTTP requests to the {@code
-     * GatewayApplication} RESTful microservice.
+     * which is then used to make HTTP requests synchronously to the
+     * {@code GatewayApplication} RESTful microservice.
      */
     @Autowired
     QuoteAPI mQuoteAPI;

@@ -1,0 +1,64 @@
+package edu.vandy.quoteservices.microservices.handey;
+
+import edu.vandy.quoteservices.common.BaseController;
+import edu.vandy.quoteservices.common.BaseService;
+import edu.vandy.quoteservices.common.Quote;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
+import java.util.Objects;
+
+import static edu.vandy.quoteservices.utils.RegexUtils.makeRegex;
+
+/**
+ * This class defines implementation methods that are called by the
+ * {@link BaseController}, which serves as the main "front-end" app
+ * gateway entry point for remote clients that want to receive Handey
+ * quotes.
+ *
+ * This class implements the abstract methods in {@link BaseService}
+ * using the Project Reactor framework.
+ *
+ * This class is annotated as a Spring {@code @Service}, which enables
+ * the automatic detection and wiring of dependent implementation
+ * classes via classpath scanning. It also includes its name in the
+ * {@code @Service} annotation below so that it can be identified as a
+ * service.
+ */
+public class HandeyService
+       extends BaseService<Flux<Quote>> {
+    /**
+     * @return A {@link Flux} of all {@link Quote} objects
+     */
+    public Flux<Quote> getAllQuotes() {
+        return mRepository
+            .findAll();
+    }
+
+    /**
+     * Get a {@link Flux} that contains the requested quotes.
+     *
+     * @param quoteIds A {@link Flux} containing the given random
+     *                 {@code quoteIds}
+     * @return A {@link Flux} of all requested {@link Quote} objects
+     */
+    public Flux<Quote> postQuotes(List<Integer> quoteIds) {
+        return mRepository
+            .findAllById(quoteIds);
+    }
+
+    /**
+     * Search for quotes containing the given {@link String} queries
+     * and return a {@link Flux} of matching {@link Quote} objects.
+     *
+     * @param queries The search queries
+     * @return A {@code Flux} of quotes containing {@link Quote}
+     *         objects matching the given {@code queries}
+     */
+    public Flux<Quote> search(List<String> queries) {
+        return null;
+    }
+}

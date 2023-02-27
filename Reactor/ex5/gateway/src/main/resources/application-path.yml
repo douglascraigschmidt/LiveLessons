@@ -1,0 +1,29 @@
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_FIRST
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "http://localhost:3000"
+            allowed-methods:
+              - "GET"
+              - "POST"
+            allowed-headers:
+              - "Content-Type"
+        add-to-simple-url-handler-mapping: true
+      routes:
+        - id: handey
+          uri: http://localhost:9100
+          predicates:
+            - Path= /handey/**
+          filters:
+            - StripPrefix=1 # ...
+
+        - id: zippy
+          uri: http://localhost:9101
+          predicates:
+              - Path= /zippy/**
+          filters:
+            - StripPrefix=1 # ...

@@ -4,8 +4,10 @@ import org.springframework.context.annotation.Configuration;
 
 import edu.vandy.pubsub.subscriber.PublisherAPI;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.client.RestTemplate;
 import retrofit2.Retrofit;
+import reactor.core.scheduler.Schedulers;
 import retrofit2.converter.gson.GsonConverterFactory;
 import com.jakewharton.retrofit2.adapter.reactor.ReactorCallAdapterFactory;
 
@@ -24,6 +26,8 @@ public class ClientBeans {
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
     }
+
+    ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
     /**
      * Creates a new instance of the Retrofit object with the base URL
@@ -53,8 +57,8 @@ public class ClientBeans {
             .addConverterFactory(GsonConverterFactory.create())
 
             // Add a ReactorCallAdapterFactory to handle reactive calls.
-            .addCallAdapterFactory(ReactorCallAdapterFactory.create())
-
+            // .addCallAdapterFactory(ReactorCallAdapterFactory.create())
+            .addCallAdapterFactory(ReactorCallAdapterFactory.createWithScheduler(Schedulers.boundedElastic()))
             // Build the Retrofit instance.
             .build()
 

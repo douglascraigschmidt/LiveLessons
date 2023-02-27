@@ -3,6 +3,7 @@ package edu.vandy.pubsub.subscriber;
 import edu.vandy.pubsub.common.ClientBeans;
 import edu.vandy.pubsub.publisher.PublisherApplication;
 
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,18 +26,19 @@ public class PublisherProxy {
     /**
      * Automatically inject a {@link PublisherAPI} instance.
      */
-    /*
+
       @Autowired
       private PublisherAPI mApi;
-    */
 
-    @Autowired
-    RestTemplate mRestTemplate;
+
+    // @Autowired
+   // RestTemplate mRestTemplate;
 
     /**
      * The WebClient provides the means to access the APIGateway
      * microservice.
      */
+    /*
     final WebClient mApi = WebClient
         // Start building.
         .builder()
@@ -46,6 +48,8 @@ public class PublisherProxy {
 
         // Build the webclient.
         .build();
+
+     */
 
     /**
      * Start publishing a stream of random numbers.
@@ -61,46 +65,49 @@ public class PublisherProxy {
     public Flux<Integer> start(int count,
                                int maxValue,
                                boolean backpressureEnabled) {
+        /*
         var uri = UriComponentsBuilder
-            // Add the base path.
-            .fromPath(GET_START)
+        // Add the base path.
+        .fromPath(GET_START)
 
-            // Add query parameters.
-            .queryParam("count",
-                        count)
-            .queryParam("maxValue",
-                        maxValue)
-            .queryParam("backpressureEnabled",
-                        backpressureEnabled)
+        // Add query parameters.
+        .queryParam("count",
+        count)
+        .queryParam("maxValue",
+        maxValue)
+        .queryParam("backpressureEnabled",
+        backpressureEnabled)
 
-            // Create a UriComponents object.
-            .build()
+        // Create a UriComponents object.
+        .build()
 
-            // Convert to a Uri string.
-            .toUriString();
+        // Convert to a Uri string.
+        .toUriString();
 
         // System.out.println(uri);
 
         return mApi
-            // Create an HTTP GET request.
-            .get()
+        // Create an HTTP GET request.
+        .get()
 
-            // Add the uri to the baseUrl.
-            .uri(uri)
+        // Add the uri to the baseUrl.
+        .uri(uri)
 
-            // Retrieve the response.
-            .retrieve()
+        // Retrieve the response.
+        .retrieve()
             
-            // Convert to a Flux.
-            .bodyToFlux(Integer.class);
+        // Convert to a Flux.
+        .bodyToFlux(Integer.class);
 
-        /*
-          return mApi
-          // Forward to the API.
-          .start(count,
-          maxValue,
-          backpressureEnabled);
         */
+
+
+        return mApi
+            // Forward to the API.
+            .start(count,
+                   maxValue,
+                   backpressureEnabled);
+
     }
 
     /**
@@ -110,22 +117,24 @@ public class PublisherProxy {
      *         done
      */
     public Mono<Void> stop() {
-        return mApi
-            // Create an HTTP POST request.
-            .delete()
-
-            // Add the uri to the baseUrl.
-            .uri(DELETE_STOP)
-
-            // Retrieve the response.
-            .retrieve()
-
-            .bodyToMono(Void.class);
-
         /*
           return mApi
-          // Forward to the API.
-          .stop();
+          // Create an HTTP POST request.
+          .delete()
+
+          // Add the uri to the baseUrl.
+          .uri(DELETE_STOP)
+
+          // Retrieve the response.
+          .retrieve()
+
+          .bodyToMono(Void.class);
+
         */
+
+        return mApi
+            // Forward to the API.
+            .stop();
+
     }
 }

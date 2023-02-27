@@ -1,9 +1,8 @@
 package edu.vandy.quoteservices.microservices.zippy;
 
 import edu.vandy.quoteservices.common.BaseApplication;
-import edu.vandy.quoteservices.common.Components;
+import edu.vandy.quoteservices.common.ServerBeans;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.common.QuoteRepository;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * This class provides the entry point into the Spring WebMVC-based
- * version of the Handey quote microservice.
+ * version of the Zippy quote microservice.
  *
  * The {@code @SpringBootApplication} annotation enables apps to use
  * autoconfiguration, component scan, and to define extra
@@ -23,10 +22,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @ComponentScan(basePackageClasses = {
     ZippyApplication.class,
-    Components.class
+    ServerBeans.class
 })
 @EntityScan(basePackageClasses = {Quote.class})
-@EnableJpaRepositories(basePackageClasses = {QuoteRepository.class})
+@EnableJpaRepositories(basePackageClasses = {JPAQuoteRepository.class})
 public class ZippyApplication extends BaseApplication {
     /**
      * The static main() entry point runs this Spring application.

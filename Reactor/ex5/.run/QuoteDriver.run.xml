@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="QuoteDriver" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="ex5.client.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.QuoteDriver" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="edu.vandy.quoteservices.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

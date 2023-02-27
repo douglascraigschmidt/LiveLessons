@@ -2,7 +2,6 @@ package edu.vandy.quoteservices.microservices.zippy;
 
 import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.common.QuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +28,7 @@ public class ZippyController
      * Spring-injected repository that contains all quotes.
      */
     @Autowired
-    private QuoteRepository mRepository;
+    private JPAQuoteRepository mRepository;
 
     /**
      * Search for quotes containing the given {@link String} queries

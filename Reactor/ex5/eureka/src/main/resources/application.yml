@@ -1,0 +1,18 @@
+# Define the port number listened on by the Eureka discovery service
+# and other properties.
+
+server:
+  port: 8761
+spring:
+  application:
+    name: eureka
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

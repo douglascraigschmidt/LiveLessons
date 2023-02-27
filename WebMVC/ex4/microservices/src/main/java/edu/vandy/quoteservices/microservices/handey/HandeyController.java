@@ -8,7 +8,8 @@ import java.util.List;
 
 /**
  * This Spring controller demonstrates how Spring WebMVC can be used
- * to handle HTTP GET requests.
+ * to handle HTTP GET and POST requests for Handey quotes
+ * synchronously.
  *
  * The {@code @RestController} annotation is a specialization of
  * {@code @Component} and is automatically detected through classpath
