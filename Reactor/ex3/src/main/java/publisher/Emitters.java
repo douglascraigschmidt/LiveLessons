@@ -1,6 +1,8 @@
+package publisher;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import utils.Options;
+import common.Options;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,7 +33,7 @@ public final class Emitters {
      *         {@link Flux} stream of random integers using a hybrid
      *         push/pull backpressure model
      */
-    static Consumer<FluxSink<Integer>>
+    public static Consumer<FluxSink<Integer>>
         makeBackpressureEmitter(Iterator<Integer> iterator,
                                 AtomicInteger pendingItemCount) {
         // Create an emitter that uses the hybrid push/pull
@@ -83,7 +85,7 @@ public final class Emitters {
      *         {@link Flux} stream of random integers without concern
      *         for backpressure
      */
-    static Consumer<FluxSink<Integer>>
+    public static Consumer<FluxSink<Integer>>
         makeNonBackpressureEmitter(Iterator<Integer> iterator,
                                    AtomicInteger pendingItemCount,
                                    int size) {

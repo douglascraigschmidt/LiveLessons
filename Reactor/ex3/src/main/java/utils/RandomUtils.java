@@ -9,11 +9,11 @@ import static java.util.stream.Collectors.toList;
  * This Java utility class defines static methods and fields used by
  * other classes.
  */
-public class Utils {
+public class RandomUtils {
     /**
      * A Java utility class should have a private constructor.
      */
-    private Utils() {}
+    private RandomUtils() {}
 
     /**
      * Generate and return a {@link List} of random {@link Integer}s.
@@ -22,7 +22,8 @@ public class Utils {
      * @param maxValue The maximum value of the random {@link Integer}s
      * @return A {@link List} of random {@link Integer}s
      */
-    public static List<Integer> generateRandomIntegers(int count, int maxValue) {
+    public static List<Integer> generateRandomIntegers(int count,
+                                                       int maxValue) {
         return new Random()
             // Generate "count" random ints.
             .ints(count,

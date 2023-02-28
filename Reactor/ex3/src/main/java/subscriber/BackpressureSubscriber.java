@@ -1,9 +1,11 @@
+package subscriber;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Disposable;
 import utils.ExceptionUtils;
-import utils.Options;
-import utils.PrimeUtils;
+import common.Options;
+import common.PrimeUtils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +55,7 @@ public class BackpressureSubscriber
     /**
      * Constructor initializes the field.
      */
-    BackpressureSubscriber(AtomicInteger pendingItemCount) {
+    public BackpressureSubscriber(AtomicInteger pendingItemCount) {
         // Initially false.
         mIsDisposed = false;
 
@@ -85,7 +87,7 @@ public class BackpressureSubscriber
     /**
      * @return The next request size for the publisher.
      */
-    int nextRequestSize() {
+    public int nextRequestSize() {
         if (Options.instance().backPressureEnabled())
             // Request only this many items.
             return mREQUEST_SIZE;

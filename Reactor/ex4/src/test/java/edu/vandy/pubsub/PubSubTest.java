@@ -284,7 +284,7 @@ public class PubSubTest {
             .sortMap(map, comparingByValue())
 
             // Print out the entire contents of the sorted map.
-            .doOnNext(sortedMap -> {
+            .doOnSuccess(sortedMap -> {
                     Options.print("map with "
                                   + sortedMap.size()
                                   + " elements sorted by value = \n"
@@ -295,35 +295,10 @@ public class PubSubTest {
 
                     // Print out the non-prime #'s using skipWhile().
                     PrimeUtils.printNonPrimes(sortedMap);
-                });
-    }
+                })
 
-    /**
-     * Sort {@code map} via the {@code comparator} and {@code
-     * LinkedHashMap}.
-     *
-     * @param map The map to sort
-     * @param comparator The comparator to compare map entries
-     * @return A {@link Mono} that emits a sorted {@link Map}
-     */
-    private Mono<Map<Integer, Integer>> sortMap
-        (Map<Integer, Integer> map,
-         Comparator<Map.Entry<Integer, Integer>> comparator) {
-        // Create a Map that's sorted by the value in Map.
-        return Flux
-            // Convert EntrySet of the Map into a flux stream.
-            .fromIterable(map.entrySet())
-
-            // Sort the elements in the stream using the comparator.
-            .sort(comparator)
-
-            // Trigger intermediate processing and collect key/value
-            // pairs in the stream into a LinkedHashMap, which
-            // preserves the sorted order.
-            .collect(toMap(Map.Entry::getKey,
-                           Map.Entry::getValue,
-                           (e1, e2) -> e2,
-                           LinkedHashMap::new));
+            // Block until all process completes.
+            .block();
     }
 
     /**

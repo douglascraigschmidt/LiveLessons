@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import edu.vandy.pubsub.common.Options;
 
 /**
- * This publisher generates a flux stream from a microservice that's
+ * This publisher generates a {@link Flux} stream from a microservice that's
  * connected to the subscriber via WebFlux mechanisms.
  */
 @Service

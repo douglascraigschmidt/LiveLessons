@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+import static java.util.stream.Collectors.toMap;
+
 /**
  * A utility class containing helpful methods for manipulating various
  * Reactor features.
@@ -207,9 +209,9 @@ public class ReactorUtils {
      * Sort {@code map} via the {@code comparator} and {@code LinkedHashMap}
      * @param map The map to sort
      * @param comparator The comparator to compare map entries
-     * @return The sorted {@link Map}
+     * @return A {@link Mono} that emits the sorted {@link Map}
      */
-    public static Map<Integer, Integer> sortMap
+    public static Mono<Map<Integer, Integer>> sortMap
         (Map<Integer, Integer> map,
          Comparator<Map.Entry<Integer, Integer>> comparator) {
         // Create a map that's sorted by the value in map.
@@ -223,12 +225,9 @@ public class ReactorUtils {
             // Trigger intermediate processing and collect key/value
             // pairs in the stream into a LinkedHashMap, which
             // preserves the sorted order.
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                                      Map.Entry::getValue,
-                                      (e1, e2) -> e2,
-                                      LinkedHashMap::new))
-
-            // Block until processing is done.
-            .block();
+            .collect(toMap(Map.Entry::getKey,
+                           Map.Entry::getValue,
+                           (e1, e2) -> e2,
+                           LinkedHashMap::new));
     }
 }
