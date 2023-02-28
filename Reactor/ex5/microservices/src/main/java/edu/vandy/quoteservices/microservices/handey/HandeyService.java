@@ -2,6 +2,7 @@ package edu.vandy.quoteservices.microservices.handey;
 
 import edu.vandy.quoteservices.common.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
  * {@code @Service} annotation below so that it can be identified as a
  * service.
  */
+@Service
 public class HandeyService
        implements BaseService<Flux<Quote>> {
     /**

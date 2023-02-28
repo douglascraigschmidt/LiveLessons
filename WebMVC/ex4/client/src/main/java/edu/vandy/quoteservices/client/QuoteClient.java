@@ -84,13 +84,20 @@ public class QuoteClient {
      * {@link List} of {@code queries} on the Zippy microservice
      * using a custom SQL method.
      *
+     * @param route The microservice that performs the request
      * @param queries The {@link List} of queries to search for
+     *  @param parallel Run the queries in parallel if true, else run
+     *                  sequentially
      * @return An {@link List} of {@link Quote} objects that
      *         contain all {@code queries}
      */
-    public List<Quote> searchQuotesEx(List<String> queries) {
+    public List<Quote> searchQuotesEx(String route,
+                                      List<String> queries,
+                                      Boolean parallel) {
         return mQuoteProxy
             // Forward to the proxy.
-            .searchEx(queries);
+            .searchEx(route,
+                      queries,
+                      parallel);
     }
 }

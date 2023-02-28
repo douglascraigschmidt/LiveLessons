@@ -45,4 +45,16 @@ public interface BaseService<T> {
      */
      T search(List<String> queries,
               Boolean parallel);
+
+    /**
+     * Search for quotes containing all the given {@link String} and
+     * return a {@link Flux} that emits the matching {@link Quote}
+     * objects.
+     *
+     * @param queries The search queries
+     * @return A {@code Flux} that emits {@link Quote} objects
+     *         containing the given {@code queries}
+     */
+     T searchEx(List<String> queries,
+                Boolean parallel);
 }

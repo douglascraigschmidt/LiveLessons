@@ -92,11 +92,15 @@ public interface QuoteAPI {
      * @param queries The {@link List} of {@code queries} to search
      *                for, which is passed in the body of the {@code
      *                POST} request
+     * @param parallel Search for the {@code queries} in parallel if
+     *                 true, else run sequentially, which is passed
+     *                 as part of the URL
      * @return A {@link Call} object that yields a {@link List}
      *         containing the {@link Quote} objects on success and
      *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_SEARCHES_EX)
     Call<List<Quote>> searchEx(@Path("routename") String routename,
-                               @Body List<String> queries);
+                               @Body List<String> queries,
+                               @Query("parallel") Boolean parallel);
 }

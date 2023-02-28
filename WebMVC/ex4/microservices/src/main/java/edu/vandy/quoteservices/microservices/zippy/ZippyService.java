@@ -36,9 +36,8 @@ public class ZippyService
     /**
      * @return A {@link List} of all {@link Quote} objects
      */
+    @Override
     public List<Quote> getAllQuotes() {
-        System.out.println("ZippyService.getAllQuotes()");
-
         return mRepository
             // Forward to the repository.
             .findAll();
@@ -53,6 +52,7 @@ public class ZippyService
      *                 sequentially
      * @return A {@link List} of all requested {@link Quote} objects
      */
+    @Override
     public List<Quote> postQuotes(List<Integer> quoteIds,
                                   Boolean parallel) {
         System.out.println("ZippyService.getQuotes()");
@@ -72,6 +72,7 @@ public class ZippyService
      * @return A {@code List} of quotes containing {@link Quote}
      *         objects matching the given {@code queries}
      */
+    @Override
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
         // Use a Java sequential or parallel stream and the JPA to
@@ -96,4 +97,21 @@ public class ZippyService
             // Convert the Stream to a List.
             .toList();
     }
+
+    /**
+     * Search for quotes containing all the given {@link String} and
+     * return a {@link List} that contains the matching {@link Quote}
+     * objects.
+     *
+     * @param queries The search queries
+     * @return A {@code List} containing {@link Quote} objects
+     *         matching the given {@code queries}
+     */
+    @Override
+    public List<Quote> searchEx(List<String> queries,
+                                Boolean notUsed) {
+         return mRepository
+             // Forward to the repository.
+             .findAllByQuoteContainingAllIn(queries);
+     }
 }

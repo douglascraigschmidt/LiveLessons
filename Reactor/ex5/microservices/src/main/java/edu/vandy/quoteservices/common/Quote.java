@@ -1,6 +1,13 @@
 package edu.vandy.quoteservices.common;
 
-import javax.persistence.*;
+// import jakarta.persistence.*;
+// import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+// import javax.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -19,7 +26,7 @@ import lombok.Value;
 @Value
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@Entity // For R2DBC
+// @Entity // For R2DBC and JPA
 @Table(name = "QUOTE")
 public class Quote {
     /**
@@ -32,6 +39,6 @@ public class Quote {
     /**
      * A quote.
      */
-    @Column(name = "quote", nullable = false)
+    @Column("quote")
     public String quote;
 }

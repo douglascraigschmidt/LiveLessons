@@ -140,7 +140,9 @@ public class QuoteDriver
         
         zippyQuotes = RunTimer
             .timeRun(() -> quoteClient
-                     .searchQuotesEx(quoteAndList),
+                     .searchQuotesEx(ZIPPY,
+                             quoteAndList,
+                                     parallel),
                      "Zippy searches (extended)");
 
         Options.display("Zippy searches (extended)"
@@ -198,6 +200,27 @@ public class QuoteDriver
                         + " received "
                         + handeyQuotes.size()
                         + " of 14 expected results");
+
+        // Make a List of common Handey words that are used to search
+        // for all matches.
+        var quoteAndList = List
+                .of("man",
+                        "that");
+
+        handeyQuotes = RunTimer
+                .timeRun(() -> quoteClient
+                                .searchQuotesEx(HANDEY,
+                                        quoteAndList,
+                                        parallel),
+                        "Handey searches (extended)");
+
+        Options.display("Handey searches (extended)"
+                + (handeyQuotes.size() == 1
+                ? " successfully"
+                : " unsuccessfully")
+                + " received "
+                + handeyQuotes.size()
+                + " of 1 expected results");
     }
 
     /**

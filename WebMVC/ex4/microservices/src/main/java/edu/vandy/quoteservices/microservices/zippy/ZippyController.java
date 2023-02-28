@@ -29,22 +29,4 @@ public class ZippyController
      */
     @Autowired
     private JPAQuoteRepository mRepository;
-
-    /**
-     * Search for quotes containing the given {@link String} queries
-     * and return a {@link List<Quote>} of matches using a custom
-     * SQL query.
-     *
-     * @param queries The search queries
-     * @return A {@code T} containing the queries
-     */
-    @PostMapping(POST_SEARCHES_EX)
-    public List<Quote> searchEx(@RequestBody List<String> queries) {
-        // Use a custom SQL query to find all movies whose 'id'
-        // matches the List of 'queries' and return them as a List of
-        // Quote objects that contain no duplicates.
-        return mRepository
-            .findAllByQuoteContainingAllIn(queries);
-    }
-
 }

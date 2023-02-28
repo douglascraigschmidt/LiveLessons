@@ -1,7 +1,8 @@
 package edu.vandy.quoteservices.microservices.handey;
 
 import edu.vandy.quoteservices.common.Quote;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+// import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
@@ -15,7 +16,7 @@ import reactor.core.publisher.Flux;
  */
 @Repository
 public interface ReactiveQuoteRepository
-       extends ReactiveCrudRepository<Quote, Integer> /*,
+       extends R2dbcRepository<Quote, Integer> /*,
                                                MultiQueryRepository */ {
     /**
      * Find all {@link Quote} rows in the database that contain the

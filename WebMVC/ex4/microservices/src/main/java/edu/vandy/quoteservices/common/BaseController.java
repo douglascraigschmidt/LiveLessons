@@ -56,7 +56,6 @@ public abstract class BaseController<T> {
      */
     @GetMapping(GET_ALL_QUOTES)
     public T getAllQuotes() {
-        System.out.println("getAllQuotes()");
         return getService()
             // Forward request to the service.
             .getAllQuotes();
@@ -91,8 +90,31 @@ public abstract class BaseController<T> {
     @PostMapping(POST_SEARCHES)
     public T search(@RequestBody List<String> queries,
                     Boolean parallel) {
+        System.out.println("search");
+
         return getService()
             // Forward to the service.
             .search(queries, parallel);
+    }
+
+
+    /**
+     * Search for quotes containing the given {@link String} queries
+     * and return a {@link List<Quote>} of matches using a custom
+     * SQL query.
+     *
+     * @param queries The search queries
+     * @return A {@code T} containing the queries
+     */
+    @PostMapping(POST_SEARCHES_EX)
+    public T searchEx(@RequestBody List<String> queries,
+                      Boolean parallel) {
+        System.out.println("searchEx");
+        // Use a custom SQL query to find all movies whose 'id'
+        // matches the List of 'queries' and return them as a List of
+        // Quote objects that contain no duplicates.
+        return getService()
+            // Forward to the service.
+            .searchEx(queries, parallel);
     }
 }

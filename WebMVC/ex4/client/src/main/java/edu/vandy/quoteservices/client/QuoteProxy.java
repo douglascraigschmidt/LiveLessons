@@ -128,18 +128,23 @@ public class QuoteProxy {
      * Search the Zippy microservice for quotes containing all the
      * given {@link List} of {@code queries} using a custom SQL method.
      *
+     * @param route The microservice that performs the request
      * @param queries The {@link List} of {@code queries} to search
      *                for
+     * @param parallel Search for the {@code queries} in parallel if
+     *                 true, else run sequentially
      * @return A {@link List} of {@link Quote} objects that match the
      *         queries
      */
     public List<Quote> searchEx
-        (List<String> queries) {
+        (String route,
+         List<String> queries,
+         Boolean parallel) {
         try {
             // Execute the searchEx() retrofit API method.
             var response = mQuoteAPI
-                .searchEx(ZIPPY,
-                          queries).execute();
+                .searchEx(route,
+                          queries, parallel).execute();
 
             // Determine whether this method succeeded or failed.
             if (response.isSuccessful())
