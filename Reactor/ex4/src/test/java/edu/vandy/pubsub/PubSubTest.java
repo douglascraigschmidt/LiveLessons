@@ -1,36 +1,31 @@
 package edu.vandy.pubsub;
 
+import edu.vandy.pubsub.common.Options;
 import edu.vandy.pubsub.common.Result;
+import edu.vandy.pubsub.publisher.PublisherApplication;
+import edu.vandy.pubsub.subscriber.HybridBackpressureSubscriber;
+import edu.vandy.pubsub.subscriber.PublisherProxy;
+import edu.vandy.pubsub.utils.Memoizer;
+import edu.vandy.pubsub.utils.PrimeUtils;
+import edu.vandy.pubsub.utils.ReactorUtils;
+import edu.vandy.pubsub.utils.RunTimer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import edu.vandy.pubsub.publisher.PublisherApplication;
-import edu.vandy.pubsub.subscriber.HybridBackpressureSubscriber;
-import edu.vandy.pubsub.subscriber.PublisherProxy;
-import edu.vandy.pubsub.utils.Memoizer;
-import edu.vandy.pubsub.utils.ReactorUtils;
-import edu.vandy.pubsub.utils.RunTimer;
 import reactor.core.Disposable;
+import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink.OverflowStrategy;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.core.Disposables;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import edu.vandy.pubsub.common.Options;
-import edu.vandy.pubsub.utils.PrimeUtils;
-
 import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * This program applies WebFlux and Project Reactor features to
@@ -279,7 +274,7 @@ public class PubSubTest {
      * @param map The {@link Map} to sort
      */
     private void demonstrateSlicing(Map<Integer, Integer> map) {
-        this
+        ReactorUtils
             // Sort the map by its values.
             .sortMap(map, comparingByValue())
 
