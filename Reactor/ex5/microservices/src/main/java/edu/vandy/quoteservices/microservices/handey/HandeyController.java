@@ -1,7 +1,6 @@
 package edu.vandy.quoteservices.microservices.handey;
 
 import edu.vandy.quoteservices.common.BaseController;
-import edu.vandy.quoteservices.common.Quote;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 

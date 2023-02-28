@@ -1,5 +1,6 @@
 package edu.vandy.quoteservices.common;
 
+import edu.vandy.quoteservices.microservices.handey.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +57,6 @@ public abstract class BaseController<T> {
      */
     @GetMapping(GET_ALL_QUOTES)
     public T getAllQuotes() {
-        System.out.println("getAllQuotes()");
         return getService()
             // Forward request to the service.
             .getAllQuotes();

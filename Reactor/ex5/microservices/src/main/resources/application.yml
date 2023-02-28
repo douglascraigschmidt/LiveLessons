@@ -29,7 +29,7 @@ eureka:
    # Common Database properties
    datasource:
      driverClassName: org.h2.Driver
-     url: r2dbc:h2:mem:handey;DB_CLOSE_ON_EXIT=TRUE
+     url: r2dbc:h2:mem:///handey;DB_CLOSE_ON_EXIT=TRUE
    sql:
      init:
        platform: h2
