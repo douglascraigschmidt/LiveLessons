@@ -112,6 +112,6 @@ public class ZippyService
                                 Boolean notUsed) {
          return mRepository
              // Forward to the repository.
-             .findAllByQuoteContainingAllIn(queries);
+             .findAllByQuoteContainingIgnoreCaseAllIn(queries);
      }
 }

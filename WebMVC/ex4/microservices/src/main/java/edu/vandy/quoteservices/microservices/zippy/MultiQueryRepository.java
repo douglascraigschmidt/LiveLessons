@@ -5,9 +5,8 @@ import edu.vandy.quoteservices.common.Quote;
 import java.util.List;
 
 /**
- * This interface defines a method that returns a {@link List} of
- * {@link Quote} objects in the database containing all of
- * the {@code queries} (ignoring case).
+ * This interface defines a means to perform multiple queries
+ * on the Quote database.
  */
 public interface MultiQueryRepository {
     /**
@@ -19,5 +18,6 @@ public interface MultiQueryRepository {
      *         containing all of the {@code queries}
      *         (ignoring case)
      */
-    List<Quote> findAllByQuoteContainingAllIn(List<String> queries);
+    List<Quote> findAllByQuoteContainingIgnoreCaseAllIn
+                    (List<String> queries);
 }

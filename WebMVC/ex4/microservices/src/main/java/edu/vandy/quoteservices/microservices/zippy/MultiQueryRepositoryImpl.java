@@ -3,9 +3,7 @@ package edu.vandy.quoteservices.microservices.zippy;
 import edu.vandy.quoteservices.common.Quote;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -29,34 +27,61 @@ public class MultiQueryRepositoryImpl
      * Find a {@link List} of {@link Quote} objects in the database
      * containing all of the {@code queries} (ignoring case).
      *
-     * @param queries List of queries
+     * @param queries The {@lin List} of queries
      * @return A {@link List} of {@link Quote} objects in the database
      *         containing at all of the {@code queries}
      *         (ignoring case)
      */
     @Override
-    public List<Quote> findAllByQuoteContainingAllIn(@NonNull List<String> queries) {
+    public List<Quote> findAllByQuoteContainingIgnoreCaseAllIn
+        (@NonNull List<String> queries) {
         // Get a CriteriaBuilder object from the EntityManager
         // associated with the current JPA transaction and use it to
-        // create the criteria query that will be used to search for
-        // quotes.
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        // create the CriteriaQuery used to search for quotes.
+        var criteriaBuilder = entityManager
+            .getCriteriaBuilder();
 
-        // Create a new criteria query of type Quote that's used to
-        // specify the search criteria for the quotes.
-        CriteriaQuery<Quote> cq = cb.createQuery(Quote.class);
+        // Create a new CriteriaQuery of type Quote used to specify
+        // the search criteria for the quotes.
+        var criteriaQuery = criteriaBuilder
+            .createQuery(Quote.class);
 
         // Create a Root object for the Quote entity that specifies
         // the entity to query.
-        Root<Quote> quote = cq.from(Quote.class);
+        var quote = criteriaQuery.from(Quote.class);
 
         // Create an Expression object that represents the lower-cased
-        // ID ("quote") field of the Quote entity that's used to create
-        // the search predicate that matches the specified queries.
+        // ID ("quote") column of the Quote entity used to create the
+        // search predicate that matches the specified queries.
         var idExpression
-            = cb.lower(quote.get("quote"));
+            = criteriaBuilder.lower(quote.get("quote"));
 
-        var andPredicate = queries
+        // Get a Predicate that "ands" all the queries together.
+        var andPredicate =
+            getPredicate(queries, criteriaBuilder, idExpression);
+
+        // Perform the query and return the results.
+        return getQueryResults(criteriaQuery, andPredicate);
+    }
+
+    /**
+     * Get a {@link Predicate} that "ands" all the {@code queries}
+     * together.
+     * 
+     * @param queries The {@lin List} of queries
+     * @param criteriaBuilder Create the {@link CriteriaQuery} used to
+     *                        search for quotes
+
+     * @param idExpression The lower-cased ID ("quote") column of the
+     *                     {@link Quote} entity
+     * @return A {@link Predicate} that "ands" all the {@code queries}
+     *         together
+     */
+    private static Predicate
+        getPredicate(List<String> queries,
+                     CriteriaBuilder criteriaBuilder,
+                     Expression<String> idExpression) {
+        return queries
             // Convert the List to a Stream.
             .stream()
 
@@ -65,17 +90,32 @@ public class MultiQueryRepositoryImpl
 
             // Map each query to a "like" predicate that matches the
             // ID (title) field of the Quote entity.
-            .map(query -> cb
+            .map(query -> criteriaBuilder
                  .like(idExpression, "%" + query + "%"))
 
             // Reduce the list of predicates to a single conjunction
             // (and) predicate.
-            .reduce(cb.conjunction(), cb::and);
+            .reduce(criteriaBuilder.conjunction(), criteriaBuilder::and);
+    }
 
+    /**
+     * Perform the query and return the results.
+     * 
+     * @param criteriaQuery A {@link CriteriaQuery} of type {@link
+     *                       Quote} that specifies the search criteria
+     *                       for the quotes
+     * @param andPredicate A {@link Predicate} that "ands" all the
+     *                     queries together
+     * @return A {@link List} of {@link Quote} objects in the database
+     *         containing at all of the {@code queries}
+     *         (ignoring case)
+     */
+    private List<Quote> getQueryResults(CriteriaQuery<Quote> criteriaQuery,
+                                        Predicate andPredicate) {
         return entityManager
             // Create a Query object from the specified criteria
             // query.
-            .createQuery(cq
+            .createQuery(criteriaQuery
                          // Add the orPredicate to the CriteriaQuery
                          // "where" clause, which returns the quote if
                          // it matches all the specified queries.
