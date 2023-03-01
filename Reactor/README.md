@@ -11,6 +11,11 @@ overview of what's included:
         a Flux of available flights.  Another three algorithms use
         Java Streams features to perform the same computations.
 
+. ex2 - This program applies Project Reactor features to check the
+        primality of randomly generate Integer objects via a publisher
+        and a subscriber that (conditionally) run in different
+        threads/schedulers.
+
 . ex3 - This program applies Project Reactor features to implement
         various types of backpressure strategies (e.g., ignore,
         buffer, error, latest, drop, and push/pull) between a
@@ -35,18 +40,10 @@ overview of what's included:
         demonstrates the use of slicing with the Flux takeWhile() and
         skipWhile() operations.
 
-. ex5 - This program applies object-oriented, functional, and reactive
-        programming capabilities to implement a multi-tier Airline
-        Booking App (ABA) as an Intellij project.  The ABA project
-        showcases a wide range of Java concurrency and parallelism
-        frameworks that are used to synchronously and asynchronously
-        communicate with various microservices to find prices for
-        flights and convert these prices to/from various currencies.
-        These price are displayed after the microservices complete
-        their computations.
+. ex5 - ...
 
 . ex6 - This program shows performance differences between Project
-        Reactor's single-threaed Flux, the flatMap() concurrency
+        Reactor's single-threaded Flux, the flatMap() concurrency
         idiom, and several variants of ParallelFlux when creating Set
         objects containing the unique words appearing in the complete
         work of William Shapespeare.
