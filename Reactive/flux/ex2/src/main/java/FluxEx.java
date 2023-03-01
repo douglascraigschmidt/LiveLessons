@@ -209,8 +209,8 @@ public class FluxEx {
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
         return (FluxSink<BigInteger> sink) -> Flux
-            // Emit sMAX_ITERATIONS integers starting at 1.
-            .range(1, sMAX_ITERATIONS)
+            // Emit up to Integer.MAX_VALUE integers starting at 1.
+            .range(1, Integer.MAX_VALUE)
 
             // Convert to Long since Flux lacks a rangeLong() method.
             .map(Integer::toUnsignedLong)
@@ -226,6 +226,9 @@ public class FluxEx {
             // Eliminate even numbers from consideration since they
             // aren't prime!
             .filter(sOnlyOdd)
+
+            // Only take sMAX_ITERATIONS Integer objects.
+            .take(sMAX_ITERATIONS)
 
             // Always dispose of the "publisher" thread regardless of
             // what happens.
