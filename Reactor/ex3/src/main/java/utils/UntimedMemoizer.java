@@ -15,7 +15,7 @@ import java.util.function.Function;
  *
  * This code is inspired by an example in "Java Concurrency in
  * Practice" by Brian Goetz et al.  More information on memoization is
- * available at https://en.wikipedia.org/wiki/Memoization.
+ * available <A HREF="https://en.wikipedia.org/wiki/Memoization">here</A>.
  */
 public class UntimedMemoizer<K, V>
        extends Memoizer<K, V> {
@@ -46,7 +46,7 @@ public class UntimedMemoizer<K, V>
      * no value associated with the key then the function is called to
      * create the value and store it in the cache before returning it.
      */
-    public V apply(final K key) {
+    public V apply(K key) {
         // Check to see if the key already has a value in the map.
         return mCache.computeIfAbsent(key, mFunction);
     }

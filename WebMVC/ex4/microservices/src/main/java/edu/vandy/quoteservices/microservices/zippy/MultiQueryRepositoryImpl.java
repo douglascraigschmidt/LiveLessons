@@ -9,9 +9,10 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 
 /**
- * This implementation defines a method that returns a {@link List} of
- * {@link Quote} objects in the database containing at least one of
- * the {@code queries} (ignoring case).
+ * This class realizes the "Repository Implementation Pattern" to
+ * define a method that returns a {@link List} of {@link Quote}
+ * objects in the database containing at least one of the {@code
+ * queries} (ignoring case).
  */
 public class MultiQueryRepositoryImpl
        implements MultiQueryRepository {
@@ -48,17 +49,18 @@ public class MultiQueryRepositoryImpl
 
         // Create a Root object for the Quote entity that specifies
         // the entity to query.
-        var quote = criteriaQuery.from(Quote.class);
+        var quote = criteriaQuery
+            .from(Quote.class);
 
         // Create an Expression object that represents the lower-cased
-        // ID ("quote") column of the Quote entity used to create the
+        // "quote" column of the Quote entity used to create the
         // search predicate that matches the specified queries.
-        var idExpression
-            = criteriaBuilder.lower(quote.get("quote"));
+        var quoteExpression = criteriaBuilder
+            .lower(quote.get("quote"));
 
         // Get a Predicate that "ands" all the queries together.
         var andPredicate =
-            getPredicate(queries, criteriaBuilder, idExpression);
+            getPredicate(queries, criteriaBuilder, quoteExpression);
 
         // Perform the query and return the results.
         return getQueryResults(criteriaQuery, andPredicate);
@@ -72,15 +74,15 @@ public class MultiQueryRepositoryImpl
      * @param criteriaBuilder Create the {@link CriteriaQuery} used to
      *                        search for quotes
 
-     * @param idExpression The lower-cased ID ("quote") column of the
-     *                     {@link Quote} entity
+     * @param quoteExpression The lower-cased "quote" column of the
+     *                        {@link Quote} entity
      * @return A {@link Predicate} that "ands" all the {@code queries}
      *         together
      */
     private static Predicate
         getPredicate(List<String> queries,
                      CriteriaBuilder criteriaBuilder,
-                     Expression<String> idExpression) {
+                     Expression<String> quoteExpression) {
         return queries
             // Convert the List to a Stream.
             .stream()
@@ -89,9 +91,10 @@ public class MultiQueryRepositoryImpl
             .map(String::toLowerCase)
 
             // Map each query to a "like" predicate that matches the
-            // ID (title) field of the Quote entity.
+            // "quote" column of the Quote entity.
             .map(query -> criteriaBuilder
-                 .like(idExpression, "%" + query + "%"))
+                 .like(quoteExpression,
+                       "%" + query + "%"))
 
             // Reduce the list of predicates to a single conjunction
             // (and) predicate.

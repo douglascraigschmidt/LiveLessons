@@ -2,10 +2,12 @@ package publisher;
 
 import common.Options;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * This publisher generates a {@link Flux} stream of
@@ -29,17 +31,10 @@ public class Publisher {
         (Scheduler scheduler,
          List<Integer> randomIntegers) {
         // Create the designated emitter.
-        var emitter = Options.instance()
-            .backPressureEnabled()
-            // Emit integers using backpressure.
-            ? Emitters.makeBackpressureEmitter(randomIntegers.iterator(),
-                                               sPendingItemCount)
-            // Emit integers not using backpressure.
-            : Emitters.makeNonBackpressureEmitter(randomIntegers.iterator(),
-                                                  sPendingItemCount,
-                                                  randomIntegers.size());
+        var emitter =
+            getEmitter(randomIntegers);
 
-        // This consumer emits a flux stream of random integers.
+        // This consumer emits a flux stream of random Integer objects.
         return Flux
             // Emit a flux stream of random integers.
             .create(emitter,
@@ -48,5 +43,24 @@ public class Publisher {
 
             // Subscribe on the given scheduler.
             .subscribeOn(scheduler);
+    }
+
+    /**
+     * Return a {@link Consumer} that emits {@link Integer} objects.
+     *
+     * @param randomIntegers The {@link List} of random {@link Integer} objects
+     * @return A {@link Consumer} that emits {@link Integer} objects
+     */
+    private static Consumer<FluxSink<Integer>> getEmitter
+        (List<Integer> randomIntegers) {
+        return Options.instance()
+                .backPressureEnabled()
+                // Emit integers using backpressure.
+                ? Emitters.makeBackpressureEmitter(randomIntegers.iterator(),
+                                                   sPendingItemCount)
+                // Emit integers not using backpressure.
+                : Emitters.makeNonBackpressureEmitter(randomIntegers.iterator(),
+                                                      sPendingItemCount,
+                                                      randomIntegers.size());
     }
 }

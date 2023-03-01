@@ -15,7 +15,7 @@ import java.util.function.Function;
 public abstract class Memoizer<K, V>
        implements Function<K, V> {
     /**
-     * This function produces a value based on the key.
+     * This {@link Function} produces a value based on the key.
      */
     protected final Function<K, V> mFunction;
 

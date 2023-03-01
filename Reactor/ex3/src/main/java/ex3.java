@@ -38,24 +38,24 @@ public class ex3 {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * The scheduler used to consume random integers by checking if
-     * they are prime or not.
-     */
-    private final Scheduler mSubscriberScheduler;
-
-    /**
      * The {@link Scheduler} used to publish random {@link Integer}
      * objects in its own thread.
      */
     private final Scheduler mPublisherScheduler = Schedulers
-        .newParallel("publisher", 1);
+            .newParallel("publisher", 1);
+
+    /**
+     * The {@link Scheduler} used to consume random integers by checking
+     * if they are prime or not.  This {@link Scheduler} can be either
+     * sequential or parallel, depending on program options.
+     */
+    private final Scheduler mSubscriberScheduler;
 
     /**
      * A subscriber that applies backpressure.
      */
     private final BackpressureSubscriber mSubscriber =
         new BackpressureSubscriber(sPendingItemCount);
-    ;
 
     /**
      * Track all disposables to dispose them all at once.
@@ -86,7 +86,7 @@ public class ex3 {
             // Otherwise run everything on the publisher's scheduler.
             : mPublisherScheduler;
 
-        // Track all     disposables to dispose them all at once.
+        // Track all disposables to dispose them all at once.
         mDisposables = Disposables
             .composite(mPublisherScheduler,
                        mSubscriberScheduler,
@@ -162,11 +162,12 @@ public class ex3 {
         Function<Integer, Mono<PrimeUtils.Result>> check4Prime =
             getPrimeCheckFunction(primeChecker);
 
-        // Create a publisher that runs on its own scheduler and
-        // returns a Flux that emits random Integers.
         Publisher
+            // Create a publisher that runs on its own scheduler and
+            // returns a Flux that emits random Integer objects.
             .publishIntegers(mPublisherScheduler,
                              randomIntegers)
+
             // Conditionally enable logging.
             .transform(ReactorUtils
                        // Conditionally enable logging.

@@ -3,9 +3,6 @@ from my webinars on [Modern Java by
 Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
-. ex1 - This example shows how to apply timeouts with the Project
-         Reactor framework.
-  
 . ex2 - This example demonstrates various reactive algorithms for
         finding all the minimum values in an unordered list, which is
         surprisingly not well documented in the literature.  These
@@ -53,3 +50,7 @@ overview of what's included:
         idiom, and several variants of ParallelFlux when creating Set
         objects containing the unique words appearing in the complete
         work of William Shapespeare.
+
+. ex7 - This example shows how to apply timeouts with the Project
+        Reactor framework.
+  
