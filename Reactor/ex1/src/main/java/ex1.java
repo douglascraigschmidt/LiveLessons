@@ -8,7 +8,7 @@ import streamstests.StreamsTests;
 import utils.Options;
 import utils.RunTimer;
 import utils.AsyncTaskBarrier;
-import utils.FlightFactory;
+import common.FlightFactory;
 
 import java.time.LocalDate;
 import java.util.AbstractMap.SimpleEntry;

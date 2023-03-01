@@ -1,4 +1,4 @@
-package utils;
+package common;
 
 import reactor.core.publisher.Mono;
 
@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
-import static utils.ExchangeRate.Currency.*;
+import static common.ExchangeRate.Currency.*;
 
 /**
  * Manages exchange rates amongst various currencies.

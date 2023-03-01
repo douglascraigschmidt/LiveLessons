@@ -1,7 +1,7 @@
 package streamstests;
 
 import datamodels.Flight;
-import utils.CheapestPriceCollectorStream;
+import common.CheapestPriceCollectorStream;
 
 import java.util.ArrayList;
 import java.util.Comparator;

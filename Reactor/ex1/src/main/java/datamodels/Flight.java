@@ -1,7 +1,7 @@
 package datamodels;
 
 import lombok.*;
-import utils.ExchangeRate;
+import common.ExchangeRate;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

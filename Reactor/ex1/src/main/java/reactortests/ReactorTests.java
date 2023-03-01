@@ -3,7 +3,7 @@ package reactortests;
 import datamodels.Flight;
 import reactor.core.publisher.Flux;
 import reactor.math.MathFlux;
-import utils.CheapestPriceCollectorFlux;
+import common.CheapestPriceCollectorFlux;
 
 import java.util.Comparator;
 import java.util.List;
