@@ -79,7 +79,7 @@ public class BigFractionUtils {
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
                                               StringBuffer sb) {
         // Quick sort the list asynchronously.
-        Mono<List<BigFraction>> quickSortM = Mono
+        var quickSortM = Mono
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
             .fromCallable(() -> quickSort(list))
@@ -89,7 +89,7 @@ public class BigFractionUtils {
             .subscribeOn(Schedulers.parallel());
 
         // Heap sort the list asynchronously.
-        Mono<List<BigFraction>> heapSortM =  Mono
+        var heapSortM =  Mono
             // Use the fromCallable() factory method to obtain the
             // results of heap sorting the list.
             .fromCallable(() -> heapSort(list))
@@ -163,7 +163,7 @@ public class BigFractionUtils {
      * Perform a quick sort on the {@code list}.
      */
     public static List<BigFraction> quickSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
+        var copy = new ArrayList<>(list);
     
         // Order the list with quick sort.
         Collections.sort(copy);
@@ -175,7 +175,7 @@ public class BigFractionUtils {
      * Perform a heap sort on the {@code list}.
      */
     public static List<BigFraction> heapSort(List<BigFraction> list) {
-        List<BigFraction> copy = new ArrayList<>(list);
+        var copy = new ArrayList<>(list);
 
         // Order the list with heap sort.
         HeapSort.sort(copy);
