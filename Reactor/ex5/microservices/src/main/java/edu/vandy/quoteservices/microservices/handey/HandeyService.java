@@ -35,8 +35,11 @@ public class HandeyService
      * @return A {@link Flux} of all {@link Quote} objects
      */
     public Flux<Quote> getAllQuotes() {
-        return mRepository
+        System.out.println("starting getAllQuotes()");
+        var results = mRepository
             .findAll();
+        System.out.println("leaving getAllQuotes()");
+        return results;
     }
 
     /**

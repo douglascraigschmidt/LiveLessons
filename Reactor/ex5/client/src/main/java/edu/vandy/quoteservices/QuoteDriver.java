@@ -172,7 +172,7 @@ public class QuoteDriver
             .expectNextCount(3)
             .as("The count wasn't as expected")
             .verifyComplete();
-            
+
  */
     }
 

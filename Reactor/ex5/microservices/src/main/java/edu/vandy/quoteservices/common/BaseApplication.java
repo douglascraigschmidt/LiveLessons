@@ -39,7 +39,7 @@ public class BaseApplication {
             .properties(singletonMap("spring.application.name", name))
             .build();
         app.setAdditionalProfiles(name);
-        app.setLazyInitialization(true);
+        // app.setLazyInitialization(true);
         app.run(args);
     }
 
