@@ -109,7 +109,6 @@ public abstract class BaseController<T> {
     @PostMapping(POST_SEARCHES_EX)
     public T searchEx(@RequestBody List<String> queries,
                       Boolean parallel) {
-        System.out.println("searchEx");
         // Use a custom SQL query to find all movies whose 'id'
         // matches the List of 'queries' and return them as a List of
         // Quote objects that contain no duplicates.

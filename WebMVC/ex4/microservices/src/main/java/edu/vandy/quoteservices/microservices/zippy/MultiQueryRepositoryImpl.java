@@ -28,7 +28,7 @@ public class MultiQueryRepositoryImpl
      * Find a {@link List} of {@link Quote} objects in the database
      * containing all of the {@code queries} (ignoring case).
      *
-     * @param queries The {@lin List} of queries
+     * @param queries The {@link List} of queries
      * @return A {@link List} of {@link Quote} objects in the database
      *         containing at all of the {@code queries}
      *         (ignoring case)
@@ -98,7 +98,8 @@ public class MultiQueryRepositoryImpl
 
             // Reduce the list of predicates to a single conjunction
             // (and) predicate.
-            .reduce(criteriaBuilder.conjunction(), criteriaBuilder::and);
+            .reduce(criteriaBuilder.conjunction(),
+                    criteriaBuilder::and);
     }
 
     /**
@@ -119,7 +120,7 @@ public class MultiQueryRepositoryImpl
             // Create a Query object from the specified criteria
             // query.
             .createQuery(criteriaQuery
-                         // Add the orPredicate to the CriteriaQuery
+                         // Add the andPredicate to the CriteriaQuery
                          // "where" clause, which returns the quote if
                          // it matches all the specified queries.
                          .where(andPredicate))

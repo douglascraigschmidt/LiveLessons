@@ -48,7 +48,7 @@ public interface BaseService<T> {
 
     /**
      * Search for quotes containing all the given {@link String} and
-     * return a {@link Flux} that emits the matching {@link Quote}
+     * return a {@link List} that emits the matching {@link Quote}
      * objects.
      *
      * @param queries The search queries
