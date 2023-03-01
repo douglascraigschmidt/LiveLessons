@@ -3,7 +3,7 @@ from my webinars on [Modern Java by
 Example](http://www.dre.vanderbilt.edu/~schmidt/MJBE).  Here's an
 overview of what's included:
 
-. ex2 - This example demonstrates various reactive algorithms for
+. ex1 - This example demonstrates various reactive algorithms for
         finding all the minimum values in an unordered list, which is
         surprisingly not well documented in the literature.  These
         three algorithms use Project Reactor features to return

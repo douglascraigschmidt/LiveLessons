@@ -31,7 +31,7 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * Flux of available flights.  Another three algorithms use Java
  * Streams features to perform the same computations.
  */
-public class ex2 {
+public class ex1 {
     /**
      * This functional interface is used to represent the signature of
      * the Project Reactor min-finding algorithms.
@@ -69,7 +69,7 @@ public class ex2 {
      */
     public static void main(String[] argv) {
         Options.instance().parseArgs(argv);
-        new ex2().runTests();
+        new ex1().runTests();
     }
 
     /**
