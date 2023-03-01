@@ -20,9 +20,13 @@ public class ex1 {
         // synchronous Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync2);
 
-        // Yet another test of BigFraction multiplication using a synchronous
-        // Flux stream.
+        // Yet another test of BigFraction multiplication using a
+        // synchronous Flux stream.
         AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationSync3);
+
+        // Test erroneous BigFraction division using a synchronous
+        // Flux stream.
+        AsyncTaskBarrier.register(FluxEx::testFractionDivisonErrorSync);
 
         // A test of the Flux.mapNotNull() operator using a synchronous
         // Flux stream.

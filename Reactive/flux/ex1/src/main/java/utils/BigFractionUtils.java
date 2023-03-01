@@ -86,4 +86,15 @@ public class BigFractionUtils {
                     + reducedFraction.toString()
                     + "\n     calling BigFraction::toMixedString\n");
     }
+
+    /**
+     * Append the {@code Throwable} to the {@link StringBuilder}.
+     */
+    public static void logError(Throwable exception, StringBuilder sb) {
+        sb.append("    ["
+                + Thread.currentThread().threadId()
+                + "] doOnError() logging "
+                + exception.getMessage()
+                + "\n");
+    }
 }

@@ -15,7 +15,7 @@ import static utils.BigFractionUtils.*;
 /**
  * This class shows how to apply Project Reactor features
  * synchronously to perform basic Flux operations, including just(),
- * fromIterable(), fromArray(), from(), doOnNext(), map(),
+ * fromIterable(), fromArray(), from(), doOnNext(), doOnError(), map(),
  * mapNotNull(), mergeWith(), repeat(), and subscribe().
  */
 @SuppressWarnings("ALL")
@@ -100,11 +100,13 @@ public class FluxEx {
             .fromIterable(bigFractionList)
 
             // Log the contents of the computation.
-            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
+            .doOnNext(bf ->
+                      logBigFraction(sBigReducedFraction, bf, sb))
 
             // Use map() to multiply each element in the stream by a
             // constant.
-            .map(fraction -> fraction.multiply(sBigReducedFraction))
+            .map(fraction -> fraction
+                 .multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since
@@ -154,19 +156,20 @@ public class FluxEx {
             BigFraction.valueOf(100, 1)
         };
 
-        Flux<BigFraction> f1 = Flux
+        var f1 = Flux
             // Use fromArray() to generate a stream of big
             // fractions.
             .fromArray(bigFractionArray);
 
-        Flux<BigFraction> f2 = Flux
-            // Use from() and Mono.fromCallable() to "lazily" generate a
-            // stream of random big fractions since Flux lacks fromCallable().
-            .from(Mono.fromCallable(() -> BigFractionUtils
-                                    .makeBigFraction(random,
-                                                     true)))
+        var f2 = Flux
+            // Use from() to "lazily" generate a stream of random
+            // BigFraction objects.
+            .<BigFraction>from(p -> p
+                               .onNext(BigFractionUtils
+                                       .makeBigFraction(random,
+                                                        true)))
 
-            // Generate random big fractions 3 + 1 times.
+            // Generate random big fractions 4 (3 + 1) times.
             .repeat(3);
 
         f1
@@ -175,17 +178,21 @@ public class FluxEx {
             .mergeWith(f2)
 
             // Log the contents of the computation.
-            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
+            .doOnNext(bf ->
+                      logBigFraction(sBigReducedFraction, bf, sb))
 
-            // Use map() to multiply each element in the stream by
-            // a constant.
-            .map(fraction -> fraction.multiply(sBigReducedFraction))
+            // Use map() to multiply each element in the stream by a
+            // constant.
+            .map(fraction -> fraction
+                 .multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
             // handle the results synchronously.
             .subscribe(// Handle next event.
                        fraction -> 
-                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                       sb.append(" = " 
+                                 + fraction.toMixedString() 
+                                 + "\n"),
                        // Handle the error.
                        t -> {
                            // Append the error message to the
@@ -205,6 +212,75 @@ public class FluxEx {
     }
 
     /**
+     * Test BigFraction division using a synchronous Flux stream.
+     */
+    public static Mono<Void> testFractionDivisonErrorSync() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionDivisonErrorSync()\n");
+
+        // Create a list of BigFraction objects.
+        List<BigFraction> bigFractionList = List.of
+            (BigFraction.valueOf(100, 3),
+             BigFraction.valueOf(100, 4),
+             BigFraction.valueOf(100, 2),
+             BigFraction.valueOf(100, 1));
+
+        Flux
+            // Use fromIterable() to generate a stream of big
+            // fractions.
+            .fromIterable(bigFractionList)
+
+            // Log the contents of the computation.
+            .doOnNext(bigFraction ->
+                      sb.append("    ["
+                                + Thread.currentThread().getId()
+                                + "] "
+                                + bigFraction.toMixedString()
+                                + " x "
+                                + sBigReducedFraction.toMixedString()
+                                + "\n"))
+
+            // Use map() to divide each element in the stream by a
+            // constant 0, which will throw ArithmeticException.
+            .map(bigFraction -> bigFraction
+                 // Divide by zero and return result.
+                 .divide(BigFraction.ZERO))
+
+            // Log the contents of the exception.
+            .doOnError(exception -> BigFractionUtils
+                    .logError(exception, sb))
+
+            // Use subscribe() to initiate all the processing and
+            // handle the results.  This call runs synchronously since
+            // the publisher (just()) is synchronous and runs in the
+            // calling thread.  However, there are more interesting
+            // types of publishers that enable asynchrony.
+            .subscribe(// Handle next event.
+                       multipliedBigFraction ->
+                       // Add fraction to the string builder.
+                       sb.append(" = " 
+                                 + multipliedBigFraction.toMixedString() 
+                                 + "\n"),
+                       // Handle error result event.
+                       error -> {
+                           // Append the exception name.
+                           sb.append(error.getMessage()
+                                     + "\n");
+
+                           // Display results when processing is done.
+                           BigFractionUtils.display(sb.toString());
+                       },
+                       // Handle final completion event.
+                       () -> BigFractionUtils
+                       // Display results when processing is done.
+                       .display(sb.toString()));
+
+        // Return empty mono to indicate to the AsyncTaskBarrier that
+        // all the processing is done.
+        return sVoidM;
+    }
+
+    /**
      * A test of the Flux.mapNotNull() operator using a synchronous
      * Flux stream.
      */
@@ -220,7 +296,8 @@ public class FluxEx {
                   BigFraction.valueOf(100, 1))
 
             // Log the contents of the computation.
-            .doOnNext(bf -> logBigFraction(sBigReducedFraction, bf, sb))
+            .doOnNext(bf ->
+                      logBigFraction(sBigReducedFraction, bf, sb))
 
             // Do not emit null values.
             .mapNotNull(bf -> bf
@@ -231,7 +308,9 @@ public class FluxEx {
             // handle the results synchronously.
             .subscribe(// Handle next event.
                        fraction -> 
-                       sb.append(" = " + fraction.toMixedString() + "\n"),
+                       sb.append(" = " 
+                                 + fraction.toMixedString() 
+                                 + "\n"),
                        // Handle the error.
                        t -> {
                            // Append the error message to the

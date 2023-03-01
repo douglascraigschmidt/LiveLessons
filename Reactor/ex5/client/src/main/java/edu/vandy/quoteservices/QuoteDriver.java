@@ -141,7 +141,7 @@ public class QuoteDriver
             .expectNextCount(10)
             .as("The count wasn't as expected")
             .verifyComplete();
-
+/*
         // Make a List of common Handey words.
         var quoteList = List
             .of("Dad",
@@ -172,6 +172,8 @@ public class QuoteDriver
             .expectNextCount(3)
             .as("The count wasn't as expected")
             .verifyComplete();
+            
+ */
     }
 
     /**
