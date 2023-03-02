@@ -1,0 +1,54 @@
+# Enable bean overriding.
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+# Common Eureka client properties
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+---
+# Handy microservice profile.
+ 
+ server:
+   port: 9100
+ 
+ spring:
+   application:
+     name: handey
+   config:
+     activate:
+       on-profile: handey
+   # Common Database properties
+   datasource:
+     driverClassName: org.h2.Driver
+     url: r2dbc:h2:mem:///handey;DB_CLOSE_ON_EXIT=TRUE
+   sql:
+     init:
+       platform: h2
+       username: sa
+       password:
+       mode: always
+       data-locations: classpath:handey/data.sql
+       schema-locations: classpath:handey/schema.sql
+   # Use R2DBC database.
+ 
+   jpa:
+     hibernate:
+       ddl-auto: none
+     database-platform: org.hibernate.dialect.H2Dialect
+     show-sql: true
+ 
+   # Allow use of H2 console at localhost:port/h2-console for debugging.
+   h2:
+     console:
+       settings:
+         web-allow-others: true
+       enabled: true
