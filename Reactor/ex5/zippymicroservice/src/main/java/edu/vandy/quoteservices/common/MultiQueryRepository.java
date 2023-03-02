@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.common;
 
 import java.util.List;
 

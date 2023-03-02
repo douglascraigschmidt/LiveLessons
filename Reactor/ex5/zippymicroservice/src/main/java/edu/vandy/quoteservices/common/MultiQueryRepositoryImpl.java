@@ -1,13 +1,11 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.common;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 
 import java.util.List;
 

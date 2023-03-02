@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.common;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;

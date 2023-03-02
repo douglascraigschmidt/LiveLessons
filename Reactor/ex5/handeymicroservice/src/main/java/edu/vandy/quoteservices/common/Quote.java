@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.common;
 
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.annotation.Id;

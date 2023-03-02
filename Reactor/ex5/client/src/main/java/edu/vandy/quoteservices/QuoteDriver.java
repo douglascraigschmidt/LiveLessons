@@ -141,7 +141,8 @@ public class QuoteDriver
             .expectNextCount(10)
             .as("The count wasn't as expected")
             .verifyComplete();
-/*
+
+        /*
         // Make a List of common Handey words.
         var quoteList = List
             .of("Dad",
@@ -151,6 +152,7 @@ public class QuoteDriver
                 "poor",
                 "cry");
 
+
         StepVerifier
             .create(mQuoteClient
                     .searchQuotes(HANDEY,
@@ -158,6 +160,7 @@ public class QuoteDriver
             .expectNextCount(14)
             .as("The count wasn't as expected")
             .verifyComplete();
+        */
 
         // Make a List of common Handey words that are used to search
         // for all matches.
@@ -168,12 +171,11 @@ public class QuoteDriver
         StepVerifier
             .create(mQuoteClient
                     .searchQuotesEx(ZIPPY,
-                                    quoteAndList))
-            .expectNextCount(3)
+                                    quoteAndList)
+                    .doOnNext(System.out::println))
+            .expectNextCount(6)
             .as("The count wasn't as expected")
             .verifyComplete();
-
- */
     }
 
     /**

@@ -1,6 +1,5 @@
 package edu.vandy.quoteservices.common;
 
-import edu.vandy.quoteservices.microservice.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;

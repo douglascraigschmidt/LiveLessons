@@ -1,5 +1,6 @@
 package edu.vandy.quoteservices.microservice;
 
+import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,7 @@ public class ZippyController {
     }
 
     /**
-     * @return A {@link Flux<Quote>} containing all the quotes
+     * @return A {@link Flux< Quote >} containing all the quotes
      */
     @GetMapping(GET_ALL_QUOTES)
     public Flux<Quote> getAllQuotes() {

@@ -1,9 +1,13 @@
 package edu.vandy.quoteservices.common;
 
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactories;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.r2dbc.connection.R2dbcTransactionManager;
+import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.transaction.ReactiveTransactionManager;
 
 /**
  * This class contains a {@code Bean} annotation that can be injected
@@ -14,16 +18,20 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
     value = "classpath:/application.yml",
     factory = YamlPropertySourceFactory.class)
 public class ServerBeans {
-    // @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setPersistenceUnitName("MultiQueryRepo");
-        emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter()); // set JPA vendor adapter
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        return ConnectionFactories.get("r2dbc:h2:mem:///test?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+    }
 
-        // set packages to scan for JPA entities
-        emf.setPackagesToScan("edu.vandy.quoteservices.microservices.zippy");
+    @Bean
+    public DatabaseClient databaseClient(ConnectionFactory connectionFactory,
+                                         ReactiveTransactionManager transactionManager) {
+        return DatabaseClient.create(connectionFactory);
+    }
 
-        return emf;
+    @Bean
+    public ReactiveTransactionManager transactionManager(ConnectionFactory connectionFactory) {
+        return new R2dbcTransactionManager(connectionFactory);
     }
 
 }

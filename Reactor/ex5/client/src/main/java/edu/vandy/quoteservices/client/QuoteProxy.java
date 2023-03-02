@@ -37,17 +37,10 @@ public class QuoteProxy {
      *         objects
      */
     public Flux<Quote> getAllQuotes(String route) {
-        // Use the UriComponentsBuilder to create a URL to the
-        // GET_ALL_QUOTES endpoint of the 'route' microservice.
-        var uri = UriComponentsBuilder
-            // Create a partial uri from this path.
-            .fromPath(route + "/" + GET_ALL_QUOTES)
-
-            // Create the UriComponentsBuilder.
-            .build()
-
-            // Convert to a URI String. 
-            .toUriString();
+        // Use WebUtils to create a URL to the GET_ALL_QUOTES endpoint
+        // of the 'route' microservice.
+        var uri = WebUtils
+            .buildUriString(route + "/" + GET_ALL_QUOTES);
 
         return WebUtils
             // Use WebUtils and mWebClient to get a Flux of all
@@ -69,17 +62,10 @@ public class QuoteProxy {
     public Flux<Quote> postQuotes
         (String route,
          List<Integer> quoteIds) {
-        // Use the UriComponentsBuilder to create a URL to the
-        // POST_QUOTES endpoint of the 'route' microservice.
-        var uri = UriComponentsBuilder
-            // Create a partial uri from this path.
-            .fromPath(route + "/" + POST_QUOTES)
-
-            // Create the UriComponentsBuilder.
-            .build()
-
-            // Convert to a URI String. 
-            .toUriString();
+        // Use WebUtils to create a URL to the POST_QUOTES endpoint of
+        // the 'route' microservice.
+        var uri = WebUtils
+            .buildUriString(route + "/" + POST_QUOTES);
 
         return WebUtils
             // Use WebUtils and mWebClient to get a Flux of all
@@ -103,17 +89,10 @@ public class QuoteProxy {
     public Flux<Quote> search
         (String route,
          List<String> queries) {
-        // Use the UriComponentsBuilder to create a URL to the
-        // POST_SEARCHES endpoint of the 'route' microservice.
-        var uri = UriComponentsBuilder
-            // Create a partial uri from this path.
-            .fromPath(route + "/" + POST_SEARCHES)
-
-            // Create the UriComponentsBuilder.
-            .build()
-
-            // Convert to a URI String. 
-            .toUriString();
+        // Use WebUtils to create a URL to the POST_SEARCHES
+        // endpoint of the 'route' microservice.
+        var uri = WebUtils
+            .buildUriString(route + "/" + POST_SEARCHES);
 
         return WebUtils
             // Use WebUtils and mWebClient to get a Flux of all
@@ -138,17 +117,10 @@ public class QuoteProxy {
     public Flux<Quote> searchEx
         (String route, 
          List<String> queries) {
-        // Use the UriComponentsBuilder to create a URL to the
-        // POST_SEARCHES_EX endpoint of the 'route' microservice.
-        var uri = UriComponentsBuilder
-            // Create a partial uri from this path.
-            .fromPath(route + "/" + POST_SEARCHES_EX)
-
-            // Create the UriComponentsBuilder.
-            .build()
-
-            // Convert to a URI String. 
-            .toUriString();
+        // Use WebUtils to create a URL to the POST_SEARCHES_EX
+        // endpoint of the 'route' microservice.
+        var uri = WebUtils
+            .buildUriString(route + "/" + POST_SEARCHES_EX);
 
         return WebUtils
             // Use WebUtils and mWebClient to get a Flux of all

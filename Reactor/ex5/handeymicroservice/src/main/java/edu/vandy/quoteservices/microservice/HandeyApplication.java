@@ -1,6 +1,8 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.BaseApplication;
+import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.quoteservices.common.ReactiveQuoteRepository;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;

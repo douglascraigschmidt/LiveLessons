@@ -73,6 +73,6 @@ public class HandeyService {
      *         containing the given {@code queries}
      */
     public Flux<Quote> searchEx(List<String> queries) {
-        return null;
+        return mRepository.findAllByQuoteContainingAllIn(queries);
     }
 }

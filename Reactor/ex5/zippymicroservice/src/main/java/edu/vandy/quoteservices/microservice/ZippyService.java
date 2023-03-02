@@ -1,5 +1,7 @@
 package edu.vandy.quoteservices.microservice;
 
+import edu.vandy.quoteservices.common.JPAQuoteRepository;
+import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +26,8 @@ public class ZippyService {
     /**
      * Spring-injected repository that contains all quotes.
      */
-   @Autowired
-   private JPAQuoteRepository mRepository;
+    @Autowired
+    private JPAQuoteRepository mRepository;
 
     /**
      * @return A {@link Flux} that emits all {@link Quote} objects
@@ -66,22 +68,23 @@ public class ZippyService {
         // Use a Java sequential or parallel stream and the JPA to
         // locate all quotes whose 'id' matches the List of 'queries'
         // and return them as a List of Quote objects.
-        return Flux.fromIterable(queries.parallelStream()
+        return Flux
+            .fromIterable(queries.parallelStream()
+                          // Flatten the Stream of Streams into a
+                          // Stream.
+                          .flatMap(query ->  mRepository
+                                   // Find all Quote rows in the
+                                   // database that match the 'query'.
+                                   .findByQuoteContainingIgnoreCase(query)
 
-                // Flatten the Stream of Streams into a Stream.
-                .flatMap(query ->  mRepository
-                        // Find all Quote rows in the database that match
-                        // the 'query'.
-                        .findByQuoteContainingIgnoreCase(query)
+                                   // Convert List to a Stream.
+                                   .stream())
 
-                        // Convert List to a Stream.
-                        .stream())
+                          // Elimintate duplicate Zippy quotes.
+                          .distinct()
 
-                // Ensure duplicate Zippy quotes aren't returned.
-                .distinct()
-
-                // Convert the Stream to a List.
-                .toList());
+                          // Convert the Stream to a List.
+                          .toList());
     }
 
     /**

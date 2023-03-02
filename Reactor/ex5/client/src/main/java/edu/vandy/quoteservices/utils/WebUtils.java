@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 import java.net.URLEncoder;
@@ -209,5 +210,26 @@ public final class WebUtils {
             // Trigger intermediate operations and convert each String
             // in the Stream into a single comma-separated String.
             .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Return a Uri {@link String} created from the {@code
+     * partialPath}.
+     *
+     * @param partialPath The partial path used to create the Uri
+     *                    {@link String}
+     * @return A Uri {@link String} created from the {@code
+     *         partialPath}
+     */
+    public static String buildUriString(String partialPath) {
+        return UriComponentsBuilder
+            // Create a partial uri from this partialPath.
+            .fromPath(partialPath)
+
+            // Create the UriComponentsBuilder.
+            .build()
+
+            // Convert to a URI String. 
+            .toUriString();
     }
 }
