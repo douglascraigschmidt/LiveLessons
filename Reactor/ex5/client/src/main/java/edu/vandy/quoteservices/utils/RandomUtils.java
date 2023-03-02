@@ -22,9 +22,15 @@ public final class RandomUtils {
             // Generate a stream containing 'numberOfIndices' random
             // ints whose values range from 1 and the total number of
             // quotes.
-            .ints(numberOfIndices,
+            .ints(Integer.MAX_VALUE,
                   1,
                   numberOfQuotes)
+
+            // Ensure the randomly generated ints are distinct.
+            .distinct()
+
+            // Stop after getting numberOfIndices random ints.
+            .limit(numberOfIndices)
 
             // Convert the IntStream of native ints into a Stream of
             // Integers.

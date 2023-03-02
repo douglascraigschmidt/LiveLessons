@@ -190,8 +190,18 @@ public class QuoteDriver
 
         // List holding all Quote objects.
         return mQuoteClient
+            // Get a Flux containing all the quotes.
             .getAllQuotes(quoter)
+
+            // .doOnNext(System.out::println)
+            // Determine the total number of quotes.
             .count()
+            .doOnSuccess(count -> System.out
+                                .println("Received "
+                                         + count
+                                         + " quotes"))
+
+            // Return selected random quotes.
             .flatMapMany(postQuotes);
     }
 }
