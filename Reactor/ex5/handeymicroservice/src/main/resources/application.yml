@@ -29,6 +29,7 @@ eureka:
    # Common Database properties
    datasource:
      driverClassName: org.h2.Driver
+     # Use R2DBC database.
      url: r2dbc:h2:mem:///handey;DB_CLOSE_ON_EXIT=TRUE
    sql:
      init:
@@ -36,9 +37,8 @@ eureka:
        username: sa
        password:
        mode: always
-       data-locations: classpath:handey/data.sql
-       schema-locations: classpath:handey/schema.sql
-   # Use R2DBC database.
+       data-locations: classpath:data.sql
+       schema-locations: classpath:schema.sql
  
    jpa:
      hibernate:

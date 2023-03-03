@@ -14,11 +14,11 @@ import java.util.List;
 public class MultiQueryRepositoryImpl
       implements MultiQueryRepository {
     /**
-     * This field represents a session with the database that provides
-     * the main API for performing CRUD (Create, Read, Update, Delete)
-     * operations and querying the database.
+     * This field is a reactive R2DBC-based client for executing SQL
+     * queries against a database using reactive programming
+     * constructs, such as Flux and Mono.  It provides a fluent API to
+     * build and execute SQL queries in a reactive, non-blocking way.
      */
-
     @Autowired
     private DatabaseClient databaseClient;
 

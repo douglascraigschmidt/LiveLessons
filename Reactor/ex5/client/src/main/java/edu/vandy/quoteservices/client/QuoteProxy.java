@@ -71,9 +71,9 @@ public class QuoteProxy {
             // Use WebUtils and mWebClient to get a Flux of all
             // matching quoteIds from the 'route' microservice.
             .makePostRequestFlux(mWebClient,
-                                uri,
-                                quoteIds,
-                                Quote.class);
+                                 uri,
+                                 quoteIds,
+                                 Quote.class);
     }
 
     /**
@@ -98,9 +98,9 @@ public class QuoteProxy {
             // Use WebUtils and mWebClient to get a Flux of all
             // matching queries from the 'route' microservice.
             .makePostRequestFlux(mWebClient,
-                                uri,
-                                queries,
-                                Quote.class);
+                                 uri,
+                                 queries,
+                                 Quote.class);
     }
 
     /**
@@ -126,8 +126,8 @@ public class QuoteProxy {
             // Use WebUtils and mWebClient to get a Flux of all
             // matching queries from the 'route' microservice.
             .makePostRequestFlux(mWebClient,
-                                uri,
-                                queries,
-                                Quote.class);
+                                 uri,
+                                 queries,
+                                 Quote.class);
     }
 }
