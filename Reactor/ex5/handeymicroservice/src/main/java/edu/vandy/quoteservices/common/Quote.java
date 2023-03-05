@@ -22,7 +22,7 @@ public class Quote {
      * ID # of the quote.
      */
     @Id
-    @Column
+    @Column("id")
     public Integer id;
 
     /**

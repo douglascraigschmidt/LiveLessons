@@ -31,8 +31,8 @@ spring:
       username: sa
       password:
       mode: always
-      data-locations: classpath:zippy/data.sql
-      schema-locations: classpath:zippy/schema.sql
+      data-locations: classpath:data.sql
+      schema-locations: classpath:schema.sql
   # Use JPA database.
 
   jpa:

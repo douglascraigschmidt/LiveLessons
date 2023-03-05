@@ -20,4 +20,7 @@ public interface MultiQueryRepository {
      *         (ignoring case)
      */
     Flux<Quote> findAllByQuoteContainingAllIn(List<String> queries);
+
+    Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries);
+
 }

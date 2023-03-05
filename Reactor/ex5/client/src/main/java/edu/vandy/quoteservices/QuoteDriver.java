@@ -139,10 +139,9 @@ public class QuoteDriver
         StepVerifier
             .create(runQuotes(HANDEY))
             .expectNextCount(10)
-            .as("The count wasn't as expected")
+            .as("The runQuotes() count wasn't as expected")
             .verifyComplete();
 
-        /*
         // Make a List of common Handey words.
         var quoteList = List
             .of("Dad",
@@ -152,15 +151,13 @@ public class QuoteDriver
                 "poor",
                 "cry");
 
-
         StepVerifier
             .create(mQuoteClient
                     .searchQuotes(HANDEY,
                                   quoteList))
             .expectNextCount(14)
-            .as("The count wasn't as expected")
+            .as("The searchQuotes() count wasn't as expected")
             .verifyComplete();
-        */
 
         // Make a List of common Handey words that are used to search
         // for all matches.
@@ -170,10 +167,9 @@ public class QuoteDriver
         
         StepVerifier
             .create(mQuoteClient
-                    .searchQuotesEx(ZIPPY,
-                                    quoteAndList)
-                    .doOnNext(System.out::println))
-            .expectNextCount(6)
+                    .searchQuotesEx(HANDEY,
+                                    quoteAndList))
+            .expectNextCount(4)
             .as("The count wasn't as expected")
             .verifyComplete();
     }
@@ -198,10 +194,6 @@ public class QuoteDriver
             // .doOnNext(System.out::println)
             // Determine the total number of quotes.
             .count()
-            .doOnSuccess(count -> System.out
-                                .println("Received "
-                                         + count
-                                         + " quotes"))
 
             // Return selected random quotes.
             .flatMapMany(postQuotes);

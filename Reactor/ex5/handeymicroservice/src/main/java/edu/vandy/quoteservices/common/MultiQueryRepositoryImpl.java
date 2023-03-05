@@ -6,6 +6,8 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+import static edu.vandy.quoteservices.utils.ArrayUtils.obj2Number;
+
 /**
  * This implementation defines a method that returns a {@link List} of
  * {@link Quote} objects in the database containing at least one of
@@ -22,6 +24,26 @@ public class MultiQueryRepositoryImpl
     @Autowired
     private DatabaseClient databaseClient;
 
+    @Override
+    public Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries) {
+        String sql =
+            "SELECT * FROM quote WHERE LOWER(quote) LIKE $1";
+
+        String params = "'%"
+            + String.join("%' OR LOWER(quote) LIKE '%",
+                queries)
+            .toLowerCase()
+            + "%'";
+
+        sql = sql.replace("$1", params);
+        return databaseClient
+            .sql(sql)
+            .map(row ->
+                new Quote(obj2Number(row.get("id"), Integer.class),
+                     row.get("quote", String.class)))
+            .all();
+    }
+
     /**
      * Find a {@link Flux} of {@link Quote} objects in the database
      * containing all of the {@code queries} (ignoring case).
@@ -33,18 +55,21 @@ public class MultiQueryRepositoryImpl
      */
     @Override
     public Flux<Quote> findAllByQuoteContainingAllIn(List<String> queries) {
-        return databaseClient
-                .sql("SELECT * FROM quotes WHERE LOWER(quote) LIKE CONCAT('%', $1, '%')")
-                .bind("$1", String.join("%' OR LOWER(quote) LIKE '%", queries).toLowerCase())
+        String sql =
+            "SELECT * FROM quote WHERE LOWER(quote) LIKE $1";
 
-                /*
-            .sql("SELECT * FROM quotes WHERE LOWER(quote) LIKE $1")
-            .bind("$1",
-                  "%"
-                  + String.join("%", queries).toLowerCase()
-                  + "%") */
-            .map(row -> new Quote(row.get("id", Integer.class),
-                                  row.get("quote", String.class)))
+        String params = "'%"
+            + String.join("%' AND LOWER(quote) LIKE '%",
+                queries)
+            .toLowerCase()
+            + "%'";
+
+        sql = sql.replace("$1", params);
+        return databaseClient
+            .sql(sql)
+            .map(row ->
+                new Quote(obj2Number(row.get("id"), Integer.class),
+                         row.get("quote", String.class)))
             .all();
     }
 }

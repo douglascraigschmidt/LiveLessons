@@ -30,7 +30,7 @@ eureka:
    datasource:
      driverClassName: org.h2.Driver
      # Use R2DBC database.
-     url: r2dbc:h2:mem:///handey;DB_CLOSE_ON_EXIT=TRUE
+     url: r2dbc:h2:mem:///quote?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
    sql:
      init:
        platform: h2

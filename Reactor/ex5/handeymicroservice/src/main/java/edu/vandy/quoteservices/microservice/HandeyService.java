@@ -60,7 +60,7 @@ public class HandeyService {
      *         queries}
      */
     public Flux<Quote> search(List<String> queries) {
-        return null;
+        return mRepository.findAllByQuoteContainingAnyIn(queries);
     }
 
     /**
