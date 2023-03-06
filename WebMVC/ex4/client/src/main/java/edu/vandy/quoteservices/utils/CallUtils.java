@@ -41,11 +41,7 @@ public class CallUtils {
                 int statusCode = response.code();
                 assert response.errorBody() != null;
                 String errorMessage = response.errorBody().string();
-                System.out.println("Request failed with status code "
-                        + statusCode
-                        + ": "
-                        + errorMessage);
-                throw new IOException();
+                throw new IOException(errorMessage);
             }
         }).get();
     }
