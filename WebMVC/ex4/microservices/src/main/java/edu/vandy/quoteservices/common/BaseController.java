@@ -36,22 +36,6 @@ public abstract class BaseController<T> {
     }
 
     /**
-     * A request for testing Eureka connection.
-     *
-     * @return The application name
-     */
-    @GetMapping({"/", "actuator/info"})
-    public ResponseEntity<String> info() {
-        // Indicate the request succeeded and return the application
-        // name and thread id.
-        return ResponseEntity
-            .ok(applicationContext.getId() 
-                + " is alive and running at "
-                + Thread.currentThread()
-                + "\n");
-    }
-
-    /**
      * @return A {@code T} containing all the quotes
      */
     @GetMapping(GET_ALL_QUOTES)
