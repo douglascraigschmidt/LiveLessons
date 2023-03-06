@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.projectreactor:reactor-core:3.4.21'
+    implementation 'io.projectreactor:reactor-core:3.5.3'
     implementation 'io.projectreactor.addons:reactor-extra:3.4.8'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
