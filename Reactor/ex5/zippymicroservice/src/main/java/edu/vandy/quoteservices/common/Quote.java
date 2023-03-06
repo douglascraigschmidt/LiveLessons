@@ -21,7 +21,8 @@ import lombok.Value;
 @NoArgsConstructor(force = true)
 @Entity // For JPA
 @Table(name = "QUOTE")
-public class Quote {
+public class Quote
+       implements Comparable<Quote> {
     /**
      * ID # of the quote.
      */
@@ -34,4 +35,24 @@ public class Quote {
      */
     @Column(name = "quote", nullable = false)
     public String quote;
+
+/**
+ * Perform a comparison of this {@link Quote}
+ * with the {@code other} {@link Quote} based on their {@code quote}
+ * columns.
+ *
+ * @param other The {@link Quote} to compare to this {@link Quote}
+ * @return A negative integer, zero, or a positive integer as this
+ *         movie's ID is less than, equal to, or greater than the
+ *         specified movie's ID (ignoring case)
+ */
+    @Override
+    public int compareTo(Quote other) {
+        // Compare the quote field of this Quote with the quote
+        // field of the other Quote and return the results.
+        assert this.id != null;
+        assert other.id != null;
+        return this.id
+            .compareTo(other.id);
+    }
 }

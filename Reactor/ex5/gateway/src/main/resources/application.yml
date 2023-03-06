@@ -4,10 +4,14 @@ server:
 
 # Application name.
 spring:
-  profiles:
-    active: path
   application:
     name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: 'true'
+          lower-case-service-id: 'true'
   main:
     web-application-type: reactive
 
@@ -15,7 +19,7 @@ spring:
 eureka:
   client:
     enabled: true
-    register-with-eureka: true
+    register-with-eureka: false
     fetch-registry: true
     service-url:
       default-zone: http://localhost:8761/eureka

@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.TreeSet;
 
 import reactor.core.publisher.Flux;
+
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * This class defines implementation methods that are called by the
@@ -68,6 +71,7 @@ public class ZippyService {
         // Use a Java sequential or parallel stream and the JPA to
         // locate all quotes whose 'id' matches the List of 'queries'
         // and return them as a List of Quote objects.
+        System.out.println("search(List<String> queries");
         return Flux
             .fromIterable(queries.parallelStream()
                           // Flatten the Stream of Streams into a
@@ -80,11 +84,8 @@ public class ZippyService {
                                    // Convert List to a Stream.
                                    .stream())
 
-                          // Elimintate duplicate Zippy quotes.
-                          .distinct()
-
-                          // Convert the Stream to a List.
-                          .toList());
+                          // Eliminate duplicate Zippy quotes.
+                          .collect(toCollection(TreeSet::new)));
     }
 
     /**

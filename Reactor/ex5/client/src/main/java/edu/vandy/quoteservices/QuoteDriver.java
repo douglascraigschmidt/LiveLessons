@@ -89,11 +89,13 @@ public class QuoteDriver
      * Record how long it takes to get the Zippy quotes.
      */
     private void timeZippyQuotes() {
-        StepVerifier
-            .create(runQuotes(ZIPPY))
-            .expectNextCount(10)
-            .as("The count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() -> StepVerifier
+                     .create(runQuotes(ZIPPY))
+                     .expectNextCount(10)
+                     .as("The count wasn't as expected")
+                     .verifyComplete(),
+                     "Zippy runQuotes()");
 
         // Make a List of common Zippy words that are used to search
         // for any matches.
@@ -109,13 +111,16 @@ public class QuoteDriver
                 "presiden",
                 "vase");
 
-        StepVerifier
-            .create(mQuoteClient
-                    .searchQuotes(ZIPPY,
-                                  quoteOrList))
-            .expectNextCount(114)
-            .as("The count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() ->
+                     StepVerifier
+                     .create(mQuoteClient
+                             .searchQuotes(ZIPPY,
+                                           quoteOrList))
+                     .expectNextCount(114)
+                     .as("The count wasn't as expected")
+                     .verifyComplete(),
+                     "Zippy searchQuotes()");
 
         // Make a List of common Zippy words that are used to search
         // for all matches.
@@ -123,24 +128,28 @@ public class QuoteDriver
             .of("yow",
                 "yet");
         
-        StepVerifier
-            .create(mQuoteClient
-                    .searchQuotesEx(ZIPPY,
-                                    quoteAndList))
-            .expectNextCount(6)
-            .as("The count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() -> StepVerifier
+                     .create(mQuoteClient
+                             .searchQuotesEx(ZIPPY,
+                                             quoteAndList))
+                     .expectNextCount(6)
+                     .as("The count wasn't as expected")
+                     .verifyComplete(),
+                     "Zippy searchQuotesEx()");
     }
 
     /**
      * Record how long it takes to get the Handey quotes.
      */
     private void timeHandeyQuotes() {
-        StepVerifier
-            .create(runQuotes(HANDEY))
-            .expectNextCount(10)
-            .as("The runQuotes() count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() -> StepVerifier
+                     .create(runQuotes(HANDEY))
+                     .expectNextCount(10)
+                     .as("The runQuotes() count wasn't as expected")
+                     .verifyComplete(),
+                     "Handey runQuotes()");
 
         // Make a List of common Handey words.
         var quoteList = List
@@ -151,13 +160,16 @@ public class QuoteDriver
                 "poor",
                 "cry");
 
-        StepVerifier
-            .create(mQuoteClient
-                    .searchQuotes(HANDEY,
-                                  quoteList))
-            .expectNextCount(14)
-            .as("The searchQuotes() count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() ->
+                     StepVerifier
+                     .create(mQuoteClient
+                             .searchQuotes(HANDEY,
+                                           quoteList))
+                     .expectNextCount(14)
+                     .as("The searchQuotes() count wasn't as expected")
+                     .verifyComplete(),
+                     "Handey searchQuotes()");
 
         // Make a List of common Handey words that are used to search
         // for all matches.
@@ -165,13 +177,15 @@ public class QuoteDriver
             .of("man",
                 "the");
         
-        StepVerifier
-            .create(mQuoteClient
-                    .searchQuotesEx(HANDEY,
-                                    quoteAndList))
-            .expectNextCount(4)
-            .as("The count wasn't as expected")
-            .verifyComplete();
+        RunTimer
+            .timeRun(() -> StepVerifier
+                     .create(mQuoteClient
+                             .searchQuotesEx(HANDEY,
+                                             quoteAndList))
+                     .expectNextCount(4)
+                     .as("The count wasn't as expected")
+                     .verifyComplete(),
+                     "Handey searchQuotesEx()");
     }
 
     /**
@@ -179,12 +193,12 @@ public class QuoteDriver
      */
     private Flux<Quote> runQuotes(String quoter) {
         Function<Long,
-                 Publisher<? extends Quote>> postQuotes = size
+            Publisher<? extends Quote>> postQuotes = size
             -> mQuoteClient
             // Return the selected quotes.
             .postQuotes(quoter,
                         makeRandom(sQUOTES_REQUESTED,
-                                Math.toIntExact(size)));
+                                   Math.toIntExact(size)));
 
         // List holding all Quote objects.
         return mQuoteClient

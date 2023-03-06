@@ -219,7 +219,7 @@ public class FluxEx {
             new StringBuilder(">> Calling testFractionDivisonErrorSync()\n");
 
         // Create a list of BigFraction objects.
-        List<BigFraction> bigFractionList = List.of
+        var bigFractionList = List.of
             (BigFraction.valueOf(100, 3),
              BigFraction.valueOf(100, 4),
              BigFraction.valueOf(100, 2),
@@ -230,15 +230,8 @@ public class FluxEx {
             // fractions.
             .fromIterable(bigFractionList)
 
-            // Log the contents of the computation.
-            .doOnNext(bigFraction ->
-                      sb.append("    ["
-                                + Thread.currentThread().getId()
-                                + "] "
-                                + bigFraction.toMixedString()
-                                + " x "
-                                + sBigReducedFraction.toMixedString()
-                                + "\n"))
+            .doOnNext(bf ->
+                logBigFraction(sBigReducedFraction, bf, sb))
 
             // Use map() to divide each element in the stream by a
             // constant 0, which will throw ArithmeticException.
@@ -248,7 +241,7 @@ public class FluxEx {
 
             // Log the contents of the exception.
             .doOnError(exception -> BigFractionUtils
-                    .logError(exception, sb))
+                       .logError(exception, sb))
 
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since

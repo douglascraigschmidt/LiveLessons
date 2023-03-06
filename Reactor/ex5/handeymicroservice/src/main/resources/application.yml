@@ -1,31 +1,14 @@
-# Enable bean overriding.
-spring:
-  main:
-    allow-bean-definition-overriding: true
-
-# Common Eureka client properties
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    enabled: true
-    register-with-eureka: true
-    fetch-registry: true
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka
-
----
 # Handy microservice profile.
- 
  server:
-   port: 9100
+   port: 0
  
  spring:
    application:
      name: handey
-   config:
-     activate:
-       on-profile: handey
+#   config:
+#     activate:
+#       on-profile: handey
+
    # Common Database properties
    datasource:
      driverClassName: org.h2.Driver
@@ -52,3 +35,13 @@ eureka:
        settings:
          web-allow-others: true
        enabled: true
+---
+
+# Common Eureka client properties
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
