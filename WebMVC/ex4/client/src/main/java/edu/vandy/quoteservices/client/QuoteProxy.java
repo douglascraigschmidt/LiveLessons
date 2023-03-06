@@ -1,6 +1,7 @@
 package edu.vandy.quoteservices.client;
 
 import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.quoteservices.utils.CallUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,23 +33,9 @@ public class QuoteProxy {
      *         objects
      */
     public List<Quote> getAllQuotes(String route) {
-        try {
+        return CallUtils
             // Execute the getAllQuotes() retrofit API method.
-            var response = mQuoteAPI
-                .getAllQuotes(route).execute();
-
-            // Determine whether this method succeeded or failed.
-            if (response.isSuccessful())
-                return response.body();
-            else {
-                assert response.errorBody() != null;
-                System.out.println(response.errorBody().string());
-
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            .executeCall(mQuoteAPI.getAllQuotes(route));
     }
 
     /**
@@ -66,25 +53,12 @@ public class QuoteProxy {
         (String route,
          List<Integer> quoteIds,
          Boolean parallel) {
-        try {
+        return CallUtils
             // Execute the getQuotes() retrofit API method.
-            var response = mQuoteAPI
-                .postQuotes(route,
-                           quoteIds,
-                           parallel).execute();
-
-            // Determine whether this method succeeded or failed.
-            if (response.isSuccessful())
-                return response.body();
-            else {
-                assert response.errorBody() != null;
-                System.out.println(response.errorBody().string());
-
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            .executeCall(mQuoteAPI
+                         .postQuotes(route,
+                                     quoteIds,
+                                     parallel));
     }
 
     /**
@@ -103,25 +77,12 @@ public class QuoteProxy {
         (String route,
          List<String> queries,
          Boolean parallel) {
-        try {
+        return CallUtils
             // Execute the search() retrofit API method.
-            var response = mQuoteAPI
-                .search(route,
-                        queries,
-                        parallel).execute();
-
-            // Determine whether this method succeeded or failed.
-            if (response.isSuccessful())
-                return response.body();
-            else {
-                assert response.errorBody() != null;
-                System.out.println(response.errorBody().string());
-
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            .executeCall(mQuoteAPI
+                         .search(route,
+                                 queries,
+                                 parallel));
     }
 
     /**
@@ -140,23 +101,9 @@ public class QuoteProxy {
         (String route,
          List<String> queries,
          Boolean parallel) {
-        try {
+        return CallUtils
             // Execute the searchEx() retrofit API method.
-            var response = mQuoteAPI
-                .searchEx(route,
-                          queries, parallel).execute();
-
-            // Determine whether this method succeeded or failed.
-            if (response.isSuccessful())
-                return response.body();
-            else {
-                assert response.errorBody() != null;
-                System.out.println(response.errorBody().string());
-
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            .executeCall(mQuoteAPI
+                         .searchEx(route, queries, parallel));
     }
 }
