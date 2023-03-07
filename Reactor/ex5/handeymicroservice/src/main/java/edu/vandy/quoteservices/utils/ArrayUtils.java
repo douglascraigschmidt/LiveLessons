@@ -128,15 +128,15 @@ public class ArrayUtils {
             // appropriate wrapper class. The clazz.cast() method is
             // used to cast the resulting object to the desired Number
             // subclas.
-            switch (clazz.getSimpleName()) {
-            case "Integer": return clazz.cast(Integer.valueOf(str));
-            case "Long": return clazz.cast(Long.valueOf(str));
-            case "Float": return clazz.cast(Float.valueOf(str));
-            case "Double": return clazz.cast(Double.valueOf(str));
-            case "Short": return clazz.cast(Short.valueOf(str));
-            case "Byte": return clazz.cast(Byte.valueOf(str));
-            default: return null;
-            }
+            return switch (clazz.getSimpleName()) {
+                case "Integer" -> clazz.cast(Integer.valueOf(str));
+                case "Long" -> clazz.cast(Long.valueOf(str));
+                case "Float" -> clazz.cast(Float.valueOf(str));
+                case "Double" -> clazz.cast(Double.valueOf(str));
+                case "Short" -> clazz.cast(Short.valueOf(str));
+                case "Byte" -> clazz.cast(Byte.valueOf(str));
+                default -> null;
+            };
         } catch (NumberFormatException e) {
             return null;
         }
