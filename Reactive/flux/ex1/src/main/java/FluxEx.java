@@ -164,10 +164,12 @@ public class FluxEx {
         var f2 = Flux
             // Use from() to "lazily" generate a stream of random
             // BigFraction objects.
-            .<BigFraction>from(p -> p
-                               .onNext(BigFractionUtils
-                                       .makeBigFraction(random,
-                                                        true)))
+            .<BigFraction>from(Mono
+                               // This operator is also "lazily"
+                               // bound.
+                               .fromCallable(() -> BigFractionUtils
+                                             .makeBigFraction(random,
+                                                              true)))
 
             // Generate random big fractions 4 (3 + 1) times.
             .repeat(3);
@@ -212,7 +214,8 @@ public class FluxEx {
     }
 
     /**
-     * Test BigFraction division using a synchronous Flux stream.
+     * Test BigFraction (erroneous) division using a synchronous Flux
+     * stream.
      */
     public static Mono<Void> testFractionDivisonErrorSync() {
         StringBuilder sb =
@@ -220,26 +223,31 @@ public class FluxEx {
 
         // Create a list of BigFraction objects.
         var bigFractionList = List.of
-            (BigFraction.valueOf(100, 3),
-             BigFraction.valueOf(100, 4),
-             BigFraction.valueOf(100, 2),
-             BigFraction.valueOf(100, 1));
+            (BigFraction.valueOf(100, 30),
+             BigFraction.valueOf(100, 20),
+             BigFraction.valueOf(100, 50),
+             BigFraction.valueOf(100, 10));
 
         Flux
             // Use fromIterable() to generate a stream of big
             // fractions.
             .fromIterable(bigFractionList)
 
+            // Use map() to divide each element in the stream by a
+            // constant 0, which will throw ArithmeticException.
+            .map(bigFraction -> bigFraction.equals(BigFraction.TWO)
+                 // Divide by zero.
+                 ? bigFraction.divide(BigFraction.ZERO)
+                 // Divide by two.
+                 : bigFraction.divide(BigFraction.TWO))
+
+            // Log on success.
             .doOnNext(bf ->
                 logBigFraction(sBigReducedFraction, bf, sb))
 
-            // Use map() to divide each element in the stream by a
-            // constant 0, which will throw ArithmeticException.
-            .map(bigFraction -> bigFraction
-                 // Divide by zero and return result.
-                 .divide(BigFraction.ZERO))
-
-            // Log the contents of the exception.
+            // Log on failure (i.e., ArithmeticException).  This
+            // implementation doesn't try to recover from this
+            // exception.
             .doOnError(exception -> BigFractionUtils
                        .logError(exception, sb))
 
