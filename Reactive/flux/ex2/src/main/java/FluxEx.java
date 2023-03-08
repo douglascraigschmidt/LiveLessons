@@ -69,7 +69,7 @@ public class FluxEx {
      */
     private static Function<Long, BigInteger> sGenerateRandomBigInteger = __ ->
         BigInteger.valueOf(sLOWER_BOUND +
-                           sRANDOM.nextInt(sMAX_ITERATIONS));
+                           sRANDOM.nextInt(sMAX_VALUE));
 
     /**
      * Test a stream of random BigIntegers to determine which values
@@ -118,7 +118,7 @@ public class FluxEx {
     private static Consumer<FluxSink<BigInteger>> makeTimedFluxSink() {
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
-        return (FluxSink<BigInteger> sink) -> Flux
+        return sink -> Flux
             // Generate a Long stream starting at 0 periodically in a
             // background thread from the Schedulers.parallel() thread
             // pool.
@@ -189,7 +189,7 @@ public class FluxEx {
 
             // Always dispose of the "subscriber" thread regardless of
             // what happens in the stream.
-            .doFinally(___ -> subscriber.dispose())
+           .doFinally(___ -> subscriber.dispose())
 
             // Return an empty Mono to synchronize with
             // AsyncTaskBarrier.
@@ -208,7 +208,7 @@ public class FluxEx {
 
         // FluxSink emits any number of next() signals followed by
         // zero or one onError()/onComplete().
-        return (FluxSink<BigInteger> sink) -> Flux
+        return sink -> Flux
             // Emit up to Integer.MAX_VALUE integers starting at 1.
             .range(1, Integer.MAX_VALUE)
 
