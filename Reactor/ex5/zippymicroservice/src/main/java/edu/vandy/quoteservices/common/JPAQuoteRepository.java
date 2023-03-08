@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface JPAQuoteRepository
        extends JpaRepository<Quote, Integer>,
-        MultiQueryRepository {
+               MultiQueryRepository {
     /**
      * Find all {@link Quote} rows in the database that contain the
      * {@code query} {@link String} (ignoring case).
@@ -25,7 +25,6 @@ public interface JPAQuoteRepository
      * @return A {@link List} of {@link Quote} objects that match the
      *         {@code query}
      */
-
     List<Quote> findByQuoteContainingIgnoreCase(String query);
 }
 

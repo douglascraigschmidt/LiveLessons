@@ -127,7 +127,7 @@ public class ArrayUtils {
             // Number subclass using the valueOf() method of the
             // appropriate wrapper class. The clazz.cast() method is
             // used to cast the resulting object to the desired Number
-            // subclas.
+            // subclass.
             return switch (clazz.getSimpleName()) {
                 case "Integer" -> clazz.cast(Integer.valueOf(str));
                 case "Long" -> clazz.cast(Long.valueOf(str));

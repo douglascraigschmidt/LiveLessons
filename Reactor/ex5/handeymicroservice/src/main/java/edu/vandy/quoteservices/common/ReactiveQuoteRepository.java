@@ -16,7 +16,6 @@ import reactor.core.publisher.Flux;
  */
 @Repository
 public interface ReactiveQuoteRepository
-//       extends R2dbcRepository<Quote, Integer> /*,
        extends ReactiveCrudRepository<Quote, Integer>,
                MultiQueryRepository {
     /**

@@ -5,9 +5,6 @@
  spring:
    application:
      name: handey
-#   config:
-#     activate:
-#       on-profile: handey
 
    # Common Database properties
    datasource:
@@ -20,8 +17,8 @@
        username: sa
        password:
        mode: always
-       data-locations: classpath:data.sql
-       schema-locations: classpath:schema.sql
+       # data-locations: classpath:data.sql
+       # schema-locations: classpath:schema.sql
  
    jpa:
      hibernate:

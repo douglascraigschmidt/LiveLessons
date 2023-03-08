@@ -50,9 +50,9 @@ public class MultiQueryRepositoryImpl
         Root<Quote> quote = cq.from(Quote.class);
 
         // Create an Expression object that represents the lower-cased
-        // ID ("quote") field of the Quote entity that's used to create
-        // the search predicate that matches the specified queries.
-        var idExpression
+        // quote ("quote") column/field of the Quote entity that's used to
+        // create the search predicate that matches the specified queries.
+        var quoteExpression
                 = cb.lower(quote.get("quote"));
 
         var andPredicate = queries
@@ -65,7 +65,7 @@ public class MultiQueryRepositoryImpl
                 // Map each query to a "like" predicate that matches the
                 // ID (title) field of the Quote entity.
                 .map(query -> cb
-                        .like(idExpression, "%" + query + "%"))
+                        .like(quoteExpression, "%" + query + "%"))
 
                 // Reduce the list of predicates to a single conjunction
                 // (and) predicate.

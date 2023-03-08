@@ -73,7 +73,9 @@ public class ZippyService {
         // and return them as a List of Quote objects.
         System.out.println("search(List<String> queries");
         return Flux
-            .fromIterable(queries.parallelStream()
+            .fromIterable(queries
+                          // Convert List to parallel stream.
+                          .parallelStream()
                           // Flatten the Stream of Streams into a
                           // Stream.
                           .flatMap(query ->  mRepository
@@ -84,7 +86,8 @@ public class ZippyService {
                                    // Convert List to a Stream.
                                    .stream())
 
-                          // Eliminate duplicate Zippy quotes.
+                          // Eliminate duplicate Zippy quotes and sorts the
+                          // results.
                           .collect(toCollection(TreeSet::new)));
     }
 

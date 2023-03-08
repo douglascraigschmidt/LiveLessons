@@ -5,22 +5,19 @@ server:
 spring:
   application:
     name: zippy
-#  config:
-#    activate:
-#      on-profile: zippy
 
   # Common Database properties
   datasource:
     driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:zippy;DB_CLOSE_ON_EXIT=TRUE
+    url: jdbc:h2:mem:///zippy;DB_CLOSE_ON_EXIT=TRUE
   sql:
     init:
       platform: h2
       username: sa
       password:
       mode: always
-      data-locations: classpath:data.sql
-      schema-locations: classpath:schema.sql
+      # data-locations: classpath:data.sql
+      # schema-locations: classpath:schema.sql
   # Use JPA database.
 
   jpa:
