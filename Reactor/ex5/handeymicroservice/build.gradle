@@ -6,6 +6,9 @@ dependencies {
     implementation 'commons-dbcp:commons-dbcp:1.4'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     runtimeOnly 'io.r2dbc:r2dbc-h2'
+    // implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
+    // implementation 'org.postgresql:postgresql'
+    // runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

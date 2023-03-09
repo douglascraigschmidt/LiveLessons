@@ -36,13 +36,9 @@ public class FluxEx {
                   BigFraction.valueOf(100, 1))
 
             // Log the contents of the computation.
-            .doOnNext(bigFraction -> 
-                      sb.append("    ["
-                                + Thread.currentThread().getId()
-                                + "] "
-                                + bigFraction.toMixedString()
-                                + " x "
-                                + sBigReducedFraction.toMixedString()))
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction,
+                                           bf,
+                                           sb))
 
             // Use map() to multiply each element in the stream by a
             // constant.
@@ -53,8 +49,7 @@ public class FluxEx {
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since
             // the publisher (just()) is synchronous and runs in the
-            // calling thread.  However, there are more interesting
-            // types of publishers that enable asynchrony.
+            // calling thread.
             .subscribe(// Handle next event.
                        multipliedBigFraction ->
                        // Add fraction to the string builder.
@@ -100,8 +95,9 @@ public class FluxEx {
             .fromIterable(bigFractionList)
 
             // Log the contents of the computation.
-            .doOnNext(bf ->
-                      logBigFraction(sBigReducedFraction, bf, sb))
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction,
+                                           bf,
+                                           sb))
 
             // Use map() to multiply each element in the stream by a
             // constant.
@@ -111,8 +107,7 @@ public class FluxEx {
             // Use subscribe() to initiate all the processing and
             // handle the results.  This call runs synchronously since
             // the publisher (fromIterable()) is synchronous and runs
-            // in the calling thread.  However, there are more
-            // interesting types of publishers that enable asynchrony.
+            // in the calling thread.
             .subscribe(// Handle next event.
                        multipliedBigFraction ->
                        // Add fraction to the string builder.
@@ -180,8 +175,9 @@ public class FluxEx {
             .mergeWith(f2)
 
             // Log the contents of the computation.
-            .doOnNext(bf ->
-                      logBigFraction(sBigReducedFraction, bf, sb))
+            .doOnNext(bf -> logBigFraction(sBigReducedFraction,
+                                           bf,
+                                           sb))
 
             // Use map() to multiply each element in the stream by a
             // constant.
@@ -189,11 +185,13 @@ public class FluxEx {
                  .multiply(sBigReducedFraction))
 
             // Use subscribe() to initiate all the processing and
-            // handle the results synchronously.
+            // handle the results.  This call runs synchronously since
+            // the publisher (fromArray()) is synchronous and runs in
+            // the calling thread.
             .subscribe(// Handle next event.
-                       fraction -> 
+                       multipliedBigFraction -> 
                        sb.append(" = " 
-                                 + fraction.toMixedString() 
+                                 + multipliedBigFraction.toMixedString() 
                                  + "\n"),
                        // Handle the error.
                        t -> {
@@ -243,7 +241,7 @@ public class FluxEx {
 
             // Log on success.
             .doOnNext(bf ->
-                logBigFraction(sBigReducedFraction, bf, sb))
+                      logBigFraction(sBigReducedFraction, bf, sb))
 
             // Log on failure (i.e., ArithmeticException).  This
             // implementation doesn't try to recover from this
