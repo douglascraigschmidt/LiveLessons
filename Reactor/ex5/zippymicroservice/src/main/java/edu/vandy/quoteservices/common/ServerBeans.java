@@ -1,5 +1,6 @@
 package edu.vandy.quoteservices.common;
 
+import edu.vandy.quoteservices.common.YamlPropertySourceFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;

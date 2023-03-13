@@ -1,5 +1,6 @@
-package edu.vandy.quoteservices.common;
+package edu.vandy.quoteservices.microservice;
 
+import edu.vandy.quoteservices.common.Quote;
 import reactor.core.publisher.Flux;
 
 import java.util.List;

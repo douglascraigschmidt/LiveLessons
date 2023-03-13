@@ -1,4 +1,6 @@
-package edu.vandy.quoteservices.common;
+package edu.vandy.quoteservices.microservice;
+
+import edu.vandy.quoteservices.common.Quote;
 
 import java.util.List;
 

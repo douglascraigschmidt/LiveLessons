@@ -1,5 +1,6 @@
-package edu.vandy.quoteservices.common;
+package edu.vandy.quoteservices.microservice;
 
+import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;

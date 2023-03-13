@@ -55,7 +55,7 @@ public class ZippyController {
     }
 
     /**
-     * @return A {@link Flux<Quote>} containing all the quotes
+     * @return A {@link Flux< Quote >} containing all the quotes
      */
     @GetMapping(GET_ALL_QUOTES)
     public Flux<Quote> getAllQuotes() {

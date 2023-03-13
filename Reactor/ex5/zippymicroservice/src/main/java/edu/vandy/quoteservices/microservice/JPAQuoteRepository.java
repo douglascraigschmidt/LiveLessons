@@ -1,10 +1,10 @@
-package edu.vandy.quoteservices.common;
+package edu.vandy.quoteservices.microservice;
 
-// import org.springframework.data.r2dbc.repository.R2dbcRepository;
-
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import edu.vandy.quoteservices.common.Quote;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 /**
  * A persistent repository that contains information about {@link
@@ -15,16 +15,18 @@ import reactor.core.publisher.Flux;
  * delete operation on {@link Quote} objects.
  */
 @Repository
-public interface ReactiveQuoteRepository
-       extends ReactiveCrudRepository<Quote, Integer>,
+public interface JPAQuoteRepository
+       extends JpaRepository<Quote, Integer>,
                MultiQueryRepository {
     /**
      * Find all {@link Quote} rows in the database that contain the
      * {@code query} {@link String} (ignoring case).
      *
      * @param query The {@link String} to search for
-     * @return A {@link Flux} of {@link Quote} objects that match the
+     * @return A {@link List} of {@link Quote} objects that match the
      *         {@code query}
      */
-    Flux<Quote> findByQuoteContainingIgnoreCase(String query);
+    List<Quote> findByQuoteContainingIgnoreCase(String query);
 }
+
+

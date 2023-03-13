@@ -1,7 +1,6 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.BaseApplication;
-import edu.vandy.quoteservices.common.JPAQuoteRepository;
 import edu.vandy.quoteservices.common.Quote;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
