@@ -59,6 +59,7 @@ public class ZippyController {
      */
     @GetMapping(GET_ALL_QUOTES)
     public Flux<Quote> getAllQuotes() {
+        System.out.println("NORMAL");
         return mService
             // Forward request to the service.
             .getAllQuotes();

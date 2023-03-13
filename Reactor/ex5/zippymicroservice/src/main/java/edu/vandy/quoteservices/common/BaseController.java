@@ -45,7 +45,7 @@ public abstract class BaseController<T> {
         // Indicate the request succeeded and return the application
         // name and thread id.
         return ResponseEntity
-            .ok(applicationContext.getId() 
+            .ok(applicationContext.getId()
                 + " is alive and running at "
                 + Thread.currentThread()
                 + "\n");
@@ -56,6 +56,7 @@ public abstract class BaseController<T> {
      */
     @GetMapping(GET_ALL_QUOTES)
     public T getAllQuotes() {
+        System.out.println("WEIRD");
         return getService()
             // Forward request to the service.
             .getAllQuotes();

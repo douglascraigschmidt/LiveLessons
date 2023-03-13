@@ -39,7 +39,7 @@ public interface BaseService<T> {
      * @return A {@code T} of quotes containing the given {@code
      *         queries}
      */
-     T search(List<String> queries);
+    T search(List<String> queries);
 
     /**
      * Search for quotes containing all of the given {@link String}
@@ -48,5 +48,5 @@ public interface BaseService<T> {
      * @param queries The search queries
      * @return A {@code T} containing the matching {@code queries}
      */
-     T searchEx(List<String> queries);
+    T searchEx(List<String> queries);
 }
