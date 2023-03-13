@@ -73,16 +73,15 @@ public class MultiQueryRepositoryImpl
      * @param queries The {@lin List} of queries
      * @param criteriaBuilder Create the {@link CriteriaQuery} used to
      *                        search for quotes
-
      * @param quoteExpression The lower-cased "quote" column of the
      *                        {@link Quote} entity
      * @return A {@link Predicate} that "ands" all the {@code queries}
      *         together
      */
-    private static Predicate
-        getPredicate(List<String> queries,
-                     CriteriaBuilder criteriaBuilder,
-                     Expression<String> quoteExpression) {
+    private static Predicate getPredicate
+        (List<String> queries,
+         CriteriaBuilder criteriaBuilder,
+         Expression<String> quoteExpression) {
         return queries
             // Convert the List to a Stream.
             .stream()
