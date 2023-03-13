@@ -74,7 +74,7 @@ public class QuoteDriver
         System.out.println("Entering QuoteDriver run()");
 
         // Record how long it takes to get the Zippy quotes.
-       timeZippyQuotes();
+        timeZippyQuotes();
 
         // Record how long it takes to get the Handey quotes.
         timeHandeyQuotes();
