@@ -1,6 +1,7 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.*;
+import edu.vandy.quoteservices.repository.ReactiveQuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

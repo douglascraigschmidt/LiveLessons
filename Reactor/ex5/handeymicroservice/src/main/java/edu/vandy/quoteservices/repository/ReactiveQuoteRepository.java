@@ -1,9 +1,8 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.repository;
 
 // import org.springframework.data.r2dbc.repository.R2dbcRepository;
 
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.microservice.MultiQueryRepository;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;

@@ -1,6 +1,7 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.Quote;
+import edu.vandy.quoteservices.repository.JPAQuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

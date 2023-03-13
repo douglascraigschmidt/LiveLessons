@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.microservice;
+package edu.vandy.quoteservices.repository;
 
 import edu.vandy.quoteservices.common.Quote;
 import org.springframework.data.jpa.repository.JpaRepository;
