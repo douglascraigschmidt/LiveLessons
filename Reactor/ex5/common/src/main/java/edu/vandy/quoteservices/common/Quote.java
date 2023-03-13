@@ -11,8 +11,8 @@ public class Quote {
     /**
      * ID # of the quote.
      */
-    @Id
-    @org.springframework.data.annotation.Id
+    @Id // For JPA
+    @org.springframework.data.annotation.Id // For r2dbc
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int id;
 
