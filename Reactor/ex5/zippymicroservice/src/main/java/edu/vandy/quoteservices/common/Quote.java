@@ -22,11 +22,7 @@ import lombok.Value;
  * The {@code NoArgsConstructor} annotation will generate a
  * constructor with no parameters.
  */
-@Value
 @RequiredArgsConstructor
-@NoArgsConstructor(force = true)
-@Entity // For JPA
-@Table(name = "QUOTE")
 public class Quote
        implements Comparable<Quote> {
     /**

@@ -3,16 +3,15 @@ package edu.vandy.quoteservices.common;
 /*
 import org.springframework.data.relational.core.mapping.Table;
 */
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+// import jakarta.persistence.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 
 import jakarta.persistence.Table;
 
 import org.springframework.data.annotation.Id;
-
-import lombok.NoArgsConstructor;
-import lombok.Value;
 
 /**
  * This class stores quotes.
@@ -20,8 +19,7 @@ import lombok.Value;
  * The {@code NoArgsConstructor} annotation will generate a
  * constructor with no parameters.
  */
-@Value
-@NoArgsConstructor(force = true)
+@Entity
 @Table(name = "QUOTE")
 public class Quote {
     /**
@@ -36,12 +34,15 @@ public class Quote {
      */
     public String quote;
 
-    /**
-     * Initialize columns in a {@link Quote}.
-     */
-    @PersistenceCreator
     public Quote(Integer id, String quote) {
         this.id = id;
         this.quote = quote;
     }
+
+    public Quote() {}
+
+    /**
+     * Initialize columns in a {@link Quote}.
+     */
+    // @PersistenceCreator
 }
