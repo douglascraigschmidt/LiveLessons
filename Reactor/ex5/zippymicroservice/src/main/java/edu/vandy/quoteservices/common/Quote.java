@@ -2,7 +2,8 @@ package edu.vandy.quoteservices.common;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.
+import jakarta.persistence.Table;
+import jakarta.persistence.Entity;
 import org.springframework.data.annotation.Id;
 
 import lombok.NoArgsConstructor;
@@ -37,7 +38,7 @@ public class Quote
     /**
      * A quote.
      */
-    @Column(name = "quote", nullable = false)
+    // @Column(name = "quote", nullable = false)
     public String quote;
 
 /**
