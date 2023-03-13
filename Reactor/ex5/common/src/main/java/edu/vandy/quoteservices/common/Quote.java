@@ -13,6 +13,7 @@ public class Quote {
      */
     @Id // For JPA
     @org.springframework.data.annotation.Id // For r2dbc
+    //@@Doug: you can get rid of this line if you don't add new values to the table from source.
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int id;
 
