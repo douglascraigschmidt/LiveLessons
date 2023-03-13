@@ -1,44 +1,31 @@
 # Handy microservice profile.
- server:
-   port: 0
- 
- spring:
-   application:
-     name: handey
+server:
+  port: 0
 
-   # Common Database properties
-   datasource:
-     driverClassName: org.h2.Driver
-     # Use R2DBC database.
-     url: r2dbc:h2:mem:///quote?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-   sql:
-     init:
-       platform: h2
-       username: sa
-       password:
-       mode: always
-       # data-locations: classpath:data.sql
-       # schema-locations: classpath:schema.sql
- 
-   jpa:
-     hibernate:
-       ddl-auto: none
-     database-platform: org.hibernate.dialect.H2Dialect
-     show-sql: true
- 
-   # Allow use of H2 console at localhost:port/h2-console for debugging.
-   h2:
-     console:
-       settings:
-         web-allow-others: true
-       enabled: true
----
-
-# Common Eureka client properties
+# Eureka client properties
 eureka:
   client:
-    enabled: true
-    register-with-eureka: true
-    fetch-registry: false
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka
+    enabled: false
+
+spring:
+  application:
+    name: handey
+
+  # Common Database properties
+  datasource:
+    driverClassName: org.h2.Driver
+    # Use R2DBC database.
+    url: r2dbc:h2:mem:///quote?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  sql:
+    init:
+      platform: h2
+      username: sa
+      password:
+      mode: always
+
+  # Allow use of H2 console at localhost:port/h2-console for debugging.
+  h2:
+    console:
+      settings:
+        web-allow-others: true
+      enabled: true

@@ -2,6 +2,11 @@
 server:
   port: 0
 
+# Eureka client properties
+eureka:
+  client:
+    enabled: false
+
 spring:
   application:
     name: zippy
@@ -16,9 +21,6 @@ spring:
       username: sa
       password:
       mode: always
-      # data-locations: classpath:data.sql
-      # schema-locations: classpath:schema.sql
-  # Use JPA database.
 
   jpa:
     hibernate:
@@ -32,13 +34,3 @@ spring:
       settings:
         web-allow-others: true
       enabled: true
----
-
-# Common Eureka client properties
-eureka:
-  client:
-    enabled: true
-    register-with-eureka: true
-    fetch-registry: false
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka

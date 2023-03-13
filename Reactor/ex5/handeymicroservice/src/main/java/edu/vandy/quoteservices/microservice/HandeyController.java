@@ -21,6 +21,7 @@ import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
  * The {@code @RestController} annotation is a specialization of
  * {@code @Component} and is automatically detected through classpath
  * scanning.  It adds the {@code @Controller} and {@code
+ *
  * @ResponseBody} annotations. It also converts responses to
  * JSON or XML.
  */
@@ -43,15 +44,17 @@ public class HandeyController {
      *
      * @return The application name
      */
-    @GetMapping({"/", "actuator/info"})
+    @GetMapping({
+        "/",
+        "actuator/info"})
     public ResponseEntity<String> info() {
         // Indicate the request succeeded and return the application
         // name and thread id.
         return ResponseEntity
-            .ok(applicationContext.getId() 
-                + " is alive and running at "
-                + Thread.currentThread()
-                + "\n");
+            .ok(applicationContext.getId()
+                    + " is alive and running at "
+                    + Thread.currentThread()
+                    + "\n");
     }
 
     /**
@@ -70,7 +73,7 @@ public class HandeyController {
      * @param quoteIds A {@link List} containing the given random
      *                 {@code quoteIds}
      * @return A {@link Flux<Quote>} containing the {@link Quote} objects
-     *         associated with the requested quotes
+     * associated with the requested quotes
      */
     @PostMapping(POST_QUOTES)
     Flux<Quote> postQuotes(@RequestBody List<Integer> quoteIds) {

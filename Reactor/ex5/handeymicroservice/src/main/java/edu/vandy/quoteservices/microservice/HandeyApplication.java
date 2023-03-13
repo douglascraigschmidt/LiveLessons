@@ -3,9 +3,13 @@ package edu.vandy.quoteservices.microservice;
 import edu.vandy.quoteservices.common.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
 import edu.vandy.quoteservices.repository.ReactiveQuoteRepository;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+
+import java.util.List;
 
 /**
  * This class provides the entry point into the Spring WebMVC-based
@@ -29,5 +33,13 @@ public class HandeyApplication extends BaseApplication {
         // Call BaseApplication helper method to build and run this
         // microservice.
         run(HandeyApplication.class, args);
+    }
+
+    @Bean
+    public CommandLineRunner demo(ReactiveQuoteRepository repository) {
+        return args -> {
+            repository.findAllById(List.of(1, 2))
+                      .subscribe(it -> System.out.println(it.quote));
+        };
     }
 }
