@@ -1,6 +1,10 @@
 package edu.vandy.quoteservices.common;
 
-import jakarta.persistence.*;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.
+import org.springframework.data.annotation.Id;
+
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;

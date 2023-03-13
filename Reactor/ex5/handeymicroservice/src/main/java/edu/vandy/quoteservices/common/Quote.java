@@ -8,9 +8,8 @@ import jakarta.persistence.GenerationType;
 import org.springframework.data.annotation.PersistenceCreator;
 
 import jakarta.persistence.Table;
-import jakarta.persistence.Id;
 
-// import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Id;
 
 import lombok.NoArgsConstructor;
 import lombok.Value;
