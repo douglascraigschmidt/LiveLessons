@@ -4,7 +4,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
+// import org.springframework.data.annotation.Id;
 
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
