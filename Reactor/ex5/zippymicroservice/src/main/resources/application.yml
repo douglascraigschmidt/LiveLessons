@@ -5,7 +5,7 @@ server:
 # Eureka client properties
 eureka:
   client:
-    enabled: false
+    enabled: true
 
 spring:
   application:

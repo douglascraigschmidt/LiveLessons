@@ -86,8 +86,8 @@ public class ZippyService {
                                    // Convert List to a Stream.
                                    .stream())
 
-                          // Eliminate duplicate Zippy quotes and sorts the
-                          // results.
+                          // Eliminate duplicate Zippy quotes and
+                          // sorts the results.
                           .collect(toCollection(TreeSet::new)));
     }
 
