@@ -1,14 +1,12 @@
 dependencies {
+    implementation project(path: ':common')
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'commons-dbcp:commons-dbcp:1.4'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     runtimeOnly 'io.r2dbc:r2dbc-h2'
-    // implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
-    // implementation 'org.postgresql:postgresql'
-    // runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

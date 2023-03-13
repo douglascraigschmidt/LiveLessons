@@ -1,9 +1,16 @@
 package edu.vandy.quoteservices.common;
 
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.annotation.Id;
+/*
 import org.springframework.data.relational.core.mapping.Table;
+*/
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import org.springframework.data.annotation.PersistenceCreator;
+
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+
+// import org.springframework.data.annotation.Id;
 
 import lombok.NoArgsConstructor;
 import lombok.Value;
@@ -22,13 +29,12 @@ public class Quote {
      * ID # of the quote.
      */
     @Id
-    @Column("id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
 
     /**
      * A quote.
      */
-    @Column("quote")
     public String quote;
 
     /**
