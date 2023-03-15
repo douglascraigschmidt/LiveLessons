@@ -6,6 +6,7 @@ import jakarta.persistence.*;
  * This class stores {@link Quote} objects in the JPA and R2DBC
  * databases.
  */
+@Entity
 @Table(name = "QUOTE")
 public class Quote
        implements Comparable<Quote> {

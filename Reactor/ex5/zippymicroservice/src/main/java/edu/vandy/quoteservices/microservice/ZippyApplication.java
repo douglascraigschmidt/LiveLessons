@@ -25,12 +25,14 @@ import java.util.List;
 @SpringBootApplication
 @EntityScan(basePackageClasses = {Quote.class})
 @EnableJpaRepositories(basePackageClasses = {JPAQuoteRepository.class})
-public class ZippyApplication extends BaseApplication {
+public class ZippyApplication 
+       extends BaseApplication {
     /**
      * The static main() entry point runs this Spring application.
      */
     public static void main(String[] args) {
-        // Call BaseClass helper to build and run this application.
+        // Call the BaseApplication.run() method to build and run this
+        // application.
         run(ZippyApplication.class, args);
     }
 

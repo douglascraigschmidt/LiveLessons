@@ -20,9 +20,6 @@ import static java.util.Collections.singletonMap;
  * gateway application.
  */
 @Configuration
-@PropertySource(
-    value = "classpath:/application.yml",
-    factory = YamlPropertySourceFactory.class)
 public class BaseApplication {
     /**
      * Helper method that builds a Spring Boot application using the

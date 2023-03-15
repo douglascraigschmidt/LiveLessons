@@ -12,9 +12,9 @@ import java.util.Properties;
 /**
  * This class implementats the {@link PropertySourceFactory} interface
  * used to create a new {@link PropertySource} from a YAML file. It
- * takes in a name and an {@link EncodedResource} and returns a
- * {@link PropertiesPropertySource} object that can be used to
- * retrieve properties from the YAML file.
+ * takes in a name and an {@link EncodedResource} and returns a {@link
+ * PropertiesPropertySource} object that can be used to retrieve
+ * properties from the YAML file.
  */
 public class YamlPropertySourceFactory
        implements PropertySourceFactory {

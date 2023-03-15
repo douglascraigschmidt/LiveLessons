@@ -25,7 +25,8 @@ import java.util.List;
 @SpringBootApplication
 @EntityScan(basePackageClasses = {Quote.class})
 @EnableR2dbcRepositories(basePackageClasses = {ReactiveQuoteRepository.class})
-public class HandeyApplication extends BaseApplication {
+public class HandeyApplication 
+       extends BaseApplication {
     /**
      * The static main() entry point runs this Spring application.
      */
