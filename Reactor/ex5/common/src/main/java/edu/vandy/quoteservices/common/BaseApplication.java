@@ -17,7 +17,8 @@ import static java.util.Collections.singletonMap;
  * A static class with a single {@link #run} static method that is used by all
  * microservices to build a Spring Boot application instance and to give a
  * unique name that is used as a path component in URLs and for routing by the
- * gateway application.
+ * gateway application.   It also configures the use of Java 19 virtual threads
+ * to process incoming HTTP requests.
  */
 @Configuration
 public class BaseApplication {

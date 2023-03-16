@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="GatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="Reactor.ex5.gateway.main" />
+    <module name="ex5.gateway.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.gateway.GatewayApplication" />
     <extension name="coverage">
       <pattern>
