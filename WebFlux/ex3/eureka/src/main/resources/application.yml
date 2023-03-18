@@ -1,0 +1,22 @@
+# Define the port number listened on by the Eureka discovery service
+# and other properties.
+server:
+  port: 8761
+spring:
+  application:
+    name: eureka
+
+eureka:
+  instance:
+    # Configure this version of Eureka to run on the localhost
+    # & use IP addresses instead of host names.
+    hostname: localhost
+    prefer-ip-address: true
+  client:
+    # Don't register this Eureka server with another Eureka server.
+    register-with-eureka: false
+    # Don't fetch the registry from other Eureka servers, i.e.,
+    # don't try to synchronize registries.
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

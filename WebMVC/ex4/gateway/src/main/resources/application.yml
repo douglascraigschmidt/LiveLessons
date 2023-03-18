@@ -5,10 +5,11 @@ server:
 # Application name.
 spring:
   profiles:
-    active: path
+    active: path # See the application-path.yml file.
   application:
     name: gateway
   main:
+    # This is required for Spring API Gateways!
     web-application-type: reactive
 
 logging:

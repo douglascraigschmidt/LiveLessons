@@ -1,14 +1,2 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-    }
-}
-
-include ':eureka'
-include ':common'
-include ':zippymicroservice'
-include ':handeymicroservice'
-include ':gateway'
-include ':client'
+rootProject.name = 'ex5'
 

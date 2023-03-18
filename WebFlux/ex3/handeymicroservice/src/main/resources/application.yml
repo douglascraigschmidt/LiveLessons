@@ -1,0 +1,33 @@
+# Handy microservice profile.
+server:
+  # A value of 0 ensures Eureka selects the port number.
+  port: 0
+
+# Eureka client properties
+eureka:
+  client:
+    enabled: true
+
+spring:
+  application:
+    name: handey
+
+  # Common Database properties
+  datasource:
+    driverClassName: org.h2.Driver
+    # Use the R2DBC H2 in-memory database with table "quote".
+    url: r2dbc:h2:mem:///quote?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  sql:
+    init:
+      platform: h2
+      username: sa
+      password:
+      mode: always
+
+  # Allow use of H2 console at localhost:port/h2-console for
+  # debugging.
+  h2:
+    console:
+      settings:
+        web-allow-others: true
+      enabled: true

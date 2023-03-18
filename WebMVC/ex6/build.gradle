@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.4'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = "com.example"
+version = "1.0.0"
+description = 'spring-core-6'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("junit:junit")
+    testImplementation("org.assertj:assertj-core:3.24.1")
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_19
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+compileJava {
+    options.compilerArgs.addAll(
+                                ['--enable-preview',
+                                 '--add-modules', 'jdk.incubator.concurrent'
+                                 ])
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['--enable-preview',
+                             '--add-modules', 'jdk.incubator.concurrent']
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+    jvmArgs += '--add-modules'
+    jvmArgs += 'jdk.incubator.concurrent'
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '--enable-preview'
+}
+

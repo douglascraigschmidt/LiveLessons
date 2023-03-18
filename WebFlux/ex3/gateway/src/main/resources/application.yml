@@ -1,0 +1,41 @@
+# The port the API gateway listens on for client requests.
+server:
+  port: 8080
+
+# The API gateway application name.
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # Enable integration of the Gateway with a discovery
+          # service, so it automatically creates routes for
+          # registered microservices.
+          enabled: 'true'
+          # Convert service IDs from the discovery service to
+          # lowercase before creating routes.
+          lower-case-service-id: 'true'
+  main:
+    # A reactive web runtime must be used for a Spring API Gateway!
+    web-application-type: reactive
+
+# Registers Gateway Application with Eureka.
+eureka:
+  client:
+    # Enable Eureka client functionality.
+    enabled: true
+    # Disable registration of Gateway with Eureka.
+    register-with-eureka:
+    # Enable fetching of Eureka registry, so the API Gateway can
+    # discover other microservices registered with Eureka.
+    fetch-registry: true
+    # The URL of the Eureka server the API Gateway connects to for
+    # microservice discovery.
+    service-url:
+      default-zone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.web: DEBUG

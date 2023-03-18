@@ -1,57 +1,14 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.0.1'
-    id 'io.spring.dependency-management' version '1.1.0'
-    id 'io.franzbecker.gradle-lombok' version "4.0.0"
-}
+group 'livelessons'
+version '1.0-SNAPSHOT'
 
-group = 'edu.vandy'
-version = '0.0.1-SNAPSHOT'
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
+apply plugin: 'java'
 
 repositories {
     mavenCentral()
 }
 
-subprojects {
-    apply {
-        plugin("org.springframework.boot")
-        plugin("io.spring.dependency-management")
-//        plugin("io.franzbecker.gradle-lombok")
-        plugin("java")
-    }
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_19
-    }
-
-    repositories {
-        mavenCentral()
-        maven { url 'https://artifactory-oss.prod.netflix.net/artifactory/maven-oss-candidates' }
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.0")
-    }
-
-    dependencies {
-        compileOnly 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
-        runtimeOnly 'org.springframework.boot:spring-boot-properties-migrator'
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    tasks.named('test') {
-        useJUnitPlatform()
-    }
+dependencies {
+    implementation 'io.projectreactor:reactor-core:3.4.21'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+    implementation 'org.jetbrains:annotations:22.0.0'
 }

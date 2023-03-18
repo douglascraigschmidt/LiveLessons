@@ -32,3 +32,5 @@ Here's an overview of what's currently included in these examples:
         also shows how to encode/decode complex objects that use
         inheritance relationships and transmits them between
         processes.
+
+. ex6 - 
