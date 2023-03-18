@@ -44,8 +44,11 @@ public class LockController {
 
     /**
      * Acquire a {@link Lock}, blocking until one is available.
+     * A {@link DeferredResult} result is used to avoid blocking
+     * a thread in the Servlet thread pool.
      *
-     * @return A {@link Lock} that can be acquired
+     * @return A {@link DeferredResult} to a {@link Lock} that a
+     *         client can acquire and hold during critical sections
      */
     @GetMapping(ACQUIRE_LOCK)
     public DeferredResult<Lock> acquire() {
