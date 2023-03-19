@@ -25,7 +25,15 @@ Here's an overview of what's currently included in these examples:
         microservices that provide quotes from Zippy th' Pinhead and
         Jack Handey.
 
-. ex5 - This example shows the use of Spring WebMVC to apply Java
+. ex5 - This program tests the features of the LockApplication
+        microservice, which uses Spring WebMVC to provide a
+        distributed lock manager for Spring applications using
+        quasi-asynchronous Spring DeferredResult controller methods
+        with a synchronous client.  It also shows how to use the HTTP
+        interface features in Spring framework 6, which enables the
+        definition of declarative HTTP services using Java interfaces.
+
+. ex6 - This example shows the use of Spring WebMVC to apply Java
         sequential and parallel streams to process entries in a
         recursively-structured directory folder sequentially and/or
         concurrently in a client/server environment.  This example
@@ -33,4 +41,4 @@ Here's an overview of what's currently included in these examples:
         inheritance relationships and transmits them between
         processes.
 
-. ex6 - 
+

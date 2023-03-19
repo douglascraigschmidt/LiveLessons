@@ -14,5 +14,17 @@ overview of what's included:
         demonstrates the use of slicing with the Flux takeWhile() and
         skipWhile() operations.
 
-. ex2 - ...
+. ex2 - This program tests the features of the LockApplication
+        microservice, which uses Spring WebFlux to provide a
+        distributed lock manager for Spring applications using an
+        asynchronous Spring controller method that returns a Mono
+        reactive type.  It also shows how to use the HTTP interface
+        features in Spring framework 6, which enables the definition
+        of declarative HTTP services using Java interfaces.
+
+. ex3 - This example demonstrates the ability to use Spring WebFlux
+        features so a client uses the Eureka discover service in
+        conjunction with an API gateway to interact with two
+        microservices that provide quotes from Zippy th' Pinhead and
+        Jack Handey.
 

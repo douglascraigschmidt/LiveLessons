@@ -1,68 +1,35 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.0.4'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
 }
 
-group = "com.example"
-version = "1.0.0"
+version = '0.0.1-SNAPSHOT'
 description = 'spring-core-6'
 
-repositories {
-    mavenCentral()
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+repositories {
+	mavenCentral()
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("junit:junit")
-    testImplementation("org.assertj:assertj-core:3.24.1")
-}
-
-
-repositories {
-    mavenCentral()
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_19
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'io.projectreactor:reactor-core:3.4.23'
+    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
 
-compileJava {
-    options.compilerArgs.addAll(
-                                ['--enable-preview',
-                                 '--add-modules', 'jdk.incubator.concurrent'
-                                 ])
-}
 
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['--enable-preview',
-                             '--add-modules', 'jdk.incubator.concurrent']
-}
-
-tasks.withType(Test).configureEach {
-    jvmArgs += '--enable-preview'
-    jvmArgs += '--add-modules'
-    jvmArgs += 'jdk.incubator.concurrent'
-}
-
-tasks.withType(JavaExec).configureEach {
-    jvmArgs += '--enable-preview'
-}
 

@@ -11,11 +11,12 @@ import static edu.vandy.lockmanager.Utils.log;
 
 /**
  * This program tests the features of the {@link LockApplication}
- * microservice, which provides a distributed lock manager for Spring
- * applications using the Spring {@link DeferredResult} mechanism.  It
- * also shows how to use the HTTP interface features in Spring
- * framework 6, which enables the definition of declarative HTTP
- * services using Java interfaces.
+ * microservice, which uses Spring WebMVC to provide a distributed
+ * lock manager for Spring applications using quasi-asynchronous
+ * Spring {@link DeferredResult} controller methods with a synchronous
+ * client.  It also shows how to use the HTTP interface features in
+ * Spring framework 6, which enables the definition of declarative
+ * HTTP services using Java interfaces.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
