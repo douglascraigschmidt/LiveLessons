@@ -25,7 +25,7 @@ public class LockApplication {
      * Configure the use of Java virtual threads to handle all
      * incoming HTTP requests.
      */
-    // @Bean(APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+    @Bean(APPLICATION_TASK_EXECUTOR_BEAN_NAME)
     public AsyncTaskExecutor asyncTaskExecutor() {
         return new TaskExecutorAdapter(Executors
                                        .newVirtualThreadPerTaskExecutor());
@@ -35,7 +35,7 @@ public class LockApplication {
      * Customize the ProtocolHandler on the TomCat Connector to
      * use Java virtual threads to handle all incoming HTTP requests.
      */
-    // @Bean
+    @Bean
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
         return protocolHandler -> {
             protocolHandler

@@ -8,7 +8,7 @@ import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
 /**
  * An auto-generated proxy used by clients to access the
- * capabibilities of the {@link LockApplication} microservice.
+ * capabilities of the {@link LockApplication} microservice.
  */
 public interface LockAPI {
     /**

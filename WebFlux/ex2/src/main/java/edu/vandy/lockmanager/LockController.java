@@ -3,6 +3,8 @@ package edu.vandy.lockmanager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.service.annotation.GetExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
@@ -44,9 +46,9 @@ public class LockController {
     }
 
     /**
-     * Acquire a {@link Lock}, blocking until one is available.
+     * Acquire a {@link Lock}.
      *
-     * @return A {@link Lock} that can be acquired
+     * @return A {@link Mono} that emits an acquired {@link Lock}
      */
     @GetMapping(ACQUIRE_LOCK)
     public Mono<Lock> acquire() {
@@ -56,15 +58,29 @@ public class LockController {
     }
 
     /**
+     * Acquire {@code permits} number of {@link Lock} objects.
+     *
+     * @param permits The number of permits to acquire
+     * @return A {@link Flux} that emits {@code permits} newly
+     *         acquired {@link Lock} objects
+     */
+    @GetMapping(ACQUIRE_LOCKS)
+    Flux<Lock> acquire(int permits) {
+        Utils.log("LockController.acquire(permits)");
+
+        return mService.acquire(permits);
+    }
+
+    /**
      * Release the {@link Lock} so other clients can acquire it.
      *
      * @param lock The {@link Lock} to release
      */
     @PostMapping(RELEASE_LOCK)
-    public void release(@RequestBody Lock lock) {
+    public Mono<Void> release(@RequestBody Lock lock) {
         Utils.log("LockController.release()");
 
-        mService.release(lock);
+        return mService.release(lock);
     }
 }
 

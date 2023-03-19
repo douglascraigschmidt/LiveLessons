@@ -69,24 +69,22 @@ class LockManagerTests {
      * @param iteration The curren test iteration
      */
     private Mono<Void> acquireAndReleaseLocks
-        (Integer iteration) {
-        log("starting iteration " + iteration);
+    (Integer iteration) {
+        log("Starting iteration "
+            + iteration);
         return mLockAPI
             // Acquire a lock asynchronously.
             .acquire()
 
-            // Run on a thread that can block for release().
-            .publishOn(Schedulers.boundedElastic())
+            // Display the lock when it's acquired.
+            .doOnSuccess(lock ->
+                log(iteration + " acquired lock " + lock))
 
-            //
-            .doOnSuccess(lock -> {
-                log("acquired lock " + lock.id);
+            // Release the lock asynchronously.
+            .flatMap(lock -> mLockAPI
+                .release(lock))
 
-                // Release the lock on success.
-                mLockAPI.release(lock);
-            })
-
-            // Log exceptions.
+            // Log any exceptions.
             .doOnError(exception ->
                 log("exception = " + exception.getMessage()))
 

@@ -3,13 +3,14 @@ package edu.vandy.lockmanager;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
 /**
  * An auto-generated proxy used by clients to access the
- * capabibilities of the {@link LockApplication} microservice.
+ * capabilities of the {@link LockApplication} microservice.
  */
 public interface LockAPI {
     /**
@@ -22,16 +23,30 @@ public interface LockAPI {
     void create(@RequestBody Integer maxLocks);
 
     /**
-     * @return A newly acquired {@link Lock}
+     * Acquire a {@link Lock}.
+     *
+     * @return A {@link Mono} that emits a newly acquired
+     *         {@link Lock}
      */
     @GetExchange(ACQUIRE_LOCK)
     Mono<Lock> acquire();
 
     /**
-     * Release the lock back to the {@link Lock} manager.
+     * Acquire {@code permits} number of {@link Lock} objects.
      *
-     * @param lock The {@link Lock} to release
+     * @param permits The number of permits to acquire
+     * @return A {@link Flux} that emits {@code permits} newly
+     *         acquired {@link Lock} objects
+     */
+    @GetExchange(ACQUIRE_LOCK)
+    Flux<Lock> acquire(int permits);
+
+    /**
+     * Release the {@code lock} back to the {@link Lock} manager.
+     *
+     * @param lock A {@link Lock} to release
+     * @return A {@link Mono} that emits a {@link Void}
      */
     @PostExchange(RELEASE_LOCK)
-    void release(@RequestBody Lock lock);
+    Mono<Void> release(@RequestBody Lock lock);
 }

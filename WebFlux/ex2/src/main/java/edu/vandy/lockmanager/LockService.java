@@ -2,6 +2,7 @@ package edu.vandy.lockmanager;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -69,30 +70,86 @@ public class LockService {
     }
 
     /**
-     * Acquire a {@link Lock}, blocking until one is available.
+     * Acquire a {@link Lock}, blocking until one is available,
+     * but returning a {@link Mono} so the client doesn't
+     * have to block.
      *
-     * @return A {@link Lock} that can be gazed into
+     * @return A {@link Mono} that emits a {@link Lock}
      */
     public Mono<Lock> acquire() {
         log("LockService.acquire()");
 
         var result = Mono
+            // Acquire an available lock, which may
+            // block.
             .fromCallable(() -> {
                 log("LockService - requesting a Lock");
 
                 var lock = mAvailableLocks.take();
 
-                log("LockService - returning Lock "
+                log("LockService - obtained Lock "
                     + lock);
+
+                // Return the Lock.
                 return lock;
             })
-            .subscribeOn(Schedulers.parallel())
+
+            // Display any exception that might occur.
             .doOnError(exception ->
                 log("LockService error - "
                     + exception.getMessage()))
+
+            // Add a delay to make the test interesting.
             .delayElement(Duration.ofSeconds(2));
 
         log("LockService - returning Mono");
+
+        // This Mono will be returned before the lock
+        // is acquired.
+        return result;
+    }
+
+    /**
+     * Acquire {@code permits} number of {@link Lock} objects.
+     *
+     * @param permits The number of permits to acquire
+     * @return A {@link Flux} that emits {@code permits} newly
+     * acquired {@link Lock} objects
+     */
+    public Flux<Lock> acquire(int permits) {
+        log("LockService.acquire(permits)");
+
+        var result = Flux
+                .range(0, permits)
+                .map(___ -> {
+                    log("LockService - requesting a Lock");
+
+                    Lock lock = null;
+                    try {
+                        lock = mAvailableLocks.take();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    log("LockService - obtained Lock "
+                        + lock);
+
+                    // Return the Lock.
+                    return lock;
+                })
+
+                // Display any exception that might occur.
+                .doOnError(exception ->
+                    log("LockService error - "
+                        + exception.getMessage()));
+
+                // Add a delay to make the test interesting.
+                //.delayElement(Duration.ofSeconds(2));
+
+        log("LockService - returning Flux");
+
+        // This Flux will be returned before the lock
+        // is acquired.
         return result;
     }
 
@@ -101,14 +158,19 @@ public class LockService {
      *
      * @param Lock The {@link Lock} to release
      */
-    public void release(Lock Lock) {
+    public Mono<Void> release(Lock Lock) {
         log("LockService.release()");
-        try {
-            // Add the Lock parameter back to the queue.
-            mAvailableLocks.put(Lock);
-            log("releasing " + Lock);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        return Mono
+            .fromCallable(() -> {
+                try {
+                    // Put the Lock parameter back into the queue.
+                    mAvailableLocks.put(Lock);
+                    log("releasing " + Lock);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return Mono.empty();
+            })
+            .then();
     }
 }

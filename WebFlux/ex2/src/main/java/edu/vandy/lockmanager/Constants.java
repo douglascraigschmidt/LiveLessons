@@ -9,6 +9,7 @@ public class Constants {
     public static class Endpoints {
         public static final String CREATE = "create";
         public static final String ACQUIRE_LOCK = "acquireLock";
+        public static final String ACQUIRE_LOCKS = "acquireLocks";
         public static final String RELEASE_LOCK = "releaseLock";
     }
 }
