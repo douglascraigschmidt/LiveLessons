@@ -11,5 +11,6 @@ public class Constants {
         public static final String ACQUIRE_LOCK = "acquireLock";
         public static final String ACQUIRE_LOCKS = "acquireLocks";
         public static final String RELEASE_LOCK = "releaseLock";
+        public static final String RELEASE_LOCKS = "releaseLocks";
     }
 }

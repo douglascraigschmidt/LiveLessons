@@ -7,6 +7,8 @@ import org.springframework.web.service.annotation.GetExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
 /**
@@ -42,7 +44,9 @@ public class LockController {
     public void create(@RequestBody Integer lockCount) {
         Utils.log("LockController.create()");
 
-        mService.create(lockCount);
+        mService
+            // Forward to the service.
+            .create(lockCount);
     }
 
     /**
@@ -54,7 +58,9 @@ public class LockController {
     public Mono<Lock> acquire() {
         Utils.log("LockController.acquire()");
 
-        return mService.acquire();
+        return mService
+            // Forward to the service.
+            .acquire();
     }
 
     /**
@@ -65,22 +71,43 @@ public class LockController {
      *         acquired {@link Lock} objects
      */
     @GetMapping(ACQUIRE_LOCKS)
-    Flux<Lock> acquire(int permits) {
+    Flux<Lock> acquire(Integer permits) {
         Utils.log("LockController.acquire(permits)");
 
-        return mService.acquire(permits);
+        return mService
+            // Forward to the service.
+            .acquire(permits);
     }
 
     /**
      * Release the {@link Lock} so other clients can acquire it.
      *
      * @param lock The {@link Lock} to release
+     * @return A {@link Mono} that emits {@link Void}
      */
     @PostMapping(RELEASE_LOCK)
     public Mono<Void> release(@RequestBody Lock lock) {
-        Utils.log("LockController.release()");
+        Utils.log("LockController.release(lock)");
 
-        return mService.release(lock);
+        return mService
+            // Forward to the service.
+            .release(lock);
+    }
+
+    /**
+     * Release the {@code locks} so other clients can acquire them.
+     *
+     * @param locks A {@link List} that contains {@link Lock} objects
+     *              to release
+     * @return A {@link Mono} that emits {@link Void}
+     */
+    @PostMapping(RELEASE_LOCKS)
+    public Mono<Void> release(@RequestBody List<Lock> locks) {
+        Utils.log("LockController.release(locks)");
+
+        return mService
+            // Forward to the service.
+            .release(locks);
     }
 }
 

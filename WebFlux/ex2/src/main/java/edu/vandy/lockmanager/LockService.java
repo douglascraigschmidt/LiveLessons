@@ -141,10 +141,10 @@ public class LockService {
                 // Display any exception that might occur.
                 .doOnError(exception ->
                     log("LockService error - "
-                        + exception.getMessage()));
+                        + exception.getMessage()))
 
                 // Add a delay to make the test interesting.
-                //.delayElement(Duration.ofSeconds(2));
+                .delayElements(Duration.ofSeconds(2));
 
         log("LockService - returning Flux");
 
@@ -154,23 +154,46 @@ public class LockService {
     }
 
     /**
-     * Release the {@link Lock} so other Beings can acquire it.
+     * Release the {@link Lock}.
      *
-     * @param Lock The {@link Lock} to release
+     * @param lock The {@link Lock} to release
+     * @return A {@link Mono} that emits {@link Void}
      */
-    public Mono<Void> release(Lock Lock) {
-        log("LockService.release()");
+    public Mono<Void> release(Lock lock) {
+        log("LockService.release(lock)");
         return Mono
             .fromCallable(() -> {
                 try {
                     // Put the Lock parameter back into the queue.
-                    mAvailableLocks.put(Lock);
-                    log("releasing " + Lock);
+                    mAvailableLocks.put(lock);
+                    log("releasing " + lock);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 return Mono.empty();
             })
             .then();
+    }
+
+    /**
+     * Release the {@code locks}.
+     *
+     * @param locks A {@link List} that contains {@link Lock}
+     *              objects to release
+     * @return A {@link Mono} that emits {@link Void}
+     */
+    public Mono<Void> release(List<Lock> locks) {
+        log("LockService.release(locks)");
+        locks
+            .forEach(lock -> {
+                try {
+                    // Put the Lock parameter back into the queue.
+                    mAvailableLocks.put(lock);
+                    log("releasing " + lock);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        return Mono.empty();
     }
 }

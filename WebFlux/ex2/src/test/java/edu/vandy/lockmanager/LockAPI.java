@@ -1,10 +1,13 @@
 package edu.vandy.lockmanager;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
@@ -38,8 +41,8 @@ public interface LockAPI {
      * @return A {@link Flux} that emits {@code permits} newly
      *         acquired {@link Lock} objects
      */
-    @GetExchange(ACQUIRE_LOCK)
-    Flux<Lock> acquire(int permits);
+    @GetExchange(ACQUIRE_LOCKS)
+    Flux<Lock> acquire(@RequestParam Integer permits);
 
     /**
      * Release the {@code lock} back to the {@link Lock} manager.
@@ -49,4 +52,13 @@ public interface LockAPI {
      */
     @PostExchange(RELEASE_LOCK)
     Mono<Void> release(@RequestBody Lock lock);
+
+    /**
+     * Release the {@code locks} back to the {@link Lock} manager.
+     *
+     * @param locks A {@link List} that contains {@link Lock} objects to release
+     * @return A {@link Mono} that emits a {@link Void}
+     */
+    @PostExchange(RELEASE_LOCKS)
+    Mono<Void> release(@RequestBody List<Lock> locks);
 }
