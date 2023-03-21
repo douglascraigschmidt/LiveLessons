@@ -1,8 +1,11 @@
 package edu.vandy.lockmanager;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
+
+import java.util.List;
 
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
@@ -27,10 +30,28 @@ public interface LockAPI {
     Lock acquire();
 
     /**
+     * Acquire {@code permits} number of {@link Lock} objects.
+     *
+     * @param permits The number of permits to acquire
+     * @return A {@link List} containing {@code permits} newly
+     *         acquired {@link Lock} objects
+     */
+    @GetExchange(ACQUIRE_LOCKS)
+    List<Lock> acquire(@RequestParam Integer permits);
+
+    /**
      * Release the lock back to the {@link Lock} manager.
      *
      * @param lock The {@link Lock} to release
      */
     @PostExchange(RELEASE_LOCK)
     void release(@RequestBody Lock lock);
+
+    /**
+     * Release the {@code locks} back to the {@link Lock} manager.
+     *
+     * @param locks A {@link List} that contains {@link Lock} objects to release
+     */
+    @PostExchange(RELEASE_LOCKS)
+    void release(@RequestBody List<Lock> locks);
 }

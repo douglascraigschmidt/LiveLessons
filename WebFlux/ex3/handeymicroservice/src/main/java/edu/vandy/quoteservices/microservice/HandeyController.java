@@ -40,7 +40,7 @@ public class HandeyController {
     HandeyService mService;
 
     /**
-     * A request for testing Eureka connection.
+     * A GET request used to test Eureka connectivity.
      *
      * @return The application name
      */

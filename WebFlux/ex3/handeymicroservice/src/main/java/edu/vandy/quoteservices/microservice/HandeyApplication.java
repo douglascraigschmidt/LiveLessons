@@ -19,12 +19,18 @@ import java.util.List;
  * autoconfiguration, component scan, and to define extra
  * configurations on their "application" class.
  *
- * The {@code @ComponentScan} annotation configures component scanning
- * directives for use with {@code @Configuration} classes.
+ * The {@code @EntityScan} annotation is used when entity
+ * classes are not placed in the main application package
+ * or its sub-packages.
+ *
+ * The {@code @EnableR2dvcRepositories} annotation activates
+ * reactive relational repositories using R2DBC.
  */
 @SpringBootApplication
-@EntityScan(basePackageClasses = {Quote.class})
-@EnableR2dbcRepositories(basePackageClasses = {ReactiveQuoteRepository.class})
+@EntityScan(basePackageClasses =
+    {Quote.class})
+@EnableR2dbcRepositories(basePackageClasses =
+    {ReactiveQuoteRepository.class})
 public class HandeyApplication 
        extends BaseApplication {
     /**

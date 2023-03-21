@@ -67,7 +67,7 @@ public class LockController {
      * Acquire {@code permits} number of {@link Lock} objects.
      *
      * @param permits The number of permits to acquire
-     * @return A {@link Flux} that emits {@code permits} newly
+     * @return A {@link Flux} that emits {@code permits} number of
      *         acquired {@link Lock} objects
      */
     @GetMapping(ACQUIRE_LOCKS)

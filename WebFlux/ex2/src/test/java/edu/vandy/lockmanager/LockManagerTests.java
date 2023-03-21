@@ -42,9 +42,10 @@ class LockManagerTests {
     private final int mMAX_ITERATIONS = 2;
 
     /**
-     * Test the {@link LockApplication} microservice.
+     * Test the {@link LockApplication} microservice's ability to
+     * acquire and release single locks.
      */
-    // @Test
+    @Test
     public void testSingleAcquireAndRelease() {
         log("testSingleAcquireAndRelease() started");
 
@@ -68,7 +69,8 @@ class LockManagerTests {
     }
 
     /**
-     * Test the {@link LockApplication} microservice.
+     * Test the {@link LockApplication} microservice's ability to
+     * acquire and release multiple locks.
      */
     @Test
     public void testMultipleAcquireAndRelease() {
@@ -90,11 +92,11 @@ class LockManagerTests {
             // Block until all async processing is done.
             .block();
 
-        log("testSingleAcquireAndRelease() finished");
+        log("testMultipleAcquireAndRelease() finished");
     }
 
     /**
-     * Acquire and release {@link Lock} objects.
+     * Acquire and release single {@link Lock} objects.
      *
      * @param iteration The curren test iteration
      */
@@ -123,7 +125,7 @@ class LockManagerTests {
     }
 
     /**
-     * Acquire and release {@link Lock} objects.
+     * Acquire and release multiple {@link Lock} objects.
      *
      * @param iteration The curren test iteration
      */
@@ -138,12 +140,16 @@ class LockManagerTests {
             // Display the lock when it's acquired.
             .doOnNext(lock ->
                 log(iteration + " acquired lock " + lock))
+
+            // Collect the Flux contents into a List.
             .collectList()
+
+            // Block until all locks are acquired.
             .block();
 
 
         return mLockAPI
-            // Release all the locks.
+            // Release all the locks at once.
             .release(locks)
 
             // Log any exceptions.

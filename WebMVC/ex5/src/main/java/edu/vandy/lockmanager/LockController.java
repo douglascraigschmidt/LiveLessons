@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.List;
+
 import static edu.vandy.lockmanager.Constants.Endpoints.*;
 
 /**
@@ -58,15 +60,46 @@ public class LockController {
     }
 
     /**
+     * Acquire {@code permits} number of {@link Lock} objects.
+     *
+     * @param permits The number of permits to acquire
+     * @return A {@link DeferredResult<List>} containing {@code
+     *         permits} number of acquired {@link Lock} objects
+     */
+    @GetMapping(ACQUIRE_LOCKS)
+    DeferredResult<List<Lock>> acquire(Integer permits) {
+        Utils.log("LockController.acquire(permits)");
+
+        return mService
+            // Forward to the service.
+            .acquire(permits);
+    }
+
+    /**
      * Release the {@link Lock} so other clients can acquire it.
      *
      * @param lock The {@link Lock} to release
      */
     @PostMapping(RELEASE_LOCK)
     public void release(@RequestBody Lock lock) {
-        Utils.log("LockController.release()");
+        Utils.log("LockController.release(lock)");
 
         mService.release(lock);
+    }
+
+    /**
+     * Release the {@code locks} so other clients can acquire them.
+     *
+     * @param locks A {@link List} that contains {@link Lock} objects
+     *              to release
+     */
+    @PostMapping(RELEASE_LOCKS)
+    public void release(@RequestBody List<Lock> locks) {
+        Utils.log("LockController.release(locks)");
+
+        mService
+            // Forward to the service.
+            .release(locks);
     }
 }
 

@@ -20,6 +20,7 @@ import java.util.List;
  * {@code @Service} annotation below so that it can be identified as a
  * service.
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 public class HandeyService {
     /**

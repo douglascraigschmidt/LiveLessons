@@ -5,20 +5,29 @@ import jakarta.persistence.*;
 /**
  * This class stores {@link Quote} objects in the JPA and R2DBC
  * databases.
+ *
+ * The {@code @Entity} annotation indicates that {@link Quote}
+ * entities are persistence objects stored as records in
+ * the database.
+ *
+ * The {@code @Table} annotation specifies the table in the
+ * database with which each {@link Quote} entity is mapped.
+ *
  */
 @Entity
 @Table(name = "QUOTE")
 public class Quote
        implements Comparable<Quote> {
     /**
-     * ID # of the quote.
+     * ID # of the quote.  The {@code @Id} annotation specifies
+     * the primary key of an entity.
      */
     @Id // For JPA
     @org.springframework.data.annotation.Id // For R2DBC
     public Integer id;
 
     /**
-     * A quote.
+     * A quote that's stored in the database.
      */
     public String quote;
 

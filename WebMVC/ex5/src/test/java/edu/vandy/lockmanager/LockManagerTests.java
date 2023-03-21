@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.Utils.log;
@@ -29,6 +30,11 @@ class LockManagerTests {
     private LockAPI mLockAPI;
 
     /**
+     * Number of permits to acquire and release simultaneously.
+     */
+    private static final int MULTIPLE_PERMITS = 2;
+
+    /**
      * The total number of {@link Lock} objects to create.
      */
     private final Integer mMAX_LOCKS = 1;
@@ -39,33 +45,76 @@ class LockManagerTests {
     private final int mMAX_ITERATIONS = 2;
 
     /**
-     * Test the {@link LockApplication} microservice.
+     * Test the {@link LockApplication} microservice's ability to
+     * acquire and release single locks.
      */
     @Test
-    public void testLockApplication() {
-        log("testLockApplication() started");
+    public void testSingleAcquireAndRelease() {
+        log("testSingleAcquireAndRelease() started");
 
         // Create a Lock manager containing mMAX_LOCKS.
         mLockAPI.create(mMAX_LOCKS);
 
         // Run mMAX_ITERATIONS tests in parallel.
         IntStream
+            // Perform mMAX_ITERATIONS.
             .range(0, mMAX_ITERATIONS)
-            .parallel()
-            .forEach(iteration -> acquireAndReleaseLocks());
 
-        log("testLockApplication() finished");
+            // Run the operations in parallel.
+            .parallel()
+
+            // Perform this action each iteration.
+            .forEach(this::acquireAndReleaseSingleLocks);
+
+        log("testSingleAcquireAndRelease() finished");
     }
 
     /**
-     * Acquire and release {@link Lock} objects.
+     * Test the {@link LockApplication} microservice's ability to
+     * acquire and release multiple locks.
      */
-    private void acquireAndReleaseLocks() {
-        // Iterate for multiple iterations.
-        for (int i = 0; i < mMAX_ITERATIONS; i++) {
-            var lock = mLockAPI.acquire();
-            log("acquired lock " + lock.id);
-            mLockAPI.release(lock);
-        }
+    // @Test
+    public void testMultipleAcquireAndRelease() {
+        log("testMultipleAcquireAndRelease() started");
+
+        // Create a Lock manager containing mMAX_LOCKS.
+        mLockAPI.create(mMAX_LOCKS * 2);
+
+        IntStream
+            // Run mMAX_ITERATIONS tests.
+            .range(0, mMAX_ITERATIONS)
+
+            // Run the operations in parallel.
+            .parallel()
+
+            // Call acquireAndReleaseLocks() each iteration.
+            .forEach(this::acquireAndReleaseMultipleLocks);
+
+        log("testMultipleAcquireAndRelease() finished");
+    }
+
+    /**
+     * Acquire and release single {@link Lock} objects.
+     *
+     * @param iteration The curren test iteration
+     */
+    private void acquireAndReleaseSingleLocks(int iteration) {
+        log("iteration " + iteration);
+        var lock = mLockAPI.acquire();
+        log("acquired lock " + lock);
+        mLockAPI.release(lock);
+    }
+
+    /**
+     * Acquire and release multiple {@link Lock} objects.
+     *
+     * @param iteration The curren test iteration
+     */
+    private void acquireAndReleaseMultipleLocks(int iteration) {
+        log("iteration " + iteration);
+        var locks = mLockAPI.acquire(MULTIPLE_PERMITS);
+        log("acquired locks " + locks);
+        mLockAPI.release(locks);
+        log("released locks");
     }
 }

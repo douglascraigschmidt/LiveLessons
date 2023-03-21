@@ -17,11 +17,6 @@ import static edu.vandy.lockmanager.Utils.log;
 @Service
 public class LockService {
     /**
-     * The total number of Locks.
-     */
-    private int mLockCount;
-
-    /**
      * An ArrayBlockingQueue that limits concurrent access to the
      * fixed number of available locks managed by the
      * {@link LockService}.
@@ -35,13 +30,11 @@ public class LockService {
      *                  manage.
      */
     public void create(Integer lockCount) {
-        mLockCount = lockCount;
-
         mAvailableLocks =
             new ArrayBlockingQueue<>(lockCount,
-                true);
+                                     true);
 
-        // Add each Locki to the queue.
+        // Add each Lock to the queue.
         mAvailableLocks.addAll(makeLocks(lockCount));
     }
 
@@ -68,50 +61,127 @@ public class LockService {
     /**
      * Acquire a {@link Lock}, blocking until one is available.
      *
-     * @return A {@link Lock} that can be gazed into
+     * @return A {@link DeferredResult<Lock>}
      */
     public DeferredResult<Lock> acquire() {
         log("LockService.acquire()");
 
+        // Create a DeferredResult containing the List of Lock
+        // objects.
         DeferredResult<Lock> deferredResult =
             new DeferredResult<>();
 
+        // Create a new VirtualThreadPerTaskExecutor().
         var executor = Executors
             .newVirtualThreadPerTaskExecutor();
+
         try {
-            executor.submit(() -> {
-                log("LockService - requesting a Lock");
+            // Run the computation off the Servlet thread.
+            executor
+                .submit(() -> {
+                        log("LockService - requesting a Lock");
 
-                try {
-                    var lock = mAvailableLocks
-                        .poll();
+                        try {
+                            var lock = mAvailableLocks
+                                .poll();
                     
-                    if (lock == null) {
-                        log("LockService -- blocking for lock acquire");
+                            if (lock == null) {
+                                log("LockService -- blocking for lock acquire");
 
-                        // Block until a Lock is available.
-                        lock = mAvailableLocks.take();
-                    } else
-                        log("LockService -- non-blocking lock acquire");
+                                // Block until a Lock is available.
+                                lock = mAvailableLocks.take();
+                            } else
+                                log("LockService -- non-blocking lock acquire");
 
-                    // Sleep for 2 seconds.
-                    Thread.sleep(2000);
+                            // Set the result to the acquired Lock.
+                            deferredResult
+                                .setResult(lock);
 
-                    // Set the result to the acquired Lock.
-                    deferredResult
-                        .setResult(lock);
-
-                    log("LockService - returning Lock "
-                        + lock);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+                            log("LockService - returning Lock "
+                                + lock);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         } catch (Exception exception) {
             log("Catch exception "
                 + exception.getMessage());
             deferredResult
                 .setResult(new Lock(exception.getMessage()));
+        }
+        log("returning deferredResult");
+        return deferredResult;
+    }
+
+    /**
+     * Acquire {@code permits} number of {@link Lock} objects.
+     *
+     * @param permits The number of permits to acquire
+     * @return A {@link DeferredResult<List>} containing {@code
+     *         permits} number of acquired {@link Lock} objects
+     */
+    public DeferredResult<List<Lock>> acquire(int permits) {
+        log("LockService.acquire(permits)");
+
+        // Create a DeferredResult containing the List of Lock
+        // objects.
+        DeferredResult<List<Lock>> deferredResult =
+            new DeferredResult<>();
+
+        // Create a new VirtualThreadPerTaskExecutor().
+        var executor = Executors
+            .newVirtualThreadPerTaskExecutor();
+
+        try {
+            // Run the computation off the Servlet thread.
+            executor
+                .submit(() -> {
+                        var locks = IntStream
+                            // Iterate 'permit' times.
+                            .range(0, permits)
+
+                            // Acquire a Lock each iteration.
+                            .mapToObj(___ -> {
+                                    log("LockService - requesting a Lock");
+
+                                    log("LockService -- blocking for lock acquire");
+
+                                    // Block until a Lock is available.
+                                    Lock lock = null;
+
+                                    try {
+                                        lock = mAvailableLocks.take();
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+
+                                    log("LockService - obtained Lock "
+                                        + lock);
+                                
+                                    // Return the Lock.
+                                    return lock;
+                                })
+
+                            // Convert Stream to a List.
+                            .toList();
+
+                        log("LockService - collected the locks "
+                            + locks);
+
+                        // Set the deferredResult to the acquired List
+                        // of Lock objects.
+                        deferredResult
+                            .setResult(locks);
+
+                        log("LockService - returning Locks "
+                            + locks);
+                    });
+        } catch (Exception exception) {
+            log("Catch exception "
+                + exception.getMessage());
+            var lock = new Lock(exception.getMessage());
+            deferredResult
+                .setResult(List.of(lock));
         }
         log("returning deferredResult");
         return deferredResult;
@@ -131,5 +201,25 @@ public class LockService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Release the {@code locks}.
+     *
+     * @param locks A {@link List} that contains {@link Lock}
+     *              objects to release
+     */
+    public void release(List<Lock> locks) {
+        log("LockService.release(locks)");
+        locks
+            .forEach(lock -> {
+                    try {
+                        // Put the Lock parameter back into the queue.
+                        mAvailableLocks.put(lock);
+                        log("releasing " + lock);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }

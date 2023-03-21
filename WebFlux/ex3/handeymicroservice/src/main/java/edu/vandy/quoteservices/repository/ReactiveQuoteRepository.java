@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
 /**
- * A persistent repository that contains information about {@link
- * Quote} objects.
+ * A persistent repository containing information about
+ * {@link Quote} objects using the R2DBC reactive database.
  *
  * The {@code @Repository} annotation indicates that this class
  * provides the mechanism for storage, retrieval, search, update and
