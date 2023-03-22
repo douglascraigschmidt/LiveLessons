@@ -2,11 +2,9 @@ package edu.vandy.lockmanager;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.List;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.Utils.log;
@@ -42,7 +40,7 @@ class LockManagerTests {
     /**
      * The total number of times to iterate.
      */
-    private final int mMAX_ITERATIONS = 2;
+    private final int mMAX_CLIENTS = 2;
 
     /**
      * Test the {@link LockApplication} microservice's ability to
@@ -57,8 +55,8 @@ class LockManagerTests {
 
         // Run mMAX_ITERATIONS tests in parallel.
         IntStream
-            // Perform mMAX_ITERATIONS.
-            .range(0, mMAX_ITERATIONS)
+            // Perform mMAX_CLIENT.
+            .range(0, mMAX_CLIENTS)
 
             // Run the operations in parallel.
             .parallel()
@@ -82,7 +80,7 @@ class LockManagerTests {
 
         IntStream
             // Run mMAX_ITERATIONS tests.
-            .range(0, mMAX_ITERATIONS)
+            .range(0, mMAX_CLIENTS)
 
             // Run the operations in parallel.
             .parallel()

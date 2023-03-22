@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import static edu.vandy.lockmanager.Utils.log;
 
@@ -39,7 +40,7 @@ class LockManagerTests {
     /**
      * The total number of times to iterate.
      */
-    private final int mMAX_ITERATIONS = 2;
+    private final int mMAX_CLIENTS = 2;
 
     /**
      * Test the {@link LockApplication} microservice's ability to
@@ -53,8 +54,8 @@ class LockManagerTests {
         mLockAPI.create(mMAX_LOCKS);
 
         Flux
-            // Run mMAX_ITERATIONS tests.
-            .range(0, mMAX_ITERATIONS)
+            // Run mMAX_CLIENTS tests.
+            .range(0, mMAX_CLIENTS)
 
             // Call acquireAndReleaseLocks() each iteration.
             .flatMap(this::acquireAndReleaseSingleLocks)
@@ -81,7 +82,7 @@ class LockManagerTests {
 
         Flux
             // Run mMAX_ITERATIONS tests.
-            .range(0, mMAX_ITERATIONS)
+            .range(0, mMAX_CLIENTS)
 
             // Call acquireAndReleaseLocks() each iteration.
             .flatMap(this::acquireAndReleaseMultipleLocks)
@@ -146,7 +147,6 @@ class LockManagerTests {
 
             // Block until all locks are acquired.
             .block();
-
 
         return mLockAPI
             // Release all the locks at once.

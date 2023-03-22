@@ -1,7 +1,6 @@
 package edu.vandy.lockmanager;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.async.DeferredResult;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -9,7 +8,6 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.Utils.log;
@@ -18,13 +16,9 @@ import static edu.vandy.lockmanager.Utils.log;
  * This Spring {@code Service} implements the {@link LockController}
  * endpoint handler methods.
  */
+@SuppressWarnings("BlockingMethodInNonBlockingContext")
 @Service
 public class LockService {
-    /**
-     * The total number of Locks.
-     */
-    private int mLockCount;
-
     /**
      * An ArrayBlockingQueue that limits concurrent access to the
      * fixed number of available locks managed by the
@@ -39,8 +33,6 @@ public class LockService {
      *                  manage.
      */
     public void create(Integer lockCount) {
-        mLockCount = lockCount;
-
         mAvailableLocks =
             new ArrayBlockingQueue<>(lockCount,
                 true);
@@ -97,10 +89,7 @@ public class LockService {
             // Display any exception that might occur.
             .doOnError(exception ->
                 log("LockService error - "
-                    + exception.getMessage()))
-
-            // Add a delay to make the test interesting.
-            .delayElement(Duration.ofSeconds(2));
+                    + exception.getMessage()));
 
         log("LockService - returning Mono");
 
@@ -120,35 +109,38 @@ public class LockService {
         log("LockService.acquire(permits)");
 
         var result = Flux
-                .range(0, permits)
-                .map(___ -> {
-                    log("LockService - requesting a Lock");
+            // Iterate permits number of times.
+            .range(0, permits)
 
-                    Lock lock = null;
-                    try {
-                        lock = mAvailableLocks.take();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+            // Block until we get the request lock.
+            .map(___ -> {
+                log("LockService - requesting a Lock");
 
-                    log("LockService - obtained Lock "
-                        + lock);
+                Lock lock = null;
+                try {
+                    lock = mAvailableLocks.take();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
-                    // Return the Lock.
-                    return lock;
-                })
+                log("LockService - obtained Lock "
+                    + lock);
 
-                // Display any exception that might occur.
-                .doOnError(exception ->
-                    log("LockService error - "
-                        + exception.getMessage()))
+                // Return the Lock.
+                return lock;
+            })
 
-                // Add a delay to make the test interesting.
-                .delayElements(Duration.ofSeconds(2));
+            // Display any exception that might occur.
+            .doOnError(exception ->
+                log("LockService error - "
+                    + exception.getMessage()))
 
-        log("LockService - returning Flux");
+            // Run these computations in a background thread pool.
+            .subscribeOn(Schedulers.boundedElastic());
 
-        // This Flux will be returned before the lock
+            log("LockService - returning Flux");
+
+        // This Flux will be returned before the locks
         // is acquired.
         return result;
     }
@@ -162,6 +154,7 @@ public class LockService {
     public Mono<Void> release(Lock lock) {
         log("LockService.release(lock)");
         return Mono
+            // Factory method that releases a lock to the queue.
             .fromCallable(() -> {
                 try {
                     // Put the Lock parameter back into the queue.
@@ -172,6 +165,8 @@ public class LockService {
                 }
                 return Mono.empty();
             })
+
+            // Indicate that we're done.
             .then();
     }
 
@@ -185,6 +180,7 @@ public class LockService {
     public Mono<Void> release(List<Lock> locks) {
         log("LockService.release(locks)");
         locks
+            // Iterate through each of the locks.
             .forEach(lock -> {
                 try {
                     // Put the Lock parameter back into the queue.
@@ -194,6 +190,8 @@ public class LockService {
                     e.printStackTrace();
                 }
             });
-        return Mono.empty();
+        return Mono
+            // Indicate that we're done.
+            .empty();
     }
 }

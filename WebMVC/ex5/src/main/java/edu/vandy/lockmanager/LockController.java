@@ -34,14 +34,14 @@ public class LockController {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param lockCount The number of {@link Lock} objects to
-     *                  manage.
+     * @param permitCount The number of {@link Lock} objects to
+     *                    manage
      */
     @PostMapping(CREATE)
-    public void create(@RequestBody Integer lockCount) {
+    public void create(@RequestBody Integer permitCount) {
         Utils.log("LockController.create()");
 
-        mService.create(lockCount);
+        mService.create(permitCount);
     }
 
     /**

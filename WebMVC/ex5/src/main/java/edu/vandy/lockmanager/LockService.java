@@ -5,6 +5,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
@@ -17,6 +18,12 @@ import static edu.vandy.lockmanager.Utils.log;
 @Service
 public class LockService {
     /**
+     * Create a new {@code VirtualThreadPerTaskExecutor}.
+     */
+    ExecutorService mExecutor = Executors
+        .newVirtualThreadPerTaskExecutor();
+
+    /**
      * An ArrayBlockingQueue that limits concurrent access to the
      * fixed number of available locks managed by the
      * {@link LockService}.
@@ -26,27 +33,28 @@ public class LockService {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param lockCount The number of {@link Lock} objects to
+     * @param permitCount The number of {@link Lock} objects to
      *                  manage.
      */
-    public void create(Integer lockCount) {
+    public void create(Integer permitCount) {
         mAvailableLocks =
-            new ArrayBlockingQueue<>(lockCount,
+            // Make an ArrayBlockQueue with "fair" semantics.
+            new ArrayBlockingQueue<>(permitCount,
                                      true);
 
         // Add each Lock to the queue.
-        mAvailableLocks.addAll(makeLocks(lockCount));
+        mAvailableLocks.addAll(makeLocks(permitCount));
     }
 
     /**
      * Create the requested number of {@link Lock} objects.
      *
-     * @param count The number of {@link Lock} objects to create
+     * @param permitCount The number of {@link Lock} objects to create
      */
-    private List<Lock> makeLocks(int count) {
+    private List<Lock> makeLocks(int permitCount) {
         return IntStream
             // Iterate from 0 to count - 1.
-            .range(0, count)
+            .range(0, permitCount)
 
             // Convert Integer to String.
             .mapToObj(Integer::toString)
@@ -71,13 +79,9 @@ public class LockService {
         DeferredResult<Lock> deferredResult =
             new DeferredResult<>();
 
-        // Create a new VirtualThreadPerTaskExecutor().
-        var executor = Executors
-            .newVirtualThreadPerTaskExecutor();
-
         try {
             // Run the computation off the Servlet thread.
-            executor
+            mExecutor
                 .submit(() -> {
                         log("LockService - requesting a Lock");
 
@@ -110,6 +114,9 @@ public class LockService {
                 .setResult(new Lock(exception.getMessage()));
         }
         log("returning deferredResult");
+
+        // Return the deferredResult before the lock
+        // are obtained.
         return deferredResult;
     }
 
@@ -128,13 +135,9 @@ public class LockService {
         DeferredResult<List<Lock>> deferredResult =
             new DeferredResult<>();
 
-        // Create a new VirtualThreadPerTaskExecutor().
-        var executor = Executors
-            .newVirtualThreadPerTaskExecutor();
-
         try {
             // Run the computation off the Servlet thread.
-            executor
+            mExecutor
                 .submit(() -> {
                         var locks = IntStream
                             // Iterate 'permit' times.
@@ -142,14 +145,12 @@ public class LockService {
 
                             // Acquire a Lock each iteration.
                             .mapToObj(___ -> {
-                                    log("LockService - requesting a Lock");
-
                                     log("LockService -- blocking for lock acquire");
 
-                                    // Block until a Lock is available.
                                     Lock lock = null;
 
                                     try {
+                                        // Block until a Lock is available.
                                         lock = mAvailableLocks.take();
                                     } catch (InterruptedException e) {
                                         throw new RuntimeException(e);
@@ -179,11 +180,16 @@ public class LockService {
         } catch (Exception exception) {
             log("Catch exception "
                 + exception.getMessage());
+            // Return an error message.
             var lock = new Lock(exception.getMessage());
+
             deferredResult
                 .setResult(List.of(lock));
         }
         log("returning deferredResult");
+
+        // Return the deferredResult before the locks
+        // are obtained.
         return deferredResult;
     }
 
@@ -195,7 +201,7 @@ public class LockService {
     public void release(Lock Lock) {
         log("LockService.release()");
         try {
-            // Add the Lock parameter back to the queue.
+            // Put the Lock parameter back to the queue.
             mAvailableLocks.put(Lock);
             log("releasing " + Lock);
         } catch (InterruptedException e) {
@@ -212,9 +218,10 @@ public class LockService {
     public void release(List<Lock> locks) {
         log("LockService.release(locks)");
         locks
+            // Put each lock back in the queue.
             .forEach(lock -> {
                     try {
-                        // Put the Lock parameter back into the queue.
+                        // Put the lock back into the queue.
                         mAvailableLocks.put(lock);
                         log("releasing " + lock);
                     } catch (InterruptedException e) {
