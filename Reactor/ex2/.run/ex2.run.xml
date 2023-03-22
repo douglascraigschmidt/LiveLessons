@@ -4,7 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ex2" />
     <module name="ex2.main" />
-    <option name="PROGRAM_PARAMETERS" value="-c 50 -d true -T ex2" />
+    <option name="PROGRAM_PARAMETERS" value="-c 50 -d true -T ex2,Emitter,BlockingSubscriber" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
