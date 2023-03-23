@@ -1,5 +1,7 @@
 package edu.vandy.lockmanager;
 
+import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -7,11 +9,11 @@ import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
-import static edu.vandy.lockmanager.Constants.Endpoints.*;
+import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 
 /**
  * An auto-generated proxy used by clients to access the
- * capabilities of the {@link LockApplication} microservice.
+ * capabilities of the {@link LockManagerApplication} microservice.
  */
 public interface LockAPI {
     /**

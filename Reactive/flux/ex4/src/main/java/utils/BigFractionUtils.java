@@ -127,7 +127,7 @@ public class BigFractionUtils {
     }
 
     /**
-     * Sort the {@link flux} and store the results in the {@link
+     * Sort the {@link Flux} and store the results in the {@link
      * StringBuffer} parameter.
      */
     public static Mono<Void> sortAndPrintFlux(Flux<BigFraction> flux,

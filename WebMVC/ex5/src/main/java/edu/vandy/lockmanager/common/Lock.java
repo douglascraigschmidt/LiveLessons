@@ -1,4 +1,4 @@
-package edu.vandy.lockmanager;
+package edu.vandy.lockmanager.common;
 
 /**
  * Define an object that clients can use as a lock in a

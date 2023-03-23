@@ -20,14 +20,16 @@ public class AsyncTaskBarrierTests {
      */
     private Mono<Void> syncThrowException() {
         int numerator = 10;
+
+        // This will cause trouble!
         int denominator = 0;
         return Mono
             // Intentionally trigger an ArithmeticException.
             .just(numerator)
-            .doOnNext (value ->
-                           display("syncThrowException",
-                                   value))
-            .map(n -> n /denominator)
+            .doOnNext(value ->
+                display("syncThrowException",
+                    value))
+            .map(n -> n / denominator)
             .then();
     }
 
@@ -36,16 +38,19 @@ public class AsyncTaskBarrierTests {
      */
     private Mono<Void> asyncThrowException() {
         int numerator = 10;
+
+        // This will still cause trouble!
         int denominator = 0;
+
         return Mono
-                // Intentionally trigger an ArithmeticException.
-                .just(numerator)
-                .subscribeOn(Schedulers.single())
-                .doOnNext (value ->
-                        display("asyncThrowException",
-                                value))
-                .map(n -> n /denominator)
-                .then();
+            // Intentionally trigger an ArithmeticException.
+            .just(numerator)
+            .subscribeOn(Schedulers.single())
+            .doOnNext(value ->
+                display("asyncThrowException",
+                    value))
+            .map(n -> n / denominator)
+            .then();
     }
 
     /**
@@ -53,21 +58,27 @@ public class AsyncTaskBarrierTests {
      */
     private Mono<Void> onErrorResume1() {
         int numerator = 10;
+
+        // Still causing trouble ;-)
         int denominator = 0;
+
         return Flux
-                .just(numerator)
-                // Intentionally trigger an ArithmeticException.
-                .map(i -> i / denominator)
-                // This call to onErrorResume() isn't run since
-                // there's a call to onErrorContinue() downstream.
-                .onErrorResume(t -> {
-                    display("onErrorResume1(): "
-                            + t.getMessage()
-                            + "\n",
-                            0);
-                    return Flux.empty();
-                })
-                .then();
+            .just(numerator)
+
+            // Intentionally trigger an ArithmeticException.
+            .map(i -> i / denominator)
+
+            // This call to onErrorResume() isn't run since
+            // there's a call to onErrorContinue() downstream
+            // in the AsyncTaskBarrier framework itself.
+            .onErrorResume(t -> {
+                display("onErrorResume1(): "
+                        + t.getMessage()
+                        + "\n",
+                    0);
+                return Flux.empty();
+            })
+            .then();
     }
 
     /**
@@ -75,23 +86,31 @@ public class AsyncTaskBarrierTests {
      */
     private Mono<Void> onErrorResume2() {
         int numerator = 10;
+
+        // Will generate the ArithmeticException.
         int denominator = 0;
+
         return Flux
-                .just(numerator)
-                // Intentionally trigger an ArithmeticException.
-                .map(i -> i / denominator)
-                // This call to onErrorResume() is run since
-                // there's a call to onErrorStop() downstream.
-                .onErrorResume(t -> {
-                    display("onErrorResume2(): "
-                            + t.getMessage()
-                            + " ",
-                            0);
-                    return Flux.empty();
-                })
-                // Ensures that onErrorResume() is actually run!
-                .onErrorStop()
-                .then();
+            .just(numerator)
+
+            // Intentionally trigger an ArithmeticException.
+            .map(i -> i / denominator)
+
+            // This call to onErrorResume() is run since
+            // there's a call to onErrorStop() downstream.
+            .onErrorResume(t -> {
+                display("onErrorResume2(): "
+                        + t.getMessage()
+                        + " ",
+                    0);
+                return Flux.empty();
+            })
+
+            // Ensures that onErrorResume() is actually run
+            // by overriding the onErrorContinue() operator.
+            .onErrorStop()
+
+            .then();
     }
 
     /**
@@ -100,9 +119,9 @@ public class AsyncTaskBarrierTests {
     private Mono<Void> syncNoThrow() {
         return Mono
             .fromCallable(() -> 10 * 10)
-            .doOnNext (value ->
-                           display("syncNoThrow",
-                                   value))
+            .doOnNext(value ->
+                display("syncNoThrow",
+                    value))
             .then();
     }
 
@@ -113,9 +132,9 @@ public class AsyncTaskBarrierTests {
         return Mono
             .fromCallable(() -> 10 * 10)
             .subscribeOn(Schedulers.single())
-            .doOnNext (value ->
-                       display("asyncNoThrow",
-                                value))
+            .doOnNext(value ->
+                display("asyncNoThrow",
+                    value))
             .then();
     }
 
@@ -175,20 +194,20 @@ public class AsyncTaskBarrierTests {
 
         System.out.println("Completed " + testCount + " test successfully\n");
     }
-    
+
     /**
      * Display the results.
      *
      * @param calledBy The method that calls {@code display}
-     * @param integer The value to print
+     * @param integer  The value to print
      */
     private void display(String calledBy,
                          Integer integer) {
         System.out.println("["
-                + Thread.currentThread().getId()
-                + "] "
-                + calledBy
-                + " "
-                + integer);
+            + Thread.currentThread().getId()
+            + "] "
+            + calledBy
+            + " "
+            + integer);
     }
 }

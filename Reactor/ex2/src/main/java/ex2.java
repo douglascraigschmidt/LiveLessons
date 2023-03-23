@@ -89,7 +89,7 @@ public class ex2 {
      * @param primeChecker A {@link Function} that maps candidate
      *                     primes to their smallest factor (if they
      *                     aren't prime) or 0 if they are prime
-     * @param testName     Name of the test
+     * @param testName Name of the test
      */
     @SuppressWarnings("SameParameterValue")
     private void run

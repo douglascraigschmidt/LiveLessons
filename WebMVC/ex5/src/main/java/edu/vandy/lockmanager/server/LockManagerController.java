@@ -1,28 +1,30 @@
-package edu.vandy.lockmanager;
+package edu.vandy.lockmanager.server;
 
+import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.utils.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.List;
 
-import static edu.vandy.lockmanager.Constants.Endpoints.*;
+import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 
 /**
  * This Spring {@code @RestController} defines methods that
  * provide a distributed lock manager.
  */
 @RestController
-public class LockController {
+public class LockManagerController {
     /**
-     * Auto-wire the {@link LockController} to the
-     * {@link LockService}.
+     * Auto-wire the {@link LockManagerController} to the
+     * {@link LockManagerService}.
      */
     @Autowired
-    LockService mService;
+    LockManagerService mService;
 
     /**
-     * @return Information indicating the {@link LockController}
+     * @return Information indicating the {@link LockManagerController}
      *         is running
      */
     @RequestMapping("/")
@@ -39,7 +41,7 @@ public class LockController {
      */
     @PostMapping(CREATE)
     public void create(@RequestBody Integer permitCount) {
-        Utils.log("LockController.create()");
+        Logger.log("LockController.create()");
 
         mService.create(permitCount);
     }
@@ -54,7 +56,7 @@ public class LockController {
      */
     @GetMapping(ACQUIRE_LOCK)
     public DeferredResult<Lock> acquire() {
-        Utils.log("LockController.acquire()");
+        Logger.log("LockController.acquire()");
 
         return mService.acquire();
     }
@@ -68,7 +70,7 @@ public class LockController {
      */
     @GetMapping(ACQUIRE_LOCKS)
     DeferredResult<List<Lock>> acquire(Integer permits) {
-        Utils.log("LockController.acquire(permits)");
+        Logger.log("LockController.acquire(permits)");
 
         return mService
             // Forward to the service.
@@ -82,7 +84,7 @@ public class LockController {
      */
     @PostMapping(RELEASE_LOCK)
     public void release(@RequestBody Lock lock) {
-        Utils.log("LockController.release(lock)");
+        Logger.log("LockController.release(lock)");
 
         mService.release(lock);
     }
@@ -95,7 +97,7 @@ public class LockController {
      */
     @PostMapping(RELEASE_LOCKS)
     public void release(@RequestBody List<Lock> locks) {
-        Utils.log("LockController.release(locks)");
+        Logger.log("LockController.release(locks)");
 
         mService
             // Forward to the service.

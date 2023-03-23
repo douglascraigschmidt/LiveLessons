@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-import static edu.vandy.lockmanager.Constants.LOCK_MANAGER_SERVER_BASE_URL;
+import static edu.vandy.lockmanager.common.Constants.LOCK_MANAGER_SERVER_BASE_URL;
 
 /**
  * Defines one or more {@code @Bean} factory methods used to

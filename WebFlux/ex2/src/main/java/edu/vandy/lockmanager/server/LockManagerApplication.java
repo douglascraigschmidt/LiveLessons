@@ -1,9 +1,10 @@
-package edu.vandy.lockmanager;
+package edu.vandy.lockmanager.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 
@@ -12,12 +13,13 @@ import java.util.concurrent.Executors;
 import static org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME;
 
 @SpringBootApplication
-public class LockApplication {
+@ComponentScan("edu.vandy.lockmanager")
+public class LockManagerApplication {
     /**
-     * The main entry point into the Palantiri microservice.
+     * The main entry point into the LockManager microservice.
      */
     public static void main(String[] args) {
-        SpringApplication.run(LockApplication.class,
+        SpringApplication.run(LockManagerApplication.class,
                               args);
     }
 

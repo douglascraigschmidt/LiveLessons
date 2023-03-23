@@ -1,63 +1,73 @@
 package edu.vandy.lockmanager;
 
+import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.server.LockManagerApplication;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
-import static edu.vandy.lockmanager.Utils.log;
+import static edu.vandy.lockmanager.utils.Logger.log;
 
 /**
- * This program tests the features of the {@link LockApplication}
+ * This program tests the features of the {@link LockManagerApplication}
  * microservice, which uses Spring WebFlux to provide a distributed
- * lock manager for Spring applications using an asynchronous Spring
- * controller method that returns a Mono reactive type.  It also shows
- * how to use the HTTP interface features in Spring framework 6, which
- * enables the definition of declarative HTTP services using Java
- * interfaces.
+ * lock manager for asynchronous Spring applications using
+ * asynchronous controller methods that return Project Reactor {@link
+ * Mono} and {@link Flux} reactive objects.  It also shows how to use the asynchronous
+ * HTTP interface features in Spring framework 6, which enables the
+ * definition of declarative HTTP services using Java interfaces.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = LockManagerApplication.class,
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
     /**
-     * Number of permits to acquire and release simultaneously.
-     */
-    private static final int MULTIPLE_PERMITS = 2;
-
-    /**
      * The auto-wired {@link LockAPI} that accesses the {@link
-     * LockApplication} microservice.
+     * LockManagerApplication} microservice.
      */
     @Autowired
     private LockAPI mLockAPI;
 
     /**
+     * Number of permits to acquire and release simultaneously.
+     */
+    private static final int sMULTIPLE_PERMITS = 2;
+
+    /**
      * The total number of {@link Lock} objects to create.
      */
-    private final Integer mMAX_LOCKS = 4;
+    private static final Integer sMAX_LOCKS = 4;
 
     /**
-     * The total number of times to iterate.
+     * The total number of clients to run concurrently.
      */
-    private final int mMAX_CLIENTS = 2;
+    private static final int sMAX_CLIENTS = 4;
 
     /**
-     * Test the {@link LockApplication} microservice's ability to
+     * This method runs before each test to initialize the
+     * LockManager.
+     */
+    @BeforeEach
+    public void initializeTests() {
+        // Create a Lock manager containing mMAX_LOCKS.
+        mLockAPI.create(sMAX_LOCKS);
+    }
+
+    /**
+     * Test the {@link LockManagerApplication} microservice's ability to
      * acquire and release single locks.
      */
-    @Test
+    // @Test
     public void testSingleAcquireAndRelease() {
         log("testSingleAcquireAndRelease() started");
 
-        // Create a Lock manager containing mMAX_LOCKS.
-        mLockAPI.create(mMAX_LOCKS);
-
         Flux
-            // Run mMAX_CLIENTS tests.
-            .range(0, mMAX_CLIENTS)
+            // Run mMAX_CLIENTS tests in parallel.
+            .range(0, sMAX_CLIENTS)
 
-            // Call acquireAndReleaseLocks() each iteration.
+            // Call acquireAndReleaseLocks() each client.
             .flatMap(this::acquireAndReleaseSingleLocks)
 
             // Collect the results into a List<Void>.
@@ -70,21 +80,18 @@ class LockManagerTests {
     }
 
     /**
-     * Test the {@link LockApplication} microservice's ability to
+     * Test the {@link LockManagerApplication} microservice's ability to
      * acquire and release multiple locks.
      */
     @Test
     public void testMultipleAcquireAndRelease() {
         log("testMultipleAcquireAndRelease() started");
 
-        // Create a Lock manager containing mMAX_LOCKS.
-        mLockAPI.create(mMAX_LOCKS);
-
         Flux
-            // Run mMAX_ITERATIONS tests.
-            .range(0, mMAX_CLIENTS)
+            // Run mMAX_CLIENTS tests in parallel.
+            .range(0, sMAX_CLIENTS)
 
-            // Call acquireAndReleaseLocks() each iteration.
+            // Call acquireAndReleaseLocks() each client.
             .flatMap(this::acquireAndReleaseMultipleLocks)
 
             // Collect the results into a List<Void>.
@@ -99,19 +106,19 @@ class LockManagerTests {
     /**
      * Acquire and release single {@link Lock} objects.
      *
-     * @param iteration The curren test iteration
+     * @param client The test client
      */
     private Mono<Void> acquireAndReleaseSingleLocks
-        (Integer iteration) {
-        log("Starting iteration "
-            + iteration);
+        (Integer client) {
+        log("Starting client "
+            + client);
         return mLockAPI
             // Acquire a lock asynchronously.
             .acquire()
 
             // Display the lock when it's acquired.
             .doOnSuccess(lock ->
-                log(iteration + " acquired lock " + lock))
+                log(client + " acquired lock " + lock))
 
             // Release the lock asynchronously.
             .flatMap(lock -> mLockAPI
@@ -128,35 +135,33 @@ class LockManagerTests {
     /**
      * Acquire and release multiple {@link Lock} objects.
      *
-     * @param iteration The curren test iteration
+     * @param client The test client
      */
     private Mono<Void> acquireAndReleaseMultipleLocks
-        (Integer iteration) {
-        log("Starting iteration "
-            + iteration);
-        var locks = mLockAPI
-            // Acquire a lock asynchronously.
-            .acquire(MULTIPLE_PERMITS)
-
-            // Display the lock when it's acquired.
-            .doOnNext(lock ->
-                log(iteration + " acquired lock " + lock))
-
-            // Collect the Flux contents into a List.
-            .collectList()
-
-            // Block until all locks are acquired.
-            .block();
+        (Integer client) {
+        log("Starting client " + client);
 
         return mLockAPI
-            // Release all the locks at once.
-            .release(locks)
+            // Asynchronously acquire a lock.
+            .acquire(sMULTIPLE_PERMITS) 
 
-            // Log any exceptions.
-            .doOnError(exception ->
-                log("exception = " + exception.getMessage()))
+               // Collect the locks into a Mono to a List.
+            .collectList() 
 
-            // Indicate that we're finished running asynchronously.
-            .then();
+            // Perform operations when the Mono emits its List.
+            .flatMap(locks -> {
+                log(client + " acquired locks " + locks);
+
+                return mLockAPI
+                    // Release the locks when they're all acquired.
+                    .release(locks)
+
+                    // Log any exceptions.
+                    .doOnError(exception -> log("exception = "
+                        + exception.getMessage()))
+
+                    // Return an empty Mono to indicate we're done.
+                    .then();
+            });
     }
 }

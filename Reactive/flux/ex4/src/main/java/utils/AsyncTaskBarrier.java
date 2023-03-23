@@ -80,7 +80,7 @@ public class AsyncTaskBarrier {
      */
     public static Mono<Long> runTasks() {
         // Needed to keep track of how many exceptions occurred.
-        AtomicLong exceptionCount = new AtomicLong(0);
+        var exceptionCount = new AtomicLong(0);
 
         // Log the exception and increment the exceptionCount.
         BiConsumer<Throwable,

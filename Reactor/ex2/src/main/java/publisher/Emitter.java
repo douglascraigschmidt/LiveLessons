@@ -46,7 +46,7 @@ public final class Emitter {
 
             // Keep going while the iterator is not done.
             while (iterator.hasNext()) {
-                // Get the next item.
+                // Get the next random integer.
                 Integer item = iterator.next();
 
                 // Store current pending item count.

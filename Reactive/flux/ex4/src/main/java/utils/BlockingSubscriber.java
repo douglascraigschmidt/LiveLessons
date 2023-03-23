@@ -22,17 +22,17 @@ public class BlockingSubscriber<T>
     final CountDownLatch mLatch;
 
     /**
-     * The consumer to invoke on each value.
+     * The consumer to invoke on each onNext() value.
      */
     private final Consumer<? super T> mConsumer;
 
     /**
-     * The consumer to invoke on error signal.
+     * The consumer to invoke on onError() error signal.
      */
     private final Consumer<? super Throwable> mErrorConsumer;
 
     /**
-     * The consumer to invoke on complete signal.
+     * The runnable to invoke on onComplete() complete signal.
      */
     private final Runnable mCompleteRunnable;
 

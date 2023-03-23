@@ -1,9 +1,9 @@
-package edu.vandy.lockmanager;
+package edu.vandy.lockmanager.utils;
 
-public class Utils {
+public class Logger {
     public static void log(String text) {
         var thread = Thread.currentThread(); //.threadId();
         System.out.println(text
-            + " [" + thread + "]: ");
+        + " [" + thread + "]: ");
     }
 }
