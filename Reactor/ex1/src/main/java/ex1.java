@@ -10,6 +10,7 @@ import utils.RunTimer;
 import utils.AsyncTaskBarrier;
 import common.FlightFactory;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -67,23 +68,9 @@ public class ex1 {
     /**
      * Main entry point into the test program.
      */
-    public static void main(String[] argv) {
-        Flux.<Integer>generate(sink -> {
-                int value = (int) (Math.random() * 100);
-                System.out.println("Generated value: " + value);
-                sink.next(value);
-            })
-            .repeatWhen(
-                flux -> flux
-                    .takeUntilOther(Flux.range(1, 1).filter(i -> Math.random() * 100 > 50))
-                )
-            .subscribe(value -> System.out.println("Received value: " + value));
-
-        /*
+    public static void main(String[] argv) throws InterruptedException {
         Options.instance().parseArgs(argv);
         new ex1().runTests();
-
-         */
     }
 
     /**
