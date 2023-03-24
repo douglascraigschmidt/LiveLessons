@@ -33,9 +33,7 @@ import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
  * an implementation of the interface that the client uses to make
  * asynchronous HTTP requests to the API.
  */
-@HttpExchange(url = HANDEY + "/",
-    accept = "application/json",
-    contentType = "application/json")
+@HttpExchange(url = HANDEY + "/")
 public interface HandeyQuoteAPI {
     /**
      * Get a {@link Flux} that emits the requested quotes.
