@@ -33,7 +33,7 @@ import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
  * an implementation of the interface that the client uses to make
  * asynchronous HTTP requests to the API.
  */
-    @HttpExchange(url = ZIPPY + "/")
+@HttpExchange(url = ZIPPY + "/")
 public interface ZippyQuoteAPI {
     /**
      * Get a {@link Flux} that emits the requested quotes.
