@@ -46,14 +46,11 @@ public class QuoteClient {
      *         objects
      */
     public Flux<Quote> getAllQuotes(String routename) {
-        if (routename.equals(HANDEY))
-            return mHandeyQuoteAPI
+        return routename.equals(HANDEY)
             // Forward to the Handey proxy.
-            .getAllQuotes();
-        else
-            return mZippyQuoteAPI
+            ? mHandeyQuoteAPI.getAllQuotes()
             // Forward to the Zippy proxy.
-            .getAllQuotes();
+            : mZippyQuoteAPI.getAllQuotes();
     }
 
     /**
@@ -67,14 +64,11 @@ public class QuoteClient {
      */
     public Flux<Quote> postQuotes(String routename,
                                   List<Integer> quoteIds) {
-        if (routename.equals(HANDEY))
-            return mHandeyQuoteAPI
-                // Forward to the Handey proxy.
-                .postQuotes(quoteIds);
-        else
-            return mZippyQuoteAPI
-                // Forward to the Zippy proxy.
-                .postQuotes(quoteIds);
+        return routename.equals(HANDEY)
+            // Forward to the Handey proxy.
+            ? mHandeyQuoteAPI.postQuotes(quoteIds)
+            // Forward to the Zippy proxy.
+            : mZippyQuoteAPI.postQuotes(quoteIds);
     }
 
     /**
@@ -88,20 +82,17 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotes(String routename,
                                     List<String> queries) {
-        if (routename.equals(HANDEY))
-            return mHandeyQuoteAPI
-                // Forward to the Handey proxy.
-                .search(queries);
-        else
-            return mZippyQuoteAPI
-                // Forward to the Zippy proxy.
-                .search(queries);
+        return routename.equals(HANDEY)
+            // Forward to the Handey proxy.
+            ? mHandeyQuoteAPI.search(queries)
+            // Forward to the Zippy proxy.
+            : mZippyQuoteAPI.search(queries);
     }
 
     /**
      * Search for quotes containing all {@code queries} in the given
-     * {@link List} of {@code queries} on the Zippy microservice
-     * using a custom SQL method.
+     * {@link List} of {@code queries} on the Zippy microservice using
+     * a custom SQL method.
      *
      * @param queries The {@link List} of queries to search for
      * @return A {@link Flux} that emits {@link Quote} objects that
@@ -109,14 +100,10 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotesEx(String routename,
                                       List<String> queries) {
-        if (routename.equals(HANDEY))
-            return mHandeyQuoteAPI
-                // Forward to the Handey proxy.
-                .searchEx(queries);
-        else
-            return mZippyQuoteAPI
-                // Forward to Zippy proxy.
-                .searchEx(queries);
-        
+        return routename.equals(HANDEY)
+            // Forward to the Handey proxy.
+            ? mHandeyQuoteAPI.searchEx(queries)
+            // Forward to Zippy proxy.
+            : mZippyQuoteAPI.searchEx(queries);
     }
 }
