@@ -26,30 +26,6 @@ public class MultiQueryRepositoryImpl
     private DatabaseClient mDatabaseClient;
 
     /**
-     * Return a {@link Flux} that emits {@link Quote} objects in the
-     * database containing any of the {@code queries} (ignoring case).
-     *
-     * @param queries A {@code List} of {@code String} objects
-     *                containing the queries to search for
-     * @return A {@code Flux} that emits {@code Quote} objects that
-     *         match any of the specified {@code queries} (ignoring
-     *         case)
-     */
-    @Override
-    public Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries) {
-        // Build an SQL query String that will match Quote objects in
-        // the database containing all the queries.
-        String sql = buildQueryString
-            ("SELECT * FROM quote WHERE LOWER(quote) LIKE :params",
-             "%' OR LOWER(quote) LIKE '%",
-             queries);
-
-        // Perform the SQL query and return a Flux of matching Quote
-        // objects.
-        return getQuoteFlux(sql);
-    }
-
-    /**
      * Find a {@link Flux} of {@link Quote} objects in the database
      * containing all the {@code queries} (ignoring case).
      *
@@ -66,6 +42,30 @@ public class MultiQueryRepositoryImpl
         String sql = buildQueryString
             ("SELECT * FROM quote WHERE LOWER(quote) LIKE :params",
              "%' AND LOWER(quote) LIKE '%",
+             queries);
+
+        // Perform the SQL query and return a Flux of matching Quote
+        // objects.
+        return getQuoteFlux(sql);
+    }
+
+    /**
+     * Return a {@link Flux} that emits {@link Quote} objects in the
+     * database containing any of the {@code queries} (ignoring case).
+     *
+     * @param queries A {@code List} of {@code String} objects
+     *                containing the queries to search for
+     * @return A {@code Flux} that emits {@code Quote} objects that
+     *         match any of the specified {@code queries} (ignoring
+     *         case)
+     */
+    @Override
+    public Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries) {
+        // Build an SQL query String that will match Quote objects in
+        // the database containing all the queries.
+        String sql = buildQueryString
+            ("SELECT * FROM quote WHERE LOWER(quote) LIKE :params",
+             "%' OR LOWER(quote) LIKE '%",
              queries);
 
         // Perform the SQL query and return a Flux of matching Quote

@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toCollection;
  * {@code @Service} annotation below so that it can be identified as a
  * service.
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 public class ZippyService {
     /**

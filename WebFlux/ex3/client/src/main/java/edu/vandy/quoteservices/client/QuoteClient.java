@@ -7,6 +7,8 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
+
 /**
  * This client uses Spring WebMVC features to perform synchronous
  * remote method invocations on the {@code ZippyController} and {@code
@@ -22,10 +24,19 @@ import java.util.List;
 public class QuoteClient {
     /**
      * This auto-wired field connects the {@link QuoteClient} to the
-     * {@link QuoteClient} that performs HTTP requests synchronously.
+     * {@link HandeyQuoteAPI} that exchanges HTTP requests with the
+     * {@code HandeyApplication} microservice asynchronously.
      */
     @Autowired
-    private QuoteProxy mQuoteProxy;
+    private HandeyQuoteAPI mHandeyQuoteAPI;
+
+    /**
+     * This auto-wired field connects the {@link QuoteClient} to the
+     * {@link ZippyQuoteAPI} that exchanges HTTP requests with the
+     * {@code ZippyApplication} microservice asynchronously.
+     */
+    @Autowired
+    private ZippyQuoteAPI mZippyQuoteAPI;
 
     /**
      * Get a {@link Flux} that emits the requested quotes.
@@ -35,9 +46,14 @@ public class QuoteClient {
      *         objects
      */
     public Flux<Quote> getAllQuotes(String routename) {
-        return mQuoteProxy
-            // Forward to the proxy.
-            .getAllQuotes(routename);
+        if (routename.equals(HANDEY))
+            return mHandeyQuoteAPI
+            // Forward to the Handey proxy.
+            .getAllQuotes();
+        else
+            return mZippyQuoteAPI
+            // Forward to the Zippy proxy.
+            .getAllQuotes();
     }
 
     /**
@@ -51,10 +67,14 @@ public class QuoteClient {
      */
     public Flux<Quote> postQuotes(String routename,
                                   List<Integer> quoteIds) {
-        return mQuoteProxy
-            // Forward to the proxy.
-            .postQuotes(routename,
-                        quoteIds);
+        if (routename.equals(HANDEY))
+            return mHandeyQuoteAPI
+                // Forward to the Handey proxy.
+                .postQuotes(quoteIds);
+        else
+            return mZippyQuoteAPI
+                // Forward to the Zippy proxy.
+                .postQuotes(quoteIds);
     }
 
     /**
@@ -68,9 +88,14 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotes(String routename,
                                     List<String> queries) {
-        return mQuoteProxy
-            // Forward to the proxy.
-            .search(routename, queries);
+        if (routename.equals(HANDEY))
+            return mHandeyQuoteAPI
+                // Forward to the Handey proxy.
+                .search(queries);
+        else
+            return mZippyQuoteAPI
+                // Forward to the Zippy proxy.
+                .search(queries);
     }
 
     /**
@@ -84,8 +109,14 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotesEx(String routename,
                                       List<String> queries) {
-        return mQuoteProxy
-            // Forward to the proxy.
-            .searchEx(routename, queries);
+        if (routename.equals(HANDEY))
+            return mHandeyQuoteAPI
+                // Forward to the Handey proxy.
+                .searchEx(queries);
+        else
+            return mZippyQuoteAPI
+                // Forward to Zippy proxy.
+                .searchEx(queries);
+        
     }
 }
