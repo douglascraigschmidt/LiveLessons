@@ -27,7 +27,7 @@ eureka:
     # Enable Eureka client functionality.
     enabled: true
     # Disable registration of Gateway with Eureka.
-    register-with-eureka:
+    register-with-eureka: true
     # Enable fetching of Eureka registry, so the API Gateway can
     # discover other microservices registered with Eureka.
     fetch-registry: true

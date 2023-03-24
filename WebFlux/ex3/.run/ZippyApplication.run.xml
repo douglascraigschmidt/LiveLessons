@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ZippyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="ex5.zippymicroservice.main" />
+    <module name="ex3.zippymicroservice.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservice.ZippyApplication" />
     <extension name="coverage">
       <pattern>

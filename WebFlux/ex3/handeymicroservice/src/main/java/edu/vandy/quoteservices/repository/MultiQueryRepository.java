@@ -6,22 +6,33 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 /**
- * This implementation defines a method that returns a {@link List} of
- * {@link Quote} objects in the database containing at least one of
- * the {@code queries} (ignoring case).
+ * This interface defines methods that return a {@link Flux} that
+ * emits {@link Quote} objects in the database containing all or any
+ * of the queries (ignoring case).
  */
 public interface MultiQueryRepository {
     /**
-     * Find a {@link List} of {@link Quote} objects in the database
-     * containing at least one of the {@code queries} (ignoring case).
+     * Return a {@link Flux} that emits {@link Quote} objects in the
+     * database containing all the {@code queries} (ignoring case).
      *
-     * @param queries List of queries
-     * @return A {@link List} of {@link Quote} objects in the database
-     *         containing at least one of the {@code queries}
-     *         (ignoring case)
+     * @param queries A {@code List} of {@code String} objects
+     *                containing the queries to search for
+     * @return A {@code Flux} that emits {@code Quote} objects that
+     *         match any of the specified {@code queries} (ignoring
+     *         case)
      */
     Flux<Quote> findAllByQuoteContainingAllIn(List<String> queries);
 
-    Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries);
 
+    /**
+     * Return a {@link Flux} that emits {@link Quote} objects in the
+     * database containing any of the {@code queries} (ignoring case).
+     *
+     * @param queries A {@code List} of {@code String} objects
+     *                containing the queries to search for
+     * @return A {@link Flux} that emits {@link Quote} objects in the
+     *         database containing all the {@code queries} (ignoring
+     *         case)
+     */
+    Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries);
 }
