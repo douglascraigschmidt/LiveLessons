@@ -1,4 +1,4 @@
-package edu.vandy.lockmanager;
+package edu.vandy.lockmanager.client;
 
 import edu.vandy.lockmanager.common.Lock;
 import edu.vandy.lockmanager.server.LockManagerApplication;

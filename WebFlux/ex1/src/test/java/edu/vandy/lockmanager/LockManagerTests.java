@@ -1,5 +1,6 @@
 package edu.vandy.lockmanager;
 
+import edu.vandy.lockmanager.client.LockAPI;
 import edu.vandy.lockmanager.common.Lock;
 import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.junit.jupiter.api.BeforeEach;
