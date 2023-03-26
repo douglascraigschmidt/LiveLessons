@@ -1,11 +1,13 @@
 package edu.vandy.lockmanager;
 
+import edu.vandy.lockmanager.client.LockAPI;
 import edu.vandy.lockmanager.common.Lock;
 import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.stream.IntStream;
@@ -22,7 +24,9 @@ import static edu.vandy.lockmanager.utils.Logger.log;
  * which enables the definition of declarative HTTP services using
  * Java interfaces.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = LockManagerApplication.class,
+                webEnvironment = SpringBootTest
+                    .WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
     /**
      * The auto-wired {@link LockAPI} that accesses the {@link

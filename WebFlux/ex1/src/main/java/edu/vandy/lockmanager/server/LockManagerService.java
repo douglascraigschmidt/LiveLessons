@@ -37,13 +37,13 @@ public class LockManagerService {
             mAvailableLocks =
                 // Make an ArrayBlockQueue with "fair" semantics.
                 new ArrayBlockingQueue<>(permitCount,
-                                         true);
+                    true);
         } else if (permitCount != mAvailableLocks.size()) {
             mAvailableLocks.clear();
             mAvailableLocks =
                 // Make an ArrayBlockQueue with "fair" semantics.
                 new ArrayBlockingQueue<>(permitCount,
-                                         true);
+                    true);
         } else
             return;
 
@@ -84,21 +84,23 @@ public class LockManagerService {
         var result = Mono
             // Acquire an available lock, which may block.
             .fromCallable(() -> {
-                    log("LockService - requesting a Lock");
+                log("LockService - requesting a Lock");
 
-                    var lock = mAvailableLocks.take();
+                // This call can block since it runs in a
+                // virtual thread.
+                var lock = mAvailableLocks.take();
 
-                    log("LockService - obtained Lock "
-                        + lock);
+                log("LockService - obtained Lock "
+                    + lock);
 
-                    // Return the Lock.
-                    return lock;
-                })
+                // Return the Lock.
+                return lock;
+            })
 
             // Display any exception that might occur.
             .doOnError(exception ->
-                       log("LockService error - "
-                           + exception.getMessage()));
+                log("LockService error - "
+                    + exception.getMessage()));
 
         log("LockService - returning Mono");
 
@@ -111,7 +113,7 @@ public class LockManagerService {
      *
      * @param permits The number of permits to acquire
      * @return A {@link Flux} that emits {@code permits} newly
-     *         acquired {@link Lock} objects
+     * acquired {@link Lock} objects
      */
     public Flux<Lock> acquire(int permits) {
         log("LockService.acquire("
@@ -125,8 +127,8 @@ public class LockManagerService {
         return Mono
             // Create a Mono that executes tryAcquireLock() method and
             // emits its result.
-            .fromCallable(() ->
-                          tryAcquireLock(acquiredLocks))
+            .fromSupplier(() ->
+                tryAcquireLock(acquiredLocks))
 
             // Repeat the Mono indefinitely.
             .repeat()
@@ -146,7 +148,7 @@ public class LockManagerService {
      * @param acquiredLocks The {@link List} of {@link Lock} objects
      *                      we're trying to acquire
      * @return The number of {@link Lock} objects in {@code
-     *         acquiredLocks}
+     * acquiredLocks}
      */
     private Integer tryAcquireLock(List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
@@ -156,6 +158,7 @@ public class LockManagerService {
             // Not enough locks are available, so release the acquired
             // locks.
             acquiredLocks
+                // offer() does not block.
                 .forEach(mAvailableLocks::offer);
 
             // Clear out the acquiredLocks List.
@@ -183,7 +186,7 @@ public class LockManagerService {
             + lock
             + ")");
 
-        // Put the lock back into mAvailableQueue.
+        // Put the lock back into mAvailableQueue w/out blocking.
         mAvailableLocks.offer(lock);
 
         return Mono
@@ -204,7 +207,8 @@ public class LockManagerService {
             + ")");
 
         locks
-            // Put all the locks back into mAvailableLocks.
+            // Put all the locks back into mAvailableLocks
+            // without blocking.
             .forEach(mAvailableLocks::offer);
 
         return Mono

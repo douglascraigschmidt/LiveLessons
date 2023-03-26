@@ -20,9 +20,10 @@ import static edu.vandy.lockmanager.utils.Logger.log;
 @Service
 public class LockManagerService {
     /**
-     * Create a new {@code VirtualThreadPerTaskExecutor}.
+     * Create a new {@code VirtualThreadPerTaskExecutor} that's
+     * used to run incoming requests off the servlet thread.
      */
-    ExecutorService mExecutor = Executors
+    private ExecutorService mExecutor = Executors
         .newVirtualThreadPerTaskExecutor();
 
     /**

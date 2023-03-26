@@ -4,8 +4,10 @@
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
+/DownloadImages
 /build
 /captures
+
 
 # Built application files
 *.apk
@@ -18,7 +20,6 @@
 *.class
 
 # Generated files
-target/
 bin/
 gen/
 

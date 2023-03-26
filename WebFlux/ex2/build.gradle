@@ -1,16 +1,15 @@
 plugins {
+    id "org.springframework.boot" version "3.0.1" apply true
+    id "io.spring.dependency-management" version "1.1.0"
     id 'java'
-    id 'org.springframework.boot' version '3.0.4'
-    id 'io.spring.dependency-management' version '1.1.0'
 }
 
-group = "com.example"
-version = "1.0.0"
-description = 'spring-core-6'
-
-repositories {
-    mavenCentral()
+ext {
+    set('springCloudVersion', "2022.0.0")
 }
+
+group = 'edu.vandy.pubsub'
+version = '0.0.1-SNAPSHOT'
 
 configurations {
     compileOnly {
@@ -18,37 +17,27 @@ configurations {
     }
 }
 
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("junit:junit")
-    testImplementation("org.assertj:assertj-core:3.24.1")
-}
-
-
 repositories {
     mavenCentral()
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_19
-}
-
-test {
-    useJUnitPlatform()
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework:spring-jdbc:5.3.14'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.jakewharton.retrofit:retrofit2-reactor-adapter:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
 }
 
 compileJava {
     options.compilerArgs.addAll(
-                                ['--enable-preview',
-                                 '--add-modules', 'jdk.incubator.concurrent'
-                                 ])
+            ['--enable-preview',
+             '--add-modules', 'jdk.incubator.concurrent'
+            ])
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -66,3 +55,6 @@ tasks.withType(JavaExec).configureEach {
     jvmArgs += '--enable-preview'
 }
 
+test {
+    useJUnitPlatform()
+}
