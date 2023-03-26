@@ -10,6 +10,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.utils.Logger.log;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * This Spring {@code Service} implements the {@link LockManagerController}
@@ -29,26 +31,36 @@ public class LockManagerService {
      * Initialize the {@link Lock} manager.
      *
      * @param permitCount The number of {@link Lock} objects to manage
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     * the {@code permitCount} changed the state of the
+     * lock manager and {@link Boolean#FALSE} otherwise.
      */
-    public void create(Integer permitCount) {
+    public Mono<Boolean> create(Integer permitCount) {
         log("creating " + permitCount + " locks");
 
-        if (mAvailableLocks == null) {
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount,
-                    true);
-        } else if (permitCount != mAvailableLocks.size()) {
-            mAvailableLocks.clear();
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount,
-                    true);
-        } else
-            return;
+        // Check to see if mAvailableLocks should be initialized or
+        // resized.
+        if (mAvailableLocks == null || permitCount != mAvailableLocks.size()) {
+            // Clear the existing queue.
+            if (mAvailableLocks != null)
+                mAvailableLocks.clear();
 
-        // Add each Lock to the queue.
-        mAvailableLocks.addAll(makeLocks(permitCount));
+            mAvailableLocks =
+                // Make an ArrayBlockQueue with "fair" semantics.
+                new ArrayBlockingQueue<>(permitCount, true);
+
+            mAvailableLocks
+                // Add each Lock to the queue.
+                .addAll(makeLocks(permitCount));
+
+            return Mono
+                // Indicate something changed as a result of
+                // this call.
+                .just(TRUE);
+        } else
+            return Mono
+                // Indicate nothing changed as a result of this call.
+                .just(FALSE);
     }
 
     /**
@@ -179,19 +191,18 @@ public class LockManagerService {
      * Release the {@link Lock}.
      *
      * @param lock The {@link Lock} to release
-     * @return A {@link Mono} that emits {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     * the {@link Lock} was released properly and
+     * {@link Boolean#FALSE} otherwise.
      */
-    public Mono<Void> release(Lock lock) {
+    public Mono<Boolean> release(Lock lock) {
         log("LockService.release("
             + lock
             + ")");
 
-        // Put the lock back into mAvailableQueue w/out blocking.
-        mAvailableLocks.offer(lock);
-
         return Mono
-            // Indicate that we're done.
-            .empty();
+            // Put the lock back into mAvailableQueue w/out blocking.
+            .just(mAvailableLocks.offer(lock));
     }
 
     /**
@@ -199,20 +210,26 @@ public class LockManagerService {
      *
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
-     * @return A {@link Mono} that emits {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and
+     *         {@link Boolean#FALSE} otherwise.
      */
-    public Mono<Void> release(List<Lock> locks) {
+    public Mono<Boolean> release(List<Lock> locks) {
         log("LockService.release("
             + locks
             + ")");
 
-        locks
-            // Put all the locks back into mAvailableLocks
-            // without blocking.
-            .forEach(mAvailableLocks::offer);
+        boolean allReleased = locks
+            // Convert List to a Stream.
+            .stream()
+
+            // Return true if all locks are put back
+            // into mAvailableLocks successfully (does
+            // not block).
+            .allMatch(mAvailableLocks::offer);
 
         return Mono
-            // Indicate that we're done.
-            .empty();
+            // Return the result, either true or false.
+            .just(allReleased);
     }
 }

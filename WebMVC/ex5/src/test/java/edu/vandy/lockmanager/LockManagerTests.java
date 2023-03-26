@@ -57,7 +57,10 @@ class LockManagerTests {
     @BeforeEach
     public void initializeTests() {
         // Create a Lock manager containing mMAX_LOCKS.
-        mLockAPI.create(sMAX_LOCKS);
+        var result = mLockAPI.create(sMAX_LOCKS);
+        
+        log("The LockManager state changed = "
+            + result);
     }
 
     /**
@@ -109,10 +112,11 @@ class LockManagerTests {
      * @param client The test client
      */
     private void acquireAndReleaseSingleLocks(int client) {
-        log("client " + client);
+        log("Starting client " + client);
         var lock = mLockAPI.acquire();
-        log("acquired lock " + lock);
-        mLockAPI.release(lock);
+        log(client + " acquired lock " + lock);
+        var result = mLockAPI.release(lock);
+        log(client + " released lock " + result);
     }
 
     /**
@@ -121,10 +125,10 @@ class LockManagerTests {
      * @param client The test client
      */
     private void acquireAndReleaseMultipleLocks(int client) {
-        log("client " + client);
+        log("Starting client " + client);
         var locks = mLockAPI.acquire(sMULTIPLE_PERMITS);
-        log("acquired locks " + locks);
-        mLockAPI.release(locks);
-        log("released locks");
+        log(client + " acquired locks " + locks);
+        var result = mLockAPI.release(locks);
+        log(client + " released lock " + result);
     }
 }

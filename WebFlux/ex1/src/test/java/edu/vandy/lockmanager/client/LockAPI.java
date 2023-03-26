@@ -23,9 +23,12 @@ public interface LockAPI {
      *
      * @param maxLocks The total number of {@link Lock}
      *                 objects to create
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if the
+     *         {@code permitCount} changed the state of the lock
+     *         manager and {@link Boolean#FALSE} otherwise.
      */
     @PostExchange(CREATE)
-    void create(@RequestBody Integer maxLocks);
+    Mono<Boolean> create(@RequestBody Integer maxLocks);
 
     /**
      * Acquire a {@link Lock}.
@@ -50,17 +53,21 @@ public interface LockAPI {
      * Release the {@code lock} back to the {@link Lock} manager.
      *
      * @param lock A {@link Lock} to release
-     * @return A {@link Mono} that emits a {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and
+     *         {@link Boolean#FALSE} otherwise.
      */
     @PostExchange(RELEASE_LOCK)
-    Mono<Void> release(@RequestBody Lock lock);
+    Mono<Boolean> release(@RequestBody Lock lock);
 
     /**
      * Release the {@code locks} back to the {@link Lock} manager.
      *
      * @param locks A {@link List} that contains {@link Lock} objects to release
-     * @return A {@link Mono} that emits a {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and
+     *         {@link Boolean#FALSE} otherwise.
      */
     @PostExchange(RELEASE_LOCKS)
-    Mono<Void> release(@RequestBody List<Lock> locks);
+    Mono<Boolean> release(@RequestBody List<Lock> locks);
 }

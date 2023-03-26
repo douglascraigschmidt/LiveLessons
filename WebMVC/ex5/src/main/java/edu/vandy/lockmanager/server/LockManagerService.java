@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.utils.Logger.log;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * This Spring {@code Service} implements the {@link LockManagerController}
@@ -38,26 +40,33 @@ public class LockManagerService {
      *
      * @param permitCount The number of {@link Lock} objects to
      *                    manage
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@code permitCount} changed the state of the
+     *         lock manager and {@link Boolean#FALSE} otherwise.
      */
-    public void create(Integer permitCount) {
+    public Boolean create(Integer permitCount) {
         log("creating " + permitCount + " locks");
 
-        if (mAvailableLocks == null) {
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount,
-                    true);
-        } else if (permitCount != mAvailableLocks.size()) {
-            mAvailableLocks.clear();
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount,
-                    true);
-        } else
-            return;
+        // Check to see if mAvailableLocks should be initialized or
+        // resized.
+        if (mAvailableLocks == null 
+            || permitCount != mAvailableLocks.size()) {
+            // Clear the existing queue.
+            if (mAvailableLocks != null)
+                mAvailableLocks.clear();
 
-        // Add each Lock to the queue.
-        mAvailableLocks.addAll(makeLocks(permitCount));
+            mAvailableLocks =
+                // Make an ArrayBlockQueue with "fair" semantics.
+                new ArrayBlockingQueue<>(permitCount, true);
+
+            // Add each Lock to the queue.
+            mAvailableLocks.addAll(makeLocks(permitCount));
+
+            // Indicate something changed as a result of this call.
+            return TRUE;
+        } else
+            // Indicate nothing changed as a result of this call.
+            return FALSE;
     }
 
     /**
@@ -224,11 +233,14 @@ public class LockManagerService {
      * Release the {@link Lock} so other Beings can acquire it.
      *
      * @param lock The {@link Lock} to release
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
-    public void release(Lock lock) {
+    public Boolean release(Lock lock) {
         log("LockService.release() " + lock);
         // Put the Lock parameter back to the queue.
-        mAvailableLocks.offer(lock);
+        return mAvailableLocks.offer(lock);
     }
 
     /**
@@ -236,13 +248,21 @@ public class LockManagerService {
      *
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
-    public void release(List<Lock> locks) {
+    public Boolean release(List<Lock> locks) {
         log("LockService.release(locks) "
             + locks);
 
-        locks
-            // Put all locks back in the queue.
-            .forEach(mAvailableLocks::offer);
+        return locks
+            // Convert List to a Stream.
+            .stream()
+
+            // Return true if all locks are put back
+            // into mAvailableLocks successfully (does
+            // not block).
+            .allMatch(mAvailableLocks::offer);
     }
 }

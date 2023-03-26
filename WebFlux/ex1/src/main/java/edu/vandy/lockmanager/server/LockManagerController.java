@@ -39,12 +39,15 @@ public class LockManagerController {
      *
      * @param lockCount The number of {@link Lock} objects to
      *                  manage.
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@code permitCount} changed the state of the
+     *         lock manager and {@link Boolean#FALSE} otherwise.
      */
     @PostMapping(CREATE)
-    public void create(@RequestBody Integer lockCount) {
+    public Mono<Boolean> create(@RequestBody Integer lockCount) {
         Logger.log("LockController.create()");
 
-        mService
+        return mService
             // Forward to the service.
             .create(lockCount);
     }
@@ -85,10 +88,12 @@ public class LockManagerController {
      * Release the {@link Lock} so other clients can acquire it.
      *
      * @param lock The {@link Lock} to release
-     * @return A {@link Mono} that emits {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and
+     *         {@link Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCK)
-    public Mono<Void> release(@RequestBody Lock lock) {
+    public Mono<Boolean> release(@RequestBody Lock lock) {
         Logger.log("LockController.release("
                   + lock
                   + ")");
@@ -103,10 +108,12 @@ public class LockManagerController {
      *
      * @param locks A {@link List} that contains {@link Lock} objects
      *              to release
-     * @return A {@link Mono} that emits {@link Void}
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and
+     *         {@link Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCKS)
-    public Mono<Void> release(@RequestBody List<Lock> locks) {
+    public Mono<Boolean> release(@RequestBody List<Lock> locks) {
         Logger.log("LockController.release("
                   + locks
                   + ")");

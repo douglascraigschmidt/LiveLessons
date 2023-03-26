@@ -38,12 +38,17 @@ public class LockManagerController {
      *
      * @param permitCount The number of {@link Lock} objects to
      *                    manage
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@code permitCount} changed the state of the
+     *         lock manager and {@link Boolean#FALSE} otherwise.
      */
     @PostMapping(CREATE)
-    public void create(@RequestBody Integer permitCount) {
+    public Boolean create(@RequestBody Integer permitCount) {
         Logger.log("LockController.create()");
 
-        mService.create(permitCount);
+        return mService
+            // Forward to the service.
+            .create(permitCount);
     }
 
     /**
@@ -58,7 +63,9 @@ public class LockManagerController {
     public DeferredResult<Lock> acquire() {
         Logger.log("LockController.acquire()");
 
-        return mService.acquire();
+        return mService
+            // Forward to the service
+            .acquire();
     }
 
     /**
@@ -81,12 +88,17 @@ public class LockManagerController {
      * Release the {@link Lock} so other clients can acquire it.
      *
      * @param lock The {@link Lock} to release
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCK)
-    public void release(@RequestBody Lock lock) {
+    public Boolean release(@RequestBody Lock lock) {
         Logger.log("LockController.release(lock)");
 
-        mService.release(lock);
+        return mService
+            // Forward to the service.
+            .release(lock);
     }
 
     /**
@@ -94,12 +106,15 @@ public class LockManagerController {
      *
      * @param locks A {@link List} that contains {@link Lock} objects
      *              to release
+     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCKS)
-    public void release(@RequestBody List<Lock> locks) {
+    public Boolean release(@RequestBody List<Lock> locks) {
         Logger.log("LockController.release(locks)");
 
-        mService
+        return mService
             // Forward to the service.
             .release(locks);
     }

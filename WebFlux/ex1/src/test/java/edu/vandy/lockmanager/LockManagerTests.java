@@ -22,7 +22,7 @@ import static edu.vandy.lockmanager.utils.Logger.log;
  * definition of declarative HTTP services using Java interfaces.
  */
 @SpringBootTest(classes = LockManagerApplication.class,
-                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
     /**
      * The auto-wired {@link LockAPI} that accesses the {@link
@@ -47,32 +47,31 @@ class LockManagerTests {
     private static final int sMAX_CLIENTS = 4;
 
     /**
-     * This method runs before each test to initialize the
-     * LockManager.
+     * Test the {@link LockManagerApplication} microservice's ability
+     * to acquire and release single locks.
      */
-    @BeforeEach
-    public void initializeTests() {
-        // Create a Lock manager containing mMAX_LOCKS.
-        mLockAPI.create(sMAX_LOCKS);
-    }
-
-    /**
-     * Test the {@link LockManagerApplication} microservice's ability to
-     * acquire and release single locks.
-     */
-    // @Test
+    @Test
     public void testSingleAcquireAndRelease() {
         log("testSingleAcquireAndRelease() started");
 
-        Flux
-            // Run mMAX_CLIENTS tests in parallel.
-            .range(0, sMAX_CLIENTS)
+        mLockAPI
+            // Create a Lock manager containing mMAX_LOCKS.
+            .create(sMAX_LOCKS)
 
-            // Call acquireAndReleaseLocks() each client.
-            .flatMap(this::acquireAndReleaseSingleLocks)
+            // Acquire and release single locks asynchronously.
+            .flatMap(changed -> {
+                    log("The LockManager state changed = "
+                        + changed);
+                   return Flux
+                        // Run mMAX_CLIENTS tests in parallel.
+                        .range(0, sMAX_CLIENTS)
 
-            // Collect the results into a List<Void>.
-            .collectList()
+                        // Call acquireAndReleaseLocks() each client.
+                        .flatMap(this::acquireAndReleaseSingleLocks)
+
+                        // Collect the results into a List<Void>.
+                        .collectList();
+                })
 
             // Block until all async processing is done.
             .block();
@@ -88,15 +87,25 @@ class LockManagerTests {
     public void testMultipleAcquireAndRelease() {
         log("testMultipleAcquireAndRelease() started");
 
-        Flux
-            // Run mMAX_CLIENTS tests in parallel.
-            .range(0, sMAX_CLIENTS)
+        mLockAPI
+            // Create a Lock manager containing mMAX_LOCKS.
+            .create(sMAX_LOCKS)
 
-            // Call acquireAndReleaseLocks() each client.
-            .flatMap(this::acquireAndReleaseMultipleLocks)
+            // Acquire and release multiple locks asynchronously.
+            .flatMap(changed -> {
+                log("The LockManager state changed = "
+                    + changed);
+                return
+                    Flux
+                        // Run mMAX_CLIENTS tests in parallel.
+                        .range(0, sMAX_CLIENTS)
 
-            // Collect the results into a List<Void>.
-            .collectList()
+                        // Call acquireAndReleaseLocks() each client.
+                        .flatMap(this::acquireAndReleaseMultipleLocks)
+
+                        // Collect the results into a List<Void>.
+                        .collectList();
+            })
 
             // Block until all async processing is done.
             .block();
@@ -110,7 +119,7 @@ class LockManagerTests {
      * @param client The test client
      */
     private Mono<Void> acquireAndReleaseSingleLocks
-        (Integer client) {
+    (Integer client) {
         log("Starting client "
             + client);
         return mLockAPI
@@ -124,6 +133,10 @@ class LockManagerTests {
             // Release the lock asynchronously.
             .flatMap(lock -> mLockAPI
                 .release(lock))
+
+            // Indicate whether release() worked.
+            .doOnSuccess(result ->
+                log(client + " released lock " + result))
 
             // Log any exceptions.
             .doOnError(exception ->
@@ -139,15 +152,15 @@ class LockManagerTests {
      * @param client The test client
      */
     private Mono<Void> acquireAndReleaseMultipleLocks
-        (Integer client) {
+    (Integer client) {
         log("Starting client " + client);
 
         return mLockAPI
             // Asynchronously acquire a lock.
-            .acquire(sMULTIPLE_PERMITS) 
+            .acquire(sMULTIPLE_PERMITS)
 
-               // Collect the locks into a Mono to a List.
-            .collectList() 
+            // Collect the locks into a Mono to a List.
+            .collectList()
 
             // Perform operations when the Mono emits its List.
             .flatMap(locks -> {
@@ -156,6 +169,10 @@ class LockManagerTests {
                 return mLockAPI
                     // Release the locks when they're all acquired.
                     .release(locks)
+
+                    // Indicate whether release() worked.
+                    .doOnSuccess(result ->
+                        log(client + " released locks " + result))
 
                     // Log any exceptions.
                     .doOnError(exception -> log("exception = "
