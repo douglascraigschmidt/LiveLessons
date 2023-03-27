@@ -22,7 +22,8 @@ import static edu.vandy.lockmanager.utils.Logger.log;
  * definition of declarative HTTP services using Java interfaces.
  */
 @SpringBootTest(classes = LockManagerApplication.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+                webEnvironment = SpringBootTest
+                    .WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
     /**
      * The auto-wired {@link LockAPI} that accesses the {@link

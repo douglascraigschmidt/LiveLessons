@@ -25,7 +25,7 @@ public class LockManagerService {
      * Create a new {@code VirtualThreadPerTaskExecutor} that's
      * used to run incoming requests off the servlet thread.
      */
-    private ExecutorService mExecutor = Executors
+    private final ExecutorService mExecutor = Executors
         .newVirtualThreadPerTaskExecutor();
 
     /**
@@ -76,7 +76,7 @@ public class LockManagerService {
      */
     private List<Lock> makeLocks(int permitCount) {
         return IntStream
-            // Iterate from 0 to count - 1.
+            // Iterate from 0 to permitCount - 1.
             .range(0, permitCount)
 
             // Convert Integer to String.
@@ -112,13 +112,14 @@ public class LockManagerService {
                         var lock = mAvailableLocks
                             .poll();
 
-                        if (lock == null) {
+                        if (lock != null)
+                            log("LockService -- non-blocking lock acquire");
+                        else {
                             log("LockService -- blocking for lock acquire");
 
                             // Block until a Lock is available.
                             lock = mAvailableLocks.take();
-                        } else
-                            log("LockService -- non-blocking lock acquire");
+                        }
 
                         // Set the result to the acquired Lock.
                         deferredResult
@@ -210,7 +211,13 @@ public class LockManagerService {
         // Perform a non-blocking poll().
         var lock = mAvailableLocks.poll();
 
-        if (lock == null) {
+        if (lock != null) {
+            // Add the acquired lock to the List.
+            acquiredLocks.add(lock);
+
+            // Return the number of locks acquired.
+            return acquiredLocks.size();
+        } else {
             // Not enough locks available, so release
             // the acquired locks;.
             acquiredLocks
@@ -222,11 +229,6 @@ public class LockManagerService {
             // Indicate that we need to start from the beginning.
             return 0;
         }
-        // Add the acquired lock to the List.
-        acquiredLocks.add(lock);
-
-        // Return the number of locks acquired.
-        return acquiredLocks.size();
     }
 
     /**

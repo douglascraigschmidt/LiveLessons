@@ -6,7 +6,7 @@ package edu.vandy.lockmanager.common;
  */
 public class Lock {
     /**
-     * The identity of the {@link Lock}
+     * The identity of the {@link Lock}.
      */
     public String id;
 
