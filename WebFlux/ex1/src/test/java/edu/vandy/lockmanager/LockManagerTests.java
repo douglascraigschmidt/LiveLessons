@@ -45,7 +45,7 @@ class LockManagerTests {
     /**
      * The total number of clients to run concurrently.
      */
-    private static final int sMAX_CLIENTS = 4;
+    private static final int sMAX_CLIENTS = 8;
 
     /**
      * Test the {@link LockManagerApplication} microservice's ability

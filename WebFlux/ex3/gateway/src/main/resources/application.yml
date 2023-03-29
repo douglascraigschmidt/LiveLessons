@@ -13,10 +13,10 @@ spring:
           # Enable integration of the Gateway with a discovery
           # service, so it automatically creates routes for
           # registered microservices.
-          enabled: 'true'
+          enabled: true
           # Convert service IDs from the discovery service to
           # lowercase before creating routes.
-          lower-case-service-id: 'true'
+          lower-case-service-id: true
   main:
     # A reactive web runtime must be used for a Spring API Gateway!
     web-application-type: reactive

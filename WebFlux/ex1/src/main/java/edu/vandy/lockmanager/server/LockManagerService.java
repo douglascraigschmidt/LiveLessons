@@ -4,9 +4,11 @@ import edu.vandy.lockmanager.common.Lock;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.utils.Logger.log;
@@ -98,12 +100,19 @@ public class LockManagerService {
             .fromCallable(() -> {
                 log("LockService - requesting a Lock");
 
-                // This call can block since it runs in a
-                // virtual thread.
-                var lock = mAvailableLocks.take();
+                var lock = mAvailableLocks.poll();
 
-                log("LockService - obtained Lock "
-                    + lock);
+                if (lock != null)
+                    log("LockService - obtained Lock non-blocking "
+                        + lock);
+                else {
+                    // This call can block since it runs in a
+                    // virtual thread.
+                    lock = mAvailableLocks.take();
+
+                    log("LockService - obtained Lock blocking "
+                        + lock);
+                }
 
                 // Return the Lock.
                 return lock;
@@ -136,7 +145,7 @@ public class LockManagerService {
         List<Lock> acquiredLocks =
             new ArrayList<>(permits);
 
-        return Mono
+        var flux = Mono
             // Create a Mono that executes tryAcquireLock() method and
             // emits its result.
             .fromSupplier(() ->
@@ -149,9 +158,22 @@ public class LockManagerService {
             // acquired locks is equal to 'permits'.
             .takeUntil(result -> result.equals(permits))
 
+            // Log the results.
+            .doOnNext(result -> {
+                if (result == permits)
+                    log("LockService.acquire("
+                        + permits
+                        + ") = "
+                        + result);
+            })
             // Transform the Flux<Integer> to a Flux<Lock> that emits
             // the acquired Lock objects as individual elements.
             .thenMany(Flux.fromIterable(acquiredLocks));
+
+        log("LockService.acquire("
+            + permits
+            + ") returning Flux");
+        return flux;
     }
 
     /**
@@ -166,7 +188,13 @@ public class LockManagerService {
         // Perform a non-blocking poll().
         var lock = mAvailableLocks.poll();
 
-        if (lock == null) {
+        if (lock != null) {
+            // Add the acquired lock to the List.
+            acquiredLocks.add(lock);
+
+            // Return the number of acquired locks.
+            return acquiredLocks.size();
+        } else {
             // Not enough locks are available, so release the acquired
             // locks.
             acquiredLocks
@@ -180,11 +208,7 @@ public class LockManagerService {
             return 0;
         }
 
-        // Add the acquired lock to the List.
-        acquiredLocks.add(lock);
 
-        // Return the number of acquired locks.
-        return acquiredLocks.size();
     }
 
     /**
@@ -211,8 +235,8 @@ public class LockManagerService {
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
      * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     *         the {@link Lock} was released properly and
-     *         {@link Boolean#FALSE} otherwise.
+     * the {@link Lock} was released properly and
+     * {@link Boolean#FALSE} otherwise.
      */
     public Mono<Boolean> release(List<Lock> locks) {
         log("LockService.release("

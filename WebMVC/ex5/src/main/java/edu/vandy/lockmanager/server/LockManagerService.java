@@ -119,6 +119,8 @@ public class LockManagerService {
 
                             // Block until a Lock is available.
                             lock = mAvailableLocks.take();
+
+                            Thread.sleep(5000);
                         }
 
                         // Set the result to the acquired Lock.
@@ -170,6 +172,11 @@ public class LockManagerService {
                     while (tryAcquireLock(acquiredLocks) != permits)
                         continue;
 
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     log("LockService - got all "
                         + acquiredLocks.size()
                         + " lock(s) "
