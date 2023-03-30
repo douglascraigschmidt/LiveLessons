@@ -15,7 +15,8 @@ import static edu.vandy.lockmanager.common.Constants.LOCK_MANAGER_SERVER_BASE_UR
 @Configuration
 public class ClientBeans {
     /**
-     * @return A new instance of the {@link LockAPI}
+     * @return A new instance of the {@link LockAPI} that is used with
+     *         synchronous WebMVC clients
      */
     @Bean
     public LockAPI getLockAPI() {

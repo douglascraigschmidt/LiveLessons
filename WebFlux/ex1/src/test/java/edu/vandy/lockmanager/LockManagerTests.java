@@ -23,29 +23,15 @@ import static edu.vandy.lockmanager.utils.Logger.log;
  */
 @SpringBootTest(classes = LockManagerApplication.class,
                 webEnvironment = SpringBootTest
-                    .WebEnvironment.DEFINED_PORT)
+                .WebEnvironment.DEFINED_PORT)
 class LockManagerTests {
     /**
      * The auto-wired {@link LockAPI} that accesses the {@link
-     * LockManagerApplication} microservice.
+     * LockManagerApplication} microservice asynchronously using
+     * Spring WebFlux.
      */
     @Autowired
     private LockAPI mLockAPI;
-
-    /**
-     * Number of permits to acquire and release simultaneously.
-     */
-    private static final int sMULTIPLE_PERMITS = 2;
-
-    /**
-     * The total number of {@link Lock} objects to create.
-     */
-    private static final Integer sMAX_LOCKS = 4;
-
-    /**
-     * The total number of clients to run concurrently.
-     */
-    private static final int sMAX_CLIENTS = 8;
 
     /**
      * Test the {@link LockManagerApplication} microservice's ability
@@ -55,20 +41,25 @@ class LockManagerTests {
     public void testSingleAcquireAndRelease() {
         log("testSingleAcquireAndRelease() started");
 
+        // Define the parameters for the test.
+        int maxLocks = 2;
+        int maxClients = 4;
+
         mLockAPI
-            // Create a Lock manager containing mMAX_LOCKS.
-            .create(sMAX_LOCKS)
+            // Create a Lock manager containing maxLocks.
+            .create(maxLocks)
 
             // Acquire and release single locks asynchronously.
-            .flatMap(changed -> {
-                    log("The LockManager state changed = "
-                        + changed);
-                   return Flux
-                        // Run mMAX_CLIENTS tests in parallel.
-                        .range(0, sMAX_CLIENTS)
+            .flatMap(lockManager -> {
+                    log("The LockManager's id = " + lockManager);
+                    return Flux
+                        // Run maxClients tests in parallel.
+                        .range(0, maxClients)
 
                         // Call acquireAndReleaseLocks() each client.
-                        .flatMap(this::acquireAndReleaseSingleLocks)
+                        .flatMap(client -> 
+                                 acquireAndReleaseSingleLocks(client,
+                                                              lockManager))
 
                         // Collect the results into a List<Void>.
                         .collectList();
@@ -88,21 +79,28 @@ class LockManagerTests {
     public void testMultipleAcquireAndRelease() {
         log("testMultipleAcquireAndRelease() started");
 
+        // Define the parameters for the test.
+        int maxLocks = 4;
+        int maxClients = 8;
+        int maxPermits = 2;
+
         mLockAPI
-            // Create a Lock manager containing mMAX_LOCKS.
-            .create(sMAX_LOCKS)
+            // Create a Lock manager containing maxLocks.
+            .create(maxLocks)
 
             // Acquire and release multiple locks asynchronously.
-            .flatMap(changed -> {
-                log("The LockManager state changed = "
-                    + changed);
+            .flatMap(lockManager -> {
+                log("The LockManager's id = " + lockManager);
                 return
                     Flux
-                        // Run mMAX_CLIENTS tests in parallel.
-                        .range(0, sMAX_CLIENTS)
+                        // Run maxClients tests in parallel.
+                        .range(0, maxClients)
 
                         // Call acquireAndReleaseLocks() each client.
-                        .flatMap(this::acquireAndReleaseMultipleLocks)
+                        .flatMap(client ->
+                                 acquireAndReleaseMultipleLocks(client,
+                                                                lockManager,
+                                                                maxPermits)
 
                         // Collect the results into a List<Void>.
                         .collectList();
@@ -118,69 +116,77 @@ class LockManagerTests {
      * Acquire and release single {@link Lock} objects.
      *
      * @param client The test client
+     * @param lockManager The {@link LockManager} associated with this
+     *                    test run
      */
     private Mono<Void> acquireAndReleaseSingleLocks
-    (Integer client) {
-        log("Starting client "
-            + client);
-        return mLockAPI
-            // Acquire a lock asynchronously.
-            .acquire()
+        (int client,
+         LockManager lockManager) {
+            log("Starting client " + client);
+            return mLockAPI
+                // Acquire a lock asynchronously.
+                .acquire(lockManager)
 
-            // Display the lock when it's acquired.
-            .doOnSuccess(lock ->
-                log(client + " acquired lock " + lock))
+                // Display the lock when it's acquired.
+                .doOnSuccess(lock ->
+                             log(client + " acquired lock " + lock))
 
-            // Release the lock asynchronously.
-            .flatMap(lock -> mLockAPI
-                .release(lock))
+                // Release the lock asynchronously.
+                .flatMap(lock -> mLockAPI
+                         .release(lockManager, lock))
 
-            // Indicate whether release() worked.
-            .doOnSuccess(result ->
-                log(client + " released lock " + result))
+                // Indicate whether release() worked.
+                .doOnSuccess(result ->
+                             log(client + " released lock " + result))
 
-            // Log any exceptions.
-            .doOnError(exception ->
-                log("exception = " + exception.getMessage()))
+                // Log any exceptions.
+                .doOnError(exception ->
+                           log("exception = " + exception.getMessage()))
 
-            // Indicate that we're finished running asynchronously.
-            .then();
-    }
+                // Indicate that we're finished running asynchronously.
+                .then();
+        }
 
     /**
      * Acquire and release multiple {@link Lock} objects.
      *
-     * @param client The test client
+     * @param client     The test client id
+     * @param lockManager The {@link LockManager} associated with this
+     *                    test run
+     * @param maxPermits The number of permits to acquire and release
+     *                   simultaneously
      */
     private Mono<Void> acquireAndReleaseMultipleLocks
-    (Integer client) {
+        (int client,
+         LockManager lockManager,
+         int maxPermits) {
         log("Starting client " + client);
 
         return mLockAPI
             // Asynchronously acquire a lock.
-            .acquire(sMULTIPLE_PERMITS)
+            .acquire(lockManager, maxPermits)
 
             // Collect the locks into a Mono to a List.
             .collectList()
 
             // Perform operations when the Mono emits its List.
             .flatMap(locks -> {
-                log(client + " acquired locks " + locks);
+                    log(client + " acquired locks " + locks);
 
-                return mLockAPI
-                    // Release the locks when they're all acquired.
-                    .release(locks)
+                    return mLockAPI
+                        // Release locks after they're acquired.
+                        .release(lockManager, locks)
 
-                    // Indicate whether release() worked.
-                    .doOnSuccess(result ->
-                        log(client + " released locks " + result))
+                        // Indicate whether release() worked.
+                        .doOnSuccess(result ->
+                                     log(client + " released locks " + result))
 
-                    // Log any exceptions.
-                    .doOnError(exception -> log("exception = "
-                        + exception.getMessage()))
+                        // Log any exceptions.
+                        .doOnError(exception -> log("exception = "
+                                                    + exception.getMessage()))
 
-                    // Return an empty Mono to indicate we're done.
-                    .then();
-            });
+                        // Return an empty Mono to indicate we're done.
+                        .then();
+                });
     }
 }

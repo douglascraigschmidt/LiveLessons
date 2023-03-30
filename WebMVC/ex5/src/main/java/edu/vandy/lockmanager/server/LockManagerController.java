@@ -15,13 +15,14 @@ import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
  * This Spring {@code @RestController} defines methods that provide a
- * distributed lock manager.
+ * lock manager for a semaphore that can be shared amongst multiple
+ * synchronous Spring WebMVC clients.
  */
 @RestController
 public class LockManagerController {
     /**
-     * Auto-wire the {@link LockManagerController} to the
-     * {@link LockManagerService}.
+     * Auto-wire the {@link LockManagerController} to the {@link
+     * LockManagerService}.
      */
     @Autowired
     LockManagerService mService;
@@ -141,8 +142,9 @@ public class LockManagerController {
      *         Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCKS)
-    public Boolean release(@RequestParam LockManager lockManager,
-                           @RequestBody List<Lock> locks) {
+    public Boolean release
+        (@RequestParam LockManager lockManager,
+         @RequestBody List<Lock> locks) {
         log("LockController.release("
             + locks
             + ")");

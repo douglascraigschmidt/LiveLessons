@@ -21,12 +21,12 @@ import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
  * This Spring {@code Service} implements the {@link
- * LockManagerController} endpoint handler methods via a {@link Map}
- * of {@link LockManager} objects associated with the {@link
- * ArrayBlockingQueue} objects that store the state of each semaphore.
+ * LockManagerController} endpoint handler methods using Spring WebMVC
+ * conventional Java types and a {@link Map} of {@link LockManager}
+ * objects associated with the {@link ArrayBlockingQueue} objects that
+ * store the state of each semaphore.
  */
 @Service
-@ComponentScan("edu.vandy.lockmanager")
 public class LockManagerService {
     /**
      * Obtain the underlying {@link AsyncTaskExecutor} created by

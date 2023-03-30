@@ -16,18 +16,23 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 /**
- * This Spring {@code Service} implements the {@link LockManagerController}
- * endpoint handler methods.
+ * This Spring {@code Service} implements the {@link
+ * LockManagerController} endpoint handler methods using Spring
+ * WebFlux reactive types and a {@link Map} of {@link LockManager}
+ * objects associated with the {@link ArrayBlockingQueue} objects that
+ * store the state of each semaphore.
  */
 @SuppressWarnings("BlockingMethodInNonBlockingContext")
 @Service
 public class LockManagerService {
     /**
-     * An {@link ArrayBlockingQueue} that limits concurrent access to
-     * the fixed number of available locks managed by the {@link
-     * LockManagerService}.
+     * A {@link Map} that associates {@link LockManager} objects with
+     * the {@link ArrayBlockingQueue} that stores the state of the
+     * semaphore.
      */
-    private ArrayBlockingQueue<Lock> mAvailableLocks;
+    private final Map<LockManager,
+                      ArrayBlockingQueue<Lock>> mLockManagerMap =
+        new ConcurrentHashMap<>();
 
     /**
      * Initialize the {@link Lock} manager.

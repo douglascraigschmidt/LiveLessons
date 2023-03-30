@@ -13,15 +13,14 @@ import java.util.List;
 import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 
 /**
- * An auto-generated proxy used by clients to access the
- * capabilities of the {@link LockManagerApplication} microservice.
+ * An auto-generated proxy used by synchronous WebMVC clients to
+ * access the capabilities of the {@link LockManagerApplication}
+ * microservice.
  */
 public interface LockAPI {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param lockManager The {@link LockManager} that is associated
-     *                    with the state of the semaphore it manages
      * @param permitCount The total number of {@link Lock}
      *                    objects to create
      * @return A {@link LockManager} that is associated with

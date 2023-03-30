@@ -25,13 +25,14 @@ import static edu.vandy.lockmanager.utils.Utils.log;
  * Java interfaces.
  */
 @SpringBootTest(classes = LockManagerApplication.class,
-    webEnvironment = SpringBootTest
-        .WebEnvironment.DEFINED_PORT)
+                webEnvironment = SpringBootTest
+                .WebEnvironment.DEFINED_PORT)
 @ComponentScan("edu.vandy.lockmanager")
 class LockManagerTests {
     /**
      * The auto-wired {@link LockAPI} that accesses the {@link
-     * LockManagerApplication} microservice.
+     * LockManagerApplication} microservice synchronously using Spring
+     * WebMVC.
      */
     @Autowired
     private LockAPI mLockAPI;
@@ -68,8 +69,8 @@ class LockManagerTests {
 
             // Perform this action for each client.
             .forEach(client ->
-                acquireAndReleaseSingleLocks(client,
-                    lockManager));
+                     acquireAndReleaseSingleLocks(client,
+                                                  lockManager));
 
         log("testSingleAcquireAndRelease() finished");
     }
@@ -102,9 +103,9 @@ class LockManagerTests {
 
             // Perform this action for each client.
             .forEach(client ->
-                acquireAndReleaseMultipleLocks(client,
-                    lockManager,
-                    maxPermits));
+                     acquireAndReleaseMultipleLocks(client,
+                                                    lockManager,
+                                                    maxPermits));
 
         log("testMultipleAcquireAndRelease() finished");
     }
@@ -113,14 +114,17 @@ class LockManagerTests {
      * Acquire and release single {@link Lock} objects.
      *
      * @param client      The test client
-     * @param lockManager
+     * @param lockManager The {@link LockManager} associated with this
+     *                    test run
      */
     private void acquireAndReleaseSingleLocks
-    (int client,
-     LockManager lockManager) {
+        (int client,
+         LockManager lockManager) {
         log("Starting client " + client);
+
         var lock = mLockAPI.acquire(lockManager);
         log(client + " acquired lock " + lock);
+
         var result = mLockAPI
             .release(lockManager, lock);
         log(client + " released lock " + result);
@@ -129,17 +133,23 @@ class LockManagerTests {
     /**
      * Acquire and release multiple {@link Lock} objects.
      *
-     * @param client     The test client
-     * @param maxPermits
+     * @param client     The test client id
+     * @param lockManager The {@link LockManager} associated with this
+     *                    test run
+     * @param maxPermits The number of permits to acquire and release
+     *                   simultaneously
      */
     private void acquireAndReleaseMultipleLocks
         (int client,
-         LockManager lockManager, int maxPermits) {
+         LockManager lockManager,
+         int maxPermits) {
         log("Starting client " + client);
+
         var locks = mLockAPI
             .acquire(lockManager,
-                maxPermits);
+                     maxPermits);
         log(client + " acquired locks " + locks);
+
         var result = mLockAPI
             .release(lockManager, locks);
         log(client + " released lock " + result);

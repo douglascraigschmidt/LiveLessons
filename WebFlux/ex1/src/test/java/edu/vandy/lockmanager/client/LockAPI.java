@@ -14,60 +14,71 @@ import java.util.List;
 import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 
 /**
- * An auto-generated proxy used by clients to access the
- * capabilities of the {@link LockManagerApplication} microservice.
+ * An auto-generated proxy used by asynchronous WebFlux clients to
+ * access the capabilities of the {@link LockManagerApplication}
+ * microservice.
  */
 public interface LockAPI {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param maxLocks The total number of {@link Lock}
-     *                 objects to create
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if the
-     *         {@code permitCount} changed the state of the lock
-     *         manager and {@link Boolean#FALSE} otherwise.
+     * @param permitCount The total number of {@link Lock}
+     *                    objects to create
+     * @return A {@link Mono} that emits a {@link LockManager}
+     *         associated with the state of the semaphore it manages
      */
-    @PostExchange(CREATE)
-    Mono<Boolean> create(@RequestBody Integer maxLocks);
+    @GetExchange(CREATE)
+    Mono<LockManager> create(@RequestParam Integer permitCount);
 
     /**
-     * Acquire a {@link Lock}.
+     * Acquire a {@link Lock}, blocking until one is available.
      *
-     * @return A {@link Mono} that emits a newly acquired
-     *         {@link Lock}
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
+     * @return A {@link Mono} that emits a newly acquired {@link Lock}
      */
     @GetExchange(ACQUIRE_LOCK)
-    Mono<Lock> acquire();
+    Mono<Lock> acquire(@RequestParam LockManager lockManager);
 
     /**
      * Acquire {@code permits} number of {@link Lock} objects.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param permits The number of permits to acquire
-     * @return A {@link Flux} that emits {@code permits} newly
-     *         acquired {@link Lock} objects
+     * @return A {@link Flux} that emits a {@link List} containing
+     *         {@code permits} newly acquired {@link Lock} objects
      */
     @GetExchange(ACQUIRE_LOCKS)
-    Flux<Lock> acquire(@RequestParam Integer permits);
+    Flux<Lock> acquire(@RequestParam LockManager lockManager,
+                       @RequestParam Integer permits);
 
     /**
-     * Release the {@code lock} back to the {@link Lock} manager.
+     * Release the lock back to the {@link Lock} manager.
      *
-     * @param lock A {@link Lock} to release
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     *         the {@link Lock} was released properly and
-     *         {@link Boolean#FALSE} otherwise.
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
+     * @param lock The {@link Lock} to release
+     * @return A {@link Mono} that emits a {@link Boolean} containing
+     *         {@link Boolean#TRUE} if the {@link Lock} was released
+     *         properly and {@link Boolean#FALSE} otherwise
      */
-    @PostExchange(RELEASE_LOCK)
-    Mono<Boolean> release(@RequestBody Lock lock);
+    @GetExchange(RELEASE_LOCK)
+    Mono<Boolean> release(@RequestParam LockManager lockManager,
+                          @RequestParam Lock lock);
 
     /**
      * Release the {@code locks} back to the {@link Lock} manager.
      *
-     * @param locks A {@link List} that contains {@link Lock} objects to release
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     *         the {@link Lock} was released properly and
-     *         {@link Boolean#FALSE} otherwise.
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
+     * @param locks A {@link List} containing {@link Lock} objects to
+     *              release
+     * @return A {@link Mono} that emits a {@link Boolean} containing
+     *         {@link Boolean#TRUE} if the {@link Lock} was released
+     *         properly and {@link Boolean#FALSE} otherwise
      */
     @PostExchange(RELEASE_LOCKS)
-    Mono<Boolean> release(@RequestBody List<Lock> locks);
+    Mono<Boolean> release(@RequestParam LockManager lockManager,
+                          @RequestBody List<Lock> locks);
 }

@@ -15,7 +15,8 @@ import static edu.vandy.lockmanager.common.Constants.SERVER_BASE_URL;
 @Configuration
 public class ClientBeans {
     /**
-     * @return A new instance of the {@link LockAPI}
+     * @return A new instance of the {@link LockAPI} that
+     *         is used with asynchronous WebFlux clients
      */
     @Bean
     public LockAPI getLockAPI() {
