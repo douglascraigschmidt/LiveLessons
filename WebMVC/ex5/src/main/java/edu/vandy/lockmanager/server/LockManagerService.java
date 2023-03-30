@@ -20,8 +20,10 @@ import java.util.stream.IntStream;
 import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
- * This Spring {@code Service} implements the {@link LockManagerController}
- * endpoint handler methods via an {@link ArrayBlockingQueue}.
+ * This Spring {@code Service} implements the {@link
+ * LockManagerController} endpoint handler methods via a {@link Map}
+ * of {@link LockManager} objects associated with the {@link
+ * ArrayBlockingQueue} objects that store the state of each semaphore.
  */
 @Service
 @ComponentScan("edu.vandy.lockmanager")
@@ -34,9 +36,12 @@ public class LockManagerService {
     private AsyncTaskExecutor mExecutor;
 
     /**
-     * ...
+     * A {@link Map} that associates {@link LockManager} objects with
+     * the {@link ArrayBlockingQueue} that stores the state of the
+     * semaphore.
      */
-    private final Map<LockManager, ArrayBlockingQueue<Lock>> mLockManagerMap =
+    private final Map<LockManager,
+                      ArrayBlockingQueue<Lock>> mLockManagerMap =
         new ConcurrentHashMap<>();
 
     /**
@@ -44,14 +49,14 @@ public class LockManagerService {
      *
      * @param permitCount The number of {@link Lock} objects to
      *                    manage
-     * @return A {@link LockManager} that uniquely identifies
-     * this semaphore.
+     * @return A {@link LockManager} that uniquely identifies this
+     *         semaphore
      */
     public LockManager create(Integer permitCount) {
         var availableLocks =
-            // Make an ArrayBlockQueue with "fair" semantics
-            // that limits concurrent access to the
-            // fixed number of available locks.
+            // Make an ArrayBlockQueue with "fair" semantics that
+            // limits concurrent access to the fixed number of
+            // available locks.
             new ArrayBlockingQueue<Lock>(permitCount,
                 true);
 
@@ -100,11 +105,17 @@ public class LockManagerService {
     }
 
     /**
-     * Acquire a {@link Lock}, blocking until one is available.
-     * Since this method is marked as {@code Async} Spring will
-     * run it in a background thread.
+     * Acquire a {@link Lock}, blocking until one is available.  Since
+     * this method is marked as {@code Async} Spring will run it in a
+     * background thread.
+     *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
+     * @param callback The {@link Callback} object that defines
+     *                 methods for handling the completion or failure
+     *                 of the asynchronous acquire operation
      */
-    // @Async
+    @Async
     public void acquire(LockManager lockManager,
                         Callback callback) {
         log("LockService.acquire() on " + lockManager);
@@ -148,9 +159,11 @@ public class LockManagerService {
     /**
      * Acquire {@code permits} number of {@link Lock} objects.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param permits The number of permits to acquire
      * @return A {@link DeferredResult<List>} containing {@code
-     * permits} number of acquired {@link Lock} objects
+     *         permits} number of acquired {@link Lock} objects
      */
     public DeferredResult<List<Lock>>
     acquire(LockManager lockManager,
@@ -222,10 +235,11 @@ public class LockManagerService {
      * @param acquiredLocks  The {@link List} of {@link Lock} objects
      *                       we're trying to acquire
      * @return The number of {@link Lock} objects in {@code
-     * acquiredLocks}
+     *         acquiredLocks}
      */
-    private Integer tryAcquireLock(ArrayBlockingQueue<Lock> availableLocks,
-                                   List<Lock> acquiredLocks) {
+    private Integer tryAcquireLock
+        (ArrayBlockingQueue<Lock> availableLocks,
+         List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
         var lock = availableLocks.poll();
 
@@ -252,10 +266,12 @@ public class LockManagerService {
     /**
      * Release the {@link Lock} so other Beings can acquire it.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param lock The {@link Lock} to release
      * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and {@link
-     * Boolean#FALSE} otherwise.
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise
      */
     public Boolean release(LockManager lockManager,
                            Lock lock) {
@@ -278,11 +294,13 @@ public class LockManagerService {
     /**
      * Release the {@code locks}.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
      * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and {@link
-     * Boolean#FALSE} otherwise.
+     *         the {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise
      */
     public Boolean release(LockManager lockManager,
                            List<Lock> locks) {

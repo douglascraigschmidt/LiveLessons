@@ -1,7 +1,8 @@
 package edu.vandy.lockmanager.common;
 
 /**
- * The {@code Callback} interface defines methods for handling the completion or failure of an asynchronous operation.
+ * The {@code Callback} interface defines methods for handling the
+ * completion or failure of an asynchronous operation.
  *
  */
 public interface Callback {

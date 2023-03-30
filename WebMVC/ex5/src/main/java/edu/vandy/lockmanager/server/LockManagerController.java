@@ -14,11 +14,10 @@ import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
- * This Spring {@code @RestController} defines methods that
- * provide a distributed lock manager.
+ * This Spring {@code @RestController} defines methods that provide a
+ * distributed lock manager.
  */
 @RestController
-@ComponentScan("edu.vandy.lockmanager")
 public class LockManagerController {
     /**
      * Auto-wire the {@link LockManagerController} to the
@@ -32,13 +31,14 @@ public class LockManagerController {
      *
      * @param permitCount The number of {@link Lock} objects to
      *                    manage
-     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     * the {@code permitCount} changed the state of the lock
-     * manager and {@link Boolean#FALSE} otherwise.
+     * @return A {@link LockManager} that is associated with
+     *         the state of the semaphore it manages
      */
     @GetMapping(CREATE)
     public LockManager create(@RequestParam Integer permitCount) {
-        log("LockController.create()");
+        log("LockController.create("
+            + permitCount
+            + ")");
 
         return mService
             // Forward to the service.
@@ -46,12 +46,14 @@ public class LockManagerController {
     }
 
     /**
-     * Acquire a {@link Lock}, blocking until one is available.
-     * A {@link DeferredResult} result is used to avoid blocking
-     * a thread in the Servlet thread pool.
+     * Acquire a {@link Lock}, blocking until one is available.  A
+     * {@link DeferredResult} result is used to avoid blocking a
+     * thread in the Servlet thread pool.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *         with the state of the semaphore it manages
      * @return A {@link DeferredResult} to a {@link Lock} that a
-     * client can acquire and hold during critical sections
+     *         client can acquire and hold during critical sections
      */
     @GetMapping(ACQUIRE_LOCK)
     public DeferredResult<Lock> acquire
@@ -63,8 +65,8 @@ public class LockManagerController {
             new DeferredResult<>();
 
         mService
-            // Forward to the service, which runs this method
-            // asynchronously.
+            // Forward to the service, which runs this method and the
+            // associated callback asynchronously.
             .acquire(lockManager, new Callback() {
                 @Override
                 public void onSuccess(Lock lock) {
@@ -86,9 +88,11 @@ public class LockManagerController {
     /**
      * Acquire {@code permits} number of {@link Lock} objects.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *         with the state of the semaphore it manages
      * @param permits The number of permits to acquire
      * @return A {@link DeferredResult<List>} containing {@code
-     * permits} number of acquired {@link Lock} objects
+     *         permits} number of acquired {@link Lock} objects
      */
     @GetMapping(ACQUIRE_LOCKS)
     DeferredResult<List<Lock>> acquire
@@ -106,10 +110,12 @@ public class LockManagerController {
     /**
      * Release the {@link Lock} so other clients can acquire it.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param lock The {@link Lock} to release
-     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and {@link
-     * Boolean#FALSE} otherwise.
+     * @return A {@link Boolean} that's {@link Boolean#TRUE} if the
+     *         {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
     @GetMapping(RELEASE_LOCK)
     public Boolean release(@RequestParam LockManager lockManager,
@@ -126,11 +132,13 @@ public class LockManagerController {
     /**
      * Release the {@code locks} so other clients can acquire them.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param locks A {@link List} that contains {@link Lock} objects
      *              to release
-     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and {@link
-     * Boolean#FALSE} otherwise.
+     * @return A {@link Boolean} that's {@link Boolean#TRUE} if the
+     *         {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
     @PostMapping(RELEASE_LOCKS)
     public Boolean release(@RequestParam LockManager lockManager,
