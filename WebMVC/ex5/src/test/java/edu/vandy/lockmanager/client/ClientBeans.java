@@ -6,6 +6,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
+import java.time.Duration;
+
 import static edu.vandy.lockmanager.common.Constants.LOCK_MANAGER_SERVER_BASE_URL;
 
 /**
@@ -37,10 +39,14 @@ public class ClientBeans {
             .builder(WebClientAdapter
                 .forClient(webClient))
 
+            // @@Doug
+            .blockTimeout(Duration.ofSeconds(30))
+
             // Build the HttpServiceProxyFactory instance.
             .build()
 
             // Create a new instance of the LockAPI interface.
             .createClient(LockAPI.class);
     }
+
 }
