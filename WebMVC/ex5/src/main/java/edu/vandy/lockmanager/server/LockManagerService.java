@@ -142,7 +142,6 @@ public class LockManagerService {
                     // Block until a Lock is available.
                     lock = availableLocks.take();
 
-                    // @@ Monte, this causes the client to timeout.
                     Thread.sleep(5000);
                 }
 
