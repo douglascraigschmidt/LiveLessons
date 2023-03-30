@@ -2,15 +2,15 @@ package edu.vandy.lockmanager;
 
 import edu.vandy.lockmanager.client.LockAPI;
 import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.common.LockManager;
 import edu.vandy.lockmanager.server.LockManagerApplication;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static edu.vandy.lockmanager.utils.Logger.log;
+import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
  * This program tests the features of the {@link LockManagerApplication}
@@ -100,7 +100,7 @@ class LockManagerTests {
                         .flatMap(client ->
                                  acquireAndReleaseMultipleLocks(client,
                                                                 lockManager,
-                                                                maxPermits)
+                                                                maxPermits))
 
                         // Collect the results into a List<Void>.
                         .collectList();

@@ -1,6 +1,8 @@
 package edu.vandy.lockmanager.server;
 
 import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.common.LockManager;
+import edu.vandy.lockmanager.utils.Utils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -8,10 +10,12 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
-import static edu.vandy.lockmanager.utils.Logger.log;
+import static edu.vandy.lockmanager.utils.Utils.generateUniqueId;
+import static edu.vandy.lockmanager.utils.Utils.log;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
@@ -38,36 +42,43 @@ public class LockManagerService {
      * Initialize the {@link Lock} manager.
      *
      * @param permitCount The number of {@link Lock} objects to manage
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     * the {@code permitCount} changed the state of the
-     * lock manager and {@link Boolean#FALSE} otherwise.
+     * @return A {@link Mono} that emits a {@link LockManager}
+     *         uniquely identifying this semaphore
      */
-    public Mono<Boolean> create(Integer permitCount) {
-        log("creating " + permitCount + " locks");
+    public Mono<LockManager> create(Integer permitCount) {
+        return Mono
+            .fromSupplier(() -> {
+                    var availableLocks =
+                        // Make an ArrayBlockQueue with "fair"
+                        // semantics that limits concurrent access to
+                        // the fixed number of available locks.
+                        new ArrayBlockingQueue<Lock>(permitCount,
+                                                     true);
 
-        // Check to see if mAvailableLocks should be initialized or
-        // resized.
-        if (mAvailableLocks == null || permitCount != mAvailableLocks.size()) {
-            // Clear the existing queue.
-            if (mAvailableLocks != null)
-                mAvailableLocks.clear();
+                    // Add each Lock to the queue.
+                    availableLocks.addAll(makeLocks(permitCount));
 
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount, true);
+                    // Create a new LockManager with a unique name.
+                    var lockManager =
+                        new LockManager(generateUniqueId(),
+                                        permitCount);
 
-            mAvailableLocks
-                // Add each Lock to the queue.
-                .addAll(makeLocks(permitCount));
+                    // Insert the new LockManager and the
+                    // ArrayBlockingQueue into the Map.
+                    mLockManagerMap.put(lockManager,
+                                        availableLocks);
 
-            return Mono
-                // Indicate something changed as a result of
-                // this call.
-                .just(TRUE);
-        } else
-            return Mono
-                // Indicate nothing changed as a result of this call.
-                .just(FALSE);
+                    log("LockService.create("
+                        + permitCount
+                        + ") "
+                        + "- made "
+                        +  lockManager
+                        + " with locks = "
+                        + availableLocks);
+
+                    // Return the new LockManager.
+                    return lockManager;
+                });
     }
 
     /**
@@ -91,107 +102,130 @@ public class LockManagerService {
     }
 
     /**
-     * Acquire a {@link Lock}, blocking until one is available,
-     * but returning a {@link Mono} so the client doesn't
-     * have to block.
+     * Acquire a {@link Lock}, blocking until one is available, but
+     * return a {@link Mono} so the caller needn't block.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @return A {@link Mono} that emits a {@link Lock}
      */
-    public Mono<Lock> acquire() {
-        log("LockService.acquire()");
+    public Mono<Lock> acquire(LockManager lockManager) {
+        log("LockService.acquire() on " + lockManager);
 
-        var result = Mono
+        return Mono
             // Acquire an available lock, which may block.
             .fromCallable(() -> {
-                log("LockService - requesting a Lock");
+                    log("LockService - requesting a Lock");
 
-                var lock = mAvailableLocks.poll();
+                    // Find the current state of the semaphore
+                    // associated with lockManager.
+                    var availableLocks =
+                        mLockManagerMap.get(lockManager);
 
-                if (lock != null)
-                    log("LockService - obtained Lock non-blocking "
-                        + lock);
-                else {
-                    // This call can block since it runs in a
-                    // virtual thread.
-                    lock = mAvailableLocks.take();
+                    if (availableLocks == null)
+                        throw new IllegalArgumentException
+                                     (lockManager.name);
+                    else {
+                        var lock = availableLocks.poll();
 
-                    log("LockService - obtained Lock blocking "
-                        + lock);
-                }
+                        if (lock != null)
+                            log("LockService - obtained Lock non-blocking "
+                                + lock);
+                        else {
+                            // This call can block since it runs in a
+                            // virtual thread.
+                            lock = availableLocks.take();
 
-                // Return the Lock.
-                return lock;
-            })
+                            log("LockService - obtained Lock blocking "
+                                + lock);
+                        }
 
+                        // Return the Lock.
+                        return lock;
+                    }
+                })
             // Display any exception that might occur.
             .doOnError(exception ->
-                log("LockService error - "
-                    + exception.getMessage()));
-
-        log("LockService - returning Mono");
-
-        // This Mono is returned before the lock is acquired.
-        return result;
+                       log("LockService error - "
+                           + exception.getMessage()))
+            .doOnSuccess(mono ->
+                         log("LockService - returning Mono"));
     }
 
     /**
      * Acquire {@code permits} number of {@link Lock} objects.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param permits The number of permits to acquire
      * @return A {@link Flux} that emits {@code permits} newly
-     * acquired {@link Lock} objects
+     *         acquired {@link Lock} objects
      */
-    public Flux<Lock> acquire(int permits) {
+    public Flux<Lock> acquire(LockManager lockManager,
+                              int permits) {
         log("LockService.acquire("
             + permits
             + ")");
 
-        // Create a List to hold the acquired Lock objects.
-        List<Lock> acquiredLocks =
-            new ArrayList<>(permits);
+        // Find the current state of the semaphore associated with
+        // lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
 
-        var flux = Mono
-            // Create a Mono that executes tryAcquireLock() method and
-            // emits its result.
-            .fromSupplier(() ->
-                tryAcquireLock(acquiredLocks))
+        if (availableLocks == null)
+            throw new IllegalArgumentException
+                (lockManager.name);
+        else {
+            // Create a List to hold the acquired Lock objects.
+            List<Lock> acquiredLocks =
+                new ArrayList<>(permits);
 
-            // Repeat the Mono indefinitely.
-            .repeat()
+            var flux = Mono
+                // Create a Mono that executes tryAcquireLock() method
+                // and emits its result.
+                .fromSupplier(() ->
+                              tryAcquireLock(availableLocks,
+                                             acquiredLocks))
 
-            // Take elements from the stream until the number of
-            // acquired locks is equal to 'permits'.
-            .takeUntil(result -> result.equals(permits))
+                // Repeat the Mono indefinitely.
+                .repeat()
 
-            // Log the results.
-            .doOnNext(result -> {
-                if (result == permits)
-                    log("LockService.acquire("
-                        + permits
-                        + ") = "
-                        + result);
-            })
-            // Transform the Flux<Integer> to a Flux<Lock> that emits
-            // the acquired Lock objects as individual elements.
-            .thenMany(Flux.fromIterable(acquiredLocks));
+                // Take elements from the stream until the number of
+                // acquired locks is equal to 'permits'.
+                .takeUntil(result -> result.equals(permits))
 
-        log("LockService.acquire("
-            + permits
-            + ") returning Flux");
-        return flux;
+                // Log the results.
+                .doOnNext(result -> {
+                        if (result == permits)
+                            log("LockService.acquire("
+                                + permits
+                                + ") = "
+                                + result);
+                    })
+                // Transform Flux<Integer> to Flux<Lock> that emits
+                // the acquired Lock objects as individual elements.
+                .thenMany(Flux.fromIterable(acquiredLocks));
+
+            log("LockService.acquire("
+                + permits
+                + ") returning Flux");
+            return flux;
+        }
     }
 
     /**
      * This helper method tries to acquire a {@link Lock}.
      *
+     * @param availableLocks Contains the state of the semaphore
      * @param acquiredLocks The {@link List} of {@link Lock} objects
      *                      we're trying to acquire
      * @return The number of {@link Lock} objects in {@code
-     * acquiredLocks}
+     *         acquiredLocks}
      */
-    private Integer tryAcquireLock(List<Lock> acquiredLocks) {
+    private Integer tryAcquireLock(ArrayBlockingQueue<Lock> availableLocks,
+                                   List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
-        var lock = mAvailableLocks.poll();
+        var lock = availableLocks.poll();
 
         if (lock != null) {
             // Add the acquired lock to the List.
@@ -204,7 +238,7 @@ public class LockManagerService {
             // locks.
             acquiredLocks
                 // offer() does not block.
-                .forEach(mAvailableLocks::offer);
+                .forEach(availableLocks::offer);
 
             // Clear out the acquiredLocks List.
             acquiredLocks.clear();
@@ -212,53 +246,76 @@ public class LockManagerService {
             // Indicate we need to restart from the beginning.
             return 0;
         }
-
-
     }
 
     /**
      * Release the {@link Lock}.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param lock The {@link Lock} to release
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and
-     * {@link Boolean#FALSE} otherwise.
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if the
+     *         {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
-    public Mono<Boolean> release(Lock lock) {
-        log("LockService.release("
+    public Mono<Boolean> release(LockManager lockManager,
+                                 Lock lock) {
+        log("LockService.release(["
             + lock
-            + ")");
+            + "]) on "
+            + lockManager);
 
+        // Try to get the locks associated with the lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
+
+        if (availableLocks == null)
+            return Mono
+                .just(FALSE);
         return Mono
             // Put the lock back into mAvailableQueue w/out blocking.
-            .just(mAvailableLocks.offer(lock));
+            .just(availableLocks.offer(lock));
     }
 
     /**
      * Release the {@code locks}.
      *
+     * @param lockManager The {@link LockManager} that is associated
+     *                    with the state of the semaphore it manages
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
-     * @return A {@link Mono} that emits {@link Boolean#TRUE} if
-     * the {@link Lock} was released properly and
-     * {@link Boolean#FALSE} otherwise.
+     * @return A {@link Mono} that emits {@link Boolean#TRUE} if the
+     *         {@link Lock} was released properly and {@link
+     *         Boolean#FALSE} otherwise.
      */
-    public Mono<Boolean> release(List<Lock> locks) {
+    public Mono<Boolean> release(LockManager lockManager,
+                                 List<Lock> locks) {
         log("LockService.release("
+            + locks.size()
+            + ") "
             + locks
-            + ")");
+            + " on "
+            + lockManager);
 
-        boolean allReleased = locks
-            // Convert List to a Stream.
-            .stream()
+        // Try to get the locks associated with lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
 
-            // Return true if all locks are put back
-            // into mAvailableLocks successfully (does
-            // not block).
-            .allMatch(mAvailableLocks::offer);
+        if (availableLocks == null)
+            return Mono
+                .just(FALSE);
+        else {
+            boolean allReleased = locks
+                // Convert List to a Stream.
+                .stream()
 
-        return Mono
-            // Return the result, either true or false.
-            .just(allReleased);
+                // Return true if all locks are put back into
+                // mAvailableLocks successfully (does not block).
+                .allMatch(availableLocks::offer);
+
+            return Mono
+                // Return the result, either true or false.
+                .just(allReleased);
+        }
     }
 }

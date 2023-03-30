@@ -1,6 +1,7 @@
 package edu.vandy.lockmanager.client;
 
 import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.common.LockManager;
 import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;

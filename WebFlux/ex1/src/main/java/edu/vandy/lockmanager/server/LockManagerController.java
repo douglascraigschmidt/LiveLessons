@@ -1,7 +1,7 @@
 package edu.vandy.lockmanager.server;
 
 import edu.vandy.lockmanager.common.Lock;
-import edu.vandy.lockmanager.utils.Logger;
+import edu.vandy.lockmanager.common.LockManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
+import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
  * This Spring {@code @RestController} defines methods that provide a
@@ -34,12 +35,13 @@ public class LockManagerController {
      *         associated with the state of the semaphore it manages
      */
     @GetMapping(CREATE)
-    public Mono<LockManager> create(@RequestParam Integer lockCount) {
-        Logger.log("LockController.create()");
+    public Mono<LockManager> create
+        (@RequestParam Integer permitCount) {
+        log("LockController.create()");
 
         return mService
             // Forward to the service.
-            .create(lockCount);
+            .create(permitCount);
     }
 
     /**
@@ -51,11 +53,11 @@ public class LockManagerController {
      */
     @GetMapping(ACQUIRE_LOCK)
     public Mono<Lock> acquire(@RequestParam LockManager lockManager) {
-        Logger.log("LockController.acquire()");
+        log("LockController.acquire()");
 
         return mService
             // Forward to the service.
-            .acquire();
+            .acquire(lockManager);
     }
 
     /**
@@ -70,13 +72,13 @@ public class LockManagerController {
     @GetMapping(ACQUIRE_LOCKS)
     Flux<Lock> acquire(@RequestParam LockManager lockManager,
                        Integer permits) {
-        Logger.log("LockController.acquire("
+        log("LockController.acquire("
                   + permits
                   + ")");
 
         return mService
             // Forward to the service.
-            .acquire(permits);
+            .acquire(lockManager, permits);
     }
 
     /**
@@ -91,14 +93,14 @@ public class LockManagerController {
      */
     @GetMapping(RELEASE_LOCK)
     public Mono<Boolean> release(@RequestParam LockManager lockManager,
-                                 @RequestBody Lock lock) {
-        Logger.log("LockController.release("
+                                 @RequestParam Lock lock) {
+        log("LockController.release("
                   + lock
                   + ")");
 
         return mService
             // Forward to the service.
-            .release(lock);
+            .release(lockManager, lock);
     }
 
     /**
@@ -116,13 +118,13 @@ public class LockManagerController {
     public Mono<Boolean> release
         (@RequestParam LockManager lockManager,
          @RequestBody List<Lock> locks) {
-        Logger.log("LockController.release("
+        log("LockController.release("
                   + locks
                   + ")");
 
         return mService
             // Forward to the service.
-            .release(locks);
+            .release(lockManager, locks);
     }
 }
 

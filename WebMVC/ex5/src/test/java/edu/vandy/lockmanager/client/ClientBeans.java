@@ -17,6 +17,11 @@ import static edu.vandy.lockmanager.common.Constants.LOCK_MANAGER_SERVER_BASE_UR
 @Configuration
 public class ClientBeans {
     /**
+     * Set the timeout duration for blocking reads to be 60 seconds.
+     */
+    private long sTIMEOUT_DURATION = 60;
+
+    /**
      * @return A new instance of the {@link LockAPI} that is used with
      *         synchronous WebMVC clients
      */
@@ -40,8 +45,10 @@ public class ClientBeans {
             .builder(WebClientAdapter
                 .forClient(webClient))
 
-            // @@Doug
-            .blockTimeout(Duration.ofSeconds(30))
+            // Set the block timeout in case the semaphore is
+            // highly contested.
+            .blockTimeout(Duration
+                .ofSeconds(sTIMEOUT_DURATION))
 
             // Build the HttpServiceProxyFactory instance.
             .build()
