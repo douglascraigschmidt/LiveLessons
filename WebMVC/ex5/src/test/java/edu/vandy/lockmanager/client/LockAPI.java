@@ -1,6 +1,7 @@
 package edu.vandy.lockmanager.client;
 
 import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.common.LockManager;
 import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,20 +20,21 @@ public interface LockAPI {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param maxLocks The total number of {@link Lock}
+     * @param permitCount The total number of {@link Lock}
      *                 objects to create
      * @return A {@link Boolean} containing {@link Boolean#TRUE} if
      *         the {@code permitCount} changed the state of the lock
      *         manager and {@link Boolean#FALSE} otherwise.
      */
-    @PostExchange(CREATE)
-    Boolean create(@RequestBody Integer maxLocks);
+    @GetExchange(CREATE)
+    LockManager create(@RequestParam Integer permitCount);
 
     /**
      * @return A newly acquired {@link Lock}
      */
     @GetExchange(ACQUIRE_LOCK)
-    Lock acquire();
+    // Lock acquire(@RequestParam LockManager lockManager);
+    Lock acquire(@RequestParam LockManager lockManager);
 
     /**
      * Acquire {@code permits} number of {@link Lock} objects.
@@ -42,7 +44,8 @@ public interface LockAPI {
      *         acquired {@link Lock} objects
      */
     @GetExchange(ACQUIRE_LOCKS)
-    List<Lock> acquire(@RequestParam Integer permits);
+    List<Lock> acquire(@RequestParam LockManager lockManager,
+                       @RequestParam Integer permits);
 
     /**
      * Release the lock back to the {@link Lock} manager.
@@ -52,8 +55,9 @@ public interface LockAPI {
      *         the {@link Lock} was released properly and {@link
      *         Boolean#FALSE} otherwise.
      */
-    @PostExchange(RELEASE_LOCK)
-    Boolean release(@RequestBody Lock lock);
+    @GetExchange(RELEASE_LOCK)
+    Boolean release(@RequestParam LockManager lockManager,
+                    @RequestParam Lock lock);
 
     /**
      * Release the {@code locks} back to the {@link Lock} manager.
@@ -65,5 +69,6 @@ public interface LockAPI {
      *         Boolean#FALSE} otherwise.
      */
     @PostExchange(RELEASE_LOCKS)
-    Boolean release(@RequestBody List<Lock> locks);
+    Boolean release(@RequestParam LockManager lockManager,
+                    @RequestBody List<Lock> locks);
 }

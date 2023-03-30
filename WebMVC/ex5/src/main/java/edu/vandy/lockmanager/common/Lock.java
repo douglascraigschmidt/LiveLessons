@@ -29,6 +29,6 @@ public class Lock {
      */
     @Override
     public String toString() {
-       return "lock#" + id;
+       return id;
     }
 }

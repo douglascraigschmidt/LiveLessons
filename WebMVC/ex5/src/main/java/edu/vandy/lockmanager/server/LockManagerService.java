@@ -1,72 +1,82 @@
 package edu.vandy.lockmanager.server;
 
+import edu.vandy.lockmanager.common.Callback;
 import edu.vandy.lockmanager.common.Lock;
+import edu.vandy.lockmanager.common.LockManager;
+import edu.vandy.lockmanager.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
-import static edu.vandy.lockmanager.utils.Logger.log;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
+import static edu.vandy.lockmanager.utils.Utils.log;
 
 /**
  * This Spring {@code Service} implements the {@link LockManagerController}
  * endpoint handler methods via an {@link ArrayBlockingQueue}.
  */
 @Service
+@ComponentScan("edu.vandy.lockmanager")
 public class LockManagerService {
     /**
-     * Create a new {@code VirtualThreadPerTaskExecutor} that's
-     * used to run incoming requests off the servlet thread.
+     * Obtain the underlying {@link AsyncTaskExecutor} created by
+     * Spring.
      */
-    private final ExecutorService mExecutor = Executors
-        .newVirtualThreadPerTaskExecutor();
+    @Autowired
+    private AsyncTaskExecutor mExecutor;
 
     /**
-     * An ArrayBlockingQueue that limits concurrent access to the
-     * fixed number of available locks managed by the
-     * {@link LockManagerService}.
+     * ...
      */
-    private ArrayBlockingQueue<Lock> mAvailableLocks;
+    private final Map<LockManager, ArrayBlockingQueue<Lock>> mLockManagerMap =
+        new ConcurrentHashMap<>();
 
     /**
      * Initialize the {@link Lock} manager.
      *
      * @param permitCount The number of {@link Lock} objects to
      *                    manage
-     * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     *         the {@code permitCount} changed the state of the
-     *         lock manager and {@link Boolean#FALSE} otherwise.
+     * @return A {@link LockManager} that uniquely identifies
+     * this semaphore.
      */
-    public Boolean create(Integer permitCount) {
-        log("creating " + permitCount + " locks");
+    public LockManager create(Integer permitCount) {
+        var availableLocks =
+            // Make an ArrayBlockQueue with "fair" semantics
+            // that limits concurrent access to the
+            // fixed number of available locks.
+            new ArrayBlockingQueue<Lock>(permitCount,
+                true);
 
-        // Check to see if mAvailableLocks should be initialized or
-        // resized.
-        if (mAvailableLocks == null 
-            || permitCount != mAvailableLocks.size()) {
-            // Clear the existing queue.
-            if (mAvailableLocks != null)
-                mAvailableLocks.clear();
+        // Add each Lock to the queue.
+        availableLocks.addAll(makeLocks(permitCount));
 
-            mAvailableLocks =
-                // Make an ArrayBlockQueue with "fair" semantics.
-                new ArrayBlockingQueue<>(permitCount, true);
+        // Create a new LockManager with a unique name.
+        var lockManager =
+            new LockManager(Utils.generateUniqueId(),
+                            permitCount);
 
-            // Add each Lock to the queue.
-            mAvailableLocks.addAll(makeLocks(permitCount));
+        // Insert the new LockManager and the ArrayBlockingQueue
+        // into the Map.
+        mLockManagerMap.put(lockManager,
+                            availableLocks);
 
-            // Indicate something changed as a result of this call.
-            return TRUE;
-        } else
-            // Indicate nothing changed as a result of this call.
-            return FALSE;
+        log ("get() = " + mLockManagerMap.get(lockManager));
+
+        log("LockService.create() "
+            + lockManager
+        + " with locks = "
+        + availableLocks);
+
+        // Return the new LockManager.
+        return lockManager;
     }
 
     /**
@@ -91,59 +101,48 @@ public class LockManagerService {
 
     /**
      * Acquire a {@link Lock}, blocking until one is available.
-     *
-     * @return A {@link DeferredResult<Lock>}
+     * Since this method is marked as {@code Async} Spring will
+     * run it in a background thread.
      */
-    public DeferredResult<Lock> acquire() {
-        log("LockService.acquire()");
+    // @Async
+    public void acquire(LockManager lockManager,
+                        Callback callback) {
+        log("LockService.acquire() on " + lockManager);
 
-        // Create a DeferredResult containing the List of Lock
-        // objects.
-        DeferredResult<Lock> deferredResult =
-            new DeferredResult<>();
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
 
-        try {
-            // Run the computation off the Servlet thread.
-            mExecutor
-                .submit(() -> {
-                    log("LockService - requesting a Lock");
+        if (availableLocks == null)
+            callback.onError(new IllegalArgumentException
+                (lockManager.name));
+        else {
+            try {
+                log("LockService - requesting a Lock");
 
-                    try {
-                        var lock = mAvailableLocks
-                            .poll();
+                // Try to acquire a Lock without blocking.
+                var lock = availableLocks
+                    .poll();
 
-                        if (lock != null)
-                            log("LockService -- non-blocking lock acquire");
-                        else {
-                            log("LockService -- blocking for lock acquire");
+                if (lock != null)
+                    log("LockService -- non-blocking lock acquire");
+                else {
+                    log("LockService -- blocking for lock acquire");
 
-                            // Block until a Lock is available.
-                            lock = mAvailableLocks.take();
+                    // Block until a Lock is available.
+                    lock = availableLocks.take();
+                }
 
-                            Thread.sleep(5000);
-                        }
+                // Set the result to the acquired Lock.
+                callback.onSuccess(lock);
 
-                        // Set the result to the acquired Lock.
-                        deferredResult
-                            .setResult(lock);
-
-                        log("LockService - returning Lock "
-                            + lock);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        } catch (Exception exception) {
-            log("Catch exception "
-                + exception.getMessage());
-            deferredResult
-                .setResult(new Lock(exception.getMessage()));
+                log("LockService - returning Lock["
+                    + lock
+                    + "]");
+            } catch (Exception e) {
+                // Set the error.
+                callback.onError(e);
+            }
         }
-        log("returning deferredResult");
-
-        // Return the deferredResult before the lock
-        // are obtained.
-        return deferredResult;
     }
 
     /**
@@ -153,52 +152,62 @@ public class LockManagerService {
      * @return A {@link DeferredResult<List>} containing {@code
      * permits} number of acquired {@link Lock} objects
      */
-    public DeferredResult<List<Lock>> acquire(int permits) {
-        log("LockService.acquire(permits)");
+    public DeferredResult<List<Lock>>
+    acquire(LockManager lockManager,
+            int permits) {
+        log("LockService.acquire("
+            + permits
+            + ")");
 
         // Create a DeferredResult containing the List of Lock
         // objects.
         DeferredResult<List<Lock>> deferredResult =
             new DeferredResult<>();
 
-        try {
-            // Run the computation off the Servlet thread.
-            mExecutor
-                .submit(() -> {
-                    // Create a List to hold the acquired Lock objects.
-                    List<Lock> acquiredLocks =
-                        new ArrayList<>(permits);
+        // Try to get the locks associated with the lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
 
-                    while (tryAcquireLock(acquiredLocks) != permits)
-                        continue;
-
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    log("LockService - got all "
-                        + acquiredLocks.size()
-                        + " lock(s) "
-                        + acquiredLocks);
-
-                    // Set the deferredResult to the acquired List
-                    // of Lock objects.
-                    deferredResult
-                        .setResult(acquiredLocks);
-
-                    log("LockService - returning acquired locks "
-                        + acquiredLocks);
-                });
-        } catch (Exception exception) {
-            log("Catch exception "
-                + exception.getMessage());
-            // Return an error message.
-            var lock = new Lock(exception.getMessage());
-
+        if (availableLocks == null)
             deferredResult
-                .setResult(List.of(lock));
+                .setErrorResult(new IllegalArgumentException
+                    (lockManager.name));
+        else {
+            try {
+                // Run the computation off the Servlet thread.
+                mExecutor
+                    .submit(() -> {
+                        // Create a List to hold the acquired Lock objects.
+                        List<Lock> acquiredLocks =
+                            new ArrayList<>(permits);
+
+                        while (tryAcquireLock(availableLocks,
+                            acquiredLocks) != permits)
+                            continue;
+
+                        log("LockService - got all "
+                            + acquiredLocks.size()
+                            + " lock(s) "
+                            + acquiredLocks);
+
+                        // Set the deferredResult to the acquired List
+                        // of Lock objects.
+                        deferredResult
+                            .setResult(acquiredLocks);
+
+                        log("LockService - returning acquired locks "
+                            + acquiredLocks);
+                    });
+            } catch (Exception exception) {
+                log("Catch exception "
+                    + exception.getMessage());
+                // Return an error message.
+
+                deferredResult
+                    .setErrorResult(exception);
+            }
         }
+
         log("returning deferredResult");
 
         // Return the deferredResult before the locks
@@ -209,14 +218,16 @@ public class LockManagerService {
     /**
      * This helper method tries to acquire a {@link Lock}.
      *
-     * @param acquiredLocks The {@link List} of {@link Lock} objects
-     *                      we're trying to acquire
+     * @param availableLocks The available locks
+     * @param acquiredLocks  The {@link List} of {@link Lock} objects
+     *                       we're trying to acquire
      * @return The number of {@link Lock} objects in {@code
-     *         acquiredLocks}
+     * acquiredLocks}
      */
-    private Integer tryAcquireLock(List<Lock> acquiredLocks) {
+    private Integer tryAcquireLock(ArrayBlockingQueue<Lock> availableLocks,
+                                   List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
-        var lock = mAvailableLocks.poll();
+        var lock = availableLocks.poll();
 
         if (lock != null) {
             // Add the acquired lock to the List.
@@ -228,7 +239,7 @@ public class LockManagerService {
             // Not enough locks available, so release
             // the acquired locks;.
             acquiredLocks
-                .forEach(mAvailableLocks::offer);
+                .forEach(availableLocks::offer);
 
             // Clear out the acquiredLocks List.
             acquiredLocks.clear();
@@ -243,13 +254,25 @@ public class LockManagerService {
      *
      * @param lock The {@link Lock} to release
      * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     *         the {@link Lock} was released properly and {@link
-     *         Boolean#FALSE} otherwise.
+     * the {@link Lock} was released properly and {@link
+     * Boolean#FALSE} otherwise.
      */
-    public Boolean release(Lock lock) {
-        log("LockService.release() " + lock);
-        // Put the Lock parameter back to the queue.
-        return mAvailableLocks.offer(lock);
+    public Boolean release(LockManager lockManager,
+                           Lock lock) {
+        log("LockService.release(["
+            + lock
+            + "]) on "
+            + lockManager);
+
+        // Try to get the locks associated with the lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
+
+        if (availableLocks == null)
+            return false;
+        else
+            // Put the Lock parameter back to the queue.
+            return availableLocks.offer(lock);
     }
 
     /**
@@ -258,20 +281,33 @@ public class LockManagerService {
      * @param locks A {@link List} that contains {@link Lock}
      *              objects to release
      * @return A {@link Boolean} that emits {@link Boolean#TRUE} if
-     *         the {@link Lock} was released properly and {@link
-     *         Boolean#FALSE} otherwise.
+     * the {@link Lock} was released properly and {@link
+     * Boolean#FALSE} otherwise.
      */
-    public Boolean release(List<Lock> locks) {
-        log("LockService.release(locks) "
-            + locks);
+    public Boolean release(LockManager lockManager,
+                           List<Lock> locks) {
+        log("LockService.release("
+            + locks.size()
+            + ") "
+            + locks
+            + " on "
+            + lockManager);
 
-        return locks
-            // Convert List to a Stream.
-            .stream()
+        // Try to get the locks associated with the lockManager.
+        var availableLocks =
+            mLockManagerMap.get(lockManager);
 
-            // Return true if all locks are put back
-            // into mAvailableLocks successfully (does
-            // not block).
-            .allMatch(mAvailableLocks::offer);
+        if (availableLocks == null)
+            return false;
+        else {
+            return locks
+                // Convert List to a Stream.
+                .stream()
+
+                // Return true if all locks are put back
+                // into mAvailableLocks successfully (does
+                // not block).
+                .allMatch(availableLocks::offer);
+        }
     }
 }
