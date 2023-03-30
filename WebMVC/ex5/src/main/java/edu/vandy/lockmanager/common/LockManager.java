@@ -46,19 +46,31 @@ public class LockManager {
         name = "default";
     }
 
+    /**
+     * @return A {@link String} representation
+     */
     @Override
     public String toString() {
         return name;
     }
 
+    /**
+     * Overrides the {@code equals()} method to compare two {@link
+     * LockManager} objects based on their {@code name}.
+     *
+     * @param object The other {@link Object} to compare with this
+     *               object
+     * @return true if the object names are equal, false otherwise
+     */
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof LockManager other) {
-            return this.name.equals(other.name);
-        }
-        return false;
+    public boolean equals(Object object) {
+        return object instanceof LockManager other
+            && this.name.equals(other.name);
     }
 
+    /**
+     * @return A hash of the {@link LockManager} {@code name}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(name);
