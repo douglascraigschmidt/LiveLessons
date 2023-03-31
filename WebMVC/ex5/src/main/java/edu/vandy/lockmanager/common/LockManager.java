@@ -1,10 +1,11 @@
 package edu.vandy.lockmanager.common;
 
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- * This class is used to keep track of allocated {@link LockManager}
- * objects.
+ * This class is used to keep track of allocated
+ * {@link ArrayBlockingQueue} objects.
  */
 public class LockManager {
     /**
@@ -18,22 +19,20 @@ public class LockManager {
     public Integer permitCount;
 
     /**
-     * @return The unique name of the {@link LockManager}
-     *
-    public String getName() {
-        return mName;
-    }
-    */
-
-    /**
      * Set the unique name of the {@link LockManager}.
      *
-     * @param name The unique name of the {@link LockManager}
+     * @param name The unique name of this {@link LockManager}
      */
     public LockManager(String name) {
         this.name = name;
     }
 
+    /**
+     * Constructor initializes the name of the {@link LockManager}.
+     *
+     * @param name The unique name of this {@link LockManager}
+     * @param permitCount The number of permits managed
+     */
     public LockManager(String name,
                        Integer permitCount) {
         this.name = name + ":[" + permitCount + "]";
@@ -64,6 +63,7 @@ public class LockManager {
      */
     @Override
     public boolean equals(Object object) {
+        // Fun use of a recent Java feature.
         return object instanceof LockManager other
             && this.name.equals(other.name);
     }

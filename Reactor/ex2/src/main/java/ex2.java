@@ -1,5 +1,5 @@
 import common.Options;
-import common.PrimeUtils;
+import utils.PrimeUtils;
 import org.reactivestreams.Subscriber;
 import publisher.Publisher;
 import reactor.core.Disposable;
@@ -16,9 +16,9 @@ import java.util.function.Function;
 import static publisher.Publisher.sPendingItemCount;
 
 /**
- * This program applies Project Reactor features to check the primality
- * of randomly generate {@link Integer} objects via a publisher and
- * a subscriber that (conditionally) run in different threads/schedulers.
+     * This program applies Project Reactor features to check the primality
+     * of randomly generate {@link Integer} objects via a publisher and
+     * a subscriber that (conditionally) run in different threads/schedulers.
  */
 public class ex2 {
     /**
@@ -156,7 +156,7 @@ public class ex2 {
                      Mono<PrimeUtils.Result>> makePrimeCheckFunction
         (Function<Integer, Integer> primeChecker) {
         return number -> Mono
-            .fromCallable(() -> number)
+            .fromSupplier(() -> number)
 
             // Subscriber may run in different thread(s).
             .publishOn(mSubscriberScheduler)

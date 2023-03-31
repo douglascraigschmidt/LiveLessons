@@ -6,14 +6,17 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import utils.ExceptionUtils;
 import common.Options;
-import common.PrimeUtils;
+import utils.PrimeUtils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A {@link Flux} {@link Subscriber} that blocks the caller.
+ * A {@link Flux} {@link Subscriber} that consumes random large
+ * Integer objects from the publisher and allows the subscriber
+ * thread to block.
  */
+@SuppressWarnings("ReactiveStreamsSubscriberImplementation")
 public class BlockingSubscriber
        implements Subscriber<PrimeUtils.Result>,
                   Disposable {
@@ -88,7 +91,8 @@ public class BlockingSubscriber
         // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
 
-        Options.debug(TAG, "subscriber pending items: " + pendingItems);
+        Options.debug(TAG, "subscriber pending items: "
+                      + pendingItems);
     }
 
     /**

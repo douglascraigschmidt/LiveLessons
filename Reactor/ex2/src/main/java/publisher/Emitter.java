@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * This Java utility class defines static methods that emit random {@link Integer}s
- * with either backpressure enabled or disabled.
+ * This Java utility class defines static methods that emit
+ * random {@link Integer} objects with backpressure disabled.
  */
 public final class Emitter {
     /**
