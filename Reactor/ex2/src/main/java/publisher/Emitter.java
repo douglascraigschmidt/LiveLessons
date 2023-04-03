@@ -53,11 +53,12 @@ public final class Emitter {
                 int pendingItems =
                     pendingItemCount.incrementAndGet();
 
-                Options.debug(TAG,
-                              "published item: "
-                              + item
-                              + ", pending items = "
-                              + pendingItems);
+                if (Options.instance().printDiagnostic(pendingItems))
+                    Options.debug(TAG,
+                                  "published item: "
+                                  + item
+                                  + ", pending items = "
+                                  + pendingItems);
 
                 // Only publish an item if the sink hasn't been
                 // cancelled.

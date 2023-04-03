@@ -82,7 +82,15 @@ public class BackpressureSubscriber
         mSubscription = subscription;
 
         // Set the initial request size.
-        mSubscription.request(mREQUEST_SIZE);
+        mSubscription.request(nextRequestSize());
+    }
+
+    /**
+     * @return The next request size for the publisher.
+     */
+    public int nextRequestSize() {
+        // Request only this many items.
+        return mREQUEST_SIZE;
     }
 
     /**
@@ -91,21 +99,33 @@ public class BackpressureSubscriber
      */
     @Override
     public void onNext(PrimeUtils.Result result) {
-        PrimeUtils.printResult(result);
+        // Print the results of prime number checking
+        if (result.mSmallestFactor != 0) {
+            Options.debug(TAG,
+                result.mPrimeCandidate
+                    + " is not prime with smallest factor "
+                    + result.mSmallestFactor);
+        } else {
+            Options.debug(TAG,
+                result.mPrimeCandidate
+                    + " is prime");
+        }
 
         // Store the current pending item count. 
         int pendingItems = mPendingItemCount.decrementAndGet();
 
-        Options.debug(TAG, "subscriber pending items: "
-                      + pendingItems);
+        Options.debug(TAG, "subscriber pending items: " + pendingItems);
+
+        // Compute 70% of mREQUEST_SIZE.
+        int seventyPercent = (int) (mREQUEST_SIZE * (70.0f / 100.0f));
 
         // Check to see if we've consumed 70% our window of items.
-        if (++mItemsProcessedSinceLastRequest == mREQUEST_SIZE) {
+        if (++mItemsProcessedSinceLastRequest == seventyPercent) {
             Options.debug(TAG,
                 "subscriber requesting next tranche of items");
 
             // Request next tranche of items.
-            mSubscription.request(mREQUEST_SIZE);
+            mSubscription.request(nextRequestSize());
 
             // Reset the counter.
             mItemsProcessedSinceLastRequest = 0;

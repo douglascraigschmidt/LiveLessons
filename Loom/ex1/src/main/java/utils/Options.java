@@ -32,7 +32,7 @@ public class Options {
     /**
      * The iteration when a diagnostic should be printed.
      */
-    private int mPrintDiagnostic = 100;
+    private int mPrintDiagnosticOnIteration = 100;
 
     /**
      * @return The one and only singleton uniqueInstance
@@ -72,7 +72,7 @@ public class Options {
      */
     public boolean printDiagnostic(int i) {
         return mDiagnosticsEnabled
-                && (i % mPrintDiagnostic) == 0;
+                && (i % mPrintDiagnosticOnIteration) == 0;
     }
 
     /**
@@ -84,7 +84,7 @@ public class Options {
                 switch (argv[argc]) {
                     case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     case "-n" -> mNumberOfElements = Integer.parseInt(argv[argc + 1]);
-                    case "-p" -> mPrintDiagnostic = Integer.parseInt(argv[argc + 1]);
+                    case "-p" -> mPrintDiagnosticOnIteration = Integer.parseInt(argv[argc + 1]);
                     case "-t" -> mVirtualThreads = argv[argc + 1].equals("v");
                     default -> {
                         printUsage();
@@ -99,10 +99,10 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-d [true|false]");
-        System.out.println("-n [numberOfElements]");
-        System.out.println("-p [printDiagnostic]");
-        System.out.println("-t [p|v]");
+        System.out.println("-d [true|false]\n"
+                           + "-i [iteration]\n"
+                           + "-n [numberOfElements]\n"
+                           + "-t [p|v]";
     }
 
     /**

@@ -16,9 +16,9 @@ import java.util.function.Function;
 import static publisher.Publisher.sPendingItemCount;
 
 /**
-     * This program applies Project Reactor features to check the primality
-     * of randomly generate {@link Integer} objects via a publisher and
-     * a subscriber that (conditionally) run in different threads/schedulers.
+ * This program applies Project Reactor features to check the primality
+ * of randomly generate {@link Integer} objects via a publisher and
+ * a subscriber that (conditionally) run in different threads/schedulers.
  */
 public class ex2 {
     /**
@@ -31,7 +31,7 @@ public class ex2 {
      * objects in its own thread.
      */
     private final Scheduler mPublisherScheduler = Schedulers
-            .newParallel("publisher", 1);
+        .newParallel("publisher", 1);
 
     /**
      * The {@link Scheduler} used to consume random integers by checking
@@ -40,11 +40,30 @@ public class ex2 {
      */
     private final Scheduler mSubscriberScheduler;
 
+    // Track all disposables to dispose them all at once.
     /**
      * A {@link Subscriber} that blocks the caller.
      */
-    private final BlockingSubscriber mSubscriber =
-        new BlockingSubscriber(sPendingItemCount);
+    private final BlockingSubscriber<PrimeUtils.Result> mSubscriber =
+        new BlockingSubscriber<>(result -> {
+
+
+                // Store the current pending item count.
+                int pendingItems = Publisher
+                    .sPendingItemCount.decrementAndGet();
+
+                if (Options.instance().printDiagnostic(pendingItems)) {
+                    // Print the results of prime number checking.
+                    PrimeUtils.printResult(result);
+                    Options.debug(TAG, "subscriber pending items: "
+                        + pendingItems);
+                }
+        },
+        throwable -> {
+            Options.print("failure " + throwable);
+        },
+        () -> Options.print("completed"),
+        Integer.MAX_VALUE);
 
     /**
      * Track all disposables to dispose them all at once.
@@ -57,7 +76,7 @@ public class ex2 {
     static public void main(String[] argv) {
         // Create an instance to run the test.
         new ex2(argv).run(PrimeUtils::isPrime,
-                          "pub/sub prime checker");
+            "pub/sub prime checker");
     }
 
     /**
@@ -71,16 +90,15 @@ public class ex2 {
         mSubscriberScheduler = Options.instance().parallel()
             // Choose a different scheduler if we're running in parallel.
             ? Schedulers.newParallel("subscriber",
-                                     Options.instance().parallelism())
+            Options.instance().parallelism())
 
             // Otherwise run everything on the publisher's scheduler.
             : mPublisherScheduler;
 
-        // Track all disposables to dispose them all at once.
         mDisposables = Disposables
             .composite(mPublisherScheduler,
-                       mSubscriberScheduler,
-                       mSubscriber);
+                mSubscriberScheduler,
+                mSubscriber);
     }
 
     /**
@@ -89,22 +107,23 @@ public class ex2 {
      * @param primeChecker A {@link Function} that maps candidate
      *                     primes to their smallest factor (if they
      *                     aren't prime) or 0 if they are prime
-     * @param testName Name of the test
+     * @param testName     Name of the test
      */
     @SuppressWarnings("SameParameterValue")
     private void run
-        (Function<Integer, Integer> primeChecker,
-         String testName) {
+    (Function<Integer, Integer> primeChecker,
+     String testName) {
         Options.print("Starting "
-                      + testName
-                      + " with count = "
-                      + Options.instance().count());
+            + testName
+            + " with count = "
+            + Options.instance().count());
 
-        // Generate a list of 'count' random Integers whose values
+        // Generate a list of 'count' odd random Integers whose values
         // don't exceed the given maximum.
         var randomIntegers = RandomUtils
             .generateRandomIntegers(Options.instance().count(),
-                                    Options.instance().maxValue());
+                Options.instance().maxValue(),
+                true);
 
         // This Function asynchronously determines if a random # is
         // prime or not.
@@ -115,12 +134,12 @@ public class ex2 {
             // Create a publisher that runs on its own scheduler and
             // returns a Flux that emits random Integer objects.
             .publishIntegers(mPublisherScheduler,
-                             randomIntegers)
+                randomIntegers)
 
             // Conditionally enable logging.
             .transform(ReactorUtils
-                       // Conditionally enable logging.
-                       .logIf(Options.instance().loggingEnabled()))
+                // Conditionally enable logging.
+                .logIf(Options.instance().loggingEnabled()))
 
             // Concurrently (maybe) check each random # to see if it's
             // prime.  This operation may run on the subscriber's
@@ -150,11 +169,11 @@ public class ex2 {
      * @param primeChecker A {@link Function} that checks a number's
      *                     primality
      * @return A {@link Function} that  asynchronously determines if a
-     *         random # is prime or not
+     * random # is prime or not
      */
     private Function<Integer,
-                     Mono<PrimeUtils.Result>> makePrimeCheckFunction
-        (Function<Integer, Integer> primeChecker) {
+        Mono<PrimeUtils.Result>> makePrimeCheckFunction
+    (Function<Integer, Integer> primeChecker) {
         return number -> Mono
             .fromSupplier(() -> number)
 
@@ -163,8 +182,8 @@ public class ex2 {
 
             // Check if the # is prime.
             .map(__ -> PrimeUtils
-                 .checkIfPrime(number,
-                               primeChecker));
+                .checkIfPrime(number,
+                    primeChecker));
     }
 
     /**

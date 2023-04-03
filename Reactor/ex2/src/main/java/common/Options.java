@@ -31,6 +31,11 @@ public class Options {
     private boolean mDiagnosticsEnabled = false;
 
     /**
+     * The iteration when a diagnostic should be printed.
+     */
+    private int mPrintDiagnosticOnIteration = 10;
+
+    /**
      * Controls whether backpressure is enabled (defaults to true).
      */
     private boolean mBackPressureEnabled = true;
@@ -81,6 +86,15 @@ public class Options {
      */
     public boolean diagnosticsEnabled() {
         return mDiagnosticsEnabled;
+    }
+
+    /**
+     * @return True if {@code i} modulus the print diagnostic == 0,
+     *         else false
+     */
+    public boolean printDiagnostic(int i) {
+        return mDiagnosticsEnabled
+                && (i % mPrintDiagnosticOnIteration) == 0;
     }
 
     /**
@@ -161,6 +175,7 @@ public class Options {
                     case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
                     case "-l" -> mLoggingEnabled = argv[argc + 1].equals("true");
                     case "-c" -> mCount = Integer.parseInt(argv[argc + 1]);
+                    case "-i" -> mPrintDiagnosticOnIteration = Integer.parseInt(argv[argc + 1]);
                     case "-m" -> mMaxValue = Integer.parseInt(argv[argc + 1]);
                     case "-p" -> mParallel = argv[argc + 1].equals("true");
                     case "-P" -> mParallelism = Integer.parseInt(argv[argc + 1]);
@@ -183,12 +198,13 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-c [n] "
-                           + "-d [true|false] "
-                           + "-l [true|false] "
-                           + "-m [maxValue] "
-                           + "-p [true|false]"
-                           + "-P [parallelism]"
+        System.out.println("-c [n]\n"
+                           + "-d [true|false]\n"
+                           + "-i [iteration]\n"
+                           + "-l [true|false]\n"
+                           + "-m [maxValue]\n"
+                           + "-p [true|false]\n"
+                           + "-P [parallelism]\n"
                            + "-T [tag,...]");
     }
 

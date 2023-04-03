@@ -16,29 +16,20 @@ public class RandomUtils {
     private RandomUtils() {}
 
     /**
-     * Generate and return a {@link List} of random {@link Integer}
-     * objects of size 'count' that only contains odd numbers.
+     * Generate and return a {@link List} of random {@link Integer}s.
      *
      * @param count The number of random Integers to generate
-     * @param maxValue The maximum value of the random {@link Integer}
-     *        objects
-     * @param oddOnly If true only generate odd numbers
-     * @return A {@link List} of random {@link Integer} objects
+     * @param maxValue The maximum value of the random {@link Integer}s
+     * @return A {@link List} of random {@link Integer}s
      */
     public static List<Integer> generateRandomIntegers(int count,
-                                                       int maxValue,
-                                                       boolean oddOnly) {
+                                                       int maxValue) {
         return new Random()
-            // Generate "infinite" random ints.
-            .ints(// Try to generate duplicates.
+            // Generate "count" random ints.
+            .ints(count,
+                  // Try to generate duplicates.
                   maxValue - count,
                   maxValue)
-
-            // Only generate odd numbers if 'oddOnly' is true.
-            .filter(n -> !oddOnly || n % 2 != 0)
-
-            // Only take 'count' numbers.
-            .limit(count)
 
             // Convert each primitive int to Integer.
             .boxed()

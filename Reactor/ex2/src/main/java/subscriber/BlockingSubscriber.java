@@ -2,23 +2,20 @@ package subscriber;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Mono;
 import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
 import utils.ExceptionUtils;
-import common.Options;
-import utils.PrimeUtils;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
- * A {@link Flux} {@link Subscriber} that consumes random large
- * Integer objects from the publisher and allows the subscriber
- * thread to block.
+ * Define a Subscriber implementation that handles blocking, which is
+ * otherwise not well-supported by Project Reactor.
  */
 @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-public class BlockingSubscriber
-       implements Subscriber<PrimeUtils.Result>,
+public class BlockingSubscriber<T>
+       implements Subscriber<T>,
                   Disposable {
     /**
      * Debugging tag used by the logger.
@@ -26,14 +23,31 @@ public class BlockingSubscriber
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * Count the number of pending items.
+     * The calling thread uses this Barrier synchronizer to wait for a
+     * subscriber to complete all its async processing.
      */
-    private final AtomicInteger mPendingItemCount;
+    final CountDownLatch mLatch;
 
     /**
-     * Subscription object.
+     * The consumer to invoke on each onNext() value.
      */
-    private Subscription mSubscription;
+    private final Consumer<? super T> mConsumer;
+
+    /**
+     * The consumer to invoke on onError() error signal.
+     */
+    private final Consumer<? super Throwable> mErrorConsumer;
+
+    /**
+     * The runnable to invoke on onComplete() complete signal.
+     */
+    private final Runnable mCompleteRunnable;
+
+    /**
+     * The strictly positive number of elements
+     * to requests to the upstream Publisher.
+     */
+    private final long mN;
 
     /**
      * Keeps track of whether we've been disposed.
@@ -41,81 +55,83 @@ public class BlockingSubscriber
     private boolean mIsDisposed;
 
     /**
-     * Barrier synchronizer that a calling thread can use to wait
-     * until the subscriber completes all its processing.
+     * Pass and store params that will respectively consume all the
+     * elements in the sequence, handle errors and react to completion.
+     *
+     * @param consumer The consumer to invoke on each value
+     * @param errorConsumer The consumer to invoke on error signal
+     * @param completeRunnable The consumer to invoke on complete signal
+     * @param n The strictly positive number of elements
+     *          to requests to the upstream Publisher
      */
-    private CountDownLatch mLatch;
-
-    /**
-     * Constructor initializes the field.
-     */
-    public BlockingSubscriber(AtomicInteger pendingItemCount) {
-        // Initially false.
-        mIsDisposed = false;
-
-        // Store a reference to this count.
-        mPendingItemCount = pendingItemCount;
-    }
-
-    /**
-     * Hook method called when this subscriber is first subscribed.
-     * It sets the initial request size.
-     */
-    @Override
-    public void onSubscribe(Subscription subscription) {
-        // Create a countdown latch that causes the main thread to
-        // block until all flux processing is done.
+    public BlockingSubscriber(Consumer<? super T> consumer,
+                              Consumer<? super Throwable> errorConsumer,
+                              Runnable completeRunnable,
+                              long n) {
         mLatch = new CountDownLatch(1);
-
-        // Disable backpressure and inform the Publisher to
-        // send requests as quickly as possible.
-        subscription.request(Integer.MAX_VALUE);
+        mConsumer = consumer;
+        mErrorConsumer = errorConsumer;
+        mCompleteRunnable = completeRunnable;
+        mN = n;
     }
 
     /**
-     * Hook method called when next item arrives.  It prints the
-     * results of prime # checking and updates the next request size.
+     * Block until all events have been processed by subscribe().
+     *
+     * @return An empty {@link Mono} to indicate to the caller that
+     * all processing is done
      */
-    @Override
-    public void onNext(PrimeUtils.Result result) {
-        // Print the results of prime number checking
-        if (result.mSmallestFactor != 0) {
-            Options.debug(TAG, result.mPrimeCandidate
-                          + " is not prime with smallest factor "
-                          + result.mSmallestFactor);
-        } else {
-            Options.debug(TAG, result.mPrimeCandidate
-                          + " is prime");
-        }
+    public Mono<Void> await() {
+        // Block caller until the latch is released.
+        ExceptionUtils.rethrowRunnable(mLatch::await);
 
-        // Store the current pending item count. 
-        int pendingItems = mPendingItemCount.decrementAndGet();
-
-        Options.debug(TAG, "subscriber pending items: "
-                      + pendingItems);
+        // Return empty Mono to indicate to the caller that all
+        // processing is done.
+        return Mono.empty();
     }
 
     /**
-     * Hook method called to handle an error by printing the
-     * exception.
+     * Hook method invoked after calling subscribe(subscriber) below.
+     * No data starts flowing until s.request(long) is invoked.
      */
     @Override
-    public void onError(Throwable t) { 
-        Options.print("failure " + t); 
+    public void onSubscribe(Subscription s) {
+        // Set the backpressure value.
+        s.request(mN);
+    }
 
-        // Release the latch since we're done.
+    /**
+     * Process the next element in the stream.
+     * @param t The next element {@link T} in the stream
+     */
+    @Override
+    public void onNext(T t) {
+        // Run the consumer's hook method.
+        mConsumer.accept(t);
+    }
+
+    /**
+     * Handle an error event.
+     * @param t The exception that occurred
+     */
+    @Override
+    public void onError(Throwable t) {
+        // Run the errorConsumer's hook method.
+        mErrorConsumer.accept(t);
+
+        // Release the latch.
         mLatch.countDown();
     }
 
     /**
-     * Hook method that's called when all integers have been
-     * processed.
+     * Handle final completion event.
      */
     @Override
     public void onComplete() {
-        Options.print("completed");
+        // Run the completeConsumer's hook method.
+        mCompleteRunnable.run();
 
-        // Release the latch since we're done.
+        // Release the latch.
         mLatch.countDown();
     }
 
@@ -134,13 +150,4 @@ public class BlockingSubscriber
     public boolean isDisposed() {
         return mIsDisposed;
     }
-
-    /**
-     * Block caller until the latch is released.
-     */
-    public void await() {
-        // Block caller until the latch is released.
-        ExceptionUtils.rethrowRunnable(mLatch::await);
-     }
 }
-

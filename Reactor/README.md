@@ -18,17 +18,17 @@ Here's an overview of what's included:
         various types of backpressure strategies (e.g., ignore,
         buffer, error, latest, drop, and push/pull) between a
         publisher and a subscriber that (conditionally) run in
-        different threads/schedulers.  This program also measures the
+        different threads/schedulers.  
+
+. ex4 - This program applies Project Reactor features to measure the
         performance of checking random numbers for primality with and
         without various types of memoizers (e.g., untimed and timed)
-        based on Java ConcurrentHashMap.  In addition, it demonstrates
-        the use of slicing with the Flux takeWhile() and skipWhile()
-        operations.
+        based on Java ConcurrentHashMap.  
 
-. ex4 - This example shows how to apply timeouts with the Project
+. ex5 - This example shows how to apply timeouts with the Project
         Reactor framework.
   
-. ex5 - This program shows performance differences between Project
+. ex6 - This program shows performance differences between Project
         Reactor's single-threaded Flux, the flatMap() concurrency
         idiom, and several variants of ParallelFlux when creating Set
         objects containing the unique words appearing in the complete

@@ -1,7 +1,6 @@
 package utils;
 
 import common.Options;
-import publisher.Publisher;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
@@ -14,7 +13,7 @@ public class PrimeUtils {
     /**
      * Debugging tag used by the logger.
      */
-    private static final String TAG = PrimeUtils.class.getSimpleName();
+    private static final String TAG = PrimeUtils.class.getName();
 
     /**
      * Count # of calls to isPrime() to determine caching benefits.
@@ -49,7 +48,7 @@ public class PrimeUtils {
      * Check if {@code primeCandidate} is prime or not.
      *
      * @param primeCandidate The number to check if it's prime
-     * @param primeChecker   A function that checks if number is prime
+     * @param primeChecker A function that checks if number is prime
      * @return A {@code Result} object that contains the original
      * {@code primeCandidate} and either 0 if it's prime or its
      * smallest factor if it's not prime.
@@ -59,7 +58,7 @@ public class PrimeUtils {
         // Return a tuple containing the prime candidate and the
         // result of checking if it's prime.
         return new Result(primeCandidate,
-            primeChecker.apply(primeCandidate));
+                          primeChecker.apply(primeCandidate));
     }
 
     /**
@@ -97,7 +96,7 @@ public class PrimeUtils {
         var primes = Flux
             // Convert EntrySet of the map into a flux stream.
             .fromIterable(sortedMap.entrySet())
-
+            
             // Slice the stream using a predicate that stops after a
             // non-prime # (i.e., getValue() != 0) is reached.
             .takeWhile(entry -> entry.getValue() == 0)
@@ -131,13 +130,13 @@ public class PrimeUtils {
 
             // Collect the results into a list.
             .collect(toList())
-
+            
             // Block until processing is done.
             .block();
 
         // Print out the list of primes.
         Options.print("non-prime numbers and their factors =\n"
-            + nonPrimes);
+                      + nonPrimes);
     }
 
     /**
@@ -146,14 +145,15 @@ public class PrimeUtils {
      * @param result The {@link Result} to print
      */
     public static void printResult(Result result) {
-        if (result.mSmallestFactor != 0)
+        // Print the results of prime number checking.
+        if (result.mSmallestFactor != 0) 
             Options.debug(TAG,
-                result.mPrimeCandidate
-                    + " is not prime with smallest factor "
-                    + result.mSmallestFactor);
+                          result.mPrimeCandidate
+                          + " is not prime with smallest factor "
+                          + result.mSmallestFactor);
         else
             Options.debug(TAG,
-                result.mPrimeCandidate
-                    + " is prime");
+                          result.mPrimeCandidate
+                          + " is prime");
     }
 }
