@@ -30,7 +30,6 @@ public final class Emitter {
      * as possible.
      *
      * @param iterator {@link Iterator} containing the random integers
-     * @param pendingItemCount Count of the number of pending items
      * @param size Number of items to emit
      * @return A {@link Consumer} to a {@link FluxSink} that emits a
      *         {@link Flux} stream of random integers without concern
@@ -38,7 +37,6 @@ public final class Emitter {
      */
     public static Consumer<FluxSink<Integer>>
     makeEmitter(Iterator<Integer> iterator,
-                AtomicInteger pendingItemCount,
                 int size) {
         // Create an emitter that just blasts out random integers.
         return sink -> {
@@ -50,8 +48,8 @@ public final class Emitter {
                 Integer item = iterator.next();
 
                 // Store current pending item count.
-                int pendingItems =
-                    pendingItemCount.incrementAndGet();
+                int pendingItems = Options
+                    .sPendingItemCount.incrementAndGet();
 
                 if (Options.instance().printDiagnostic(pendingItems))
                     Options.debug(TAG,

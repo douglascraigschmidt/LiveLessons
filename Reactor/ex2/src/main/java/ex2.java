@@ -13,8 +13,6 @@ import utils.ReactorUtils;
 
 import java.util.function.Function;
 
-import static publisher.Publisher.sPendingItemCount;
-
 /**
  * This program applies Project Reactor features to check the primality
  * of randomly generate {@link Integer} objects via a publisher and
@@ -46,10 +44,8 @@ public class ex2 {
      */
     private final BlockingSubscriber<PrimeUtils.Result> mSubscriber =
         new BlockingSubscriber<>(result -> {
-
-
                 // Store the current pending item count.
-                int pendingItems = Publisher
+                int pendingItems = Options
                     .sPendingItemCount.decrementAndGet();
 
                 if (Options.instance().printDiagnostic(pendingItems)) {

@@ -4,6 +4,7 @@ import reactor.core.publisher.FluxSink;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -59,6 +60,12 @@ public class Options {
      * Controls whether logging is enabled
      */
     private boolean mLoggingEnabled;
+
+    /**
+     * Count the # of pending items between publisher and subscriber.
+     */
+    public static final AtomicInteger sPendingItemCount =
+        new AtomicInteger(0);
 
     /**
      * True if the producer and consumer should run in parallel, else

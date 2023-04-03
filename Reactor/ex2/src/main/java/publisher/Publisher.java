@@ -15,12 +15,6 @@ import java.util.function.Consumer;
  */
 public class Publisher {
     /**
-     * Count the # of pending items between publisher and subscriber.
-     */
-    public static final AtomicInteger sPendingItemCount =
-        new AtomicInteger(0);
-
-    /**
      * Publish a stream of random numbers.
      *
      * @param scheduler {@link Scheduler} to publish the random
@@ -53,7 +47,6 @@ public class Publisher {
         (List<Integer> randomIntegers) {
         return // Emit integers not using backpressure.
                Emitter.makeEmitter(randomIntegers.iterator(),
-                                   sPendingItemCount,
                                    randomIntegers.size());
     }
 }
