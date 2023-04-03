@@ -1,11 +1,8 @@
 package common;
 
-import reactor.core.publisher.FluxSink;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
@@ -35,11 +32,6 @@ public class Options {
      * The iteration when a diagnostic should be printed.
      */
     private int mPrintDiagnosticOnIteration = 10;
-
-    /**
-     * Controls whether backpressure is enabled (defaults to true).
-     */
-    private boolean mBackPressureEnabled = true;
 
     /**
      * Controls how many longs are generated.
@@ -205,14 +197,15 @@ public class Options {
      */
     private void printUsage() {
         System.out.println("Usage: ");
-        System.out.println("-c [n]\n"
-                           + "-d [true|false]\n"
-                           + "-i [iteration]\n"
-                           + "-l [true|false]\n"
-                           + "-m [maxValue]\n"
-                           + "-p [true|false]\n"
-                           + "-P [parallelism]\n"
-                           + "-T [tag,...]");
+        System.out.println("""
+            -c [n]
+            -d [true|false]
+            -i [iteration]
+            -l [true|false]
+            -m [maxValue]
+            -p [true|false]
+            -P [parallelism]
+            -T [tag,...]""");
     }
 
     /**
