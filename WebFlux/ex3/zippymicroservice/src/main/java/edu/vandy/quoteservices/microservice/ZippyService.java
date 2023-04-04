@@ -6,18 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.TreeSet;
 
 import reactor.core.publisher.Flux;
-
-import static java.util.stream.Collectors.toCollection;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * This class defines implementation methods that are called by the
  * {@link ZippyController}, which serves as the main "front-end" app
  * gateway entry point for remote clients that want to receive Zippy
  * quotes.
- *
+ * <p>
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
  * classes via classpath scanning. It also includes its name in the
@@ -40,8 +38,8 @@ public class ZippyService {
         return Flux
             // Convert List to a Flux.
             .fromIterable(mRepository
-                          // Forward to the repository.
-                          .findAll());
+                // Forward to the repository.
+                .findAll());
     }
 
     /**
@@ -55,8 +53,8 @@ public class ZippyService {
         return Flux
             // Convert List to a Flux.
             .fromIterable(mRepository
-                          // Forward to the repository.
-                          .findAllById(quoteIds));
+                // Forward to the repository.
+                .findAllById(quoteIds));
     }
 
     /**
@@ -66,30 +64,38 @@ public class ZippyService {
      *
      * @param queries The search queries
      * @return A {@code Flux} that emits {@link Quote} objects
-     *         matching the given {@code queries}
+     * matching the given {@code queries}
      */
+    @SuppressWarnings("BlockingMethodInNonBlockingContext")
     public Flux<Quote> search(List<String> queries) {
-        // Use a Java sequential or parallel stream and the JPA to
-        // locate all quotes whose 'id' matches the List of 'queries'
-        // and return them as a List of Quote objects.
+        // Use a Project Reactor ParallelFlux and the JPA to
+        // locate all quotes whose 'quote' field matches the List
+        // of 'queries' and return them as a Flux of Quote objects.
         System.out.println("search(List<String> queries");
+
         return Flux
-            .fromIterable(queries
-                          // Convert List to parallel stream.
-                          .parallelStream()
-                          // Flatten the Stream of Streams into a
-                          // Stream.
-                          .flatMap(query ->  mRepository
+            // Convert List to a Flux.
+            .fromIterable(queries)
+
+            // Convert Flux to a ParallelFlux.
+            .parallel()
+
+            // Run the computations in the BoundedElastic thread pool.
+            .runOn(Schedulers.boundedElastic())
+
+            // Flatten the Flux of Fluxes into a Flux.
+            .flatMap(query -> Flux
+                     // Convert the List to a Flux.
+                     .fromIterable(mRepository
                                    // Find all Quote rows in the
                                    // database that match the 'query'.
-                                   .findByQuoteContainingIgnoreCase(query)
+                                   .findByQuoteContainingIgnoreCase(query)))
 
-                                   // Convert List to a Stream.
-                                   .stream())
+            // Convert ParallelFlux to Flux.
+            .sequential()
 
-                          // Eliminate duplicate Zippy quotes and
-                          // sorts the results.
-                          .collect(toCollection(TreeSet::new)));
+            // Ensure duplicate Zippy quotes aren't returned.
+            .distinct();
     }
 
     /**
@@ -99,16 +105,16 @@ public class ZippyService {
      *
      * @param queries The search queries
      * @return A {@code Flux} that emits {@link Quote} objects
-     *         containing the given {@code queries}
+     * containing the given {@code queries}
      */
     public Flux<Quote> searchEx(List<String> queries) {
-        // Use the JPA to locate all quotes whose 'id' matches the
-        // List of 'queries' and return them as a Flux of Quote
+        // Use the JPA to locate all quotes whose 'quote' field matches
+        // the List of 'queries' and return them as a Flux of Quote
         // objects.
         return Flux
             // Convert the List to a Stream.
             .fromIterable(mRepository
-                          // Forward to the repository.
-                          .findAllByQuoteContainingAllIn(queries));
+                // Forward to the repository.
+                .findAllByQuoteContainingIgnoreCaseAllIn(queries));
     }
 }

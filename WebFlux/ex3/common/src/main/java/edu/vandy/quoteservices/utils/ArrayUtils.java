@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,8 +38,8 @@ public class ArrayUtils {
      *         the conversion fails
      * @param <T> A subclass of {@link Number}
      */
-    public static <T extends Number> List<T> obj2Vector(Object obj,
-                                                        Class<T> clazz) {
+    public static <T extends Number> List<T> obj2List(Object obj,
+                                                      Class<T> clazz) {
         if (obj == null || !obj.getClass().isArray()) {
             // Return an empty List on failure.
             return Collections.emptyList();

@@ -5,6 +5,7 @@ import edu.vandy.quoteservices.utils.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * of the queries (ignoring case).
  */
 public class MultiQueryRepositoryImpl
-       implements MultiQueryRepository {
+    implements MultiQueryRepository {
     /**
      * This field is a reactive R2DBC-based client for executing SQL
      * queries against a database using reactive programming
@@ -22,6 +23,7 @@ public class MultiQueryRepositoryImpl
      * a fluent API to build and execute SQL queries in a reactive,
      * non-blocking way.
      */
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private DatabaseClient mDatabaseClient;
 
@@ -32,17 +34,18 @@ public class MultiQueryRepositoryImpl
      * @param queries A {@code List} of {@code String} objects
      *                containing the queries to search for
      * @return A {@link Flux} that emits {@link Quote} objects in the
-     *         database containing all the {@code queries} (ignoring
-     *         case)
+     * database containing all the {@code queries} (ignoring
+     * case)
      */
     @Override
-    public Flux<Quote> findAllByQuoteContainingAllIn(List<String> queries) {
+    public Flux<Quote> findAllByQuoteContainingIgnoreCaseAllIn
+    (List<String> queries) {
         // Build an SQL query String that will match Quote objects in
         // the database containing all the queries.
         String sql = buildQueryString
             ("SELECT * FROM quote WHERE LOWER(quote) LIKE :params",
-             "%' AND LOWER(quote) LIKE '%",
-             queries);
+                "%' AND LOWER(quote) LIKE '%",
+                queries);
 
         // Perform the SQL query and return a Flux of matching Quote
         // objects.
@@ -56,17 +59,18 @@ public class MultiQueryRepositoryImpl
      * @param queries A {@code List} of {@code String} objects
      *                containing the queries to search for
      * @return A {@code Flux} that emits {@code Quote} objects that
-     *         match any of the specified {@code queries} (ignoring
-     *         case)
+     * match any of the specified {@code queries} (ignoring
+     * case)
      */
     @Override
-    public Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries) {
+    public Flux<Quote> findAllByQuoteContainingIgnoreCaseAnyIn
+    (List<String> queries) {
         // Build an SQL query String that will match Quote objects in
         // the database containing all the queries.
         String sql = buildQueryString
             ("SELECT * FROM quote WHERE LOWER(quote) LIKE :params",
-             "%' OR LOWER(quote) LIKE '%",
-             queries);
+                "%' OR LOWER(quote) LIKE '%",
+                queries);
 
         // Perform the SQL query and return a Flux of matching Quote
         // objects.
@@ -88,32 +92,24 @@ public class MultiQueryRepositoryImpl
      * placeholder replaced by a {@link String} of wildcard values
      */
     public static String buildQueryString(String sqlString,
-                                      String whereFilter,
-                                      List<String> queries) {
+                                          String whereFilter,
+                                          List<String> queries) {
         // Return a String that replaces the ':params' placeholder in
         // the 'sqlString' param with a String of concatenated
-        // wildcard values based on the input List of queries and then
-        // adds an 'Order By' clause to sort the result set in
-        // ascending order by the 'id' column in a case-insensitive
-        // manner.
+        // wildcard values based on the input List of queries.
 
-        // TODO -- you fill in here, replacing 'return null' with the
-        // proper solution.
-        // SOLUTION-START
         // Create a params String that filters the queries according
         // to 'whereFilter' in a case-insensitive manner.
-        String params =
-            "'%" + String.join(whereFilter, queries).toLowerCase() + "%'";
+        String expandedParams =
+            "'%" + String
+                .join(whereFilter,
+                    queries).toLowerCase() + "%'";
 
         // Return the sqlString.
         return sqlString
             // Replace the ':params' placeholder with the params
             // String.
-            .replace(":params", params)
-
-            // Sort in ascending order.
-            + " Order By LOWER(id) Asc";
-        // SOLUTION-END return null;
+            .replace(":params", expandedParams);
     }
 
     /**
@@ -129,10 +125,6 @@ public class MultiQueryRepositoryImpl
     public Flux<Quote> getQuoteFlux(String sql) {
         // Use the mDatabaseClient to perform a reactive SQL query and
         // return a Flux that emits matching Quote objects.
-        // TODO -- You fill in here, replacing 'return null' with the
-        // proper solution.
-
-        // SOLUTION-START
         return mDatabaseClient
             // Specify the SQL query that will be executed via the
             // 'sql' string.
@@ -142,17 +134,16 @@ public class MultiQueryRepositoryImpl
             // to transform it into a Quote object, which contains the
             // id and quote values from the row.
             .map(row ->
-                 new Quote(ArrayUtils
-                           // Extract 'id' as an Integer
-                           .obj2Number(row.get("id"), Integer.class),
+                new Quote(ArrayUtils
+                    // Extract 'id' as an Integer
+                    .obj2Number(row.get("id"), Integer.class),
 
-                           // Extract the quote value as a String.
-                           row.get("quote", String.class)))
+                    // Extract the 'quote' value as a String.
+                    row.get("quote", String.class)))
 
             // This call should not block, but instead will return the
             // Quote objects as they appear and stream them back to
             // the client.
             .all();
-        // SOLUTION-END
     }
 }

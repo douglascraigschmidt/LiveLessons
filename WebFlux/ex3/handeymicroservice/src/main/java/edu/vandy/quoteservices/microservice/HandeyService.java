@@ -59,7 +59,7 @@ public class HandeyService {
      *         queries}
      */
     public Flux<Quote> search(List<String> queries) {
-        return mRepository.findAllByQuoteContainingAnyIn(queries);
+        return mRepository.findAllByQuoteContainingIgnoreCaseAnyIn(queries);
     }
 
     /**
@@ -72,6 +72,6 @@ public class HandeyService {
      *         containing the given {@code queries}
      */
     public Flux<Quote> searchEx(List<String> queries) {
-        return mRepository.findAllByQuoteContainingAllIn(queries);
+        return mRepository.findAllByQuoteContainingIgnoreCaseAllIn(queries);
     }
 }

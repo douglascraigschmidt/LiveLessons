@@ -1,6 +1,6 @@
 package edu.vandy.quoteservices.microservice;
 
-import edu.vandy.quoteservices.common.BaseApplication;
+import edu.vandy.quoteservices.utils.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
 import edu.vandy.quoteservices.repository.ReactiveQuoteRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -42,7 +42,7 @@ public class HandeyApplication
         run(HandeyApplication.class, args);
     }
 
-    @Bean
+    // @Bean
     public CommandLineRunner demo(ReactiveQuoteRepository repository) {
         return args -> {
             repository.findAllById(List.of(1, 2))

@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface ReactiveQuoteRepository
        extends ReactiveCrudRepository<Quote, Integer>,
-    MultiQueryRepository {
+               MultiQueryRepository {
     /**
      * Find all {@link Quote} rows in the database that contain the
      * {@code query} {@link String} (ignoring case).

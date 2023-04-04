@@ -2,6 +2,8 @@ package edu.vandy.quoteservices.common;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 /**
  * This class stores {@link Quote} objects in the JPA and R2DBC
  * databases.
@@ -50,6 +52,13 @@ public class Quote
     }
 
     /**
+     * @return The {@link String} value of the quote
+     */
+    public String getQuote() {
+        return quote;
+    }
+
+    /**
      * Perform a comparison of this {@link Quote} with the {@code
      * other} {@link Quote} based on their {@code quote} columns.
      *
@@ -62,10 +71,31 @@ public class Quote
     public int compareTo(Quote other) {
         assert this.id != null;
         assert other.id != null;
-        return this.id
+        return this.quote
             // Compare the quote field of this Quote with the quote
             // field of the other Quote and return the results.
-            .compareTo(other.id);
+            .compareTo(other.quote);
     }
 
+    /**
+     * Overrides the {@code equals()} method to compare two {@link
+     * Quote} objects based on their {@code id} only.
+     *
+     * @param object The other {@link Object} to compare with this
+     *              object
+     * @return true if the object ids are equal, false otherwise
+     */
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof Quote other
+            && this.quote.equals(other.quote);
+    }
+
+    /**
+     * @return A hash of the {@link Quote} {@code quote}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(quote);
+    }
 }

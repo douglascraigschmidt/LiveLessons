@@ -117,7 +117,7 @@ public class QuoteDriver
                      .create(mQuoteClient
                              .searchQuotes(ZIPPY,
                                            quoteOrList))
-                     .expectNextCount(114)
+                     .expectNextCount(113)
                      .as("The count wasn't as expected")
                      .verifyComplete(),
                      "Zippy searchQuotes()");

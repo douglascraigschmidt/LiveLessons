@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="QuoteDriver" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="ex3.client.main" />
+    <module name="WebFlux.ex3.client.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.QuoteDriver" />
     <extension name="coverage">
       <pattern>

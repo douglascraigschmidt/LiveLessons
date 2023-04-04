@@ -1,4 +1,4 @@
-# Handy microservice profile.
+# Handey microservice profile.
 server:
   # A value of 0 ensures Eureka selects the port number.
   port: 0

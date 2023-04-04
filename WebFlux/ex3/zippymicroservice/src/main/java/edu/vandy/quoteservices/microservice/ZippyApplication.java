@@ -1,12 +1,11 @@
 package edu.vandy.quoteservices.microservice;
 
-import edu.vandy.quoteservices.common.BaseApplication;
+import edu.vandy.quoteservices.utils.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
 import edu.vandy.quoteservices.repository.JPAQuoteRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.List;
@@ -18,6 +17,10 @@ import java.util.List;
  * The {@code @SpringBootApplication} annotation enables apps to use
  * autoconfiguration, component scan, and to define extra
  * configurations on their "application" class.
+ *
+ * The {@code @EnableJpaRepositories} annotation is used to scan the
+ * packages for configuration and repository class for Spring Data
+ * JPA.
  *
  * The {@code @ComponentScan} annotation configures component scanning
  * directives for use with {@code @Configuration} classes.
@@ -36,11 +39,10 @@ public class ZippyApplication
         run(ZippyApplication.class, args);
     }
 
-    @Bean
+    // @Bean
     public CommandLineRunner demo(JPAQuoteRepository repository) {
         return args -> {
             repository.findAllById(List.of(1, 2))
-                      .stream()
                       .forEach(it -> System.out.println(it.quote));
         };
     }

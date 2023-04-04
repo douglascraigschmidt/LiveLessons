@@ -21,7 +21,7 @@ public interface MultiQueryRepository {
      *         match any of the specified {@code queries} (ignoring
      *         case)
      */
-    Flux<Quote> findAllByQuoteContainingAllIn(List<String> queries);
+    Flux<Quote> findAllByQuoteContainingIgnoreCaseAllIn(List<String> queries);
 
 
     /**
@@ -34,5 +34,5 @@ public interface MultiQueryRepository {
      *         database containing all the {@code queries} (ignoring
      *         case)
      */
-    Flux<Quote> findAllByQuoteContainingAnyIn(List<String> queries);
+    Flux<Quote> findAllByQuoteContainingIgnoreCaseAnyIn(List<String> queries);
 }

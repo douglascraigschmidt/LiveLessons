@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="HandeyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="ex3.handeymicroservice.main" />
+    <module name="WebFlux.ex3.handeymicroservice.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservice.HandeyApplication" />
     <extension name="coverage">
       <pattern>

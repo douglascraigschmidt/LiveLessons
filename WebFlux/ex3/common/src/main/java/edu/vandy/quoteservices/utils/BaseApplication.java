@@ -1,4 +1,4 @@
-package edu.vandy.quoteservices.common;
+package edu.vandy.quoteservices.utils;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
