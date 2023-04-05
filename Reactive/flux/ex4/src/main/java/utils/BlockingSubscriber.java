@@ -18,12 +18,6 @@ import static utils.BigFractionUtils.sVoidM;
 public class BlockingSubscriber<T>
     implements Subscriber<T> {
     /**
-     * The calling thread uses this Barrier synchronizer to wait for a
-     * subscriber to complete all its async processing.
-     */
-    final CountDownLatch mLatch;
-
-    /**
      * The consumer to invoke on each onNext() value.
      */
     private final Consumer<? super T> mConsumer;
@@ -42,7 +36,7 @@ public class BlockingSubscriber<T>
      * The strictly positive number of elements
      * to requests to the upstream Publisher.
      */
-    private final long mWindowSize;
+    private final long mRequestSize;
 
     /**
      * The {@link StringBuffer} to write debug messages into.
@@ -50,19 +44,27 @@ public class BlockingSubscriber<T>
     private final StringBuffer mSb;
 
     /**
-     * Keep track of the number of events processed thus far.
-     */
-    private long mEventsProcessedThusFar;
-
-    /**
      * Holds the {@link Subscription} received from the publisher.
      */
     private Subscription mSubscription;
 
     /**
+     * Keep track of the number of events processed thus far.
+     */
+    private final AtomicInteger mEventsProcessedThusFar =
+        new AtomicInteger(0);
+
+    /**
      * Track the total number of events received.
      */
-    private final AtomicInteger mTotalEvents = new AtomicInteger(0);
+    private final AtomicInteger mTotalEvents =
+        new AtomicInteger(0);
+
+    /**
+     * The calling thread uses this Barrier synchronizer to wait for a
+     * subscriber to complete all its async processing.
+     */
+    final CountDownLatch mLatch;
 
     /**
      * Pass and store params that will respectively consume all the
@@ -80,43 +82,18 @@ public class BlockingSubscriber<T>
                               Runnable completeRunnable,
                               long n,
                               StringBuffer sb) {
-        mLatch = new CountDownLatch(1);
         mConsumer = consumer;
         mErrorConsumer = errorConsumer;
         mCompleteRunnable = completeRunnable;
-        mWindowSize = n;
-        mEventsProcessedThusFar = 0;
+        mRequestSize = n;
         mSb = sb;
+        mLatch = new CountDownLatch(1);
 
         // Add some useful diagnostic output.
         sb.append("["
             + Thread.currentThread().getId()
             + "] "
             + "Starting async processing.\n");
-    }
-
-    /**
-     * Block until all events have been processed by subscribe().
-     *
-     * @return An empty {@link Mono} to indicate to the caller that
-     * all processing is done
-     */
-    public Mono<Void> await() {
-        // Add some useful diagnostic output.
-        mSb.append("["
-                   + Thread.currentThread().getId()
-                   + "] "
-                   + "Waiting for async computations to complete.\n");
-
-        try {
-            mLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Return empty Mono to indicate to the caller that all
-        // processing is done.
-        return sVoidM;
     }
 
     /**
@@ -128,26 +105,26 @@ public class BlockingSubscriber<T>
         mSubscription = subscription;
 
         // Set the backpressure value.
-        mSubscription.request(mWindowSize);
+        mSubscription.request(mRequestSize);
     }
 
     /**
      * Process the next element in the stream.
      *
-     * @param t The next element {@link T} in the stream
+     * @param element The next element {@link T} in the stream
      */
     @Override
-    public void onNext(T t) {
+    public void onNext(T element) {
         // Run the consumer's hook method.
-        mConsumer.accept(t);
+        mConsumer.accept(element);
 
         mTotalEvents.incrementAndGet();
-        if (++mEventsProcessedThusFar == mWindowSize) {
+        if (mEventsProcessedThusFar.incrementAndGet() == mRequestSize) {
             mSb.append("Requesting size "
-                + mWindowSize
+                + mRequestSize
                 + " more events\n");
-            mSubscription.request(mWindowSize);
-            mEventsProcessedThusFar = 0;
+            mSubscription.request(mRequestSize);
+            mEventsProcessedThusFar.set(0);
         }
     }
 
@@ -187,7 +164,7 @@ public class BlockingSubscriber<T>
                    + totalEvents()
                    + " async computations completed successfully\n");
 
-        // Run the completeConsumer's hook method.
+        // Run the completeRunnable's hook method.
         mCompleteRunnable.run();
 
         // Release the latch.
@@ -199,6 +176,30 @@ public class BlockingSubscriber<T>
      */
     public int totalEvents() {
         return mTotalEvents.get();
+    }
+
+    /**
+     * Block until all events have been processed by subscribe().
+     *
+     * @return An empty {@link Mono} to indicate to the caller that
+     * all processing is done
+     */
+    public Mono<Void> await() {
+        // Add some useful diagnostic output.
+        mSb.append("["
+            + Thread.currentThread().getId()
+            + "] "
+            + "Waiting for async computations to complete.\n");
+
+        try {
+            mLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Return empty Mono to indicate to the caller that all
+        // processing is done.
+        return sVoidM;
     }
 }
 

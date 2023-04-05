@@ -7,6 +7,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
 /**
@@ -201,7 +202,7 @@ public class BigFractionUtils {
      * the given parameters.
      *
      * @param sb The {@link StringBuffer} to record output
-     * @param requestSize The size to pass to {@link Subscription#request}
+     * @param requestSize The size to pass to {@link Flow.Subscription#request}
      * @return A {@link BlockingSubscriber} that consumes events
      */
     public static BlockingSubscriber<BigFraction> makeBlockingSubscriber
@@ -224,7 +225,7 @@ public class BigFractionUtils {
                 BigFractionUtils.display(sb.toString());
             },
 
-            // Value passed to {@link Subscription#request}.
+            // Value passed to Subscription#request.
             requestSize,
 
             // Pass the StringBuffer.

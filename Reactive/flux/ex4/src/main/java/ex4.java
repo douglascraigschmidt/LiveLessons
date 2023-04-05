@@ -17,17 +17,17 @@ public class ex4 {
         // A test of BigFraction multiplication using an asynchronous
         // Flux stream and a blocking Subscriber implementation that
         // doesn't apply backpressure.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber1);
+        // AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber1);
 
         // A test of BigFraction multiplication using an asynchronous
         // Flux stream and a blocking Subscriber implementation that
         // applies backpressure.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber2);
+        // AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBlockingSubscriber2);
 
         // A test of BigFraction multiplication using an asynchronous
-        // Flux stream with a backpressure strategy and a blocking
+        // Flux stream with an overflow strategy and a blocking
         // Subscriber implementation.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsBackpressureStrategy);
+        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsOverflowStrategy);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

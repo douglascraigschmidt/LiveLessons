@@ -1,7 +1,6 @@
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
@@ -9,7 +8,6 @@ import utils.BlockingSubscriber;
 import utils.Emitter;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static utils.BigFractionUtils.*;
 
@@ -51,7 +49,8 @@ public class FluxEx {
         };
 
         // Create a blocking subscriber that processes various
-        // types of signals.
+        // types of signals have this subscribe not be aware
+        // of backpressure and it logs the results.
         BlockingSubscriber<BigFraction> blockingSubscriber =
             makeBlockingSubscriber(sb,
                                    Long.MAX_VALUE,
@@ -97,10 +96,10 @@ public class FluxEx {
             new StringBuffer(">> Calling testFractionMultiplicationsBlockingSubscriber2()\n");
 
         // Create a blocking subscriber that processes various
-        // types of signals.
+        // types of signals and is "backpressure aware."
         BlockingSubscriber<BigFraction> blockingSubscriber =
             makeBlockingSubscriber(sb,
-                                   2L,
+                                   2,
                                    true);
 
         Mono
@@ -108,12 +107,12 @@ public class FluxEx {
             .fromSupplier(() -> BigFractionUtils
                           .makeBigFraction(sRANDOM, true))
 
-            // Generate multiple BigFraction objects.
+            // Generate a total of sMAX_FRACTIONS BigFraction objects.
             .repeat(sMAX_FRACTIONS - 1)
 
-            // Transform the item emitted by this Mono into a
-            // Publisher and then forward its emissions into the
-            // returned Flux.
+            // Use the "flatMap() concurrency idiom" to transform the items
+            // emitted by this Flux into a Publisher and then forward its
+            // emissions into the returned Flux.
             .flatMap(bf1 -> BigFractionUtils
                      .multiplyFraction(bf1,
                                        sBigReducedFraction,
@@ -132,25 +131,27 @@ public class FluxEx {
 
     /**
      * A test of BigFraction multiplication using an asynchronous Flux
-     * stream and a blocking Subscriber implementation that does apply
-     * backpressure.
+     * stream and a blocking Subscriber implementation that applies
+     * a backpressure strategy.
      */
-    public static Mono<Void> testFractionMultiplicationsBackpressureStrategy() {
+    public static Mono<Void> testFractionMultiplicationsOverflowStrategy() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionMultiplicationsBackpressureStrategy()\n");
 
         // Create a blocking subscriber that processes various
-        // types of signals.
+        // types of signals and is backpressure "unaware".
         BlockingSubscriber<BigFraction> blockingSubscriber =
             makeBlockingSubscriber(sb,
                                    Integer.MAX_VALUE,
                                    true);
 
+        // Set the count to something reasonably large.
+        var count = sMAX_FRACTIONS * 100;
+
         Flux
             // Make the publisher generation more BigFraction objects
             // than the consumer can handled without dropping events.
-            .create(Emitter.makeEmitter(sMAX_FRACTIONS * 100,
-                                        sb),
+            .create(Emitter.makeEmitter(count,sb),
                     // Generate an exception when overflow occurs.
                     FluxSink.OverflowStrategy.ERROR)
 

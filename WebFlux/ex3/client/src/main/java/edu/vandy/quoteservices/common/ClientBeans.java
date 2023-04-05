@@ -20,7 +20,7 @@ public class ClientBeans {
      * @return A new instance of the {@link HandeyQuoteAPI}
      */
     @Bean
-        public HandeyQuoteAPI getHandeyQuoteAPI() {
+    public HandeyQuoteAPI getHandeyQuoteAPI() {
             var webClient = WebClient
                 // Create a new WebClient.
                 .builder()

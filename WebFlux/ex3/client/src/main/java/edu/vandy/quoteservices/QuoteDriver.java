@@ -152,7 +152,7 @@ public class QuoteDriver
                      "Handey runQuotes()");
 
         // Make a List of common Handey words.
-        var quoteList = List
+        var quoteOrList = List
             .of("Dad",
                 "man",
                 "gold",
@@ -165,7 +165,7 @@ public class QuoteDriver
                      StepVerifier
                      .create(mQuoteClient
                              .searchQuotes(HANDEY,
-                                           quoteList))
+                                           quoteOrList))
                      .expectNextCount(14)
                      .as("The searchQuotes() count wasn't as expected")
                      .verifyComplete(),

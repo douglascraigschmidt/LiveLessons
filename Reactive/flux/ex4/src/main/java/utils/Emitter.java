@@ -37,18 +37,18 @@ public final class Emitter {
      * random integers without concern for backpressure, i.e., as fast
      * as possible.
      *
-     * @param size Number of items to emit
+     * @param count Number of items to emit
      * @return A {@link Consumer} to a {@link FluxSink} that emits a
      *         {@link Flux} stream of random integers without concern
      *         for backpressure
      */
     public static Consumer<FluxSink<BigFraction>>
-    makeEmitter(int size,
+    makeEmitter(int count,
                 StringBuffer sb) {
         // Create an emitter that just blasts out random integers.
         return sink -> {
             // Keep going while the iterator is not done.
-            for (int i = 0; i < size; ++i) {
+            for (int i = 0; i < count; ++i) {
                 // Get the next random integer.
                 var item = makeBigFraction(mRandom, false);
 
