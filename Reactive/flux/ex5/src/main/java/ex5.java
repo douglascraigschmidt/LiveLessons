@@ -1,35 +1,27 @@
 import utils.AsyncTaskBarrier;
 
 /**
- * This example shows how to apply Project Reactor features
- * asynchronously to perform a range of Flux operations, including
- * flatMap(), collect(), subscribeOn(), and various types of thread
- * pools.  It also shows various Mono operations, such as when(),
- * firstWithSignal(), materialize(), flatMap(), flatMapMany(),
- * flatMapIterable(), subscribeOn(), and the parallel thread pool.  In
- * addition, it demonstrates how to combine the Java streams framework
- * with the Project Reactor framework.
+ * This example demonstrates how to use various {@link Flux}, {@link
+ * ParallelFlux}, and {@link Mono} operators to perform BigFraction
+ * multiplications and additions in parallel, as well as download and
+ * store images from remote web servers in parallel.  The {@link Flux}
+ * operators include fromArray(), parallel(), doOnComplete(), and
+ * collect().  The {@link ParallelFlux} operators include runOn(),
+ * map(), doOnNext(), reduce(), sequential().  The {@link Mono}
+ * operators include doOnSuccess() and then().
  */
 public class ex5 {
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Test BigFraction multiplications by combining the Java
-        // Streams framework with the Project Reactor framework and
-        // the Java common fork-join pool.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreams);
+        // Use a ParallelFlux stream and a pool of threads to perform
+        // BigFraction multiplications and additions in parallel.
+        AsyncTaskBarrier.register(ParallelFluxEx::testFractionMultiplications);
 
-        // Test BigFraction multiplications by combining the Java
-        // Streams framework with the Project Reactor framework and
-        // the Java common fork-join pool in a slightly different way.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreamsEx1);
-
-        // Test BigFraction multiplications by combining the Java
-        // Streams framework with the Project Reactor framework and
-        // the Java common fork-join pool in yet another slightly
-        // different way.
-        AsyncTaskBarrier.register(FluxEx::testFractionMultiplicationsStreamsEx2);
+        // Use a ParallelFLux to download and store images from remote
+        // web servers in parallel.
+        AsyncTaskBarrier.register(ParallelFluxEx::testParallelDownloads);
 
         @SuppressWarnings("ConstantConditions")
         long testCount = AsyncTaskBarrier

@@ -2,12 +2,10 @@ package utils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
 /**
@@ -72,6 +70,107 @@ public class BigFractionUtils {
         return BigFraction.valueOf(numerator,
                                    denominator,
                                    reduced);
+    }
+
+    /**
+     * Sort the {@code list} in parallel using quicksort and mergesort
+     * and store the results in the {@link StringBuffer} parameter.
+     */
+    public static Mono<Void> sortAndPrintList(List<BigFraction> list,
+                                              StringBuffer sb) {
+        // Quick sort the list asynchronously.
+        Mono<List<BigFraction>> quickSortM = Mono
+            // Use the fromCallable() factory method to obtain the
+            // results of quick sorting the list.
+            .fromCallable(() -> quickSort(list))
+
+            // Use subscribeOn() to run all the processing in the
+            // parallel thread pool.
+            .subscribeOn(Schedulers.parallel());
+
+        // Heap sort the list asynchronously.
+        Mono<List<BigFraction>> heapSortM =  Mono
+            // Use the fromCallable() factory method to obtain the
+            // results of heap sorting the list.
+            .fromCallable(() -> heapSort(list))
+
+            // Use subscribeOn() to run all the processing in the
+            // parallel thread pool.
+            .subscribeOn(Schedulers.parallel());
+
+        // Display the results as mixed fractions.
+        Consumer<List<BigFraction>> displayList = sortedList -> {
+            // Iterate through each BigFraction in the sorted list.
+            sortedList .forEach(fraction ->
+                                // Store the big fraction in sb.
+                                sb.append("\n     "
+                                          + fraction.toMixedString()));
+            sb.append("\n");
+
+            // Display the results.
+            display(sb.toString());
+        };
+
+        return Mono
+            // Use firstWithSignal() to select the result of whichever
+            // sort finishes first and use it to print the sorted
+            // list.
+            .firstWithSignal(quickSortM,
+                             heapSortM)
+
+            // Use doOnSuccess() to display the first sorted list.
+            .doOnSuccess(displayList)
+                
+            // Use then() to return an empty mono to synchronize with
+            // the AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Sort the {@link Flux} and store the results in the {@link
+     * StringBuffer} parameter.
+     */
+    public static Mono<Void> sortAndPrintFlux(Flux<BigFraction> flux,
+                                              StringBuffer sb) {
+        return flux
+            // Sort the flux.
+            .sort()
+
+            // Store the big fraction in sb.
+            .doOnNext(fraction ->
+                      sb.append("\n    "
+                                + fraction.toMixedString()))
+
+            // Display the results.
+            .doFinally(___ -> display(sb.toString()))
+
+            // Use then() to return an empty mono to synchronize with
+            // the AsyncTaskBarrier framework.
+            .then();
+    }
+
+    /**
+     * Perform a quick sort on the {@code list}.
+     */
+    public static List<BigFraction> quickSort(List<BigFraction> list) {
+        List<BigFraction> copy = new ArrayList<>(list);
+    
+        // Order the list with quick sort.
+        Collections.sort(copy);
+
+        return copy;
+    }
+
+    /*
+     * Perform a heap sort on the {@code list}.
+     */
+    public static List<BigFraction> heapSort(List<BigFraction> list) {
+        List<BigFraction> copy = new ArrayList<>(list);
+
+        // Order the list with heap sort.
+        HeapSort.sort(copy);
+
+        return copy;
     }
 
     /**
@@ -142,58 +241,5 @@ public class BigFractionUtils {
                             + bigFraction
                             + "\n");
         BigFractionUtils.display(stringBuffer.toString());
-    }
-
-    /**
-     * This factory method returns a {@link Mono} that's signaled
-     * after the {@code unreducedFraction} is reduced/multiplied
-     * asynchronously in background threads from the given {@link
-     * Scheduler}.
-     *
-     * @param unreducedFraction An unreduced {@link BigFraction}
-     * @param scheduler         The {@link Scheduler} to perform the
-     *                          computation in
-     * @param sb                The {@link StringBuffer} to store logging messages
-     * @return A {@link Mono<BigFraction>} that's signaled when the
-     * asynchronous computation completes
-     */
-    public static Mono<BigFraction> reduceAndMultiplyFraction
-        (BigFraction unreducedFraction,
-         Scheduler scheduler,
-         StringBuffer sb) {
-        return Mono
-            // Emit one item that performs the reduction.
-            .fromSupplier(() -> BigFraction
-                          .reduce(unreducedFraction))
-
-            // Perform all processing asynchronously in the scheduler.
-            .subscribeOn(scheduler)
-
-            // Return a Mono to a multiplied BigFraction.
-            .flatMap(reducedFraction ->
-                     multiplyFraction(reducedFraction,
-                                      sBigReducedFraction,
-                                      scheduler,
-                                      sb));
-    }
-
-    /**
-     * @return A {@link Mono} that's signaled after the {@link
-     * BigFraction} is multiplied asynchronously in a background
-     * thread from the given {@link Scheduler}
-     */
-    public static Mono<BigFraction> multiplyFraction(BigFraction bf1,
-                                                     BigFraction bf2,
-                                                     Scheduler scheduler,
-                                                     StringBuffer sb) {
-        return Mono
-            // Return a Mono to a multiplied big fraction.
-            .fromSupplier(() -> bf1
-                          // Multiply the big fractions
-                          .multiply(bf2))
-
-            // Perform processing asynchronously in a pool of
-            // background threads.
-            .subscribeOn(scheduler);
     }
 }

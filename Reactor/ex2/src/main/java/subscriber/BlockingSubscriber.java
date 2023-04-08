@@ -2,7 +2,6 @@ package subscriber;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.Mono;
 import reactor.core.Disposable;
 import utils.ExceptionUtils;
 
@@ -77,17 +76,10 @@ public class BlockingSubscriber<T>
 
     /**
      * Block until all events have been processed by subscribe().
-     *
-     * @return An empty {@link Mono} to indicate to the caller that
-     * all processing is done
      */
-    public Mono<Void> await() {
+    public void await() {
         // Block caller until the latch is released.
         ExceptionUtils.rethrowRunnable(mLatch::await);
-
-        // Return empty Mono to indicate to the caller that all
-        // processing is done.
-        return Mono.empty();
     }
 
     /**
