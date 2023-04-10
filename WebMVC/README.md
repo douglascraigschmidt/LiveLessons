@@ -21,9 +21,10 @@ Here's an overview of what's currently included in these examples:
         these Integer objects.
 
 . ex4 - This example demonstrates the ability to use Spring WebMVC
-        features so a client uses an API gateway to interact with two
-        microservices that provide quotes from Zippy th' Pinhead and
-        Jack Handey.
+        features, including the Jakarta Persistence API in conjunction
+        with Spring server-side caching, so a client using the Spring
+        Cloud API gateway to interact with two microservices that
+        provide quotes from Zippy th' Pinhead and Jack Handey.
 
 . ex5 - This program tests the features of the LockManagerApplication
         microservice, which uses Spring WebMVC to provide a
