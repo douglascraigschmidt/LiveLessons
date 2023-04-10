@@ -2,12 +2,13 @@ package edu.vandy.quoteservices.common;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
 
@@ -25,6 +26,7 @@ public abstract class BaseController<T> {
     ApplicationContext applicationContext;
 
     // The service to delegate requests.
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     BaseService<T> mService;
 
@@ -43,6 +45,21 @@ public abstract class BaseController<T> {
         return getService()
             // Forward request to the service.
             .getAllQuotes();
+    }
+
+    /**
+     * Get a {@link Quote} corresponding to the given id.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                 {@code quoteId}
+     * @return An {@link Optional} holding a {@link Quote}
+     *         containing the requested quote
+     */
+    @GetMapping(GET_QUOTE)
+    Quote getQuote(@RequestParam Integer quoteId) {
+        return getService()
+            // Forward request to the service.
+            .getQuote(quoteId);
     }
 
     /**

@@ -88,8 +88,8 @@ public class ParallelFluxEx {
      * remote web servers in parallel.
      */
     public static Mono<Void> testParallelDownloads() {
-        StringBuilder sb =
-            new StringBuilder(">> Calling testParallelDownloads()\n");
+        StringBuffer sb =
+            new StringBuffer(">> Calling testParallelDownloads()\n");
 
         sb.append("["
                   + Thread.currentThread().getId()
@@ -98,7 +98,7 @@ public class ParallelFluxEx {
 
         return Options.instance()
             // Get a Flux that emits URLs to download.
-            .getUrlFlux()
+            .getUrlFlux(Options.instance().maxImages())
 
             // Create a ParallelFlux.
             .parallel()

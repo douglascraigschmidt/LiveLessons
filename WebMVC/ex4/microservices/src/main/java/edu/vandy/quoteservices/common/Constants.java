@@ -7,15 +7,17 @@ package edu.vandy.quoteservices.common;
 public class Constants {
     public static final String HANDEY_QUOTES = "handey/handey-quotes.txt";
     public static final String ZIPPY_QUOTES = "zippy/zippy-quotes.txt";
+    public static final String ZIPPY_CACHE = "ZippyCache";
 
     /**
      * All supported HTTP request endpoints.
      */
     public static class EndPoint {
-        public static final String GET_ALL_QUOTES = "allQuotes";
-        public static final String POST_QUOTES = "quotes";
-        public static final String POST_SEARCHES = "searchQuotes";
-        public static final String POST_SEARCHES_EX = "searchQuotesEx";
+        public static final String GET_ALL_QUOTES = "getAllQuotes";
+        public static final String GET_QUOTE = "getQuote";
+        public static final String POST_QUOTES = "postQuotes";
+        public static final String POST_SEARCHES = "postSearchQuotes";
+        public static final String POST_SEARCHES_EX = "postSearchQuotesEx";
 
         /**
          * Supported HTTP request parameters identifiers.

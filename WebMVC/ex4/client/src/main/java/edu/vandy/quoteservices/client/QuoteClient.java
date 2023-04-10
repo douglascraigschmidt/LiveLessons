@@ -40,6 +40,20 @@ public class QuoteClient {
     }
 
     /**
+     * Get a {@link Quote} corresponding to the given id.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                 {@code quoteId}
+     * @return A {@link Quote} containing the requested {@code quoteId}
+     */
+    public Quote getQuote(String routename,
+                          Integer quoteId) {
+        return mQuoteProxy
+            // Forward to the proxy.
+            .getQuote(routename, quoteId);
+    }
+
+    /**
      * Get a {@link List} containing the requested quotes.
      *
      * @param routename The service that will perform the request

@@ -20,18 +20,18 @@ import static edu.vandy.quoteservices.utils.RandomUtils.makeRandomIndices;
  * so a client (i.e., {@link QuoteClient}) can interact with various
  * microservices (i.e., {@code ZippyController} and {@code
  * HandeyController}) via an API {@code Gateway}.
- *
+ * <p>
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, e.g.,
  * {@code ZippyApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
- *
+ * <p>
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
 @SpringBootApplication
 public class QuoteDriver
-       implements CommandLineRunner {
+    implements CommandLineRunner {
     /**
      * Number of quotes requested.
      */
@@ -68,6 +68,9 @@ public class QuoteDriver
     public void run(String... args) {
         System.out.println("Entering QuoteDriver run()");
 
+        // Measure the impact of caching.
+        timeZippyQuotesCaching();
+
         // Record how long it takes to get the Zippy quotes.
         timeZippyQuotes(false);
         timeZippyQuotes(true);
@@ -76,6 +79,7 @@ public class QuoteDriver
         timeHandeyQuotes(false);
         timeHandeyQuotes(true);
 
+        // Print the results.
         System.out.println(RunTimer.getTimingResults());
 
         System.out.println("Leaving QuoteDriver run()");
@@ -83,25 +87,64 @@ public class QuoteDriver
     }
 
     /**
+     * Perform operations to demonstrate the benefits of
+     * server-side caching.
+     */
+    private void timeZippyQuotesCaching() {
+        // Get a List that contains all Quote objects.
+        var quotes = RunTimer
+            .timeRun(() -> quoteClient
+                    .getAllQuotes(ZIPPY),
+                "first call to getAllQuotes()");
+
+        // Call again and measure impact of caching.
+        quotes = RunTimer
+            .timeRun(() -> quoteClient
+                    .getAllQuotes(ZIPPY),
+                "second call to getAllQuotes()");
+
+        // Get a random Integer that's within the
+        // range of the number of Zippy quotes.
+        var randomQuoteId =
+            makeRandomIndices(1,
+                quotes.size());
+
+        // Get a Quote for the given quoteId.
+        RunTimer
+            .timeRun(() -> quoteClient
+                    .getQuote(ZIPPY,
+                        randomQuoteId.get(0)),
+                "first call to getQuote()");
+
+        // Call again and measure impact of caching.
+        RunTimer
+            .timeRun(() -> quoteClient
+                    .getQuote(ZIPPY,
+                        randomQuoteId.get(0)),
+                "second call to getQuote()");
+    }
+
+    /**
      * Record how long it takes to get the Zippy quotes.
      *
-     * @param parallel Run the queries in parallel if true, else run sequentially
+     * @param parallel Run the queries in parallel if true,
+     *                 else run sequentially
      */
     private void timeZippyQuotes(boolean parallel) {
         String type = parallel ? "Parallel " : "Sequential ";
 
         var zippyQuotes = RunTimer
             .timeRun(() -> runQuotes(ZIPPY, parallel),
-                     type + "Zippy quotes");
+                type + "Zippy quotes");
 
         // Print the Zippy quote results.
         Options.display(type + "Zippy quotes"
-                        + (zippyQuotes.size() == 10
-                           ? " successfully"
-                           : " unsuccessfully")
-                        + " received "
-                        + zippyQuotes.size()
-                        + " of 10 expected results");
+            + (zippyQuotes.size() == 10
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + zippyQuotes.size()
+            + " of 10 expected results");
 
         // Make a List of common Zippy words that are used to search
         // for any matches.
@@ -119,39 +162,39 @@ public class QuoteDriver
 
         zippyQuotes = RunTimer
             .timeRun(() -> quoteClient
-                     .searchQuotes(ZIPPY,
-                                   quoteOrList,
-                                   parallel),
-                     type + "Zippy searches");
+                    .searchQuotes(ZIPPY,
+                        quoteOrList,
+                        parallel),
+                type + "Zippy searches");
 
         Options.display(type + "Zippy searches"
-                        + (zippyQuotes.size() == 114
-                           ? " successfully"
-                           : " unsuccessfully")
-                        + " received "
-                        + zippyQuotes.size()
-                        + " of 114 expected results");
+            + (zippyQuotes.size() == 114
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + zippyQuotes.size()
+            + " of 114 expected results");
 
         // Make a List of common Zippy words that are used to search
         // for all matches.
         var quoteAndList = List
-                .of("yow",
-                        "yet");
-        
+            .of("yow",
+                "yet");
+
         zippyQuotes = RunTimer
             .timeRun(() -> quoteClient
-                     .searchQuotesEx(ZIPPY,
-                             quoteAndList,
-                                     parallel),
-                     "Zippy searches (extended)");
+                    .searchQuotesEx(ZIPPY,
+                        quoteAndList,
+                        parallel),
+                "Zippy searches (extended)");
 
         Options.display("Zippy searches (extended)"
-                        + (zippyQuotes.size() == 6
-                           ? " successfully"
-                           : " unsuccessfully")
-                        + " received "
-                        + zippyQuotes.size()
-                        + " of 6 expected results");
+            + (zippyQuotes.size() == 6
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + zippyQuotes.size()
+            + " of 6 expected results");
     }
 
     /**
@@ -165,16 +208,16 @@ public class QuoteDriver
 
         var handeyQuotes = RunTimer
             .timeRun(() -> runQuotes(HANDEY, parallel),
-                     type + "Handey quotes");
+                type + "Handey quotes");
 
         // Print the Handey quote results.
         Options.display(type + "Handey quotes"
-                        + (handeyQuotes.size() == 10
-                           ? " successfully"
-                           : " unsuccessfully")
-                        + " received "
-                        + handeyQuotes.size()
-                        + " of 10 expected results");
+            + (handeyQuotes.size() == 10
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + handeyQuotes.size()
+            + " of 10 expected results");
 
         // Make a List of common Handey words.
         var quoteList = List
@@ -187,40 +230,40 @@ public class QuoteDriver
 
         handeyQuotes = RunTimer
             .timeRun(() -> quoteClient
-                     .searchQuotes(HANDEY,
-                                   quoteList,
-                                   parallel),
-                     type + "Handey searches");
+                    .searchQuotes(HANDEY,
+                        quoteList,
+                        parallel),
+                type + "Handey searches");
 
         // Print the Handey quote results.
         Options.display(type + "Handey searches"
-                        + (handeyQuotes.size() == 14
-                           ? " successfully"
-                           : " unsuccessfully")
-                        + " received "
-                        + handeyQuotes.size()
-                        + " of 14 expected results");
+            + (handeyQuotes.size() == 14
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + handeyQuotes.size()
+            + " of 14 expected results");
 
         // Make a List of common Handey words that are used to search
         // for all matches.
         var quoteAndList = List
-                .of("man",
-                        "that");
+            .of("man",
+                "that");
 
         handeyQuotes = RunTimer
-                .timeRun(() -> quoteClient
-                                .searchQuotesEx(HANDEY,
-                                        quoteAndList,
-                                        parallel),
-                        "Handey searches (extended)");
+            .timeRun(() -> quoteClient
+                    .searchQuotesEx(HANDEY,
+                        quoteAndList,
+                        parallel),
+                "Handey searches (extended)");
 
         Options.display("Handey searches (extended)"
-                + (handeyQuotes.size() == 1
-                ? " successfully"
-                : " unsuccessfully")
-                + " received "
-                + handeyQuotes.size()
-                + " of 1 expected results");
+            + (handeyQuotes.size() == 1
+            ? " successfully"
+            : " unsuccessfully")
+            + " received "
+            + handeyQuotes.size()
+            + " of 1 expected results");
     }
 
     /**
@@ -235,8 +278,8 @@ public class QuoteDriver
         // Return the selected quotes.
         return quoteClient
             .postQuotes(quoter,
-                       makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
-                                         quotes.size()),
-                       parallel);
+                makeRandomIndices(sNUMBER_OF_QUOTES_REQUESTED,
+                    quotes.size()),
+                parallel);
     }
 }

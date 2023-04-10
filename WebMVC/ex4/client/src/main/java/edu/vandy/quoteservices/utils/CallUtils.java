@@ -26,19 +26,18 @@ public class CallUtils {
      *             API
      * @return The {@link T} received from the server on success
      */
+    @SuppressWarnings("resource")
     public static <T> T executeCall(Call<T> call){
         return rethrowSupplier(() -> {
             // Execute the call.
             Response<T> response = call.execute();
 
-            // If the request is successful return the body
-            // (which is a List).
+            // If the request is successful return the body.
             if (response.isSuccessful()) {
                 return response.body();
             } else {
                 // If there's a failure then find out what failed
                 // throw IOException.
-                int statusCode = response.code();
                 assert response.errorBody() != null;
                 String errorMessage = response.errorBody().string();
                 throw new IOException(errorMessage);

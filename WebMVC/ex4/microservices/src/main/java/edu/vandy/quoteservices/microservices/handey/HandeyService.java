@@ -47,6 +47,19 @@ public class HandeyService
     }
 
     /**
+     * Get a {@link Quote} corresponding to the given id.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                 {@code quoteId}
+     * @return A {@link Quote}
+     *         containing the requested quote
+     */
+    @Override
+    public Quote getQuote(Integer quoteId) {
+       return mQuotes.get(quoteId);
+    }
+
+    /**
      * Get a {@link List} that contains the requested quotes.
      *
      * @param quoteIds A {@link List} containing the given random

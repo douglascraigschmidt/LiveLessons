@@ -4,10 +4,13 @@ import edu.vandy.quoteservices.common.BaseController;
 import edu.vandy.quoteservices.common.BaseService;
 import edu.vandy.quoteservices.common.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
+
+import static edu.vandy.quoteservices.common.Constants.ZIPPY_CACHE;
 
 /**
  * This class defines implementation methods that are called by the
@@ -16,7 +19,8 @@ import java.util.stream.StreamSupport;
  * quotes.
  *
  * This class implements the abstract methods in {@link BaseService}
- * using the Java sequential streams framework.
+ * using the Java sequential streams framework.  It also demonstrates
+ * the use of Spring server-side caching.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
@@ -34,13 +38,53 @@ public class ZippyService
     private JPAQuoteRepository mRepository;
 
     /**
+     * Return all the {@link Quote} objects.  This method enables
+     * server-side catching.
+     *
      * @return A {@link List} of all {@link Quote} objects
      */
+    @Cacheable(ZIPPY_CACHE)
     @Override
     public List<Quote> getAllQuotes() {
+        System.out.println("ZippyService.getAllQuotes()");
+
+        // Artificially delay this call to demonstrate the
+        // benefits of server-side caching.
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return mRepository
             // Forward to the repository.
             .findAll();
+    }
+
+    /**
+     * Get a {@link Quote} corresponding to the given
+     * {@code quoteId}.  This method enables server-side
+     * catching at the level of a given {@code quoteId}.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                {@code quoteId}
+     * @return A {@link Quote} containing the requested
+     *         {@code quoteId}
+     */
+    @Cacheable(value = ZIPPY_CACHE, key = "#quoteId")
+    @Override
+    public Quote getQuote(Integer quoteId) {
+        System.out.println("ZippyService.getQuote()");
+
+        // Artificially delay this call to demonstrate the
+        // benefits of server-side caching.
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return mRepository
+            // Forward to the repository.
+            .findById(quoteId).orElseThrow(IllegalArgumentException::new);
     }
 
     /**

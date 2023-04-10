@@ -22,6 +22,15 @@ public interface BaseService<T> {
     T getAllQuotes();
 
     /**
+     * Get a {@link Quote} corresponding to the given id.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                 {@code quoteId}
+     * @return A {@link Quote} containing the requested {@code quoteId}
+     */
+    Quote getQuote(Integer quoteId);
+
+    /**
      * Get a {@link List} that contains the requested quotes.
      *
      * @param quoteIds A {@link List} containing the given random

@@ -5,10 +5,7 @@ import edu.vandy.quoteservices.utils.CallUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
-
-import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
 
 /**
  * This class is a proxy to the {@code GatewayApplication} API gateway
@@ -36,6 +33,21 @@ public class QuoteProxy {
         return CallUtils
             // Execute the getAllQuotes() retrofit API method.
             .executeCall(mQuoteAPI.getAllQuotes(route));
+    }
+
+    /**
+     * Get a {@link Quote} corresponding to the given id.
+     *
+     * @param quoteId An {@link Integer} containing the given
+     *                 {@code quoteId}
+     * @return A {@link Quote} containing the requested {@code quoteId}
+     */
+
+    public Quote getQuote(String route,
+                          Integer quoteId) {
+        return CallUtils
+            // Execute the getQuote() retrofit API method.
+            .executeCall(mQuoteAPI.getQuote(route, quoteId));
     }
 
     /**

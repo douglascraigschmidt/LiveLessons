@@ -118,7 +118,7 @@ public class Options {
     /**
      * @return A {@link Flux} of {@link URL} objects
      */
-    public Flux<URL> getUrlFlux() {
+    public Flux<URL> getUrlFlux(int maxSize) {
         return Flux
             // Convert the array of strings into a stream of strings.
             .fromArray(mDefaultImageNames)
@@ -127,7 +127,7 @@ public class Options {
             .flatMap(this::convertStringToFlux)
 
             // Limit the number of entries generated.
-            .take(mMAX_SIZE);
+            .take(maxSize);
     }
 
     /**
@@ -242,5 +242,12 @@ public class Options {
 
         // Create the image directory.
         imageDirectory.mkdirs();
+    }
+
+    /**
+     * @return Return the number of images to process.
+     */
+    public int maxImages() {
+        return mMaxImages;
     }
 }

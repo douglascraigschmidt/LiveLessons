@@ -12,10 +12,11 @@ public class Constants {
      * All supported HTTP request endpoints.
      */
     public static class EndPoint {
-        public static final String GET_ALL_QUOTES = "allQuotes";
-        public static final String POST_QUOTES = "quotes";
-        public static final String POST_SEARCHES = "searchQuotes";
-        public static final String POST_SEARCHES_EX = "searchQuotesEx";
+        public static final String GET_ALL_QUOTES = "getAllQuotes";
+        public static final String GET_QUOTE = "getQuote";
+        public static final String POST_QUOTES = "postQuotes";
+        public static final String POST_SEARCHES = "postSearchQuotes";
+        public static final String POST_SEARCHES_EX = "postSearchQuotesEx";
     }
 
     /**
