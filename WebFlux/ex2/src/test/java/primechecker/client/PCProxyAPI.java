@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_FLUX;
 
@@ -44,8 +45,8 @@ public interface PCProxyAPI {
      *         it's not prime
      */
     @GetExchange(CHECK_IF_PRIME)
-    public Integer checkIfPrime(@RequestParam Integer strategy,
-                                @RequestParam Integer primeCandidate);
+    Integer checkIfPrime(@RequestParam Integer strategy,
+                         @RequestParam Integer primeCandidate);
 
     /**
      * Checks all the elements in the {@code primeCandidates} {@link
@@ -63,8 +64,8 @@ public interface PCProxyAPI {
      */
     @PostExchange(value = CHECK_IF_PRIME_FLUX,
                   // Enables passing Flux as a param.
-                  contentType = "application/stream+json")
-    public Flux<Integer> checkIfPrimeFlux
+                  contentType = APPLICATION_NDJSON_VALUE)
+    Flux<Integer> checkIfPrimeFlux
         (@RequestParam Integer strategy,
          @RequestBody Flux<Integer> primeCandidates);
 }

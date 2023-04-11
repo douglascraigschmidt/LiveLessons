@@ -10,6 +10,8 @@ import reactor.core.publisher.Flux;
 import java.net.http.HttpResponse;
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_FLUX;
 
@@ -86,8 +88,8 @@ public class PCServerController {
      *         it's not prime
      */
     @GetMapping(CHECK_IF_PRIME)
-    public int checkIfPrime(@RequestParam Integer strategy,
-                            @RequestParam Integer primeCandidate) {
+    public int checkIfPrime(Integer strategy,
+                            Integer primeCandidate) {
         return mService
             // Forward to the service.
             .checkIfPrime(strategy,
@@ -113,9 +115,9 @@ public class PCServerController {
      */
     @PostMapping(value = CHECK_IF_PRIME_FLUX,
                  // Enables passing Flux as a param.
-                 consumes = "application/stream+json")
+                 consumes = APPLICATION_NDJSON_VALUE)
     public Flux<Integer> checkIfPrimeFlux
-        (@RequestParam Integer strategy,
+        (Integer strategy,
          @RequestBody Flux<Integer> primeCandidates) {
         return mService
             // Forward to the service.
