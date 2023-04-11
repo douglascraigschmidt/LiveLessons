@@ -18,9 +18,13 @@ public class ex5 {
      * Main entry point into the test program.
      */
     public static void main (String[] argv) throws InterruptedException {
-        // Use a ParallelFlux stream and a pool of threads to perform
+        // Use a ParallelFlux and a pool of threads to perform
+        // BigFraction multiplications in parallel.
+        AsyncTaskBarrier.register(ParallelFluxEx::testFractionMultiplications1);
+
+        // Use a ParallelFlux and a pool of threads to perform
         // BigFraction multiplications and additions in parallel.
-        AsyncTaskBarrier.register(ParallelFluxEx::testFractionMultiplications);
+        AsyncTaskBarrier.register(ParallelFluxEx::testFractionMultiplications2);
 
         // Use a ParallelFLux to download and store images from remote
         // web servers in parallel.

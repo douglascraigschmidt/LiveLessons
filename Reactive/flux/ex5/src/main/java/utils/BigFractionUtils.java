@@ -155,7 +155,7 @@ public class BigFractionUtils {
      *                          computation in
      * @param sb                The {@link StringBuffer} to store logging messages
      * @return A {@link Mono<BigFraction>} that's signaled when the
-     * asynchronous computation completes
+     *         asynchronous computation completes
      */
     public static Mono<BigFraction> reduceAndMultiplyFraction
         (BigFraction unreducedFraction,
@@ -179,8 +179,8 @@ public class BigFractionUtils {
 
     /**
      * @return A {@link Mono} that's signaled after the {@link
-     * BigFraction} is multiplied asynchronously in a background
-     * thread from the given {@link Scheduler}
+     *         BigFraction} is multiplied asynchronously in a
+     *         background thread from the given {@link Scheduler}
      */
     public static Mono<BigFraction> multiplyFraction(BigFraction bf1,
                                                      BigFraction bf2,
@@ -195,5 +195,45 @@ public class BigFractionUtils {
             // Perform processing asynchronously in a pool of
             // background threads.
             .subscribeOn(scheduler);
+    }
+
+    /**
+     * Iterate through the {@code original} {@link Flux} and the
+     * {@code results} {@link Flux} and display the results side-by-side.
+     *
+     * @param original A {@link Flux} of {@link BigFraction} objects
+     * @param constant The constant {@link BigFraction} used to
+     *                 multiply with the {@code original} values
+     * @param results A {@link Flux} containing the results of the
+     *                {@link BigFraction} multiplications
+     * @param sb      The {@link StringBuilder} containing logging info
+     * @return An {@link Mono<Void>} that signals when the
+     *         computations are done
+     */
+    public static Mono<Void> displayResults
+        (Flux<BigFraction> original,
+         BigFraction constant,
+         Flux<BigFraction> results,
+         StringBuilder sb) {
+        return original
+            // Combine original with results.
+            .zipWith(results)
+
+            // Print the results.
+            .doOnNext(tuple ->
+                sb.append("Result of multiplying "
+                          + tuple.getT1().toMixedString()
+                          + " by "
+                          + constant.toMixedString()
+                          + " = "
+                          + tuple.getT2().toMixedString()
+                          + "\n"))
+
+            // Print the logging info.
+            .doFinally(___ -> display(sb.toString()))
+
+            // Return an empty Mono to synchronize with the
+            // AsyncTaskBarrier.
+            .then();
     }
 }

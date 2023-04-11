@@ -91,7 +91,7 @@ public class Options {
     /**
      * Controls how many entries are generated.
      */
-    private int mMAX_SIZE = Integer.MAX_VALUE;
+    private int mMaxImages = Integer.MAX_VALUE;
 
     /**
      * Controls whether logging is enabled
@@ -182,7 +182,7 @@ public class Options {
                     mLoggingEnabled = argv[argc + 1].equals("true");
                         break;
                 case "-s":
-                    mMAX_SIZE = Integer.parseInt(argv[argc + 1]);
+                    mMaxImages = Integer.parseInt(argv[argc + 1]);
                     break;
                 default:
                     printUsage();

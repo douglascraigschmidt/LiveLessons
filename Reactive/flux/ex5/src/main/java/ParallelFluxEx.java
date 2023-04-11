@@ -25,13 +25,54 @@ import static utils.BigFractionUtils.sBigReducedFraction;
 @SuppressWarnings("ALL")
 public class ParallelFluxEx {
     /**
-     * Use a {@link ParallelFlux} stream and a pool of threads to
-     * perform {@link BigFraction} multiplications and additions in
-     * parallel.
+     * Use a {@link ParallelFlux} and a pool of threads to perform
+     * {@link BigFraction} multiplications in parallel.
      */
-    public static Mono<Void> testFractionMultiplications() {
+    public static Mono<Void> testFractionMultiplications1() {
+        StringBuilder sb =
+            new StringBuilder(">> Calling testFractionMultiplications1()\n");
+
+        // Create an array of reduced BigFraction objects.
+        BigFraction[] bigFractionArray = {
+            BigFraction.valueOf(1000, 30),
+            BigFraction.valueOf(1000, 40),
+            BigFraction.valueOf(1000, 20),
+            BigFraction.valueOf(1000, 10)
+        };
+
+        var multiplied = Flux
+            // Emit a stream of reduced big fractions.
+            .fromArray(bigFractionArray)
+
+            // Convert the Flux to a ParallelFlux.
+            .parallel()
+
+            // Run subsequent processing in the parallel Scheduler pool.
+            .runOn(Schedulers.parallel())
+
+            // Use a ParallelFlux to multiply these BigFraction
+            // objects in parallel Scheduler pool.
+            .map(bf -> bf
+                 .multiply(sBigReducedFraction))
+
+            .sequential();
+
+            // Return a Mono<Void> to synchronize with the
+            // AsyncTaskBarrier framework.
+        return BigFractionUtils
+            .displayResults(multiplied,
+                            sBigReducedFraction,
+                            Flux.fromArray(bigFractionArray),
+                            sb);
+    }
+
+    /**
+     * Use a {@link ParallelFlux} and a pool of threads to perform
+     * {@link BigFraction} multiplications and additions in parallel.
+     */
+    public static Mono<Void> testFractionMultiplications2() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionMultiplications()\n");
+            new StringBuffer(">> Calling testFractionMultiplications2()\n");
 
         // Create an array of reduced BigFraction objects.
         BigFraction[] bigFractionArray = {
@@ -58,11 +99,11 @@ public class ParallelFluxEx {
             // Convert the Flux to a ParallelFlux.
             .parallel()
 
-            // Run subsequent processing in the parallel pool.
+            // Run subsequent processing in the parallel Scheduler pool.
             .runOn(Schedulers.parallel())
 
             // Use a ParallelFlux to multiply these BigFraction
-            // objects in parallel in a thread pool.
+            // objects in parallel Scheduler pool.
             .map(bf -> bf
                  .multiply(sBigReducedFraction))
 
@@ -80,7 +121,7 @@ public class ParallelFluxEx {
 
             // Return a Mono<Void> to synchronize with the
             // AsyncTaskBarrier framework.
-            .then();
+            .then(); 
     }
 
     /**
