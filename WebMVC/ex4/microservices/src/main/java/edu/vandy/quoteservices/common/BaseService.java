@@ -22,7 +22,7 @@ public interface BaseService<T> {
     T getAllQuotes();
 
     /**
-     * Get a {@link Quote} corresponding to the given id.
+     * Get a {@link Quote} associated with the given {@code quoteId}.
      *
      * @param quoteId An {@link Integer} containing the given
      *                 {@code quoteId}

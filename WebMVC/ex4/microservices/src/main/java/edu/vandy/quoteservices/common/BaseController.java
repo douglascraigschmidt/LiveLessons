@@ -48,12 +48,11 @@ public abstract class BaseController<T> {
     }
 
     /**
-     * Get a {@link Quote} corresponding to the given id.
+     * Get a {@link Quote} associated with the given {@code quoteId}.
      *
      * @param quoteId An {@link Integer} containing the given
      *                 {@code quoteId}
-     * @return An {@link Optional} holding a {@link Quote}
-     *         containing the requested quote
+     * @return A {@link Quote} containing the requested {@code quoteId}
      */
     @GetMapping(GET_QUOTE)
     Quote getQuote(@RequestParam Integer quoteId) {

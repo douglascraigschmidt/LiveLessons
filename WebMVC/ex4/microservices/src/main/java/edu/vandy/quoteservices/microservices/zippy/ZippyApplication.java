@@ -25,9 +25,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     ZippyApplication.class,
     ServerBeans.class
 })
-@EnableCaching
 @EntityScan(basePackageClasses = {Quote.class})
 @EnableJpaRepositories(basePackageClasses = {JPAQuoteRepository.class})
+@EnableCaching
 public class ZippyApplication extends BaseApplication {
     /**
      * The static main() entry point runs this Spring application.

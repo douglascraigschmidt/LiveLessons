@@ -20,12 +20,12 @@ import static edu.vandy.quoteservices.utils.RandomUtils.makeRandomIndices;
  * so a client (i.e., {@link QuoteClient}) can interact with various
  * microservices (i.e., {@code ZippyController} and {@code
  * HandeyController}) via an API {@code Gateway}.
- * <p>
+ *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, e.g.,
  * {@code ZippyApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
- * <p>
+ *
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */

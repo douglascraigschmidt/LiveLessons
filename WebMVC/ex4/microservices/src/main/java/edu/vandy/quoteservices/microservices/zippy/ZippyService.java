@@ -61,7 +61,7 @@ public class ZippyService
     }
 
     /**
-     * Get a {@link Quote} corresponding to the given
+     * Get a {@link Quote} associated with the given
      * {@code quoteId}.  This method enables server-side
      * catching at the level of a given {@code quoteId}.
      *
