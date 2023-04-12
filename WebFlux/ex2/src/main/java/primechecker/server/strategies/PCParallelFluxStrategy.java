@@ -3,6 +3,7 @@ package primechecker.server.strategies;
 import primechecker.common.Options;
 import primechecker.utils.PrimeUtils;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -10,8 +11,8 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
- * This strategy uses the Java parallel streams framework to check all
- * the elements in a {@link List} for primality.
+ * This strategy uses the Project Reactor {@link ParallelFlux} framework to
+ * check all the elements in a {@link Flux} for primality.
  */
 public class PCParallelFluxStrategy
        implements PCAbstractStrategy {

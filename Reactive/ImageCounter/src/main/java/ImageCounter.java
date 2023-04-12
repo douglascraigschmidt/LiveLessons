@@ -2,24 +2,28 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap.KeySetView;
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Schedulers;
 import utils.Options;
-import utils.ReactorUtils;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
+import java.util.concurrent.ForkJoinPool;
+
+import static utils.ReactorUtils.commonPoolMono;
 
 /**
  * This class asynchronously and concurrently counts the number of
  * images in a recursively-defined folder structure using a range of
- * Project Reactor features, including {@link Mono} features (e.g., just(),
+ * Project Reactor features, including {@link Mono} operators (e.g., just(),
  * fromCallable(), blockOptional(), doOnSuccess(), subscribeOn(),
- * map(), flatMap(), zipWith(), transformDeferred(),
- * defaultIfEmpty()), and {@link Flux} features (e.g., fromIterable(),
- * flatMap(), and reduce()).  The root folder can either reside
- * locally (filesystem-based) or remotely (web-based).
+ * map(), flatMap(), zipWith(), transformDeferred(), defaultIfEmpty()),
+ * {@link Flux} operators (e.g., fromIterable()), and {@link ParallelFlux}
+ * operators (e.g., flatMap(), and reduce()).  The root folder can either
+ * reside locally (filesystem-based) or remotely (web-based).
  */
 public class ImageCounter {
     /**
@@ -145,7 +149,7 @@ public class ImageCounter {
                 .map(this::getImagesInPage)
 
                 // Run the operations in the common fork-join pool.
-                .transformDeferred(ReactorUtils.commonPoolMono())
+                .transformDeferred(commonPoolMono())
 
                 // Count the number of images on this page.
                 .map(List::size);
@@ -159,7 +163,7 @@ public class ImageCounter {
                          crawlLinksInPage(page, depth))
 
                 // Run the operations in the common fork-join pool.
-                .transformDeferred(ReactorUtils.commonPoolMono());
+                .transformDeferred(commonPoolMono());
 
             // Return a Mono that emits a count of the # of images on
             // this page plus the # of images on hyperlinks accessible
@@ -186,8 +190,9 @@ public class ImageCounter {
      *                       images in links on this page
      * @return A Mono that emits the total number of images counted
      */
-    private Mono<Integer> combineImageCounts(Mono<Integer> imagesInPageM,
-                                             Mono<Integer> imagesInLinksM) {
+    private Mono<Integer> combineImageCounts
+        (Mono<Integer> imagesInPageM,
+         Mono<Integer> imagesInLinksM) {
         // Return a Mono that emits the results of adding the two Mono
         // params after they both complete their async processing.
         return imagesInPageM
@@ -213,7 +218,7 @@ public class ImageCounter {
                 .getPage(pageUri))
 
             // Run the operation in the common fork-join pool.
-            .transformDeferred(ReactorUtils.commonPoolMono());
+            .transformDeferred(commonPoolMono());
     }
 
     /**
@@ -248,24 +253,22 @@ public class ImageCounter {
             // Find all hyperlinks on this page.
             .fromIterable(page.select("a[href]"))
 
-            // Use the flapMap() concurrency idiom to process each
-            // hyperlink to a Mono containing a count of the number of
-            // images found at that hyperlink.
-            .flatMap(hyperLink -> Mono
-                     // Emit this hyperlink.
-                     .fromCallable(() -> hyperLink)
+            // Convert Flux to ParallelFLux.
+            .parallel()
 
-                     // Run operations in the common fork-join pool.
-                     .transformDeferred(ReactorUtils.commonPoolMono())
+            // Run on the common fork-join pool.
+            .runOn(Schedulers
+                .fromExecutor(ForkJoinPool
+                    .commonPool()))
 
-                     // De-nest the results of calling countImages() below.
-                     .flatMap(url ->
-                              // Recursively visit hyperlink(s) on
-                              // this uri.
-                              countImages(Options.instance()
-                                          .getJSuper()
-                                          .getHyperLink(url),
-                                          depth + 1)))
+            // Process each hyperlink to a Mono containing a count of the
+            // number of images found at that hyperlink.
+            .flatMap(hyperlink ->
+                // Recursively visit hyperlink(s) on this uri.
+                countImages(Options.instance()
+                        .getJSuper()
+                        .getHyperLink(hyperlink),
+                    depth + 1))
 
             // Sum all the counts (if any).
             .reduce(Integer::sum)
@@ -284,7 +287,7 @@ public class ImageCounter {
     private void print(String string) {
         if (Options.instance().getDiagnosticsEnabled())
             System.out.println("Thread["
-                               + Thread.currentThread().getId()
+                               + Thread.currentThread().threadId()
                                + "]: "
                                + string);
     }

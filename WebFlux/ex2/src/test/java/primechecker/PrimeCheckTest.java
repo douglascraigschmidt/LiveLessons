@@ -20,12 +20,12 @@ import java.util.function.Function;
  * This program tests the {@link PCClientConcurrentFlux} and {@link
  * PCClientParallelFlux} and its ability to communicate with the
  * {@link PCServerController} via Spring WebFlux features.
- * 
+ * <p>
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (a {@code @SpringBootApplication}, i.e.,
  * {@link PCServerApplication}) and use that to start a Spring
  * application context to serve as the target of the tests.
- * 
+ * <p>
  * The {@code @SpringBootConfiguration} annotation indicates that a
  * class provides a Spring Boot application {@code @Configuration}.
  */
@@ -53,7 +53,7 @@ public class PrimeCheckTest {
         "-d",
         "false", // Disable debugging messages.
         "-c",
-        "500" // Generate and test 500 random large Integer objects.
+        "1000" // Generate and test 1000 random large odd Integer objects.
     };
 
     /**
@@ -66,10 +66,11 @@ public class PrimeCheckTest {
         // Parse the arguments.
         Options.instance().parseArgs(mArgv);
 
-        // Generate a List of random Integer objects.
-        List<Integer> randomIntegers = RandomUtils
-            .generateRandomNumbers(Options.instance().getCount(),
-                                   Options.instance().maxValue());
+        // Generate a List of random odd Integer objects.
+        var randomIntegers = RandomUtils
+            .generateRandomIntegers(Options.instance().getCount(),
+                Options.instance().maxValue(),
+                true);
 
         assert (testClientPF != null);
 
@@ -85,18 +86,18 @@ public class PrimeCheckTest {
                  Flux.fromIterable(randomIntegers),
                  "individualCallsConcurrentFlux");
 
-        // Test sending a List in one HTTP POST request to the server,
-        // which check List elements for primality using ParallelFlux.
+        // Test sending a Flux in one HTTP POST request to the server,
+        // which check Flux elements for primality using ParallelFlux.
         timeTest(testClientPF::testFluxCall,
             Flux.fromIterable(randomIntegers),
-            "listCallParallelFlux");
+                 "fluxCallParallelFlux");
 
-        // Test sending a List in one HTTP POST request to the server,
-        // which checks List elements for primality using the flatMap()
+        // Test sending a Flux in one HTTP POST request to the server,
+        // which checks Flux elements for primality using the flatMap()
         // concurrency idiom.
         timeTest(testClientCF::testFluxCall,
-                 Flux.fromIterable(randomIntegers),
-                 "listCallConcurrentFlux");
+            Flux.fromIterable(randomIntegers),
+                 "fluxCallConcurrentFlux");
 
         // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());
@@ -107,19 +108,19 @@ public class PrimeCheckTest {
     /**
      * Time {@code testName} using the given {@code test}.
      *
-     * @param test A {@link Function} that performs the test
+     * @param test            A {@link Function} that performs the test
      * @param primeCandidates A {@link Flux} that emits {@link
      *                        Integer} objects to check for primality
-     * @param testName The name of the test
+     * @param testName        The name of the test
      */
     private void timeTest
         (Function<Flux<Integer>, Flux<Integer>> test,
          Flux<Integer> primeCandidates,
          String testName) {
         Options.print("Starting "
-                      + testName
-                      + " with count = "
-                      + Options.instance().getCount());
+            + testName
+            + " with count = "
+            + Options.instance().getCount());
 
         // Garbage collect to leave memory in a pristine state.
         System.gc();
@@ -127,21 +128,21 @@ public class PrimeCheckTest {
         var results = RunTimer
             // Time how long this test takes to run.
             .timeRun(() -> test
-                     // Run test using the given Function and params.
-                     .apply(primeCandidates)
+                    // Run test using the given Function and params.
+                    .apply(primeCandidates)
 
-                     // Collect results into a List.
-                     .collectList()
+                    // Collect results into a List.
+                    .collectList()
 
-                     // Block until the results are received.
-                     .block(),
+                    // Block until the results are received.
+                    .block(),
 
-                     // The name of the test.
-                     testName);
+                // The name of the test.
+                testName);
 
         // Display the results.
         Options.displayResults(primeCandidates,
-                               Flux.fromIterable(results));
+            Flux.fromIterable(results));
     }
 }
     

@@ -6,9 +6,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 /*
- * This strategy uses a customization of the Java completable futures
- * framework that uses virtual threads to check all the elements in a
- * {@link Flux} for primality.
+ * This strategy uses the Project Reactor flatMap() concurrency idiom to check
+ * all the elements in a {@link Flux} for primality.
  */
 public class PCConcurrentFluxStrategy
        implements PCAbstractStrategy {

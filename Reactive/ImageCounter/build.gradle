@@ -1,13 +1,10 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.3'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'org.springframework.boot' version '3.0.1'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 version '1.0-SNAPSHOT'
-
-java.targetCompatibility = JavaVersion.VERSION_11
-java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
@@ -15,8 +12,8 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.jsoup:jsoup:1.10.3'
-    implementation 'io.projectreactor:reactor-core:3.4.6'
+    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'io.projectreactor:reactor-core:3.5.5'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'junit', module: 'junit'
     }
