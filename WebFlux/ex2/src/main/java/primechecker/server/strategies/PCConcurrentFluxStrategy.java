@@ -29,7 +29,7 @@ public class PCConcurrentFluxStrategy
     (Flux<Integer> primeCandidates) {
         return primeCandidates
             // Asynchronously check each primeCandidate for
-            // primality.
+            // primality using the flatMap() concurrency idiom.
             .flatMap(primeCandidate -> Mono
                 .fromCallable(() -> PrimeUtils
                     .isPrime(primeCandidate))

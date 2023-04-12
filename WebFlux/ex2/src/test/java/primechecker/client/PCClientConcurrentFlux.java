@@ -47,6 +47,7 @@ public class PCClientConcurrentFlux {
     public Flux<Integer> testIndividualCalls
         (Flux<Integer> primeCandidates) {
         return primeCandidates
+            // Apply the flatMap() concurrency idiom.
             .flatMap(primeCandidate -> Mono
                      // Forward each prime candidate to the proxy.
                      .fromCallable(() -> mPCProxy

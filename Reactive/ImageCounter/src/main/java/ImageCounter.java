@@ -14,10 +14,10 @@ import java.util.Optional;
 /**
  * This class asynchronously and concurrently counts the number of
  * images in a recursively-defined folder structure using a range of
- * Project Reactor features, including Mono features (e.g., just(),
+ * Project Reactor features, including {@link Mono} features (e.g., just(),
  * fromCallable(), blockOptional(), doOnSuccess(), subscribeOn(),
  * map(), flatMap(), zipWith(), transformDeferred(),
- * defaultIfEmpty()), and Flux features (e.g., fromIterable(),
+ * defaultIfEmpty()), and {@link Flux} features (e.g., fromIterable(),
  * flatMap(), and reduce()).  The root folder can either reside
  * locally (filesystem-based) or remotely (web-based).
  */
@@ -97,7 +97,10 @@ public class ImageCounter {
         // and if not add it to the hashset to avoid revisiting
         // it again unnecessarily.
         else if (mUniqueUris
+                 // Get the underlying HashSet.
                  .getMap()
+                 // Conditionally/atomically add pageUri if it's
+                 // not already present.
                  .putIfAbsent(pageUri,
                               mUniqueUris.getMappedValue()) != null) {
             print("(depth "
@@ -255,7 +258,7 @@ public class ImageCounter {
                      // Run operations in the common fork-join pool.
                      .transformDeferred(ReactorUtils.commonPoolMono())
 
-                     // De-nest the results.
+                     // De-nest the results of calling countImages() below.
                      .flatMap(url ->
                               // Recursively visit hyperlink(s) on
                               // this uri.

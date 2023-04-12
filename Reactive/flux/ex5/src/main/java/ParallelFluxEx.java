@@ -55,6 +55,7 @@ public class ParallelFluxEx {
             .map(bf -> bf
                  .multiply(sBigReducedFraction))
 
+            // Convert the ParallelFlux to a Flux.
             .sequential();
 
             // Return a Mono<Void> to synchronize with the
@@ -163,7 +164,7 @@ public class ParallelFluxEx {
                               + file.length()
                               + "\n"))
 
-            // Merge the parallel results back into a single Flux.
+            // Convert the ParallelFlux to a Flux.
             .sequential()
 
             // Print information about downloaded images.

@@ -30,9 +30,7 @@ public class PCParallelFluxStrategy
     @Override
     public Flux<Integer> checkIfPrimeFlux
         (Flux<Integer> primeCandidates) {
-        return /* Flux
-            .fromIterable(primeCandidates) */
-            primeCandidates
+        return primeCandidates
 
             // Convert Flux to ParallelFlux.
             .parallel()

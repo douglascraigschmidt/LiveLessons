@@ -71,6 +71,7 @@ public class QuoteDriver
         // Measure the impact of caching.
         timeZippyQuotesCaching();
 
+        /*
         // Record how long it takes to get the Zippy quotes.
         timeZippyQuotes(false);
         timeZippyQuotes(true);
@@ -78,6 +79,8 @@ public class QuoteDriver
         // Record how long it takes to get the Handey quotes.
         timeHandeyQuotes(false);
         timeHandeyQuotes(true);
+
+         */
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());

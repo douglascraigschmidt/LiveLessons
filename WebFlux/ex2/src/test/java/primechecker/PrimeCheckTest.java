@@ -77,13 +77,19 @@ public class PrimeCheckTest {
         // sequentially to check if an Integer is prime or not
         timeTest(testClientPF::testIndividualCalls,
                  Flux.fromIterable(randomIntegers),
-                 "individualCallsConcurrentFlux");
+                 "individualCallsParallelFlux");
 
         // Test sending individual HTTP GET requests to the server in
         // parallel to check if an Integer is prime or not.
         timeTest(testClientCF::testIndividualCalls,
                  Flux.fromIterable(randomIntegers),
-                 "individualCallsParallelFlux");
+                 "individualCallsConcurrentFlux");
+
+        // Test sending a List in one HTTP POST request to the server,
+        // which check List elements for primality using ParallelFlux.
+        timeTest(testClientPF::testFluxCall,
+            Flux.fromIterable(randomIntegers),
+            "listCallParallelFlux");
 
         // Test sending a List in one HTTP POST request to the server,
         // which checks List elements for primality using the flatMap()
@@ -91,12 +97,6 @@ public class PrimeCheckTest {
         timeTest(testClientCF::testFluxCall,
                  Flux.fromIterable(randomIntegers),
                  "listCallConcurrentFlux");
-
-        // Test sending a List in one HTTP POST request to the server,
-        // which check List elements for primality using ParallelFlux.
-        timeTest(testClientPF::testFluxCall,
-                 Flux.fromIterable(randomIntegers),
-                 "listCallParallelFlux");
 
         // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());
