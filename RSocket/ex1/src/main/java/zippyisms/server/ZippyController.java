@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zippyisms.common.Constants;
 import zippyisms.common.model.Subscription;
-import zippyisms.common.model.ZippyQuote;
+import zippyisms.common.model.Quote;
 
 import static zippyisms.common.Constants.*;
 
@@ -119,15 +119,15 @@ public class ZippyController {
      * @return A {@link Flux} that emits Zippy quote every second
      */
     @MessageMapping(GET_ALL_QUOTES)
-    Flux<ZippyQuote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
+    Flux<Quote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .getAllQuotes(subscriptionRequest);
     }
 
     /**
-     * Get a {@link Flux} that emits the requested Zippy quotes.  This
-     * method implements a two-way async RSocket bi-directional
+     * Get a {@link Flux} that emits the requested Zippy quotes.
+     * This method implements a two-way async RSocket bi-directional
      * channel call where a Flux stream is sent to the server and the
      * server returns a Flux in response.
      *
@@ -136,11 +136,11 @@ public class ZippyController {
      * @return A {@link Flux} that emits the requested Zippy quotes
      *         once every second
      */
-    @MessageMapping(GET_RANDOM_QUOTES)
-    Flux<ZippyQuote> getRandomQuotes(Flux<Integer> quoteIds) {
+    @MessageMapping(GET_QUOTES)
+    Flux<Quote> getQuotes(Flux<Integer> quoteIds) {
         return mService
             // Forward to the service.
-            .getRandomQuotes(quoteIds);
+            .getQuotes(quoteIds);
     }
 
     /**

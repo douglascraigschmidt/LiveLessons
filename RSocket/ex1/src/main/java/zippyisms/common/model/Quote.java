@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ZippyQuote {
+public class Quote {
     /**
      * ID # of the quote.
      */
@@ -25,13 +25,13 @@ public class ZippyQuote {
     /**
      * A quote from Zippy th' Pinhead.
      */
-    private String zippyism;
+    private String quote;
 
     /**
      * The constructor initializes the fields.
      */
-    public ZippyQuote(int quoteId, String zippyism) {
+    public Quote(int quoteId, String quote) {
         this.quoteId = quoteId;
-        this.zippyism = zippyism;
+        this.quote = quote;
     }
 }

@@ -16,7 +16,7 @@ public class Constants {
     public static final String CANCEL_CONFIRMED = "zippycontroller.cancelConfirmed";
     public static final String CANCEL_UNCONFIRMED = "zippycontroller.cancelUnconfirmed";
     public static final String GET_ALL_QUOTES = "zippycontroller.getQuotes";
-    public static final String GET_RANDOM_QUOTES = "zippycontroller.getQuote";
+    public static final String GET_QUOTES = "zippycontroller.getQuote";
     public static final String GET_NUMBER_OF_QUOTES = "zippycontroller.getNumberOfQuotes";
 }
 

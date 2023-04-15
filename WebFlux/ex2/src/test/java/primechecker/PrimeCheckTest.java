@@ -34,8 +34,8 @@ import java.util.function.Function;
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class PrimeCheckTest {
     /**
-     * These fields connect {@link PrimeCheckTest} to the {@code
-     * PCClientFlux} and {@link PCClientParallelFlux}.  The
+     * These fields connect {@link PrimeCheckTest} to the {@link
+     * PCClientConcurrentFlux} and {@link PCClientParallelFlux}.  The
      * {@code @Autowired} annotation ensures this field is initialized
      * via Spring dependency injection, where an object receives
      * another object it depends on.

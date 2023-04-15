@@ -3,10 +3,10 @@ package zippyisms.server;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import zippyisms.common.Components;
+import zippyisms.common.ServerBeans;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.SubscriptionStatus;
-import zippyisms.common.model.ZippyQuote;
+import zippyisms.common.model.Quote;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -16,11 +16,11 @@ import java.util.Set;
 
 /**
  * This class defines methods that return zany quotes from Zippy th'
- * Pinhead.  
- *
+ * Pinhead.
+ * <p>
  * The {@code @Service} annotation enables the autodetection of
  * implementation classes via classpath scanning (in this case {@link
- * ZippyQuote}).
+ * Quote}).
  */
 @Service
 public class ZippyService {
@@ -29,17 +29,18 @@ public class ZippyService {
      * {@code @Autowired} annotation ensures this field is initialized
      * via Spring's dependency injection facilities, where an object
      * receives other objects that it depends on, i.e., the {@link
-     * List} of {@link ZippyQuote} objects from the {@link Components}
+     * List} of {@link Quote} objects from the {@link ServerBeans}
      * class.
      */
     @Autowired
-    public List<ZippyQuote> mQuotes;
+    public List<Quote> mQuotes;
 
     /**
      * A Java {@link Set} of {@link Subscription} objects used to
      * determine whether a client has subscribed already.
      */
-    private final Set<Subscription> mSubscriptions = new HashSet<>();
+    private final Set<Subscription> mSubscriptions =
+        new HashSet<>();
 
     /**
      * This method must be called before attempting to receive a
@@ -50,25 +51,25 @@ public class ZippyService {
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return An update {@link Mono} that emits the result of the {@link
-     *         Subscription} request
+     * Subscription} request
      */
     Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return subscriptionRequest
             .doOnNext(r -> {
-                    // Set the request status to confirm the subscription.
-                    r.setStatus(SubscriptionStatus.CONFIRMED);
+                // Set the request status to confirm the subscription.
+                r.setStatus(SubscriptionStatus.CONFIRMED);
 
-                    // Add this request to the set of subscriptions.
-                    mSubscriptions.add(r);
+                // Add this request to the set of subscriptions.
+                mSubscriptions.add(r);
 
-                    // Print subscription information as a diagnostic.
-                    System.out.println("subscribe::"
-                                         + r.getRequestId()
-                                         + ":"
-                                         + r.getStatus());
-                });
+                // Print subscription information as a diagnostic.
+                System.out.println("subscribe::"
+                    + r.getRequestId()
+                    + ":"
+                    + r.getStatus());
+            });
     }
 
     /**
@@ -81,37 +82,10 @@ public class ZippyService {
      *                            Subscription} request
      */
     void cancelSubscriptionUnconfirmed(Mono<Subscription> subscriptionRequest) {
-        // Cancel the subscription without informing the client if
-        // something goes wrong.
         subscriptionRequest
-            .doOnNext(r -> {
-                    // Print the subscription information as a diagnostic.
-                    System.out.print("cancelSubscription::"
-                                     + r.getRequestId());
-
-                    // Check whether there's a matching request in the
-                    // subscription set.
-                    if (mSubscriptions.contains(r)) {
-                        // Remove the request from the subscription set.
-                        mSubscriptions.remove(r);
-
-                        // Set the request status to indicate the
-                        // subscription has been cancelled
-                        // successfully.
-                        r.setStatus(SubscriptionStatus.CANCELLED);
-
-                        System.out.println(":"
-                                           + r.getStatus()
-                                           + " cancel succeeded");
-                    } else {
-                        // Indicate that the subscription wasn't registered.
-                        r.setStatus(SubscriptionStatus.ERROR);
-
-                        System.out.println(":"
-                                           + r.getStatus()
-                                           + " cancel failed");
-                    }
-                })
+            // Cancel the subscription without informing the client if
+            // something goes wrong.
+            .doOnNext(this::cancelSubscription)
 
             // Initiate the cancellation, which is necessary since no
             // response is sent back to the client.
@@ -127,46 +101,17 @@ public class ZippyService {
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return A {@link Mono} that emits a {@link Subscription}
-     *         indicating if the cancel request succeeded or failed
+     * indicating if the cancel request succeeded or failed
      */
     Mono<Subscription> cancelSubscriptionConfirmed
-        (Mono<Subscription> subscriptionRequest) {
+    (Mono<Subscription> subscriptionRequest) {
         // Try to cancel the subscription and indicate if the
         // cancellation succeeded.
         return subscriptionRequest
-            .map(r -> {
-                    // Print the subscription information as a diagnostic.
-                    System.out.print("cancelSubscription::"
-                                     + r.getRequestId());
-
-                    // Check whether there's a matching request in the
-                    // subscription set.
-                    if (mSubscriptions.contains(r)) {
-                        // Remove the request from subscription set.
-                        mSubscriptions.remove(r);
-
-                        // Set the request status to indicate the
-                        // subscription has been cancelled
-                        // successfully.
-                        r.setStatus(SubscriptionStatus.CANCELLED);
-
-                        System.out.println(":"
-                                           + r.getStatus()
-                                           + " cancel succeeded");
-                    } else {
-                        // Indicate that the subscription wasn't
-                        // registered.
-                        r.setStatus(SubscriptionStatus.ERROR);
-
-                        System.out.println(":"
-                                           + r.getStatus()
-                                           + " cancel failed");
-                    }
-
-                    // Return the updated subscription indicating
-                    // success or failure.
-                    return r;
-                });
+            // Print the subscription information as a diagnostic
+            // and return the updated subscription indicating
+            // success or failure.
+            .map(this::cancelSubscription);
     }
 
     /**
@@ -178,25 +123,25 @@ public class ZippyService {
      *                            Subscription} request
      * @return A {@link Flux} that emits Zippy quote every second
      */
-    Flux<ZippyQuote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
+    Flux<Quote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
         return subscriptionRequest
-            .doOnNext(r ->
-                      System.out.println("getAllQuotes::"
-                                         + r.getRequestId()
-                                         + ":"
-                                         + r.getStatus()))
+            .doOnNext(r -> System.out
+                .println("getAllQuotes::"
+                    + r.getRequestId()
+                    + ":"
+                    + r.getStatus()))
 
             // Check to ensure the subscription request is registered
             // and confirmed.
             .flatMapMany(r -> mSubscriptions
-                         .contains(r)
-                         // If request is subscribed/confirmed return
-                         // a Flux that emits the list of quotes.
-                         ? Flux.fromIterable(mQuotes)
+                .contains(r)
+                // If request is subscribed/confirmed return
+                // a Flux that emits the list of quotes.
+                ? Flux.fromIterable(mQuotes)
 
-                         // If the request is not confirmed return an
-                         // empty Flux.
-                         : Flux.empty())
+                // If the request is not confirmed return an
+                // empty Flux.
+                : Flux.empty())
 
             // Delay each emission by one second to demonstrate the
             // streaming capability to clients.
@@ -212,17 +157,27 @@ public class ZippyService {
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}
      * @return A {@link Flux} that emits the requested Zippy quotes
-     *         once every second
+     * once every second
      */
-    Flux<ZippyQuote> getRandomQuotes(Flux<Integer> quoteIds) {
+    Flux<Quote> getQuotes(Flux<Integer> quoteIds) {
         return quoteIds
-            // Get the Zippy th' Pinhead quote at each quote id,
-            // subtracting 1 since the List is 0-based.
-            .map(quoteId -> mQuotes.get(quoteId - 1))
+            // Get the Zippy th' Pinhead quote at each quote id
+            // since the List is 0-based.
+            .map(this::getQuote)
 
             // Delay each emission by one second to demonstrate
             // RSocket's streaming capability back to clients.
             .delayElements(Duration.ofSeconds(1));
+    }
+
+    /**
+     * Get the {@link Quote} associated with {@code quoteId}.
+     *
+     * @param quoteId The given Zippy th' Pinhead quote id
+     * @return The Zippy th' Pinhead quote associated with {@code quoteId}
+     */
+    private Quote getQuote(Integer quoteId) {
+        return mQuotes.get(quoteId);
     }
 
     /**
@@ -233,5 +188,47 @@ public class ZippyService {
         return Mono
             // Return the total number of Zippy th' Pinhead quotes.
             .just(mQuotes.size());
+    }
+
+    /**
+     * Cancel the {@link Subscription} and indicate if the cancellation
+     * succeeded or failed.
+     *
+     * @param subscriptionRequest A {@link Mono} that emits a {@link
+     *                            Subscription} request
+     * @return A {@link Mono} that emits a {@link Subscription}
+     * indicating if the cancel request succeeded or failed
+     */
+    private Subscription cancelSubscription
+    (Subscription subscriptionRequest) {
+        // Print the subscription information as a diagnostic.
+        System.out.print("cancelSubscription::"
+            + subscriptionRequest.getRequestId());
+
+        // Check whether there's a matching request in the
+        // subscription set.
+        if (mSubscriptions.contains(subscriptionRequest)) {
+            // Remove the request from the subscription set.
+            mSubscriptions.remove(subscriptionRequest);
+
+            // Set the request status to indicate the
+            // subscription has been cancelled
+            // successfully.
+            subscriptionRequest
+                .setStatus(SubscriptionStatus.CANCELLED);
+
+            System.out.println(":"
+                + subscriptionRequest.getStatus()
+                + " cancel succeeded");
+        } else {
+            // Indicate that the subscription wasn't registered.
+            subscriptionRequest
+                .setStatus(SubscriptionStatus.ERROR);
+
+            System.out.println(":"
+                + subscriptionRequest.getStatus()
+                + " cancel failed");
+        }
+        return subscriptionRequest;
     }
 }
