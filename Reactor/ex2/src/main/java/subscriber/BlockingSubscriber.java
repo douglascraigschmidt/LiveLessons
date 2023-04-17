@@ -1,12 +1,14 @@
-package subscriber;
+package utils;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.Disposable;
-import utils.ExceptionUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
+import static utils.BigFractionUtils.sVoidM;
 
 /**
  * Define a Subscriber implementation that handles blocking, which is
@@ -14,19 +16,7 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
 public class BlockingSubscriber<T>
-       implements Subscriber<T>,
-                  Disposable {
-    /**
-     * Debugging tag used by the logger.
-     */
-    private final String TAG = getClass().getSimpleName();
-
-    /**
-     * The calling thread uses this Barrier synchronizer to wait for a
-     * subscriber to complete all its async processing.
-     */
-    final CountDownLatch mLatch;
-
+    implements Subscriber<T> {
     /**
      * The consumer to invoke on each onNext() value.
      */
@@ -46,40 +36,64 @@ public class BlockingSubscriber<T>
      * The strictly positive number of elements
      * to requests to the upstream Publisher.
      */
-    private final long mN;
+    private final long mRequestSize;
 
     /**
-     * Keeps track of whether we've been disposed.
+     * The {@link StringBuffer} to write debug messages into.
      */
-    private boolean mIsDisposed;
+    private final StringBuffer mSb;
+
+    /**
+     * Holds the {@link Subscription} received from the publisher.
+     */
+    private Subscription mSubscription;
+
+    /**
+     * Keep track of the number of events processed thus far.
+     */
+    private final AtomicInteger mEventsProcessedThusFar =
+        new AtomicInteger(0);
+
+    /**
+     * Track the total number of events received.
+     */
+    private final AtomicInteger mTotalEvents =
+        new AtomicInteger(0);
+
+    /**
+     * The calling thread uses this Barrier synchronizer to wait for a
+     * subscriber to complete all its async processing.
+     */
+    final CountDownLatch mLatch;
 
     /**
      * Pass and store params that will respectively consume all the
      * elements in the sequence, handle errors and react to completion.
      *
-     * @param consumer The consumer to invoke on each value
-     * @param errorConsumer The consumer to invoke on error signal
+     * @param consumer         The consumer to invoke on each value
+     * @param errorConsumer    The consumer to invoke on error signal
      * @param completeRunnable The consumer to invoke on complete signal
-     * @param n The strictly positive number of elements
-     *          to requests to the upstream Publisher
+     * @param n                The strictly positive number of elements
+     *                         to requests to the upstream Publisher
+     * @param sb               The {@link StringBuffer} to write debug statements into
      */
     public BlockingSubscriber(Consumer<? super T> consumer,
                               Consumer<? super Throwable> errorConsumer,
                               Runnable completeRunnable,
-                              long n) {
-        mLatch = new CountDownLatch(1);
+                              long n,
+                              StringBuffer sb) {
         mConsumer = consumer;
         mErrorConsumer = errorConsumer;
         mCompleteRunnable = completeRunnable;
-        mN = n;
-    }
+        mRequestSize = n;
+        mSb = sb;
+        mLatch = new CountDownLatch(1);
 
-    /**
-     * Block until all events have been processed by subscribe().
-     */
-    public void await() {
-        // Block caller until the latch is released.
-        ExceptionUtils.rethrowRunnable(mLatch::await);
+        // Add some useful diagnostic output.
+        sb.append("["
+            + Thread.currentThread().getId()
+            + "] "
+            + "Starting async processing.\n");
     }
 
     /**
@@ -87,27 +101,50 @@ public class BlockingSubscriber<T>
      * No data starts flowing until s.request(long) is invoked.
      */
     @Override
-    public void onSubscribe(Subscription s) {
+    public void onSubscribe(Subscription subscription) {
+        mSubscription = subscription;
+
         // Set the backpressure value.
-        s.request(mN);
+        mSubscription.request(mRequestSize);
     }
 
     /**
      * Process the next element in the stream.
-     * @param t The next element {@link T} in the stream
+     *
+     * @param element The next element {@link T} in the stream
      */
     @Override
-    public void onNext(T t) {
+    public void onNext(T element) {
         // Run the consumer's hook method.
-        mConsumer.accept(t);
+        mConsumer.accept(element);
+
+        mTotalEvents.incrementAndGet();
+        if (mEventsProcessedThusFar.incrementAndGet() == mRequestSize) {
+            mSb.append("Requesting size "
+                + mRequestSize
+                + " more events\n");
+            mSubscription.request(mRequestSize);
+            mEventsProcessedThusFar.set(0);
+        }
     }
 
     /**
      * Handle an error event.
+     *
      * @param t The exception that occurred
      */
     @Override
     public void onError(Throwable t) {
+        // Add the total number of events processed.
+        mSb.append("["
+                   + Thread.currentThread().getId()
+                   + "] "
+                   + totalEvents()
+                   + " async computations completed successfully,\n    but then received "
+                   + t.getClass().getSimpleName()
+                   + ":\n    "
+                   + t.getMessage());
+
         // Run the errorConsumer's hook method.
         mErrorConsumer.accept(t);
 
@@ -120,7 +157,14 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onComplete() {
-        // Run the completeConsumer's hook method.
+        // Add the total number of events processed.
+        mSb.append("["
+                   + Thread.currentThread().getId()
+                   + "] "
+                   + totalEvents()
+                   + " async computations completed successfully\n");
+
+        // Run the completeRunnable's hook method.
         mCompleteRunnable.run();
 
         // Release the latch.
@@ -128,18 +172,33 @@ public class BlockingSubscriber<T>
     }
 
     /**
-     * Hook method called when this subscriber is disposed.
+     * @return The total number of events processed
      */
-    @Override
-    public void dispose() {
-        mIsDisposed = true;
+    public int totalEvents() {
+        return mTotalEvents.get();
     }
 
     /**
-     * @return True if this subscriber has been disposed, else false.
+     * Block until all events have been processed by subscribe().
+     *
+     * @return An empty {@link Mono} to indicate to the caller that
+     * all processing is done
      */
-    @Override
-    public boolean isDisposed() {
-        return mIsDisposed;
+    public Mono<Void> await() {
+        // Add some useful diagnostic output.
+        mSb.append("["
+            + Thread.currentThread().getId()
+            + "] "
+            + "Waiting for async computations to complete.\n");
+
+        try {
+            mLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Return empty Mono to indicate to the caller that all
+        // processing is done.
+        return sVoidM;
     }
 }

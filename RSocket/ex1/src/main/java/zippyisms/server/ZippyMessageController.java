@@ -2,15 +2,16 @@ package zippyisms.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.rsocket.RSocketRequester;
-import org.springframework.messaging.rsocket.annotation.ConnectMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zippyisms.common.Constants;
-import zippyisms.common.model.Subscription;
+import zippyisms.common.Options;
 import zippyisms.common.model.Quote;
+import zippyisms.common.model.Subscription;
 
 import static zippyisms.common.Constants.*;
 
@@ -40,7 +41,7 @@ import static zippyisms.common.Constants.*;
  * the {@code @MessageMapping annotation}, which maps a message onto a
  * message-handling method by matching the declared patterns to a
  * destination extracted from the message.
- * <p>
+ *
  * Combining the {@code @Controller} annotation with the
  * {@code @MessageMapping} annotation enables this class to declare
  * service endpoints, which in this case map to RSocket endpoints that
@@ -50,34 +51,15 @@ import static zippyisms.common.Constants.*;
  * across a communication channel.
  */
 @Controller
-public class ZippyController {
+public class ZippyMessageController {
     /**
-     * The {@link ZippyService} that's associated with this {@link
-     * ZippyController} via Spring's dependency injection facilities,
+     * The {@link ZippyMessageService} that's associated with this {@link
+     * ZippyMessageController} via Spring's dependency injection facilities,
      * where an object receives other objects that it depends on (in
-     * this case, the {@link ZippyService}).
+     * this case, the {@link ZippyMessageService}).
      */
     @Autowired
-    private ZippyService mService;
-
-    /**
-     * This endpoint handler is called when a client connects
-     * to the server.
-     *
-     * @param requester The {@link RSocketRequester} that's
-     *                  associated with the client that's
-     *                  connecting to the server.
-     * @param clientIdentity The identity of the client that's
-     *                       connecting to the server.
-     */
-    @ConnectMapping(SERVER_CONNECT)
-    public void handleConnect
-        (RSocketRequester requester,
-         @Payload String clientIdentity) {
-        mService
-            // Forward to the service.
-            .handleConnect(requester, clientIdentity);
-    }
+    private ZippyMessageService mService;
 
     /**
      * This method must be called before attempting to receive a Flux
@@ -169,10 +151,11 @@ public class ZippyController {
      * @return A {@link Mono} that emits the total number of Zippy th'
      * Pinhead quotes
      */
+    @PreAuthorize("hasRole('USER')")
     @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
-    Mono<Integer> getNumberOfQuotes() {
+    Mono<Integer> getNumberOfQuotes(@AuthenticationPrincipal UserDetails user) {
         return mService
             // Forward to the service.
-            .getNumberOfQuotes();
+            .getNumberOfQuotes(user);
     }
 }

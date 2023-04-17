@@ -38,7 +38,6 @@ public class ex2 {
      */
     private final Scheduler mSubscriberScheduler;
 
-    // Track all disposables to dispose them all at once.
     /**
      * A {@link Subscriber} that blocks the caller.
      */

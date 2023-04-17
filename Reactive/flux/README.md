@@ -30,7 +30,16 @@ features, as follows:
         how to implement a blocking subscriber that uses various type
         of backpressure mechanisms.
 
-. ex5 - This example shows how to apply Project Reactor features
+. ex5 - This example demonstrates how to use various Flux,
+        ParallelFlux, and Mono operators to perform BigFraction
+        multiplications and additions in parallel, as well as download
+        and store images from remote web servers in parallel.  The
+        Flux operators include fromArray(), parallel(),
+        doOnComplete(), and collect().  The ParallelFlux operators
+        include runOn(), map(), doOnNext(), reduce(), sequential().
+        The Mono operators include doOnSuccess() and then().
+
+. ex6 - This example shows how to apply Project Reactor features
         asynchronously to perform a range of Flux operations,
         including flatMap(), collect(), subscribeOn(), and various
         types of thread pools.  It also shows various Mono operations,

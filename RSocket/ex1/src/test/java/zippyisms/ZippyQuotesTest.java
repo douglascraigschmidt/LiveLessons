@@ -1,5 +1,6 @@
 package zippyisms;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,48 +9,67 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import zippyisms.client.ZippyProxy;
+import zippyisms.common.Options;
 import zippyisms.common.model.Quote;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.SubscriptionStatus;
 import zippyisms.server.ZippyApplication;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import java.util.UUID;
 
 /**
  * This class tests the endpoints provided by the {@link
  * ZippyApplication} microservice for each of the four interaction
  * models supported by RSocket.
- *
+ * 
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (e.g., one with
  * {@code @SpringBootApplication}) and use that to start a Spring
  * application context.
- *
+ * 
  * The {@code @ComponentScan} annotation enables auto-detection of
  * beans by a Spring container.  Java classes that are decorated with
  * stereotypes such as {@code @Component}, {@code @Configuration},
  * {@code @Service} are auto-detected by Spring.
  */
 @SpringBootTest(classes = ZippyApplication.class,
-    webEnvironment = SpringBootTest
-        .WebEnvironment.DEFINED_PORT)
+        webEnvironment = SpringBootTest
+                .WebEnvironment.DEFINED_PORT)
 @ComponentScan("zippyisms")
 public class ZippyQuotesTest {
     /**
-     * The number of Zippy th' Pinhead quotes to process.
+     * Define the "command-line" options.
      */
-    private static final int sNUMBER_OF_INDICES = 5;
+    private static final String[] sArgv = new String[] {
+        "-d", "true" // Enable debugging.
+    };
 
     /**
-     * This object connects to the {@link ZippyProxy}.
-     * The {@code @Autowired} annotation ensures this field is
-     * initialized via Spring's dependency injection facilities, where
-     * an object receives other objects that it depends on (in this
-     * case, by creating a {@link ZippyProxy}).
+     * Debugging tag used by Options.
+     */
+    private final String TAG = getClass()
+        .getSimpleName();
+
+    /**
+     * The number of Zippy th' Pinhead quotes to process.
+     */
+    private final int mNUMBER_OF_INDICES = 5;
+
+    /**
+     * This object connects to the {@link ZippyProxy}.  The
+     * {@code @Autowired} annotation ensures this field is initialized
+     * via Spring's dependency injection facilities, where an object
+     * receives other objects that it depends on (in this case, by
+     * creating a {@link ZippyProxy}).
      */
     @Autowired
     private ZippyProxy mZippyProxy;
+
+    @BeforeAll
+    public static void setup() {
+        Options.instance().parseArgs(sArgv);
+    }
 
     /**
      * Subscribe and cancel requests to receive Zippy quotes.  This
@@ -59,52 +79,60 @@ public class ZippyQuotesTest {
      */
     @Test
     public void testSubscribeAndCancel() {
-        System.out.println("Entering testSubscribeAndCancel()");
+        Options.print(TAG, ">>> Entering testSubscribeAndCancel()");
+
+        // Create a random subscription ID.
+        var subscriptionId = UUID.randomUUID();
 
         // Create a Mono<SubscriptionRequest>.
         Mono<Subscription> subscriptionRequest = mZippyProxy
-            // Subscribe using a random ID.
-            .subscribe(UUID.randomUUID())
+            // Subscribe using the random subscription ID.
+            .subscribe(subscriptionId)
 
             // Print the results as a diagnostic.
-            .doOnNext(r ->
-                System.out.println(r.getRequestId()
-                    + ":" + r.getStatus()));
+            .doOnNext(sr ->
+                      Options.debug(TAG,
+                                    "sending subscriptionRequest "
+                                    + sr.getRequestId()
+                                    + ":" + sr.getStatus()));
 
         // Ensure that the subscriptionRequest's status is CONFIRMED.
         StepVerifier
             .create(subscriptionRequest)
-            .expectNextMatches(r -> r
-                .getStatus()
-                .equals(SubscriptionStatus.CONFIRMED))
+            .expectNextMatches(sr -> sr
+                               .getStatus()
+                               .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        Mono<Subscription> mono = mZippyProxy
-            // Perform a confirmed cancellation of the subscription
-            // (should succeed).
-            .cancelConfirmed(subscriptionRequest);
+        Mono<Subscription> subscriptionResponse = mZippyProxy
+            // Perform a confirmed cancellation of the valid
+            // subscription ID, which should succeed.
+            .cancelConfirmed(mZippyProxy
+                             .subscribe(subscriptionId));
 
         // Test that the subscription was successfully cancelled.
         StepVerifier
-            .create(mono)
-            .expectNextMatches(r -> r
-                .getStatus()
-                .equals(SubscriptionStatus.CANCELLED))
+            .create(subscriptionResponse)
+            .expectNextMatches(sr -> sr
+                               .getStatus()
+                               .equals(SubscriptionStatus.CANCELLED))
             .verifyComplete();
 
-        mono = mZippyProxy
-            // Try to cancel the subscription (which intentionally
-            // fails since there was no registered subscription with
-            // this ID).
+        subscriptionResponse = mZippyProxy
+            // Try to cancel the subscription, which intentionally
+            // should fail since there was no registered subscription
+            // with this ID.
             .cancelConfirmed(UUID.randomUUID());
 
         // Test that the subscription was unsuccessfully cancelled.
         StepVerifier
-            .create(mono)
-            .expectNextMatches(r -> r
-                .getStatus()
-                .equals(SubscriptionStatus.ERROR))
+            .create(subscriptionResponse)
+            .expectNextMatches(sr -> sr
+                               .getStatus()
+                               .equals(SubscriptionStatus.ERROR))
             .verifyComplete();
+
+        Options.print(TAG, "<<< Leaving testSubscribeAndCancel()");
     }
 
     /**
@@ -115,7 +143,7 @@ public class ZippyQuotesTest {
      */
     @Test
     public void testValidSubscribeForQuotes() {
-        System.out.println("Entering testValidSubscribeForQuotes()");
+        Options.print(TAG, ">>> Entering testValidSubscribeForQuotes()");
 
         Mono<Subscription> subscriptionRequest = mZippyProxy
             // Get a confirmed SubscriptionRequest from the server.
@@ -128,30 +156,32 @@ public class ZippyQuotesTest {
 
             // Print each Zippy quote emitted by the Flux<ZippyQuote>.
             .doOnNext(m ->
-                System.out.println("Quote: " + m.getQuote()))
+                      Options.debug(TAG, "Quote: " + m.getQuote()))
 
-            // Only emit sNUMBER_OF_QUOTES (5).
-            .take(sNUMBER_OF_INDICES);
+            // Only emit mNUMBER_OF_QUOTES.
+            .take(mNUMBER_OF_INDICES);
 
-        // Ensure all the sNUMBER_OF_INDICES (5) responses appear in
-        // the right order.
+        // Ensure all the mNUMBER_OF_INDICES responses appear in the
+        // right order.
         StepVerifier.create(zippyQuotes)
             .expectNextMatches(m -> m
-                .getQuote()
-                .equals("All of life is a blur of Republicans and meat!"))
+                               .getQuote()
+                               .equals("All of life is a blur of Republicans and meat!"))
             .expectNextMatches(m -> m
-                .getQuote()
-                .equals("..Are we having FUN yet...?"))
+                               .getQuote()
+                               .equals("..Are we having FUN yet...?"))
             .expectNextMatches(m -> m
-                .getQuote()
-                .equals("Life is a POPULARITY CONTEST!  I'm REFRESHINGLY CANDID!!"))
+                               .getQuote()
+                               .equals("Life is a POPULARITY CONTEST!  I'm REFRESHINGLY CANDID!!"))
             .expectNextMatches(m -> m
-                .getQuote()
-                .equals("You were s'posed to laugh!"))
+                               .getQuote()
+                               .equals("You were s'posed to laugh!"))
             .expectNextMatches(m -> m
-                .getQuote()
-                .equals("Fold, fold, FOLD!!  FOLDING many items!!"))
+                               .getQuote()
+                               .equals("Fold, fold, FOLD!!  FOLDING many items!!"))
             .verifyComplete();
+
+        Options.print(TAG, "<<< Leaving testValidSubscribeForQuotes()");
     }
 
     /**
@@ -162,7 +192,7 @@ public class ZippyQuotesTest {
      */
     @Test
     public void testInvalidSubscribeForAllQuotes() {
-        System.out.println("Entering testInvalidSubscribeForQuotes()");
+        Options.print(TAG, ">>> Entering testInvalidSubscribeForQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
         Mono<Subscription> subscriptionRequest = mZippyProxy
@@ -170,17 +200,17 @@ public class ZippyQuotesTest {
             .subscribe(UUID.randomUUID())
 
             // Print the results as a diagnostic.
-            .doOnNext(r ->
-                System.out.println("subscribe-returned::"
-                    + r.getRequestId()
-                    + ":" + r.getStatus()));
+            .doOnNext(sr ->
+                      Options.debug(TAG, "subscribe-returned::"
+                                    + sr.getRequestId()
+                                    + ":" + sr.getStatus()));
 
         // Ensure that the subscriptionRequest's status is CONFIRMED.
         StepVerifier
             .create(subscriptionRequest)
-            .expectNextMatches(r -> r
-                .getStatus()
-                .equals(SubscriptionStatus.CONFIRMED))
+            .expectNextMatches(sr -> sr
+                               .getStatus()
+                               .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
         Mono<Void> mono = mZippyProxy
@@ -206,22 +236,24 @@ public class ZippyQuotesTest {
             .create(zippyQuotes)
             .expectError(IllegalAccessException.class)
             .verify();
+
+        Options.print(TAG, "<<< Leaving testInvalidSubscribeForQuotes()");
     }
 
     /**
      * Get/print/test that a given number of random Zippy th' Pinhead
      * quotes are received.  This method demonstrates the RSocket
-     * two-way async bi-directional channel model where a {@link Flux}
+     * two-way async bidirectional channel model where a {@link Flux}
      * stream is sent to the server and the server returns a {@link
      * Flux} in response.
      */
     @Test
     public void testGetRandomQuotes() {
-        System.out.println("Entering testGetRandomQuotes()");
+        Options.print(TAG, ">>> Entering testGetRandomQuotes()");
 
         var randomIndices = mZippyProxy
             // Make random indices needed for the test.
-            .makeRandomIndices(sNUMBER_OF_INDICES)
+            .makeRandomIndices(mNUMBER_OF_INDICES)
 
             // Turn this Mono into a hot source and cache last emitted
             // signals for later subscribers.
@@ -236,10 +268,11 @@ public class ZippyQuotesTest {
             .getRandomQuotes(randomIndices)
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
-            .doOnNext(m -> System.out
-                .println("Quote ("
-                    + m.getQuoteId() + ") = "
-                    + m.getQuote()));
+            .doOnNext(quote -> Options
+                      .debug(TAG,
+                             "Quote ("
+                             + quote.getQuoteId() + ") = "
+                             + quote.getQuote()));
 
         // Get the random indices emitted by the randomIndices().
         var ri = randomIndices.block();
@@ -251,16 +284,18 @@ public class ZippyQuotesTest {
         StepVerifier
             .create(zippyQuotes)
             .expectNextMatches(m -> m
-                .getQuoteId() == ri[0])
+                               .getQuoteId() == ri[0])
             .expectNextMatches(m -> m
-                .getQuoteId() == ri[1])
+                               .getQuoteId() == ri[1])
             .expectNextMatches(m -> m
-                .getQuoteId() == ri[2])
+                               .getQuoteId() == ri[2])
             .expectNextMatches(m -> m
-                .getQuoteId() == ri[3])
+                               .getQuoteId() == ri[3])
             .expectNextMatches(m -> m
-                .getQuoteId() == ri[4])
+                               .getQuoteId() == ri[4])
             .verifyComplete();
+
+        Options.print(TAG, "<<< Leaving testGetRandomQuotes()");
     }
 
     /**
@@ -268,7 +303,10 @@ public class ZippyQuotesTest {
      */
     @PreDestroy
     public void closeConnection() {
-        System.out.println("Closing connection");
+        Options.print(TAG, ">>> Entering closeConnection()");
+
+        // Instruct the server to shut down.
         mZippyProxy.closeConnection();
+        Options.print(TAG, "<<< Leaving closeConnection()");
     }
 }

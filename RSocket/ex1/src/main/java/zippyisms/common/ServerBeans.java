@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
  * {@code Bean} that creates the {@link RSocketRequester} used by the
  * RSocket clients and another {@code Bean} that creates a {@link
  * List} of {@link Quote} obtained retrieved from a file.
- * <p>
+ *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., without having to write any explicit
  * code, Spring will scan the application for classes annotated with
@@ -31,8 +31,8 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class ServerBeans {
     /**
-     * @return Return a {@link List} of {@link Quote} objects
-     * that were stored in the file of Zippyisms
+     * @return Return a {@link List} of {@link Quote} objects that
+     *         were stored in the file of Zippyisms
      */
     @Bean
     public List<Quote> getInput() {

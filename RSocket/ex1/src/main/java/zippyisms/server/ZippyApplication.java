@@ -2,7 +2,11 @@ package zippyisms.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+
+import java.util.concurrent.Executors;
 
 /**
  * Provides the context for running the ZippyApplication, which is a
