@@ -286,4 +286,11 @@ public class ZippyProxy {
             .switchIfEmpty(Flux
                 .error(new IllegalAccessException("Subscription cancelled")));
     }
+
+    /**
+     *
+     */
+    public void closeConnection() {
+        mZippyQuoteRequester.block().rsocket().dispose();
+    }
 }

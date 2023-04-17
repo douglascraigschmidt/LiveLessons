@@ -1,6 +1,8 @@
 package zippyisms.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zippyisms.common.ServerBeans;
@@ -9,21 +11,29 @@ import zippyisms.common.model.SubscriptionStatus;
 import zippyisms.common.model.Quote;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static zippyisms.common.Constants.SERVER_RESPONSE;
 
 /**
  * This class defines methods that return zany quotes from Zippy th'
  * Pinhead.
- * <p>
+ *
  * The {@code @Service} annotation enables the autodetection of
  * implementation classes via classpath scanning (in this case {@link
  * Quote}).
  */
+@SuppressWarnings("DataFlowIssue")
 @Service
 public class ZippyService {
+    /**
+     * A {@link List} of connected clients.
+     */
+    private final List<RSocketRequester> mConnectedClients =
+        new ArrayList<>();
+
     /**
      * An in-memory {@link List} of all the Zippy quotes.  The
      * {@code @Autowired} annotation ensures this field is initialized
@@ -41,6 +51,126 @@ public class ZippyService {
      */
     private final Set<Subscription> mSubscriptions =
         new HashSet<>();
+
+    /**
+     * This hook method is called when a client connects
+     * to the server.
+     *
+     * @param requester The {@link RSocketRequester} that's
+     *                  associated with the client that's
+     *                  connecting to the server.
+     * @param clientIdentity The identity of the client that's
+     *                       connecting to the server.
+     */
+    public void handleConnect
+        (RSocketRequester requester,
+         @Payload String clientIdentity) {
+        // Handle the connection setup payload and client
+        // status changes.
+        handleClientStatusChanges(requester, clientIdentity);
+
+        // Finalize the connection setup with the client.
+        finalizeConnectionSetup(requester);
+    }
+
+    /**
+     * Finalize the connection setup with the client.
+     *
+     * @param requester The {@link RSocketRequester} that's associated
+     *                  with the client that's connecting to the server
+     */
+    private void finalizeConnectionSetup
+        (RSocketRequester requester) {
+        // Protocol to finalize the connection with the client.
+        requester
+            // Route the response back to the initiating client.
+            .route(SERVER_RESPONSE)
+
+            // Indicate that the connection has been accepted.
+            .data("Connection accepted")
+
+            // Send the response back to the client and
+            // get its acknowledgement.
+            .retrieveMono(String.class)
+
+            // Print the client's acknowledgment.
+            .doOnNext(s -> System.out
+                .println("Client's acknowledgement = "
+                    + s))
+
+            // Initiate the response.
+            .subscribe();
+    }
+
+    /**
+     * Handle changes in the client's connection status.
+     *
+     * @param requester The {@link RSocketRequester} associated
+     *                  with the client that connected to the server
+     * @param clientIdentity The identity of the client that
+     *                       connected with the server
+     */
+    private void handleClientStatusChanges
+        (RSocketRequester requester,
+         String clientIdentity) {
+        requester
+            // Handle the connection setup payload
+            .rsocket()
+
+            // Return a Mono that terminates when the
+            // instance is terminated by any reason.
+            .onClose()
+
+            // Add a behavior triggered before the Mono
+            // is subscribed to.
+            .doFirst(() -> {
+                System.out.println("Received connection from client "
+                    + clientIdentity);
+                // Add the client to the client List.
+                mConnectedClients.add(requester);
+            })
+
+            // Add behavior triggered when the Mono completes with an error.
+            .doOnError(error -> {
+                // Warn when channels are closed by clients
+                System.out.println("Connection closed from client "
+                    + clientIdentity);
+                mConnectedClients.remove(requester);
+            })
+
+            // Add behavior triggering after the Mono terminates for any reason,
+            // including cancellation.
+            .doFinally(consumer -> {
+                // Remove disconnected clients from the client list
+                System.out.println("Disconnecting client "
+                    + clientIdentity);
+                // Remove the client from the client List.
+                mConnectedClients.remove(requester);
+            })
+
+            // Initiate processing.
+            .subscribe();
+    }
+
+    /**
+     * Cleanup the client connections on shutdown.
+     *
+     * A method annotated with {@code @PreDestroy} runs only once,
+     * just before Spring removes the bean from the application
+     * context and destroys the bean.
+     */
+    @PreDestroy
+    void shutdown() {
+        System.out.println("Detaching all remaining clients...");
+
+        mConnectedClients
+            // Dispose of all clients.
+            .forEach(requester -> requester
+                .rsocket()
+                .dispose());
+
+        System.out.println("Server shutting down.");
+    }
 
     /**
      * This method must be called before attempting to receive a

@@ -2,6 +2,9 @@ package zippyisms.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,15 +32,15 @@ import static zippyisms.common.Constants.*;
  *
  * <li>Channel, where a stream of async messages can be sent in both
  * directions between client and server.</li>
- *</ul>
- *
+ * </ul>
+ * <p>
  * Spring enables the integration of RSockets into a controller via
  * the {@code @Controller} annotation, which enables the autodetection
  * of implementation classes via classpath scanning, and
  * the {@code @MessageMapping annotation}, which maps a message onto a
  * message-handling method by matching the declared patterns to a
  * destination extracted from the message.
- *
+ * <p>
  * Combining the {@code @Controller} annotation with the
  * {@code @MessageMapping} annotation enables this class to declare
  * service endpoints, which in this case map to RSocket endpoints that
@@ -58,14 +61,33 @@ public class ZippyController {
     private ZippyService mService;
 
     /**
+     * This endpoint handler is called when a client connects
+     * to the server.
+     *
+     * @param requester The {@link RSocketRequester} that's
+     *                  associated with the client that's
+     *                  connecting to the server.
+     * @param clientIdentity The identity of the client that's
+     *                       connecting to the server.
+     */
+    @ConnectMapping(SERVER_CONNECT)
+    public void handleConnect
+        (RSocketRequester requester,
+         @Payload String clientIdentity) {
+        mService
+            // Forward to the service.
+            .handleConnect(requester, clientIdentity);
+    }
+
+    /**
      * This method must be called before attempting to receive a Flux
      * stream of Zippy quotes.  It implements a two-way async RSocket
      * request/response call that sends a response back to the client.
      *
-     * @param subscriptionRequest A {@link Mono} that emits a {@link 
+     * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription}
      * @return A {@link Mono} that emits the result of the {@link
-     *         Subscription} request
+     * Subscription} request
      */
     @MessageMapping(SUBSCRIBE)
     Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
@@ -99,11 +121,11 @@ public class ZippyController {
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return A {@link Mono} that emits a {@link Subscription}
-     *         indicating if the cancel request succeeded or failed
+     * indicating if the cancel request succeeded or failed
      */
     @MessageMapping(CANCEL_CONFIRMED)
     Mono<Subscription> cancelSubscriptionConfirmed
-        (Mono<Subscription> subscriptionRequest) {
+    (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .cancelSubscriptionConfirmed(subscriptionRequest);
@@ -134,7 +156,7 @@ public class ZippyController {
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds} once every second
      * @return A {@link Flux} that emits the requested Zippy quotes
-     *         once every second
+     * once every second
      */
     @MessageMapping(GET_QUOTES)
     Flux<Quote> getQuotes(Flux<Integer> quoteIds) {

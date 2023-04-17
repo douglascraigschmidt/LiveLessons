@@ -13,6 +13,7 @@ import zippyisms.common.model.Subscription;
 import zippyisms.common.model.SubscriptionStatus;
 import zippyisms.server.ZippyApplication;
 
+import javax.annotation.PreDestroy;
 import java.util.UUID;
 
 /**
@@ -34,7 +35,7 @@ import java.util.UUID;
     webEnvironment = SpringBootTest
         .WebEnvironment.DEFINED_PORT)
 @ComponentScan("zippyisms")
-public class ZippyMicroserviceTest {
+public class ZippyQuotesTest {
     /**
      * The number of Zippy th' Pinhead quotes to process.
      */
@@ -48,7 +49,7 @@ public class ZippyMicroserviceTest {
      * case, by creating a {@link ZippyProxy}).
      */
     @Autowired
-    private ZippyProxy zippyProxy;
+    private ZippyProxy mZippyProxy;
 
     /**
      * Subscribe and cancel requests to receive Zippy quotes.  This
@@ -61,7 +62,7 @@ public class ZippyMicroserviceTest {
         System.out.println("Entering testSubscribeAndCancel()");
 
         // Create a Mono<SubscriptionRequest>.
-        Mono<Subscription> subscriptionRequest = zippyProxy
+        Mono<Subscription> subscriptionRequest = mZippyProxy
             // Subscribe using a random ID.
             .subscribe(UUID.randomUUID())
 
@@ -78,7 +79,7 @@ public class ZippyMicroserviceTest {
                 .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        Mono<Subscription> mono = zippyProxy
+        Mono<Subscription> mono = mZippyProxy
             // Perform a confirmed cancellation of the subscription
             // (should succeed).
             .cancelConfirmed(subscriptionRequest);
@@ -91,7 +92,7 @@ public class ZippyMicroserviceTest {
                 .equals(SubscriptionStatus.CANCELLED))
             .verifyComplete();
 
-        mono = zippyProxy
+        mono = mZippyProxy
             // Try to cancel the subscription (which intentionally
             // fails since there was no registered subscription with
             // this ID).
@@ -116,11 +117,11 @@ public class ZippyMicroserviceTest {
     public void testValidSubscribeForQuotes() {
         System.out.println("Entering testValidSubscribeForQuotes()");
 
-        Mono<Subscription> subscriptionRequest = zippyProxy
+        Mono<Subscription> subscriptionRequest = mZippyProxy
             // Get a confirmed SubscriptionRequest from the server.
             .subscribe(UUID.randomUUID());
 
-        Flux<Quote> zippyQuotes = zippyProxy
+        Flux<Quote> zippyQuotes = mZippyProxy
             // Use the confirmed SubscriptionRequest to get a Flux
             // that emits ZippyQuote objects from the server.
             .getAllQuotes(subscriptionRequest)
@@ -160,11 +161,11 @@ public class ZippyMicroserviceTest {
      * fire-and-forget model that does not return a response.
      */
     @Test
-    public void testInvalidSubscribeForQuotes() {
+    public void testInvalidSubscribeForAllQuotes() {
         System.out.println("Entering testInvalidSubscribeForQuotes()");
 
         // Get a confirmed SubscriptionRequest from the server.
-        Mono<Subscription> subscriptionRequest = zippyProxy
+        Mono<Subscription> subscriptionRequest = mZippyProxy
             // Subscribe using a random ID.
             .subscribe(UUID.randomUUID())
 
@@ -182,7 +183,7 @@ public class ZippyMicroserviceTest {
                 .equals(SubscriptionStatus.CONFIRMED))
             .verifyComplete();
 
-        Mono<Void> mono = zippyProxy
+        Mono<Void> mono = mZippyProxy
             // Perform a one-way unconfirmed cancellation of
             // subscriptionRequest.
             .cancelUnconfirmed(subscriptionRequest);
@@ -193,7 +194,7 @@ public class ZippyMicroserviceTest {
             .create(mono)
             .verifyComplete();
 
-        Flux<Quote> zippyQuotes = zippyProxy
+        Flux<Quote> zippyQuotes = mZippyProxy
             // Attempt to get all the Zippy th' Pinhead quotes, which
             // should intentionally fail since the subscriptionRequest
             // was cancelled.
@@ -218,7 +219,7 @@ public class ZippyMicroserviceTest {
     public void testGetRandomQuotes() {
         System.out.println("Entering testGetRandomQuotes()");
 
-        var randomIndices = zippyProxy
+        var randomIndices = mZippyProxy
             // Make random indices needed for the test.
             .makeRandomIndices(sNUMBER_OF_INDICES)
 
@@ -228,7 +229,7 @@ public class ZippyMicroserviceTest {
 
         // Get a Flux that emits Zippy th' Pinhead quotes from
         // the server.
-        var zippyQuotes = zippyProxy
+        var zippyQuotes = mZippyProxy
             // Create a Flux that emits Zippy th' Pinhead quotes at
             // the random indices emitted by the randomZippyQuotes
             // Flux.
@@ -260,5 +261,14 @@ public class ZippyMicroserviceTest {
             .expectNextMatches(m -> m
                 .getQuoteId() == ri[4])
             .verifyComplete();
+    }
+
+    /**
+     * Close the connection to the Zippy th' Pinhead quotes server.
+     */
+    @PreDestroy
+    public void closeConnection() {
+        System.out.println("Closing connection");
+        mZippyProxy.closeConnection();
     }
 }
