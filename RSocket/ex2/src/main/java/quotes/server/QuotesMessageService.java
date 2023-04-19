@@ -21,9 +21,8 @@ import static quotes.common.model.SubscriptionType.ZIPPY;
 
 /**
  * This class defines methods that return quotes from Zippy th'
- * Pinhead and Jack Handey.  These methods are dispatched in a single
- * thread, so there's no need for synchronization.
- * <p>
+ * Pinhead and Jack Handey.
+ *
  * The {@code @Service} annotation enables the auto-detection of
  * implementation classes via classpath scanning (in this case {@link
  * Quote}).
@@ -32,7 +31,7 @@ import static quotes.common.model.SubscriptionType.ZIPPY;
 @Service
 public class QuotesMessageService {
     /**
-     * Debugging tag used by Options.
+     * Debugging tag used by {@link Options}.
      */
     private final String TAG = getClass().getSimpleName();
 
@@ -54,28 +53,31 @@ public class QuotesMessageService {
 
     /**
      * A Java {@link Set} of {@link Subscription} objects used to
-     * determine whether a client has subscribed already.
+     * determine whether a client has subscribed already.  The Spring
+     * RSocket implementation appears to dispatch all methods in a
+     * single thread, so there's no need for synchronization.
      */
     private final Set<Subscription> mSubscriptions =
-            new HashSet<>();
+        new HashSet<>();
 
     /**
-     * This method must be called before attempting to receive a
-     * {@link Flux} stream of {@link Quote} objects.  It implements a
-     * two-way async RSocket request/response call that sends a
-     * response back to the client.
+     * A client must call this method to subscribe before attempting
+     * to receive a {@link Flux} stream of {@link Quote} objects.  
+     *
+     * It implements a two-way async RSocket request/response call
+     * that sends a response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return An update {@link Mono} that emits the result of the
-     * {@link Subscription} request
+     *         {@link Subscription} request
      */
     Mono<Subscription> subscribe
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return subscriptionRequest
-                .doOnNext(sr -> {
+            .doOnNext(sr -> {
                     // Set the request status to confirm the
                     // subscription.
                     sr.setStatus(SubscriptionStatus.CONFIRMED);
@@ -85,73 +87,76 @@ public class QuotesMessageService {
 
                     // Print subscription information as a diagnostic.
                     Options.debug(TAG,
-                            "subscribe::"
-                                    + sr.getType()
-                                      + ":"
-                                    + sr.getStatus()
-                                    + ":"
-                                    + sr.getRequestId());
+                                  "subscribe::"
+                                  + sr.getType()
+                                  + ":"
+                                  + sr.getStatus()
+                                  + ":"
+                                  + sr.getRequestId());
                 });
     }
 
     /**
      * Cancel a {@link Subscription} in an unconfirmed manner, i.e.,
-     * any errors aren't returned to the client.  This method
-     * implements a one-way async RSocket fire-and-forget call that
-     * doesn't send a response back to the client.
+     * any errors aren't returned to the client.
+     *
+     * This method implements a one-way async RSocket fire-and-forget
+     * call that doesn't send a response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      */
     void cancelSubscriptionUnconfirmed
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         subscriptionRequest
-                // Cancel the subscription without informing the client if
-                // something goes wrong.
-                .doOnNext(this::cancelSubscription)
+            // Cancel the subscription without informing the client if
+            // something goes wrong.
+            .doOnNext(this::cancelSubscription)
 
-                // Initiate the cancellation, which is necessary since no
-                // response is sent back to the client.
-                .subscribe();
+            // Initiate the cancellation, which is necessary since no
+            // response is sent back to the client.
+            .subscribe();
     }
 
     /**
      * Cancel a {@link Subscription} in a confirmed manner, i.e., any
-     * errors are indicated to the client.  This method implements a
-     * two-way async RSocket request/response call that sends a
-     * response back to the client.
+     * errors are indicated to the client.
+     *
+     * This method implements a two-way async RSocket request/response
+     * call that sends a response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return A {@link Mono} that emits a {@link Subscription}
-     * indicating if the cancel request succeeded or failed
+     *         indicating if the cancel request succeeded or failed
      */
     Mono<Subscription> cancelSubscriptionConfirmed
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         // Try to cancel the subscription and indicate if the
         // cancellation succeeded.
         return subscriptionRequest
-                // Print the subscription information as a diagnostic and
-                // return the updated subscription indicating success or
-                // failure.
-                .map(this::cancelSubscription);
+            // Print the subscription information as a diagnostic and
+            // return the updated subscription indicating success or
+            // failure.
+            .map(this::cancelSubscription);
     }
 
     /**
-     * Cancel the {@link Subscription} and indicate if the
-     * cancellation succeeded or failed.
+     * This helper method cancels the {@link Subscription} and returns
+     * an updated {@link Subscription} indicating if the cancellation
+     * succeeded or failed.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return A {@link Mono} that emits a {@link Subscription}
-     * indicating if the cancel request succeeded or failed
+     *         indicating if the cancel request succeeded or failed
      */
     private Subscription cancelSubscription
-    (Subscription subscriptionRequest) {
+        (Subscription subscriptionRequest) {
         // Print the subscription information as a diagnostic.
         Options.debug(TAG,
-                "cancelSubscription::"
-                        + subscriptionRequest.getRequestId());
+                      "cancelSubscription::"
+                      + subscriptionRequest.getRequestId());
 
         // Check whether there's a matching request in the
         // subscription set.
@@ -163,19 +168,19 @@ public class QuotesMessageService {
             // subscription has been cancelled
             // successfully.
             subscriptionRequest
-                    .setStatus(SubscriptionStatus.CANCELLED);
+                .setStatus(SubscriptionStatus.CANCELLED);
 
             Options.debug(TAG,
-                    subscriptionRequest.getStatus()
-                            + " cancel succeeded");
+                          subscriptionRequest.getStatus()
+                          + " cancel succeeded");
         } else {
             // Indicate that the subscription wasn't registered.
             subscriptionRequest
-                    .setStatus(SubscriptionStatus.ERROR);
+                .setStatus(SubscriptionStatus.ERROR);
 
             Options.debug(TAG,
-                    subscriptionRequest.getStatus()
-                            + " cancel failed");
+                          subscriptionRequest.getStatus()
+                          + " cancel failed");
         }
 
         return subscriptionRequest;
@@ -183,38 +188,41 @@ public class QuotesMessageService {
 
     /**
      * Get a {@link Flux} that emits quotes according to the type of
-     * {@link Subscription}.  This method implements the async RSocket
-     * request/stream model, where each request receives a stream of
-     * responses from the server.
+     * {@link Subscription}.
+     *
+     * This method implements the async RSocket request/stream model,
+     * where each request receives a stream of responses from the
+     * server.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
-     * @return A {@link Flux} that emits a {@link Quote} of the
-     * type associated with the {@link Subscription}
+     * @return A {@link Flux} that emits a {@link Quote} of the type
+     *         associated with a {@link Subscription} or an empty
+     *         {@link Flux} otherwise.
      */
     Flux<Quote> getAllQuotes
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         return subscriptionRequest
-                .doOnNext(sr -> Options
-                        .debug(TAG,
-                                "getAllQuotes::"
-                                        + sr.getType()
-                                          + ":"
-                                        + sr.getStatus()
-                                        + ":"
-                                        + sr.getRequestId()))
+            .doOnNext(sr -> Options
+                      .debug(TAG,
+                             "getAllQuotes::"
+                             + sr.getType()
+                             + ":"
+                             + sr.getStatus()
+                             + ":"
+                             + sr.getRequestId()))
 
-                // Check to ensure the subscription request is registered
-                // and confirmed.
-                .flatMapMany(sr -> mSubscriptions
-                        .contains(sr)
-                        // If the request is not confirmed return a
-                        // Flux that emits the list of quotes.
-                        ? Flux.fromIterable(sr.getType() == ZIPPY
-                                            ? mZippyQuotes : mHandeyQuotes)
+            // Check to ensure the subscription request is registered
+            // and confirmed.
+            .flatMapMany(sr -> mSubscriptions
+                         .contains(sr)
+                         // If the request is not confirmed return a
+                         // Flux that emits the list of quotes.
+                         ? Flux.fromIterable(sr.getType() == ZIPPY
+                                             ? mZippyQuotes : mHandeyQuotes)
 
-                        // If the request is not confirmed return an
-                        // empty Flux.
-                        : Flux.empty());
+                         // If the request is not confirmed return an
+                         // empty Flux.
+                         : Flux.empty());
     }
 }

@@ -24,6 +24,7 @@ import org.springframework.security.rsocket.core.PayloadSocketAcceptorIntercepto
  * {@code @EnableReactiveMethodSecurity} to enable RSocket security
  * and reactive method security, respectively.
  */
+@SuppressWarnings("deprecation")
 @Configuration
 @EnableRSocketSecurity
 @EnableReactiveMethodSecurity

@@ -86,6 +86,8 @@ public class ZippyProxy {
      * This method returns a Flux that emits random Zippy th' Pinhead
      * quotes once a second until the stream is complete.
      *
+     * @param subscriptionRequest A {@link Subscription} object that
+     *                            should be valid
      * @param randomIndices A {@link Mono} that emits an array of
      *                      random indices used to request the associated Zippy
      *                      quote
@@ -94,7 +96,8 @@ public class ZippyProxy {
      */
     @SuppressWarnings("ReactiveStreamsUnusedPublisher")
     public Flux<Quote> getRandomQuotes
-        (Mono<Integer[]> randomIndices) {
+        (Mono<Subscription> subscriptionRequest,
+         Mono<Integer[]> randomIndices) {
         // Return a Flux that emits random Zippy quotes.
         return mZippyQuoteRequester
             // Combine the results of both Monos into a Tuple2 object.

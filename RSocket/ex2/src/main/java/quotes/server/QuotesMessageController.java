@@ -51,23 +51,26 @@ import static quotes.common.Constants.*;
 @Controller
 public class QuotesMessageController {
     /**
-     * The {@link QuotesMessageService} that's associated with this {@link
-     * QuotesMessageController} via Spring's dependency injection facilities,
-     * where an object receives other objects that it depends on (in
-     * this case, the {@link QuotesMessageService}).
+     * The {@link QuotesMessageService} that's associated with this
+     * {@link QuotesMessageController} via Spring's dependency
+     * injection facilities, where an object receives other objects
+     * that it depends on (in this case, the {@link
+     * QuotesMessageService}).
      */
     @Autowired
     private QuotesMessageService mService;
 
     /**
-     * This method must be called before attempting to receive a Flux
-     * stream of Zippy quotes.  It implements a two-way async RSocket
-     * request/response call that sends a response back to the client.
+     * A client must call this method to subscribe before attempting
+     * to receive a {@link Flux} stream of {@link Quote} objects.  
+     *
+     * It implements a two-way async RSocket request/response call
+     * that sends a response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription}
      * @return A {@link Mono} that emits the result of the {@link
-     * Subscription} request
+     *         Subscription} request
      */
     @MessageMapping(SUBSCRIBE)
     Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
@@ -78,9 +81,10 @@ public class QuotesMessageController {
 
     /**
      * Cancel a {@link Subscription} in an unconfirmed manner, i.e.,
-     * any errors are not returned to the client.  This method
-     * implements a one-way async RSocket fire-and-forget call that
-     * sends no response back to the client.
+     * any errors are not returned to the client.
+     *
+     * This method implements a one-way async RSocket fire-and-forget
+     * call that sends no response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
@@ -94,31 +98,37 @@ public class QuotesMessageController {
 
     /**
      * Cancel a {@link Subscription} in a confirmed manner, i.e., any
-     * errors are indicated to the client.  This method implements a
-     * two-way async RSocket request/response call that sends a
-     * response back to the client.
+     * errors are indicated to the client.
+     *
+     * This method implements a two-way async RSocket request/response
+     * call that sends a response back to the client.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      * @return A {@link Mono} that emits a {@link Subscription}
-     * indicating if the cancel request succeeded or failed
+     *         indicating if the cancel request succeeded or failed
      */
     @MessageMapping(CANCEL_CONFIRMED)
     Mono<Subscription> cancelSubscriptionConfirmed
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .cancelSubscriptionConfirmed(subscriptionRequest);
     }
 
     /**
-     * Get a {@link Flux} that emits Zippy quotes once a second.  This
-     * method implements the async RSocket request/stream model, where
-     * each request receives a stream of responses from the server.
+     * Get a {@link Flux} that emits all the {@link Quote} objects
+     * associated with the subscription.
+     *
+     * This method implements the async RSocket request/stream model,
+     * where each request receives a stream of responses from the
+     * server.
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
-     * @return A {@link Flux} that emits Zippy quote every second
+     * @return A {@link Flux} that emits a {@link Quote} of the type
+     *         associated with a {@link Subscription} or an empty
+     *         {@link Flux} otherwise.
      */
     @MessageMapping(GET_ALL_QUOTES)
     Flux<Quote> getAllQuotes(Mono<Subscription> subscriptionRequest) {

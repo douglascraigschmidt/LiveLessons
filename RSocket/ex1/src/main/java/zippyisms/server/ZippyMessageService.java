@@ -210,7 +210,7 @@ public class ZippyMessageService {
             // and confirmed.
             .flatMapMany(sr -> mSubscriptions
                          .contains(sr)
-                         // If request is subscribed/confirmed return
+                         // If the request is subscribed/confirmed return
                          // a Flux that emits the list of quotes.
                          ? Flux.fromIterable(mQuotes)
 
@@ -229,20 +229,37 @@ public class ZippyMessageService {
      * channel call where a {@link Flux} stream is sent to the server
      * and the server returns a {@link Flux} in response.
      *
+     * @param subscriptionRequest A {@link Mono} that emits a {@link
+     *                            Subscription} request
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}
      * @return A {@link Flux} that emits the requested Zippy quotes
      *         once every second
      */
-    Flux<Quote> getQuotes(Flux<Integer> quoteIds) {
-        return quoteIds
-            // Get the Zippy th' Pinhead quote at each quote id
-            // since the List is 0-based.
-            .map(this::getQuote)
+    Flux<Quote> getQuotes(Mono<Subscription> subscriptionRequest,
+                          Flux<Integer> quoteIds) {
+        return subscriptionRequest
+            .doOnNext(sr -> Options
+                .debug(TAG,
+                    "getQuotes::"
+                        + sr.getRequestId()
+                        + ":"
+                        + sr.getStatus()))
 
-            // Delay each emission by one second to demonstrate
-            // RSocket's streaming capability back to clients.
-            .delayElements(Duration.ofSeconds(1));
+                .flatMapMany(sr -> mSubscriptions
+                    .contains(sr)
+                    ? quoteIds
+                        // Get the Zippy th' Pinhead quote at each quote id
+                        // since the List is 0-based.
+                        .map(this::getQuote)
+
+                         // Delay each emission by one second to demonstrate
+                         // RSocket's streaming capability back to clients.
+                         .delayElements(Duration.ofSeconds(1))
+
+                    // If the request is not confirmed return an
+                    // empty Flux.
+                    : Flux.empty());
     }
 
     /**

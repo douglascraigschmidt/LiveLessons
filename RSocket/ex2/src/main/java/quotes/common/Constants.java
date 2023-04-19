@@ -28,8 +28,6 @@ public class Constants {
     public static final String CANCEL_CONFIRMED = "cancelConfirmed";
     public static final String CANCEL_UNCONFIRMED = "cancelUnconfirmed";
     public static final String GET_ALL_QUOTES = "getQuotes";
-    public static final String GET_QUOTES = "getQuote";
-    public static final String GET_NUMBER_OF_QUOTES = "getNumberOfQuotes";
 
     /**
      * The various types of Quotes supported.

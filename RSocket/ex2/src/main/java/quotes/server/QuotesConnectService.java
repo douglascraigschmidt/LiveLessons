@@ -137,7 +137,7 @@ public class QuotesConnectService {
                     Options.debug(TAG,
                                   "Disconnecting client "
                                   + clientIdentity);
-                    // Remove the client from the client List.
+                    // Remove the client from the client Map.
                     mConnectedClients.remove(clientIdentity);
                 })
 
