@@ -11,6 +11,7 @@ import reactor.test.StepVerifier;
 import zippyisms.client.ZippyProxy;
 import zippyisms.common.Options;
 import zippyisms.common.model.Quote;
+import zippyisms.common.model.RandomRequest;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.SubscriptionStatus;
 import zippyisms.server.ZippyApplication;
@@ -72,10 +73,11 @@ public class ZippyQuotesTest {
     }
 
     /**
-     * Subscribe and cancel requests to receive Zippy quotes.  This
-     * test demonstrates the RSocket two-way async request/response
-     * model, where each client request receives a confirmation
-     * response from the server.
+     * Subscribe and cancel requests to receive Zippy quotes.
+     * 
+     * This test demonstrates the RSocket two-way async
+     * request/response model, where each client request receives a
+     * confirmation response from the server.
      */
     @Test
     public void testSubscribeAndCancel() {
@@ -187,8 +189,10 @@ public class ZippyQuotesTest {
     /**
      * Try to subscribe for and receive Zippy th' Pinhead quotes,
      * which intentionally fails because the {@link Subscription} has
-     * been cancelled.  It also demonstrates the RSocket one-way async
-     * fire-and-forget model that does not return a response.
+     * been cancelled.
+     * 
+     * It demonstrates the RSocket one-way async fire-and-forget model
+     * that does not return a response.
      */
     @Test
     public void testInvalidSubscribeForAllQuotes() {
@@ -242,14 +246,99 @@ public class ZippyQuotesTest {
 
     /**
      * Get/print/test that a given number of random Zippy th' Pinhead
-     * quotes are received.  This method demonstrates the RSocket
-     * two-way async bidirectional channel model where a {@link Flux}
-     * stream is sent to the server and the server returns a {@link
-     * Flux} in response.
+     * quotes are received, requiring the client to subscribe first.
+     *
+     * This method demonstrates the RSocket two-way async
+     * request/stream channel model where a non-reactive {@link
+     * RandomRequest} object is sent to the server and the server
+     * returns a {@link Flux} in response.
      */
     @Test
-    public void testGetRandomQuotes() {
-        Options.print(TAG, ">>> Entering testGetRandomQuotes()");
+    public void testGetRandomQuotesSubscribed() {
+        Options.print(TAG,
+            ">>> Entering testGetRandomQuotesSubscribed()");
+
+        var randomIndices = mZippyProxy
+            // Make random indices needed for the test.
+            .makeRandomIndices(mNUMBER_OF_INDICES)
+
+            // Turn this Mono into a hot source and cache last emitted
+            // signals for later subscribers.
+            .cache();
+
+        // Get the array emitted by the randomIndices().
+        var ri = randomIndices
+            // Block until we get it.
+            .block();
+
+        // Get a confirmed SubscriptionRequest from the server.
+        Subscription subscriptionRequest = mZippyProxy
+            // Subscribe using a random ID.
+            .subscribe(UUID.randomUUID())
+
+            // Print the results as a diagnostic.
+            .doOnNext(sr ->
+                Options.debug(TAG, "subscribe-returned::"
+                    + sr.getRequestId()
+                    + ":" + sr.getStatus()))
+
+            // Block until we get it.
+            .block();
+
+        // Get a Flux that emits Zippy th' Pinhead quotes from
+        // the server.
+        var zippyQuotes = mZippyProxy
+            // Create a Flux that emits Zippy th' Pinhead quotes at
+            // the random indices emitted by the randomZippyQuotes
+            // Flux.
+            .getRandomQuotesSubscribed
+                (new RandomRequest(subscriptionRequest,
+                                        ri))
+
+            // Print the Zippyisms emitted by the Flux<ZippyQuote>.
+            .doOnNext(quote -> Options
+                      .debug(TAG,
+                             "Quote ("
+                             + quote.getQuoteId() + ") = "
+                             + quote.getQuote()));
+
+
+        assert ri != null;
+
+        // Ensure the results are correct, i.e., the returned quoteIds
+        // match those sent to the GET_RANDOM_QUOTES endpoint.
+        StepVerifier
+            .create(zippyQuotes)
+            .expectNextMatches(m -> m
+                               .getQuoteId() == ri[0])
+            .expectNextMatches(m -> m
+                               .getQuoteId() == ri[1])
+            .expectNextMatches(m -> m
+                               .getQuoteId() == ri[2])
+            .expectNextMatches(m -> m
+                               .getQuoteId() == ri[3])
+            .expectNextMatches(m -> m
+                               .getQuoteId() == ri[4])
+            .verifyComplete();
+
+        Options.print(TAG,
+            "<<< Leaving testGetRandomQuotesSubscribed()");
+    }
+
+    /**
+     * Get/print/test that a given number of random Zippy th' Pinhead
+     * quotes are received without requiring the client to subscribe
+     * first.
+     *
+     * This method demonstrates the RSocket two-way async
+     * bidirectional channel model where a {@link Flux} stream is sent
+     * to the server and the server returns a {@link Flux} in
+     * response.
+     */
+    @Test
+    public void testGetRandomQuotesUnsubscribed() {
+        Options.print(TAG,
+            ">>> Entering testGetRandomQuotesUnsubscribed()");
 
         var randomIndices = mZippyProxy
             // Make random indices needed for the test.
@@ -265,14 +354,14 @@ public class ZippyQuotesTest {
             // Create a Flux that emits Zippy th' Pinhead quotes at
             // the random indices emitted by the randomZippyQuotes
             // Flux.
-            .getRandomQuotes(randomIndices)
+            .getRandomQuotesUnsubscribed(randomIndices)
 
             // Print the Zippyisms emitted by the Flux<ZippyQuote>.
             .doOnNext(quote -> Options
-                      .debug(TAG,
-                             "Quote ("
-                             + quote.getQuoteId() + ") = "
-                             + quote.getQuote()));
+                .debug(TAG,
+                    "Quote ("
+                        + quote.getQuoteId() + ") = "
+                        + quote.getQuote()));
 
         // Get the random indices emitted by the randomIndices().
         var ri = randomIndices.block();
@@ -295,7 +384,8 @@ public class ZippyQuotesTest {
                                .getQuoteId() == ri[4])
             .verifyComplete();
 
-        Options.print(TAG, "<<< Leaving testGetRandomQuotes()");
+        Options.print(TAG,
+                      "<<< Leaving testGetRandomQuotesUnsubscribed()");
     }
 
     /**

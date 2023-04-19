@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+import zippyisms.common.model.RandomRequest;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.Quote;
 import zippyisms.server.ZippyApplication;
@@ -18,9 +19,9 @@ import static zippyisms.utils.RandomUtils.getRandomIntegers;
 
 /**
  * This class provides a proxy whose methods can be used to send
- * messages to endpoints provided by the {@link ZippyApplication} microservice
- * that demonstrates each of the four interaction models supported by
- * RSocket.
+ * messages to endpoints provided by the {@link ZippyApplication}
+ * microservice that demonstrates each of the four interaction models
+ * supported by RSocket.
  *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
@@ -42,90 +43,6 @@ public class ZippyProxy {
      */
     @Autowired
     private Mono<RSocketRequester> mZippyQuoteRequester;
-
-    /**
-     * @return A {@link Mono} that emits the total number of Zippy
-     *         th' Pinhead quotes
-     */
-    public Mono<Integer> getQuoteMax() {
-        // Return an array of random indicates.
-        return mZippyQuoteRequester
-            // Initialize the request that will be sent to the server.
-            .map(r -> r
-                // Set the metadata to indicate the request is for
-                // the server's GET_NUMBER_OF_QUOTES endpoint.
-                .route(GET_NUMBER_OF_QUOTES))
-
-            // Perform a two-way call using the metadata and then
-            // convert the response to a Mono that emits the total
-            // number of Zippyisms.
-            .flatMap(r -> r
-                .retrieveMono(Integer.class));
-    }
-
-    /**
-     * This factory method returns an array of random indices that are
-     * then used to generate random Zippy th' Pinhead quotes.
-     *
-     * @param numberOfIndices The number of random indices to generate
-     * @return A {@link Mono} that emits an array of random indices
-     *         within the range of the Zippy quotes
-     */
-    public Mono<Integer[]> makeRandomIndices(int numberOfIndices) {
-        return this
-            // Get the max number of Zippy quotes.
-            .getQuoteMax()
-
-            // Create an Integer array containing random indices.
-            .map(numberOfZippyQuotes ->
-                getRandomIntegers(numberOfIndices,
-                    numberOfZippyQuotes));
-    }
-
-    /**
-     * This method returns a Flux that emits random Zippy th' Pinhead
-     * quotes once a second until the stream is complete.
-     *
-     * @param subscriptionRequest A {@link Subscription} object that
-     *                            should be valid
-     * @param randomIndices A {@link Mono} that emits an array of
-     *                      random indices used to request the associated Zippy
-     *                      quote
-     * @return A {@link Flux} that emits random Zippy quotes once a
-     *         second until the stream is complete
-     */
-    @SuppressWarnings("ReactiveStreamsUnusedPublisher")
-    public Flux<Quote> getRandomQuotes
-        (Mono<Subscription> subscriptionRequest,
-         Mono<Integer[]> randomIndices) {
-        // Return a Flux that emits random Zippy quotes.
-        return mZippyQuoteRequester
-            // Combine the results of both Monos into a Tuple2 object.
-            .zipWith(randomIndices)
-
-            // Initialize the request that will be sent to the server.
-            .map(tuple ->
-                // Set the metadata to indicate the request is for
-                // the server's GET_QUOTES endpoint.
-                tuple.getT1().route(GET_QUOTES)
-
-                    // Create the param to pass to the GET_QUOTES
-                    // endpoint.
-                    .data(Flux
-                        // Create a Flux that emits indices for random
-                        // Zippy th' Pinhead quotes.
-                        .fromArray(tuple.getT2())
-
-                        // Emit the indices once every second.
-                        .delayElements(Duration.ofSeconds(1))))
-
-            // Perform a two-way call using the metadata and then
-            // convert the Mono result to a Flux<ZippyQuote> that
-            // emits ZippyQuote objects once every second until the
-            // stream is complete.
-            .flatMapMany(r -> r
-                        .retrieveFlux(Quote.class));
-    }
 
     /**
      * A factory method that creates and returns a {@link
@@ -318,6 +235,121 @@ public class ZippyProxy {
             // emits a stream of Quote objects.
             .flatMapMany(r -> r
                          .retrieveFlux(Quote.class));
+    }
+
+    /**
+     * @return A {@link Mono} that emits the total number of Zippy
+     *         th' Pinhead quotes
+     */
+    public Mono<Integer> getQuoteMax() {
+        // Return an array of random indicates.
+        return mZippyQuoteRequester
+            // Initialize the request that will be sent to the server.
+            .map(r -> r
+                // Set the metadata to indicate the request is for
+                // the server's GET_NUMBER_OF_QUOTES endpoint.
+                .route(GET_NUMBER_OF_QUOTES))
+
+            // Perform a two-way call using the metadata and then
+            // convert the response to a Mono that emits the total
+            // number of Zippyisms.
+            .flatMap(r -> r
+                .retrieveMono(Integer.class));
+    }
+
+    /**
+     * This factory method returns an array of random indices that are
+     * then used to generate random Zippy th' Pinhead quotes.
+     *
+     * @param numberOfIndices The number of random indices to generate
+     * @return A {@link Mono} that emits an array of random indices
+     *         within the range of the Zippy quotes
+     */
+    public Mono<Integer[]> makeRandomIndices
+        (int numberOfIndices) {
+        return this
+            // Get the max number of Zippy quotes.
+            .getQuoteMax()
+
+            // Create an Integer array containing random indices.
+            .map(numberOfZippyQuotes ->
+                getRandomIntegers(numberOfIndices,
+                    numberOfZippyQuotes));
+    }
+
+    /**
+     * This method returns a Flux that emits random Zippy th' Pinhead
+     * quotes once a second until the stream is complete.
+     *
+     * @param randomRequest A {@link RandomRequest} that contains
+     *                      {@link Subscription} and random indices
+     * @return A {@link Flux} that emits random Zippy quotes once a
+     *         second until the stream is complete
+     */
+    @SuppressWarnings("ReactiveStreamsUnusedPublisher")
+    public Flux<Quote> getRandomQuotesSubscribed
+        (RandomRequest randomRequest) {
+        // Return a Flux that emits random Zippy quotes.
+        return mZippyQuoteRequester
+            // Initialize the request that will be sent to the server.
+            .map(r ->
+                // Set the metadata to indicate the request is for
+                // the server's GET_QUOTES endpoint.
+                r.route(GET_QUOTES_SUBSCRIBED)
+
+                    // Pass randomRequest to the GET_QUOTES
+                    // endpoint.
+                    .data(randomRequest))
+
+            // Perform a two-way call and return to a Flux<Quote>
+            // that emits Quote objects once every second until the
+            // stream is complete.
+            .flatMapMany(r -> r
+                        .retrieveFlux(Quote.class));
+    }
+
+    /**
+     * This method returns a {@link Flux} that emits random Zippy th'
+     * Pinhead quotes once a second until the stream is complete and
+     * doesn't require the client to subscribe first.
+
+     * @param subscriptionRequest A {@link Subscription} object that
+     *                            should be valid
+     * @param randomIndices A {@link Mono} that emits an array of
+     *                      random indices used to request the
+     *                      associated Zippy quote
+     * @return A {@link Flux} that emits random Zippy quotes once a
+     *         second until the stream is complete
+     */
+    @SuppressWarnings("ReactiveStreamsUnusedPublisher")
+    public Flux<Quote> getRandomQuotesUnsubscribed
+        (Mono<Integer[]> randomIndices) {
+        // Return a Flux that emits random Zippy quotes.
+        return mZippyQuoteRequester
+            // Combine the results of both Monos into a Tuple2 object.
+            .zipWith(randomIndices)
+
+            // Initialize the request that will be sent to the server.
+            .map(tuple ->
+                // Set the metadata to indicate the request is for the
+                // server's GET_QUOTES endpoint.
+                tuple.getT1().route(GET_QUOTES_UNSUBSCRIBED)
+
+                    // Create the param to pass to the GET_QUOTES
+                    // endpoint.
+                    .data(Flux
+                        // Create a Flux that emits indices for random
+                        // Zippy th' Pinhead quotes.
+                        .fromArray(tuple.getT2())
+
+                        // Emit the indices once every second.
+                        .delayElements(Duration.ofSeconds(1))))
+
+            // Perform a two-way call and return a Flux<ZippyQuote>
+            // that emits ZippyQuote objects once every second until
+            // the stream is complete.
+            .flatMapMany(r -> r
+                .retrieveFlux(Quote.class));
     }
 
     /**

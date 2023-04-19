@@ -9,8 +9,8 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zippyisms.common.Constants;
-import zippyisms.common.Options;
 import zippyisms.common.model.Quote;
+import zippyisms.common.model.RandomRequest;
 import zippyisms.common.model.Subscription;
 
 import static zippyisms.common.Constants.*;
@@ -130,21 +130,45 @@ public class ZippyMessageController {
     }
 
     /**
-     * Get a {@link Flux} that emits the requested Zippy quotes.
-     * This method implements a two-way async RSocket bi-directional
-     * channel call where a Flux stream is sent to the server and the
-     * server returns a Flux in response.
+     * Get a {@link Flux} that emits the requested Zippy quotes if
+     * the client has subscribed.
+     *
+     * This method implements a two-way async RSocket request/stream
+     * call where a {@link RandomRequest} non-reactive type is sent
+     * to the server and the server returns a {@link Flux} in
+     * response.
+     *
+     * @param randomRequest A non-reactive {@link RandomRequest} that
+     *                      contains {@link Subscription} and random
+     *                      indices array
+     * @return A {@link Flux} that emits the requested Zippy quotes
+     * once every second
+     */
+    @MessageMapping(GET_QUOTES_SUBSCRIBED)
+    Flux<Quote> getQuotesSubscribed(RandomRequest randomRequest) {
+        return mService
+            // Forward to the service.
+            .getQuotesSubscribed(randomRequest);
+    }
+
+    /**
+     * Get a {@link Flux} that emits the requested Zippy quotes without
+     * the client having to subscribe first.
+     *
+     * This method implements a two-way async RSocket bidirectional
+     * channel call where a {@link Flux} stream is sent to the server
+     * and the server returns a {@link Flux} in response.
      *
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds} once every second
      * @return A {@link Flux} that emits the requested Zippy quotes
-     * once every second
+     *         once every second
      */
-    @MessageMapping(GET_QUOTES)
-    Flux<Quote> getQuotes(Flux<Integer> quoteIds) {
+    @MessageMapping(GET_QUOTES_UNSUBSCRIBED)
+    Flux<Quote> getQuotesUnsubscribed(Flux<Integer> quoteIds) {
         return mService
             // Forward to the service.
-            .getQuotes(quoteIds);
+            .getQuotesUnsubscribed(quoteIds);
     }
 
     /**

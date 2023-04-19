@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 import zippyisms.common.Options;
 import zippyisms.common.ServerBeans;
 import zippyisms.common.model.Quote;
+import zippyisms.common.model.RandomRequest;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.SubscriptionStatus;
 
@@ -61,7 +62,8 @@ public class ZippyMessageService {
      * @return An update {@link Mono} that emits the result of the
      * {@link Subscription} request
      */
-    Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
+    Mono<Subscription> subscribe
+        (Mono<Subscription> subscriptionRequest) {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return subscriptionRequest
@@ -224,42 +226,77 @@ public class ZippyMessageService {
     }
 
     /**
-     * Get a {@link Flux} that emits the requested Zippy quotes.  This
-     * method implements a two-way async RSocket bi-directional
+     * Get a {@link Flux} that emits the requested Zippy quotes if the
+     * client is subscribed.
+     *
+     * This method implements a two-way async RSocket request/stream
+     * call where a {@link RandomRequest} non-reactive type is sent
+     * to the server and the server returns a {@link Flux} in
+     * response.
+     *
+     * @param randomRequest A non-reactive {@link RandomRequest} that
+     *                      contains {@link Subscription} and random
+     *                      indices array
+     * @return A {@link Flux} that emits the requested Zippy quotes
+     *         once every second
+     */
+    Flux<Quote> getQuotesSubscribed
+        (RandomRequest randomRequest) {
+        var subscription = randomRequest
+            // Get the Subcription field.
+            .getSubscription();
+
+        Options
+            .debug(TAG,
+                   "getQuotes::"
+                   + subscription.getRequestId()
+                   + ":"
+                   + subscription.getStatus());
+
+        return mSubscriptions
+            // Check whether the subscription is confirmed.
+            .contains(subscription)
+            ? Flux
+            // If it's confirmed convert the array of random
+            // indices into a Flux.
+            .fromArray(randomRequest.getRandomIndices())
+
+            // Get the Zippy th' Pinhead quote at each quote id since
+            // the array is 0-based.
+            .map(this::getQuote)
+
+            // Delay each emission by one second to demonstrate
+            // RSocket's streaming capability back to clients.
+            .delayElements(Duration.ofSeconds(1))
+
+            : 
+            // Otherwise, if the request is not confirmed return an
+            // empty Flux.
+            Flux.empty();
+    }
+
+    /**
+     * Get a {@link Flux} that emits the requested Zippy quotes without
+     * the client having to subscribe first.
+     *
+     * This method implements a two-way async RSocket bidirectional
      * channel call where a {@link Flux} stream is sent to the server
      * and the server returns a {@link Flux} in response.
      *
-     * @param subscriptionRequest A {@link Mono} that emits a {@link
-     *                            Subscription} request
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}
      * @return A {@link Flux} that emits the requested Zippy quotes
      *         once every second
      */
-    Flux<Quote> getQuotes(Mono<Subscription> subscriptionRequest,
-                          Flux<Integer> quoteIds) {
-        return subscriptionRequest
-            .doOnNext(sr -> Options
-                .debug(TAG,
-                    "getQuotes::"
-                        + sr.getRequestId()
-                        + ":"
-                        + sr.getStatus()))
+    Flux<Quote> getQuotesUnsubscribed(Flux<Integer> quoteIds) {
+        return quoteIds
+                // Get the Zippy th' Pinhead quote at each quote id
+                // since the List is 0-based.
+                .map(this::getQuote)
 
-                .flatMapMany(sr -> mSubscriptions
-                    .contains(sr)
-                    ? quoteIds
-                        // Get the Zippy th' Pinhead quote at each quote id
-                        // since the List is 0-based.
-                        .map(this::getQuote)
-
-                         // Delay each emission by one second to demonstrate
-                         // RSocket's streaming capability back to clients.
-                         .delayElements(Duration.ofSeconds(1))
-
-                    // If the request is not confirmed return an
-                    // empty Flux.
-                    : Flux.empty());
+                // Delay each emission by one second to demonstrate
+                // RSocket's streaming capability back to clients.
+                .delayElements(Duration.ofSeconds(1));
     }
 
     /**
