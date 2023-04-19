@@ -68,7 +68,7 @@ public class ServerBeans {
                         quote.stripLeading()))
 
                 // Collect results into a list of ZippyQuote objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

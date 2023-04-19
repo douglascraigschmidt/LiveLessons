@@ -1,4 +1,4 @@
-package zippyisms.server;
+package quotes.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -8,18 +8,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import zippyisms.common.Constants;
-import zippyisms.common.Options;
-import zippyisms.common.model.Quote;
-import zippyisms.common.model.Subscription;
+import quotes.common.model.Quote;
+import quotes.common.model.Subscription;
 
-import static zippyisms.common.Constants.*;
+import static quotes.common.Constants.*;
 
 /**
  * This controller enables RSocket clients to get random Zippy th'
  * Pinhead quotes, subscribe to receive Flux streams of these quotes,
  * as well as cancel earlier subscriptions.  It demonstrates the
- * following RSocket interaction models:
+ * following RSocket interaction models
  *
  * <ul>
  * <li>Request/Response, where each two-way async request receives a
@@ -51,15 +49,15 @@ import static zippyisms.common.Constants.*;
  * across a communication channel.
  */
 @Controller
-public class ZippyMessageController {
+public class QuotesMessageController {
     /**
-     * The {@link ZippyMessageService} that's associated with this {@link
-     * ZippyMessageController} via Spring's dependency injection facilities,
+     * The {@link QuotesMessageService} that's associated with this {@link
+     * QuotesMessageController} via Spring's dependency injection facilities,
      * where an object receives other objects that it depends on (in
-     * this case, the {@link ZippyMessageService}).
+     * this case, the {@link QuotesMessageService}).
      */
     @Autowired
-    private ZippyMessageService mService;
+    private QuotesMessageService mService;
 
     /**
      * This method must be called before attempting to receive a Flux
@@ -127,35 +125,5 @@ public class ZippyMessageController {
         return mService
             // Forward to the service.
             .getAllQuotes(subscriptionRequest);
-    }
-
-    /**
-     * Get a {@link Flux} that emits the requested Zippy quotes.
-     * This method implements a two-way async RSocket bi-directional
-     * channel call where a Flux stream is sent to the server and the
-     * server returns a Flux in response.
-     *
-     * @param quoteIds A {@link Flux} that emits the given Zippy
-     *                 {@code quoteIds} once every second
-     * @return A {@link Flux} that emits the requested Zippy quotes
-     * once every second
-     */
-    @MessageMapping(GET_QUOTES)
-    Flux<Quote> getQuotes(Flux<Integer> quoteIds) {
-        return mService
-            // Forward to the service.
-            .getQuotes(quoteIds);
-    }
-
-    /**
-     * @return A {@link Mono} that emits the total number of Zippy th'
-     * Pinhead quotes
-     */
-    @PreAuthorize("hasRole('USER')")
-    @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
-    Mono<Integer> getNumberOfQuotes(@AuthenticationPrincipal UserDetails user) {
-        return mService
-            // Forward to the service.
-            .getNumberOfQuotes(user);
     }
 }

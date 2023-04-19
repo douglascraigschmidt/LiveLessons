@@ -1,4 +1,4 @@
-package zippyisms.common;
+package quotes.common;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,6 @@ import org.springframework.security.rsocket.core.PayloadSocketAcceptorIntercepto
  * {@code @EnableReactiveMethodSecurity} to enable RSocket security
  * and reactive method security, respectively.
  */
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableRSocketSecurity
 @EnableReactiveMethodSecurity

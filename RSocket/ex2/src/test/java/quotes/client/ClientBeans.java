@@ -1,4 +1,4 @@
-package zippyisms.client;
+package quotes.client;
 
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketConnector;
@@ -17,15 +17,15 @@ import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHa
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
-import zippyisms.common.Constants;
-import zippyisms.common.Options;
+import quotes.common.Constants;
+import quotes.common.Options;
 
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static io.rsocket.metadata.WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION;
-import static zippyisms.common.Constants.*;
+import static quotes.common.Constants.*;
 
 /**
  * The class defines a {@code @Bean} that returns a {@link Mono}

@@ -41,7 +41,7 @@ public class ZippyMessageService {
      * class.
      */
     @Autowired
-    public List<Quote> mQuotes;
+    private List<Quote> mQuotes;
 
     /**
      * A Java {@link Set} of {@link Subscription} objects used to

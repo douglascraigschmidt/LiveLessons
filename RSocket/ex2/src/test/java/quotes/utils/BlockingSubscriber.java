@@ -1,8 +1,8 @@
-package subscriber;
+package quotes.utils;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.Disposable;
+import quotes.common.Options;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CountDownLatch;
@@ -10,13 +10,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * Define a Subscriber implementation that handles blocking, which is
- * otherwise not well-supported by Project Reactor.
+ * Define a backpressure-aware Subscriber implementation that
+ * handles blocking (which is otherwise not well-supported by
+ * Project Reactor).
  */
 @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
 public class BlockingSubscriber<T>
-    implements Subscriber<T>,
-               Disposable {
+       implements Subscriber<T> {
+    /**
+     * Debugging tag used by Options.
+     */
+    private final String TAG = getClass().getSimpleName();
+
     /**
      * The consumer to invoke on each onNext() value.
      */
@@ -60,11 +65,6 @@ public class BlockingSubscriber<T>
      * subscriber to complete all its async processing.
      */
     final CountDownLatch mLatch;
-
-    /**
-     * Keeps track of whether we've been disposed.
-     */
-    private boolean mIsDisposed;
 
     /**
      * Pass and store params that will respectively consume all the
@@ -111,6 +111,9 @@ public class BlockingSubscriber<T>
 
         mTotalEvents.incrementAndGet();
         if (mEventsProcessedThusFar.incrementAndGet() == mRequestSize) {
+            Options.debug(TAG, "Requesting size "
+                + mRequestSize
+                + " more events\n");
             mSubscription.request(mRequestSize);
             mEventsProcessedThusFar.set(0);
         }
@@ -123,6 +126,14 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onError(Throwable t) {
+        // Add the total number of events processed.
+        Options.debug(TAG,
+                   + totalEvents()
+                   + " async computations completed successfully,\n    but then received "
+                   + t.getClass().getSimpleName()
+                   + ":\n    "
+                   + t.getMessage());
+
         // Run the errorConsumer's hook method.
         mErrorConsumer.accept(t);
 
@@ -135,6 +146,11 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onComplete() {
+        // Add the total number of events processed.
+        Options.debug(TAG,
+                totalEvents()
+                   + " async computations completed successfully\n");
+
         // Run the completeRunnable's hook method.
         mCompleteRunnable.run();
 
@@ -152,34 +168,20 @@ public class BlockingSubscriber<T>
     /**
      * Block until all events have been processed by subscribe().
      *
-     * @return An empty {@link Mono} to indicate to the caller that
-     * all processing is done
+     * @return A {@link Mono} that completes when all events have been
+     *         processed
      */
     public Mono<Void> await() {
+        // Add some useful diagnostic output.
+        Options.debug(TAG, "Waiting for async computations to complete.");
+
         try {
             mLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // Return empty Mono to indicate to the caller that all
-        // processing is done.
+        // Return an empty Mono.
         return Mono.empty();
-    }
-
-    /**
-     * Hook method called when this subscriber is disposed.
-     */
-    @Override
-    public void dispose() {
-        mIsDisposed = true;
-    }
-
-    /**
-     * @return True if this subscriber has been disposed, else false.
-     */
-    @Override
-    public boolean isDisposed() {
-        return mIsDisposed;
     }
 }

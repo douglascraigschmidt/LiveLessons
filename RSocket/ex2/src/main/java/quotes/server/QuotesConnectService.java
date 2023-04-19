@@ -1,18 +1,16 @@
-package zippyisms.server;
+package quotes.server;
 
-import jakarta.annotation.PreDestroy;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Service;
-import zippyisms.common.Options;
-import zippyisms.common.model.Quote;
+import quotes.common.Options;
+import quotes.common.model.Quote;
 
-import java.util.ArrayList;
+import jakarta.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
 import java.util.Map;
 
-import static zippyisms.common.Constants.SERVER_RESPONSE;
+import static quotes.common.Constants.SERVER_RESPONSE;
 
 /**
  * This class defines methods that establish a connection with a
@@ -24,7 +22,7 @@ import static zippyisms.common.Constants.SERVER_RESPONSE;
  */
 @SuppressWarnings("DataFlowIssue")
 @Service
-public class ZippyConnectService {
+public class QuotesConnectService {
     /**
      * Debugging tag used by Options.
      */
@@ -38,8 +36,7 @@ public class ZippyConnectService {
 
     /**
      * This hook method is called when a client connects to the
-     * server to finalize connection setup with the client and
-     * handle client status changes.
+     * server.
      *
      * @param clientRequester The {@link RSocketRequester} that's
      *                        associated with the client that's
