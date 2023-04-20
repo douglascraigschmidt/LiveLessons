@@ -1,8 +1,9 @@
-package edu.vandy.quoteservices.repository;
+package quotes.repository;
 
-import edu.vandy.quoteservices.common.Quote;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
+import quotes.common.model.Quote;
+
 import reactor.core.publisher.Flux;
 
 /**
@@ -15,15 +16,12 @@ import reactor.core.publisher.Flux;
  */
 @Repository
 public interface ReactiveQuoteRepository
-       extends ReactiveCrudRepository<Quote, Integer>,
-               MultiQueryRepository {
+       extends ReactiveCrudRepository<Quote, Integer> {
     /**
-     * Find all {@link Quote} rows in the database that contain the
-     * {@code query} {@link String} (ignoring case).
+     * This method finds all quotes of the given type.
      *
-     * @param query The {@link String} to search for
-     * @return A {@link Flux} of {@link Quote} objects that match the
-     *         {@code query}
+     * @param type The type of quote to find, e.g., Zippy = 1, Handey = 2, etc.
+     * @return A {@link Flux} that emits all quotes of the given type.
      */
-    Flux<Quote> findByQuoteContainingIgnoreCase(String query);
+    Flux<Quote> findAllByType(int type);
 }

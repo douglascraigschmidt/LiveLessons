@@ -2,7 +2,11 @@ package quotes.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+import quotes.common.model.Quote;
+import quotes.repository.ReactiveQuoteRepository;
 
 /**
  * Provides the context for running the QuotesApplication, which is a
@@ -20,6 +24,10 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication
 @ComponentScan("quotes")
+@EntityScan(basePackageClasses =
+    {Quote.class})
+@EnableR2dbcRepositories(basePackageClasses =
+    {ReactiveQuoteRepository.class})
 public class QuotesApplication {
     public static void main(String[] args) {
         // Run the QuotesApplication microservice.

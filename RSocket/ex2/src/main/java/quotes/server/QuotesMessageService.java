@@ -7,6 +7,7 @@ import quotes.common.Options;
 import quotes.common.model.Quote;
 import quotes.common.model.Subscription;
 import quotes.common.model.SubscriptionStatus;
+import quotes.repository.ReactiveQuoteRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,20 +37,10 @@ public class QuotesMessageService {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * An in-memory {@link List} of all the Zippy quotes autowired by
-     * Spring's dependency injection mechanism.
+     * The {@link ReactiveQuoteRepository} used to access the quote data.
      */
     @Autowired
-    @Qualifier(ZIPPY_QUOTES)
-    public List<Quote> mZippyQuotes;
-
-    /**
-     * An in-memory {@link List} of all the Handey quotes autowired by
-     * Spring's dependency injection mechanism.
-     */
-    @Autowired
-    @Qualifier(HANDEY_QUOTES)
-    public List<Quote> mHandeyQuotes;
+    private ReactiveQuoteRepository mQuoteRepository;
 
     /**
      * A Java {@link Set} of {@link Subscription} objects used to
@@ -218,8 +209,8 @@ public class QuotesMessageService {
                          .contains(sr)
                          // If the request is not confirmed return a
                          // Flux that emits the list of quotes.
-                         ? Flux.fromIterable(sr.getType() == ZIPPY
-                                             ? mZippyQuotes : mHandeyQuotes)
+                         ? mQuoteRepository
+                            .findAllByType(sr.getType().ordinal())
 
                          // If the request is not confirmed return an
                          // empty Flux.
