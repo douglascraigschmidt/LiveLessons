@@ -21,7 +21,7 @@ import java.util.Set;
  * This class defines methods that return zany quotes from Zippy th'
  * Pinhead. These methods are dispatched in a single thread, so
  * there's no need for synchronization.
- *
+ * <p>
  * The {@code @Service} annotation enables the auto-detection of
  * implementation classes via classpath scanning (in this case {@link
  * Quote}).
@@ -67,20 +67,24 @@ public class ZippyMessageService {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
         return subscriptionRequest
-            .doOnNext(sr -> {
-                    // Set the request status to confirm the
-                    // subscription.
-                    sr.setStatus(SubscriptionStatus.CONFIRMED);
+            .map(sr -> {
+                    // Create a confirmation response.
+                    var subscriptionResponse =
+                        new Subscription(sr.requestId(),
+                                         SubscriptionStatus.CONFIRMED);
 
-                    // Add this request to the set of subscriptions.
-                    mSubscriptions.add(sr);
+                    // Add this response to the set of subscriptions.
+                    mSubscriptions.add(subscriptionResponse);
 
                     // Print subscription information as a diagnostic.
                     Options.debug(TAG,
                                   "subscribe::"
-                                  + sr.getRequestId()
+                                  + subscriptionResponse.requestId()
                                   + ":"
-                                  + sr.getStatus());
+                                  + subscriptionResponse.status());
+
+                    // Return the response.
+                    return subscriptionResponse;
                 });
     }
 
@@ -131,52 +135,62 @@ public class ZippyMessageService {
      * Cancel the {@link Subscription} and indicate if the
      * cancellation succeeded or failed.
      *
-     * @param subscriptionRequest A {@link Mono} that emits a {@link
-     *                            Subscription} request
+     * @param subscription A {@link Mono} that emits a {@link
+     *                            Subscription}
      * @return A {@link Mono} that emits a {@link Subscription}
-     *         indicating if the cancel request succeeded or failed
+     * indicating if the cancel request succeeded or failed
      */
     private Subscription cancelSubscription
-        (Subscription subscriptionRequest) {
+        (Subscription subscription) {
         // Print the subscription information as a diagnostic.
         Options.debug(TAG,
                       "cancelSubscription::"
-                      + subscriptionRequest.getRequestId());
+                      + subscription.requestId()
+                      + ":"
+                      + subscription.status());
+
+        Subscription subscriptionResponse;
 
         // Check whether there's a matching request in the
         // subscription set.
-        if (mSubscriptions.contains(subscriptionRequest)) {
+        if (mSubscriptions.contains(subscription)) {
             // Remove the request from the subscription set.
-            mSubscriptions.remove(subscriptionRequest);
+            mSubscriptions.remove(subscription);
 
-            // Set the request status to indicate the
-            // subscription has been cancelled
-            // successfully.
-            subscriptionRequest
-                .setStatus(SubscriptionStatus.CANCELLED);
+            // Set the request status to indicate the subscription has
+            // been cancelled successfully.
+            subscriptionResponse =
+                new Subscription(subscription.requestId(),
+                                 SubscriptionStatus.CANCELLED);
 
             Options.debug(TAG,
-                          subscriptionRequest.getStatus()
+                          subscriptionResponse.requestId()
+                          + ":"
+                          + subscriptionResponse.status()
                           + " cancel succeeded");
         } else {
             // Indicate that the subscription wasn't registered.
-            subscriptionRequest
-                .setStatus(SubscriptionStatus.ERROR);
+            subscriptionResponse =
+                new Subscription(subscription.requestId(),
+                                 SubscriptionStatus.ERROR);
 
             Options.debug(TAG,
-                          subscriptionRequest.getStatus()
+                          subscriptionResponse.requestId()
+                          + ":"
+                          + subscriptionResponse.status()
                           + " cancel failed");
         }
 
-        return subscriptionRequest;
+        // Return the subscription response.
+        return subscriptionResponse;
     }
 
     /**
      * Get the total number of Zippy quotes.
-
+     *
      * @param user The {@link UserDetails} associated with the caller
      * @return A {@link Mono} that emits the total number of Zippy th'
-     *         Pinhead quotes
+     * Pinhead quotes
      */
     Mono<Integer> getNumberOfQuotes(UserDetails user) {
         Options.debug(TAG,
@@ -204,16 +218,17 @@ public class ZippyMessageService {
             .doOnNext(sr -> Options
                       .debug(TAG,
                              "getAllQuotes::"
-                             + sr.getRequestId()
+                             + sr.requestId()
                              + ":"
-                             + sr.getStatus()))
+                             + sr.status()))
 
             // Check to ensure the subscription request is registered
             // and confirmed.
             .flatMapMany(sr -> mSubscriptions
                          .contains(sr)
-                         // If the request is subscribed/confirmed return
-                         // a Flux that emits the list of quotes.
+                         // If the request is subscribed/confirmed
+                         // return a Flux that emits the list of
+                         // quotes.
                          ? Flux.fromIterable(mQuotes)
 
                          // If the request is not confirmed return an
@@ -228,7 +243,7 @@ public class ZippyMessageService {
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes if the
      * client is subscribed.
-     *
+     * <p>
      * This method implements a two-way async RSocket request/stream
      * call where a {@link RandomRequest} non-reactive type is sent
      * to the server and the server returns a {@link Flux} in
@@ -238,20 +253,20 @@ public class ZippyMessageService {
      *                      contains {@link Subscription} and random
      *                      indices array
      * @return A {@link Flux} that emits the requested Zippy quotes
-     *         once every second
+     * once every second
      */
     Flux<Quote> getQuotesSubscribed
         (RandomRequest randomRequest) {
         var subscription = randomRequest
             // Get the Subcription field.
-            .getSubscription();
+            .subscription();
 
         Options
             .debug(TAG,
                    "getQuotes::"
-                   + subscription.getRequestId()
+                   + subscription.requestId()
                    + ":"
-                   + subscription.getStatus());
+                   + subscription.status());
 
         return mSubscriptions
             // Check whether the subscription is confirmed.
@@ -259,7 +274,7 @@ public class ZippyMessageService {
             ? Flux
             // If it's confirmed convert the array of random
             // indices into a Flux.
-            .fromArray(randomRequest.getRandomIndices())
+            .fromArray(randomRequest.randomIndices())
 
             // Get the Zippy th' Pinhead quote at each quote id since
             // the array is 0-based.
@@ -269,7 +284,7 @@ public class ZippyMessageService {
             // RSocket's streaming capability back to clients.
             .delayElements(Duration.ofSeconds(1))
 
-            : 
+            :
             // Otherwise, if the request is not confirmed return an
             // empty Flux.
             Flux.empty();
@@ -278,7 +293,7 @@ public class ZippyMessageService {
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes without
      * the client having to subscribe first.
-     *
+     * <p>
      * This method implements a two-way async RSocket bidirectional
      * channel call where a {@link Flux} stream is sent to the server
      * and the server returns a {@link Flux} in response.
@@ -286,17 +301,17 @@ public class ZippyMessageService {
      * @param quoteIds A {@link Flux} that emits the given Zippy
      *                 {@code quoteIds}
      * @return A {@link Flux} that emits the requested Zippy quotes
-     *         once every second
+     * once every second
      */
     Flux<Quote> getQuotesUnsubscribed(Flux<Integer> quoteIds) {
         return quoteIds
-                // Get the Zippy th' Pinhead quote at each quote id
-                // since the List is 0-based.
-                .map(this::getQuote)
+            // Get the Zippy th' Pinhead quote at each quote id
+            // since the List is 0-based.
+            .map(this::getQuote)
 
-                // Delay each emission by one second to demonstrate
-                // RSocket's streaming capability back to clients.
-                .delayElements(Duration.ofSeconds(1));
+            // Delay each emission by one second to demonstrate
+            // RSocket's streaming capability back to clients.
+            .delayElements(Duration.ofSeconds(1));
     }
 
     /**
@@ -304,7 +319,7 @@ public class ZippyMessageService {
      *
      * @param quoteId The given Zippy th' Pinhead quote id
      * @return The Zippy th' Pinhead quote associated with {@code
-     *         quoteId}
+     * quoteId}
      */
     private Quote getQuote(Integer quoteId) {
         // Return the quote associated with quoteId.

@@ -9,6 +9,7 @@ import reactor.util.function.Tuple2;
 import zippyisms.common.model.RandomRequest;
 import zippyisms.common.model.Subscription;
 import zippyisms.common.model.Quote;
+import zippyisms.common.model.SubscriptionStatus;
 import zippyisms.server.ZippyApplication;
 
 import java.time.Duration;
@@ -62,7 +63,8 @@ public class ZippyProxy {
 
                 // Create a new Subscription with the given
                 // subscription ID and pass it as the data param.
-                .data(new Subscription(uuid)))
+                .data(new Subscription(uuid,
+                        SubscriptionStatus.PENDING)))
 
             // Perform a two-way call using the metadata and data and
             // then convert the response to a Mono that emits the
@@ -72,7 +74,7 @@ public class ZippyProxy {
 
             // Convert this Mono into a hot source, which caches the
             // emitted signals for future subscribers.
-            .cache();
+           .cache();
     }
 
     /**
@@ -109,7 +111,7 @@ public class ZippyProxy {
     }
 
     /**
-     * Perform a confirmed cancellation on a {@link Subscription}.
+     * Perform a confirmed cancellation on a {@link UUID}.
      *
      * @param uuid A unique ID that should identify a previous
      *             subscription
@@ -127,7 +129,8 @@ public class ZippyProxy {
 
                 // Create a new Subscription and pass it as the data
                 // param.
-                .data(new Subscription(uuid)))
+                .data(new Subscription(uuid,
+                        SubscriptionStatus.CONFIRMED)))
 
             // Perform a two-way call using the metadata and data and
             // then convert the response to a Mono that emits the
@@ -312,9 +315,7 @@ public class ZippyProxy {
      * This method returns a {@link Flux} that emits random Zippy th'
      * Pinhead quotes once a second until the stream is complete and
      * doesn't require the client to subscribe first.
-
-     * @param subscriptionRequest A {@link Subscription} object that
-     *                            should be valid
+     *
      * @param randomIndices A {@link Mono} that emits an array of
      *                      random indices used to request the
      *                      associated Zippy quote

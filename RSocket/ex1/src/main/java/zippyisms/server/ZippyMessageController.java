@@ -53,10 +53,11 @@ import static zippyisms.common.Constants.*;
 @Controller
 public class ZippyMessageController {
     /**
-     * The {@link ZippyMessageService} that's associated with this {@link
-     * ZippyMessageController} via Spring's dependency injection facilities,
-     * where an object receives other objects that it depends on (in
-     * this case, the {@link ZippyMessageService}).
+     * The {@link ZippyMessageService} that's associated with this
+     * {@link ZippyMessageController} via Spring's dependency
+     * injection facilities, where an object receives other objects
+     * that it depends on (in this case, the {@link
+     * ZippyMessageService}).
      */
     @Autowired
     private ZippyMessageService mService;
@@ -72,7 +73,8 @@ public class ZippyMessageController {
      * Subscription} request
      */
     @MessageMapping(SUBSCRIBE)
-    Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
+    Mono<Subscription> subscribe
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .subscribe(subscriptionRequest);
@@ -88,7 +90,8 @@ public class ZippyMessageController {
      *                            Subscription} request
      */
     @MessageMapping(CANCEL_UNCONFIRMED)
-    void cancelSubscriptionUnconfirmed(Mono<Subscription> subscriptionRequest) {
+    void cancelSubscriptionUnconfirmed
+        (Mono<Subscription> subscriptionRequest) {
         mService
             // Forward to the service.
             .cancelSubscriptionUnconfirmed(subscriptionRequest);
@@ -107,7 +110,7 @@ public class ZippyMessageController {
      */
     @MessageMapping(CANCEL_CONFIRMED)
     Mono<Subscription> cancelSubscriptionConfirmed
-    (Mono<Subscription> subscriptionRequest) {
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .cancelSubscriptionConfirmed(subscriptionRequest);
@@ -123,7 +126,8 @@ public class ZippyMessageController {
      * @return A {@link Flux} that emits Zippy quote every second
      */
     @MessageMapping(GET_ALL_QUOTES)
-    Flux<Quote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
+    Flux<Quote> getAllQuotes
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .getAllQuotes(subscriptionRequest);
@@ -145,7 +149,8 @@ public class ZippyMessageController {
      * once every second
      */
     @MessageMapping(GET_QUOTES_SUBSCRIBED)
-    Flux<Quote> getQuotesSubscribed(RandomRequest randomRequest) {
+    Flux<Quote> getQuotesSubscribed
+        (RandomRequest randomRequest) {
         return mService
             // Forward to the service.
             .getQuotesSubscribed(randomRequest);
@@ -177,7 +182,8 @@ public class ZippyMessageController {
      */
     @PreAuthorize("hasRole('USER')")
     @MessageMapping(Constants.GET_NUMBER_OF_QUOTES)
-    Mono<Integer> getNumberOfQuotes(@AuthenticationPrincipal UserDetails user) {
+    Mono<Integer> getNumberOfQuotes
+        (@AuthenticationPrincipal UserDetails user) {
         return mService
             // Forward to the service.
             .getNumberOfQuotes(user);
