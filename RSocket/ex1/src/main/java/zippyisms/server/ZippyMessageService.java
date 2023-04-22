@@ -21,7 +21,7 @@ import java.util.Set;
  * This class defines methods that return zany quotes from Zippy th'
  * Pinhead. These methods are dispatched in a single thread, so
  * there's no need for synchronization.
- * <p>
+ * 
  * The {@code @Service} annotation enables the auto-detection of
  * implementation classes via classpath scanning (in this case {@link
  * Quote}).
@@ -243,7 +243,7 @@ public class ZippyMessageService {
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes if the
      * client is subscribed.
-     * <p>
+     * 
      * This method implements a two-way async RSocket request/stream
      * call where a {@link RandomRequest} non-reactive type is sent
      * to the server and the server returns a {@link Flux} in
@@ -293,7 +293,7 @@ public class ZippyMessageService {
     /**
      * Get a {@link Flux} that emits the requested Zippy quotes without
      * the client having to subscribe first.
-     * <p>
+     * 
      * This method implements a two-way async RSocket bidirectional
      * channel call where a {@link Flux} stream is sent to the server
      * and the server returns a {@link Flux} in response.

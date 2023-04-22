@@ -6,6 +6,8 @@ import quotes.common.model.Quote;
 
 import reactor.core.publisher.Flux;
 
+import java.util.List;
+
 /**
  * A persistent repository containing information about
  * {@link Quote} objects using the R2DBC reactive database.
@@ -24,4 +26,6 @@ public interface ReactiveQuoteRepository
      * @return A {@link Flux} that emits all quotes of the given type.
      */
     Flux<Quote> findAllByPlay(String play);
+
+    Flux<Quote> findAllByIdIn(List<Integer> queryIds);
 }

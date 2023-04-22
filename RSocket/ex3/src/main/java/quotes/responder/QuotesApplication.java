@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import quotes.common.model.Quote;
@@ -39,8 +40,11 @@ public class QuotesApplication {
     // @Bean
     public CommandLineRunner demo(ReactiveQuoteRepository repository) {
         return args -> {
-            repository.findAll()
-                    .subscribe(it -> System.out.println(it.getQuote()));
+            repository
+                .findAll()
+                .count()
+                .subscribe(it ->
+                    System.out.println("Number of quotes: " + it));
         };
     }
 
