@@ -4,4 +4,5 @@ build/
 *.iml
 *.log
 local.properties
+private.properties
 .DS_Store

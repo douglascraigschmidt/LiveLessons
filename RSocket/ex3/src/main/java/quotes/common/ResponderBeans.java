@@ -1,14 +1,10 @@
 package quotes.common;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import quotes.BuildConfig;
 
 /**
  * This class contains {@code @Bean} methods that initialize various
@@ -23,47 +19,24 @@ import java.nio.file.Paths;
 @Component
 public class ResponderBeans {
     /**
-     * This method reads the ChatGPT API key from the
-     * {@code local.properties} file in the resources
-     * package.
-     *
-     * @return Return the API key to communicate with ChatGPT
-     */
-    public String getChatGPTAPIKey() {
-        try {
-            // Convert the filename into a pathname.
-            URI uri = ClassLoader
-                .getSystemResource("local.properties")
-                .toURI();
-
-            // Open the file, read all the bytes, and return it as a
-            // String.
-            var key = new String(Files
-                .readAllBytes(Paths.get(uri)))
-                .replaceAll("\\R$", "");
-
-            System.out.println("API key = " + key);
-
-            return key;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
      * @return A {@link WebClient} instance with the API key and
      *         default content type as default headers.
      */
     @Bean
     WebClient getWebClient() {
+        // This variable obtains the ChatGPT API key from the
+        // private.properties file in the root package.
+        String mChatGPTAPIKey = BuildConfig.API_KEY;
+
+        System.out.println("API_KEY = " + mChatGPTAPIKey);
+
         return WebClient
             // Start building a new WebClient instance.
             .builder()
 
             // Add the API key as a default authorization header.
             .defaultHeader("Authorization",
-                "Bearer " + getChatGPTAPIKey())
+                           "Bearer " + mChatGPTAPIKey)
 
             // Set the default content type to JSon.
             .defaultHeader("Content-Type",
