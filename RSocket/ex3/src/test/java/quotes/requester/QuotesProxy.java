@@ -3,6 +3,8 @@ package quotes.requester;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Component;
+import quotes.common.model.RandomRequest;
+import quotes.common.model.SubscriptionStatus;
 import quotes.responder.QuotesApplication;
 import quotes.responder.quoter.QuotesMessageController;
 import reactor.core.publisher.Flux;
@@ -14,6 +16,7 @@ import reactor.util.function.Tuple2;
 import java.util.UUID;
 
 import static quotes.common.Constants.*;
+import static quotes.utils.RandomUtils.getRandomIntegers;
 
 /**
  * This class provides a client whose methods can be used to send
@@ -47,8 +50,8 @@ public class QuotesProxy {
      *
      * @param uuid  A unique ID to identify the subscription
      * @param play The type of the subscription
-     * @return A {@link Mono} that emits a confirmed
-     *         {@link Subscription}
+     * @return A {@link Mono} that emits a confirmed {@link
+     *         Subscription}
      */
     public Mono<Subscription> subscribe(UUID uuid,
                                         String play) {
@@ -60,9 +63,11 @@ public class QuotesProxy {
                 .route(SUBSCRIBE)
 
                 // Create a new Subscription with the given
-                // subscription ID and pass it as the data param.
+                // parameters and pass it as the data param.
                 .data(new Subscription(uuid,
-                                            play)))
+
+                    SubscriptionStatus.PENDING,
+                    play)))
 
             // Perform a two-way call using the metadata and data and
             // then convert the response to a Mono that emits the
@@ -109,10 +114,81 @@ public class QuotesProxy {
     }
 
     /**
-     * This method returns a {@link Flux} that emits all Zippy th'
-     * Pinhead and Jack Handey quotes until complete if the {@code
-     * subscriptionRequest} is valid, otherwise it returns an {@link
-     * Flux} that emits an {@link IllegalAccessException}.
+     * @return A {@link Mono} that emits the total number of
+     *         Shakespeare quotes
+     */
+    public Mono<Long> getQuoteMax() {
+        // Return an array of random indicates.
+        return mQuoteRequester
+            // Initialize the request that will be sent to the server.
+            .map(r -> r
+                // Set the metadata to indicate the request is for the
+                // server's GET_NUMBER_OF_QUOTES endpoint.
+                .route(GET_NUMBER_OF_QUOTES))
+
+            // Perform a two-way call using the metadata and then
+            // convert the response to a Mono that emits the total
+            // number of quotes
+            .flatMap(r -> r
+                .retrieveMono(Long.class));
+    }
+
+    /**
+     * This factory method returns an array of random indices that are
+     * then used to generate random Shakespeare quotes.
+     *
+     * @param numberOfIndices The number of random indices to generate
+     * @return A {@link Mono} that emits an array of random indices
+     *         within the range of the Shakespeare quotes
+     */
+    public Mono<Integer[]> makeRandomIndices
+        (int numberOfIndices) {
+        return this
+            // Get the max number of Shakespeare quotes.
+            .getQuoteMax()
+
+            // Create a Long array containing random indices.
+            .map(numberOfQuotes ->
+                getRandomIntegers(numberOfIndices,
+                    numberOfQuotes.intValue()))
+
+            // Turn this Mono into a hot source and cache last emitted
+            // signals for later subscribers.
+            .cache();
+    }
+
+    /**
+     * This method returns a Flux that emits random Shakespeare
+     * quotes.
+     *
+     * @param randomRequest A {@link RandomRequest} that contains
+     *                      {@link Subscription} and random indices
+     * @return A {@link Flux} that emits random Shakespeare quotes
+     *              */
+    public Flux<Quote> getRandomQuotesSubscribed
+        (RandomRequest randomRequest) {
+        // Return a Flux that emits random Shakespeare quotes.
+        return mQuoteRequester
+            // Initialize the request that will be sent to the server.
+            .map(r ->
+                // Set the metadata to indicate the request is for the
+                // server's GET_QUOTES endpoint.
+                r.route(GET_QUOTES_SUBSCRIBED)
+
+                    // Pass randomRequest to the GET_QUOTES endpoint.
+                    .data(randomRequest))
+
+            // Perform a two-way call and return to a Flux<Quote> that
+            // emits Shakespeare Quote objects.
+            .flatMapMany(r -> r
+                        .retrieveFlux(Quote.class));
+    }
+
+    /**
+     * This method returns a {@link Flux} that emits all Shakespeare
+     * quotes until complete if the {@code subscriptionRequest} is
+     * valid, otherwise it returns an {@link Flux} that emits an
+     * {@link IllegalAccessException}.
      *
      * @param subscriptionRequest A {@link Subscription} object
      * @return A {@link Flux} that emits all {@link Quote} objects if
@@ -127,8 +203,8 @@ public class QuotesProxy {
             // these elements once into a Tuple2 object.
             .zipWith(subscriptionRequest)
 
-            // Use the Tuple2 metadata and data to pass a message to the
-            // server and then convert the response to a Flux that
+            // Use the Tuple2 metadata and data to pass a message to
+            // the server and then convert the response to a Flux that
             // emits a stream of Quote objects.
             .flatMapMany(QuotesProxy::getAllQuotes)
 

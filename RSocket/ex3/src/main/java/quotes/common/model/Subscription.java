@@ -17,33 +17,32 @@ import java.util.UUID;
  * The {@code NoArgsConstructor} annotation will generate a
  * constructor with no parameters.
  */
-@Data
-@NoArgsConstructor
-public class Subscription {
-    /**
+// @Data
+// @NoArgsConstructor
+public record Subscription (
+    /*
      * The unique subscription request id.
      */
-    private UUID requestId;
+    UUID requestId,
 
-    /**
+    /*
      * The current status of the subscription.
      */
-    private SubscriptionStatus status = SubscriptionStatus.PENDING;
+    SubscriptionStatus status,
 
-    /**
-     * The type of the subscription, e.g., ZIPPY vs. HANDEY.
+    /*
+     * The Shakespeare play, e.g., "Hamlet", "Macbeth", etc.
      */
-    private String play;
+    String play
 
     /**
      * The constructor initializes the field.
      *
      * @param requestId The ID that uniquely indicates the request
-     * @param play The type of the subscription
-     */
+     * @param play The Shakespeare play
+     *
     public Subscription(UUID requestId,
                         String play) {
         this.requestId = requestId;
         this.play = play;
-    }
-}
+    } */) {}
