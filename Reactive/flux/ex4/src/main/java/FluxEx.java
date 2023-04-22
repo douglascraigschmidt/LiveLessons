@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
-import utils.BlockingSubscriber;
+import utils.BackpressureSubscriber;
 import utils.Emitter;
 
 import java.util.Random;
@@ -51,7 +51,7 @@ public class FluxEx {
         // Create a blocking subscriber that processes various
         // types of signals have this subscribe not be aware
         // of backpressure and it logs the results.
-        BlockingSubscriber<BigFraction> blockingSubscriber =
+        BackpressureSubscriber<BigFraction> backpressureSubscriber =
             makeBlockingSubscriber(sb,
                                    Long.MAX_VALUE,
                                    true);
@@ -78,12 +78,12 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(blockingSubscriber);
+            .subscribe(backpressureSubscriber);
 
         // Wait for all async computations to complete and return an
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
-        return blockingSubscriber.await();
+        return backpressureSubscriber.await();
     }
 
     /**
@@ -97,7 +97,7 @@ public class FluxEx {
 
         // Create a blocking subscriber that processes various
         // types of signals and is "backpressure aware."
-        BlockingSubscriber<BigFraction> blockingSubscriber =
+        BackpressureSubscriber<BigFraction> backpressureSubscriber =
             makeBlockingSubscriber(sb,
                                    2,
                                    true);
@@ -121,12 +121,12 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(blockingSubscriber);
+            .subscribe(backpressureSubscriber);
 
         // Wait for all async computations to complete and return an
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
-        return blockingSubscriber.await();
+        return backpressureSubscriber.await();
     }
 
     /**
@@ -140,7 +140,7 @@ public class FluxEx {
 
         // Create a blocking subscriber that processes various
         // types of signals and is backpressure "unaware".
-        BlockingSubscriber<BigFraction> blockingSubscriber =
+        BackpressureSubscriber<BigFraction> backpressureSubscriber =
             makeBlockingSubscriber(sb,
                                    Integer.MAX_VALUE,
                                    true);
@@ -166,11 +166,11 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(blockingSubscriber);
+            .subscribe(backpressureSubscriber);
 
         // Wait for all async computations to complete and return an
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
-        return blockingSubscriber.await();
+        return backpressureSubscriber.await();
     }
 }

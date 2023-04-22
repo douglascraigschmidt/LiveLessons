@@ -17,7 +17,7 @@ import static quotes.common.Constants.*;
  * This controller enables RSocket clients to get random Zippy th'
  * Pinhead quotes, subscribe to receive Flux streams of these quotes,
  * as well as cancel earlier subscriptions.  It demonstrates the
- * following RSocket interaction models
+ * following RSocket interaction models:
  *
  * <ul>
  * <li>Request/Response, where each two-way async request receives a

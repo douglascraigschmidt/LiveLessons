@@ -4,7 +4,10 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import quotes.common.model.Quote;
 
+import quotes.common.model.SubscriptionType;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 /**
  * A persistent repository containing information about
@@ -18,10 +21,14 @@ import reactor.core.publisher.Flux;
 public interface ReactiveQuoteRepository
        extends ReactiveCrudRepository<Quote, Integer> {
     /**
-     * This method finds all quotes of the given type.
+     * This method finds all {@link Quote} objects of the
+     * given {@link SubscriptionType}.
      *
-     * @param type The type of quote to find, e.g., Zippy = 1, Handey = 2, etc.
-     * @return A {@link Flux} that emits all quotes of the given type.
+     * @param types A {@link List} of {@link SubscriptionType}
+     *             objects to find, e.g., ZIPPY = 1, HANDEY
+     *             = 2, etc.
+     * @return A {@link Flux} that emits all {@link Quote} objects
+     *         of the given {@link SubscriptionType}
      */
-    Flux<Quote> findAllByType(int type);
+    Flux<Quote> findAllByTypeIn(List<Integer> types);
 }

@@ -1,10 +1,10 @@
-package quotes.client;
+package quotes.requester;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Component;
-import quotes.common.model.SubscriptionType;
-import quotes.server.QuotesApplication;
+import quotes.responder.QuotesApplication;
+import quotes.responder.quoter.QuotesMessageController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import quotes.common.model.Subscription;
@@ -17,10 +17,10 @@ import static quotes.common.Constants.*;
 
 /**
  * This class provides a client whose methods can be used to send
- * messages to endpoints provided by the {@link QuotesApplication}
+ * messages to endpoints provided by the {@link QuotesMessageController}
  * microservice that demonstrates each of the four interaction models
  * supported by RSocket.
- * <p>
+ *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
  * classes annotated with {@code @Component}, instantiate them, and

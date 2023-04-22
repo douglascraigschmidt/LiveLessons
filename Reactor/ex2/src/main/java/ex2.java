@@ -7,7 +7,7 @@ import reactor.core.Disposables;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import subscriber.BlockingSubscriber;
+import subscriber.BackpressureSubscriber;
 import utils.RandomUtils;
 import utils.ReactorUtils;
 
@@ -41,8 +41,8 @@ public class ex2 {
     /**
      * A {@link Subscriber} that blocks the caller.
      */
-    private final BlockingSubscriber<PrimeUtils.Result> mSubscriber =
-        new BlockingSubscriber<>(result -> {
+    private final BackpressureSubscriber<PrimeUtils.Result> mSubscriber =
+        new BackpressureSubscriber<>(result -> {
                 // Store the current pending item count.
                 int pendingItems = Options
                     .sPendingItemCount.decrementAndGet();

@@ -1,7 +1,6 @@
-package quotes.server;
+package quotes.responder.quoter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import quotes.common.Options;
 import quotes.common.model.Quote;
@@ -11,14 +10,8 @@ import quotes.repository.ReactiveQuoteRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
-import static quotes.common.Constants.HANDEY_QUOTES;
-import static quotes.common.Constants.ZIPPY_QUOTES;
-import static quotes.common.model.SubscriptionType.ZIPPY;
 
 /**
  * This class defines methods that return quotes from Zippy th'

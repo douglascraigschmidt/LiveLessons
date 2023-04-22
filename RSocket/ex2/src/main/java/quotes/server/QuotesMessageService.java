@@ -1,7 +1,6 @@
 package quotes.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import quotes.common.Options;
 import quotes.common.model.Quote;
@@ -11,14 +10,9 @@ import quotes.repository.ReactiveQuoteRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static quotes.common.Constants.HANDEY_QUOTES;
-import static quotes.common.Constants.ZIPPY_QUOTES;
-import static quotes.common.model.SubscriptionType.ZIPPY;
 
 /**
  * This class defines methods that return quotes from Zippy th'
@@ -185,35 +179,51 @@ public class QuotesMessageService {
      * where each request receives a stream of responses from the
      * server.
      *
-     * @param subscriptionRequest A {@link Mono} that emits a {@link
-     *                            Subscription} request
+     * @param subscription A {@link Mono} that emits a {@link
+     *                            Subscription}
      * @return A {@link Flux} that emits a {@link Quote} of the type
      *         associated with a {@link Subscription} or an empty
      *         {@link Flux} otherwise.
      */
     Flux<Quote> getAllQuotes
-        (Mono<Subscription> subscriptionRequest) {
-        return subscriptionRequest
-            .doOnNext(sr -> Options
+        (Mono<Subscription> subscription) {
+        return subscription
+            .doOnNext(sub -> Options
                       .debug(TAG,
                              "getAllQuotes::"
-                             + sr.getType()
+                             + sub.getType()
                              + ":"
-                             + sr.getStatus()
+                             + sub.getStatus()
                              + ":"
-                             + sr.getRequestId()))
+                             + sub.getRequestId()))
 
             // Check to ensure the subscription request is registered
             // and confirmed.
-            .flatMapMany(sr -> mSubscriptions
-                         .contains(sr)
+            .flatMapMany(sub -> mSubscriptions
+                         .contains(sub)
                          // If the request is not confirmed return a
                          // Flux that emits the list of quotes.
                          ? mQuoteRepository
-                            .findAllByType(sr.getType().ordinal())
+                         .findAllByTypeIn(type2Int(sub))
 
                          // If the request is not confirmed return an
                          // empty Flux.
                          : Flux.empty());
+    }
+
+    /**
+     * Convert a {@link Subscription} type into a {@link List} of
+     * {@link Integer} representing the type.
+     *
+     * @param subscription The {@link Subscription}
+     * @return A {@link List} of {@link Integer} representing the type
+     */
+    private static List<Integer> type2Int
+    (Subscription subscription) {
+        return subscription
+                .getType()
+                .stream()
+                .map(Enum::ordinal)
+                .toList();
     }
 }

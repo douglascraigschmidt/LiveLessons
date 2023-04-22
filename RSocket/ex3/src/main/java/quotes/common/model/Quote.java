@@ -30,26 +30,36 @@ public class Quote {
     private Integer id;
 
     /**
-     * The type of quote, e.g., Zippy = 1, Handey = 2, etc.
+     * The play associated with the {@link Quote}, e.g.,
+     * "Hamlet", "Macbeth", etc.
      */
     private String play;
 
     /**
-     * A quote from some source, e.g., Zippy, Handey, etc.
+     * A quote from some Bard play.
      */
     private String quote;
 
     /**
+     * The sentiment of the {@link Quote}.
+     */
+    private String sentiment;
+
+    /**
      * The constructor initializes the fields.
      * @param quoteId ID # of the quote (the primary key)
-     * @param play This is the type of quote, e.g., Zippy = 1,
-     *             Handey = 2, etc.
-     * @param quote A quote from some source, e.g.,
-     *              Zippy, Handey, etc.
+     * @param play This is the play associated with the {@link Quote},
+     *              e.g., "Hamlet", "Macbeth", etc.
+     * @param quote A quote from some Bard play
+     * @param sentiment The sentiment of the {@link Quote}
      */
-    public Quote(int quoteId, String play, String quote) {
+    public Quote(int quoteId,
+                 String play,
+                 String quote,
+                 String sentiment) {
         this.id = quoteId;
         this.play = play;
         this.quote = quote;
+        this.sentiment = sentiment;
     }
 }

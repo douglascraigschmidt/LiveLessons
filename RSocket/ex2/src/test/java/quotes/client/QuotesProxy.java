@@ -12,15 +12,15 @@ import quotes.common.model.Quote;
 import reactor.util.function.Tuple2;
 
 import java.util.UUID;
+import java.util.List;
 
 import static quotes.common.Constants.*;
 
 /**
  * This class provides a client whose methods can be used to send
  * messages to endpoints provided by the {@link QuotesApplication}
- * microservice that demonstrates each of the four interaction models
- * supported by RSocket.
- * <p>
+ * microservice.
+ *
  * The {@code @Component} annotation allows Spring to automatically
  * detect custom beans, i.e., Spring will scan the application for
  * classes annotated with {@code @Component}, instantiate them, and
@@ -62,7 +62,7 @@ public class QuotesProxy {
                 // Create a new Subscription with the given
                 // subscription ID and pass it as the data param.
                 .data(new Subscription(uuid,
-                                            type)))
+                                            List.of(type))))
 
             // Perform a two-way call using the metadata and data and
             // then convert the response to a Mono that emits the
@@ -73,6 +73,43 @@ public class QuotesProxy {
             // Convert this Mono into a hot source, which caches the
             // emitted signals for future subscribers.
             .cache();
+    }
+
+    /**
+     * A factory method that creates and returns a confirmed {@link
+     * Subscription}.
+     *
+     * @param uuid  A unique ID to identify the subscription
+     * @param typeList A {@link List} of {@link SubscriptionType}
+     *                 objects
+     * @return A {@link Mono} that emits a confirmed
+     *         {@link Subscription}
+     */
+    public Mono<Subscription> subscribe
+        (UUID uuid,
+         List<SubscriptionType> typeList) {
+        return mQuoteRequester
+                // Initialize the request to send to the server.
+                .map(r -> r
+                        // Set the metadata to indicate the request is
+                        // for the server's SUBSCRIBE endpoint.
+                        .route(SUBSCRIBE)
+
+                        // Create a new Subscription with the given
+                        // subscription ID and pass it as the data
+                        // param.
+                        .data(new Subscription(uuid,
+                                                    typeList)))
+
+                // Perform a two-way call using the metadata and data
+                // and then convert the response to a Mono that emits
+                // the resulting Subscription.
+                .flatMap(r -> r
+                        .retrieveMono(Subscription.class))
+
+                // Convert this Mono into a hot source, which caches
+                // the emitted signals for future subscribers.
+                .cache();
     }
 
     /**

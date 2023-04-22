@@ -1,4 +1,4 @@
-package quotes.client;
+package quotes.requester;
 
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketConnector;
@@ -32,7 +32,7 @@ import static quotes.common.Constants.*;
  * emitting an {@link RSocketRequester} connected to the server.
  */
 @Component
-public class ClientBeans {
+public class RequesterBeans {
     /**
      * Debugging tag used by Options.
      */

@@ -3,6 +3,7 @@ package quotes.common.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -31,9 +32,9 @@ public class Subscription {
     private SubscriptionStatus status = SubscriptionStatus.PENDING;
 
     /**
-     * The type of the subscription, e.g., ZIPPY vs. HANDEY.
+     * The type of the subscriptions, e.g., ZIPPY, HANDEY, or both.
      */
-    private SubscriptionType type = SubscriptionType.NONE;
+    private List<SubscriptionType> type;
 
     /**
      * The constructor initializes the field.
@@ -42,7 +43,7 @@ public class Subscription {
      * @param type The type of the subscription
      */
     public Subscription(UUID requestId,
-                        SubscriptionType type) {
+                        List<SubscriptionType> type) {
         this.requestId = requestId;
         this.type = type;
     }

@@ -1,4 +1,4 @@
-package quotes.server;
+package quotes.responder.connect;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;

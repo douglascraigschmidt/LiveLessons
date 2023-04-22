@@ -29,7 +29,7 @@ public class Options {
     /**
      * Records the total number of quotes to handle.
      */
-    private long mTotalNumberOfQuotes = 15;
+    private long mTotalNumberOfQuotes = 2;
 
     /**
      * Method to return the one and only singleton instance.

@@ -1,7 +1,7 @@
 package subscriber;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import utils.ExceptionUtils;
@@ -12,10 +12,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A {@link Flux} {@link Subscriber} that implements backpressure.
+ * A {@link Flux} {@link CoreSubscriber} that implements backpressure.
  */
 public class BackpressureSubscriber
-    implements Subscriber<PrimeUtils.Result>,
+    implements CoreSubscriber<PrimeUtils.Result>,
     Disposable {
     /**
      * Debugging tag used by the logger.

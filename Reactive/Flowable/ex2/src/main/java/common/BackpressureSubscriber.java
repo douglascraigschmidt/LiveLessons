@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * An RxJava {@link Subscriber} that can implement backpressure.
  */
+@SuppressWarnings("ReactiveStreamsSubscriberImplementation")
 public class BackpressureSubscriber
        implements Subscriber<PrimeUtils.Result>,
                   Disposable {

@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-messaging'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'com.google.code.gson:gson'
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.3'
     implementation 'edu.stanford.nlp:stanford-corenlp:models-english'
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.3:models'

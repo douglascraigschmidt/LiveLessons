@@ -1,8 +1,10 @@
-package subscriber;
+package quotes.utils;
 
-import org.reactivestreams.Subscriber;
+import org.springframework.lang.NonNull;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-import reactor.core.Disposable;
+import quotes.common.Options;
+import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CountDownLatch;
@@ -10,13 +12,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * Define a Subscriber implementation that handles blocking, which is
- * otherwise not well-supported by Project Reactor.
+ * Define a backpressure-aware {@link CoreSubscriber} implementation
+ * that handles blocking (which is otherwise not well-supported by
+ * Project Reactor).
  */
-@SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-public class BlockingSubscriber<T>
-    implements Subscriber<T>,
-               Disposable {
+public class BackpressureSubscriber<T>
+       implements CoreSubscriber<T> {
+    /**
+     * Debugging tag used by Options.
+     */
+    private final String TAG = getClass().getSimpleName();
+
     /**
      * The consumer to invoke on each onNext() value.
      */
@@ -46,7 +52,7 @@ public class BlockingSubscriber<T>
     /**
      * Keep track of the number of events processed thus far.
      */
-    private final AtomicInteger mEventsProcessedThusFar =
+    private final AtomicInteger mProcessedEvents =
         new AtomicInteger(0);
 
     /**
@@ -62,11 +68,6 @@ public class BlockingSubscriber<T>
     final CountDownLatch mLatch;
 
     /**
-     * Keeps track of whether we've been disposed.
-     */
-    private boolean mIsDisposed;
-
-    /**
      * Pass and store params that will respectively consume all the
      * elements in the sequence, handle errors and react to completion.
      *
@@ -76,10 +77,10 @@ public class BlockingSubscriber<T>
      * @param n                The strictly positive number of elements
      *                         to requests to the upstream Publisher
      */
-    public BlockingSubscriber(Consumer<? super T> consumer,
-                              Consumer<? super Throwable> errorConsumer,
-                              Runnable completeRunnable,
-                              long n) {
+    public BackpressureSubscriber(Consumer<? super T> consumer,
+                                  Consumer<? super Throwable> errorConsumer,
+                                  Runnable completeRunnable,
+                                  long n) {
         mConsumer = consumer;
         mErrorConsumer = errorConsumer;
         mCompleteRunnable = completeRunnable;
@@ -88,14 +89,15 @@ public class BlockingSubscriber<T>
     }
 
     /**
-     * Hook method invoked after calling subscribe(subscriber) below.
-     * No data starts flowing until s.request(long) is invoked.
+     * Hook method invoked by the {@link Publisher} to start the stream
+     * processing after the {@link CoreSubscriber} has subscribed.
      */
     @Override
-    public void onSubscribe(Subscription subscription) {
+    public void onSubscribe(@NonNull Subscription subscription) {
         mSubscription = subscription;
 
-        // Set the backpressure value.
+        // Set the backpressure value (no data starts flowing
+        // until request() is invoked).
         mSubscription.request(mRequestSize);
     }
 
@@ -109,10 +111,20 @@ public class BlockingSubscriber<T>
         // Run the consumer's hook method.
         mConsumer.accept(element);
 
+        // Increment the count of total events received thus far.
         mTotalEvents.incrementAndGet();
-        if (mEventsProcessedThusFar.incrementAndGet() == mRequestSize) {
+
+        // Check if we've reached the request size.
+        if (mProcessedEvents.incrementAndGet() == mRequestSize) {
+            Options.debug(TAG, "Requesting size "
+                + mRequestSize
+                + " more events\n");
+
+            // Request another chunk of requests.
             mSubscription.request(mRequestSize);
-            mEventsProcessedThusFar.set(0);
+
+            // Reset the count of processed events.
+            mProcessedEvents.set(0);
         }
     }
 
@@ -123,6 +135,14 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onError(Throwable t) {
+        // Add the total number of events processed.
+        Options.debug(TAG,
+                   + totalEvents()
+                   + " async computations completed successfully,\n    but then received "
+                   + t.getClass().getSimpleName()
+                   + ":\n    "
+                   + t.getMessage());
+
         // Run the errorConsumer's hook method.
         mErrorConsumer.accept(t);
 
@@ -135,6 +155,11 @@ public class BlockingSubscriber<T>
      */
     @Override
     public void onComplete() {
+        // Add the total number of events processed.
+        Options.debug(TAG,
+                totalEvents()
+                   + " async computations completed successfully\n");
+
         // Run the completeRunnable's hook method.
         mCompleteRunnable.run();
 
@@ -152,34 +177,20 @@ public class BlockingSubscriber<T>
     /**
      * Block until all events have been processed by subscribe().
      *
-     * @return An empty {@link Mono} to indicate to the caller that
-     * all processing is done
+     * @return A {@link Mono} that completes when all events have been
+     *         processed
      */
     public Mono<Void> await() {
+        // Add some useful diagnostic output.
+        Options.debug(TAG, "Waiting for async computations to complete.");
+
         try {
             mLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // Return empty Mono to indicate to the caller that all
-        // processing is done.
+        // Return an empty Mono.
         return Mono.empty();
-    }
-
-    /**
-     * Hook method called when this subscriber is disposed.
-     */
-    @Override
-    public void dispose() {
-        mIsDisposed = true;
-    }
-
-    /**
-     * @return True if this subscriber has been disposed, else false.
-     */
-    @Override
-    public boolean isDisposed() {
-        return mIsDisposed;
     }
 }

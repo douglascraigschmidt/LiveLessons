@@ -1,9 +1,10 @@
 package edu.vandy.pubsub.subscriber;
 
+import org.springframework.lang.NonNull;
 import edu.vandy.pubsub.common.Options;
 import edu.vandy.pubsub.utils.ExceptionUtils;
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 
 import java.util.concurrent.CountDownLatch;
@@ -14,7 +15,7 @@ import edu.vandy.pubsub.common.Result;
  * A Flux subscriber that implements hybrid push/pull backpressure.
  */
 public class HybridBackpressureSubscriber
-       implements Subscriber<Result>,
+       implements CoreSubscriber<Result>,
                   Disposable {
     /**
      * Debugging tag used by the logger.
@@ -64,7 +65,7 @@ public class HybridBackpressureSubscriber
      * It sets the initial request size.
      */
     @Override
-    public void onSubscribe(Subscription subscription) {
+    public void onSubscribe(@NonNull Subscription subscription) {
         // Create a countdown latch that causes the main thread to
         // block until all flux processing is done.
         mLatch = new CountDownLatch(1);

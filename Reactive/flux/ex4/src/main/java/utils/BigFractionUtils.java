@@ -1,14 +1,11 @@
 package utils;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Flow;
-import java.util.function.Consumer;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -198,18 +195,18 @@ public class BigFractionUtils {
     }
 
     /**
-     * This factory method creates a {@link BlockingSubscriber} with
+     * This factory method creates a {@link BackpressureSubscriber} with
      * the given parameters.
      *
      * @param sb The {@link StringBuffer} to record output
      * @param requestSize The size to pass to {@link Flow.Subscription#request}
-     * @return A {@link BlockingSubscriber} that consumes events
+     * @return A {@link BackpressureSubscriber} that consumes events
      */
-    public static BlockingSubscriber<BigFraction> makeBlockingSubscriber
+    public static BackpressureSubscriber<BigFraction> makeBlockingSubscriber
         (StringBuffer sb,
          long requestSize,
          boolean log) {
-        return new BlockingSubscriber<>
+        return new BackpressureSubscriber<>
             (bf -> {
                 // Conditionally append the results.
                 if (log)

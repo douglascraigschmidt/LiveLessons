@@ -21,18 +21,25 @@ public class Constants {
     public static final String SERVER_RESPONSE = "serverResponse";
 
     /*
-     * These constants identify RSocket message endpoint names.
+     * These constants identify RSocket QuotesConnectController
+     * endpoint names.
      */
     public static final String SERVER_CONNECT = "serverInitializer";
+
+    /*
+     * These constants identify RSocket QuotesMessageController
+     * endpoint names.
+     */
     public static final String SUBSCRIBE = "subscribe";
     public static final String CANCEL_CONFIRMED = "cancelConfirmed";
     public static final String CANCEL_UNCONFIRMED = "cancelUnconfirmed";
     public static final String GET_ALL_QUOTES = "getQuotes";
 
-    /**
-     * The various types of Quotes supported.
+    /*
+     * These constants identify RSocket CoreNLPSentimentController and
+     * ChatGPTSentimentController endpoint names.
      */
-    public static final String ZIPPY_QUOTES = "zippyQuotes";
-    public static final String HANDEY_QUOTES = "handeyQuotes";
+    public static final String CORE_NLP_SENTIMENT_ANALYSIS = "coreNLPSentimentAnalysis";
+    public static final String CHAT_GPT_SENTIMENT_ANALYSIS = "chatGPTSentimentAnalysis";
 }
 

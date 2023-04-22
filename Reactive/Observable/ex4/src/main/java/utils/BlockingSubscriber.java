@@ -14,6 +14,7 @@ import static utils.BigFractionUtils.sVoidC;
  * Define a generic {@link Subscriber} implementation that handles blocking and
  * backpressure.
  */
+@SuppressWarnings("ReactiveStreamsSubscriberImplementation")
 public class BlockingSubscriber<T>
        implements Subscriber<T> {
     /**
