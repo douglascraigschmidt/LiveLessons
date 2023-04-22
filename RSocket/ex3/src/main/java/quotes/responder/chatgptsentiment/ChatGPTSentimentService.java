@@ -2,11 +2,11 @@ package quotes.responder.chatgptsentiment;
 
 import com.google.gson.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import quotes.BuildConfig;
 import quotes.common.Options;
 import quotes.common.model.Quote;
 import quotes.repository.ReactiveQuoteRepository;
@@ -43,30 +43,10 @@ public class ChatGPTSentimentService {
         "https://api.openai.com/v1/chat/completions";
 
     /**
-     * Put your ChatGPT web service API key here.
+     * Automatically inject the {@link WebClient} into the field.
      */
-    private static final String sAPI_KEY =
-        BuildConfig.API_KEY;
-
-
-    /**
-     * Create a WebClient instance with the API key and content type
-     * as default headers.
-     */
-    WebClient mWebClient = WebClient
-        // Start building a new WebClient instance.
-        .builder()
-
-        // Add the API key as a default authorization header.
-        .defaultHeader("Authorization",
-                       "Bearer " + sAPI_KEY)
-
-        // Set the default content type to JSon.
-        .defaultHeader("Content-Type",
-                       MediaType.APPLICATION_JSON_VALUE)
-
-        // Build the WebClient instance.
-        .build();
+    @Autowired
+    WebClient mWebClient;
 
     /**
      * Analyzes the sentiment of the given text and return
@@ -161,7 +141,7 @@ public class ChatGPTSentimentService {
             + quote.getQuote()
             + "' from the play "
             + quote.getPlay()
-            + "in one paragraph with three sentences";
+            + "in one paragraph with exactly three sentences";
     }
 
     /**

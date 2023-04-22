@@ -187,12 +187,10 @@ public class QuotesTest {
             (new RandomRequest(subscription,
                                randomIndices))
 
-            /*
             // Analyze the sentiment of each Shakespeare Quote.
             .flatMap(quote -> mSentimentProxy
                      .getSentiment(CHAT_GPT_SENTIMENT_ANALYSIS,
                                    quote))
-            */
 
             // Output the Quote objects together with the results of
             // the sentiment analysis.
@@ -202,7 +200,7 @@ public class QuotesTest {
                     + "\"\nfrom \""
                     + quote.getPlay()
                     + "\" is as follows:\n'"
-                       // + formatSentiment(quote.getSentiment(), 70)
+                    + formatSentiment(quote.getSentiment(), 70)
                     + "'"))
 
             // Cancel the Subscription when all processing is
