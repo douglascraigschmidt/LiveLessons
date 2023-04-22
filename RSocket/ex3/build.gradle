@@ -84,3 +84,5 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
+
+apply from: 'build-config.gradle'
