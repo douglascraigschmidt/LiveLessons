@@ -1,0 +1,50 @@
+sourceSets {
+    main {
+        java.srcDirs += "${project.buildDir}/generated/sources/buildConfig"
+    }
+}
+
+task generateBuildConfig {
+    ext {
+        packageName = 'quotes'
+        buildConfigClassName = 'BuildConfig'
+        versionCode = 1
+        versionName = '1.0'
+        apiKey = getProperty(project, 'api_key')
+        outputDir = "${project.buildDir}/generated/sources/buildConfig"
+    }
+    def configFile = new File("$outputDir/${packageName}/${buildConfigClassName}.java")
+    outputs.file(configFile)
+    doLast {
+        def outputDirFile = new File(outputDir)
+        outputDirFile.mkdirs()
+        configFile.text = """
+            package ${packageName};
+
+            public final class ${buildConfigClassName} {
+                public static final int VERSION_CODE = ${versionCode};
+                public static final String VERSION_NAME = "${versionName}";
+                public static final String API_KEY = "${apiKey}";
+            }
+        """
+    }
+}
+
+compileJava.dependsOn generateBuildConfig
+
+static def getProperty(Project project, String name) {
+    try {
+        def properties = new Properties()
+        def privateProperties = project.rootProject.file('private.properties')
+        properties.load(privateProperties.newDataInputStream())
+        def property = properties.getProperty(name)
+        if (property == null) {
+            throw new Exception("Property '$name' not found in private.properties.")
+        }
+        println "Loaded property '$name' from private.properties."
+        return property
+    } catch (Exception e) {
+        println "WARNING: unable to load properties from private.properties file."
+        return ""
+    }
+}

@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import quotes.BuildConfig;
 import quotes.common.Options;
 import quotes.common.model.Quote;
 import quotes.repository.ReactiveQuoteRepository;
@@ -45,7 +46,8 @@ public class ChatGPTSentimentService {
      * Put your ChatGPT web service API key here.
      */
     private static final String sAPI_KEY =
-        "sk-XXXXXXX";
+        BuildConfig.API_KEY;
+
 
     /**
      * Create a WebClient instance with the API key and content type
