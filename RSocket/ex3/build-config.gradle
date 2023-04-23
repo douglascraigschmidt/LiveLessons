@@ -41,7 +41,7 @@ static def getProperty(Project project, String name) {
         if (property == null) {
             throw new Exception("Property '$name' not found in private.properties.")
         }
-        println "Loaded property '$name' from private.properties."
+        println "Loaded property $name=$property from private.properties."
         return property
     } catch (Exception e) {
         println "WARNING: unable to load properties from private.properties file."
