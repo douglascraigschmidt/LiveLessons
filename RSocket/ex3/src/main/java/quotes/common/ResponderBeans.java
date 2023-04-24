@@ -1,5 +1,6 @@
 package quotes.common;
 
+import com.theokanning.openai.service.OpenAiService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -19,30 +20,13 @@ import quotes.BuildConfig;
 @Component
 public class ResponderBeans {
     /**
-     * @return A {@link WebClient} instance with the API key and
-     *         default content type as default headers.
+     * @return An instance of {@link OpenAiService} with the API key
+     *         configured in the private.properties file
      */
     @Bean
-    WebClient getWebClient() {
-        // This variable obtains the ChatGPT API key from the
+    OpenAiService getOpenAiService() {
+        // This variable obtains the OpenAI API key from the
         // private.properties file in the root package.
-        String mChatGPTAPIKey = BuildConfig.API_KEY;
-
-        System.out.println("API_KEY = " + mChatGPTAPIKey);
-
-        return WebClient
-            // Start building a new WebClient instance.
-            .builder()
-
-            // Add the API key as a default authorization header.
-            .defaultHeader("Authorization",
-                           "Bearer " + mChatGPTAPIKey)
-
-            // Set the default content type to JSon.
-            .defaultHeader("Content-Type",
-                MediaType.APPLICATION_JSON_VALUE)
-
-            // Build the WebClient instance.
-            .build();
+        return new OpenAiService(BuildConfig.API_KEY);
     }
 }

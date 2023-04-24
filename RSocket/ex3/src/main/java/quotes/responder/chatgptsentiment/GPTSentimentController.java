@@ -8,7 +8,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static quotes.common.Constants.CHAT_GPT_SENTIMENT_ANALYSIS;
-import static quotes.common.Constants.CORE_NLP_SENTIMENT_ANALYSIS;
 
 /**
  *
@@ -28,16 +27,16 @@ import static quotes.common.Constants.CORE_NLP_SENTIMENT_ANALYSIS;
  * across a communication channel.
  */
 @Controller
-public class ChatGPTSentimentController {
+public class GPTSentimentController {
     /**
-     * The {@link ChatGPTSentimentService} that's associated with this
-     * {@link ChatGPTSentimentController} via Spring's dependency
+     * The {@link GPTSentimentService} that's associated with this
+     * {@link GPTSentimentController} via Spring's dependency
      * injection facilities, where an object receives other objects
      * that it depends on (in this case, the {@link
-     * ChatGPTSentimentService}).
+     * GPTSentimentService}).
      */
     @Autowired
-    private ChatGPTSentimentService mService;
+    private GPTSentimentService mService;
 
     /**
      * Analyzes the sentiment of the given text and return

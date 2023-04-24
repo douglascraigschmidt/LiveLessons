@@ -13,6 +13,7 @@ import quotes.common.model.Subscription;
 import quotes.requester.QuotesProxy;
 import quotes.requester.SentimentProxy;
 import quotes.responder.QuotesApplication;
+import quotes.utils.SentimentUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -47,7 +48,7 @@ public class QuotesTest {
      * Define the "command-line" options.
      */
     private static final String[] sArgv = new String[]{
-        "-d", "true" // Enable debugging.
+        "-d", "false" // Enable debugging.
     };
 
     /**
@@ -118,14 +119,7 @@ public class QuotesTest {
 
             // Output the Quote objects together with the results of
             // the sentiment analysis.
-            .doOnNext(quote -> Options
-                .debug(TAG, "The sentiment analysis of the quote\n\""
-                    + quote.getQuote()
-                    + "\"\nfrom \""
-                    + quote.getPlay()
-                    + "\" is as follows:\n'"
-                    + formatSentiment(quote.getSentiment(), 70)
-                    + "'"))
+            .doOnNext(SentimentUtils::displaySentimentAnalysis)
 
             // Cancel the Subscription when all processing is
             // complete.
@@ -194,14 +188,7 @@ public class QuotesTest {
 
             // Output the Quote objects together with the results of
             // the sentiment analysis.
-            .doOnNext(quote -> Options
-                .debug(TAG, "The sentiment analysis of the quote\n\""
-                    + quote.getQuote()
-                    + "\"\nfrom \""
-                    + quote.getPlay()
-                    + "\" is as follows:\n'"
-                    + formatSentiment(quote.getSentiment(), 70)
-                    + "'"))
+            .doOnNext(SentimentUtils::displaySentimentAnalysis)
 
             // Cancel the Subscription when all processing is
             // complete.
@@ -217,47 +204,6 @@ public class QuotesTest {
                       "<<< Leaving testGetRandomQuotesSubscribed()");
     }
 
-    /**
-     * Adds newlines to a string to fit within a specified width.
-     * Newlines are added only between words, not within words.
-     *
-     * @param sentiment  The {@link String} to add newlines to
-     * @param lineLength The width to fit the {@link String} within
-     * @return The formatted {@link String} with newlines
-     */
-    public static String formatSentiment(String sentiment,
-                                         int lineLength) {
-        // Create a string builder to store the result
-        StringBuilder sb = new StringBuilder();
-
-        List<String> lines = Stream
-            // Split the 'sentiment' string into words using a regular
-            // expression that matches any non-word character preceded
-            // by any character.
-            .of(sentiment.split("(?<=\\W)"))
-
-            // Group the words into lines based on the maximum line
-            // length.
-            .collect(Collectors
-                     .groupingBy(s -> sb.append(s).length() / lineLength))
-
-            // Get the values of the grouping map (i.e., the words in
-            // each line).
-            .values()
-
-            // Convert the Collection to a Stream.
-            .stream()
-
-            // Join the words in each line into a String.
-            .map(list -> String.join("", list))
-
-            // Collect the lines into a List.
-            .toList();
-
-        // Join the lines with the system line separator and return
-        // the result.
-        return String.join(System.lineSeparator(), lines);
-    }
 
     /**
      * Close the connection to the quotes responder.
@@ -270,4 +216,6 @@ public class QuotesTest {
         mQuotesProxy.closeConnection();
         Options.print(TAG, "<<< Leaving closeConnection()");
     }
+
+
 }
