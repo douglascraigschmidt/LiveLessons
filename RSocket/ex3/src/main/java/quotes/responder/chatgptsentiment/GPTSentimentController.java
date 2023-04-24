@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono;
 import static quotes.common.Constants.CHAT_GPT_SENTIMENT_ANALYSIS;
 
 /**
+ * This class implements a Spring {@code @Controller} that handles
+ * the RSocket endpoint that sends requests to the ChatGPT API.
  *
  * Spring enables the integration of RSockets into a controller via
  * the {@code @Controller} annotation, which enables the autodetection
@@ -40,14 +42,15 @@ public class GPTSentimentController {
 
     /**
      * Analyzes the sentiment of the given text and return
-     * the sentiment as a {@link String}.
+     * the sentiment as an update {@link Quote} object
      *
      * @param quoteM A {@link Mono} that emits a {@link Quote} whose
      *               sentiment is analyzed
-     * @return The {@link Quote} updated to include the sentiment analysis
+     * @return The {@link Quote} updated to include the sentiment
+     *         analysis
     */
     @MessageMapping(CHAT_GPT_SENTIMENT_ANALYSIS)
-    Mono<Quote> analyzeSentiment(Mono<Quote> quoteM) {
+    public Mono<Quote> analyzeSentiment(Mono<Quote> quoteM) {
         return mService
             // Forward to the service.
             .analyzeSentiment(quoteM);

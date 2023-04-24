@@ -10,7 +10,7 @@ import jakarta.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
-import static quotes.common.Constants.SERVER_RESPONSE;
+import static quotes.common.Constants.RESPONDER_RESPONSE;
 
 /**
  * This class defines methods that establish a connection with a
@@ -29,59 +29,60 @@ public class QuotesConnectService {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * A {@link ConcurrentHashMap} of connected clients.
+     * A {@link ConcurrentHashMap} of connected requesters.
      */
-    private final Map<String, RSocketRequester> mConnectedClients =
+    private final Map<String, RSocketRequester> mConnectedRequester =
         new ConcurrentHashMap<>();
 
     /**
-     * This hook method is called when a client connects to the
-     * server.
+     * This hook method is called when a requester connects to the
+     * responder.
      *
-     * @param clientRequester The {@link RSocketRequester} that's
-     *                        associated with the client that's
-     *                        connecting to the server
-     * @param clientIdentity The UUID identity of the client that's
-     *                       connecting to the server
+     * @param requester The {@link RSocketRequester} that's
+     *                  associated with the requester that's
+     *                  connecting to the responder
+     * @param requesterIdentity The UUID identity of the requester that's
+     *                          connecting to the responder
      */
     public void handleConnect
-        (RSocketRequester clientRequester,
-         @Payload String clientIdentity) {
+        (RSocketRequester requester,
+         @Payload String requesterIdentity) {
         Options.debug(TAG, "((( Entering handleConnect()");
         
         // Handle the connection setup payload and client
         // status changes.
-        handleClientStatusChanges(clientRequester, clientIdentity);
+        handleRequesterStatusChanges(requester, requesterIdentity);
 
         // Finalize the connection setup with the client.
-        finalizeConnectionSetup(clientRequester);
+        finalizeConnectionSetup(requester);
         Options.debug(TAG, "))) Leaving handleConnect()");
     }
 
     /**
-     * Finalize the connection setup with the client.
+     * Finalize the connection setup with the requester.
      *
-     * @param clientRequester The {@link RSocketRequester} that's associated
-     *                        with the client that's connecting to the server
+     * @param requester The {@link RSocketRequester} that's associated
+     *                  with the requester that's connecting to the
+     *                  responder
      */
     private void finalizeConnectionSetup
-        (RSocketRequester clientRequester) {
-        // Protocol to finalize the connection with the client.
-        clientRequester
-            // Route the response back to the initiating client.
-            .route(SERVER_RESPONSE)
+        (RSocketRequester requester) {
+        // Protocol to finalize the connection with the requester.
+        requester
+            // Route the response back to the initiating requester.
+            .route(RESPONDER_RESPONSE)
 
             // Indicate that the connection has been accepted.
             .data("Connection accepted")
 
-            // Send the response back to the client and get its
+            // Send the response back to the requester and get its
             // acknowledgement asynchronously.
             .retrieveMono(String.class)
 
             // Print the client's acknowledgment.
             .doOnNext(s -> Options
                       .debug(TAG,
-                             "Client's acknowledgement = "
+                             "Requester's acknowledgement = "
                              + s))
 
             // Initiate the response asynchronously.
@@ -89,56 +90,57 @@ public class QuotesConnectService {
     }
 
     /**
-     * Handle changes in the client's connection status.
+     * Handle changes in the requester's connection status.
      *
-     * @param clientRequester The {@link RSocketRequester} associated
-     *                        with the client that connected to the server
-     * @param clientIdentity The identity of the client that
-     *                       connected with the server
+     * @param requester The {@link RSocketRequester} associated
+     *                        with the requester that connected to the
+     *                        responder
+     * @param requesterIdentity The identity of the requester that
+     *                       connected with the responder
      */
-    private void handleClientStatusChanges
-        (RSocketRequester clientRequester,
-         String clientIdentity) {
-        clientRequester
+    private void handleRequesterStatusChanges
+        (RSocketRequester requester,
+         String requesterIdentity) {
+        requester
             // Get the underlying RSocket to handle the connection
             // setup payload.
             .rsocket()
 
             // Return a Mono that terminates when the
-            // client is terminated by any reason.
+            // requester is terminated by any reason.
             .onClose()
 
             // Add a behavior triggered before the Mono
             // is subscribed to.
             .doFirst(() -> {
                     Options.debug(TAG,
-                                  "Received connection from client "
-                                  + clientIdentity);
-                    // Add the client to the client List.
-                    mConnectedClients.put(clientIdentity,
-                                          clientRequester);
+                                  "Received connection from requester "
+                                  + requesterIdentity);
+                    // Add the request to the requester Map.
+                    mConnectedRequester.put(requesterIdentity,
+                                          requester);
                 })
 
             // Add behavior triggered when the Mono completes with an
             // error.
             .doOnError(error -> {
-                    // Warn when channels are closed by clients
+                    // Warn when channels are closed by requesters
                     Options.debug(TAG,
-                                  "Connection closed from client "
-                                  + clientIdentity);
-                    // No need to remove the client since that will
+                                  "Connection closed from requester "
+                                  + requesterIdentity);
+                    // No need to remove the request since that will
                     // occur in doFinally().
                 })
 
             // Add behavior triggering after the Mono terminates for
             // any reason, including error or cancellation.
             .doFinally(consumer -> {
-                    // Remove disconnected clients from the client list
+                    // Remove disconnected requester from the client list
                     Options.debug(TAG,
-                                  "Disconnecting client "
-                                  + clientIdentity);
-                    // Remove the client from the client Map.
-                    mConnectedClients.remove(clientIdentity);
+                                  "Disconnecting requester "
+                                  + requesterIdentity);
+                    // Remove the request from the requester Map.
+                    mConnectedRequester.remove(requesterIdentity);
                 })
 
             // Initiate processing asynchronously.
@@ -146,7 +148,7 @@ public class QuotesConnectService {
     }
 
     /**
-     * Cleanup the client connections on shutdown.
+     * Cleanup the requester connections on shutdown.
      *
      * A method annotated with {@code @PreDestroy} runs only once,
      * just before Spring removes the bean from the application
@@ -156,13 +158,13 @@ public class QuotesConnectService {
     void shutdown() {
         Options.debug(TAG, "((( Entering shutdown()");
 
-        mConnectedClients
-            // Dispose of all clients.
+        mConnectedRequester
+            // Dispose of all requesters.
             .forEach((uuid, requester) -> {
                     Options.debug(TAG,
-                                  "Detaching client "
+                                  "Detaching requester "
                                   + uuid);
-                    // Dispose of the client.
+                    // Dispose of the requester.
                     requester
                         .rsocket()
                         .dispose();

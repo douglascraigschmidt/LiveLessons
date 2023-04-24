@@ -7,7 +7,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This Java utility class provides methods for working with
+ * sentiment analysis.
+ */
 public class SentimentUtils {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private SentimentUtils() {
+    }
+
     /**
      * Debugging tag used by Options.
      */

@@ -87,7 +87,8 @@ public class QuotesMessageController {
      *         Subscription} request
      */
     @MessageMapping(SUBSCRIBE)
-    Mono<Subscription> subscribe(Mono<Subscription> subscriptionRequest) {
+    public Mono<Subscription> subscribe
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .subscribe(subscriptionRequest);
@@ -104,7 +105,8 @@ public class QuotesMessageController {
      *                            Subscription} request
      */
     @MessageMapping(CANCEL_UNCONFIRMED)
-    void cancelSubscriptionUnconfirmed(Mono<Subscription> subscriptionRequest) {
+    public void cancelSubscriptionUnconfirmed
+        (Mono<Subscription> subscriptionRequest) {
         mService
             // Forward to the service.
             .cancelSubscriptionUnconfirmed(subscriptionRequest);
@@ -123,7 +125,7 @@ public class QuotesMessageController {
      *         indicating if the cancel request succeeded or failed
      */
     @MessageMapping(CANCEL_CONFIRMED)
-    Mono<Subscription> cancelSubscriptionConfirmed
+    public Mono<Subscription> cancelSubscriptionConfirmed
         (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
@@ -132,7 +134,7 @@ public class QuotesMessageController {
 
     /**
      * Get a {@link Flux} that emits all the {@link Quote} objects
-     * associated with the subscription.
+     * associated with the {@link Subscription}.
      *
      * This method implements the async RSocket request/stream model,
      * where each request receives a stream of responses from the
@@ -140,12 +142,13 @@ public class QuotesMessageController {
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
-     * @return A {@link Flux} that emits a {@link Quote} of the type
+     * @return A {@link Flux} that emits a {@link Quote} of the play
      *         associated with a {@link Subscription} or an empty
      *         {@link Flux} otherwise.
      */
     @MessageMapping(GET_ALL_QUOTES)
-    Flux<Quote> getAllQuotes(Mono<Subscription> subscriptionRequest) {
+    public Flux<Quote> getAllQuotes
+        (Mono<Subscription> subscriptionRequest) {
         return mService
             // Forward to the service.
             .getAllQuotes(subscriptionRequest);
@@ -166,7 +169,7 @@ public class QuotesMessageController {
      * once every second
      */
     @MessageMapping(GET_QUOTES_SUBSCRIBED)
-    Flux<Quote> getQuotesSubscribed
+    public Flux<Quote> getQuotesSubscribed
         (RandomRequest randomRequest) {
         return mService
             // Forward to the service.

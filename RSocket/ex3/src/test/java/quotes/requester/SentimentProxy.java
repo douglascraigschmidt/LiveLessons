@@ -39,8 +39,7 @@ public class SentimentProxy {
 
     /**
      * This method sends a {@link Quote} to the responder's
-     * {@code CORE_NLP_SENTIMENT_ANALYSIS} endpoint to
-     * analyze its sentiment.
+     * {@code messagePath} endpoint to use AI to analyze its sentiment.
      *
      * @param messagePath The path of the endpoint to send
      *                    the {@link Quote} to

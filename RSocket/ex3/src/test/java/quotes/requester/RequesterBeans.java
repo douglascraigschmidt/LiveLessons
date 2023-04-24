@@ -29,7 +29,7 @@ import static quotes.common.Constants.*;
 
 /**
  * The class defines a {@code @Bean} that returns a {@link Mono}
- * emitting an {@link RSocketRequester} connected to the server.
+ * emitting an {@link RSocketRequester} connected to the responder.
  */
 @Component
 public class RequesterBeans {
@@ -69,8 +69,8 @@ public class RequesterBeans {
         .build();
 
     /**
-     * Create the SocketAcceptor that will handle the server's
-     * response to the client's connection request.
+     * Create the SocketAcceptor that will handle the responder's
+     * response to the requester's connection request.
      */
     SocketAcceptor mResponder = RSocketMessageHandler
         .responder(mRsocketStrategies,
@@ -88,16 +88,16 @@ public class RequesterBeans {
                    .fixedDelay(2,
                                Duration.ofSeconds(2)))
 
-        // Define the socket acceptor to receive the server's
-        // response to the client connection.
+        // Define the socket acceptor to receive the responder's
+        // response to the requester's connection.
         .acceptor(mResponder);
 
     /**
      * This factory method returns a {@link Mono} that emits an
-     * {@link RSocketRequester} connected to the server.
+     * {@link RSocketRequester} connected to the responder.
      *
      * @return A {@link Mono} that emits an {@link
-     *         RSocketRequester} connected to the server
+     *         RSocketRequester} connected to the responder
      */
     @Bean
     public Mono<RSocketRequester> getRSocketRequester() {
@@ -117,8 +117,8 @@ public class RequesterBeans {
                   // Configure the connector strategies.
                   .rsocketConnector(connectorStrategies::accept)
 
-                  // Set up the route to connect with the server.
-                  .setupRoute(SERVER_CONNECT)
+                  // Set up the route to connect with the responder.
+                  .setupRoute(RESPONDER_CONNECT)
 
                   // Set up the metadata containing the credentials.
                   .setupMetadata(mCredentials, mMimeType)
@@ -128,32 +128,32 @@ public class RequesterBeans {
 
                   // Use TCP to connect to the given port on the local
                   // host.
-                  .tcp(LOCAL_HOST, Constants.SERVER_PORT));
+                  .tcp(LOCAL_HOST, Constants.RESPONDER_PORT));
     }
 
     /**
-     * This class handles the server response to the client's initial
-     * connection request.
+     * This class handles the responder's response to the
+     * requester's initial connection request.
      */
     class ConnectResponseHandler {
         /**
-         * This method takes in a server response as a parameter and
+         * This method takes in a responder response as a parameter and
          * returns a {@link Mono} that emits an acknowledgement back
-         * to the server.
+         * to the responder.
          *
-         * @param serverResponse A {@link String} representing the
-         *                       server response
+         * @param responderResponse A {@link String} representing the
+         *                       responder response
          * @return A {@link Mono} emitting a single {@link String}
          *         "Connection complete"
          */
-        @MessageMapping(SERVER_RESPONSE)
+        @MessageMapping(RESPONDER_RESPONSE)
         public Mono<String> statusUpdate
-            (String serverResponse) {
+            (String responderResponse) {
             Options.debug(TAG,
-                          "Server response = "
-                          + serverResponse);
+                          "Responder response = "
+                          + responderResponse);
             return Mono
-                // Acknowledgement sent back to the server.
+                // Acknowledgement sent back to the responder.
                 .just("Connection complete");
         }
     }

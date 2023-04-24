@@ -54,7 +54,7 @@ public class QuotesMessageService {
      * @return A {@link Mono} that emits the total number of
      *         Shakespeare quotes
      */
-    Mono<Long> getNumberOfQuotes(UserDetails user) {
+    public Mono<Long> getNumberOfQuotes(UserDetails user) {
         Options.debug(TAG,
                       "getNumberOfQuotes() initiated by \""
                       + user.getUsername()
@@ -77,7 +77,7 @@ public class QuotesMessageService {
      * @return An update {@link Mono} that emits the result of the
      *         {@link Subscription} request
      */
-    Mono<Subscription> subscribe
+    public Mono<Subscription> subscribe
         (Mono<Subscription> subscriptionRequest) {
         // Return a Mono whose status has been updated to confirm the
         // subscription request.
@@ -116,7 +116,7 @@ public class QuotesMessageService {
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
      */
-    void cancelSubscriptionUnconfirmed
+    public void cancelSubscriptionUnconfirmed
         (Mono<Subscription> subscriptionRequest) {
         subscriptionRequest
             // Cancel the subscription without informing the client if
@@ -140,7 +140,7 @@ public class QuotesMessageService {
      * @return A {@link Mono} that emits a {@link Subscription}
      *         indicating if the cancel request succeeded or failed
      */
-    Mono<Subscription> cancelSubscriptionConfirmed
+    public Mono<Subscription> cancelSubscriptionConfirmed
         (Mono<Subscription> subscriptionRequest) {
         // Try to cancel the subscription and indicate if the
         // cancellation succeeded.
@@ -208,8 +208,8 @@ public class QuotesMessageService {
     }
 
     /**
-     * Get a {@link Flux} that emits quotes according to the type of
-     * {@link Subscription}.
+     * Get a {@link Flux} that emits all the {@link Quote} objects
+     * associated with the {@link Subscription}.
      *
      * This method implements the async RSocket request/stream model,
      * where each request receives a stream of responses from the
@@ -217,11 +217,11 @@ public class QuotesMessageService {
      *
      * @param subscriptionRequest A {@link Mono} that emits a {@link
      *                            Subscription} request
-     * @return A {@link Flux} that emits a {@link Quote} of the type
+     * @return A {@link Flux} that emits a {@link Quote} of the play
      *         associated with a {@link Subscription} or an empty
      *         {@link Flux} otherwise.
      */
-    Flux<Quote> getAllQuotes
+    public Flux<Quote> getAllQuotes
         (Mono<Subscription> subscriptionRequest) {
         return subscriptionRequest
             .doOnNext(sr -> Options
@@ -262,10 +262,10 @@ public class QuotesMessageService {
      * @return A {@link Flux} that emits the requested Shakespeare
      *         quotes
      */
-    Flux<Quote> getQuotesSubscribed
+    public Flux<Quote> getQuotesSubscribed
         (RandomRequest randomRequest) {
         var subscription = randomRequest
-            // Get the Subcription field.
+            // Get the Subscription field.
             .subscription();
 
         Options

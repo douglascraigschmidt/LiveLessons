@@ -170,13 +170,13 @@ public class QuotesProxy {
         // Return a Flux that emits random Shakespeare quotes.
         return mQuoteRequester
             // Initialize the request that will be sent to the server.
-            .map(r ->
+            .map(r -> r
                 // Set the metadata to indicate the request is for the
                 // server's GET_QUOTES endpoint.
-                r.route(GET_QUOTES_SUBSCRIBED)
+                .route(GET_QUOTES_SUBSCRIBED)
 
-                    // Pass randomRequest to the GET_QUOTES endpoint.
-                    .data(randomRequest))
+                // Pass randomRequest to the GET_QUOTES endpoint.
+                .data(randomRequest))
 
             // Perform a two-way call and return to a Flux<Quote> that
             // emits Shakespeare Quote objects.

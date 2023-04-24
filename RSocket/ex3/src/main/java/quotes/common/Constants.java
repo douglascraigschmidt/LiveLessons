@@ -7,7 +7,7 @@ public class Constants {
     /**
      * Port number listened upon by the controller.
      */
-    public static final int SERVER_PORT = 10200;
+    public static final int RESPONDER_PORT = 10200;
 
     /**
      * The server resides on the localhost.
@@ -18,13 +18,13 @@ public class Constants {
      * The server response is sent back to the client after
      * initialization.
      */
-    public static final String SERVER_RESPONSE = "serverResponse";
+    public static final String RESPONDER_RESPONSE = "responderResponse";
 
     /*
      * These constants identify RSocket QuotesConnectController
      * endpoint names.
      */
-    public static final String SERVER_CONNECT = "serverInitializer";
+    public static final String RESPONDER_CONNECT = "responderConnect";
 
     /*
      * These constants identify RSocket QuotesMessageController

@@ -10,7 +10,8 @@ import java.util.List;
 
 /**
  * A persistent repository containing information about
- * {@link Quote} objects using the R2DBC reactive database.
+ * Shakespeare's plays and their quotes. This repository is used
+ * to store and retrieve {@link Quote} objects.
  *
  * The {@code @Repository} annotation indicates that this class
  * provides the mechanism for storage, retrieval, search, update and
@@ -20,12 +21,23 @@ import java.util.List;
 public interface ReactiveQuoteRepository
        extends ReactiveCrudRepository<Quote, Integer> {
     /**
-     * This method finds all quotes of the given type.
+     * This method finds all {@link Quote} objects associated
+     * with the given Shakespeare play.
      *
-     * @param play The type of quote to find, e.g., Zippy = 1, Handey = 2, etc.
-     * @return A {@link Flux} that emits all quotes of the given type.
+     * @param play The Shakespeare play, e.g., "Hamlet",
+     *             "Macbeth", "etc.
+     * @return A {@link Flux} that emits all the {@link Quote}
+     *         objects matching the given play
      */
     Flux<Quote> findAllByPlay(String play);
 
+    /**
+     * This method finds all {@link Quote} objects identified by
+     * the given {@link List} of {@code queryIds}.
+     *
+     * @param queryIds The {@link List} of {@code queryIds} to find
+     * @return A {@link List} that emits all identified
+     *          {@link Quote} objects
+     */
     Flux<Quote> findAllByIdIn(List<Integer> queryIds);
 }

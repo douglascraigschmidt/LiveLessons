@@ -6,7 +6,7 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.stereotype.Controller;
 
-import static quotes.common.Constants.SERVER_CONNECT;
+import static quotes.common.Constants.RESPONDER_CONNECT;
 
 /**
  * This controller enables RSocket clients to connect with the server
@@ -39,18 +39,19 @@ public class QuotesConnectController {
      * This endpoint handler is called when a client connects to the
      * server.
      *
-     * @param clientRequester The {@link RSocketRequester} that's
-     *                        associated with the client that's
-     *                        connecting to the server
-     * @param clientIdentity The identity of the client that's
-     *                       connecting to the server
+     * @param requester The {@link RSocketRequester} that's
+     *                  associated with the requester that's
+     *                  connecting to the responder
+     * @param requesterIdentity The identity of the requester that's
+     *                          connecting to the responder
      */
-    @ConnectMapping(SERVER_CONNECT)
+    @ConnectMapping(RESPONDER_CONNECT)
     public void handleConnect
-        (RSocketRequester clientRequester,
-         @Payload String clientIdentity) {
+        (RSocketRequester requester,
+         @Payload String requesterIdentity) {
         mService
             // Forward to the service.
-            .handleConnect(clientRequester, clientIdentity);
+            .handleConnect(requester,
+                requesterIdentity);
     }
 }

@@ -17,10 +17,7 @@ import quotes.utils.SentimentUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static quotes.common.Constants.CHAT_GPT_SENTIMENT_ANALYSIS;
 
@@ -28,12 +25,12 @@ import static quotes.common.Constants.CHAT_GPT_SENTIMENT_ANALYSIS;
  * This class implements a test program that obtains famous quotes
  * from works of Shakespeare and then uses machine learning models to
  * analyze these quotes for their "sentiment".
- * <p>
+ *
  * The {@code @SpringBootTest} annotation tells Spring to look for a
  * main configuration class (e.g., one with
  * {@code @SpringBootApplication}) and use that to start a Spring
  * application context.
- * <p>
+ *
  * The {@code @ComponentScan} annotation enables auto-detection of
  * beans by a Spring container.  Java classes that are decorated with
  * stereotypes such as {@code @Component}, {@code @Configuration},
@@ -48,7 +45,7 @@ public class QuotesTest {
      * Define the "command-line" options.
      */
     private static final String[] sArgv = new String[]{
-        "-d", "false" // Enable debugging.
+        "-d", "false" // Enable/disable debugging.
     };
 
     /**
@@ -73,6 +70,7 @@ public class QuotesTest {
     /**
      * The number of random Shakespeare quotes to process.
      */
+    @SuppressWarnings("FieldCanBeLocal")
     private final int mNUMBER_OF_INDICES = 2;
 
     /**
@@ -174,6 +172,7 @@ public class QuotesTest {
 
         // Get a Flux that emits random Shakespeare quotes from the
         // responder.
+        @SuppressWarnings("DataFlowIssue")
         var bardQuotes = mQuotesProxy
             // Create a Flux that emits Shakespeare quotes at the
             // random indices emitted by the bardQuotes Flux.
