@@ -36,6 +36,7 @@ import static quotes.common.Constants.CHAT_GPT_SENTIMENT_ANALYSIS;
  * stereotypes such as {@code @Component}, {@code @Configuration},
  * {@code @Service} are auto-detected by Spring.
  */
+@SuppressWarnings("DataFlowIssue")
 @SpringBootTest(classes = QuotesApplication.class,
     webEnvironment = SpringBootTest
         .WebEnvironment.DEFINED_PORT)
@@ -172,7 +173,6 @@ public class QuotesTest {
 
         // Get a Flux that emits random Shakespeare quotes from the
         // responder.
-        @SuppressWarnings("DataFlowIssue")
         var bardQuotes = mQuotesProxy
             // Create a Flux that emits Shakespeare quotes at the
             // random indices emitted by the bardQuotes Flux.

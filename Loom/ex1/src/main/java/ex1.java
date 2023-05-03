@@ -12,9 +12,9 @@ import static utils.ExceptionUtils.rethrowConsumer;
 
 /**
  * This example demonstrates how to create, start, and use virtual and
- * platform Thread objects in Java 19, which contains an
+ * platform Thread objects in Java 19+, which contains an
  * implementation of lightweight user-mode threads (virtual threads).
- * You'll need to install JDK 19 with gradle 7.6 configured.
+ * You'll need to install JDK 19+ with gradle 7.6+ configured.
  */
 public class ex1 {
     /**

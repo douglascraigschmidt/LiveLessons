@@ -53,7 +53,8 @@ public class GPTSentimentService {
                     // Create the ChatMessage containing the prompt.
                     List<ChatMessage> messages = makePrompt(quote);
 
-                    // Call ChatGPT to get the ChatCompletionResult.
+                    // Send an HTTP request to ChatGPT to get the
+                    // ChatCompletionResult.
                     var ccRequest = getResult(messages);
 
                     // Set the sentiment for the Quote.

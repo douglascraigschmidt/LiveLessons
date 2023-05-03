@@ -102,7 +102,7 @@ public class Options {
         System.out.println("-d [true|false]\n"
                            + "-i [iteration]\n"
                            + "-n [numberOfElements]\n"
-                           + "-t [p|v]";
+                           + "-t [p|v]");
     }
 
     /**

@@ -16,7 +16,7 @@ import static common.PrimalityService.checkPrimalities;
  * This example demonstrates Java structured concurrency features,
  * which enable a main task to split into several concurrent sub-tasks
  * that run concurrently to completion before the main task can
- * complete.  Java now supports structured concurrency by enhancing
+ * complete. Very modern Java supports structured concurrency by enhancing
  * {@link ExecutorService} to support AutoCloseable and updating
  * {@link Executors} to define new static factory methods that support
  * usage in a structured manner.  You'll need to install JDK 19 (or
@@ -33,7 +33,7 @@ public class ex2 {
         // Initialize any command-line options.
         Options.instance().parseArgs(argv);
 
-        // Demonstrate Java 19 structured concurrency on a
+        // Demonstrate Java 19+ structured concurrency on a
         // List of random large Integer objects.
         runTests(RandomUtils
                  .generateRandomIntegers(Options.instance()
