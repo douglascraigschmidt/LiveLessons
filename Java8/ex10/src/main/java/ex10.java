@@ -1,20 +1,18 @@
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 
 /**
  * This example shows the use of predicate lambda expressions in the
- * context of a Java {@link ConcurrentHashMap} {@code removeIf()}
- * method.
+ * context of a Java {@link HashMap} {@code removeIf()} method.
  */
 public class ex10 {
     /**
-     * This factory method creates a {@link ConcurrentHashMap}
-     * containing the names of Stooges and their IQs.
+     * This factory method creates a {@link HashMap} containing the
+     * names of Stooges and their IQs.
      */
     static private Map<String, Integer> makeMap() {
-       return new ConcurrentHashMap<String, Integer>()  {
+       return new HashMap<String, Integer>()  {
           {
             put("Larry", 100);
             put("Curly", 90);
@@ -51,6 +49,8 @@ public class ex10 {
         // This lambda expression removes entries with IQ less than or
         // equal to 100 with the name "curly".
         stooges.entrySet().removeIf(iq.and(curly));
+
+        // Print the updated Map.
         System.out.println(stooges);
     }
 }
