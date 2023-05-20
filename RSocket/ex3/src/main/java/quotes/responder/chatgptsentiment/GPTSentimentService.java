@@ -18,7 +18,7 @@ import static quotes.utils.SentimentUtils.generatePrompt;
 /**
  * This class defines methods that use the ChatGPT web service to
  * analyze the sentiment of a famous {@link Quote} from the Bard.
- * <p>
+ *
  * The {@code @Service} annotation enables the auto-detection of
  * implementation classes via classpath scanning (in this case {@link
  * Quote}).
@@ -72,7 +72,7 @@ public class GPTSentimentService {
      *              needed to make the prompt
      * @return A one-element {@link List} containing the prompt
      */
-    private List<ChatMessage> makePrompt(Quote quote) {
+    List<ChatMessage> makePrompt(Quote quote) {
         return List
             // Create the ChatMessage containing the prompt.
             .of(new ChatMessage
@@ -90,7 +90,7 @@ public class GPTSentimentService {
      * @return The {@link ChatCompletionResult} returned from
      *         ChatGPT
      */
-    private ChatCompletionResult getResult
+    ChatCompletionResult getResult
         (List<ChatMessage> messages) {
         var ccRequest = ChatCompletionRequest
             // Create the ChatCompletionRequest.Builder.
@@ -125,7 +125,7 @@ public class GPTSentimentService {
      * @param ccResult The {@link ChatCompletionResult} that
      *                 contains the result from ChatGPT
      */
-    private void setQuoteSentiment
+    void setQuoteSentiment
         (Quote quote,
          ChatCompletionResult ccResult) {
         quote

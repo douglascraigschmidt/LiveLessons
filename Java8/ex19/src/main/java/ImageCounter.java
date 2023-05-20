@@ -1,16 +1,16 @@
- 
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import utils.FuturesCollectorIntStream;
 import utils.Options;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static utils.Options.logResults;
+import static utils.Options.print;
 
 /**
  * This class uses the Java completable futures framework to count the
@@ -151,7 +151,8 @@ class ImageCounter {
     }
 
     /**
-     * @return A {@link CompletableFuture} to the page at the {@code pageURI}
+     * @return A {@link CompletableFuture} to the page at the {@code
+     *         pageURI}
      */
     private CompletableFuture<Document> getStartPage(String pageUri) {
         return CompletableFuture
@@ -167,6 +168,7 @@ class ImageCounter {
      *
      * @param pageFuture A {@link CompletableFuture} that emits a
      *                   {@link Document} when triggered
+     * @param pageUri The URL that we're counting at this point
      * @param depth The current depth of the recursive processing
      * @return A {@link CompletableFuture} that emits the number of
      *         images counted
@@ -182,7 +184,9 @@ class ImageCounter {
                           // Asynchronously count the # of images on
                           // this page and return a future to the
                           // count.
-                          .countImagesInPageAsync(pageFuture)
+                          .countImagesInPageAsync(pageFuture,
+                                                  pageUri,
+                                                  depth)
 
                           // Log what's happened, regardless of
                           // whether an exception occurred or not.
@@ -206,11 +210,15 @@ class ImageCounter {
      *
      * @param pageFuture A {@link CompletableFuture} to the page being
      *                   downloaded
+     * @param pageUri The URL that we're counting at this point
+     * @param depth The current depth of the recursive processing
      * @return A {@link CompletableFuture} that emits the number of
      *         images on this page
      */
     protected CompletableFuture<Integer>
-        countImagesInPageAsync(CompletableFuture<Document> pageFuture) {
+        countImagesInPageAsync(CompletableFuture<Document> pageFuture,
+                               String pageUri,
+                               int depth) {
         // Return a CompletableFuture to an Integer containing the #
         // of images processed on this page.
         return pageFuture
@@ -218,8 +226,11 @@ class ImageCounter {
             // process on this page.
             .thenApplyAsync(this::getImagesInPage)
 
-            // Count the number of images on this page.
-            .thenApply(List::size);
+            // Count the number of unique images on this page.
+            .thenApply(elements -> 
+                       countUniqueImages(pageUri,
+                                         depth,
+                                         elements));
     }
 
     /**
@@ -229,25 +240,65 @@ class ImageCounter {
         // Return a collection IMG SRC URLs in this page.
         return page
             // Select all the image elements in the page.
-            .select("img");
+            .select("img[src]");
+    }
+
+    /**
+     * Count the unique images in the {@code images}.
+     *
+     * @param pageUri The URL that we're considering at this point
+     * @param images The collection of IMG SRC URLs in this page
+     * @return The number of unique images in the {@code images}
+     */
+    int countUniqueImages(String pageUri,
+                          int depth,
+                          Elements images) {
+        // Remove "index.html" or "/index.html" from pageUri.
+        pageUri = pageUri
+            .replaceAll("/?index\\.html$", "");
+
+        // Append "/" to pageUri if it's not empty.
+        var updatedPageUri = !pageUri.isEmpty()
+            ? pageUri + "/"
+            : "";
+
+        // Return the count of unique images.
+        return (int) images
+            // Convert the List to a Stream.
+            .stream()
+
+            // Prepend the page URI to each image URL.
+            .map(img ->
+                 updatedPageUri + img.attr("src"))
+
+            // Filter out duplicate image URLs.
+            .filter(uri ->
+                    // If add() returns true the image URL is unique,
+                    // so count it.
+                    mUniqueUris.add(uri)
+                    // Otherwise, it's a duplicate, so ignore it.
+                    || print(depth, ": Already processed " + uri))
+
+            // Count the unique images.
+            .count();
     }
 
     /**
      * Asynchronously obtain a {@link CompletableFuture} to the # of
      * images on pages linked from this page.
      *
-     * @param pageFuture A {@link CompletableFuture} to the page
+     * @param pageF A {@link CompletableFuture} to the page
      *                   that's being downloaded
      * @param depth The current depth of the recursive processing
      * @return A {@link CompletableFuture} that emits the # of images
      *         on pages linked from this page
      */
     protected CompletableFuture<Integer>
-        crawlLinksInPageAsync(CompletableFuture<Document> pageFuture,
+        crawlLinksInPageAsync(CompletableFuture<Document> pageF,
                               int depth) {
         // Return a CompletableFuture to an Integer containing the #
         // of images processed on pages linked from this page.
-        return pageFuture
+        return pageF
             // Asynchronously/recursively crawl all hyperlinks in a
             // page.
             .thenComposeAsync(page ->
@@ -255,7 +306,6 @@ class ImageCounter {
                               // called via thenComposeAsync().
                               crawlLinksInPage(page, depth));
     }
-
 
     /**
      * Recursively crawl through hyperlinks that are in {@code page}.
@@ -265,8 +315,9 @@ class ImageCounter {
      * @return A {@link CompletableFuture} that emits how many
      *         images were in each hyperlink on this page
      */
-    private CompletableFuture<Integer> crawlLinksInPage(Document page,
-                                                        int depth) {
+    private CompletableFuture<Integer> crawlLinksInPage
+        (Document page,
+         int depth) {
         // Return a completable future to a list of counts of the # of
         // nested hyperlinks in the page.
         return page
@@ -276,14 +327,14 @@ class ImageCounter {
             // Convert the hyperlink elements into a stream.
             .stream()
 
-            // Map each hyperlink to a completable future containing a
+            // Map each link to a completable future containing a
             // count of the number of images found at that hyperlink.
-            .map(hyperLink ->
-                 // Recursively visit all the hyperlinks on this page.
+            .map(link ->
+                 // Recursively visit all the links on this page.
                  countImagesAsync(Options
                                   .instance()
                                   .getJSuper()
-                                  .getHyperLink(hyperLink),
+                                  .getHyperLink(link),
                                   depth))
 
             // Trigger intermediate operation processing and return a
@@ -299,65 +350,21 @@ class ImageCounter {
      * Asynchronously count of the # of images on this page plus the #
      * of images on hyperlinks accessible via this page.
      *
-     * @param imagesInPageFuture A {@link CompletableFuture} to a count
-     *                           of the # of images on this page
-     * @param imagesInLinksFuture A {@link CompletableFuture} to a count
-     *                            of the # of images in links on this page
+     * @param imagesInPageF A {@link CompletableFuture} to a count
+     *                      of the # of images on this page
+     * @param imagesInLinksF A {@link CompletableFuture} to a count
+     *                       of the # of images in links on this page
      * @return A {@link CompletableFuture} that emits the number of
      *         images counted
      */
     private CompletableFuture<Integer> combineCounts
-        (CompletableFuture<Integer> imagesInPageFuture,
-         CompletableFuture<Integer> imagesInLinksFuture) {
+        (CompletableFuture<Integer> imagesInPageF,
+         CompletableFuture<Integer> imagesInLinksF) {
         // Return a completable future to the results of adding the
         // two futures params after they both complete.
-        return imagesInPageFuture
+        return imagesInPageF
             // Sum the results when both futures complete.
-            .thenCombine(imagesInLinksFuture,
+            .thenCombine(imagesInLinksF,
                          Integer::sum);
-    }
-
-    /**
-     * Log the results, regardless of whether an exception occurred or
-     * not.
-     *
-     * @param totalImages The total number of images at this level
-     *                    (this param may be null if an exception was
-     *                    thrown)
-     * @param ex The exception that occurred (this param may be null
-     *           if no exception was thrown)
-     * @param pageUri The URL that we're counting at this point
-     * @param depth The current depth of the recursive processing
-     */
-    private void logResults(Integer totalImages,
-                            Throwable ex,
-                            String pageUri,
-                            int depth) {
-        if (totalImages != null)
-            print(depth,
-                  ": found "
-                  + totalImages
-                  + " images "
-                  + pageUri);
-        else
-            print(depth,
-                  ": exception " 
-                  + ex.getMessage());
-    }
-
-    /**
-     * Conditionally prints the {@link String} depending on the current
-     * setting of the {@link Options} singleton.
-     */
-    private void print(int depth, String string) {
-        if (Options.instance().getDiagnosticsEnabled()) {
-            String s = "[thr "
-                + Thread.currentThread().getId()
-                + ", depth " 
-                + depth 
-                + "]"
-                + string;
-            System.out.println(s);
-        }
     }
 }

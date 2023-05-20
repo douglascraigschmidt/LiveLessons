@@ -72,12 +72,16 @@ class ex41 {
     public static void main (String[] argv) {
         // Convert the array into a List.
         List<String> list = Arrays.asList(sUrlArray);
+
+        // Print the original List.
         System.out.println(list);
 
         // Perform the Java 7 replacements and print the results.
         System.out.println(java7Replace(list));
 
+        // Print the original List.
         System.out.println(list);
+
         // Perform the modern Java replacements and print the results.
         System.out.println(modernJavaReplace((list)));
     }

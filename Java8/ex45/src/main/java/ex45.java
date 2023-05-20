@@ -1,17 +1,12 @@
 import utils.TestDataFactory;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.text.BreakIterator;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utils.RegexUtils.getFirstLine;
 import static utils.RegexUtils.makeRegex;
-import static java.util.stream.Collectors.joining;
 
 /**
  * This example shows how the Java regular expression methods can be
@@ -42,7 +37,7 @@ public class ex45 {
         assert bardWorks != null;
 
         // Search the works of Shakespeare for a certain word/phrase.
-        processBardWorks(bardWorks, "be");
+        processBardWorks(bardWorks, "lord");
     }
 
     /**
@@ -72,14 +67,9 @@ public class ex45 {
             .stream()
 
             // Only keep works containing 'word'.
-            .filter(work -> Stream
-                    // Convert String to a Stream.
-                    .of(work)
-
+            .filter(work ->
                     // Return true if 'word' appears in 'work'.
-                    .anyMatch(string -> string
-                              .toLowerCase()
-                              .contains(word)))
+                    findMatch(work, word))
 
             // Convert List to a Stream.
             .toList();
@@ -89,7 +79,7 @@ public class ex45 {
         String regex = "\\b"
             + word
             + "\\b"
-            + ".*(true|false)";
+            + ".*(\\btrue\\b|\\bfalse\\b)";
 
         // Compile the regular expression to perform case-insensitive
         // matches.
@@ -100,6 +90,52 @@ public class ex45 {
         // Show the portions of the works of Shakespeare that match
         // the pattern.
         showRegexMatches(bardWorksMatchingWord, pattern);
+    }
+
+    /**
+     * Return true if the {@code work} contains the {@code searchWord}.
+     *
+     * @param work The text to search
+     * @param searchWord The word to search for
+     * @return true if the {@code work} contains the {@code searchWord}
+     */
+    private static boolean findMatch(String work,
+                                     String searchWord) {
+        // Create a BreakIterator that will break words.
+        BreakIterator iterator = BreakIterator
+            .getWordInstance(Locale.US);
+
+        // Set the text to search.
+        iterator.setText(work);
+
+        // Get the first and second boundary from the iterator.
+        int previous = iterator.first();
+
+        // Iterate through all the text.
+        for (int current = iterator.next(); 
+
+             // Keep iterating until the BreakIterator is done.
+             current != BreakIterator.DONE;
+
+             // Update the current boundary.
+             current = iterator.next()) {
+            // Get the text between the previous and current
+            // boundaries.
+            String word = work.substring(previous, current);
+
+            // Check if the item matches the predicate and
+            // that 'word' contains 'searchWord'.
+            if (Character.isLetterOrDigit(word.charAt(0))
+                && word.toLowerCase().equals(searchWord)) {
+                return true;
+            }
+
+            // Make current boundary the previous boundary.
+            previous = current;
+        }
+
+        // Return false if there's no match.
+        return false;
     }
 
     /**
@@ -116,19 +152,18 @@ public class ex45 {
         bardWorksMatchingWord
             // Process each work in the Stream.
             .forEach(work -> {
-                    // Get the title of the work.
-                    String title = getFirstLine(work);
-
-                    // Print the title of the work.
-                    System.out.println(title);
-
-                    // Create a Matcher that associates the regex with
-                    // the quoteString.
                     pattern
+                        // Create a Matcher that associates the regex pattern
+                        // with the work.
                         .matcher(work)
 
                         // Create a Stream of matches.
                         .results()
+
+                        // Only print the title for matches that aren't empty.
+                        .peek(___ -> System.out
+                            // Print the title of the work.
+                            .println(getFirstLine(work)))
 
                         // Print each match.
                         .forEach(matchResult -> System.out
