@@ -5,6 +5,7 @@ import utils.RandomUtils;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
@@ -80,11 +81,11 @@ public class ex1 {
 
             // Convert type of stream from IntStream to Stream<T>.
             .mapToObj(i ->
-                      // Make a new Thread (either virtual or
-                      // platform) for each int and give it a large
-                      // random number to check for primality.
-                      makeThread(makeRunnable(sRANDOM_INTEGERS.get(i - 1)),
-                                 virtual))
+                // Make a new Thread (either virtual or
+                // platform) for each int and give it a large
+                // random number to check for primality.
+                makeThread(makeRunnable(sRANDOM_INTEGERS.get(i - 1)),
+                    virtual))
 
             // Trigger intermediate processing and collect the Thread
             // objects into a List.
