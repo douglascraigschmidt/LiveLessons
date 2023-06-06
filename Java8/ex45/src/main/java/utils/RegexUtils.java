@@ -46,22 +46,22 @@ public final class RegexUtils {
     }
 
     /**
-     * Return the first line of the {@code input}.
+     * @return The first line of the {@code input}
      */
-    public static String getFirstLine(String work) {
+    public static String getFirstLine(String input) {
         // Create a Matcher.
-        Matcher m = Pattern
-            // Compile a regex that matches only the first line in the
-            // input.
+        Matcher matcher = Pattern
+            // Compile a regex that matches only the first line of
+            // multi-line input.
             .compile("(?m)^.*$")
 
-            // Create a matcher for this pattern.
-            .matcher(work);
+            // Create a Matcher for this pattern.
+            .matcher(input);
 
         // Find/return the first line in the String.
-        return m.find()
-            // Return the title string if there's a match.
-            ? m.group()
+        return matcher.find()
+            // Return the first String if there's a match.
+            ? matcher.group()
 
             // Return an empty String if there's no match.
             : "";
