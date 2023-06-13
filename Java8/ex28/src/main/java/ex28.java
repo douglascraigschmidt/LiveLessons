@@ -10,7 +10,7 @@ import static utils.ExceptionUtils.*;
  * This example shows several ways to implement the Singleton pattern
  * via a Java AtomicReference, a Java volatile variable (via the
  * Double-Checked Locking pattern), the "holder" idiom, and a Java
- * enum.  It also concurrently tests all the Singleton implementations.
+ * enum.  It also tests all the Singleton implementations concurrently.
  */
 @SuppressWarnings("ALL")
 public class ex28 {
