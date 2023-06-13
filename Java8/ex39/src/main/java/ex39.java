@@ -5,9 +5,8 @@ import utils.RunTimer;
 import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
 
@@ -19,70 +18,75 @@ import java.util.concurrent.locks.StampedLock;
  */
 class ex39 {
     /**
-     * Number of iterations to run the tests.
+     * Number of iterations to run each test.
      */
-    private static final int sMAX_ITERATIONS = 100_000_000;
+    private static final int sMAX_ITERATIONS = 10_000_000;
 
     /**
-     * A count of the number of readers.
+     * The total number of readers.
      */
-    private static final int sREADERS = 4;
+    private static final int sREADERS = 20;
 
     /**
      * Main entry point into the test program.
      */
     public static void main (String[] argv) {
-        new ex39();
-    }
-
-    public ex39() {
-        runTest(new AtomicLongRWL(1), "AtomicLongRWL");
-        runTest(new AtomicLongStampedLock(1), "AtomicLongStampedLock");
-        runTest(new AtomicLongSync(1), "AtomicLongSync");
-        runTest(new AtomicLongVarHandle(1), "AtomicLongVarHandle");
+        // Run the tests that exercise all the AtomicLong
+        // implementations.
+        runTest(new AtomicLongRWL(1),
+                "AtomicLongRWL");
+        runTest(new AtomicLongStampedLock(1),
+                "AtomicLongStampedLock");
+        runTest(new AtomicLongSync(1),
+                "AtomicLongSync");
+        runTest(new AtomicLongVarHandle(1),
+                "AtomicLongVarHandle");
+        runTest(new AtomicLongAdapter(1),
+                "AtomicLong");
 
         System.out.println(RunTimer.getTimingResults());
     }
 
     /**
-     * Time the various {@link AtomicLong} implementations.
+     * Time the various {@link AbstractAtomicLong} implementations.
      *
-     * @param atomicLong The {@link AtomicLong} implementation
+     * @param abstractAtomicLong The {@link AbstractAtomicLong} implementation
      */
-    private void runTest(AtomicLong atomicLong,
-                         String testName) {
-        // Let the system garbage collect.
+    private static void runTest(AbstractAtomicLong abstractAtomicLong,
+                                String testName) {
+        // Let the system garbage collect before running the test.
         System.gc();
 
         // Record how long the test takes to run.
         RunTimer.timeRun(() ->
                          // Run the test with the designated function.
-                         testAtomicLong(atomicLong,
+                         testAtomicLong(abstractAtomicLong,
                                         testName),
                          testName);
     }
 
     /**
-     * Test the various {@link AtomicLong} implementations.
+     * Test the various {@link AbstractAtomicLong} implementations.
      *
-     * @param atomicLong The {@link AtomicLong} implementation
+     * @param abstractAtomicLong The {@link AbstractAtomicLong} implementation
      */
-    private void testAtomicLong(AtomicLong atomicLong,
-                                String testName) {
+    private static void testAtomicLong(AbstractAtomicLong abstractAtomicLong,
+                                       String testName) {
         System.out.println("Entering " + testName);
 
         // Create an entry barrier.
-        Phaser entryBarrier = new Phaser();
+        var entryBarrier = new Phaser();
 
         // Create threads that run various AtomicLong methods.
         List<Thread> threads = new ArrayList<>();
 
         // Create the reader threads.
-        makeReaders(threads, atomicLong, entryBarrier, sREADERS);
+        makeReaders(threads, abstractAtomicLong, entryBarrier, sREADERS);
 
         // Create the writer threads.
-        makeWriters(threads, atomicLong, entryBarrier);
+        makeWriters(threads, abstractAtomicLong, entryBarrier);
 
+        // Register all the Thread objects.
         entryBarrier.bulkRegister(threads.size());
 
         // Start all the threads.
@@ -91,67 +95,77 @@ class ex39 {
         // Barrier synchronization that waits for all the threads to exit.
         threads.forEach(ExceptionUtils.rethrowConsumer(Thread::join));
 
+        // Ensure the AtomicLong implementation worked properly.
+        assert abstractAtomicLong.get() == 1;
+
         System.out.println("Leaving " 
                            + testName
                            + " with AtomicLong value = " 
-                           + atomicLong.get());
+                           + abstractAtomicLong.get());
     }
 
     /**
-     * This factory method creates the writer threads.
+     * This factory method creates the writer {@link Thread} objects.
      *
      * @param threads The {@link List} of {@link Thread} objects
-     * @param atomicLong The {@link AtomicLong} implementation
-     * @param entryBarrier The {@link Phaser} that serves as an entry barrier
+     * @param abstractAtomicLong The {@link AbstractAtomicLong} implementation
+     * @param entryBarrier The {@link Phaser} that serves as an entry
+     *                     barrier
      */
-    private void makeWriters(List<Thread> threads,
-                             AtomicLong atomicLong,
-                             Phaser entryBarrier) {
-        // Create and add all the writer tasks.
+    private static void makeWriters(List<Thread> threads,
+                                    AbstractAtomicLong abstractAtomicLong,
+                                    Phaser entryBarrier) {
         threads
+            // Create and add all the writer Thread objects.
             .addAll(List
-                    .of(new Thread(makeRunnable(entryBarrier,
-                                                atomicLong::incrementAndGet)),
-                        new Thread(makeRunnable(entryBarrier,
-                                                atomicLong::decrementAndGet)),
-                        new Thread(makeRunnable(entryBarrier,
-                                                atomicLong::getAndIncrement)),
-                        new Thread(makeRunnable(entryBarrier,
-                                                atomicLong::getAndDecrement))));
+                    .of(new Thread
+                        (makeRunnable(entryBarrier,
+                                      abstractAtomicLong::incrementAndGet)),
+                        new Thread
+                        (makeRunnable(entryBarrier,
+                                      abstractAtomicLong::decrementAndGet)),
+                        new Thread
+                        (makeRunnable(entryBarrier,
+                                      abstractAtomicLong::getAndIncrement)),
+                        new Thread
+                        (makeRunnable(entryBarrier,
+                                      abstractAtomicLong::getAndDecrement))));
     }
 
     /**
-     * This factory method creates the reader threads.
+     * This factory method creates the reader {@link Thread} objects.
      *
      * @param threads The {@link List} of {@link Thread} objects
-     * @param atomicLong The {@link AtomicLong} implementation
-     * @param entryBarrier The {@link Phaser} that serves as an entry barrier
+     * @param abstractAtomicLong The {@link AbstractAtomicLong} implementation
+     * @param entryBarrier The {@link Phaser} that serves as an entry
+     *                     barrier
      */
-    private void makeReaders(List<Thread> threads,
-                             AtomicLong atomicLong,
-                             Phaser entryBarrier,
-                             int readers) {
-        // Create the given number of reader tasks.
+    private static void makeReaders(List<Thread> threads,
+                                    AbstractAtomicLong abstractAtomicLong,
+                                    Phaser entryBarrier,
+                                    int readers) {
+        // Create the given number of reader Thread objects.
         for (int i = 0; i < readers; i++)
             threads.add(new Thread(makeRunnable(entryBarrier,
-                                                atomicLong::get)));
+                                                abstractAtomicLong::get)));
     }
 
     /**
      * This factory method returns a {@link Runnable} that performs the task.
      *
-     * @param entryBarrier The {@link Phaser} that serves as an entry barrier
+     * @param entryBarrier The {@link Phaser} that serves as an entry
+     *                     barrier
      * @param runnable The task to perform
      * @return A {@link Runnable} that performs the task
      */
-    private Runnable makeRunnable(Phaser entryBarrier,
-                                  Runnable runnable) {
+    private static Runnable makeRunnable(Phaser entryBarrier,
+                                         Runnable runnable) {
         return () -> {
             // Wait for all the threads to arrive.
             entryBarrier.arriveAndAwaitAdvance();
 
-            // Perform the task for the designated number
-            // of iterations.
+            // Perform the task for the designated number of
+            // iterations.
             for (int i = 0; i < sMAX_ITERATIONS; ++i)
                 runnable.run();
         };

@@ -6,7 +6,7 @@ package atomiclongs;
  * work.
  */
 public class AtomicLongSync
-       implements AtomicLong {
+       implements AbstractAtomicLong {
     /**
      * The value that's manipulated atomically via the methods.
      */
@@ -16,6 +16,7 @@ public class AtomicLongSync
      * Creates a new SimpleAtomicLong with the given initial value.
      */
     public AtomicLongSync(long initialValue) {
+        // Store the initial value in mValue.
         mValue = initialValue;
     }
 
@@ -25,6 +26,7 @@ public class AtomicLongSync
      * @return The current value
      */
     public long get() {
+        // This read is guaranteed to be atomic.
         return mValue;
     }
 
@@ -35,6 +37,7 @@ public class AtomicLongSync
      */
     public long incrementAndGet() {
         synchronized (this) {
+            // This read and write are guaranteed to be atomic.
             return ++mValue;
         }
     }
@@ -46,6 +49,7 @@ public class AtomicLongSync
      */
     public long decrementAndGet() {
         synchronized (this) {
+            // This read and write are guaranteed to be atomic.
             return --mValue;
         }
     }
@@ -57,6 +61,7 @@ public class AtomicLongSync
      */
     public long getAndIncrement() {
         synchronized (this) {
+            // This read and write are guaranteed to be atomic.
             return mValue++;
         } 
     }
@@ -68,6 +73,7 @@ public class AtomicLongSync
      */
     public long getAndDecrement() {
         synchronized (this) {
+            // This read and write are guaranteed to be atomic.
             return mValue--;
         } 
     }

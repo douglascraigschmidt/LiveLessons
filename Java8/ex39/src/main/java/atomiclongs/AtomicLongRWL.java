@@ -4,11 +4,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.Lock;
 
 /**
- * This class implements a subset of the Java {@link AtomicLong} class
+ * This class implements a subset of the Java {@link AbstractAtomicLong} class
  * using a {@link ReentrantReadWriteLock} to illustrate how they work.
  */
 public class AtomicLongRWL
-       implements AtomicLong {
+       implements AbstractAtomicLong {
     /**
      * The value that's manipulated atomically via the methods.
      */
@@ -18,13 +18,16 @@ public class AtomicLongRWL
      * The {@link ReentrantReadWriteLock} used to serialize access to
      * mValue.
      */
-    private final ReentrantReadWriteLock mRWLock = new ReentrantReadWriteLock();
-    private final Lock mReadLock = mRWLock.readLock();
-    private final Lock mWriteLock = mRWLock.writeLock();
+    private final ReentrantReadWriteLock mRWLock =
+        new ReentrantReadWriteLock();
+    private final Lock mReadLock = 
+        mRWLock.readLock();
+    private final Lock mWriteLock =
+        mRWLock.writeLock();
 
     /**
-     * Creates a new {@link AtomicLongRWL} with the given
-     * initial value.
+     * Creates a new {@link AtomicLongRWL} with the given initial
+     * value.
      */
     public AtomicLongRWL(long initialValue) {
         mValue = initialValue;

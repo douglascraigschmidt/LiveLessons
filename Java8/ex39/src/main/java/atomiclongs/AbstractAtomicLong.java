@@ -1,9 +1,11 @@
 package atomiclongs;
 
 /**
- * Define an interface for the various SimpleAtomicLong implementations.
+ * Define an interface for the various {@link SimpleAtomicLong}
+ * implementations.
  */
-public interface AtomicLong {
+@SuppressWarnings("UnusedReturnValue")
+public interface AbstractAtomicLong {
     /**
      * Gets the current value.
      * 

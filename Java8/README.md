@@ -151,7 +151,8 @@ Here's an overview of what's currently included in these examples:
          completable futures framework.
 
 . ex28 - This example shows several ways to implement the Singleton
-         pattern via Java AtomicReference and volatile.
+         pattern via Java AtomicReference, volatile, enum, and the
+         "holder idiom."
 
 . ex29 - This example shows how to combine the Java sequential streams
          and completable futures frameworks to generate and reduce
