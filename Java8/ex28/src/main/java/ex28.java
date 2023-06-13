@@ -10,7 +10,7 @@ import static utils.ExceptionUtils.*;
  * This example shows several ways to implement the Singleton pattern
  * via a Java AtomicReference, a Java volatile variable (via the
  * Double-Checked Locking pattern), the "holder" idiom, and a Java
- * enum.
+ * enum.  It also concurrently tests all the Singleton implementations.
  */
 @SuppressWarnings("ALL")
 public class ex28 {
@@ -18,7 +18,7 @@ public class ex28 {
      * The maximum number of Thread objects that access each
      * type of Singleton.
      */
-    private static int sMAX_THREADS_PER_SINGLETON = 5;
+    private static int sMAX_THREADS_PER_SINGLETON = 2;
 
     /**
      * Java requires a static main() entry point method to run the
@@ -26,39 +26,43 @@ public class ex28 {
      */
     public static void main(String[] args)
         throws InterruptedException {
-        // Used to block for a random amount of time.
+        // Used to wait for a random amount of time.
         Random random = new Random();
 
         // Create multiple threads to access the Singleton instances
         // concurrently.
         List<Thread> threads = new ArrayList<>();
 
-        // Initialize Thread objects
+        // Initialize Thread objects.
         for (int i = 0; i < sMAX_THREADS_PER_SINGLETON; i++) {
             // Initialize Thread objects using the AtomicReference
             // singleton.
             threads
-                .add(new Thread(() -> 
+                .add(new Thread(() ->
                                 runTask(random,
-                                        SingletonAR.<String>instance())));
+                                        SingletonAR.<String>instance()),
+                    "SingletonAR(" + i + ")"));
 
             // Initialize Thread objects using the holder idiom singleton.
             threads
-                .add(new Thread(() -> 
+                .add(new Thread(() ->
                                 runTask(random,
-                                        SingletonH.<String>instance())));
+                                        SingletonH.<String>instance()),
+                    "SingletonH(" + i + ")"));
 
             // Initialize Thread objects using the volatile singleton.
             threads
-                .add(new Thread(() -> 
+                .add(new Thread(() ->
                                 runTask(random,
-                                        SingletonV.<String>instance())));
+                                        SingletonV.<String>instance()),
+                    "SingletonV(" + i + ")"));
 
             // Initialize Thread objects using the enum singleton.
             threads
-                .add(new Thread(() -> 
+                .add(new Thread(() ->
                                 runTask(random,
-                                        SingletonE.INSTANCE)));
+                                        SingletonE.INSTANCE),
+                    "SingletonE(" + i + ")"));
         }
 
         // Start all the Thread objects.

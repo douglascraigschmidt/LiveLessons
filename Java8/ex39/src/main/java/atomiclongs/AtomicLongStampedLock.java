@@ -24,6 +24,7 @@ public class AtomicLongStampedLock
      * given initial value.
      */
     public AtomicLongStampedLock(long initialValue) {
+        // Store the nitial value.
         mValue = initialValue;
     }
 
@@ -40,16 +41,18 @@ public class AtomicLongStampedLock
         // Assign mValue to a local variable.
         value = mValue;
 
+        // If the optimistic read succeeds, simply return the value.
         if (mStampedLock.validate(stamp))
-            // If the optimistic read succeeds, we're done.
             return value;
         else {
-            // Otherwise, block to get a readLock.
+            // Otherwise, block to get a read lock.
             stamp = mStampedLock.readLock();
             try {
-               return mValue;
+                // Return the value with the read lock held.
+                return mValue;
             } finally {
-              mStampedLock.unlockRead(stamp);
+                // Always unlock the lock in a finally block.
+                mStampedLock.unlockRead(stamp);
             }
         }
     }
@@ -60,14 +63,15 @@ public class AtomicLongStampedLock
      * @return the updated value
      */
     public long incrementAndGet() {
-        // Block until we get a writeLock.
+        // Block until we get a write lock.
         long stamp = mStampedLock.writeLock();
 
         try {
-            // writeLock held.
+            // Increment & return the value with the write lock held.
             return mValue++; 
         } finally {
-          mStampedLock.unlockWrite(stamp);
+            // Always unlock the lock in a finally block.
+            mStampedLock.unlockWrite(stamp);
         }
     }
     
@@ -84,6 +88,7 @@ public class AtomicLongStampedLock
             // writeLock held.
             return --mValue;
         } finally {
+            // Always unlock the lock in a finally block.
             mStampedLock.unlockWrite(stamp);
         }
     }
@@ -125,9 +130,11 @@ public class AtomicLongStampedLock
                 }
             }
         } finally {
-            // Unlock the write lock.
+            // Always unlock the lock in a finally block.
             mStampedLock.unlockWrite(stamp);
         }
+
+        // Return the incremented value.
         return value;
     }
 
@@ -144,19 +151,22 @@ public class AtomicLongStampedLock
         try {
             // Keep looping until we get a write lock.
             for (;;) {
-                // This read is guaranteed to be valid.
+                // This read is guaranteed to be valid since
+                // the read lock is held.
                 value = mValue;
 
                 // Try to a convert to a write lock.
                 long ws = mStampedLock.tryConvertToWriteLock(stamp);
+
+                // If conversion succeeded (ws != 0), we're done.
                 if (ws != 0) {
                     mValue--;
                     stamp = ws;
                     break;
                 } else {
                     // Otherwise, unlock the read lock and try again.
-                    // (the read lock may have just been acquired
-                    // by another Thread.)
+                    // (the read lock may have just been acquired by
+                    // another Thread.)
 
                     // Unlock the read lock.
                     mStampedLock.unlockRead(stamp);
@@ -166,9 +176,11 @@ public class AtomicLongStampedLock
                 }
             }
         } finally {
-            // Unlock the write lock.
+            // Always unlock the lock in a finally block.
             mStampedLock.unlockWrite(stamp);
         }
+
+        // Return the decremented value.
         return value;
     }
 }

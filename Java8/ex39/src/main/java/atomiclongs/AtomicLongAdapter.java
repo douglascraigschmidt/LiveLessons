@@ -9,12 +9,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AtomicLongAdapter
        implements AbstractAtomicLong {
     /**
-     * The value that's manipulated atomically via the methods.
+     * The {@link AtomicLong} that's manipulated atomically via
+     * the methods below.
      */
     private final AtomicLong mAtomicLong;
 
     /**
-     * Creates a new SimpleAtomicLong with the given initial value.
+     * Creates a new {@link AtomicLongAdapter} with the given
+     * initial value.
      */
     public AtomicLongAdapter(long initialValue) {
         // Store the initial value in mAtomicLong.

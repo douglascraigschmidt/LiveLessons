@@ -5,7 +5,8 @@ import java.lang.invoke.VarHandle;
 
 /**
  * This class implements an {@link AbstractAtomicLong} that uses
- * a {@link VarHandle} to access the underlying volatile value.
+ * a {@link VarHandle} to access the underlying volatile value
+ * in a thread-safe and portable manner.
  */
 public class AtomicLongVarHandle
     implements AbstractAtomicLong {
@@ -41,6 +42,7 @@ public class AtomicLongVarHandle
      * initial value.
      */
     public AtomicLongVarHandle(long initialValue) {
+        // Store the initial value in the mValue field.
         mValue = initialValue;
     }
 

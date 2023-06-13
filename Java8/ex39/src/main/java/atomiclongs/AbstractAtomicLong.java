@@ -1,8 +1,10 @@
 package atomiclongs;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * Define an interface for the various {@link SimpleAtomicLong}
- * implementations.
+ * Define an interface for various implementations of
+ * {@link AtomicLong} subsets.
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface AbstractAtomicLong {
