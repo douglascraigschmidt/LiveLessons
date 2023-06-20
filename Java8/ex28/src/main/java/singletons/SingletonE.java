@@ -36,12 +36,19 @@ public enum SingletonE
     /**
      * Set the contents of a field and return the old contents.
      *
-     * @param f The new contents of the field
+     * @param field The new contents of the field
      * @return The old contents of the field
      */
     public String setField(String field) {
         String oldField = mField;
         mField = field;
         return oldField;
+    }
+
+    /**
+     * The static instance() method from the Singleton pattern.
+     */
+    public static SingletonE instance() {
+        return INSTANCE;
     }
 }

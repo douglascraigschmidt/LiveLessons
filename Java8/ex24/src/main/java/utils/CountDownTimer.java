@@ -49,14 +49,16 @@ public abstract class CountDownTimer {
      * Executor service that executes runnables after a given timeout.
      */
     private final ScheduledExecutorService mScheduledExecutorService =
-        Executors.newScheduledThreadPool(1,
-                                         r -> {
-                                             Thread thr = new Thread(r);
-                                             // Use a daemon thread to ensure the ScheduledThreadPool
-                                             // shuts down when the main thread exits.
-                                             thr.setDaemon(true);
-                                             return thr;
-                                         });
+        Executors
+        .newScheduledThreadPool(1,
+                                r -> {
+                                    Thread thr = new Thread(r);
+                                    // Use a daemon thread to ensure
+                                    // ScheduledThreadPool shuts down
+                                    // when the main thread exits.
+                                    thr.setDaemon(true);
+                                    return thr;
+                                });
 
     /**
      * When to stop the timer.
@@ -76,12 +78,14 @@ public abstract class CountDownTimer {
     private final Lock mLock;
 
     /**
-     * @param lock The lock used to synchronize access to the object
-     * @param millisInFuture The number of millis in the future from the call
-     *   to {@link #start()} until the countdown is done and {@link #onFinish()}
-     *   is called
+     * @param lock The {@link lock} used to synchronize access to the
+     *             object
+     * @param millisInFuture The number of millis in the future from
+     *                       the call to {@link #start()} until the
+     *                       countdown is done and {@link #onFinish()}
+     *                       is called
      * @param countDownInterval The interval along the way to receive
-     *   {@link #onTick(long)} callbacks
+     *                          {@link #onTick(long)} callbacks
      */
     public CountDownTimer(Lock lock,
                           long millisInFuture,
@@ -119,9 +123,9 @@ public abstract class CountDownTimer {
     }
 
     /**
-     * Start the countdown.
+     * @return a {@link CountDownTimer} that has been started
      */
-    public final CountDownTimer start() {
+    public CountDownTimer start() {
         mLock.lock();
         try {
             // We haven't been canceled (yet).
@@ -152,17 +156,17 @@ public abstract class CountDownTimer {
      * Schedules a timer that performs the count down logic.
      */
     private void scheduleTimer() {
-        // Create an object that's (re)scheduled to run periodically.
-        // A lambda-expression can't be used here..
+        // Create an object that's (re)scheduled to run periodically
+        // (a lambda-expression can't be used here since 'this' is
+        // accessed below).
         Runnable timerHandler = new Runnable() {
             @Override
             public void run() {
                 mLock.lock();
                 try {
                     // Stop running if we've been canceled.
-                    if (mCancelled) {
+                    if (mCancelled) 
                         return;
-                    }
 
                     // Determine how much time is left.
                     final long millisLeft =
@@ -170,9 +174,9 @@ public abstract class CountDownTimer {
 
                     // If all the time has elapsed dispatch the
                     // onFinish() hook method.
-                    if (millisLeft <= 0) {
+                    if (millisLeft <= 0) 
                         onFinish();
-                    } else {
+                    else {
                         long lastTickStart = System.currentTimeMillis();
                         // Dispatch the onTick() hook method. Note how
                         // mLock is locked!
@@ -188,27 +192,28 @@ public abstract class CountDownTimer {
                             // Just delay until done.
                             delay = millisLeft - lastTickDuration;
 
-                            // Special case: user's onTick took
-                            // more than interval to complete,
-                            // trigger onFinish without delay
+                            // Special case: user's onTick took more
+                            // than mCountInterval to complete,
+                            // trigger onFinish() without delay.
                             if (delay < 0) delay = 0;
                         } else {
                             delay = mCountdownInterval - lastTickDuration;
 
-                            // Special case: user's onTick took more than
-                            // interval to complete, skip to next interval
+                            // Special case: user's onTick took more
+                            // than mCountInterval to complete, skip
+                            // to next interval.
                             while (delay < 0) delay += mCountdownInterval;
                         }
 
-                        // Reschedule timer handler to run again
-                        // at the appropriate delay in the future.
+                        // Reschedule timer handler to run again at
+                        // the appropriate delay in the future.
                         mScheduledExecutorService
                             .schedule(this,
                                       delay,
                                       TimeUnit.MILLISECONDS);
                     }
                 } finally {
-                    // Always unlock the lock.
+                    // Always unlock the lock here.
                     mLock.unlock();
                 }
             }
@@ -222,13 +227,14 @@ public abstract class CountDownTimer {
     }
 
     /**
-     * Callback fired on regular interval.
-     * @param millisUntilFinished The amount of time until finished.
+     * This callback is fired at regular interval.
+     *
+     * @param millisUntilFinished The amount of time until finished
      */
     public abstract void onTick(long millisUntilFinished);
 
     /**
-     * Callback fired when the time is up.
+     * Callback fired when the whole time period has elapsed.
      */
     public abstract void onFinish();
 }

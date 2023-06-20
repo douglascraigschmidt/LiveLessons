@@ -61,7 +61,7 @@ public class ex28 {
             threads
                 .add(new Thread(() ->
                                 runTask(random,
-                                        SingletonE.INSTANCE),
+                                        SingletonE.instance()),
                     "SingletonE(" + i + ")"));
         }
 

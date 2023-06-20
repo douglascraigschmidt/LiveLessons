@@ -53,6 +53,7 @@ public class AtomicLongRWL
         mReadLock.lock();
 
         try {
+            // Return the value since it's protected by the read lock.
             return mValue;
         } finally {
             // Always unlock a lock in the finally block.

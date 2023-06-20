@@ -36,7 +36,7 @@ public class AtomicLongSync
      * @return the updated value
      */
     public long incrementAndGet() {
-        synchronized (this) {
+        synchronized(this) {
             // This read and write are guaranteed to be atomic.
             return ++mValue;
         }
@@ -48,7 +48,7 @@ public class AtomicLongSync
      * @return The updated value
      */
     public long decrementAndGet() {
-        synchronized (this) {
+        synchronized(this) {
             // This read and write are guaranteed to be atomic.
             return --mValue;
         }
@@ -60,7 +60,7 @@ public class AtomicLongSync
      * @return The previous value
      */
     public long getAndIncrement() {
-        synchronized (this) {
+        synchronized(this) {
             // This read and write are guaranteed to be atomic.
             return mValue++;
         } 
@@ -72,7 +72,7 @@ public class AtomicLongSync
      * @return The previous value
      */
     public long getAndDecrement() {
-        synchronized (this) {
+        synchronized(this) {
             // This read and write are guaranteed to be atomic.
             return mValue--;
         } 

@@ -27,7 +27,7 @@ public class NonReentrantSpinLock
             // on NonReentrantSpinLock objects.
             MethodHandles.Lookup l = MethodHandles.lookup();
 
-            // Initialize the VarHandle via reflection.
+            // Initialize the VarHandle via Java reflection.
             VALUE = l.findVarHandle(NonReentrantSpinLock.class,
                                     "value",
                                     int.class);
@@ -43,9 +43,9 @@ public class NonReentrantSpinLock
 
     /**
      * Acquire the lock only if it is free at the time of invocation.
-     * Acquire the lock if it is available and returns immediately
-     * with the value true.  If the lock is not available then this
-     * method will return immediately with the value false.
+
+     * @return True if the lock is immediately available and false
+     * otherwise
      */
     @Override
     public boolean tryLock() {
@@ -55,9 +55,8 @@ public class NonReentrantSpinLock
     }
 
     /**
-     * Acquire the lock non-interruptibly.  If the lock is not
-     * available then the current thread spins until the lock has been
-     * acquired.
+     * Acquire the lock non-interruptibly.  The current thread spins
+     * until the lock has been acquired.
      */
     @Override
     public void lock() {
@@ -76,7 +75,8 @@ public class NonReentrantSpinLock
 
     /**
      * Acquire the lock interruptibly.  If the lock is not available
-     * then the current thread spins until the lock has been acquired.
+     * then the current thread spins until the lock has been acquired
+     * or an interrupt occurs.
      */
     @Override
     public void lockInterruptibly() throws InterruptedException {
@@ -93,8 +93,8 @@ public class NonReentrantSpinLock
     }
 
     /**
-     * Release the lock.  Throws IllegalMonitorStateException if the
-     * calling thread doesn't own the lock.
+     * Release the lock.  Throws {@link IllegalMonitorStateException}
+     * if the calling thread doesn't own the lock.
      */
     @Override
     public void unlock() {

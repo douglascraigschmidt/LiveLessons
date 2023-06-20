@@ -11,12 +11,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This example shows the difference between a reentrant lock (e.g.,
- * Java {@link ReentrantLock}) and a non-reentrant lock (e.g., a
- * spin-lock implemented using Java {@link VarHandle} features) when
+ * Java {@link ReentrantLock}) and a non-reentrant {@link Lock} (e.g.,
+ * a spin-lock implemented using Java {@link VarHandle} features) when
  * applied in a framework that allows callbacks where the framework
  * holds a lock protecting internal framework state.  As you'll see
- * when you run this program, the reentrant lock supports this
- * use-case nicely, whereas the non-reentrant lock incurs
+ * when you run this program, the {@link ReentrantLock} supports this
+ * use-case nicely, whereas the non-reentrant {@link Lock} incurs
  * "self-deadlock."
  */
 public class ex24 {
@@ -61,7 +61,7 @@ public class ex24 {
                                 long millisInFuture,
                                 long countDownInterval,
                                 String lockName)
-            throws InterruptedException {
+        throws InterruptedException {
         // Used to wait for the test to finish running.
         CountDownLatch cdl =
             // Test the CountDownTimer that's configured with the
@@ -96,8 +96,8 @@ public class ex24 {
      *        {@code onTick(long)} callbacks
      */
     private static CountDownLatch testCountDownTimer(Lock lock,
-                                           long millisInFuture,
-                                           long countDownInterval) {
+                                                     long millisInFuture,
+                                                     long countDownInterval) {
         // Initialize the countDownLatch used to wait until the test
         // is done.
         CountDownLatch cdl = new CountDownLatch(1);

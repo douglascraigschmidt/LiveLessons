@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * using {@link AtomicLong} itself.
  */
 public class AtomicLongAdapter
-       implements AbstractAtomicLong {
+    implements AbstractAtomicLong {
     /**
      * The {@link AtomicLong} that's manipulated atomically via
      * the methods below.
@@ -25,7 +25,7 @@ public class AtomicLongAdapter
 
     /**
      * Get the current value.
-     * 
+     *
      * @return The current value
      */
     public long get() {
@@ -39,10 +39,8 @@ public class AtomicLongAdapter
      * @return the updated value
      */
     public long incrementAndGet() {
-        synchronized (this) {
-            // This operation is guaranteed to be atomic.
-            return mAtomicLong.incrementAndGet();
-        }
+        // This operation is guaranteed to be atomic.
+        return mAtomicLong.incrementAndGet();
     }
 
     /**
@@ -51,10 +49,8 @@ public class AtomicLongAdapter
      * @return The updated value
      */
     public long decrementAndGet() {
-        synchronized (this) {
-            // This operation is guaranteed to be atomic.
-            return mAtomicLong.decrementAndGet();
-        }
+        // This operation is guaranteed to be atomic.
+        return mAtomicLong.decrementAndGet();
     }
 
     /**
@@ -63,10 +59,8 @@ public class AtomicLongAdapter
      * @return The previous value
      */
     public long getAndIncrement() {
-        synchronized (this) {
-            // This operation is guaranteed to be atomic.
-            return mAtomicLong.getAndIncrement();
-        } 
+        // This operation is guaranteed to be atomic.
+        return mAtomicLong.getAndIncrement();
     }
 
     /**
@@ -75,10 +69,8 @@ public class AtomicLongAdapter
      * @return The previous value
      */
     public long getAndDecrement() {
-        synchronized (this) {
-            // This operation is guaranteed to be atomic.
-            return mAtomicLong.getAndDecrement();
-        } 
+        // This operation is guaranteed to be atomic.
+        return mAtomicLong.getAndDecrement();
     }
 }
 

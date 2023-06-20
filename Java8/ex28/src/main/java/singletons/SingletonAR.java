@@ -64,7 +64,7 @@ public class SingletonAR<T>
                           u != null ? u : new SingletonAR<T>());
 
         // Return the singleton's current value.
-        return (Singleton<T>)  sSingletonAR.get();
+        return (Singleton<T>) sSingletonAR.get();
     }
 }
 

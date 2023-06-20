@@ -3,8 +3,8 @@ package atomiclongs;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * This class implements a subset of the Java {@link AbstractAtomicLong} class
- * using a {@link StampedLock} to illustrate how they work.
+ * This class implements a subset of the Java {@link AbstractAtomicLong}
+ * class using a {@link StampedLock} to illustrate how they work.
  */
 public class AtomicLongStampedLock
        implements AbstractAtomicLong {
@@ -24,7 +24,7 @@ public class AtomicLongStampedLock
      * given initial value.
      */
     public AtomicLongStampedLock(long initialValue) {
-        // Store the nitial value.
+        // Store the initial value.
         mValue = initialValue;
     }
 
@@ -118,15 +118,14 @@ public class AtomicLongStampedLock
                     stamp = ws;
                     break;
                 } else {
-                    // Otherwise, unlock the read lock and try again.
-                    // (the read lock may have just been acquired
-                    // by another Thread.)
+                    // Otherwise, unlock the read lock and acquire a
+                    // write lock.
 
                     // Unlock the read lock.
                     mStampedLock.unlockRead(stamp);
 
-                    // Reacquire the read lock.
-                    stamp = mStampedLock.readLock();
+                    // Block until we get a write lock.
+                    stamp = mStampedLock.writeLock();
                 }
             }
         } finally {
@@ -164,15 +163,14 @@ public class AtomicLongStampedLock
                     stamp = ws;
                     break;
                 } else {
-                    // Otherwise, unlock the read lock and try again.
-                    // (the read lock may have just been acquired by
-                    // another Thread.)
+                    // Otherwise, unlock the read lock and acquire a
+                    // write lock.
 
                     // Unlock the read lock.
                     mStampedLock.unlockRead(stamp);
 
-                    // Reacquire the read lock.
-                    stamp = mStampedLock.readLock();
+                    // Block until we get a write lock.
+                    stamp = mStampedLock.writeLock();
                 }
             }
         } finally {

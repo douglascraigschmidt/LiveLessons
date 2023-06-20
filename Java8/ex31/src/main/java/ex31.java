@@ -1,6 +1,5 @@
 import utils.ExceptionUtils;
 
-import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.ExceptionUtils.rethrowRunnable;
 
 /**
@@ -34,7 +33,7 @@ public class ex31 {
      */
     public static void playPingPong() {
         // Create and start a new "pong" Thread whose Runnable
-        // lambda reacts to changes to mVal;
+        // lambda reacts to changes to the mVal volatile field;
         new Thread(() -> {
             // Keep spinning until 'lv' == sMAX_ITERATIONS.
             for (long lv = mVal, // Atomically read 'lv' from mVal.
@@ -65,7 +64,8 @@ public class ex31 {
                 // Increment and print 'lv'.
                 print("ping(" + ++lv + ")");
 
-                // Set volatile mVal to the updated value of lv.
+                // Set volatile mVal to the updated value of lv,
+                // which the "pong" Thread detects.
                 mVal = lv;
 
                 // Pause for 1 second to give the 'pong' Thread
