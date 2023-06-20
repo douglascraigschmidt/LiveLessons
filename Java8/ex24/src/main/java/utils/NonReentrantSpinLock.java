@@ -17,7 +17,7 @@ public class NonReentrantSpinLock
      */
     private static final VarHandle VALUE;
 
-    /**
+    /*
      * This block of code is run prior to any instance of the {@link
      * NonReentrantSpinLock} being created.
      */

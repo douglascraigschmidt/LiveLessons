@@ -12,11 +12,11 @@ import java.util.concurrent.*;
 
 /**
  * Customizes the {@link ImageTaskGang} to use the {@link
- * ExecutorCompletionService} in conjunction with a fixed-sized thread
- * pool to concurrently download a list of images from web servers,
- * apply image processing filters to each image, and store the results
- * in files that can be displayed to users via various means defined
- * by the context in which this class is used.
+ * ExecutorCompletionService} in conjunction with a fixed-sized {@link
+ * Thread} pool to concurrently download a list of images from web
+ * servers, apply image processing filters to each image, and store
+ * the results in files that can be displayed to users via various
+ * means defined by the context in which this class is used.
  *
  * This class implements the roles of the "Proactive Initiator" and
  * "Completion Handler" in the Proactor pattern and also plays the
@@ -27,8 +27,9 @@ public class ImageTaskCompletionServiceFixed
     /**
      * Constructor initializes the superclass and fields.
      */
-    public ImageTaskCompletionServiceFixed(Filter[] filters,
-                                           List<List<URL>> urlLists) {
+    public ImageTaskCompletionServiceFixed
+        (Filter[] filters,
+         List<List<URL>> urlLists) {
         // Initialize the super class.
         super(filters, 
               urlLists,
@@ -42,8 +43,8 @@ public class ImageTaskCompletionServiceFixed
      */
     @Override
     public Executor executorHook() {
-        // Create and Executor with a fixed pool of threads.
-        Executor executor = Executors
+        // Create an Executor with a fixed pool of threads.
+        var executor = Executors
             .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         // Prestart all the core threads.

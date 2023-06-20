@@ -14,10 +14,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * Java {@link ReentrantLock}) and a non-reentrant {@link Lock} (e.g.,
  * a spin-lock implemented using Java {@link VarHandle} features) when
  * applied in a framework that allows callbacks where the framework
- * holds a lock protecting internal framework state.  As you'll see
- * when you run this program, the {@link ReentrantLock} supports this
- * use-case nicely, whereas the non-reentrant {@link Lock} incurs
- * "self-deadlock."
+ * holds a lock protecting internal framework state.  As shown by this
+ * program, the {@link ReentrantLock} supports this use case nicely,
+ * whereas the non-reentrant {@link Lock} incurs "self-deadlock."
  */
 public class ex24 {
     /**

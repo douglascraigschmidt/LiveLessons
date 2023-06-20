@@ -44,8 +44,8 @@ public class Options {
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/kitten.png,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/schmidt_coursera.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/dark_rider.jpg,"
-        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug.jpg",
-          "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/doug.jpg,"
+        + "http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg,"
         + "http://www.dre.vanderbilt.edu/~schmidt/gifs/robot.png,"
@@ -125,7 +125,7 @@ public class Options {
     public List<List<URL>> getUrlLists() {
     	try {
             switch (mInputSource) {
-            // If the user selects the defaults source, return the
+            // If the user selects the default source, return the
             // default list of remote URL lists.
             case DEFAULT:
                 return getDefaultUrlList(false);
@@ -146,7 +146,6 @@ public class Options {
                         (convertStringToUrls(child.getText().toString()));
                 }
                 */
-
                 break;
 
             default:
@@ -177,15 +176,6 @@ public class Options {
      */
     protected List<List<URL>> getDefaultUrlList()
             throws MalformedURLException {
-        /*
-          List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
-
-          // Convert all the suggestion strings into URLs.
-          for (String suggestedUrls : mDefaultUrls)
-            variableNumberOfInputURLs.add
-                (convertStringToUrls(suggestedUrls));
-          return variableNumberOfInputURLs;
-        */
         // Convert the array of strings into a list of strings.
         // Convert the list into a stream.
         return Arrays
@@ -195,7 +185,7 @@ public class Options {
             .map(this::convertStringToUrls)
 
             // Create and return a list of a list of URLs.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -213,34 +203,38 @@ public class Options {
             	ClassLoader.getSystemResource("uci.png"),
             	ClassLoader.getSystemResource("dougs_small.jpg"),
             	ClassLoader.getSystemResource("kitten.png"),
-            	ClassLoader.getSystemResource("doug.jpg")
-            },
-            {    
+            	ClassLoader.getSystemResource("doug.jpg"),
+           // },
+           // {
             	ClassLoader.getSystemResource("ace_copy.jpg"),
             	ClassLoader.getSystemResource("tao_copy.jpg"),
             	ClassLoader.getSystemResource("lil_doug.jpg"),
             	ClassLoader.getSystemResource("ironbound.jpg"),
             	ClassLoader.getSystemResource("wm.jpg"),
             	ClassLoader.getSystemResource("robot.png"),
-            	ClassLoader.getSystemResource("doug_circle.png")
+            	ClassLoader.getSystemResource("doug_circle.png"),
+           // },
+            //{
+            	ClassLoader.getSystemResource("SchmidtD.jpg"),
+            	ClassLoader.getSystemResource("bee-patterns.jpg"),
+            	ClassLoader.getSystemResource("doc.jpg"),
+            	ClassLoader.getSystemResource("douglass.jpg"),
+            	ClassLoader.getSystemResource("dougnew.jpg"),
+            	ClassLoader.getSystemResource("vette.jpg"),
+            	ClassLoader.getSystemResource("oz.jpg")
             }
         };
 
-        // Return a list of lists of URLs.
-        return Arrays.stream(urlsArray)
-                     .map(Arrays::asList)
-                     .collect(toList());
-        /*
-        List<List<URL>> variableNumberOfInputURLs = new ArrayList<>();
+        return Arrays
+            // Convert the two-dimensional array into a Stream of
+            // one-dimensional URL objects.
+            .stream(urlsArray)
 
-        for (URL[] urls : urlsArray) {
-            // Create a new List of URLs containing the next URLs from
-            // the array.
-            variableNumberOfInputURLs.add(Arrays.asList(urls));
-        }
+            // Convert each URL array to a List of URL objects.
+            .map(Arrays::asList)
 
-        return variableNumberOfInputURLs;
-        */
+            // Return a List of List objects containing URL objects.
+            .toList();
     }
 
     /**
@@ -251,7 +245,8 @@ public class Options {
     private List<URL> convertStringToUrls(String stringOfUrls) {
         // Create a Function that returns a new URL object when
         // applied.
-        Function<String, URL> urlFactory = ExceptionUtils.rethrowFunction(URL::new);
+        Function<String, URL> urlFactory = ExceptionUtils
+            .rethrowFunction(URL::new);
 
         return
             // Create a regular expression for the "," separator.
@@ -264,7 +259,7 @@ public class Options {
             .map(urlFactory)
 
             // Create a list of URLs.
-            .collect(toList());
+            .toList();
     }
 
     /**

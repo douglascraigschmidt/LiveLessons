@@ -1,12 +1,10 @@
 package livelessons.tasks;
 
 import livelessons.filters.Filter;
-import livelessons.filters.FilterDecoratorWithImage;
 import livelessons.filters.OutputFilterDecorator;
 import livelessons.utils.Image;
 
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -68,13 +66,14 @@ public abstract class ImageTaskCompletionService
 
     /**
      * Hook method that runs in a background thread to download,
-     * process, and store an image via the ExecutorCompletionService.
+     * process, and store an image via the {@link
+     * ExecutorCompletionService}.
      */
     @Override
     protected boolean processInput(URL urlToDownload) {
         // Download an image into a new Image object.
     	final Image downloadedImage =
-            downloadImage(urlToDownload);
+            getOrDownloadImage(urlToDownload);
 
         // For each filter in the List of filters, submit a task to
         // the ExecutorCompletionService that filters the image
@@ -85,16 +84,18 @@ public abstract class ImageTaskCompletionService
             // The ExecutorCompletionService receives a Callable and
             // invokes its call() method, which returns the filtered
             // ImageEntity.
-            mCompletionService.submit(() -> {
-                    // Create an OutputFilterDecorator that
-                    // encapsulates the original filter.
-                    Filter decoratedFilter =
-                        new OutputFilterDecorator(filter);
+            mCompletionService
+                .submit(() -> {
+                        // Create an OutputFilterDecorator that
+                        // encapsulates the original filter.
+                        Filter decoratedFilter =
+                            new OutputFilterDecorator(filter);
 
-                    // Process the downloaded image, store it
-                    // into a file, return the result.
-                    return decoratedFilter.filter(downloadedImage);
-                });
+                        // Process the downloaded image, store it into
+                        // a file, return the result.
+                        return decoratedFilter
+                            .filter(downloadedImage);
+                    });
         }
 
         return true;
@@ -106,9 +107,6 @@ public abstract class ImageTaskCompletionService
      */
     @Override
     protected void initiateTaskGang(int initialNumberOfURLs) {
-        // Start the timing for this test.
-        startTiming();
-
         // Enqueue each item in the input list for execution in the
         // Executor's thread pool, which ensures there's a thread
         // available to run each task concurrently.
@@ -134,9 +132,6 @@ public abstract class ImageTaskCompletionService
                 // ExecutorCompletionService's completion queue.
                 concurrentlyProcessFilteredResults(resultsCount);
 
-                // Stop the timer for this test.
-                stopTiming();
-
                 // Check to see if there's another List of URLs
                 // available to process.
                 if (setInput(getNextInput()) == null)
@@ -150,9 +145,7 @@ public abstract class ImageTaskCompletionService
             // Only call the shutdown() and awaitTermination() methods if
             // we've actually got an ExecutorService (as opposed to just
             // an Executor).
-            if (getExecutor() instanceof ExecutorService) {
-                ExecutorService executorService =
-                    (ExecutorService) getExecutor();
+            if (getExecutor() instanceof ExecutorService executorService) {
 
                 // Tell the ExecutorService to initiate a graceful
                 // shutdown.
@@ -163,19 +156,20 @@ public abstract class ImageTaskCompletionService
                 executorService.awaitTermination(Long.MAX_VALUE,
                                                  TimeUnit.NANOSECONDS);
             }
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Removes result Futures from the ExecutorCompletionService's
-     * completion queue until all the processed downloads have been
-     * received and prints diagnostics indicating if the image
-     * downloading, processing, and storing worked properly.
+     * Removes result {@link Future} objects from the {@link
+     * ExecutorCompletionService}'s completion queue until all
+     * processed downloads have been received and prints diagnostics
+     * indicating if the image downloading, processing, and storing
+     * worked properly.
      */
-    protected void concurrentlyProcessFilteredResults(int resultsCount)
+    protected void concurrentlyProcessFilteredResults
+        (int resultsCount)
         throws InterruptedException {
         int succeeded = 0;
         int failed = 0;

@@ -12,11 +12,11 @@ import java.util.concurrent.*;
 
 /**
  * Customizes the {@link ImageTaskGang} to use the {@link
- * ExecutorCompletionService} in conjunction with a cached thread pool
- * to concurrently download a list of images from web servers, apply
- * image processing filters to each image, and store the results in
- * files that can be displayed to users via various means defined by
- * the context in which this class is used.
+ * ExecutorCompletionService} in conjunction with a cached {@link
+ * Thread} pool to concurrently download a list of images from web
+ * servers, apply image processing filters to each image, and store
+ * the results in files that can be displayed to users via various
+ * means defined by the context in which this class is used.
  *
  * This class implements the roles of the "Proactive Initiator" and
  * "Completion Handler" in the Proactor pattern and also plays the
@@ -27,8 +27,9 @@ public class ImageTaskCompletionServiceCached
     /**
      * Constructor initializes the superclass and fields.
      */
-    public ImageTaskCompletionServiceCached(Filter[] filters,
-                                            List<List<URL>> urlLists) {
+    public ImageTaskCompletionServiceCached
+        (Filter[] filters,
+         List<List<URL>> urlLists) {
         // Initialize the super class.
         super(filters, 
               urlLists,
@@ -36,13 +37,14 @@ public class ImageTaskCompletionServiceCached
     }
 
     /**
-     * Hook method that returns a cached thread pool implementation of
-     * the {@link Executor}.
+     * Hook method that returns a cached {@link thread} pool
+     * implementation of the {@link Executor} interface.
      */
     @Override
     public Executor executorHook() {
-        // Create an Executor with a cached pool of threads, which
-        // grow and shrink dynamically as new tasks are executed.
+        // Create an Executor with a cached pool of {@link Thread}
+        // objects, which grow and shrink dynamically as new tasks are
+        // executed.
         return Executors.newCachedThreadPool();
     }
 }    

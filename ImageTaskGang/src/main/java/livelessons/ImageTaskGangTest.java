@@ -7,6 +7,7 @@ import livelessons.tasks.ImageTaskCompletionServiceCached;
 import livelessons.tasks.ImageTaskCompletionServiceFixed;
 import livelessons.tasks.ImageTaskGang;
 import livelessons.utils.Options;
+import livelessons.utils.RunTimer;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -37,14 +38,6 @@ public class ImageTaskGangTest {
     };
 
     /**
-     * Store timing results for the ImageTaskGang implementation
-     * strategies, so they can be sorted and displayed when the
-     * program is finished.
-     */
-    private static final Map<String, List<Long>> mResultsMap =
-        new HashMap<>();
-
-    /**
      * Java requires a static main() entry point to run the console
      * version of the ImageTaskGang app.
      */
@@ -66,10 +59,10 @@ public class ImageTaskGangTest {
      */
     private static void runTests() {
         // Warm up the thread pool.
-        warmUpThreadPool();
+        // warmUpThreadPool();
 
         // Iterate thru the implementation strategies and test them.
-        for (TestsToRun test : TestsToRun.values()) {
+        for (var test : TestsToRun.values()) {
             // Run the garbage collector first to avoid perturbing the
             // test.
             System.gc();
@@ -81,27 +74,23 @@ public class ImageTaskGangTest {
 
             // Create a list of lists that contains all the image URLs
             // to obtain and process.
-            List<List<URL>> urlLists = Options.instance().getUrlLists();
+            var urlLists = Options.instance().getUrlLists();
 
             // Make an ImageTaskGang object via the factory method.
-            ImageTaskGang taskGang =
-                makeImageTaskGang(mFilters,
-                                  urlLists,
-                                  test);
+            ImageTaskGang taskGang = RunTimer
+                .timeRun(() -> makeImageTaskGang(mFilters,
+                                                 urlLists,
+                                                 test),
+                         test.toString());
 
             // Start running the test.
-            assert taskGang != null;
             taskGang.run();
-
-            // Store the execution times.
-            mResultsMap.put(test.toString(), 
-                            taskGang.executionTimes());
 
             System.out.println("Ending " + test);
         }
 
-        // Print out all the timing results.
-        Options.printTimingResults(mResultsMap);
+        // Print out the timing results.
+        System.out.println(RunTimer.getTimingResults());
     }
 
     /**
@@ -111,16 +100,15 @@ public class ImageTaskGangTest {
     private static ImageTaskGang makeImageTaskGang(Filter[] filters,
                                                    List<List<URL>> urlLists,
                                                    TestsToRun choice) {
-        switch (choice) {
-        case EXECUTOR_COMPLETION_SERVICE_CACHED:
-            return new ImageTaskCompletionServiceCached(filters,
-                                                        urlLists);
-        case EXECUTOR_COMPLETION_SERVICE_FIXED:
-            return new ImageTaskCompletionServiceFixed(filters,
-                                                       urlLists);
-        }
+        return switch (choice) {
+        case EXECUTOR_COMPLETION_SERVICE_CACHED ->
+            new ImageTaskCompletionServiceCached(filters,
+                                                 urlLists);
+        case EXECUTOR_COMPLETION_SERVICE_FIXED ->
+            new ImageTaskCompletionServiceFixed(filters,
+                                                urlLists);
+        };
 
-        return null;
     }
 
     /**
@@ -136,8 +124,9 @@ public class ImageTaskGangTest {
         // Create and run the ImageTaskCompletionServiceFixed test to
         // warm up threads in the thread pool.
         ImageTaskGang taskGang =
-            new ImageTaskCompletionServiceFixed(mFilters,
-                                                Options.instance().getUrlLists());
+            new ImageTaskCompletionServiceFixed
+            (mFilters,
+             Options.instance().getUrlLists());
 
         taskGang.run();
 

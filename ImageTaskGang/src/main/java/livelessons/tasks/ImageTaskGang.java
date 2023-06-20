@@ -4,26 +4,14 @@ import livelessons.filters.Filter;
 import livelessons.utils.Image;
 import livelessons.utils.FileAndNetUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
- * Customizes the TaskGang framework for images and defines methods
- * that are reused by various subclasses.
+ * Customizes the {@link TaskGang} framework for images and defines
+ * methods that are reused by various subclasses.
  */
 public abstract class ImageTaskGang 
        extends TaskGang<URL> {
@@ -33,7 +21,7 @@ public abstract class ImageTaskGang
     protected Iterator<List<URL>> mUrlListIterator;
 
     /**
-     * The list of filters to apply to the downloaded images.
+     * The {@link List} of filters to apply to the downloaded images.
      */
     protected List<Filter> mFilters;
 
@@ -51,7 +39,7 @@ public abstract class ImageTaskGang
 
     /**
      * Factory method that returns the next List of URLs to download
-     * and process concurrently by the ImageTaskGang.
+     * and process concurrently by the {@link ImageTaskGang}.
      */
     @Override
     protected List<URL> getNextInput() {
@@ -69,43 +57,11 @@ public abstract class ImageTaskGang
     }
 
     /**
-     * Factory method that retrieves the image associated with the @a
-     * urlToDownload and creates an Image to encapsulate it.
+     * Factory method that retrieves the image associated with the
+     * {@code url} and creates an Image to encapsulate it.
      */
-    protected Image downloadImage(URL url) {
+    protected Image getOrDownloadImage(URL url) {
         return new Image(url,
                          FileAndNetUtils.downloadContent(url));
-    }
-
-    /**
-     * Keeps track of how long a given test has run.
-     */
-    private long mStartTime;
-
-    /**
-     * Keeps track of all the execution times.
-     */
-    private final List<Long> mExecutionTimes = new ArrayList<>();
-
-    /**
-     * Return the time needed to execute the test.
-     */
-    public List<Long> executionTimes() {
-        return mExecutionTimes;
-    }
-
-    /**
-     * Start timing the test run.
-     */
-    public void startTiming() {
-        // Note the start time.
-        mStartTime = System.nanoTime();
-    }
-
-    /**
-     * Stop timing the test run.
-     */
-    public void stopTiming() {
-        mExecutionTimes.add((System.nanoTime() - mStartTime) / 1_000_000);
     }
 }

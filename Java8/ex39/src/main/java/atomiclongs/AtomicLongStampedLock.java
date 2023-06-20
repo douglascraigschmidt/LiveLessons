@@ -4,7 +4,8 @@ import java.util.concurrent.locks.StampedLock;
 
 /**
  * This class implements a subset of the Java {@link AbstractAtomicLong}
- * class using a {@link StampedLock} to illustrate how they work.
+ * class using a {@link StampedLock} to illustrate its "optimistic" read
+ * locks, its "pessimistic" write locks, and its conditional write locks.
  */
 public class AtomicLongStampedLock
        implements AbstractAtomicLong {
@@ -29,7 +30,7 @@ public class AtomicLongStampedLock
     }
 
     /**
-     * Gets the current value.
+     * Gets the current value using an "optimistic" read lock.
      * 
      * @return The current value
      */
@@ -58,7 +59,8 @@ public class AtomicLongStampedLock
     }
 
     /**
-     * Atomically increment the current value by one.
+     * Atomically increment the current value by one using
+     * a "pessimistic" write lock.
      *
      * @return the updated value
      */
@@ -76,7 +78,8 @@ public class AtomicLongStampedLock
     }
     
     /**
-     * Atomically decrements by one the current value.
+     * Atomically decrements by one the current value using
+     * a "pessimistic" write lock.
      *
      * @return The updated value
      */
@@ -94,9 +97,10 @@ public class AtomicLongStampedLock
     }
 
     /**
-     * Atomically increment the current value by one.
+     * Atomically increment the current value by one using
+     * a conditional write lock.
      *
-     * @return the previous value
+     * @return the previous value before the increment
      */
     public long getAndIncrement() {
         // Block until we get a read lock.
@@ -110,7 +114,8 @@ public class AtomicLongStampedLock
                 value = mValue;
 
                 // Try to convert to a write lock.
-                long ws = mStampedLock.tryConvertToWriteLock(stamp);
+                long ws = mStampedLock
+                    .tryConvertToWriteLock(stamp);
 
                 // If conversion succeeded (ws != 0), we're done.
                 if (ws != 0) {
@@ -138,9 +143,10 @@ public class AtomicLongStampedLock
     }
 
     /**
-     * Atomically decrements by one the current value.
+     * Atomically decrements by one the current value using
+     * a conditional write lock.
      *
-     * @return The previous value
+     * @return The previous value before the decrement
      */
     public long getAndDecrement() {
         // Block until we get a read lock.
@@ -155,7 +161,8 @@ public class AtomicLongStampedLock
                 value = mValue;
 
                 // Try to a convert to a write lock.
-                long ws = mStampedLock.tryConvertToWriteLock(stamp);
+                long ws = mStampedLock
+                    .tryConvertToWriteLock(stamp);
 
                 // If conversion succeeded (ws != 0), we're done.
                 if (ws != 0) {

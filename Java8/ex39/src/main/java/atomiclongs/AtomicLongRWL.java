@@ -6,7 +6,8 @@ import java.util.concurrent.locks.Lock;
 /**
  * This class implements a subset of the Java {@link AbstractAtomicLong}
  * class using a {@link ReentrantReadWriteLock} to illustrate how its
- * methods work.
+ * read locks, write locks, and readers-write lock downgrading features
+ * work.
  */
 public class AtomicLongRWL
        implements AbstractAtomicLong {
@@ -62,7 +63,8 @@ public class AtomicLongRWL
     }
 
     /**
-     * Atomically increment the current value by one.
+     * Atomically increment the current value by one using
+     * readers-writer lock downgrading.
      *
      * @return the updated value
      */
@@ -109,7 +111,8 @@ public class AtomicLongRWL
     }
 
     /**
-     * Atomically decrements by one the current value.
+     * Atomically decrements by one the current value using
+     * a write lock.
      *
      * @return The updated value
      */
@@ -127,7 +130,8 @@ public class AtomicLongRWL
     }
 
     /**
-     * Atomically increment the current value by one.
+     * Atomically increment the current value by one using a
+     * write lock.
      *
      * @return the previous value
      */
@@ -145,7 +149,8 @@ public class AtomicLongRWL
     }
 
     /**
-     * Atomically decrements by one the current value.
+     * Atomically decrements by one the current value using a
+     * write lock.
      *
      * @return The previous value
      */
