@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.main;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -10,7 +10,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ViewGroup;
-import example.imagetaskgang.util.PermissionRequest;
+
+import example.imagetaskgang.R;
+import example.imagetaskgang.utils.PermissionRequest;
 
 /**
  * Super class that handles permissions.

@@ -1,14 +1,14 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
+
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.utils.ImageEntity;
 
 /**
- * @class NullFilter
- *
- * @brief The NullFilter will return the image as it was downloaded.
- *        It's purpose is to show the original image, as well as to
- *        exemplify how filters are supposed to work on a basic level.
- *        It plays the role of the "Concrete Component" in the
- *        Decorator pattern and the "Concrete Class" in the Template
- *        Method pattern.
+ * The NullFilter will return the image as it was downloaded.  It's
+ * purpose is to show the original image, as well as to exemplify how
+ * filters are supposed to work on a basic level.  It plays the role
+ * of the "Concrete Component" in the Decorator pattern and the
+ * "Concrete Class" in the Template Method pattern.
  */
 public class NullFilter extends Filter {
     /**

@@ -1,13 +1,11 @@
-package example.imagetaskgang;
+package example.imagetaskgang.tasks;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import static example.imagetaskgang.utils.FileAndNetUtils.downloadContent;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -16,34 +14,34 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import android.annotation.SuppressLint;
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.filters.OutputFilterDecorator;
+import example.imagetaskgang.platform.PlatformStrategy;
+import example.imagetaskgang.utils.ImageEntity;
 
 /**
- * @class ImageTaskGang
+ * Customizes the TaskGang framework to use the Java
+ * ExecutorCompletionService to concurrently download a List of images
+ * from web servers, apply image processing filters to each image, and
+ * store the results in files that can be displayed to users via
+ * various means defined by the context in which this class is used.
  *
- * @brief Customizes the TaskGang framework to use the Java
- *        ExecutorCompletionService to concurrently download a List of
- *        images from web servers, apply image processing filters to
- *        each image, and store the results in files that can be
- *        displayed to users via various means defined by the context
- *        in which this class is used.
- *
- *        This class implements the roles of the "Proactive Initiator"
- *        and "Completion Handler" in the Proactor pattern and also
- *        plays the role of the "Concrete Class" in the Template
- *        Method pattern.
+ * This class implements the roles of the "Proactive Initiator" and
+ * "Completion Handler" in the Proactor pattern and also plays the
+ * role of the "Concrete Class" in the Template Method pattern.
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ImageTaskGang extends TaskGang<URL> {
     /**
      * An iterator to the List of input URLs that are used to download
      * Images.
      */
-    private Iterator<List<URL>> mUrlListIterator;
+    private final Iterator<List<URL>> mUrlListIterator;
 
     /**
      * The List of filters to apply to the downloaded images.
      */
-    private List<Filter> mFilters;
+    private final List<Filter> mFilters;
 
     /**
      * An ExecutorCompletionService used to concurrently download and
@@ -51,14 +49,14 @@ public class ImageTaskGang extends TaskGang<URL> {
      * the role of the "Asynchronous Operation Processor" in the
      * Proactor pattern.
      */
-    private ExecutorCompletionService<ImageEntity> mCompletionService;
+    private final ExecutorCompletionService<ImageEntity> mCompletionService;
 
     /**
      * Clients of ImageTaskGang supply this hook so they know when the
      * all the images have been downloaded, processed, and stored, at
      * which point they can display the stored images.
      */
-    private Runnable mCompletionHook;
+    private final Runnable mCompletionHook;
 
     /**
      * A barrier synchronizer that's used to coordinate each iteration
@@ -66,7 +64,7 @@ public class ImageTaskGang extends TaskGang<URL> {
      * barrier for the other tasks to complete their processing before
      * they all attempt to move to the next cycle en masse.
      */
-    protected CountDownLatch mIterationBarrier = null;
+    protected CountDownLatch mIterationBarrier;
 
     /**
      * Constructor initializes the superclass and data members.
@@ -146,23 +144,19 @@ public class ImageTaskGang extends TaskGang<URL> {
         // file, and puts the results of the filtered image in the
         // completion queue.
         for (final Filter filter : mFilters) {
-        	
             // The ExecutorCompletionService receives a Callable and
             // invokes its call() method, which returns the filtered
             // ImageEntity.
-            mCompletionService.submit(new Callable<ImageEntity>() {
-                    @Override
-                    public ImageEntity call() {
-                    	// Create an OutputFilterDecorator that
-                        // encapsulates the original filter.
-                        Filter decoratedFilter =
-                            new OutputFilterDecorator(filter);
+            mCompletionService.submit(() -> {
+                // Create an OutputFilterDecorator that
+                // encapsulates the original filter.
+                Filter decoratedFilter =
+                    new OutputFilterDecorator(filter);
 
-                        // Process the downloaded image, store it
-                        // into a file, return the result.
-                        return decoratedFilter.filter(downloadedImage);
-                    }
-                });
+                // Process the downloaded image, store it
+                // into a file, return the result.
+                return decoratedFilter.filter(downloadedImage);
+            });
         }
 
         return true;
@@ -270,7 +264,7 @@ public class ImageTaskGang extends TaskGang<URL> {
                     ("ImageTaskGang",
                      "Operations on file " 
                      + imageEntity.getSourceURL()
-                     + (imageEntity.getSucceeded() == true 
+                     + (imageEntity.getSucceeded()
                         ? " succeeded" 
                         : " failed"));
             } catch (ExecutionException e) {
@@ -289,41 +283,5 @@ public class ImageTaskGang extends TaskGang<URL> {
     private ImageEntity makeImageEntity(URL urlToDownload) {
         return new ImageEntity(urlToDownload,
                                downloadContent(urlToDownload));
-    }
-
-    /**
-     * Download the contents found at the given URL and return them as
-     * a raw byte array.
-     */
-    @SuppressLint("NewApi")
-    private byte[] downloadContent(URL url) {
-        // The size of the image downloading buffer.
-        final int BUFFER_SIZE = 4096;
-
-        // Creates a new ByteArrayOutputStream to write the downloaded
-        // contents to a byte array, which is a generic form of the
-        // image.
-        ByteArrayOutputStream ostream = 
-            new ByteArrayOutputStream();
-        
-        // This is the buffer in which the input data will be stored
-        byte[] readBuffer = new byte[BUFFER_SIZE];
-        int bytes;
-        
-        // Creates an InputStream from the inputUrl from which to read
-    	// the image data.
-        try (InputStream istream = (InputStream) url.openStream()) {
-            // While there is unread data from the inputStream,
-            // continue writing data to the byte array.
-            while ((bytes = istream.read(readBuffer)) > 0) 
-                ostream.write(readBuffer, 0, bytes);
-
-            return ostream.toByteArray();
-        } catch (IOException e) {
-            // "Try-with-resources" will clean up the istream
-            // automatically.
-            e.printStackTrace();
-            return null;
-        }
     }
 }

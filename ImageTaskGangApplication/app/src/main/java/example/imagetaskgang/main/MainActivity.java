@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.main;
 
 import java.io.File;
 import java.net.URL;
@@ -6,9 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,18 +17,25 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import example.imagetaskgang.tasks.ImageTaskGang;
+import example.imagetaskgang.R;
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.filters.GrayScaleFilter;
+import example.imagetaskgang.filters.NullFilter;
+import example.imagetaskgang.filters.Options;
+import example.imagetaskgang.platform.PlatformStrategy;
+import example.imagetaskgang.platform.PlatformStrategyFactory;
+
 /**
- * @class MainActivity
- *
- * @brief Main Activity for the Android version of the ImageTaskGang
- *        application.
+ * Main Activity for the Android version of the ImageTaskGang
+ * application.
  */
 public class MainActivity extends MainActivityBase {
     /**
      * A LinearLayout where each element is an AutoCompleteTextview
      * that holds a comma-separated list of URLs to download.
      */
-    protected LinearLayout mListUrlGroups;
+    public LinearLayout mListUrlGroups;
     
     /**
      * The button to run the ImageTaskGang using the user input.

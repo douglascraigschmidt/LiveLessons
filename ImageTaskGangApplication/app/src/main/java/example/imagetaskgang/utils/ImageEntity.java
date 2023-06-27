@@ -1,14 +1,14 @@
-package example.imagetaskgang;
+package example.imagetaskgang.utils;
 
 import java.net.URL;
 
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.platform.PlatformStrategy;
+
 /**
- * @class ImageEntity
- *
- * @brief Stores meta-data about an Image and also provides methods
- *        for common image- and file-related tasks, such as decoding
- *        raw byte arrays into an Image and setting/getting filter and
- *        file names.
+ * Stores meta-data about an Image and also provides methods for
+ * common image- and file-related tasks, such as decoding raw byte
+ * arrays into an Image and setting/getting filter and file names.
  */
 public class ImageEntity {
     /**

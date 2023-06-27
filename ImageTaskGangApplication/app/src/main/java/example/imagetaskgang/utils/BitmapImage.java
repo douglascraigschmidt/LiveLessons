@@ -1,15 +1,15 @@
-package example.imagetaskgang;
+package example.imagetaskgang.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import example.imagetaskgang.utils.Image;
+
 /**
- * @class BitmapImage
- *
- * @brief Encapsulates the Android Bitmap class by extending
- *        the platform-independent Image interface.
+ * Encapsulates the Android Bitmap class by extending the
+ * platform-independent Image interface.
  */
-class BitmapImage implements Image {
+public class BitmapImage implements Image {
     /**
      * An Android Bitmap object.
      */

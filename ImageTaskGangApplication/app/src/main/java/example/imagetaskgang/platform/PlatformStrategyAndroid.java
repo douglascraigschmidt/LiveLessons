@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.platform;
 
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
@@ -15,13 +15,16 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.AutoCompleteTextView;
 
+import example.imagetaskgang.main.MainActivity;
+import example.imagetaskgang.utils.BitmapImage;
+import example.imagetaskgang.utils.Image;
+import example.imagetaskgang.utils.ImageEntity;
+
 /**
- * @class PlatformStrategyAndroid
- * 
- * @brief Provides methods that define a platform-independent
- *        mechanism for getting URLs to download, as well as creating,
- *        processing, and storing URLs.  It plays the role of the
- *        "Concrete Strategy" in the Strategy pattern.
+ * Provides methods that define a platform-independent mechanism for
+ * getting URLs to download, as well as creating, processing, and
+ * storing URLs.  It plays the role of the "Concrete Strategy" in the
+ * Strategy pattern.
  */
 public class PlatformStrategyAndroid extends PlatformStrategy {
     /** 
@@ -63,7 +66,6 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
 	            
             // Take input from the Android UI
             case USER:
-            	
             	// Check if the Activity still exists
                 if (mOuterClass.get() != null) {
                 	

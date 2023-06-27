@@ -1,4 +1,4 @@
-package example.imagetaskgang.util;
+package example.imagetaskgang.utils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

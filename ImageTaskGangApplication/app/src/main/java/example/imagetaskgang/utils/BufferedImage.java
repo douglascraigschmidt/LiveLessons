@@ -1,14 +1,14 @@
-package example.imagetaskgang;
+package example.imagetaskgang.utils;
 
 // import javax.imageio.ImageIO;
 
+import example.imagetaskgang.utils.Image;
+
 /**
- * @class BufferedImage
- *
- * @brief Encapsulates the Java BufferedImage class via a
- *        platform-independent interface.
+ * Encapsulates the Java BufferedImage class via a
+ * platform-independent interface.
  */
-class BufferedImage implements Image {
+public class BufferedImage implements Image {
     /**
      * A Java BufferedImage object.
      */

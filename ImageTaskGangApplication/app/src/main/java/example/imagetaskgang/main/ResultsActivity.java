@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.main;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,11 +21,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import example.imagetaskgang.R;
+import example.imagetaskgang.platform.PlatformStrategy;
+
 /**
- * @class ResultsActivity
- *
- * @brief Allows the user to browse the processed images stored by the
- *        ImageTaskGang.
+ * Allows the user to browse the processed images stored by the
+ * ImageTaskGang.
  */
 public class ResultsActivity extends Activity {
     /**

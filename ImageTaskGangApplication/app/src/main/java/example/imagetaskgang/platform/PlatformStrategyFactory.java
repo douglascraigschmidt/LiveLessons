@@ -1,17 +1,14 @@
-package example.imagetaskgang;
+package example.imagetaskgang.platform;
 
 import java.util.HashMap;
 
 /**
- * @class PlatformStrategyFactory
- * 
- * @brief This class is a Factory that uses the Command pattern to
- *        create the designated @a PlatformStrategy implementation
- *        (e.g., either an Android application or Java console
- *        application) at runtime.  The class plays the role of the
- *        Creator in the Factory Method pattern.  It also uses the
- *        Command pattern internally to efficiently create the
- *        appropriate type of @a PlatformStrategy subclass object.
+ * This class is a Factory that uses the Command pattern to create the
+ * designated @a PlatformStrategy implementation (e.g., either an
+ * Android application or Java console application) at runtime.  The
+ * class plays the role of the Creator in the Factory Method pattern.
+ * It also uses the Command pattern internally to efficiently create
+ * the appropriate type of @a PlatformStrategy subclass object.
  */
 public class PlatformStrategyFactory {
     /**

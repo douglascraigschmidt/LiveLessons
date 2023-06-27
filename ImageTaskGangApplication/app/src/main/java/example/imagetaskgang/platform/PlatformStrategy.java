@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.platform;
 
 import java.io.FileOutputStream;
 import java.net.MalformedURLException;
@@ -8,20 +8,20 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import example.imagetaskgang.utils.Image;
+import example.imagetaskgang.utils.ImageEntity;
+
 /** 
- * @class PlatformStrategy
- *
- * @brief Provides methods that define a platform-independent
- *        mechanism for getting URLs to download, as well as creating,
- *        processing, and storing URLs.  This class is a singleton
- *        that also plays the role of the "Strategy" in the Strategy
- *        pattern and the Product in the Factory Method pattern.  Both
- *        the PlatformStrategyConsole and PlatformStrategyAndroid
- *        subclasses extend this class.
+ * Provides methods that define a platform-independent mechanism for
+ * getting URLs to download, as well as creating, processing, and
+ * storing URLs.  This class is a singleton that also plays the role
+ * of the "Strategy" in the Strategy pattern and the Product in the
+ * Factory Method pattern.  Both the PlatformStrategyConsole and
+ * PlatformStrategyAndroid subclasses extend this class.
  */
 public abstract class PlatformStrategy {
     /** 
-     * The singleton @a PlatformStrategy instance. 
+     * The singleton {@link PlatformStrategy} instance.
      */
     private static PlatformStrategy sUniqueInstance = null;
 

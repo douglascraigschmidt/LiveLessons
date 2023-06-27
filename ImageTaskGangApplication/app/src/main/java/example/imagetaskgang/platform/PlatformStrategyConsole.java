@@ -1,4 +1,4 @@
-package example.imagetaskgang;
+package example.imagetaskgang.platform;
 
 import android.annotation.SuppressLint;
 import java.io.BufferedReader;
@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// @@ import javax.imageio.ImageIO;
+import example.imagetaskgang.filters.Options;
+import example.imagetaskgang.utils.Image;
+import example.imagetaskgang.utils.ImageEntity;
 
 /**
- * @class PlatformStrategyConsole
- *
- * @brief Provides methods that define a platform-independent
- *        mechanism for getting URLs to download, as well as creating,
- *        processing, and storing URLs.  It plays the role of the
- *        "Concrete Strategy" in the Strategy pattern.
+ * Provides methods that define a platform-independent mechanism for
+ * getting URLs to download, as well as creating, processing, and
+ * storing URLs.  It plays the role of the "Concrete Strategy" in the
+ * Strategy pattern.
  */
 @SuppressLint("NewApi")
 public class PlatformStrategyConsole extends PlatformStrategy {

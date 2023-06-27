@@ -1,13 +1,14 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
+
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.utils.ImageEntity;
 
 /**
- * @class FilterDecorator
- *
- * @brief Allows the addition of behavior to a Filter object
- *        transparently without affecting the behavior of other Filter
- *        objects it encapsulates.  Plays the role of the "Decorator"
- *        in the Decorator pattern and the role of the "Abstract
- *        Class" in the Template Method pattern.
+ * Allows the addition of behavior to a Filter object transparently
+ * without affecting the behavior of other Filter objects it
+ * encapsulates.  Plays the role of the "Decorator" in the Decorator
+ * pattern and the role of the "Abstract Class" in the Template Method
+ * pattern.
  */
 public abstract class FilterDecorator extends Filter {
     /**

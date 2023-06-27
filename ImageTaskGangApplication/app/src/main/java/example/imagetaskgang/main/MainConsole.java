@@ -1,15 +1,21 @@
-package example.imagetaskgang;
+package example.imagetaskgang.main;
 
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import example.imagetaskgang.tasks.ImageTaskGang;
+import example.imagetaskgang.filters.Filter;
+import example.imagetaskgang.filters.GrayScaleFilter;
+import example.imagetaskgang.filters.NullFilter;
+import example.imagetaskgang.filters.Options;
+import example.imagetaskgang.platform.PlatformStrategy;
+import example.imagetaskgang.platform.PlatformStrategyFactory;
+
 /**
- * @class MainConsole
- *
- * @brief This class is the main entry point for a Java console
- *        version of the ImageTaskGang application.
+ * This class is the main entry point for a Java console version of
+ * the ImageTaskGang application.
  */
 public class MainConsole {
     /**

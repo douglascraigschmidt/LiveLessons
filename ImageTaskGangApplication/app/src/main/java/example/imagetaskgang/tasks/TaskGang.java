@@ -1,17 +1,16 @@
-package example.imagetaskgang;
+package example.imagetaskgang.tasks;
 
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @class TaskGang
- *
- * @brief Defines a framework for spawning and running a "gang" of
- *        tasks that concurrently process input from a generic List of
- *        elements E for one or more cycles.
+ * Defines a framework for spawning and running a "gang" of tasks that
+ * concurrently process input from a generic List of elements E for
+ * one or more cycles.
  */
-public abstract class TaskGang<E> implements Runnable {
+public abstract class TaskGang<E> 
+       implements Runnable {
     /**
      * The input List that's processed, which can be initialized via
      * the @code makeInputList() factory method.

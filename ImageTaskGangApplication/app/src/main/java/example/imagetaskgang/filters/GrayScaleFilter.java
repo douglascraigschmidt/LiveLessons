@@ -1,10 +1,10 @@
-package example.imagetaskgang;
+package example.imagetaskgang.filters;
+
+import example.imagetaskgang.platform.PlatformStrategy;
+import example.imagetaskgang.utils.ImageEntity;
 
 /**
- * @class Filter
- *
- * @brief A Filter sublcass that converts a downloaded image to
- *        grayscale.
+ * A Filter sublcass that converts a downloaded image to grayscale.
  */
 public class GrayScaleFilter extends Filter {
     /**
