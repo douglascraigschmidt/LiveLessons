@@ -3,8 +3,8 @@ package atomiclongs;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * This class implements a subset of the Java {@link AbstractAtomicLong}
- * class using a {@link StampedLock} to illustrate its "optimistic" read
+ * This class implements a subset of the {@link AbstractAtomicLong}
+ * interface using a {@link StampedLock} to illustrate its "optimistic" read
  * locks, its "pessimistic" write locks, and its conditional write locks.
  */
 public class AtomicLongStampedLock
@@ -35,7 +35,9 @@ public class AtomicLongStampedLock
      * @return The current value
      */
     public long get() {
+        // Local variable to hold the value;
         long value;
+
         // First try an optimistic read.
         long stamp = mStampedLock.tryOptimisticRead();
 
@@ -105,6 +107,8 @@ public class AtomicLongStampedLock
     public long getAndIncrement() {
         // Block until we get a read lock.
         long stamp = mStampedLock.readLock();
+
+        // Local variable to hold the value;
         long value = 0;
 
         try {

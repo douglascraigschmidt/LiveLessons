@@ -24,15 +24,15 @@ import java.util.concurrent.locks.StampedLock;
  * </pre>
  *
  * The calls to {@link #onTick(long)} are synchronized to this object
- * so that one call to {@link #onTick(long)} won't ever occur before
+ * so that one call to {@link #onTick(long)} will never occur before
  * the previous callback is complete.  This is only relevant when the
  * implementation of {@link #onTick(long)} takes an amount of time to
  * execute that is significant compared to the countdown interval.
  *
- * This framework implementation works fine if the {@code lock}
- * parameter has reentrant lock semantics.  It will self-deadlock,
- * however, if the {@code lock} parameter has non-reentrant lock
- * semantics.
+ * This framework implementation works fine if the {@link Lock}
+ * parameter passed to the {@link CountDownTimer} constructor has reentrant
+ * lock semantics.  It will self-deadlock, however, if the {@link Lock}
+ * parameter has non-reentrant lock semantics.
  */
 public abstract class CountDownTimer {
     /**
@@ -78,7 +78,7 @@ public abstract class CountDownTimer {
     private final Lock mLock;
 
     /**
-     * @param lock The {@link lock} used to synchronize access to the
+     * @param lock The {@link Lock} used to synchronize access to the
      *             object
      * @param millisInFuture The number of millis in the future from
      *                       the call to {@link #start()} until the
@@ -133,6 +133,7 @@ public abstract class CountDownTimer {
 
             // Handle odd starting point.
             if (mMillisInFuture <= 0) {
+                // Call hook method to indicate we're done.
                 onFinish();
                 return this;
             }
@@ -157,7 +158,7 @@ public abstract class CountDownTimer {
      */
     private void scheduleTimer() {
         // Create an object that's (re)scheduled to run periodically
-        // (a lambda-expression can't be used here since 'this' is
+        // (a lambda expression can't be used here since 'this' is
         // accessed below).
         Runnable timerHandler = new Runnable() {
             @Override
@@ -205,7 +206,7 @@ public abstract class CountDownTimer {
                             while (delay < 0) delay += mCountdownInterval;
                         }
 
-                        // Reschedule timer handler to run again at
+                        // Reschedule this timerHandler to run again at
                         // the appropriate delay in the future.
                         mScheduledExecutorService
                             .schedule(this,

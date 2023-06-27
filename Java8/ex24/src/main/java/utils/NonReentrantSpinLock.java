@@ -68,7 +68,7 @@ public class NonReentrantSpinLock
         // Only try to get the lock if its 0, which improves
         // cache performance.  See the stackoverflow article at
         // http://15418.courses.cs.cmu.edu/spring2013/article/31
-        // and stackoverflow.com/a/4939383/13411862 for details.
+        // and http://stackoverflow.com/a/4939383/13411862 for details.
         while (!(value == 0 && tryLock()))
             continue;
     }

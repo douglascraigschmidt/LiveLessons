@@ -3,16 +3,13 @@ package livelessons;
 import livelessons.filters.Filter;
 import livelessons.filters.GrayScaleFilter;
 import livelessons.filters.NullFilter;
-import livelessons.tasks.ImageTaskCompletionServiceCached;
-import livelessons.tasks.ImageTaskCompletionServiceFixed;
 import livelessons.tasks.ImageTaskGang;
 import livelessons.utils.Options;
 import livelessons.utils.RunTimer;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Executors;
 
 import static livelessons.utils.FileAndNetUtils.deleteAllFiles;
 
@@ -20,6 +17,7 @@ import static livelessons.utils.FileAndNetUtils.deleteAllFiles;
  * This class is the main entry point for the Java console version of
  * the ImageTaskGang app.
  */
+@SuppressWarnings("SameParameterValue")
 public class ImageTaskGangTest {
     /**
      * Enumerated type listing all implementation strategies to test.
@@ -28,7 +26,7 @@ public class ImageTaskGangTest {
         EXECUTOR_COMPLETION_SERVICE_CACHED,
         EXECUTOR_COMPLETION_SERVICE_FIXED,
     }
-    
+
     /**
      * Array of Filters to apply to the images.
      */
@@ -59,32 +57,33 @@ public class ImageTaskGangTest {
      */
     private static void runTests() {
         // Warm up the thread pool.
-        // warmUpThreadPool();
+        warmUpThreadPool();
 
         // Iterate thru the implementation strategies and test them.
         for (var test : TestsToRun.values()) {
-            // Run the garbage collector first to avoid perturbing the
-            // test.
-            System.gc();
+            System.out.println("Starting " + test);
 
             // Delete any the filtered images from the previous run.
             deleteAllFiles(mFilters);
 
-            System.out.println("Starting " + test); 
-
             // Create a list of lists that contains all the image URLs
             // to obtain and process.
-            var urlLists = Options.instance().getUrlLists();
+            var urlLists = Options.instance()
+                .getUrlLists();
 
             // Make an ImageTaskGang object via the factory method.
-            ImageTaskGang taskGang = RunTimer
-                .timeRun(() -> makeImageTaskGang(mFilters,
-                                                 urlLists,
-                                                 test),
-                         test.toString());
+            ImageTaskGang taskGang = makeImageTaskGang(mFilters,
+                                                       urlLists,
+                                                       test);
+
+            // Run the garbage collector here to avoid perturbing the
+            // test.
+            System.gc();
 
             // Start running the test.
-            taskGang.run();
+            RunTimer
+                .timeRun(taskGang,
+                         test.toString());
 
             System.out.println("Ending " + test);
         }
@@ -97,18 +96,29 @@ public class ImageTaskGangTest {
      * Factory method that creates the designated type of
      * ImageTaskGang subclass implementation.
      */
-    private static ImageTaskGang makeImageTaskGang(Filter[] filters,
-                                                   List<List<URL>> urlLists,
-                                                   TestsToRun choice) {
+    private static ImageTaskGang makeImageTaskGang
+        (Filter[] filters,
+         List<List<URL>> urlLists,
+         TestsToRun choice) {
         return switch (choice) {
         case EXECUTOR_COMPLETION_SERVICE_CACHED ->
-            new ImageTaskCompletionServiceCached(filters,
-                                                 urlLists);
+            new ImageTaskGang
+            (filters,
+             urlLists,
+             choice.toString(),
+             // Create an Executor with a cached pool of Thread
+             // objects, which grow and shrink dynamically as new
+             // tasks are executed.
+             Executors.newCachedThreadPool());
         case EXECUTOR_COMPLETION_SERVICE_FIXED ->
-            new ImageTaskCompletionServiceFixed(filters,
-                                                urlLists);
+            new ImageTaskGang
+            (filters,
+             urlLists,
+             choice.toString(),
+             Executors
+             // Create an Executor with a fixed pool of threads
+             .newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         };
-
     }
 
     /**
@@ -116,23 +126,19 @@ public class ImageTaskGangTest {
      * will be more accurate.
      */
     private static void warmUpThreadPool() {
-        System.out.println("Warming up the thread pool");
-
         // Delete any the filtered images from the previous run.
         deleteAllFiles(mFilters);
 
-        // Create and run the ImageTaskCompletionServiceFixed test to
-        // warm up threads in the thread pool.
+        // Create and run the ImageTaskGang test with a fixed-sized
+        // thread pool to warm up the threads in pool.
         ImageTaskGang taskGang =
-            new ImageTaskCompletionServiceFixed
+            new ImageTaskGang
             (mFilters,
-             Options.instance().getUrlLists());
+             Options.instance().getUrlLists(),
+                "",
+                Executors
+                    .newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
 
         taskGang.run();
-
-        // Run the garbage collector to avoid perturbing the test.
-        System.gc();
-
-        System.out.println("End warming up the thread pool");
     }
 }

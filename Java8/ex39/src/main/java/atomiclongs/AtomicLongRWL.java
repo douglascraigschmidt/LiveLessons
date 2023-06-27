@@ -4,9 +4,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.Lock;
 
 /**
- * This class implements a subset of the Java {@link AbstractAtomicLong}
- * class using a {@link ReentrantReadWriteLock} to illustrate how its
- * read locks, write locks, and readers-write lock downgrading features
+ * This class implements a subset of the {@link AbstractAtomicLong}
+ * interface using a Java {@link ReentrantReadWriteLock} to illustrate its
+ * how read locks, write locks, and readers-write lock downgrading features
  * work.
  */
 public class AtomicLongRWL
@@ -74,6 +74,7 @@ public class AtomicLongRWL
         // https://medium.com/double-pointer/guide-to-readwritelock-in-java-72c3a273b6e9
         // for more info on this technique).
 
+        // Holds the value in a thread-safe manner.
     	long value = 0;
 
         // Start out with a write lock.

@@ -42,6 +42,7 @@ public final class FileAndNetUtils {
                 (new File(Options.instance().getDirectoryPath(),
                           filter.getName()).getAbsolutePath());
 
+        if (Options.instance().diagnosticsEnabled())
         System.out.println(deletedFiles
                            + " previously downloaded file(s) deleted");
         } catch (Exception ex) {

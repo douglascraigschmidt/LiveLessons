@@ -13,8 +13,11 @@ import java.util.regex.Pattern;
  * This class implements the Singleton pattern to handle
  * command-line option processing.
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class Options {
-    /** The singleton @a Options instance. */
+    /**
+     * The singleton {@link Options} instance.
+     */
     private static Options mUniqueInstance = null;
 
     /**
@@ -125,38 +128,26 @@ public class Options {
     public List<List<URL>> getUrlLists() {
     	try {
             switch (mInputSource) {
-            // If the user selects the default source, return the
-            // default list of remote URL lists.
-            case DEFAULT:
-                return getDefaultUrlList(false);
-
-            // If the user selects the default_local source, return the
-            // default list of local URL lists.
-            case DEFAULT_LOCAL:
-                return getDefaultUrlList(true);
-
-            // Take input from the Android UI.
-            case USER:
-            	/*
-                for (int i = 0; i < numChildViews; ++i) {
-
-                    // Convert the input string into a list of URLs
-                    // and add it to the main list.
-                    variableNumberOfInputURLs.add
-                        (convertStringToUrls(child.getText().toString()));
+                // If the user selects the default source, return the
+                // default list of remote URL lists.
+                case DEFAULT -> {
+                    return getDefaultUrlList(false);
                 }
-                */
-                break;
 
-            default:
-                System.out.println("Invalid Source");
-                return null;
+                // If the user selects the default_local source, return the
+                // default list of local URL lists.
+                case DEFAULT_LOCAL -> {
+                    return getDefaultUrlList(true);
+                }
+                default -> {
+                    System.out.println("Invalid Source");
+                    return null;
+                }
             }
     	} catch (MalformedURLException e) {
             System.out.println("Invalid URL");
             return null;
     	}
-    	return null;
     }
 
     /**
@@ -189,12 +180,13 @@ public class Options {
     }
 
     /**
-     * Returns a List of default URL Lists that is usable in either
-     * platform.
+     * @return A {@link List} of default {@link URL} {@link List}
+     *         objects
      */
     protected List<List<URL>> getDefaultResourceUrlList()
             throws MalformedURLException {
-        // Create a two-dimensional array of URLs to images on the local device.
+        // Create a two-dimensional array of URLs to images on the
+        // local device.
         URL[][] urlsArray = new URL[][] {
             {
             	ClassLoader.getSystemResource("schmidt_coursera.jpg"),
@@ -204,8 +196,8 @@ public class Options {
             	ClassLoader.getSystemResource("dougs_small.jpg"),
             	ClassLoader.getSystemResource("kitten.png"),
             	ClassLoader.getSystemResource("doug.jpg"),
-           // },
-           // {
+            },
+            {
             	ClassLoader.getSystemResource("ace_copy.jpg"),
             	ClassLoader.getSystemResource("tao_copy.jpg"),
             	ClassLoader.getSystemResource("lil_doug.jpg"),
@@ -213,8 +205,8 @@ public class Options {
             	ClassLoader.getSystemResource("wm.jpg"),
             	ClassLoader.getSystemResource("robot.png"),
             	ClassLoader.getSystemResource("doug_circle.png"),
-           // },
-            //{
+            },
+            {
             	ClassLoader.getSystemResource("SchmidtD.jpg"),
             	ClassLoader.getSystemResource("bee-patterns.jpg"),
             	ClassLoader.getSystemResource("doc.jpg"),
@@ -252,7 +244,8 @@ public class Options {
             // Create a regular expression for the "," separator.
             Pattern.compile(",")
 
-            // Use the regular expression to split the strongOfUrls into a Stream<String>.
+            // Use the regular expression to split the strongOfUrls
+            // into a Stream<String>.
             .splitAsStream(stringOfUrls)
 
             // Convert each String in the Stream to a URL.
@@ -267,55 +260,6 @@ public class Options {
      */
     public boolean diagnosticsEnabled() {
         return mDiagnosticsEnabled;
-    }
-
-    /**
-     * Print out all the timing results for all the test runs in order
-     * from fastest to slowest.
-     */
-    public static void printTimingResults(Map<String, List<Long>> resultsMap) {
-        // Determine how many runs of the tests took place.
-        int numberOfRuns =
-            resultsMap.entrySet().iterator().next().getValue().size();
-
-        // Iterate through the results of each of the test runs.
-        for (int i = 0;
-             i < numberOfRuns;
-             i++) {
-            final int runNumber = i;
-            System.out.println("\nPrinting "
-                               + resultsMap.entrySet().size()
-                               + " results for input file "
-                               + (runNumber + 1)
-                               + " from fastest to slowest");
-
-            // Print out the contents of the resultsMap in sorted
-            // order.
-            resultsMap
-                // Get the entrySet for the resultsMap.
-                .entrySet()
-
-                // Convert the entrySet into a stream.
-                .stream()
-
-                // Create a SimpleImmutableEntry containing the timing
-                // results (value) followed by the test name (key).
-                .map(entry
-                     -> new AbstractMap.SimpleImmutableEntry<>
-                        (entry.getValue().get(runNumber),
-                         entry.getKey()))
-
-                // Sort the stream by the timing results (key).
-                .sorted(Map.Entry.comparingByKey())
-
-                // Print all the entries in the sorted stream.
-                .forEach(entry
-                         -> System.out.println(""
-                                               + entry.getValue()
-                                               + " executed in "
-                                               + entry.getKey()
-                                               + " msecs"));
-        }
     }
 
     /**

@@ -6,10 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Defines a framework for spawning and running a "gang" of tasks that
- * concurrently process input from a generic List of elements E for
- * one or more cycles.
+ * concurrently process input from a generic {@link List} of elements
+ * {@code E} for one or more cycles.
  */
-public abstract class TaskGang<E> 
+@SuppressWarnings("UnusedReturnValue")
+public abstract class TaskGang<E>
        implements Runnable {
     /**
      * The input {@link List} that's processed, which can be
@@ -71,7 +72,7 @@ public abstract class TaskGang<E>
 
     /**
      * Factory method that makes the next {@link List} of input to be
-     * processed concurrently by the gang of Tasks.
+     * processed concurrently by the gang of tasks.
      */
     protected abstract List<E> getNextInput();
 
