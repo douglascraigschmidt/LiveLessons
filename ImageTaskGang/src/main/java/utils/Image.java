@@ -1,4 +1,4 @@
-package livelessons.utils;
+package utils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -7,7 +7,7 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-import livelessons.filters.Filter;
+import filters.Filter;
 
 /**
  * Stores meta-data about an Image and also provides methods for

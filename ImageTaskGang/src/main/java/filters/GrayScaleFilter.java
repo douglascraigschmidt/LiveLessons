@@ -1,22 +1,23 @@
-package livelessons.filters;
+package filters;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import livelessons.utils.Image;
+import utils.Image;
 
 /**
- * A Filter sublcass that converts a downloaded image to grayscale.
+ * A {@link Filter} sublcass that converts a downloaded {@link Image}
+ * to grayscale.
  */
 public class GrayScaleFilter 
        extends Filter {
     /**
-     * Constructs a default GrayScaleFilter.
+     * Constructs a default {@link GrayScaleFilter}.
      */
     public GrayScaleFilter() {}
 
     /**
-     * Constructs a Grayscale filter with the given name. This
+     * Constructs a {@link GrayScaleFilter} with the given name. This
      * constructor can be used to specify the output directory the
      * grayscale filtered images should be stored in. This naming
      * functionality would also be useful for filters to which
@@ -57,12 +58,12 @@ public class GrayScaleFilter
             	// Check if the pixel is transparent in the original.
                 if (hasTransparent 
                     && (grayScaleImage.getRGB(j,
-                                            i) >> 24) == 0x00) 
+                                              i) >> 24) == 0x00) 
                     continue;
                 
                 // Convert the pixel to grayscale.
                 Color c = new Color(grayScaleImage.getRGB(j,
-                                                        i));
+                                                          i));
                 int grayConversion =
                     (int) (c.getRed() * 0.299)
                     + (int) (c.getGreen() * 0.587)
@@ -74,7 +75,8 @@ public class GrayScaleFilter
             }
         }
    	
-         return new Image(image.getSourceURL(),
+        // Return the filtered Image.
+        return new Image(image.getSourceURL(),
                          grayScaleImage);
     }
 }

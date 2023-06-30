@@ -69,7 +69,7 @@ public abstract class SearchTaskGangCommon
 
         // Check to see how many times (if any) the word appears in
         // the input data.
-        for (int i = inputData.indexOf(word, 0);
+        for (int i = inputData.indexOf(word);
              i != -1;
              i = inputData.indexOf(word, i + 1)) {
             // Each time a match is found it's added to the list of

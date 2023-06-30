@@ -113,15 +113,19 @@ public abstract class PlatformStrategy {
                 new ArrayList<List<URL>>();
 
         final URL[] urls1 = {        
-            new URL("http://www.dre.vanderbilt.edu/~schmidt/ka.png"),
-            new URL("http://www.dre.vanderbilt.edu/~schmidt/uci.png"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/douglass.jpg")
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/ka.png"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/uci.png"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/doug-smile.png"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/dougnew.jpg")
         };
         final URL[] urls2 = {
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/lil-doug.jpg"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/wm.jpg"),
-            new URL("http://www.cs.wustl.edu/~schmidt/gifs/ironbound.jpg")
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/lil_doug.jpg"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/wm.jpg"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/ironbound.jpg"),
+            new URL("http://www.dre.vanderbilt.edu/~schmidt/gifs/doug_circle.png")
         };
+
+        // Combine the Lists.
         variableNumberOfInputURLs.add(Arrays.asList(urls1));
         variableNumberOfInputURLs.add(Arrays.asList(urls2));
 

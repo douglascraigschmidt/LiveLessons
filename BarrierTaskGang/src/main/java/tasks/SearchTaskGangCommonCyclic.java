@@ -1,19 +1,23 @@
+package tasks;
+
+import tasks.SearchTaskGangCommon;
+import utils.TaskGang;
+
 import java.util.concurrent.CountDownLatch;
 
 /**
- * @class SearchTaskGangCommonCyclic
- * 
- * @brief This helper class extends SearchTaskGangCommon and factors
- *        out the common code used by the cyclic TaskGang
- *        implementations.
+ * This helper class extends {@link SearchTaskGangCommon} and factors
+ * out common code used by the cyclic {@link TaskGang}
+ * implementations.
  */
 public abstract class SearchTaskGangCommonCyclic
                       extends SearchTaskGangCommon {
     /**
      * Constructor initializes the data members.
      */
-    protected SearchTaskGangCommonCyclic(String[] wordsToFind,
-                                         String[][] stringsToSearch) {
+    protected SearchTaskGangCommonCyclic
+        (String[] wordsToFind,
+         String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super (wordsToFind,
                stringsToSearch);
@@ -25,10 +29,10 @@ public abstract class SearchTaskGangCommonCyclic
     }
 
     /**
-     * When there's no more input data to process release the exit
-     * latch and return false so the worker Thread will return.
-     * Otherwise, return true so the worker Thread will continue
-     * to run.
+     * When there's no more input data to process, release the exit
+     * latch and return false, so the worker Thread will return.
+     * Otherwise, return true so the worker Thread will continue to
+     * run.
      */
     @Override
     protected boolean advanceTaskToNextCycle() {

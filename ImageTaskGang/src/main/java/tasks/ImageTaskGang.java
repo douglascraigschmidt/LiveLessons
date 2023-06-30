@@ -1,10 +1,11 @@
-package livelessons.tasks;
+package tasks;
 
-import livelessons.filters.Filter;
-import livelessons.filters.OutputFilterDecorator;
-import livelessons.utils.FileAndNetUtils;
-import livelessons.utils.Image;
-import livelessons.utils.Options;
+import filters.Filter;
+import filters.OutputFilterDecorator;
+import utils.FileAndNetUtils;
+import utils.Image;
+import utils.Options;
+import utils.TaskGang;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -13,36 +14,35 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * Customizes the {@link TaskGang} to use the {@link
+ * Customizes the {@link TaskGang} to use the Java {@link
  * ExecutorCompletionService} to concurrently download a list of
  * images from web servers, apply image processing filters to each
- * image, and store the results in files that can be displayed to
+ * image, and store the results in local files that can be displayed to
  * users via various means defined by the context in which this class
  * is used.
- * <p>
+ *
  * This class implements the roles of the "Proactive Initiator" and
  * "Completion Handler" in the Proactor pattern and also plays the
  * role of the "Concrete Class" in the Template Method pattern.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ImageTaskGang
-    extends TaskGang<URL> {
+       extends TaskGang<URL> {
     /**
-     * An iterator of input {@link URL} objects that are used to
+     * An {@link Iterator} of input {@link URL} objects that are used to
      * download images.
      */
-    protected Iterator<List<URL>> mUrlListIterator;
+    protected final Iterator<List<URL>> mUrlListIterator;
 
     /**
      * The {@link List} of {@link Filter} objects to apply to the
      * downloaded images.
      */
-    protected List<Filter> mFilters;
+    protected final List<Filter> mFilters;
 
     /**
      * An {@link ExecutorCompletionService} used to concurrently
      * download and apply image processing tasks on designated URLs.
-     * This plays the role of the "Asynchronous Operation Processor"
+     * This field plays the role of the "Asynchronous Operation Processor"
      * in the Proactor pattern.
      */
     private final ExecutorCompletionService<Image> mCompletionService;
@@ -97,20 +97,21 @@ public class ImageTaskGang
     }
 
     /**
-     * Factory method that retrieves the image associated with the
-     * {@link URL} and creates an {@link Image} to encapsulate it.
-     *
-     * @return An {@link Image} containing the contents of the {@link
-     * URL}
+     * Initializes the {@link ImageTaskGang} to run each task in the
+     * designated {@link Executor} returned by {@code getExecutor()}.
      */
-    protected Image getOrDownloadImage(URL url) {
-        return new Image(url,
-            FileAndNetUtils.downloadContent(url));
+    @Override
+    protected void initiateTaskGang(int initialNumberOfURLs) {
+        // Enqueue each item in the input list for execution in the
+        // Executor's thread pool, which ensures there's a thread
+        // available to run each task concurrently.
+        for (int i = 0; i < initialNumberOfURLs; ++i)
+            getExecutor().execute(makeTask(i));
     }
 
     /**
      * Hook method that runs in a background thread to download,
-     * process, and store an image via the {@link
+     * process, and store the {@link URL} via the {@link
      * ExecutorCompletionService}.
      */
     @Override
@@ -146,27 +147,27 @@ public class ImageTaskGang
     }
 
     /**
-     * Initializes the ImageTaskGang to run each task in the
-     * designated {@link Executor}.
+     * Factory method that retrieves the image associated with the
+     * {@link URL} and creates an {@link Image} to encapsulate it.
+     *
+     * @return An {@link Image} containing the contents of the {@link
+     *         URL}
      */
-    @Override
-    protected void initiateTaskGang(int initialNumberOfURLs) {
-        // Enqueue each item in the input list for execution in the
-        // Executor's thread pool, which ensures there's a thread
-        // available to run each task concurrently.
-        for (int i = 0; i < initialNumberOfURLs; ++i)
-            getExecutor().execute(makeTask(i));
+    protected Image getOrDownloadImage(URL url) {
+        return new Image(url,
+            FileAndNetUtils.downloadContent(url));
     }
 
     /**
      * Hook method that waits for the gang of tasks to complete all
      * their processing.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     protected void awaitTasksDone() {
         try {
-            // Loop for each iteration cycle of input URLs.
-            for (; ; ) {
+            // Loop until there's no more input to process.
+            for (;;) {
                 // Keeps track of the number of result Futures to
                 // process.  Accounts for all the downloaded images
                 // and all the filters applied to these images.
@@ -222,11 +223,12 @@ public class ImageTaskGang
         for (int i = 0; i < resultsCount; ++i)
             try {
                 // Take the next available Future off the
-                // ExecutorCompletionService's completion queue.
-                final Future<Image> resultFuture =
+                // ExecutorCompletionService's completion queue
+                // (may block).
+                Future<Image> resultFuture =
                     mCompletionService.take();
 
-                // The get() call will not block since the results
+                // This get() call will not block since the results
                 // should be ready before they are added to the
                 // completion queue.
                 Image image = resultFuture.get();
@@ -242,6 +244,8 @@ public class ImageTaskGang
                             + (image.getSucceeded()
                             ? " succeeded"
                             : " failed"));
+
+                // Increment the succeeded or failed counts.
                 if (image.getSucceeded())
                     succeeded++;
                 else

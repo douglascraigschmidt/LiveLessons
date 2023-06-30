@@ -1,18 +1,22 @@
-package livelessons.filters;
+package filters;
 
-import livelessons.utils.Image;
+import utils.Image;
 
 /**
- * Command object that associates a filter with an image.
+ * A command object that associates a {@link Filter{} with an {@link
+ * Image}.
+ *
+ * {@link FilterDecoratorWithImage} plays the role of the "Command" in
+ * the Command pattern.
  */
 public class FilterDecoratorWithImage {
     /**
-     * The filter decorator.
+     * The {@link Filter} decorator.
      */
     public FilterDecorator mFilterDecorator;
 
     /**
-     * The image.
+     * The {@link Image}.
      */
     public Image mImage;
 
@@ -26,7 +30,7 @@ public class FilterDecoratorWithImage {
     }
 
     /**
-     * Run the filter decorator on the image.
+     * Run the {@link Filter} decorator on the {@link Image}.
      */
     public Image run() {
         return mFilterDecorator.filter(mImage);

@@ -1,6 +1,4 @@
-package livelessons.utils;
-
-import static java.util.stream.Collectors.toList;
+package utils;
 
 import java.io.File;
 import java.net.MalformedURLException;

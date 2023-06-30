@@ -1,4 +1,4 @@
-package livelessons.tasks;
+package utils;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -9,19 +9,18 @@ import java.util.concurrent.atomic.AtomicLong;
  * concurrently process input from a generic {@link List} of elements
  * {@code E} for one or more cycles.
  */
-@SuppressWarnings("UnusedReturnValue")
 public abstract class TaskGang<E>
        implements Runnable {
     /**
      * The input {@link List} that's processed, which can be
-     * initialized via the {@code makeInputList()} factory method.
+     * initialized via the {@code setInput()} method.
      */
-    private volatile List<E> mInput = null;
+    private volatile List<E> mInput;
 
     /**
      * Executes submitted Runnable tasks in a {@link Thread} pool.
      */
-    private Executor mExecutor = null;
+    private Executor mExecutor;
 
     /**
      * Keeps track of which cycle is currently active.
@@ -59,6 +58,7 @@ public abstract class TaskGang<E>
     /**
      * Increment to the next cycle.
      */
+    @SuppressWarnings("UnusedReturnValue")
     protected long incrementCycle() {
         return mCurrentCycle.incrementAndGet();
     }
@@ -72,7 +72,8 @@ public abstract class TaskGang<E>
 
     /**
      * Factory method that makes the next {@link List} of input to be
-     * processed concurrently by the gang of tasks.
+     * processed concurrently by the gang of tasks (must be overridden
+     * by subclasses).
      */
     protected abstract List<E> getNextInput();
 
@@ -86,7 +87,8 @@ public abstract class TaskGang<E>
     }
 
     /**
-     * Initiate the {@link TaskGang}.
+     * Initiate the {@link TaskGang} (must be overridden by
+     * subclasses).
      */
     protected abstract void initiateTaskGang(int inputSize);
 
@@ -102,7 +104,7 @@ public abstract class TaskGang<E>
 
     /**
      * Hook method that can be used as an exit barrier to wait for the
-     * gang of tasks to exit.
+     * gang of tasks to exit (must be overridden by subclasses).
      */
     protected abstract void awaitTasksDone();
 
@@ -110,9 +112,8 @@ public abstract class TaskGang<E>
      * Hook method called when a task is done. Can be used in
      * conjunction with a one-shop or cyclic barrier to wait for all
      * the other tasks to complete their current cycle. It's passed
-     * the index of the work that's done.  Returns true if the wait
-     * was successful or throws the {@link IndexOutOfBoundsException}
-     * if the item has been removed.
+     * the index of the work that's done. Throws the
+     * {@link IndexOutOfBoundsException} if the item has been removed.
      */
     protected void taskDone(int index) throws IndexOutOfBoundsException {
         // No-op.
@@ -120,8 +121,8 @@ public abstract class TaskGang<E>
 
     /**
      * Hook method that performs work a background task. Returns true
-     * if all goes well, else false (which will stop the background
-     * task from continuing to run).
+     * if all goes well, else false to stop the background task
+     * from continuing to run (must be overridden by subclasses).
      */
     protected abstract boolean processInput(E inputData);
 
@@ -134,18 +135,19 @@ public abstract class TaskGang<E>
         // Invoke hook method to get initial List of input data to
         // process.
         if (setInput(getNextInput()) != null) {
-            // Invoke hook method to initialize the gang of tasks.
+            // Invoke hook method to initiate the gang of tasks.
             initiateTaskGang(getInput().size());
 
-            // Invoke hook method to wait for all the tasks to exit.
+            // Invoke hook method to wait for all the tasks to exit
+            // (this call runs concurrently wrt the gang of tasks).
             awaitTasksDone();
         }            
     }
 
     /**
-     * Factory method that creates a {@link Runnable} task that will
-     * process one node of the input List (at location {@code index})
-     * in a background task provided by the {@link Executor}.
+     * @return A {@link Runnable} task that processes an element of the
+     *         input List at {@code index} in a background task provided
+     *         by the {@link Executor} returned by {@code getExecutor()}
      */
     protected Runnable makeTask(final int index) {
         // This lambda runs in a background task provided by the

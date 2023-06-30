@@ -1,4 +1,8 @@
+package tasks;
+
 import java.util.concurrent.CyclicBarrier;
+
+import static utils.Options.printDebugging;
 
 /**
  * Customizes the {@link SearchTaskGangCommon} framework with a {@link
@@ -7,7 +11,7 @@ import java.util.concurrent.CyclicBarrier;
  * no more input to process.
  */
 public class CyclicSearchWithCyclicBarrier 
-              extends SearchTaskGangCommonCyclic {
+             extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
      * Thread must wait on mCyclicBarrier for all the other Threads to
@@ -19,8 +23,8 @@ public class CyclicSearchWithCyclicBarrier
     /**
      * Constructor initializes the data members and superclass.
      */
-    CyclicSearchWithCyclicBarrier(String[] wordsToFind,
-                                  String[][] stringsToSearch) {
+    public CyclicSearchWithCyclicBarrier(String[] wordsToFind,
+                                         String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
               stringsToSearch);
@@ -32,7 +36,8 @@ public class CyclicSearchWithCyclicBarrier
      * current cycle.
      */
     @Override
-    protected void taskDone(int index) throws IndexOutOfBoundsException {
+    protected void taskDone(int index)
+        throws IndexOutOfBoundsException {
         try {
             // Wait for all other Threads to reach this barrier.
             mCyclicBarrier.await();
@@ -56,13 +61,13 @@ public class CyclicSearchWithCyclicBarrier
              () -> {
                 setInput(getNextInput());
                 if (getInput() != null)
-                    BarrierTaskGangTest.printDebugging
+                    printDebugging
                         ("@@@@@ Started cycle "
                          + currentCycle()
                          + " @@@@@");
             });
 
-        BarrierTaskGangTest.printDebugging
+        printDebugging
             ("@@@@@ Started cycle 1 with "
              + size
              + " Thread"

@@ -1,6 +1,6 @@
-package livelessons.utils;
+package utils;
 
-import livelessons.filters.Filter;
+import filters.Filter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

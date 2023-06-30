@@ -1,7 +1,15 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="BarrierTaskGang" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="BarrierTaskGangTest" />
-    <module name="BarrierTaskGang" />
+    <module name="BarrierTaskGang.main" />
+    <option name="PROGRAM_PARAMETERS" value="-d true" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

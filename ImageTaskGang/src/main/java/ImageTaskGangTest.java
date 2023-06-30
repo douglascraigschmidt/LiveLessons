@@ -1,23 +1,20 @@
-package livelessons;
-
-import livelessons.filters.Filter;
-import livelessons.filters.GrayScaleFilter;
-import livelessons.filters.NullFilter;
-import livelessons.tasks.ImageTaskGang;
-import livelessons.utils.Options;
-import livelessons.utils.RunTimer;
+import filters.Filter;
+import filters.GrayScaleFilter;
+import filters.NullFilter;
+import tasks.ImageTaskGang;
+import utils.Options;
+import utils.RunTimer;
 
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import static livelessons.utils.FileAndNetUtils.deleteAllFiles;
+import static utils.FileAndNetUtils.deleteAllFiles;
 
 /**
  * This class is the main entry point for the Java console version of
  * the ImageTaskGang app.
  */
-@SuppressWarnings("SameParameterValue")
 public class ImageTaskGangTest {
     /**
      * Enumerated type listing all implementation strategies to test.
@@ -117,6 +114,7 @@ public class ImageTaskGangTest {
              choice.toString(),
              Executors
              // Create an Executor with a fixed pool of threads
+             // (the number of cores known by the Java execution environment).
              .newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         };
     }

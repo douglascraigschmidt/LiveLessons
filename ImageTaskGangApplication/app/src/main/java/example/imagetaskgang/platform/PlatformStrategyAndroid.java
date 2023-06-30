@@ -42,7 +42,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
      * Constructor initializes the data member.
      */
     public PlatformStrategyAndroid(final Object output) {
-        /** The current activity window (succinct or verbose). */
+        // The current activity window (succinct or verbose).
         mOuterClass = new WeakReference<MainActivity>
             ((MainActivity) output);
     }
@@ -53,7 +53,7 @@ public class PlatformStrategyAndroid extends PlatformStrategy {
      */
     public Iterator<List<URL>> getUrlIterator(InputSource source) {
     	List<List<URL>> variableNumberOfInputURLs = 
-            new ArrayList<List<URL>>();
+            new ArrayList<>();
     	
     	try {
             switch (source) {

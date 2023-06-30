@@ -73,24 +73,27 @@ public class Options {
     /**
      * Parse command-line arguments and set the appropriate values.
      */
-    public boolean parseArgs(String argv[]) {
+    public void parseArgs(String[] argv) {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
-                if (argv[argc].equals("-f"))
-                    mPathname = argv[argc + 1];
-                else if (argv[argc].equals("-d"))
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                else if (argv[argc].equals("-s"))
-                	mSeparator = argv[argc + 1];
-                else if (argv[argc].equals("-i"))
-                	mInputSource = argv[argc + 1];
-                else {
-                    printUsage();
-                    return false;
+                switch (argv[argc]) {
+                    case "-f":
+                        mPathname = argv[argc + 1];
+                        break;
+                    case "-d":
+                        mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                        break;
+                    case "-s":
+                        mSeparator = argv[argc + 1];
+                        break;
+                    case "-i":
+                        mInputSource = argv[argc + 1];
+                        break;
+                    default:
+                        printUsage();
+                        return;
                 }
-            return true;
-        } else
-            return false;
+        }
     }
 
     /** 

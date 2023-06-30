@@ -1,13 +1,16 @@
-package livelessons.filters;
+package filters;
 
-import livelessons.utils.Image;
+import utils.Image;
 
 /**
  * An abstract class that defines an interface for applying filtering
- * operations to an Image. Each Filter has a name and an abstract
- * method whose implementation must be overridden by a subclass.
- * Plays the role of the "Abstract Class" in the Template Method
- * pattern and the role of the "Component" in the Decorator pattern.
+ * operations to an {@link Image}. Each {@link Filter} has a name and
+ * an abstract method whose implementation must be overridden by a
+ * subclass.  
+ * 
+ * {@link Filter} plays the role of the "Abstract Class" in the
+ * Template Method pattern and the role of the "Component" in the
+ * Decorator pattern.
  */
 public abstract class Filter {
     /**
@@ -16,13 +19,13 @@ public abstract class Filter {
     protected static final String TAG = "Filter";
 
     /**
-     * The name of the filter, which defaults to the "canonical name"
-     * of the subclass Filter instance.
+     * The name of the {@link Filter}, which defaults to the
+     * "canonical name" of the subclass {@link Filter} instance.
      */
     protected String mName;
 
     /**
-     * Constructs the filter with the default name.
+     * Constructs the {@link Filter} with the default name.
      */
     public Filter() {
         // Default uses the class name without the package prefix.
@@ -30,7 +33,7 @@ public abstract class Filter {
     }
 
     /**
-     * Constructs the filter with a custom name.
+     * Constructs the {@link Filter} with a custom name.
      */
     public Filter(String filterName) {
         mName = filterName;
@@ -38,15 +41,15 @@ public abstract class Filter {
 
     /**
      * This abstract hook method must be overridden by a subclass to
-     * define the logic for processing the given @a imageEntity.
+     * define the logic for processing the given {@link Image}.
      */
     protected abstract Image applyFilter(Image imageEntity);
 
     /**
-     * This template method calls the applyFilter() hook method (which
-     * must be defined by a subclass) to filter the @a imageEntity
-     * parameter and sets the filterName of the result to the name of
-     * the filter.
+     * This template method calls the {@code applyFilter()} hook
+     * method (which must be defined by a subclass) to filter the
+     * {@link Image} parameter and sets the {@code filterName} of the
+     * result to the name of the filter.
      */
     public Image filter(Image image) {
         // Call the applyFilter() hook method.
@@ -56,14 +59,14 @@ public abstract class Filter {
     }
 
     /**
-     * Sets the name of the filter.
+     * Sets the name of the {@link Filter}.
      */
     public void setName(String filterName) {
         mName = filterName;
     }
 
     /**
-     * Gets the name of the filter.
+     * @return The name of the {@link Filter}
      */
     public String getName() {
         return mName;
