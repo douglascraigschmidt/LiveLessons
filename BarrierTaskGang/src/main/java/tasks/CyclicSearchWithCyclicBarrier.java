@@ -10,8 +10,8 @@ import static utils.Options.printDebugging;
  * number of input strings via a fixed number of threads until there's
  * no more input to process.
  */
-public class CyclicSearchWithCyclicBarrier 
-             extends SearchTaskGangCommonCyclic {
+public class CyclicSearchWithCyclicBarrier
+    extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
      * Thread must wait on mCyclicBarrier for all the other Threads to
@@ -27,7 +27,7 @@ public class CyclicSearchWithCyclicBarrier
                                          String[][] stringsToSearch) {
         // Pass input to superclass constructor.
         super(wordsToFind,
-              stringsToSearch);
+            stringsToSearch);
     }
 
     /**
@@ -43,7 +43,7 @@ public class CyclicSearchWithCyclicBarrier
             mCyclicBarrier.await();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
-        } 
+        }
     }
 
     /**
@@ -57,22 +57,26 @@ public class CyclicSearchWithCyclicBarrier
         // barrier action gets the next List of input data (if any).
         mCyclicBarrier = new CyclicBarrier
             (size,
-             // Initialize the barrier action.
-             () -> {
-                setInput(getNextInput());
-                if (getInput() != null)
-                    printDebugging
-                        ("@@@@@ Started cycle "
-                         + currentCycle()
-                         + " @@@@@");
-            });
+                // Initialize the barrier action.
+                () -> {
+                    setInput(getNextInput());
+                    if (getInput() != null)
+                        printDebugging(">>> Started cycle "
+                            + currentCycle()
+                            + " with "
+                            + size
+                            + " Thread"
+                            + (size == 1 ? "" : "s")
+                            + " <<<");
+                });
 
-        printDebugging
-            ("@@@@@ Started cycle 1 with "
-             + size
-             + " Thread"
-             + (size == 1 ? "" : "s")
-             + " @@@@@");
+        printDebugging(">>> Started cycle "
+            + currentCycle()
+            + " with "
+            + size
+            + " Thread"
+            + (size == 1 ? "" : "s")
+            + " <<<");
     }
 }
 

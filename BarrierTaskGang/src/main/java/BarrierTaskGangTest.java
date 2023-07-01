@@ -19,7 +19,8 @@ public class BarrierTaskGangTest {
     enum TestsToRun {
         COUNT_DOWN_LATCH,
         CYCLIC_BARRIER,
-        PHASER
+        PHASER,
+        ONE_SHOT
     }
 
     /**
@@ -30,22 +31,16 @@ public class BarrierTaskGangTest {
 
         Options.printDebugging("Starting BarrierTaskGangTest");
 
-        new CyclicSearchWithPhaser
-            (Options.sWordList,
-                Options.sVariableNumberOfInputStrings).run();
-
-        /*
         // Iterate through all the tests.
         for (TestsToRun test : TestsToRun.values()) {
             Options.print("Starting " + test);
 
-
             // Create/run appropriate type of utils.TaskGang to search for
             // words concurrently.
-            // makeTaskGang(Options.sWordList, test).run();
+            makeTaskGang(Options.sWordList, test).run();
 
             Options.print("Ending " + test);
-        } */
+        }
 
         Options.printDebugging("Ending BarrierTaskGangTest");
     }
@@ -58,13 +53,16 @@ public class BarrierTaskGangTest {
     private static Runnable makeTaskGang(String[] wordList,
                                          TestsToRun choice) {
         return switch (choice) {
-            case COUNT_DOWN_LATCH -> new OneShotSearchWithCountDownLatch
+            case COUNT_DOWN_LATCH, ONE_SHOT ->
+                new OneShotSearchWithCountDownLatch
                 (wordList,
                  Options.sOneShotInputStrings);
-            case CYCLIC_BARRIER -> new CyclicSearchWithCyclicBarrier
+            case CYCLIC_BARRIER ->
+                new CyclicSearchWithCyclicBarrier
                 (wordList,
                  Options.sFixedNumberOfInputStrings);
-            case PHASER -> new CyclicSearchWithPhaser
+            case PHASER ->
+                new CyclicSearchWithPhaser
                 (wordList,
                  Options.sVariableNumberOfInputStrings);
         };

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import static utils.Options.print;
+import static utils.Options.printDebugging;
 
 /**
  * This helper class factors out the common code used by all
