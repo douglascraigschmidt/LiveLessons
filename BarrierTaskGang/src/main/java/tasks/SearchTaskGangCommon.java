@@ -16,11 +16,11 @@ import static utils.Options.print;
 import static utils.Options.printDebugging;
 
 /**
- * This helper class factors out the common code used by all
+ * This abstract class factors out the common code used by all
  * instantiations of the {@link TaskGang} framework in the
  * BarrierTaskGang project.  It customizes the {@link TaskGang}
- * framework to concurrently search one or more arrays of input
- * Strings for words provided in an array of words to find.
+ * framework to concurrently search one or more arrays of input {@link
+ * String} objects for words provided in an array of words to find.
  */
 public abstract class SearchTaskGangCommon
                 extends TaskGang<String> {
@@ -30,7 +30,8 @@ public abstract class SearchTaskGangCommon
     protected final String[] mWordsToFind;
 
     /**
-     * An Iterator for the array of Strings to search.
+     * An {@link Iterator} for the array of {@link String} objects to
+     * search.
      */
     private final Iterator<String[]> mInputIterator;
 
@@ -48,7 +49,8 @@ public abstract class SearchTaskGangCommon
         // Store the words to search for.
         mWordsToFind = wordsToFind;
 
-        // Create an Iterator for the List of Strings to search.
+        // Create an Iterator for the List of String objects to
+        // search.
         mInputIterator = Arrays.asList(stringsToSearch).iterator();
     }
 
@@ -58,7 +60,7 @@ public abstract class SearchTaskGangCommon
      */
     @Override
     protected List<String> getNextInput() {
-        // Return null if all input has been processed.
+        // Return null if all inputs have been processed.
         if (!mInputIterator.hasNext())
             return null;
         else {
@@ -77,7 +79,7 @@ public abstract class SearchTaskGangCommon
     @Override
     protected void initiateTaskGang(int size) {
     	// Hook method called back to perform custom initializations
-    	// before the Threads in the gang are spawned.
+    	// before the Thread objects in the gang are spawned.
         initiateHook(size);
 
         // Create and start a Thread for each element in the input
@@ -101,7 +103,7 @@ public abstract class SearchTaskGangCommon
             // Each time a match is found, the SearchResult.print()
             // method is called to print the output.  We put this call
             // in a synchronized statement, so the output isn't all
-            // scrambled up in different Threads.
+            // scrambled up in different Thread objects.
             synchronized(System.out) {
                 results.print();
             }
@@ -112,8 +114,9 @@ public abstract class SearchTaskGangCommon
 
     /**
      * @return A {@link Runnable} task that processes one data element
-     * at location {@code index} of the underlying input {@link List}
-     * in a background task run by a Java {@link Thread}.
+     *         at location {@code index} of the underlying input
+     *         {@link List} in a background task run by a Java {@link
+     *         Thread}.
      */
     protected Runnable makeTask(final int index) {
         // This method runs in a background task provided by a Java
@@ -177,13 +180,15 @@ public abstract class SearchTaskGangCommon
              currentCycle(),
              word,
              inputData,
+             // Make a List of Result objects that match
+             // the word to search for.
              makeResultsRegex(word, inputData));
     }
 
     /**
      * Use Java regular expressions to make a {@link List} of {@link
-     * SearchResults.Result} objects for the {@code word} to search
-     * for in the {@code inputData}.
+     * SearchResults.Result} objects that match the {@code word} to
+     * search for in the {@code inputData}.
      * 
      * @param word The word to search for
      * @param inputData The input to search for {@code word}
@@ -221,8 +226,8 @@ public abstract class SearchTaskGangCommon
 
     /**
      * Use Java Streams to make a {@link List} of {@link
-     * SearchResults.Result} objects for the {@code word} to search
-     * for in the {@code inputData}.
+     * SearchResults.Result} objects that match the {@code word} to
+     * search for in the {@code inputData}.
      * 
      * @param word The word to search for
      * @param inputData The input to search for {@code word}
@@ -248,36 +253,6 @@ public abstract class SearchTaskGangCommon
 
             // Collect the Result objects into a List.
             .toList();
-    }
-
-    /**
-     * Use the Java {@code indexOf()} method to make a {@link List} of
-     * {@link SearchResults.Result} objects for the {@code word} to
-     * search for in the {@code inputData}.
-     * 
-     * @param word The word to search for
-     * @param inputData The input to search for {@code word}
-     * @return A {@link List} of {@link SearchResults.Result} 
-     *         objects
-     */
-    private List<SearchResults.Result> makeResultsIndexOf
-        (String word,
-         String inputData) {
-        // Create an ArrayList to store Result objects.
-        var results = new ArrayList<SearchResults.Result>();
-
-        // Check to see how many times (if any) the word appears in
-        // the input data.
-        for (int i = inputData.indexOf(word);
-             i != -1;
-             i = inputData.indexOf(word, i + 1)) {
-            // Each time a match is found, it's added to the list of
-            // search results.
-            results.add(new SearchResults.Result(i));
-        } 
-
-        // Return the list of results.
-        return results;
     }
 }
 

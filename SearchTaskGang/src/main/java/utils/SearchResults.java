@@ -1,16 +1,17 @@
+package utils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 /**
- * Holds the search results.
+ * A helper class that holds search results.
  */
 public class SearchResults {
     /**
-     * @class SearchResult
-     *
-     * @brief Holds one search result.
+     * This nested class holds one search result.
      */
-    public class Result {
+    public static class Result {
         /**
          * The index in the search String where the word that was
          * found.
@@ -52,15 +53,16 @@ public class SearchResults {
     protected List<Result> mList;
 
     /**
-     * Create an empty SearchResults, which is used to shutdown
-     * processing of the BlockingQueue.
+     * Create an empty {@link SearchResults}, which is used to
+     * shut down processing of the {@link BlockingQueue}.
      */
     public SearchResults() {
         mList = null;
     }
 
     /**
-     * Create a SearchResults with values for the various fields.
+     * Create a {@link SearchResults} with values for the various
+     * fields.
      */
     public SearchResults(long threadId,
                          long cycle,
@@ -70,11 +72,27 @@ public class SearchResults {
         mCycle = cycle;
         mWord = word;
         mInputData = inputData;
-        mList = new ArrayList<Result>();
+        mList = new ArrayList<>();
     }
 
     /**
-     * Convert to String form.
+     * Create a {@link SearchResults} with values for the various
+     * fields.
+     */
+    public SearchResults(long threadId,
+                         long cycle,
+                         String word,
+                         String inputData,
+                         List<Result> results) {
+        mThreadId = threadId;
+        mCycle = cycle;
+        mWord = word;
+        mInputData = inputData;
+        mList = results;
+    }
+
+    /**
+     * Convert to {@link String} form.
      */
     public String toString() {
         return 
@@ -89,7 +107,7 @@ public class SearchResults {
     }
 
     /**
-     * Add a Result.
+     * Add a {@link Result}.
      */
     public void add(int index) {
         mList.add(new Result(index));
@@ -105,17 +123,18 @@ public class SearchResults {
     /**
      * Print the results.
      */
-    void print() {
+    public void print() {
         if (!isEmpty()) {
             System.out.print(toString());
 
             // Iterate through the list of indices that matched the
             // search word and print them out.
             for (Result result : mList)
-                System.out.print ("["
-                                  + result.mIndex
-                                  + "]");
-            System.out.println("");
+                System.out.print
+                    ("["
+                     + result.mIndex
+                     + "]");
+            System.out.println();
         }
     }
 }

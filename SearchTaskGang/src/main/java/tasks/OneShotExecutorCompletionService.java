@@ -1,5 +1,11 @@
+package tasks;
+
+import utils.SearchResults;
+
 import java.util.List;
 import java.util.concurrent.*;
+
+import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
  * Customizes the {@link SearchTaskGangCommon} framework to process a
@@ -10,7 +16,7 @@ import java.util.concurrent.*;
  * applied, which starts processing results immediately.
  */
 public class OneShotExecutorCompletionService
-       extends SearchTaskGangCommon {
+    extends SearchTaskGangCommon {
     /**
      * Processes the results of Futures returned from the {@code
      * Executor.submit()} method.
@@ -20,15 +26,14 @@ public class OneShotExecutorCompletionService
     /**
      * Constructor initializes the superclass and data members.
      */
-    protected OneShotExecutorCompletionService(String[] wordsToFind,
-                                               String[][] stringsToSearch) {
+    public OneShotExecutorCompletionService(String[] wordsToFind,
+                                            String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind, 
-              stringsToSearch);
+        super(wordsToFind, stringsToSearch);
 
         // Initialize the Executor with a cached pool of Threads,
         // which grow dynamically.
-        setExecutor (Executors.newCachedThreadPool());
+        setExecutor(Executors.newCachedThreadPool());
 
         // Connect the Executor with the CompletionService to process
         // SearchResults concurrently.
@@ -43,7 +48,7 @@ public class OneShotExecutorCompletionService
     protected void initiateTaskGang(int inputSize) {
         // Enqueue each item in the input List for execution in the
         // Executor's cached thread pool.
-        for (int i = 0; i < inputSize; ++i) 
+        for (int i = 0; i < inputSize; ++i)
             getExecutor().execute(makeTask(i));
 
         // Process all the Futures concurrently via the
@@ -59,22 +64,21 @@ public class OneShotExecutorCompletionService
     protected boolean processInput(final String inputData) {
         // Iterate through each word and submit a Callable that will
         // search concurrently for this word in the inputData.
-        for (final String word : mWordsToFind) {
+        for (final String word : mWordsToFind)
             // This submit() call stores the Future result in the
             // ExecutorCompletionService for concurrent results
             // processing.
             mCompletionService
-                    .submit (() ->
-                             // call() runs in a background task.
-                             searchForWord(word,
-                                           inputData));
-        }
+                .submit(() ->
+                    // This callable lambda runs in a background task.
+                    searchForWord(word, inputData));
+
         return true;
     }
 
     /**
-     * Uses the ExecutorCompletionService to concurrently process all
-     * the queued Futures.
+     * Uses the {@link ExecutorCompletionService} to concurrently process all
+     * the queued {@link Future} objects.
      */
     protected void concurrentlyProcessQueuedFutures() {
         // Need to account for all the input data and all the words
@@ -82,20 +86,18 @@ public class OneShotExecutorCompletionService
         int count = getInput().size() * mWordsToFind.length;
 
         // Loop for the designated number of results.
-        for (int i = 0; i < count; ++i) 
-            try {
-                // Take the next ready Future off the
-                // CompletionService's queue.
-                Future<SearchResults> resultFuture =
-                    mCompletionService.take();
+        for (int i = 0; i < count; ++i) {
+            // Take the next ready Future off the
+            // CompletionService's queue.
+            Future<SearchResults> resultFuture =
+                rethrowSupplier(mCompletionService::take).get();
 
-                // The get() call will not block since the results
-                // should be ready before they are added to the
-                // completion queue.
-                resultFuture.get().print();
-            } catch (Exception e) {
-                System.out.println("get() exception");
-            }
+            // The get() call will not block since the results
+            // should be ready before they are added to the
+            // completion queue.
+            rethrowSupplier(resultFuture::get).get().print();
+        }
     }
 }
+
 

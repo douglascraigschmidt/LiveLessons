@@ -21,8 +21,7 @@ public class OneShotSearchWithCountDownLatch
         (String[] wordsToFind,
          String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
-              stringsToSearch);
+        super(wordsToFind, stringsToSearch);
     }
 
     /**

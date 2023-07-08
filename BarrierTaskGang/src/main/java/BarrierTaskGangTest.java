@@ -17,10 +17,9 @@ public class BarrierTaskGangTest {
      * Enumerate the tests to run.
      */
     enum TestsToRun {
-        COUNT_DOWN_LATCH,
-        CYCLIC_BARRIER,
-        PHASER,
-        ONE_SHOT
+        ONESHOT_COUNT_DOWN_LATCH,
+        CYCLIC_CYCLIC_BARRIER,
+        CYCLIC_PHASER
     }
 
     /**
@@ -46,22 +45,25 @@ public class BarrierTaskGangTest {
     }
 
     /**
-     * Factory method that creates the desired type of utils.TaskGang
+     * @return The desired {@code choice} of {@link TaskGang}
      * subclass implementation.
      */
     @SuppressWarnings("SameParameterValue")
     private static Runnable makeTaskGang(String[] wordList,
                                          TestsToRun choice) {
         return switch (choice) {
-            case COUNT_DOWN_LATCH, ONE_SHOT ->
+            // Run a oneshot search using Java CountDownLatch.
+            case ONESHOT_COUNT_DOWN_LATCH ->
                 new OneShotSearchWithCountDownLatch
                 (wordList,
                  Options.sOneShotInputStrings);
-            case CYCLIC_BARRIER ->
+            // Run a cyclic search using Java CyclicBarrier.
+            case CYCLIC_CYCLIC_BARRIER ->
                 new CyclicSearchWithCyclicBarrier
                 (wordList,
                  Options.sFixedNumberOfInputStrings);
-            case PHASER ->
+            // Run a cyclic search using Java Phaser.
+            case CYCLIC_PHASER ->
                 new CyclicSearchWithPhaser
                 (wordList,
                  Options.sVariableNumberOfInputStrings);

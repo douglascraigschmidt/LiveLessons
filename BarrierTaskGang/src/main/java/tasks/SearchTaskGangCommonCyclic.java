@@ -19,8 +19,7 @@ public abstract class SearchTaskGangCommonCyclic
         (String[] wordsToFind,
          String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super (wordsToFind,
-               stringsToSearch);
+        super (wordsToFind, stringsToSearch);
 
         // Initialize the exit barrier to 1, which causes
         // awaitTasksDone() hook method to block until the test is
@@ -30,9 +29,9 @@ public abstract class SearchTaskGangCommonCyclic
 
     /**
      * When there's no more input data to process, release the exit
-     * latch and return false, so the worker Thread will return.
-     * Otherwise, return true so the worker Thread will continue to
-     * run.
+     * latch and return false, so the worker {@link Thread} will
+     * return.  Otherwise, return true so the worker {@link Thread}
+     * will continue to run.
      */
     @Override
     protected boolean advanceTaskToNextCycle() {

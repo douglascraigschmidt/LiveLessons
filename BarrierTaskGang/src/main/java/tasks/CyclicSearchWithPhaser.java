@@ -41,8 +41,7 @@ public class CyclicSearchWithPhaser
     public CyclicSearchWithPhaser(String[] wordsToFind,
                                   String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
-              stringsToSearch);
+        super(wordsToFind, stringsToSearch);
 
         // No reconfiguration needed initially.
         mReconfiguration = false;
@@ -181,7 +180,10 @@ public class CyclicSearchWithPhaser
     @Override
     protected void taskDone(int index)
         throws IndexOutOfBoundsException {
+        // This exception is used to shut down unnecessary
+        // Thread objects.
         IndexOutOfBoundsException exception = null;
+
         try {
             // Each task uses the Phaser arriveAndAwaitAdvance()
             // method to wait for all other tasks to complete their
@@ -192,33 +194,30 @@ public class CyclicSearchWithPhaser
             // occurs when the number of threads changes between
             // cycles.
             if (mReconfiguration) {
-                try {
-                    // Wait for all existing threads to reach this
-                    // barrier.
-                    mReconfigurationCyclicBarrier.await();
+                // Wait for all existing threads to reach this
+                // barrier.
+                mReconfigurationCyclicBarrier.await();
 
-                    // Check to see if this Thread is no longer
-                    // needed, i.e., if the new input List shrank
-                    // relative to the previous input List.
-                    if (index >= getInput().size()) {
-                        // Remove ourselves from the count of parties
-                        // that will wait on this Phaser.
-                        mPhaser.arriveAndDeregister();
+                // Check to see if this Thread is no longer needed,
+                // i.e., if the new input List shrank relative to the
+                // previous input List.
+                if (index >= getInput().size()) {
+                    // Remove ourselves from the count of parties that
+                    // will wait on this Phaser.
+                    mPhaser.arriveAndDeregister();
 
-                        // We must throw the IndexOutOfBoundsException
-                        // to stop this Thread from running.
-                        exception = new IndexOutOfBoundsException(index);
-                    }
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                } 
+                    // We must throw the IndexOutOfBoundsException to
+                    // stop this Thread from running.
+                    exception = new IndexOutOfBoundsException(index);
+                }
             }                    
         } catch (Exception ex) {
+            // Rethrow the checked exception as a runtime exception.
             throw new RuntimeException(ex);
         } 
 
-        // Throw this exception, which triggers the calling worker
-        // Thread to exit since it's no longer needed.
+        // Contintionally throw this exception, which triggers the
+        // calling worker Thread to exit since it's no longer needed.
         if (exception != null) 
             throw exception;
     }

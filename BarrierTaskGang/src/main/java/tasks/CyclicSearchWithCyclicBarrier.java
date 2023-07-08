@@ -26,8 +26,7 @@ public class CyclicSearchWithCyclicBarrier
     public CyclicSearchWithCyclicBarrier(String[] wordsToFind,
                                          String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
-            stringsToSearch);
+        super(wordsToFind, stringsToSearch);
     }
 
     /**

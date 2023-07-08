@@ -130,7 +130,7 @@ public abstract class TaskGang<E>
     protected abstract boolean processInput(E inputData);
 
     /**
-     * Template method that creates/executes all the tasks in the
+     * This template method creates/executes all the tasks in the
      * gang.
      */
     @Override
