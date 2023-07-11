@@ -19,7 +19,7 @@ import static utils.ExceptionUtils.*;
 /**
  * Customizes the {@link SearchTaskGangCommon} framework to process a
  * one-shot {@link List} of tasks via a fixed-size pool of {@link
- * Thread} objects created by the {@link ExecutorService}, which is
+ * Thread} objects associated with the {@link ExecutorService}, which is
  * also used as a barrier synchronizer to wait for all the threads in
  * the pool to shut down.  The unit of concurrency is {@code
  * invokeAll()}, which creates a task for each input string.  The
@@ -41,9 +41,11 @@ public class OneShotExecutorService
         new LinkedBlockingQueue<>();
 
     /**
-     * Number of {@link Thread} objects in the pool.
+     * Number of {@link Thread} objects in the pool is set
+     * to the number of processor cores known to the JVM.
      */
-    protected final int MAX_THREADS = 4;
+    protected final int MAX_THREADS = Runtime
+        .getRuntime().availableProcessors();
 
     /**
      * Constructor initializes the superclass.
@@ -51,8 +53,12 @@ public class OneShotExecutorService
     public OneShotExecutorService(String[] wordsToFind,
                                   String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
-              stringsToSearch);
+        super(wordsToFind, stringsToSearch);
+
+        // Create an ExecutorService that uses a fixed-size pool
+        // of Java Thread objects.
+        setExecutor(Executors
+            .newFixedThreadPool(MAX_THREADS));
     }
 
     /**
@@ -70,10 +76,6 @@ public class OneShotExecutorService
         // Initialize the exit barrier to inputSize, which causes
         // awaitTasksDone() to block until the cycle is finished.
         mExitBarrier = new CountDownLatch(inputSize);
-
-        // Create a fixed-size Thread pool.
-        if (getExecutor() == null)
-            setExecutor(Executors.newFixedThreadPool(MAX_THREADS));
     }
 
     /**

@@ -9,7 +9,7 @@ import static utils.ExceptionUtils.rethrowSupplier;
 
 /**
  * Customizes the {@link SearchTaskGangCommon} framework to process a
- * one-shot {@link List} of tasks via a variable-sized pool of {@link
+ * one-shot {@link List} of tasks via a pool of "work-stealing" {@link
  * Thread} objects created by the {@link ExecutorService}. The units
  * of concurrency are a "task per search word" *and* the input
  * strings. An asynchronous future results processing model is
@@ -31,9 +31,9 @@ public class OneShotExecutorCompletionService
         // Pass input to superclass constructor.
         super(wordsToFind, stringsToSearch);
 
-        // Initialize the Executor with a cached pool of Threads,
-        // which grow dynamically.
-        setExecutor(Executors.newCachedThreadPool());
+        // Initialize the Executor with a cached pool of "work-stealing"
+        // Thread objects.
+        setExecutor(Executors.newWorkStealingPool());
 
         // Connect the Executor with the CompletionService to process
         // SearchResults concurrently.
@@ -64,7 +64,7 @@ public class OneShotExecutorCompletionService
     protected boolean processInput(final String inputData) {
         // Iterate through each word and submit a Callable that will
         // search concurrently for this word in the inputData.
-        for (final String word : mWordsToFind)
+        for (var word : mWordsToFind)
             // This submit() call stores the Future result in the
             // ExecutorCompletionService for concurrent results
             // processing.
@@ -89,7 +89,7 @@ public class OneShotExecutorCompletionService
         for (int i = 0; i < count; ++i) {
             // Take the next ready Future off the
             // CompletionService's queue.
-            Future<SearchResults> resultFuture =
+            var resultFuture =
                 rethrowSupplier(mCompletionService::take).get();
 
             // The get() call will not block since the results

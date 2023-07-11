@@ -1,6 +1,7 @@
 package tasks;
 
 import utils.SearchResults;
+import utils.TaskGang;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import static utils.ExceptionUtils.rethrowSupplier;
  * one-shot List of tasks via a variable-sized pool of {@link Thread}
  * objects associated with the {@link ExecutorService}. The unit of
  * concurrency is a "task per search word". The results processing
- * model uses the Synchronous Future model, which defers the results
+ * model uses the Synchronous Future model, which defers results
  * processing until all words to search for have been submitted.
  */
 public class OneShotExecutorServiceFuture
@@ -33,8 +34,7 @@ public class OneShotExecutorServiceFuture
     public OneShotExecutorServiceFuture(String[] wordsToFind,
                                         String[][] stringsToSearch) {
         // Pass input to superclass constructor.
-        super(wordsToFind,
-            stringsToSearch);
+        super(wordsToFind, stringsToSearch);
 
         // Initialize the Executor with a cached pool of Threads,
         // which grow dynamically.
@@ -70,14 +70,14 @@ public class OneShotExecutorServiceFuture
     protected boolean processInput(String inputData) {
         if (getExecutor() instanceof ExecutorService executorService)
             // Iterate through each word.
-            for (final String word : mWordsToFind) {
+            for (var word : mWordsToFind) {
                 // Submit a Callable that will search concurrently for
                 // this word in the inputData & create a Future to
                 // store the results.
-                Future<SearchResults> resultFuture = executorService
+                var resultFuture = executorService
                     .submit(() -> searchForWord(word, inputData));
 
-                // Add the Future to the List so it can be processed
+                // Add the Future to the List, so it can be processed
                 // later.
                 mResultFutures.add(resultFuture);
             }
@@ -93,7 +93,7 @@ public class OneShotExecutorServiceFuture
     (List<Future<SearchResults>> resultFutures) {
         // Iterate through the List of Future objects and print the
         // SearchResults.
-        for (Future<SearchResults> resultFuture : resultFutures) {
+        for (var resultFuture : resultFutures) {
             // The get() call may block if the SearchResults aren't
             // ready yet.
             rethrowSupplier(resultFuture::get).get().print();

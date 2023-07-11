@@ -45,7 +45,7 @@ public class OneShotThreadPerTask
         // Create thread to run each task.
         if (getExecutor() == null) 
             // Create an Executor that runs each worker task in a
-            // separate Thread.
+            // separate virtual Thread.
             setExecutor (runnable -> mWorkerThreads
                 .add(Thread.startVirtualThread(runnable))
             );
@@ -65,9 +65,9 @@ public class OneShotThreadPerTask
         // Iterate through each word we're searching for.
         for (String word : mWordsToFind) {
             // Try to find the word in the inputData.
-            SearchResults results = searchForWord(word, inputData);
+            var results = searchForWord(word, inputData);
 
-            // Each time a match is found the SearchResult.print()
+            // Each time a match is found, the SearchResult.print()
             // method is called to print the output.  We put this call
             // in a synchronized block so the output isn't scrambled.
             synchronized(System.out) {
