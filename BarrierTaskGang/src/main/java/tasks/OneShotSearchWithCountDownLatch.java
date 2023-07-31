@@ -6,11 +6,13 @@ import java.util.concurrent.CountDownLatch;
 import static utils.Options.printDebugging;
 
 /**
- * Customizes the {@link SearchTaskGangCommon} framework to spawn a
- * {@link Thread} for each element in the {@link List} of input
- * strings and uses a {@link CountDownLatch} to wait for all the
- * threads to finish concurrently searching the input for an array of
- * words to find.  This class only runs for a single iteration cycle.
+ * Leverages the {@link SearchTaskGangCommon}'s ability to spawn a
+ * virtual {@link Thread} for each element in the {@link List} of
+ * input strings.  It also customizes this super class to use a {@link
+ * CountDownLatch} that waits for all {@link Thread} objects to finish
+ * concurrently searching a {@link List} of input {@link String} objects
+ * to determine if there are any matches from an array of words to
+ * find. This class only runs for a single iteration cycle.
  */
 public class OneShotSearchWithCountDownLatch 
              extends SearchTaskGangCommon {

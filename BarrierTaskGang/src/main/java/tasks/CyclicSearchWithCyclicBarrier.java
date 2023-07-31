@@ -2,13 +2,14 @@ package tasks;
 
 import java.util.concurrent.CyclicBarrier;
 
+import static utils.ExceptionUtils.rethrowSupplier;
 import static utils.Options.printDebugging;
 
 /**
- * Customizes the {@link SearchTaskGangCommon} framework with a {@link
- * CyclicBarrier} to define a test that continues searching a fixed
- * number of input strings via a fixed number of threads until there's
- * no more input to process.
+ * Customizes the {@link SearchTaskGangCommonCyclic} super class with a
+ * {@link CyclicBarrier} to define a test that continues searching a fixed
+ * number of input strings via a fixed number of {@link Thread} object
+ * until there's no more input to process.
  */
 public class CyclicSearchWithCyclicBarrier
     extends SearchTaskGangCommonCyclic {
@@ -22,6 +23,9 @@ public class CyclicSearchWithCyclicBarrier
 
     /**
      * Constructor initializes the data members and superclass.
+     *
+     * @param wordsToFind The array of words to find
+     * @param stringsToSearch The array of strings to search
      */
     public CyclicSearchWithCyclicBarrier(String[] wordsToFind,
                                          String[][] stringsToSearch) {
@@ -30,24 +34,10 @@ public class CyclicSearchWithCyclicBarrier
     }
 
     /**
-     * Each thread in the gang uses a call to {@link CyclicBarrier}
-     * {@code await()} to wait for all other threads to complete their
-     * current cycle.
-     */
-    @Override
-    protected void taskDone(int index)
-        throws IndexOutOfBoundsException {
-        try {
-            // Wait for all other Threads to reach this barrier.
-            mCyclicBarrier.await();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    /**
      * Hook method invoked by {@code initiateTaskGang()} to perform
      * custom initializations before threads in the gang are spawned.
+     *
+     * @param size The size of the task gang.
      */
     @Override
     protected void initiateHook(int size) {
@@ -76,6 +66,23 @@ public class CyclicSearchWithCyclicBarrier
             + " Thread"
             + (size == 1 ? "" : "s")
             + " <<<");
+    }
+
+    /**
+     * Each thread in the gang uses a call to {@link CyclicBarrier}
+     * {@code await()} to wait for all other threads to complete their
+     * current cycle.
+     *
+     * @param index The index of the current Thread in the gang.
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         (this method doesn't use it, but it's declared to
+     *         conform to the {@code TaskGang})
+     */
+    @Override
+    protected void taskDone(int index)
+        throws IndexOutOfBoundsException {
+        // Wait for all other Threads to reach this barrier.
+        rethrowSupplier(mCyclicBarrier::await).get();
     }
 }
 

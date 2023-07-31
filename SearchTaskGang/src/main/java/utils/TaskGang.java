@@ -152,7 +152,7 @@ public abstract class TaskGang<E>
      *         input List at {@code index} in a background task provided
      *         by the {@link Executor} returned by {@code getExecutor()}
      */
-    protected Runnable makeTask(final int index) {
+    protected Runnable makeTask(int index) {
         // This lambda runs in a background task provided by the
         // Executor.
         return () -> {

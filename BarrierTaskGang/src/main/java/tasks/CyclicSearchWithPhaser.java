@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
 
-import static utils.Options.print;
 import static utils.Options.printDebugging;
 
 /**
- * Customizes the {@link SearchTaskGangCommon} framework with a {@link
- * Phaser} to continue searching a variable number of words/threads
- * concurrently until there's no more input to process.
+ * Customizes the {@link SearchTaskGangCommonCyclic} super class with a
+ * {@link Phaser} to define a test that continues searching a variable
+ * number of words/threads concurrently until there's no more input to
+ * process.
  */
-public class CyclicSearchWithPhaser 
-             extends SearchTaskGangCommonCyclic {
+public class CyclicSearchWithPhaser
+    extends SearchTaskGangCommonCyclic {
     /**
      * The barrier that's used to coordinate each cycle, i.e., each
      * Thread must await on mPhaser for all the other threads to
@@ -33,7 +33,7 @@ public class CyclicSearchWithPhaser
     /**
      * Synchronizes all threads when a reconfiguration is triggered.
      */
-    volatile CyclicBarrier mReconfigurationCyclicBarrier;
+    volatile CyclicBarrier mReconfigCyclicBarrier;
 
     /**
      * Constructor initializes the data members and superclass.
@@ -58,8 +58,8 @@ public class CyclicSearchWithPhaser
      * cycle.
      *
      * @return A {@link Phaser} whose {@code onAdvance()} hook method
-     *         creates a {@link CyclicBarrier} to handle
-     *         reconfiguration.
+     * creates a {@link CyclicBarrier} to handle
+     * reconfiguration.
      */
     private Phaser makePhaser() {
         return new Phaser() {
@@ -81,7 +81,7 @@ public class CyclicSearchWithPhaser
                 // if a reconfiguration is needed or not.
                 int prevSize = getInput().size();
 
-                // Get the new input Strings to process.
+                // Get the new List of input Strings to process.
                 setInput(getNextInput());
 
                 // Bail out if there's no more input.
@@ -98,46 +98,64 @@ public class CyclicSearchWithPhaser
                     // change to the size of the input List.
                     if (!mReconfiguration)
                         printDebugging(">>> Started cycle "
-                                       + currentCycle()
-                                       + " with same number ("
-                                       + newSize
-                                       + ") of threads <<<");
+                            + currentCycle()
+                            + " with same number ("
+                            + newSize
+                            + ") of threads <<<");
 
-                    // A reconfiguration is needed since the size of
-                    // the input List changed.
+                        // A reconfiguration is needed since the size of
+                        // the input List changed.
                     else {
                         printDebugging(">>> Started cycle "
-                                       + currentCycle()
-                                       + " with "
-                                       + newSize
-                                       + " vs "
-                                       + prevSize
-                                       + " threads <<<");
+                            + currentCycle()
+                            + " with "
+                            + newSize
+                            + " vs "
+                            + prevSize
+                            + " threads <<<");
 
                         // Manage the reconfiguration via a new
                         // CyclicBarrier since there are a fixed
                         // number of new threads involved.
-                        mReconfigurationCyclicBarrier = new CyclicBarrier
-                            (prevSize,
-                             // Create the barrier action.
-                             () -> {
-                                // If there are more elements in
-                                // the input List than last time,
-                                // create/run new worker Threads
-                                // to process them.
-                                if (prevSize < newSize)
-                                    for (int i = prevSize; i < newSize; ++i)
-                                        new Thread(makeTask(i)).start();
-
-                                // Indicate that reconfiguration
-                                // is done.
-                                mReconfiguration = false;
-                            });
+                        mReconfigCyclicBarrier =
+                            makeCyclicBarrier(prevSize, newSize);
                     }
+                    // The Phase should not terminate since there's
+                    // more work to do.
                     return false;
                 }
             }
         };
+    }
+
+    /**
+     * Create a {@link CyclicBarrier} that's used to coordinate the
+     * reconfiguration of the task gang.
+     *
+     * @param prevSize The size of the previous input {@link List}
+     * @param newSize  The size of the new input {@link List}
+     * @return A {@link CyclicBarrier} that's used to coordinate the
+     * reconfiguration of the task gang
+     */
+    private CyclicBarrier makeCyclicBarrier(int prevSize,
+                                            int newSize) {
+        return new CyclicBarrier
+            (prevSize,
+                // Create the barrier action.
+                () -> {
+                    // If there are more elements in
+                    // the input List than last time,
+                    // create/run new virtual worker
+                    // Threads objects to process them.
+                    if (prevSize < newSize)
+                        for (int i = prevSize; i < newSize; ++i)
+                            getExecutor()
+                                .execute(makeTask(i));
+
+                    // Indicate that reconfiguration
+                    // is done.
+                    mReconfiguration = false;
+                });
     }
 
     /**
@@ -166,16 +184,17 @@ public class CyclicSearchWithPhaser
         // Print diagnostic information.
         printDebugging
             (">>> Started cycle 1 with "
-             + size
-             + " thread"
-             + (size == 1 ? "" : "s")
-             + " <<<");
+                + size
+                + " thread"
+                + (size == 1 ? "" : "s")
+                + " <<<");
     }
 
     /**
      * Wait for all other tasks to complete their iteration cycle
      * before attempting to advance.  Also handles reconfigurations
-     * triggered by a change in the number of threads, if needed.
+     * triggered by a change in the number of input elements and
+     * associated {@link Thread} objects, if needed.
      */
     @Override
     protected void taskDone(int index)
@@ -196,7 +215,7 @@ public class CyclicSearchWithPhaser
             if (mReconfiguration) {
                 // Wait for all existing threads to reach this
                 // barrier.
-                mReconfigurationCyclicBarrier.await();
+                mReconfigCyclicBarrier.await();
 
                 // Check to see if this Thread is no longer needed,
                 // i.e., if the new input List shrank relative to the
@@ -210,15 +229,15 @@ public class CyclicSearchWithPhaser
                     // stop this Thread from running.
                     exception = new IndexOutOfBoundsException(index);
                 }
-            }                    
+            }
         } catch (Exception ex) {
             // Rethrow the checked exception as a runtime exception.
             throw new RuntimeException(ex);
-        } 
+        }
 
-        // Contintionally throw this exception, which triggers the
+        // Conditionally throw this exception, which triggers the
         // calling worker Thread to exit since it's no longer needed.
-        if (exception != null) 
+        if (exception != null)
             throw exception;
     }
 }

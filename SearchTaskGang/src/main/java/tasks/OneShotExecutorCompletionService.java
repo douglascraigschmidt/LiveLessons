@@ -61,7 +61,7 @@ public class OneShotExecutorCompletionService
      * if all goes well, else false (which will stop the background
      * task from continuing to run).
      */
-    protected boolean processInput(final String inputData) {
+    protected boolean processInput(String inputData) {
         // Iterate through each word and submit a Callable that will
         // search concurrently for this word in the inputData.
         for (var word : mWordsToFind)
@@ -88,14 +88,14 @@ public class OneShotExecutorCompletionService
         // Loop for the designated number of results.
         for (int i = 0; i < count; ++i) {
             // Take the next ready Future off the
-            // CompletionService's queue.
+            // CompletionService's queue (may block).
             var resultFuture =
                 rethrowSupplier(mCompletionService::take).get();
 
             // The get() call will not block since the results
             // should be ready before they are added to the
             // completion queue.
-            rethrowSupplier(resultFuture::get).get().print();
+            resultFuture.resultNow().print();
         }
     }
 }

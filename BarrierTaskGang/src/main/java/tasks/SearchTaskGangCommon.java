@@ -1,5 +1,6 @@
 package tasks;
 
+import utils.ExceptionUtils;
 import utils.SearchResults;
 import utils.TaskGang;
 
@@ -12,6 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+import static utils.ExceptionUtils.rethrowRunnable;
+import static utils.ExceptionUtils.rethrowSupplier;
 import static utils.Options.print;
 import static utils.Options.printDebugging;
 
@@ -52,6 +55,10 @@ public abstract class SearchTaskGangCommon
         // Create an Iterator for the List of String objects to
         // search.
         mInputIterator = Arrays.asList(stringsToSearch).iterator();
+
+        // Create an Executor that runs each worker task in a
+        // separate virtual Thread.
+        setExecutor(Thread::startVirtualThread);
     }
 
     /**
@@ -82,11 +89,11 @@ public abstract class SearchTaskGangCommon
     	// before the Thread objects in the gang are spawned.
         initiateHook(size);
 
-        // Create and start a Thread for each element in the input
-        // List.  Each Thread performs the processing designated by
-        // the processInput() hook method defined above.
+        // Create and start a virtual Thread for each element in the
+        // input List. Each Thread performs the processing designated
+        // by the processInput() hook method defined above.
         for (int i = 0; i < size; ++i) 
-            new Thread(makeTask(i)).start();
+            getExecutor().execute(makeTask(i));
     }
 
     /**
@@ -98,8 +105,8 @@ public abstract class SearchTaskGangCommon
         // Iterate through each word we're searching for and try to
         // find it in the inputData.
         for (String word : mWordsToFind) {
-            SearchResults results = searchForWord(word,
-                                                  inputData);
+            var results = searchForWord(word,
+                                                     inputData);
             // Each time a match is found, the SearchResult.print()
             // method is called to print the output.  We put this call
             // in a synchronized statement, so the output isn't all
@@ -160,11 +167,8 @@ public abstract class SearchTaskGangCommon
      */
     @Override
     protected void awaitTasksDone() {
-        try {
-            // Block the calling task until all tasks are done.
-            mExitBarrier.await();
-        } catch (InterruptedException ignored) {
-        }
+        // Block the calling task until all tasks are done.
+        rethrowRunnable(mExitBarrier::await);
     }
 
     /**
@@ -180,7 +184,7 @@ public abstract class SearchTaskGangCommon
              currentCycle(),
              word,
              inputData,
-             // Make a List of Result objects that match
+             // Make a List of Result objects (if any) that match
              // the word to search for.
              makeResultsRegex(word, inputData));
     }
@@ -220,7 +224,7 @@ public abstract class SearchTaskGangCommon
             index = matcher.start() + 1;
         }
 
-        // Return the list of results.
+        // Return the List of results.
         return results;
     }
 

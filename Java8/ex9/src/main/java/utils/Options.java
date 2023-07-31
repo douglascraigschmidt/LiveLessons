@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -59,6 +60,13 @@ public class Options {
     private boolean mParallel = true;
 
     /**
+     * Count the number of calls to isPrime() as a means to determine
+     * the benefits of caching.
+     */
+    private final AtomicInteger mPrimeCheckCounter =
+        new AtomicInteger(0);
+
+    /**
      * Method to return the one and only singleton uniqueInstance.
      */
     public static Options instance() {
@@ -87,6 +95,13 @@ public class Options {
      */
     public int count() {
         return mCount;
+    }
+
+    /**
+     * @return The mPrimeCheckCounter
+     */
+    public AtomicInteger primeCheckCounter() {
+        return mPrimeCheckCounter;
     }
 
     /**

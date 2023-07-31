@@ -5,6 +5,7 @@
     <option name="MAIN_CLASS_NAME" value="BarrierTaskGangTest" />
     <module name="BarrierTaskGang.main" />
     <option name="PROGRAM_PARAMETERS" value="-d true" />
+    <option name="VM_PARAMETERS" value="--enable-preview" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
       <option name="region" />

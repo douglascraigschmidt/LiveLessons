@@ -3,6 +3,10 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
+compileJava {
+    options.compilerArgs << '--enable-preview'
+}
+
 repositories {
     mavenCentral()
 }

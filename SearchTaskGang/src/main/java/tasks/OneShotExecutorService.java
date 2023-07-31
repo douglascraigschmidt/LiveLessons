@@ -128,7 +128,6 @@ public class OneShotExecutorService
      */
     @Override
     protected void taskDone(int index) throws IndexOutOfBoundsException {
-
         // Decrements the CountDownLatch, which releases the main
         // Thread when count drops to 0.
         mExitBarrier.countDown();
