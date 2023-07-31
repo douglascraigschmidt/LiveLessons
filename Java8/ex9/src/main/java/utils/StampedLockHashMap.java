@@ -8,28 +8,32 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.Function;
 
 /**
- * A concurrent HashMap collection that's implemented using advanced
- * features of StampedLock to protect mutable shared state.  This
- * implementation just focuses on the computeIfAbsent() method, so
- * other methods are omitted for brevity.  If someone wants to
- * implement the other HashMap methods via StampedLock please feel
- * free to contribute to the project!
+ * A concurrent {@link Map} collection that's implemented using
+ * advanced features of {@link StampedLock} to protect mutable shared
+ * state.  This implementation just focuses on the {@code
+ * computeIfAbsent()} method, so other methods are omitted for
+ * brevity.
+ * 
+ * If someone wants to implement the other {@link Map} methods via
+ * {@link StampedLock} please feel free to contribute to the project!
  */
 public class StampedLockHashMap<K, V>
        extends AbstractMap<K, V> 
        implements Map<K, V> {
     /**
-     * The HashMap that's used to implement the StampedLockHashMap.
+     * The {@link Map} that's used to implement the {@link
+     * StampedLockHashMap}.
      */
     private final Map<K, V> mMap;
 
     /**
-     * The StampedLock instance used to protect the HashMap.
+     * The {@link StampedLock} instance used to protect the {@link
+     * HashMap}.
      */
     private final StampedLock mSLock;
 
     /**
-     * Constructor initializes the field.
+     * Constructor initializes the fields.
      */
     public StampedLockHashMap(){
         mMap = new HashMap<>();
@@ -37,9 +41,7 @@ public class StampedLockHashMap<K, V>
     }
 
     /**
-     * Returns the number of elements in this map.
-     *
-     * @return the number of elements in this map.
+     * @return The number of elements in this {@link Map}
      */
     @Override
     public int size() {
@@ -47,8 +49,6 @@ public class StampedLockHashMap<K, V>
     }
 
     /**
-     * Returns <tt>true</tt> if this collection contains no elements.
-     *
      * @return <tt>true</tt> if this collection contains no elements
      */
     @Override
@@ -57,7 +57,7 @@ public class StampedLockHashMap<K, V>
     }
 
     /**
-     * Removes all of the elements from this collection.  The
+     * Removes all the elements from this collection.  The
      * collection will be empty after this method returns.
      */
     @Override
@@ -66,7 +66,7 @@ public class StampedLockHashMap<K, V>
     }
 
     /**
-     * Return the entrySet.
+     * Return the {@link Set} containing all entries in the {@link Map}.
      */
     @Override
     public Set<Entry<K, V>> entrySet() {
@@ -76,7 +76,12 @@ public class StampedLockHashMap<K, V>
     /**
      * If {@code key} is not already associated with a value (or is
      * mapped to null) then compute its value using the given {@code
-     * mappingFunc} and enter it into the map (unless it's null).
+     * mappingFunc} and enter it into the {@link Map} (unless it's
+     * null).
+     *
+     * @param key The key to be mapped
+     * @param mappingFunc The {@link Function} that maps the key to the
+     *                    value that maps the key to the value
      */
     public V computeIfAbsent
         (K key,
@@ -93,6 +98,10 @@ public class StampedLockHashMap<K, V>
     /**
      * This implementation uses a conventional write lock, which is a
      * pessimistic lock.
+     *
+     * @param key The key to be mapped
+     * @value mapping The {@link Function} that maps the key to the
+     *                value that maps the key to the value
      */
     private V computeIfAbsentWriteLock
         (K key,
@@ -129,7 +138,11 @@ public class StampedLockHashMap<K, V>
 
     /**
      * This implementation uses a conditional write lock, which is a
-     * bit more optimistic.
+     * bit more optimistic than a conventional write lock.
+     *
+     * @param key The key to be mapped
+     * @value mapping The {@link Function} that maps the key to the
+     *                value that maps the key to the value
      */
     private V computeIfAbsentConditionalWrite
         (K key,
@@ -188,6 +201,10 @@ public class StampedLockHashMap<K, V>
     /**
      * This implementation uses an optimistic read lock, which is
      * optimistic by its very nature ;-).
+     *
+     * @param key The key to be mapped
+     * @value mapping The {@link Function} that maps the key to the
+     *                value that maps the key to the value
      */
     private V computeIfAbsentOptimisticRead
         (K key,
@@ -219,7 +236,7 @@ public class StampedLockHashMap<K, V>
         else if (value == null) {
             // This is the first time in for that key.
 
-            // Try upgrade the optimistic readlock to a writelock
+            // Try to upgrade the optimistic readlock to a writelock
             // (non-blocking).
             if ((stamp = mSLock.tryConvertToWriteLock(stamp)) == 0L)
                 // Revert to conditional write strategy.

@@ -6,7 +6,16 @@ import java.util.LinkedHashMap;
 
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * This Java utility class defines method(s) that provide operations
+ * on {@link Map} collections.
+ */
 public class MapUtils<K, V> {
+    /**
+     * A Java utility class should define a private constructor.
+     */
+    private MapUtils() { }
+
     /**
      * Sort {@code map} via the {@code comparator}.
      *
