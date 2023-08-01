@@ -16,11 +16,11 @@ import static utils.PrimeUtils.*;
  * object-oriented and functional programming features in the context
  * of a {@link Memoizer} configured with either a Java {@link
  * ConcurrentHashMap}, a Java {@link Collections} {@code
- * SynchronizedMap}, and a {@link HashMap} protected with a Java
- * {@link StampedLock}.  This {@link Memoizer} is used to
- * compute/cache/retrieve large prime numbers via virtual Thread
- * objects. This example also demonstrates the Java {@code record}
- * data type and several advanced features of {@link StampedLock}.
+ * SynchronizedMap}, and a {@link HashMap} protected by a Java {@link
+ * StampedLock}.  This {@link Memoizer} is used to compute, cache, and
+ * retrieve large prime numbers via virtual Thread objects. This
+ * example also demonstrates the Java {@code record} data type and
+ * several advanced features of {@link StampedLock}.
  */
 public class ex47 {
     /**

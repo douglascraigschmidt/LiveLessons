@@ -21,16 +21,15 @@ public class StampedLockHashMap<K, V>
        extends AbstractMap<K, V> 
        implements Map<K, V> {
     /**
-     * The {@link Map} that's used to implement the {@link
-     * StampedLockHashMap}.
-     */
-    private final Map<K, V> mMap;
-
-    /**
      * The {@link StampedLock} instance used to protect the {@link
      * HashMap}.
      */
     private final StampedLock mSLock;
+
+    /**
+     * The {@link Map} used to implement the {@link StampedLockHashMap}.
+     */
+    private final Map<K, V> mMap;
 
     /**
      * Constructor initializes the fields.

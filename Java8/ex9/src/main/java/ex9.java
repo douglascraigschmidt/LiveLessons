@@ -25,12 +25,12 @@ import static utils.PrimeUtils.printPrimes;
  * functional programming features in the context of a {@link
  * Memoizer} configured with either a Java {@link ConcurrentHashMap},
  * a Java {@link Collections} {@code SynchronizedMap}, and a {@link
- * HashMap} protected with a Java {@link StampedLock}.  This {@link
- * Memoizer} is used to compute/cache/retrieve large prime numbers
- * concurrently via Java sequential or parallel streams.  This example
- * also demonstrates the Java record data type, several advanced
- * features of {@link StampedLock}, and the use of slicing with the
- * Java streams {@code takeWhile()} and {@code dropWhile()}
+ * HashMap} protected by a Java {@link StampedLock}.  This {@link
+ * Memoizer} is used to compute, cache, and retrieve large prime
+ * numbers concurrently via Java sequential or parallel streams.  This
+ * example also demonstrates the Java record data type, several
+ * advanced features of {@link StampedLock}, and the use of slicing
+ * with the Java streams {@code takeWhile()} and {@code dropWhile()}
  * operations.
  */
 public class ex9 {

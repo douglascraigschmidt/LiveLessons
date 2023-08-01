@@ -50,10 +50,12 @@ Here's an overview of what's currently included in these examples:
         methods.
 
 . ex9 - This example showcases and benchmarks the use of a Java
-        object-oriented and functional programming feature in the
-        context of a Java ConcurrentHashMap, a Java SynchronizedMap,
-        and a HashMap protected with a Java StampedLock used to
-        compute/cache/retrieve large prime numbers.  This example also
+        Streams functional programming features in the context of a
+        Memoizer configured with either a Java ConcurrentHashMap, a
+        Java Collections SynchronizedMap, and a HashMap protected by a
+        Java StampedLock.  This Memoizer is used to compute, cache,
+        and retrieve large prime numbers concurrently via Java
+        sequential or parallel streams.  This example also
         demonstrates the Java record data type, several advanced
         features of StampedLock, and the use of slicing with the Java
         streams takeWhile() and dropWhile() operations.
@@ -252,3 +254,17 @@ Here's an overview of what's currently included in these examples:
          bardWorks for word.  It also show how to encode and decode a
          regular expression string so it can be sent and received as
          part of a URL.
+
+. ex46 - This example shows how the Java regular expressions can be
+         encoded and decoded so they can be sent and received as part
+         of a URL.
+
+. ex47 - This example showcases and benchmarks the use of Java
+         object-oriented and functional programming features in the
+         context of a Memoizer configured with either a Java
+         ConcurrentHashMap, a Java Collections SynchronizedMap, and a
+         HashMap protected by a Java StampedLock.  This Memoizer is
+         used to compute, cache, and retrieve large prime numbers via
+         virtual Thread objects. This example also demonstrates the
+         Java record data type and several advanced features of
+         StampedLock.
