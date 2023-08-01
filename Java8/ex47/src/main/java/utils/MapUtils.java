@@ -1,8 +1,6 @@
 package utils;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -26,23 +24,21 @@ public class MapUtils<K, V> {
     public static <K, V> Map<K, V> sortMap
         (Map<K, V> map,
          Comparator<Map.Entry<K, V>> comparator) {
-        // Create a map that's sorted by the value in map.
-        return map
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
+        // Create a list from the map's entrySet.
+        List<Map.Entry<K, V>> entries =
+            new ArrayList<>(map.entrySet());
 
-            // Sort the elements in the stream using the comparator.
-            .sorted(comparator)
+        // Sort the list using the provided comparator.
+        entries.sort(comparator);
 
-            // Trigger intermediate processing and collect key/value
-            // pairs in the stream into a LinkedHashMap, which
-            // preserves the sorted order.
-            .collect(toMap(Map.Entry::getKey,
-                           Map.Entry::getValue,
-                           (e1, e2) -> e2,
-                           LinkedHashMap::new));
+        // Create a LinkedHashMap that will preserve the sorted order.
+        Map<K, V> sortedMap = new LinkedHashMap<>();
+
+        // Add the sorted entries to the LinkedHashMap.
+        for (Map.Entry<K, V> entry : entries)
+            sortedMap.put(entry.getKey(), entry.getValue());
+
+        // Return the sorted map.
+        return sortedMap;
     }
 }

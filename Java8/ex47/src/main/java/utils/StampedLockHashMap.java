@@ -121,7 +121,7 @@ public class StampedLockHashMap<K, V>
                 // Apply the mapping function.
                 value = mappingFunction.apply(key);
 
-                // If mapping function worked then add value to map.
+                // If mapping function worked, then add value to map.
                 if (value != null) {
                     // Put the key in the map on success.
                     mMap.put(key, value);
@@ -156,7 +156,7 @@ public class StampedLockHashMap<K, V>
             // Try to get the value from the map via key.
             V value = mMap.get(key);
 
-            // If a value's associated with the key just return it.
+            // If a value's associated with the key, just return it.
             if (value != null)
                 // No need for a write lock!
                 return value;

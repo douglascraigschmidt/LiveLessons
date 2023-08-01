@@ -3,14 +3,16 @@ package utils;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static java.util.AbstractMap.SimpleImmutableEntry;
+
 /**
  * This class simplifies the computation of execution times.
  */
 public class RunTimer {
     /**
-     * Keep track of which SearchStreamGang performed the best.
+     * Keep track of which test runs performed the best.
      */
-    private static Map<String, Long> mResultsMap = new HashMap<>();
+    private static final Map<String, Long> mResultsMap = new HashMap<>();
 
     /**
      * Keeps track of how long the test has run.
@@ -74,40 +76,34 @@ public class RunTimer {
      * ordered from fastest to slowest.
      */
     public static String getTimingResults() {
-        StringBuilder stringBuffer =
-            new StringBuilder();
+        StringBuilder stringBuffer = new StringBuilder();
 
-        stringBuffer.append("Printing ")
+        stringBuffer
+            .append("Printing ")
             .append(mResultsMap.entrySet().size())
             .append(" results from fastest to slowest");
 
-        // Print out the contents of the mResultsMap in sorted
-        // order.
-        mResultsMap
-            // Get the entrySet for the mResultsMap.
-            .entrySet()
+        // Create a List from the mResultsMap's entrySet.
+        List<Map.Entry<Long, String>> entries = new ArrayList<>();
 
-            // Convert the entrySet into a stream.
-            .stream()
+        // Add the entries from mResultsMap to the List.
+        for (var entry : mResultsMap.entrySet())
+            entries.add(new SimpleImmutableEntry<>(entry.getValue(),
+                                                   entry.getKey()));
 
-            // Create a SimpleImmutableEntry containing the timing
-            // results (value) followed by the test name (key).
-            .map(entry
-                 -> new AbstractMap.SimpleImmutableEntry<>
-                 (entry.getValue(),
-                  entry.getKey()))
+        // Sort the list by the timing results (key).
+        entries.sort(Map.Entry.comparingByKey());
 
-            // Sort the stream by the timing results (key).
-            .sorted(Map.Entry.comparingByKey())
+        // Append the entries in the sorted list.
+        for (var entry : entries) {
+            stringBuffer.append("\n")
+                .append(entry.getValue())
+                .append(" executed in ")
+                .append(entry.getKey())
+                .append(" msecs");
+        }
 
-            // Append the entries in the sorted stream.
-            .forEach(entry -> stringBuffer
-                     .append("\n")
-                     .append(entry.getValue())
-                     .append(" executed in ")
-                     .append(entry.getKey())
-                     .append(" msecs"));
-
+        // Convert the StringBuffer to a String and return it.
         return stringBuffer.toString();
     }
 }

@@ -23,7 +23,7 @@ import java.util.function.Function;
  *
  * This code is inspired by an example in "Java Concurrency in
  * Practice" by Brian Goetz et al.  More information on memoization is
- * available at https://en.wikipedia.org/wiki/Memoization.
+ * available <a href="https://en.wikipedia.org/wiki/Memoization">here</a>.
  */
 public class Memoizer<K, V>
        implements Function<K, V> {
@@ -59,7 +59,10 @@ public class Memoizer<K, V>
      */
     @Override
     public V apply(final K key) {
-        return mCache.computeIfAbsent(key, mFunction);
+        return mCache
+            // If there's no value associated with the key then call the
+            // function to create the value and store it in the cache.
+            .computeIfAbsent(key, mFunction);
     }
 
     /**

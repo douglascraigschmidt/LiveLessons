@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -73,24 +74,21 @@ public class PrimeUtils {
     /**
      * Print out the prime numbers in {@code sortedMap}.
      */
-    public static void printPrimes(Map<Integer, Integer> sortedMap) {
+    public static void printPrimes
+        (Map<Integer, Integer> sortedMap) {
         // Create a list of prime integers.
-        List<Integer> primes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
+        List<Integer> primes = new ArrayList<>();
 
-            // Slice the stream using a predicate that stops after a
-            // non-prime number (i.e., getValue() != 0) is reached.
-            .takeWhile(entry -> entry.getValue() == 0)
+        // Iterate through the EntrySet of the map.
+        for (var entry : sortedMap.entrySet()) {
+            // Stop iterating when a non-prime number (i.e.,
+            // getValue() != 0) is reached.
+            if (entry.getValue() != 0)
+                break;
 
-            // Map the EntrySet into just the key.
-            .map(Map.Entry::getKey)
-
-            // Collect the results into a list.
-            .toList();
+            // Add the key to the list of primes.
+            primes.add(entry.getKey());
+        }
 
         // Print out the list of primes.
         Options.print("primes =\n" + primes);
@@ -100,21 +98,27 @@ public class PrimeUtils {
      * Print out the non-prime numbers and their factors in {@code
      * sortedMap}.
      */
-    public static void printNonPrimes(Map<Integer, Integer> sortedMap) {
+    public static void printNonPrimes
+        (Map<Integer, Integer> sortedMap) {
         // Create a list of non-prime integers and their factors.
-        List<Map.Entry<Integer, Integer>> nonPrimes = sortedMap
-            // Get the EntrySet of the map.
-            .entrySet()
-            
-            // Convert the EntrySet into a stream.
-            .stream()
+        List<Map.Entry<Integer, Integer>> nonPrimes = new ArrayList<>();
 
-            // Slice the stream using a predicate that skips over the
-            // non-prime numbers (i.e., getValue() == 0);
-            .dropWhile(entry -> entry.getValue() == 0)
+        // Create an iterator for the EntrySet of the map.
+        var iterator = sortedMap.entrySet().iterator();
 
-            // Collect the results into a list.
-            .toList();
+        // Iterate through the EntrySet of the map until the first
+        // non-prime number is found.
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (entry.getValue() != 0) {
+                nonPrimes.add(entry);
+                break;
+            }
+        }
+
+        // Add the remaining entries to the list of non-primes.
+        while (iterator.hasNext())
+            nonPrimes.add(iterator.next());
 
         // Print out the list of primes.
         Options.print("non-prime numbers and their factors =\n"

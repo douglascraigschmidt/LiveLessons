@@ -1,8 +1,14 @@
 package utils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+/**
+ * Utility class for generating random data for use by the
+ * various {@link Map} implementations.
+ */
 public class RandomUtils {
     /**
      * Generate random data for use by the various {@link Map}
@@ -12,18 +18,24 @@ public class RandomUtils {
      */
     public static List<Integer> generateRandomData
         (int count, int maxValue) {
-        // Generate a list of random large integers.
-        return new Random()
-                // Generate a stream of "count" random large ints.
-                .ints(count,
-                        // Try to generate duplicates.
-                        maxValue - count,
-                        maxValue)
+        // This List will hold random large integers.
+        List<Integer> randomIntegers = new ArrayList<>();
+        Random random = new Random();
 
-                // Convert each primitive int to Integer.
-                .boxed()
+        // Generate "count" random integers between (maxValue - count)
+        // and maxValue.
+        for (int i = 0; i < count; i++) {
+            // Generate a random number between (maxValue - count) and
+            // maxValue to ensure duplicates.
+            int randomNumber = random
+                .nextInt(maxValue - (maxValue - count))
+                        + (maxValue - count);
 
-                // Trigger intermediate operations and collect into list.
-                .toList();
+            // Add the random number to the List of random integers.
+            randomIntegers.add(randomNumber);
+        }
+
+        // Return the List of random integers.
+        return randomIntegers;
     }
 }

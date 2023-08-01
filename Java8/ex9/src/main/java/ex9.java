@@ -21,15 +21,17 @@ import static utils.PrimeUtils.printNonPrimes;
 import static utils.PrimeUtils.printPrimes;
 
 /**
- * This example showcases and benchmarks the use of a Java
- * object-oriented and functional programming features in the context
- * of a Java {@link ConcurrentHashMap}, a Java {@link Collections}
- * {@code SynchronizedMap}, and a {@link HashMap} protected with a
- * Java {@link StampedLock} used to compute/cache/retrieve large prime
- * numbers.  This example also demonstrates the Java record data type,
- * several advanced features of {@link StampedLock}, and the use of
- * slicing with the Java streams {@code takeWhile()} and {@code
- * dropWhile()} operations.
+ * This example showcases and benchmarks the use of a Java Streams
+ * functional programming features in the context of a {@link
+ * Memoizer} configured with either a Java {@link ConcurrentHashMap},
+ * a Java {@link Collections} {@code SynchronizedMap}, and a {@link
+ * HashMap} protected with a Java {@link StampedLock}.  This {@link
+ * Memoizer} is used to compute/cache/retrieve large prime numbers
+ * concurrently via Java sequential or parallel streams.  This example
+ * also demonstrates the Java record data type, several advanced
+ * features of {@link StampedLock}, and the use of slicing with the
+ * Java streams {@code takeWhile()} and {@code dropWhile()}
+ * operations.
  */
 public class ex9 {
     /**
@@ -93,11 +95,11 @@ public class ex9 {
                       stampedLockHashMap),
                      "stampedLockHashMapMemoizer");                
 
-        // Print the results.
+        // Print the timing results.
         System.out.println(RunTimer.getTimingResults());
 
-        // Demonstrate slicing on the stamped lock memoizer.
-        demonstrateSlicing(stampedLockHashMap);
+        // Print the results in the StampedLockHashMap.
+        printResults(stampedLockHashMap);
     }
 
     /**
@@ -172,7 +174,8 @@ public class ex9 {
     }
 
     /**
-     * Publish a stream of random large {@link Integer} objects.
+     * Publish a sequential or parallel stream of random large {@link
+     * Integer} objects.
      *
      * @param parallel True if the stream should be parallel, else
      *                 false
@@ -213,14 +216,11 @@ public class ex9 {
     }
 
     /**
-     * Demonstrate how to slice by applying the Java streams {@code
-     * dropWhile()} and {@code takeWhile()} operations to the {@link
-     * Map} parameter.
+     * Print the results in the {@link Map}.
      */
-    private void demonstrateSlicing(Map<Integer, Integer> map) {
+    private void printResults(Map<Integer, Integer> map) {
         // Sort the map by its values.
-        var sortedMap =
-            sortMap(map, comparingByValue());
+        var sortedMap = sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
         Options.print("map sorted by value = \n" + sortedMap);

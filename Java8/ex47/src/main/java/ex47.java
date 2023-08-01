@@ -12,15 +12,15 @@ import static utils.MapUtils.sortMap;
 import static utils.PrimeUtils.*;
 
 /**
- * This example showcases and benchmarks the use of a Java
+ * This example showcases and benchmarks the use of Java
  * object-oriented and functional programming features in the context
- * of a Java {@link ConcurrentHashMap}, a Java {@link Collections}
- * {@code SynchronizedMap}, and a {@link HashMap} protected with a
- * Java {@link StampedLock} used to compute/cache/retrieve large prime
- * numbers.  This example also demonstrates the Java record data type,
- * several advanced features of {@link StampedLock}, and the use of
- * slicing with the Java streams {@code takeWhile()} and {@code
- * dropWhile()} operations.
+ * of a {@link Memoizer} configured with either a Java {@link
+ * ConcurrentHashMap}, a Java {@link Collections} {@code
+ * SynchronizedMap}, and a {@link HashMap} protected with a Java
+ * {@link StampedLock}.  This {@link Memoizer} is used to
+ * compute/cache/retrieve large prime numbers via virtual Thread
+ * objects. This example also demonstrates the Java {@code record}
+ * data type and several advanced features of {@link StampedLock}.
  */
 public class ex47 {
     /**
@@ -84,11 +84,11 @@ public class ex47 {
                       stampedLockHashMap),
                      "stampedLockHashMapMemoizer");                
 
-        // Print the results.
+        // Print the timing results.
         System.out.println(RunTimer.getTimingResults());
 
-        // Demonstrate slicing on the stamped lock memoizer.
-        demonstrateSlicing(stampedLockHashMap);
+        // Print the results the StampedLockHashMap object.
+        printResults(stampedLockHashMap);
     }
 
     /**
@@ -142,18 +142,18 @@ public class ex47 {
         for (Integer randomInteger : mRandomIntegers) {
             Options
                 .debug("processed item: "
-                    + randomInteger
-                    + ", publisher pending items: "
-                    + mPendingItemCount.incrementAndGet());
+                       + randomInteger
+                       + ", publisher pending items: "
+                       + mPendingItemCount.incrementAndGet());
 
             threads
                 // Start a new virtual Thread to check each random
                 // number to see if it's prime.
-                .add(Thread.startVirtualThread(() ->
-                results
-                    // Check each random number to see if it's prime.
-                    .add(checkIfPrime(randomInteger,
-                                      memoizer))));
+                .add(Thread.startVirtualThread
+                     (() -> results
+                      // Check each number to see if it's prime.
+                      .add(checkIfPrime(randomInteger,
+                                        memoizer))));
         }
 
         threads
@@ -184,31 +184,28 @@ public class ex47 {
      */
     private void handleResult(PrimeUtils.PrimeResult result) {
         // Print the results.
-        if (result.smallestFactor() != 0) {
+        if (result.smallestFactor() != 0)
             Options.debug(result.primeCandidate()
                           + " is not prime with smallest factor "
                           + result.smallestFactor());
-        } else {
+        else
             Options.debug(result.primeCandidate()
                           + " is prime");
-        }
 
         Options.debug("consumer pending items: "
                       + mPendingItemCount.decrementAndGet());
     }
 
     /**
-     * Demonstrate how to slice by applying the Java streams {@code
-     * dropWhile()} and {@code takeWhile()} operations to the {@link
-     * Map} parameter.
+     * Print the results in the given {@link Map} object.
      */
-    private void demonstrateSlicing(Map<Integer, Integer> map) {
+    private void printResults(Map<Integer, Integer> map) {
         // Sort the map by its values.
         var sortedMap =
             sortMap(map, comparingByValue());
 
         // Print out the entire contents of the sorted map.
-        Options.print("map sorted by value = \n" + sortedMap);
+        Options.print("Map sorted by value = \n" + sortedMap);
 
         // Print out the prime numbers using takeWhile().
         printPrimes(sortedMap);
