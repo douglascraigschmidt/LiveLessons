@@ -1,7 +1,10 @@
+import jdk.incubator.concurrent.StructuredTaskScope;
 import utils.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Function;
@@ -10,6 +13,7 @@ import static java.util.Map.Entry.comparingByValue;
 import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.MapUtils.sortMap;
 import static utils.PrimeUtils.*;
+import static utils.RandomUtils.generateRandomData;
 
 /**
  * This example showcases and benchmarks the use of Java
@@ -18,9 +22,10 @@ import static utils.PrimeUtils.*;
  * ConcurrentHashMap}, a Java {@link Collections} {@code
  * SynchronizedMap}, and a {@link HashMap} protected by a Java {@link
  * StampedLock}.  This {@link Memoizer} is used to compute, cache, and
- * retrieve large prime numbers via virtual Thread objects. This
- * example also demonstrates the Java {@code record} data type and
- * several advanced features of {@link StampedLock}.
+ * retrieve large prime numbers concurrent via Java structured
+ * concurrency and virtual Thread objects.  This example also
+ * demonstrates the Java {@code record} data type and several advanced
+ * features of {@link StampedLock}.
  */
 public class ex47 {
     /**
@@ -50,7 +55,7 @@ public class ex47 {
         Options.instance().parseArgs(argv);
 
         // Generate random data for use by the various hashmaps.
-        mRandomIntegers = RandomUtils.generateRandomData
+        mRandomIntegers = generateRandomData
             (Options.instance().count(),
              Options.instance().maxValue());
     }
@@ -59,30 +64,32 @@ public class ex47 {
      * Run all the tests and print the results.
      */
     private void run() {
-        // Create a StampedLockHashMap.
+        // Create and time the use of a Memoizer configured with a
+        // SynchronizedHashMap, which uses a single lock.
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  Collections.synchronizedMap(new HashMap<>())),
+                 "synchronizedHashMapMemoizer");
+
+        // Create and time the use of a Memoizer configured with a
+        // ConcurrentHashMap, which uses a lock per hash table
+        // "bucket".
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  new ConcurrentHashMap<>()),
+                 "concurrentHashMapMemoizer");
+
+        // Create a StampedLockHashMap, which uses various features of
+        // a StampedLock.
         Map<Integer, Integer> stampedLockHashMap =
             new StampedLockHashMap<>();
 
-        // Create and time the use of a SynchronizedHashMap.
-        Function<Integer, Integer> synchronizedHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      Collections.synchronizedMap(new HashMap<>())),
-                     "synchronizedHashMapMemoizer");
-
-        // Create and time the use of a ConcurrentHashMap.
-        Function<Integer, Integer> concurrentHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      new ConcurrentHashMap<>()),
-                     "concurrentHashMapMemoizer");
-        
-        // Create and time the use of a StampedLockHashMap.
-        Function<Integer, Integer> stampedLockHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      stampedLockHashMap),
-                     "stampedLockHashMapMemoizer");                
+        // Create and time the use of a Memoizer configured with a
+        // StampedLockHashMap.
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  stampedLockHashMap),
+                 "stampedLockHashMapMemoizer");                
 
         // Print the timing results.
         System.out.println(RunTimer.getTimingResults());
@@ -111,7 +118,7 @@ public class ex47 {
     }
 
     /**
-     * Run the prime number test.
+     * Run the prime number test using Java structured concurrency.
      * 
      * @param memoizer A cache that maps candidate primes to their
      *                 smallest factor (if they aren't prime) or 0 if
@@ -130,39 +137,42 @@ public class ex47 {
         // Reset the counter.
         Options.instance().primeCheckCounter().set(0);
 
-        // Create a List of PrimeResult objects.
-        List<PrimeResult> results =
+        // Create a List of Future<PrimeResult> objects of the given
+        // size.
+        List<Future<PrimeResult>> results =
             new ArrayList<>(mRandomIntegers.size());
 
-        // Create a List of virtual Thread objects.
-        List<Thread> threads =
-            new ArrayList<>(mRandomIntegers.size());
+        // Create a new scope to execute virtual Thread objects.
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            // Iterate through all the random Integer objects.
+            for (Integer randomInteger : mRandomIntegers) {
+                Options
+                    .debug("processed item: "
+                           + randomInteger
+                           + ", publisher pending items: "
+                           + mPendingItemCount.incrementAndGet());
 
-        // Process each random number.
-        for (Integer randomInteger : mRandomIntegers) {
-            Options
-                .debug("processed item: "
-                       + randomInteger
-                       + ", publisher pending items: "
-                       + mPendingItemCount.incrementAndGet());
+                results
+                    // Add the Future<PrimeResult> to the List.
+                    .add(scope.
+                         // Create a virtual Thread to run the computation.
+                         fork(() ->
+                              // Check each number to see if it's prime.
+                              checkIfPrime(randomInteger,
+                                           memoizer)));
+            }
 
-            threads
-                // Start a new virtual Thread to check each random
-                // number to see if it's prime.
-                .add(Thread.startVirtualThread
-                     (() -> results
-                      // Check each number to see if it's prime.
-                      .add(checkIfPrime(randomInteger,
-                                        memoizer))));
+            // This barrier synchronizer waits for all Thread objects
+            // to finish or throw any exception that occurred.
+            scope.join().throwIfFailed();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
-
-        threads
-            // Wait for each thread to finish.
-            .forEach(rethrowConsumer(Thread::join));
 
         results
             // Handle each result.
-            .forEach(this::handleResult);
+            .forEach(resultFuture -> 
+                     handleResult(resultFuture.resultNow()));
 
         Options.print("Leaving "
                       + testName

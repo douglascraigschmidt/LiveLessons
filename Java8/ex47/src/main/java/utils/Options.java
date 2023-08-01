@@ -1,8 +1,6 @@
 package utils;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
  * This class implements the Singleton pattern to handle command-line
@@ -161,30 +159,17 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-l":
-                    mLoggingEnabled = argv[argc + 1].equals("true");
-                        break;
-                case "-c":
-                    mCount = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-s":
-                    mStampedLockStrategy = argv[argc + 1].charAt(0);
-                    break;
-                case "-m":
-                    mMaxValue = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-p":
-                    mParallel = argv[argc + 1].equals("true");
-                    break;
-                case "-t":
-                    mMaxTries = Integer.parseInt(argv[argc + 1]);
-                    break;
-                default:
-                    printUsage();
-                    return;
+                    case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    case "-l" -> mLoggingEnabled = argv[argc + 1].equals("true");
+                    case "-c" -> mCount = Integer.parseInt(argv[argc + 1]);
+                    case "-s" -> mStampedLockStrategy = argv[argc + 1].charAt(0);
+                    case "-m" -> mMaxValue = Integer.parseInt(argv[argc + 1]);
+                    case "-p" -> mParallel = argv[argc + 1].equals("true");
+                    case "-t" -> mMaxTries = Integer.parseInt(argv[argc + 1]);
+                    default -> {
+                        printUsage();
+                        return;
+                    }
                 }
             if (mMaxValue - mCount <= 0)
                 throw new IllegalArgumentException("maxValue - count must be greater than 0");

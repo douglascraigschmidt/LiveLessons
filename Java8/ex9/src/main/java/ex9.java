@@ -70,30 +70,32 @@ public class ex9 {
      * Run all the tests and print the results.
      */
     private void run() {
-        // Create a StampedLockHashMap.
+        // Create and time the use of a Memoizer configured with a
+        // SynchronizedHashMap, which uses a single lock.
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  Collections.synchronizedMap(new HashMap<>())),
+                 "synchronizedHashMapMemoizer");
+
+        // Create and time the use of a Memoizer configured with a
+        // ConcurrentHashMap, which uses a lock per hash table
+        // "bucket".
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  new ConcurrentHashMap<>()),
+                 "concurrentHashMapMemoizer");
+        
+        // Create a StampedLockHashMap, which uses various features of
+        // a StampedLock.
         Map<Integer, Integer> stampedLockHashMap =
             new StampedLockHashMap<>();
 
-        // Create and time the use of a SynchronizedHashMap.
-        Function<Integer, Integer> synchronizedHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      Collections.synchronizedMap(new HashMap<>())),
-                     "synchronizedHashMapMemoizer");
-
-        // Create and time the use of a ConcurrentHashMap.
-        Function<Integer, Integer> concurrentHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      new ConcurrentHashMap<>()),
-                     "concurrentHashMapMemoizer");
-        
-        // Create and time the use of a StampedLockHashMap.
-        Function<Integer, Integer> stampedLockHashMapMemoizer =
-            timeTest(new Memoizer<>
-                     (PrimeUtils::isPrime,
-                      stampedLockHashMap),
-                     "stampedLockHashMapMemoizer");                
+        // Create and time the use of a Memoizer configured with a
+        // StampedLockHashMap.
+        timeTest(new Memoizer<>
+                 (PrimeUtils::isPrime,
+                  stampedLockHashMap),
+                 "stampedLockHashMapMemoizer");                
 
         // Print the timing results.
         System.out.println(RunTimer.getTimingResults());
