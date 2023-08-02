@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -9,16 +10,16 @@ import java.util.function.Function;
  * the constructor.  If a value has previously been computed it is
  * returned rather than calling the function to compute it again.  The
  * Java Map computeIfAbsent() method is used to ensure only a single
- * call to the function is run when a key and value is first added to
+ * call to the function is run when a key and value are first added to
  * the cache.
  *
- * The {@code map} argumented passed to the constructor determines
- * what implementation of {@code Map} is used for the cache.
- * Implementations include {@code ConcurrentHashMap} (which is correct
+ * The {@code map} argument passed to the constructor determines
+ * what implementation of {@link Map} is used for the cache.
+ * Implementations include {@link ConcurrentHashMap} (which is correct
  * and efficient in a concurrent program), {@code SynchronizedMap}
  * (which is correct, but inefficient in a concurrent program), and
- * {@code StampedLockHashMap} (which is better than {@code
- * SynchronizedMap}, but often not as scalable as {@code
+ * {@link StampedLockHashMap} (which is better than {@code
+ * SynchronizedMap}, but often not as scalable as {@link
  * ConcurrentHashMap}).
  *
  * This code is inspired by an example in "Java Concurrency in
@@ -86,7 +87,7 @@ public class Memoizer<K, V>
     }
 
     /**
-     * @return The number of underlying map used as a cache.
+     * @return The number of underlying {@link Map} used as a cache.
      */
     public Map<K, V> getCache() {
         return mCache;

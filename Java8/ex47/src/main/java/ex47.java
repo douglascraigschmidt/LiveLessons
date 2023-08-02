@@ -10,7 +10,6 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.Function;
 
 import static java.util.Map.Entry.comparingByValue;
-import static utils.ExceptionUtils.rethrowConsumer;
 import static utils.MapUtils.sortMap;
 import static utils.PrimeUtils.*;
 import static utils.RandomUtils.generateRandomData;
@@ -22,7 +21,7 @@ import static utils.RandomUtils.generateRandomData;
  * ConcurrentHashMap}, a Java {@link Collections} {@code
  * SynchronizedMap}, and a {@link HashMap} protected by a Java {@link
  * StampedLock}.  This {@link Memoizer} is used to compute, cache, and
- * retrieve large prime numbers concurrent via Java structured
+ * retrieve large prime numbers concurrently via Java structured
  * concurrency and virtual Thread objects.  This example also
  * demonstrates the Java {@code record} data type and several advanced
  * features of {@link StampedLock}.
@@ -103,18 +102,17 @@ public class ex47 {
      *
      * @param memoizer The memoizer used to cache the prime candidates
      * @param testName The name of the test
-     * @return The memoizer updated during the test
      */
-    private Function<Integer, Integer> timeTest
+    private void timeTest
         (Function<Integer, Integer> memoizer,
          String testName) {
         // Return the memoizer updated during the test.
-        return RunTimer
+        RunTimer
             // Time how long this test takes to run.
             .timeRun(() ->
-                     // Run the test using the given memoizer.
-                     runTest(memoizer, testName),
-                     testName);
+                    // Run the test using the given memoizer.
+                    runTest(memoizer, testName),
+                testName);
     }
 
     /**
