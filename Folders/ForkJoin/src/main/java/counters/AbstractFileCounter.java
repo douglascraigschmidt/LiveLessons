@@ -1,14 +1,18 @@
+package counters;
+
 import java.io.File;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Abstract super class for the various {@code FileCounter*} subclasses.
+ * Abstract super class for the various {@code FileCounter*}
+ * subclasses.
  */
 public abstract class AbstractFileCounter
        extends RecursiveTask<Long> {
     /**
-     * The current file (i.e., document or folder) that's being analyzed.
+     * The current file (i.e., document or folder) that's being
+     * analyzed.
      */
     protected final File mFile;
 
@@ -44,7 +48,7 @@ public abstract class AbstractFileCounter
 
     /**
      * @return The number of documents counted during the recursive
-     * traversal
+     *         traversal
      */
     public long documentCount() {
         return mDocumentCount.get();
@@ -52,7 +56,7 @@ public abstract class AbstractFileCounter
 
     /**
      * @return The number of folders counted during the recursive
-     * traversal
+     *         traversal
      */
     public long folderCount() {
         return mFolderCount.get();

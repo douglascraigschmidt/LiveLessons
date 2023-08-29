@@ -1,7 +1,7 @@
+package counters;
+
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -15,7 +15,7 @@ public class FileCounterParallelStream
     /**
      * Constructor initializes the fields.
      */
-    FileCounterParallelStream(File file) {
+    public FileCounterParallelStream(File file) {
         super(file);
     }
 
@@ -30,7 +30,7 @@ public class FileCounterParallelStream
 
     /**
      * This hook method returns the size in bytes of the file, as well
-     * as all the files in folders reachable from this file.
+     * as all the "files" in folders reachable from {@code mFile}.
      */
     @Override
     protected Long compute() {
@@ -56,12 +56,12 @@ public class FileCounterParallelStream
                 // Convert to a parallel stream.
                 .parallel()
 
-                // Map each folder recursively into a
-                // FileCounterParalleStream.
-                .mapToLong(temp -> 
-                           new FileCounterParallelStream(temp,
-                                                         mDocumentCount,
-                                                         mFolderCount).compute())
+                // Map each "file" recursively into a
+                // FileCounterParallelStream.
+                .mapToLong(temp -> new FileCounterParallelStream
+                           (temp,
+                            mDocumentCount,
+                            mFolderCount).compute())
 
                 // Sum the sizes of all the files.
                 .sum();
