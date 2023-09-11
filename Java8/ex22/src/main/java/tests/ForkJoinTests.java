@@ -21,9 +21,10 @@ public final class ForkJoinTests {
      * Apply {@link Function} {@code op} to all items in the {@link
      * List} using iterative calls to fork-join methods.
      */
-    public static <T> List<T> applyAllIter(List<T> list,
-                                           Function<T, T> op,
-                                           ForkJoinPool forkJoinPool) {
+    public static <T> List<T> applyAllIter
+        (List<T> list,
+         Function<T, T> op,
+         ForkJoinPool forkJoinPool) {
         // Invoke a new task in the fork-join pool.
         return forkJoinPool.invoke(new RecursiveTask<>() {
                 /**
@@ -38,7 +39,7 @@ public final class ForkJoinTests {
                     List<T> results =
                         new LinkedList<>();
 
-                    // Iterate through list, fork all the tasks,
+                    // Iterate through List, fork all the tasks,
                     // and add them to the forks list.
                     for (T t : list)
                         // Add each new task to the forks list.
@@ -68,9 +69,10 @@ public final class ForkJoinTests {
      * Apply {@link Function} {@code op} to all items in the {@link
      * List} by recursively splitting up calls to fork-join methods.
      */
-    public static <T> List<T> applyAllSplit(List<T> list,
-                                            Function<T, T> op,
-                                            ForkJoinPool forkJoinPool) {
+    public static <T> List<T> applyAllSplit
+        (List<T> list,
+         Function<T, T> op,
+         ForkJoinPool forkJoinPool) {
         /*
          * This task splits up the list recursively and runs each half
          * in a ForkJoinTask.
@@ -148,12 +150,14 @@ public final class ForkJoinTests {
      * List} by recursively splitting up calls to fork-join methods.
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> applyAllSplitIndex(List<T> list,
-                                                 Function<T, T> op,
-                                                 ForkJoinPool forkJoinPool) {
+    public static <T> List<T> applyAllSplitIndex
+        (List<T> list,
+         Function<T, T> op,
+         ForkJoinPool forkJoinPool) {
         // Use Java reflection to create a new array to hold the results.
-        T[] results = (T[]) Array.newInstance(list.get(0).getClass(),
-                                              list.size());
+        T[] results = (T[]) Array
+            .newInstance(list.get(0).getClass(),
+                   list.size());
 
         /*
          * This task partitions list recursively and runs each half in
@@ -188,7 +192,7 @@ public final class ForkJoinTests {
                 // Find the midpoint.
                 int mid = mLo + mHi >>> 1;
 
-                // If there's just a single element then apply
+                // If there's just a single element, then apply
                 // the operation.
                 if (mLo == mid) {
                     // Update the mLo location with the results of
@@ -223,10 +227,11 @@ public final class ForkJoinTests {
      * Apply {@link Function} {@code op} to all items in the {@link
      * List} by recursively splitting up calls to fork-join methods.
      */
-    public static <T> void applyAllSplitIndexEx(List<T> list,
-                                                Function<T, T> op,
-                                                ForkJoinPool forkJoinPool,
-                                                T[] results) {
+    public static <T> void applyAllSplitIndexEx
+        (List<T> list,
+         Function<T, T> op,
+         ForkJoinPool forkJoinPool,
+         T[] results) {
         /*
          * This task partitions list recursively and runs each half in
          * a ForkJoinTask.  It uses indices to avoid the overhead of
@@ -260,7 +265,7 @@ public final class ForkJoinTests {
                 // Find the midpoint.
                 int mid = (mLo + mHi) >>> 1;
 
-                // If there's just a single element then apply
+                // If there's just a single element, then apply
                 // the operation.
                 if (mLo == mid) {
                     // Update the mLo location with the results of
@@ -324,8 +329,9 @@ public final class ForkJoinTests {
      * Apply {@link Function} {@code op} to all items in the {@link
      * List} using the Java parallel stream framework.
      */
-    public static <T> List<T> applyParallelStream(List<T> list,
-                                                  Function<T, T> op) {
+    public static <T> List<T> applyParallelStream
+        (List<T> list,
+         Function<T, T> op) {
         return list
             // Convert the list to a parallel stream.
             .parallelStream()

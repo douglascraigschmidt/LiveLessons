@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 
 /**
  * This task uses the Java parallel streams framework to compute the
- * size in bytes of a given file, as well as all the files in folders
- * reachable from this file.
+ * size in bytes of a given file, as well as all the files
+ * in folders reachable from a "file" that is a folder.
  */
 public class FileCounterParallelStream
        extends AbstractFileCounter {
@@ -35,7 +35,7 @@ public class FileCounterParallelStream
     @Override
     protected Long compute() {
         // Determine if mFile is a file (document) vs. a directory
-        // (folder).
+        // (folder). This is the base case for the recursion.
         if (mFile.isFile()) {
             // Increment the count of documents.
             mDocumentCount.incrementAndGet();
@@ -47,7 +47,7 @@ public class FileCounterParallelStream
             mFolderCount.incrementAndGet();
 
             return Stream
-                // Convert the List to a sequential stream.
+                // Convert the "list" (array) to a sequential stream.
                 .of(Objects
                     .requireNonNull(mFile
                                     // Get the List of files.
@@ -58,8 +58,8 @@ public class FileCounterParallelStream
 
                 // Map each "file" recursively into a
                 // FileCounterParallelStream.
-                .mapToLong(temp -> new FileCounterParallelStream
-                           (temp,
+                .mapToLong(file -> new FileCounterParallelStream
+                           (file,
                             mDocumentCount,
                             mFolderCount).compute())
 

@@ -11,16 +11,16 @@ import java.util.concurrent.*;
 /**
  * This example shows how to use various Java mechanisms (including
  * the Java fork-join framework and streams framework) to count the
- * number of files in a (large) recursive folder hierarchy, as well as
- * calculate the cumulative sizes of all the files.
+ * number of files in a (large) recursive folder hierarchy, as well
+ * as calculate the cumulative sizes of all the files.
  */
 class Main {
     /**
-     * Main entry point into the program runs the tests.
+     * The main entry point into the program runs the tests.
      */
     public static void main(String[] args)
         throws URISyntaxException {
-        System.out.println("Starting the file counter program");
+        System.out.println("Starting the FileCounter program");
 
         // Warmup the thread pool.
         warmupThreadPool1();
@@ -34,7 +34,7 @@ class Main {
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java 7 features.
-        runFileCounterTask();
+        runFileCounterForkJoinTask();
 
         // Run a test that uses the Java fork-join framework in
         // conjunction with Java sequential streams features.
@@ -43,14 +43,14 @@ class Main {
         // Get and print the timing results.
         System.out.println(RunTimer.getTimingResults());
 
-        System.out.println("Ending the file counter program");
+        System.out.println("Ending the FileCounter program");
     }
 
     /**
      * Run a test that uses the Java fork-join framework in
      * conjunction with Java 7 features.
      */
-    private static void runFileCounterTask()
+    private static void runFileCounterForkJoinTask()
         throws URISyntaxException {
         runTest(ForkJoinPool.commonPool(),
                 new FileCounterForkJoinTask
