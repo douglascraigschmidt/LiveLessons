@@ -37,7 +37,7 @@ public class StreamsTests {
             .convertFlightPrices(flightList, currency)
 
             // Collect into a List.
-            .collect(toList());
+            .toList();
 
         Optional<Flight> min1 = flights
             // Convert the List into a Stream.
@@ -58,7 +58,9 @@ public class StreamsTests {
                          flight.getPrice().equals(min.getPrice())));
 
         // If there are any cheapest flights return them as a List.
-        return flightStream.orElseGet(Stream::empty).collect(toList());
+        return flightStream
+            .orElseGet(Stream::empty)
+            .toList();
     }
 
     /**
@@ -81,7 +83,7 @@ public class StreamsTests {
             .sorted(Comparator.comparing(Flight::getPrice))
 
             // Collect into a List.
-            .collect(toList());
+            .toList();
 
         // If there's at least one flight then continue.
         if (sortedFlights.size() > 0) {
@@ -97,7 +99,7 @@ public class StreamsTests {
                            flight.getPrice().equals(cheapest.getPrice()))
 
                 // Print the cheapest flights.
-                .collect(toList());
+                .toList();
         } else
             // Return an empty ArrayList.
             return new ArrayList<>();

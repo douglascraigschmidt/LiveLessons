@@ -143,11 +143,12 @@ public class ex34 {
                                  .apply(flights, currency),
                                  algorithmName);
 
-                       // Print the cheapest flights.
+                    // Print the cheapest flights.
                     cheapestFlights
                         .forEach(flight -> ex34
-                                 .printResults("algorithmName = "
-                                          + flight));
+                                 .printResults(algorithmName
+                                               + " = "
+                                               + flight));
                     return null;
                 });
     }
