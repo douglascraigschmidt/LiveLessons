@@ -17,6 +17,7 @@ import static utils.Utils.startsWithHh;
  * This class defines various generators and input that these
  * generators use to produce {@link Stream} and {@link Map} objects.
  */
+@SuppressWarnings("unchecked")
 public class Generators {
     /** 
      * A {@link List} of key characters in the play Hamlet.
@@ -67,29 +68,13 @@ public class Generators {
         List.of("Fortinbras")};
 
     /**
-     * @return A sorted {@link Stream} of characters from the play
-     * Hamlet whose names start with upper- or lower-case 'h' whose
-     * names are consistently capitalized.
-     */
-    public static Stream<String> generateHCharacters(Stream<String> characters) {
-        return characters
-            // Remove any strings that don't start with 'h' or 'H'.
-            .filter(startsWithHh(true))
-
-            // Capitalize the first letter in the string.
-            .map(Utils::capitalize)
-
-            // Sort the results in ascending order.
-            .sorted();
-    }
-
-    /**
      * @return A {@link Map} of characters from the play Hamlet whose
      * keys start with upper- or lower-case 'h' whose names are
      * consistently capitalized and whose values are the lengths of
      * the character's names.
      */
-    public static Map<String, Long> generateHCharactersMap(String characters) {
+    public static Map<String, Long> generateHCharactersMap
+        (String characters) {
         return Generators
             // Generate a Stream.
             .generateHCharacters(Pattern
@@ -106,5 +91,23 @@ public class Generators {
                                 // Use a TreeMap to sort the results.
                                 TreeMap::new,
                                 summingLong(String::length)));
+    }
+
+    /**
+     * @return A sorted {@link Stream} of characters from the play
+     * Hamlet whose names start with upper- or lower-case 'h' whose
+     * names are consistently capitalized.
+     */
+    public static Stream<String> generateHCharacters
+    (Stream<String> characters) {
+        return characters
+            // Remove any strings that don't start with 'h' or 'H'.
+            .filter(startsWithHh(true))
+
+            // Capitalize the first letter in the string.
+            .map(Utils::capitalize)
+
+            // Sort the results in ascending order.
+            .sorted();
     }
 }

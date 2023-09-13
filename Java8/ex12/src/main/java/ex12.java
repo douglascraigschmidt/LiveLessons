@@ -22,7 +22,6 @@ public class ex12 {
      * The main entry point into the test program.
      */
     static public void main(String[] argv) {
-
         // Demonstrate the Java 7 baseline.
         runClassicJava();
 
@@ -100,6 +99,5 @@ public class ex12 {
         for (String s : listOfCharacters)
             System.out.println(s);
     }
-
 }
 

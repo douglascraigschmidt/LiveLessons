@@ -15,8 +15,8 @@ import static tests.Generators.sCharactersStr;
  */
 public class ReduceTests {
     /**
-     * Run an example using the collect(groupingBy()) and the two
-     * parameter version of the reduce() terminal operations.
+     * Run an example using the collect(groupingBy()) and the two-parameter
+     * version of the reduce() terminal operations.
      */
     public static void runReduce1() {
         System.out.println("\nResults from runReduce1():");
@@ -102,6 +102,7 @@ public class ReduceTests {
      * Run an example using the collect(groupingBy()) and the
      * collect(summingInt()) terminal operation.
      */
+    @SuppressWarnings("SimplifyStreamApiCallChains")
     public static void runReduce3() {
         System.out.println("\nResults from runReduce3():");
 
@@ -132,6 +133,10 @@ public class ReduceTests {
             // long result.
             .collect(summingLong(Long::longValue));
 
+            // Could also use
+            // .mapToLong(Long::longValue)
+            // .sum();
+
         // Print the results.
         System.out.println("Count of lengths of Hamlet characters' names "
                            // Get the list of character names.
@@ -141,7 +146,7 @@ public class ReduceTests {
     }
 
     /**
-     * Run an example show the three parameter reduce() terminal
+     * Run an example show the three-parameter reduce() terminal
      * operation, which also plays the role of "map" in map-reduce.
      */
     public static void runMapReduce1() {
@@ -161,7 +166,7 @@ public class ReduceTests {
 
             // Terminal operation that triggers intermediate operation
             // processing and collects the results into a list.
-            .collect(toList());
+            .toList();
 
         // Count of the length of each Hamlet character names that
         // start with 'h' or 'H'.
@@ -176,10 +181,10 @@ public class ReduceTests {
             // applications using parallel streams.
             .reduce(0L,
                     // This is the "map" operation
-                    // (a.k.a. "accumulator").
+                    // (a.k.a.. "accumulator").
                     (sum, s) -> sum + s.length(),
                     // This is the "reduce" operation
-                    // (a.k.a. "combiner").
+                    // (a.k.a., "combiner").
                     Long::sum);
 
         // Print the results.

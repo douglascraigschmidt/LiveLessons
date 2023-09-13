@@ -55,22 +55,22 @@ public class ex17 {
         testProd(0L, false);
 
         // Reduce partial results into a string using a sequential
-        // stream and the three parameter version of reduce() along
+        // stream and the three-parameter version of reduce() along
         // with StringBuilder.
         buggyStreamReduce3a(false);
 
         // Reduce partial results into a string using a parallel
-        // stream and the three parameter version of reduce() along
+        // stream and the three-parameter version of reduce() along
         // with StringBuilder..
         buggyStreamReduce3a(true);
 
         // Reduce partial results into a string using a sequential
-        // stream and the three parameter version of reduce() along
+        // stream and the three-parameter version of reduce() along
         // with StringBuffer.
         buggyStreamReduce3b(false);
 
         // Reduce partial results into a string using a parallel
-        // stream and the three parameter version of reduce() along
+        // stream and the three-parameter version of reduce() along
         // with StringBuffer.
         buggyStreamReduce3b(true);
 

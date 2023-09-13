@@ -33,8 +33,8 @@ public class CollectTests {
             .generateHCharacters(sCharacters.stream())
 
             // This terminal operation triggers intermediate operation
-            // processing and collects the results into a list, which
-            // contains duplicates.
+            // processing and collects the results into a mutable list,
+            // which contains duplicates.
             .collect(toList());
 
         // Print the results.
@@ -97,7 +97,9 @@ public class CollectTests {
 
             // Terminal operation that triggers intermediate operation
             // processing and collects the results into a map.
-            .collect(toMap(identity(), String::length, Integer::sum));
+            .collect(toMap(identity(),
+                  String::length,
+                Integer::sum));
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
@@ -168,7 +170,7 @@ public class CollectTests {
             // Trigger the intermediate operations and collect the
             // results via the teeing Collector. 
             .collect(
-                     // Collect all  characters starting with 'H' or
+                     // Collect all characters starting with 'H' or
                      // 'h' into one List followed by collecting all
                      // characters not starting with 'H' or 'h' into
                      // a separate List.
@@ -186,5 +188,4 @@ public class CollectTests {
         // Print the results.
         System.out.println(results);
     }
-
 }

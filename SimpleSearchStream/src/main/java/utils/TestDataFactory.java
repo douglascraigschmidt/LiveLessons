@@ -44,7 +44,7 @@ public class TestDataFactory {
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
                 // Collect the results into a List of String objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -52,21 +52,23 @@ public class TestDataFactory {
     }
 
     /**
-     * Return the word list in the @a filename as a list of
+     * @return The word list in the {@code filename} as a list of
      * non-empty strings.
      */
     public static List<String> getWordList(String filename) {
-        try {
-            return Files
-                // Read all lines from filename.
-                .lines(Paths.get(ClassLoader.getSystemResource
-                                 (filename).toURI()))
+        // Use the try-with-resources idiom to open the file and
+        // read all the lines from it.
+        try (var lines = Files
+                 // Read all lines from filename.
+                 .lines(Paths.get(ClassLoader.getSystemResource
+                     (filename).toURI()))) {
+            return lines
 
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
 
                 // Collect the results into a List of String objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

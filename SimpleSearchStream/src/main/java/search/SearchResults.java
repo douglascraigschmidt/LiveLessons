@@ -19,7 +19,7 @@ public class SearchResults {
          * The index in the search String where the word that was
          * found.
          */
-        private int mIndex;
+        private final int mIndex;
 
         /**
          * Create a Result object contains meta-data about a search
@@ -68,7 +68,7 @@ public class SearchResults {
     /**
      * The List of Result objects that matched the @code mWord.
      */
-    private List<Result> mList;
+    private final List<Result> mList;
 
     /**
      * Create an empty SearchResults, which is used to shutdown
@@ -122,7 +122,7 @@ public class SearchResults {
     public SearchResults(String word,
                          String title,
                          List<Result> resultList) {
-        mThreadId = Thread.currentThread().getId();
+        mThreadId = Thread.currentThread().threadId();
         mCycle = 1;
         mWord = word;
         mTitle = title;
@@ -183,19 +183,19 @@ public class SearchResults {
     }
 
     private static String formatList(List<SearchResults.Result> list) {
-         return // Create a string containing indices of all the matches.
-                    "["
-                            + list
-                            // Convert list to a stream.
-                            .stream()
+        return // Create a string containing indices of all the matches.
+            "["
+            + list
+            // Convert list to a stream.
+            .stream()
 
-                            // Create a custom collector to join all the results
-                            // together.
-                            .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
-                                    (j, r) -> j.add(r.toString()),       // accumulator
-                                    StringJoiner::merge,                 // combiner
-                                    StringJoiner::toString))             // finisher
-                            + "]";
+            // Create a custom collector to join all the results
+            // together.
+            .collect(Collector.of(() -> new StringJoiner("|"),  // supplier
+                                  (j, r) -> j.add(r.toString()),       // accumulator
+                                  StringJoiner::merge,                 // combiner
+                                  StringJoiner::toString))             // finisher
+            + "]";
     }
 
     public static void printResults(List<SearchResults.Result> list) {

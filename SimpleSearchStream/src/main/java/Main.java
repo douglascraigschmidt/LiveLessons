@@ -5,7 +5,7 @@ import utils.TestDataFactory;
 import java.util.List;
 
 /**
- * This program searches seqentially for the occurrence of words in a
+ * This program searches sequentially for the occurrence of words in a
  * string containing the contents of a file.  It demonstrates the use
  * of basic Java 8 functional programming features (such as lambda
  * expressions and method references) in conjunction with Java 8

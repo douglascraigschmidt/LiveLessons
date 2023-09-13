@@ -48,7 +48,7 @@ public class WordSearcher {
 
                 // This terminal operation triggers intermediate operation
                 // processing and collects the SearchResults into a list.
-                .collect(toList());
+                .toList();
     }
 
     /**
@@ -58,7 +58,7 @@ public class WordSearcher {
     private SearchResults searchForWord(String word) {
         // Create/return SearchResults to keep track of relevant info.
         return new SearchResults
-                (Thread.currentThread().getId(),
+                (Thread.currentThread().threadId(),
                         1,
                         word,
                         "",
@@ -73,7 +73,7 @@ public class WordSearcher {
 
                                 // This terminal operation triggers aggregate operation
                                 // processing and returns a list of Results.
-                                .collect(toList()));
+                                .toList());
     }
 
     /**
@@ -147,7 +147,7 @@ public class WordSearcher {
              // Accumulate elements from a SearchResults object into the results list.
              (resultsList, searchResults) ->
              resultsList.addAll(searchResults.getResultList()),
-             // Combine two results lists together.
+             // Combine the two results lists.
              (left, right) -> {
                 left.addAll(right);
                 return left;
