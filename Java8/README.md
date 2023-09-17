@@ -250,10 +250,10 @@ Here's an overview of what's currently included in these examples:
          which aren't.
 
 . ex45 - This example shows how the Java regular expression methods
-         can be used to search the complete works of Shakespeare
-         bardWorks for word.  It also show how to encode and decode a
-         regular expression string so it can be sent and received as
-         part of a URL.
+         can be used in conjunction with Java sequential streams to
+         search the complete works of Shakespeare bardWorks for word.
+         It also show how to encode and decode a regular expression
+         string so it can be sent and received as part of a URL.
 
 . ex46 - This example shows how the Java regular expressions can be
          encoded and decoded so they can be sent and received as part

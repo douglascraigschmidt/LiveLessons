@@ -3,7 +3,6 @@ package utils;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -23,12 +22,14 @@ public final class RegexUtils {
      *
      * @param queries The {@link List} of queries
      * @return A {@link String} that encodes the {@code queries} in
-     *         regular expression form
+     *         regular expression form and matches any string that
+     *         contains any of the keywords as whole words, regardless
+     *         of case.
      */
     public static String makeRegex(List<String> queries) {
         // Combine the 'queries' List into a lowercase String and
         // convert into a regex of the following style:
-        // (?i).*(\Qquery_1\E)|(\Qquery_2\E)...(\Qquery_n\Q).*
+        // (?i).*\b(\Qquery_1\E)|(\Qquery_2\E)...(\Qquery_n\Q)\b.*
         return queries
             // Convert the List to a Stream.
             .stream()
@@ -38,11 +39,11 @@ public final class RegexUtils {
 
             // Use the joining() collector to concatenate the keywords
             // into a single string separated by the | (OR) operator,
-            // and add the prefix (?i).*( and suffix ).* to ensure
+            // and add the prefix (?i).*\\b( and suffix )\\b.* to ensure
             // that the regular expression matches any string that
             // contains any of the keywords as whole words, regardless
             // of case.
-            .collect(joining("|", "(?i).*(", ").*"));
+            .collect(joining("|", "(?i).*\\b(", ")\\b.*"));
     }
 
     /**

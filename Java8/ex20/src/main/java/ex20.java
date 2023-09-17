@@ -89,6 +89,7 @@ public class ex20 {
     private void testDownloadBehavior(Function<URL, File> downloadAndStoreImage,
                                       String testName) {
         // Get the list of files to the downloaded images.
+
         List<File> imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
             // process them in parallel.
