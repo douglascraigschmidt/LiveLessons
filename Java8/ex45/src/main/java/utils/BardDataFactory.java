@@ -7,16 +7,14 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This utility class contains methods for obtaining test data.
  */
-public class TestDataFactory {
+public class BardDataFactory {
     /**
      * A utility class should always define a private constructor.
      */
-    private TestDataFactory() {
+    private BardDataFactory() {
     }
 
     /**

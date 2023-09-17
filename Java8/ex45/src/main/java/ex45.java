@@ -1,5 +1,5 @@
 import utils.RegexUtils;
-import utils.TestDataFactory;
+import utils.BardDataFactory;
 
 import java.text.BreakIterator;
 import java.util.List;
@@ -15,8 +15,8 @@ import static utils.RegexUtils.makeRegex;
 /**
  * This example shows how the Java regular expression methods can be
  * used in conjunction with Java sequential streams to search the
- * complete works of Shakespeare ({@code bardWorks}) particular
- * phrases.
+ * complete works of Shakespeare ({@code bardWorks}) for particular
+ * words and phrases.
  */
 public class ex45 {
     /**
@@ -29,12 +29,14 @@ public class ex45 {
      * Main entry point into the program.
      */
     static public void main(String[] argv) {
+        var test = new ex45();
+
         // Test the makeRegex() method.
-        testRegexList();
+        test.testRegexList();
 
         // Create a List of String objects containing the complete
         // works of Shakespeare.
-        List<String> bardWorks = TestDataFactory
+        List<String> bardWorks = BardDataFactory
             .getInput(sSHAKESPEARE_DATA_FILE,
                       // Split input into "works".
                       "@");
@@ -42,13 +44,13 @@ public class ex45 {
         assert bardWorks != null;
 
         // Search the works of Shakespeare for a certain word/phrase.
-        processBardWorks(bardWorks, "lord");
+        test.processBardWorks(bardWorks, "lord");
     }
 
     /**
      * Test the makeRegex() method.
      */
-    private static void testRegexList() {
+    private void testRegexList() {
         // The quote to search for matches.
         var quote = "The quick fox jumps over \nthe lazy dog.";
 
@@ -80,8 +82,8 @@ public class ex45 {
      * search the complete works of Shakespeare ({@code bardWorks} for
      * {@code word}.
      */
-    private static void processBardWorks(List<String> bardWorks,
-                                         String word) {
+    private void processBardWorks(List<String> bardWorks,
+                                  String word) {
         // Create a List of Shakespeare works containing 'word'.
         var bardWorksMatchingWord = bardWorks
             // Convert List to a Stream.
@@ -125,8 +127,8 @@ public class ex45 {
      * @return true if the {@code work} contains the {@code
      *         searchWord}, else false
      */
-    private static boolean findMatch(String work,
-                                     String searchWord) {
+    private boolean findMatch(String work,
+                              String searchWord) {
         BreakIterator iterator = BreakIterator
             // Get the word iterator for the US locale.
             .getWordInstance(Locale.US);
@@ -174,9 +176,8 @@ public class ex45 {
      *                              a search word       
      * @param pattern The compiled regular expression to search for
      */
-    private static void showRegexMatches
-        (List<String> bardWorksMatchingWord,
-         Pattern pattern) {
+    private void showRegexMatches(List<String> bardWorksMatchingWord,
+                                  Pattern pattern) {
         // Collect all match results across all works into a Map.
         var allMatchResults = bardWorksMatchingWord
             // Convert List to a Stream.
