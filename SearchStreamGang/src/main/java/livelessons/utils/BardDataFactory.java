@@ -6,17 +6,18 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 /**
  * This utility class contains methods that obtain test data.
  */
-public class TestDataFactory {
+public class BardDataFactory {
     /**
      * A utility class should always define a private constructor.
      */
-    private TestDataFactory() {
+    private BardDataFactory() {
     }
 
     /**
@@ -110,7 +111,7 @@ public class TestDataFactory {
 
                 // Trigger intermediate operations and collect the
                 // results into a list of strings.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

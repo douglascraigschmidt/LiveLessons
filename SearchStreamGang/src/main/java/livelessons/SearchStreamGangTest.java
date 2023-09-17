@@ -3,7 +3,7 @@ package livelessons;
 import livelessons.streamgangs.*;
 import livelessons.utils.Options;
 import livelessons.utils.RunTimer;
-import livelessons.utils.TestDataFactory;
+import livelessons.utils.BardDataFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -76,7 +76,7 @@ public class SearchStreamGangTest {
             new ArrayList<>() {{
                 // Create a list of input from the complete works of
                 // William Shakespeare.
-                add(TestDataFactory
+                add(BardDataFactory
                     // Split input via Options singleton separator.
                     .getSharedInput(sSHAKESPEARE_DATA_FILE, Options
                                     .getInstance()
@@ -85,7 +85,7 @@ public class SearchStreamGangTest {
 
         // Get the list of famous Bard phases to find.
         List<String> phraseList =
-            TestDataFactory.getPhraseList(sPHASE_LIST_FILE);
+            BardDataFactory.getPhraseList(sPHASE_LIST_FILE);
 
         // Initialize the map with all the implementation strategies.
         makeStrategyMap(phraseList, inputData);

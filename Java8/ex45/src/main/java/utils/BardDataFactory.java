@@ -26,7 +26,8 @@ public class BardDataFactory {
                                         String splitter) {
         try {
             // Convert the filename into a pathname.
-            URI uri = ClassLoader.getSystemResource(filename).toURI();
+            URI uri = ClassLoader
+                .getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
             CharSequence bytes =
@@ -41,7 +42,7 @@ public class BardDataFactory {
                 .splitAsStream(bytes)
 
                 // Filter out any empty strings.
-                .filter(((Predicate<String>) String::isEmpty).negate())
+                .filter(string -> !string.isEmpty())
                 
                 // Collect the results into a List of String objects.
                 .toList();
