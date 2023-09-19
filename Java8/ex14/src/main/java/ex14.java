@@ -3,6 +3,7 @@ import utils.TestDataFactory;
 
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,7 +17,7 @@ public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 10;
+    private static final int sMAX_ITERATIONS = 30;
 
     /**
      * The complete works of William Shakespeare.
@@ -135,28 +136,33 @@ public class ex14 {
 
         testName += parallel ? " parallel" : " sequential";
 
-        RunTimer.timeRun(() -> {
-                // Create an empty list.
-                List<String> list = new ArrayList<>();
-
-                IntStream
+        RunTimer .timeRun(() -> {
+                return IntStream
                     // Iterate sMAX_ITERATIONS times.
                     .range(0, sMAX_ITERATIONS)
                     
-                    // Perform the following action each iteration.
-                    .forEach((i) -> list
-                             // Append new words to end of the list.
-                             .addAll(// Convert List to sequential
-                                     // or parallel stream.
-                                     (parallel ? words.parallelStream()
-                                               : words.stream())
+                    // Convert each int to a Stream of transformed
+                    // words.
+                    .mapToObj(___ ->
+                              // Convert List to sequential or
+                              // parallel stream.
+                              (parallel ? words.parallelStream()
+                               : words.stream())
 
-                                     // Modify each string.
-                                     .map(string ->
-                                          rot13(string.toUpperCase()).toLowerCase())
+                              // Modify each string.
+                              .map(string -> rot13(string.toUpperCase())
+                                   .toLowerCase()))
 
-                                     // Convert the Stream into a List.
-                                     .toList()));
+                    // Use reduce to concatenate all the individual
+                    // streams into a single stream.
+                    .reduce(Stream::concat)
+
+                    // If the stream is empty, then return an empty
+                    // stream.
+                    .orElse(Stream.empty())
+                    
+                    // Convert the Stream into a List.
+                    .toList();
             },
             testName);
     }
@@ -209,6 +215,6 @@ public class ex14 {
                         .map(string -> string.toUpperCase())
 
                         // Collect the stream into a list.
-                        .collect(toList()));
+                        .toList());
     }
 }

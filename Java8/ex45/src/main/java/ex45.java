@@ -4,6 +4,7 @@ import utils.BardDataFactory;
 import java.text.BreakIterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,10 +42,9 @@ public class ex45 {
                       // Split input into "works".
                       "@");
 
-        assert bardWorks != null;
-
-        // Search the works of Shakespeare for a certain word/phrase.
-        test.processBardWorks(bardWorks, "lord");
+        // Search the works of Shakespeare for a certain word/phrase ("lord").
+        test.processBardWorks(Objects.requireNonNull(bardWorks),
+                         "lord");
     }
 
     /**
