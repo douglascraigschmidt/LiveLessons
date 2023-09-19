@@ -97,8 +97,7 @@ Here's an overview of what's currently included in these examples:
 . ex17 - This example shows various issues associated with using the
          Java streams reduce() terminal operation, including the need
          to use the correct identity value and to ensure operations
-         are associative.  It also demonstrates what goes wrong when
-         reduce() performs a mutable reduction on a parallel stream.
+         are associative.
 
 . ex18 - This program shows how to wait for the results of a stream of
          completable futures using (1) a custom collector and (2) the
@@ -267,3 +266,7 @@ Here's an overview of what's currently included in these examples:
          virtual Thread objects. This example also demonstrates the
          Java record data type and several advanced features of
          StampedLock.
+
+. ex48 - This example demonstrates what goes wrong when reduce()
+         performs a mutable reduction on a parallel stream and also
+         shows how to fix this problem by using collect().
