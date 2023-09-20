@@ -14,12 +14,6 @@ public class ex17 {
      * Main entry point into the program.
      */
     public static void main(String[] argv) {
-        // Run the difference reduction test sequentially.
-        testDifferenceReduce(false);
-
-        // Run the difference reduction test in parallel.
-        testDifferenceReduce(true);
-
         // Run the summation reduction test sequentially with the
         // correct identity value.
         testSum(0L, false);
@@ -36,9 +30,11 @@ public class ex17 {
         // incorrect identity value.
         testSum(1L, true);
 
-        // Run the product reduction test in parallel with an
-        // incorrect identity value.
-        testSum(0L, true);
+        // Run the difference reduction test sequentially.
+        testDifferenceReduce(false);
+
+        // Run the difference reduction test in parallel.
+        testDifferenceReduce(true);
 
         // Run the product reduction test sequentially with the
         // correct identity value.
@@ -51,6 +47,10 @@ public class ex17 {
         // Run the product reduction test sequentially with an
         // incorrect identity value.
         testProd(0L, false);
+
+        // Run the product reduction test in parallel with an
+        // incorrect identity value.
+        testProd(0L, true);
     }
 
     /**

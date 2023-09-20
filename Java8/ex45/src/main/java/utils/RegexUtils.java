@@ -24,12 +24,12 @@ public final class RegexUtils {
      * @param queries The {@link List} of queries
      * @return A {@link String} that encodes the {@code queries} in
      *         regular expression form and matches any string that
-     *         contains any of the keywords as whole words, regardless
+     *         contains any of the queries as whole words, regardless
      *         of case.
      */
     public static String makeRegex(List<String> queries) {
         // Combine the 'queries' List into a lowercase String and
-        // convert into a regex of the following style:
+        // convert into a regex of the following form:
         // (?i).*\b(\Qquery_1\E)|(\Qquery_2\E)...(\Qquery_n\Q)\b.*
         return queries
             // Convert the List to a Stream.
@@ -71,7 +71,7 @@ public final class RegexUtils {
             .filter(Matcher::find)
 
             // Transform the Stream of one Matcher into a Stream of
-            // one Strings.
+            // one String.
             .map(Matcher::group)
 
             // Return an Optional describing the first matched line,

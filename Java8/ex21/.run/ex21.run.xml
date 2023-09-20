@@ -1,8 +1,15 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ex21" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ex21" />
-    <module name="ex21" />
-    <option name="PROGRAM_PARAMETERS" value="-d true -m 10 -l 10" />
+    <module name="ex21.main" />
+    <option name="PROGRAM_PARAMETERS" value="-d true -l 10" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

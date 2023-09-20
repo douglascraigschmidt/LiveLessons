@@ -1,14 +1,5 @@
 package utils;
 
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-
 /**
  * This class implements the Singleton pattern to handle command-line
  * option processing.
@@ -22,7 +13,7 @@ public class Options {
     /**
      * Max number of integers to process.
      */
-    private int mMaxIntegers = 200_000_000;
+    private int mMaxIntegers = 10_000_000;
 
     /**
      * The number of output elements to print.
@@ -75,18 +66,13 @@ public class Options {
         if (argv != null) {
             for (int argc = 0; argc < argv.length; argc += 2)
                 switch (argv[argc]) {
-                case "-d":
-                    mDiagnosticsEnabled = argv[argc + 1].equals("true");
-                    break;
-                case "-l":
-                    mOutputLimit = Integer.parseInt(argv[argc + 1]);
-                    break;
-                case "-m":
-                    mMaxIntegers = Integer.parseInt(argv[argc + 1]);
-                    break;
-                default:
-                    printUsage();
-                    return false;
+                    case "-d" -> mDiagnosticsEnabled = argv[argc + 1].equals("true");
+                    case "-l" -> mOutputLimit = Integer.parseInt(argv[argc + 1]);
+                    case "-m" -> mMaxIntegers = Integer.parseInt(argv[argc + 1]);
+                    default -> {
+                        printUsage();
+                        return false;
+                    }
                 }
             return true;
         } else

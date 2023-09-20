@@ -116,8 +116,8 @@ Here's an overview of what's currently included in these examples:
 . ex21 - This program shows the difference between Java streams
          sources (such as List) that enforce encounter order and
          stream sources (such as HashSet) that do not in the context
-         of various order-sensitive aggregate operations, such as
-         limit() and distinct().
+         of various order-sensitive aggregate operations (such as
+         limit() and distinct()).
 
 . ex22 - This example shows how to reduce and multiply big fractions
          using the Java fork-join pool framework.

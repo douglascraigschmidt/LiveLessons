@@ -52,7 +52,10 @@ public class ex45 {
      */
     private void testRegexList() {
         // The quote to search for matches.
-        var quote = "The quick fox jumps over \nthe lazy dog.";
+        String quote = """
+                       The quick brown fox jumps 
+                       \nover the lazy dog.
+                       """;
 
         // The words to match.
         var wordsToMatch = List
@@ -74,7 +77,7 @@ public class ex45 {
                            + result
                            + " the regex string \""
                            +  regexString
-                           + "\n");
+                           + "\"\n");
     }
 
     /**
@@ -103,7 +106,7 @@ public class ex45 {
             .of("\\b"
                 + word
                 + "\\b"
-                + ".*(\\btrue\\b|\\bfalse\\b)")
+                + makeRegex(List.of("true", "false")))
 
             // Compile the regular expression to perform
             // case-insensitive matches.

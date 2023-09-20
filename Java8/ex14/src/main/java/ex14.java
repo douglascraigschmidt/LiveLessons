@@ -5,8 +5,6 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This example shows the difference in overhead/performance for using
  * parallel and sequential spliterators to split a Java {@link LinkedList}

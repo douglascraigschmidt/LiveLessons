@@ -30,7 +30,7 @@ public class BardDataFactory {
                 .getSystemResource(filename).toURI();
 
             // Open the file and get all the bytes.
-            CharSequence bytes =
+            var bytes =
                 new String(Files.readAllBytes(Paths.get(uri)));
 
             return Pattern

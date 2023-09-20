@@ -142,7 +142,7 @@ public class ex21 {
         List<Integer> list = List.of(100, 30, 100, 40, 100, 10, 100);
 
         System.out.println("Distinct numbers = "
-                         + list.stream().distinct().collect(Collectors.toList()));
+                         + list.stream().distinct().toList());
     }
 
     /**
@@ -160,7 +160,7 @@ public class ex21 {
             .boxed()
 
             // Collect into a List.
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -252,9 +252,9 @@ public class ex21 {
     }
 
     /**
-     * Shows how the use of {@code forEach()} on an unordered parallel
-     * stream can be faster than {@code forEachOrdered()} on an
-     * ordered parallel stream.
+     * Benchmarks the performance of {@code forEach()} on an unordered
+     * parallel stream vs. {@code forEachOrdered()} on an ordered parallel
+     * stream.
      * 
      * @param unordered  Indicates whether the stream should be
      *                   processed in an unordered or ordered manner
@@ -287,7 +287,7 @@ public class ex21 {
         }
         else {
             // Store the results in an unsynchronized ArrayList since
-            // forEachOrdered *is* synchronized.
+            // forEachOrdered() *is* synchronized.
             List<Integer> queue =
                 new ArrayList<>();
 
