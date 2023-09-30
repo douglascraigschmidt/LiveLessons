@@ -54,8 +54,7 @@ public class ex45 {
         // The quote to search for matches.
         String quote = """
                        The quick brown fox jumps 
-                       \nover the lazy dog.
-                       """;
+                       \nover the lazy dog.""";
 
         // The words to match.
         var wordsToMatch = List

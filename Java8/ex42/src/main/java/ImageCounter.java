@@ -123,7 +123,7 @@ class ImageCounter {
                                 mapping(this::getCountOfImagesInPage,
                                         summingLong(Long::longValue)),
                                 // Synchronously count the # of images
-                                // reachable from links on tha page.
+                                // reachable from links on that page.
                                 mapping(page -> crawlLinksInPage(page, depth),
                                         summingLong(Long::longValue)),
                                 // Return a count of the # of images

@@ -206,47 +206,53 @@ public class ReduceTests {
     public static void runMapReduce2() {
         System.out.println("\nResults from runMapReduce2():");
 
-        Map<String, Double> baseline = new HashMap<>() {
-                { put("AZ", 0.00123); }
-                { put("MI", 0.02497); }
-                { put("WI", 0.01238); }
-                { put("WY", 0.04232); }
-            };
+        // Baseline stock prices.
+        Map<String, Double> baseline = new HashMap<>() { {
+                    put("AAPL", 150.0);
+                    put("GOOGL", 120.0);
+                    put("AMZN", 125.0);
+                    put("TSLA", 260.0);
+            } };
 
-        Map<String, Double> actual = new HashMap<>() {
-                { put("AZ", 0.01023); }
-                { put("MI", 0.09497); }
-                { put("WI", 0.00238); }
-            };
+        // Actual stock prices.
+        Map<String, Double> actual = new HashMap<>() { {
+                    put("AAPL", 160.0);
+                    put("GOOGL", 130.0);
+                    put("AMZN", 127.0);
+            } };
 
-        Double breakoutFactor = baseline
+        Double percentageChange = baseline
             // Obtain the set of entries from the map.
             .entrySet()
 
-            // Convert the map into a stream.
-            .stream()
+            // Convert the map into a parallel stream.
+            .parallelStream()
 
-            // Use the three-parameter version of reduce().
+            // Use the three-parameter version of reduce() to compute
+            // the percentage change of the stocks.
             .reduce(0.0,
                     // The accumulator operates on the Map's contents.
                     (Double sum, Map.Entry<String, Double> entry) -> {
-                        Double difference = entry.getValue();
-                        if (actual.containsKey(entry.getKey())) 
-                            difference = Math
-                                .abs(entry.getValue()
-                                     - actual.get(entry.getKey()));
+                        // Track the percentage change for each stock.
+                        Double pc = 0.0;
+
+                        if (actual.containsKey(entry.getKey())) {
+                            Double baselinePrice = entry.getValue();
+                            Double actualPrice = actual.get(entry.getKey());
+                            pc = ((actualPrice - baselinePrice)
+                                                / baselinePrice) * 100;
+                        }
 
                         // Update the sum.
-                        return sum + difference;
+                        return sum + pc;
                     },
 
                     // The combiner sums Double values for parallel
-                    // streams, but is ignored for sequential streams.
+                    // streams.
                     Double::sum);
 
         // Print the results.
-        System.out.println("The breakout factor = " 
-                           + breakoutFactor);
-                    
+        System.out.println("The total percentage change in stock prices =" 
+                           + percentageChange);
     }
 }
