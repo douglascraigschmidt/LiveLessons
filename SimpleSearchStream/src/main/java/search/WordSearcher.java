@@ -35,20 +35,20 @@ public class WordSearcher {
         // Create and return a list SearchResults corresponding to the
         // index where each word occurs in the input string.
         return wordsToFind
-                // Convert the list of words to find into a stream.
-                .stream()
+            // Convert the list of words to find into a stream.
+            .stream()
 
-                // For each word to find create a stream of SearchResults
-                // indicating the index (if any) where the word matched
-                // the input.
-                .map(this::searchForWord)
+            // For each word to find create a stream of SearchResults
+            // indicating the index (if any) where the word matched
+            // the input.
+            .map(this::searchForWord)
 
-                // Filter out any SearchResults that are empty.
-                .filter(not(SearchResults::isEmpty))
+            // Filter out any SearchResults that are empty.
+            .filter(not(SearchResults::isEmpty))
 
-                // This terminal operation triggers intermediate operation
-                // processing and collects the SearchResults into a list.
-                .toList();
+            // This terminal operation triggers intermediate operation
+            // processing and collects the SearchResults into a list.
+            .toList();
     }
 
     /**
@@ -58,22 +58,22 @@ public class WordSearcher {
     private SearchResults searchForWord(String word) {
         // Create/return SearchResults to keep track of relevant info.
         return new SearchResults
-                (Thread.currentThread().threadId(),
-                        1,
-                        word,
-                        "",
+            (Thread.currentThread().threadId(),
+             1,
+             word,
+             "",
 
-                        // Use a WordMatchSpliterator to add the indices of all
-                        // places in the input where word matches.
-                        StreamSupport
-                                // Create a sequential stream of Result objects that
-                                // record where the word matched the input (if it did).
-                                .stream(new WordMatchSpliterator(mInput, word),
-                                        false)
+             // Create a sequential stream of Result objects that
+             // record where the word matched the input (if it did).
+             StreamSupport
+             // Use a WordMatchSpliterator to add the indices of all
+             // places in the input where word matches.
+             .stream(new WordMatchSpliterator(mInput, word),
+                     false)
 
-                                // This terminal operation triggers aggregate operation
-                                // processing and returns a list of Results.
-                                .toList());
+             // This terminal operation triggers aggregate operation
+             // processing and returns a list of Results.
+             .toList());
     }
 
     /**
@@ -83,11 +83,11 @@ public class WordSearcher {
                              List<SearchResults.Result> results) {
         // Print the word followed by the list of search results.
         System.out.print("Word \""
-                + word
-                + "\" appeared at indices ");
+                         + word
+                         + "\" appeared at indices ");
         SearchResults.printResults(results);
         System.out.println(" with max index of "
-                + computeMax(results));
+                           + computeMax(results));
     }
 
     /**
@@ -97,18 +97,18 @@ public class WordSearcher {
      */
     private int computeMax(List<SearchResults.Result> resultsList) {
         return resultsList
-                // Convert to a stream.
-                .stream()
+            // Convert to a stream.
+            .stream()
 
-                // Transform the stream of results into a stream of
-                // primitive int indices.
-                .mapToInt(SearchResults.Result::getIndex)
+            // Transform the stream of results into a stream of
+            // primitive int indices.
+            .mapToInt(SearchResults.Result::getIndex)
 
-                // Determine the max value in the stream.
-                .max()
+            // Determine the max value in the stream.
+            .max()
 
-                // Convert the optional to its primitive int value or 0.
-                .orElse(0);
+            // Convert the optional to its primitive int value or 0.
+            .orElse(0);
     }
 
     /**
