@@ -1,6 +1,8 @@
 import org.jsoup.nodes.Document;
 import utils.Options;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +24,8 @@ class ImageCounter {
 
     /**
      * A cache of unique URIs that have already been processed.
-     * {@link KeySetView} is part of the {@link ConcurrentHashMap}
-     * class.
      */
-    private final KeySetView<String, Boolean> mUniqueUris =
-        ConcurrentHashMap.newKeySet();
+    private final Set<String> mUniqueUris = new HashSet<>();
 
     /**
      * Constructor counts all the images reachable from the root URI.
