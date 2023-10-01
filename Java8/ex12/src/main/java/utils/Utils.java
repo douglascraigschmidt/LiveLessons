@@ -6,7 +6,16 @@ import java.util.function.Predicate;
 
 import static java.lang.Character.toLowerCase;
 
-public class Utils {
+/**
+ * This Java utility class contains static methods used by the ex12
+ * driver program.
+ */
+final public class Utils {
+    /**
+     * A Java utility class should have a private constructor.
+     */
+    private Utils() { }
+
     /**
      * @return true if the {@link String} starts with 'H' or 'h'.     
      */
@@ -46,5 +55,4 @@ public class Utils {
         // Return the concatenated List.
         return c1;
     }
-
 }

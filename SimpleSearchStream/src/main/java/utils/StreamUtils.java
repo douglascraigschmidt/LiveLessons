@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -11,11 +12,11 @@ import static java.util.stream.Collectors.toList;
  * This utility class contains methods for manipulating various Java 8
  * Streams features.
  */
-public class StreamsUtils {
+public class StreamUtils {
     /**
      * A utility class should always define a private constructor.
      */
-    private StreamsUtils() {
+    private StreamUtils() {
     }
 
     /**
@@ -59,5 +60,18 @@ public class StreamsUtils {
      */
     public static<T> Predicate<T> not(Predicate<T> p) {
         return p.negate();
+    }
+
+    /**
+     * @return The concatenation of {@link List} {@code l1} followed by
+     * {@link List} {@code l2}
+     */
+    public static <T> List<T> concat(List<T> l1,
+                                           List<T> l2) {
+        // Append the contents of l2 at the end of l1.
+        l1.addAll(l2);
+
+        // Return the concatenated List.
+        return l1;
     }
 }

@@ -1,12 +1,13 @@
 package search;
 
+import utils.StreamUtils;
+
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static utils.StreamsUtils.not;
+import static utils.StreamUtils.not;
 
 /**
  * This class demonstrates the use of basic Java 8 functional
@@ -135,7 +136,8 @@ public class WordSearcher {
     }
 
     /*
-     * This factory method creates a downstream collector that merges results lists together.
+     * This factory method creates a downstream collector that
+     * merges results lists together.
      */
     private static Collector<SearchResults, List<SearchResults.Result>, List<SearchResults.Result>> 
         toDownstreamCollector() {
@@ -148,10 +150,7 @@ public class WordSearcher {
              (resultsList, searchResults) ->
              resultsList.addAll(searchResults.getResultList()),
              // Combine the two results lists.
-             (left, right) -> {
-                left.addAll(right);
-                return left;
-            });
+             StreamUtils::concat);
     }
 
 
