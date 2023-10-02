@@ -98,8 +98,8 @@ public class CollectTests {
             // Terminal operation that triggers intermediate operation
             // processing and collects the results into a map.
             .collect(toMap(identity(),
-                  String::length,
-                Integer::sum));
+                           String::length,
+                           Integer::sum));
 
         // Print the results.
         System.out.println("Hamlet characters' names + name lengths "
@@ -138,13 +138,13 @@ public class CollectTests {
         System.out.println("\nResults from runCollectJoining():");
 
         var results = Generators
-                // Generate a Stream.
-                .generateHCharacters(sCharacters.stream())
+            // Generate a Stream.
+            .generateHCharacters(sCharacters.stream())
 
-                // This terminal operation triggers intermediate operation
-                // processing and collects the results into a String,
-                // which contains duplicates.
-                .collect(joining(" "));
+            // This terminal operation triggers intermediate operation
+            // processing and collects the results into a String,
+            // which contains duplicates.
+            .collect(joining(" "));
 
         // Print the results.
         System.out.println(results);

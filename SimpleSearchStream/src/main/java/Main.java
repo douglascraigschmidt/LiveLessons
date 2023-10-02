@@ -50,11 +50,14 @@ public class Main {
             new WordSearcher(inputString);
                                                              
         // Find all matching words.
-        List<SearchResults> results =
-            wordSearcher.findWords(wordsToFind);
+        List<SearchResults> results = wordSearcher
+            .findWords(wordsToFind);
 
         // Print all the results;
         wordSearcher.printResults(results);
+
+        results = wordSearcher
+            .findWordsEx(wordsToFind);
 
         // Print a "suffix slice" of the results starting at "La" and
         // continuing to the end of the list.

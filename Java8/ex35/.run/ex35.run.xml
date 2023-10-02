@@ -5,6 +5,11 @@
     <option name="MAIN_CLASS_NAME" value="ex35" />
     <module name="ex35.main" />
     <option name="PROGRAM_PARAMETERS" value="-i 10 -d true" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

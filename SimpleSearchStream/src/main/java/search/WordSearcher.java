@@ -3,6 +3,7 @@ package search;
 import utils.StreamUtils;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
@@ -10,10 +11,10 @@ import static java.util.stream.Collectors.groupingBy;
 import static utils.StreamUtils.not;
 
 /**
- * This class demonstrates the use of basic Java 8 functional
+ * This class demonstrates the use of basic modern Java functional
  * programming features (such as lambda expressions and method
- * references) in conjunction with Java 8 sequential streams and a
- * spliterator to search for words in an input string.
+ * references) in conjunction with Java sequential streams and a
+ * {@link Spliterator} to search for words in an input string.
  */
 public class WordSearcher {
     /**
@@ -29,8 +30,10 @@ public class WordSearcher {
     }
 
     /**
-     * Search the input for all occurrences of the @ wordsToFind and
-     * return the results (if any) as a list of SearchResults.
+     * Search the input for all occurrences of the {@code wordsToFind}
+     * using the {@code map()} and {@code filter()} intermediate operators
+     * and return the results (if any) as a {@link List} of {@link
+     * SearchResults} objects.
      */
     public List<SearchResults> findWords(List<String> wordsToFind) {
         // Create and return a list SearchResults corresponding to the
@@ -53,8 +56,33 @@ public class WordSearcher {
     }
 
     /**
-     * Looks for all instances of @code word in @code inputData and
-     * return a list of all the @code SearchResults (if any).
+     * Search the input for all occurrences of the {@code wordsToFind}
+     * using the {@code mapMulti()} intermediate operator and return
+     * the results (if any) as a {@link List} of {@link
+     * SearchResults} objects.
+     */
+    public List<SearchResults> findWordsEx(List<String> wordsToFind) {
+        // Create and return a list SearchResults corresponding to the
+        // index where each word occurs in the input string.
+        return wordsToFind
+            // Convert the list of words to find into a stream.
+            .stream()
+
+            // For each word to find create a stream of SearchResults
+            // indicating the index (if any) where the word matched
+            // the input.  Only update the consumer if there's a
+            // match.
+            .mapMulti(this::searchForWordIf)
+
+            // This terminal operation triggers intermediate operation
+            // processing and collects the SearchResults into a list.
+            .toList();
+    }
+
+    /**
+     * Looks for all instances of {@code word} in {@code inputData}
+     * and return a {@link List} of all the {@code SearchResult}
+     * objects (if any).
      */
     private SearchResults searchForWord(String word) {
         // Create/return SearchResults to keep track of relevant info.
@@ -78,10 +106,29 @@ public class WordSearcher {
     }
 
     /**
+     * Calls {@code searchForWord} with the {@code word} parameter and
+     * updates the {@link Consumer} if there's a match.
+     *
+     * @param word The word to search for
+     * @param consumer The {@link Consumer} to update if there's a match
+     */
+    private void searchForWordIf(String word,
+                                 Consumer<SearchResults> consumer) {
+        // Create/return SearchResults to keep track of
+        // matching words.
+        var result = searchForWord(word);
+
+        // Update the consumer if there's a match.
+        if (!result.isEmpty())
+            consumer.accept(result);
+    }
+
+    /**
      * Print a word and its list of indices to the output.
      */
-    private void printResult(String word,
-                             List<SearchResults.Result> results) {
+    private void printResult
+        (String word,
+         List<SearchResults.Result> results) {
         // Print the word followed by the list of search results.
         System.out.print("Word \""
                          + word
@@ -96,7 +143,8 @@ public class WordSearcher {
      * implementation works properly even if the {@code resultsList}
      * is not sorted.
      */
-    private int computeMax(List<SearchResults.Result> resultsList) {
+    private int computeMax
+        (List<SearchResults.Result> resultsList) {
         return resultsList
             // Convert to a stream.
             .stream()
@@ -115,7 +163,8 @@ public class WordSearcher {
     /**
      * Print the results of the word search.
      */
-    public void printResults(List<SearchResults> listOfSearchResults) {
+    public void printResults
+        (List<SearchResults> listOfSearchResults) {
         // Create a map that associates words found in the input with
         // the indices where they were found and then print the
         // contents of that map.
@@ -139,7 +188,9 @@ public class WordSearcher {
      * This factory method creates a downstream collector that
      * merges results lists together.
      */
-    private static Collector<SearchResults, List<SearchResults.Result>, List<SearchResults.Result>> 
+    private static Collector<SearchResults,
+                              List<SearchResults.Result>,
+                              List<SearchResults.Result>> 
         toDownstreamCollector() {
         // Use the Collector.of() factory method to create a
         // collector.
@@ -152,7 +203,6 @@ public class WordSearcher {
              // Combine the two results lists.
              StreamUtils::concat);
     }
-
 
     /**
      * Print a "prefix slice" of the {@code listOfSearchResults}
@@ -188,7 +238,9 @@ public class WordSearcher {
             // Print out the matching results in the stream, where
             // each word is first printed followed by a list of the
             // indices where the word appeared in the input.
-            .forEach(entry -> printResult(entry.getKey(), entry.getValue()));
+            .forEach(entry ->
+                     printResult(entry.getKey(),
+                                 entry.getValue()));
     }
 
     /**
@@ -226,13 +278,18 @@ public class WordSearcher {
             // Print out the matching results in the stream, where
             // each word is first printed followed by a list of the
             // indices where the word appeared in the input.
-            .forEach(entry -> printResult(entry.getKey(), entry.getValue()));
+            .forEach(entry ->
+                     printResult(entry.getKey(),
+                                 entry.getValue()));
     }
 
     /**
-     * Return true if {@code entry.getKey()} != to {@code word}, else false.
+     * Return true if {@code entry.getKey()} != to {@code word}, else
+     * false.
      */
-    private boolean notEqual(Map.Entry<String, List<SearchResults.Result>> entry, String word) {
+    private boolean notEqual
+        (Map.Entry<String, List<SearchResults.Result>> entry,
+         String word) {
         // If entry.getKey() != to word return true, otherwise return
         // false.
         return !entry.getKey().equals(word);
