@@ -193,7 +193,7 @@ public final class StreamTests {
             // Generate ints from 1 to innerCount iterations.
             .rangeClosed(1, innerCount)
 
-            // Attempt to run each computation in parallel.
+            // Run each computation in parallel.
             .parallel()
 
             // Determine if each computation ran in parallel.
