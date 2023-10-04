@@ -206,20 +206,19 @@ public class ReduceTests {
     public static void runMapReduce2() {
         System.out.println("\nResults from runMapReduce2():");
 
-        // Baseline stock prices.
-        Map<String, Double> baseline = new HashMap<>() { {
-                    put("AAPL", 150.0);
-                    put("GOOGL", 120.0);
-                    put("AMZN", 125.0);
-                    put("TSLA", 260.0);
-            } };
+        // Immutable Map containing baseline prices of mobile devices.
+        Map<String, Double> baseline = Map.ofEntries
+            (Map.entry("iPhone12", 699.99),
+             Map.entry("GalaxyS21", 799.99),
+             Map.entry("Pixel6", 599.99),
+             Map.entry("iPadPro", 999.99));
 
-        // Actual stock prices.
-        Map<String, Double> actual = new HashMap<>() { {
-                    put("AAPL", 160.0);
-                    put("GOOGL", 130.0);
-                    put("AMZN", 127.0);
-            } };
+        // Immutable Map containing discount prices of mobile devices.
+        Map<String, Double> actual = Map.ofEntries(
+            Map.entry("iPhone12", 649.99),
+            Map.entry("GalaxyS21", 769.99),
+            Map.entry("Pixel6", 579.99)
+        );
 
         Double percentageChange = baseline
             // Obtain the set of entries from the map.
@@ -229,13 +228,15 @@ public class ReduceTests {
             .parallelStream()
 
             // Use the three-parameter version of reduce() to compute
-            // the percentage change of the stocks.
+            // the percentage change of mobile device prices.
             .reduce(0.0,
                     // The accumulator operates on the Map's contents.
                     (Double sum, Map.Entry<String, Double> entry) -> {
-                        // Track the percentage change for each stock.
+                        // Track the percentage change for each device.
                         Double pc = 0.0;
 
+                        // Compute the percentage change if there's a
+                        // discount price for the mobile device.
                         if (actual.containsKey(entry.getKey())) {
                             Double baselinePrice = entry.getValue();
                             Double actualPrice = actual.get(entry.getKey());
@@ -252,7 +253,7 @@ public class ReduceTests {
                     Double::sum);
 
         // Print the results.
-        System.out.println("The total percentage change in stock prices =" 
+        System.out.println("The total percentage change in prices ="
                            + percentageChange);
     }
 }
