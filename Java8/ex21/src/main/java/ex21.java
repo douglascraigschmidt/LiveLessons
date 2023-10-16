@@ -288,8 +288,7 @@ public class ex21 {
         else {
             // Store the results in an unsynchronized ArrayList since
             // forEachOrdered() *is* synchronized.
-            List<Integer> queue =
-                new ArrayList<>();
+            List<Integer> queue = new ArrayList<>();
 
             list
                 // Convert collection into a parallel stream.

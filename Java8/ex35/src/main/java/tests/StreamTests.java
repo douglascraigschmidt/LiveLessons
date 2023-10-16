@@ -60,6 +60,8 @@ public final class StreamTests {
             // since it runs tasks in parallel.
             .map(StreamTests::innerStream)
 
+            // Convert the stream-of-streams of Integer objects into a
+            // stream of Integer objects.
             .reduce(Stream::concat)
             .orElse(Stream.empty())
 
@@ -163,7 +165,7 @@ public final class StreamTests {
                                            threadMap,
                                            outerThreadId))
 
-            // Remove all sIntermediaResult values, leaving just a
+            // Remove all sIntermediateResult values, leaving just a
             // sSequentialResult and/or sParallelResult value.
             .filter(value -> value > sIntermediateResult);
     }
@@ -202,8 +204,9 @@ public final class StreamTests {
                                                           innerThreadIdCounter,
                                                           threadMap,
                                                           outerThreadId);
-                    // Remove all sIntermediaResult values, leaving just a
-                    // sSequentialResult or sParallelResult value.
+                    // Remove all sIntermediateResult values, leaving
+                    // just a sSequentialResult or sParallelResult
+                    // value.
                     if (value > sIntermediateResult)
                         c.accept(value);
                 })

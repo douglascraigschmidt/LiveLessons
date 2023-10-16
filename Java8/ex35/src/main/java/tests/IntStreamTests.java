@@ -50,7 +50,7 @@ public final class IntStreamTests {
 
         var wasSequential =
             // Generate an outer Stream that emits the designated
-            // number of Integer objects in parallel.
+            // number of int values in parallel.
             generateOuterStream(Options.instance().iterations())
 
             // Apply map(), which works scalably for parallel streams
@@ -157,7 +157,7 @@ public final class IntStreamTests {
                                            threadMap,
                                            outerThreadId))
 
-            // Remove all sIntermediaResult values, leaving just a
+            // Remove all sIntermediateResult values, leaving just a
             // sSequentialResult and/or sParallelResult value.
             .filter(value -> value > sIntermediateResult);
     }
@@ -197,8 +197,8 @@ public final class IntStreamTests {
                                                           threadMap,
                                                           outerThreadId);
 
-                // Remove all sIntermediaResult values, leaving just a
-                // sSequentialResult or sParallelResult value.
+                // Remove all sIntermediateResult values, leaving just
+                // a sSequentialResult or sParallelResult value.
                  if (value > sIntermediateResult)
                      c.accept(value);
                  })

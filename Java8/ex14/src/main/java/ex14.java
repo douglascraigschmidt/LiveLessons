@@ -1,9 +1,13 @@
 import utils.RunTimer;
 import utils.TestDataFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * This example shows the difference in overhead/performance for using
@@ -80,14 +84,14 @@ public class ex14 {
                     // Compute the time required to split/uppercase a
                     // LinkedList via a sequential stream (and thus a
                     // sequential spliterator).
-                    timeStreamUppercase("LinkedList",
+                    timeStreamModifications("LinkedList",
                                         linkedWords,
                                         false);
 
                     // Compute the time required to split/uppercase an
                     // ArrayList via a sequential stream (and thus a
                     // sequential spliterator).
-                    timeStreamUppercase("ArrayList",
+                    timeStreamModifications("ArrayList",
                                         arrayWords,
                                         false);
                     
@@ -96,7 +100,7 @@ public class ex14 {
                     // parallel spliterator).  The performance of this
                     // test should be worse than the ArrayList test
                     // since a LinkedList splits poorly.
-                    timeStreamUppercase("LinkedList",
+                    timeStreamModifications("LinkedList",
                                         linkedWords,
                                         true);
 
@@ -107,7 +111,7 @@ public class ex14 {
                     // split costs (just a few arithmetic operations
                     // and an object creation) and also split evenly
                     // (leading to balanced computation trees).
-                    timeStreamUppercase("ArrayList",
+                    timeStreamModifications("ArrayList",
                                         arrayWords,
                                         true);
 
@@ -118,51 +122,58 @@ public class ex14 {
     }
 
     /**
-     * Determines how long it takes to split and uppercase the word
-     * list via a parallel or sequential spliterator for various
-     * types of lists.
+     * Determines how long it takes to split, rot13, and
+     * uppercase/lowercase the {@link List} of {@code words} via a
+     * parallel or sequential spliterator for various types of {@link
+     * List} implementations.
      *
      * @param testName The name of the test being run
      * @param words The {@link List} of words to upper case
      * @param parallel True if stream should be parallel else false
      */
-    private static void timeStreamUppercase(String testName,
-                                            List<String> words,
-                                            boolean parallel) {
+    private static void timeStreamModifications(String testName,
+                                                List<String> words,
+                                                boolean parallel) {
         // Run the garbage collector before each test.
         System.gc();
 
         testName += parallel ? " parallel" : " sequential";
 
-        RunTimer .timeRun(() -> {
-                return IntStream
-                    // Iterate sMAX_ITERATIONS times.
-                    .range(0, sMAX_ITERATIONS)
-                    
-                    // Convert each int to a Stream of transformed
-                    // words.
-                    .mapToObj(___ ->
-                              // Convert List to sequential or
-                              // parallel stream.
-                              (parallel ? words.parallelStream()
-                               : words.stream())
+        RunTimer
+            // Time how long it takes to split, rot13, and uppercase/lowercase
+            // a List of words using various List implementations.
+            .timeRun(() -> {
+                    IntStream
+                        // Iterate sMAX_ITERATIONS times.
+                        .range(0, sMAX_ITERATIONS)
 
-                              // Modify each string.
-                              .map(string -> rot13(string.toUpperCase())
-                                   .toLowerCase()))
+                        // Convert each int to an Integer.
+                        .boxed()
 
-                    // Use reduce to concatenate all the individual
-                    // streams into a single stream.
-                    .reduce(Stream::concat)
+                        // Convert each int to a Stream of transformed words.
+                        .mapMulti((i,
+                                          consumer) ->
+                                consumer
+                                    // Accept the transformed List of words
+                                    // into the output stream.
+                                    .accept((parallel
+                                             // Convert List to sequential or
+                                             // parallel stream.
+                                             ? words.parallelStream()
+                                             : words.stream())
 
-                    // If the stream is empty, then return an empty
-                    // stream.
-                    .orElse(Stream.empty())
-                    
-                    // Convert the Stream into a List.
-                    .toList();
-            },
-            testName);
+                                            // Modify each string.
+                                            .map(string -> rot13(string.toUpperCase())
+                                                 .toLowerCase())
+
+                                            // Collect the stream into a list.
+                                            .toList()))
+
+                        // Trigger the intermediate operations and count the
+                        // number of iterations (should be sMAX_ITERATIONS).
+                        .count();
+                },
+                testName);
     }
 
     /**
