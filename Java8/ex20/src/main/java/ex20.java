@@ -90,7 +90,7 @@ public class ex20 {
                                       String testName) {
         // Get the list of files to the downloaded images.
 
-        List<File> imageFiles = Options.instance().getUrlList()
+        var imageFiles = Options.instance().getUrlList()
             // Convert the URLs in the input list into a stream and
             // process them in parallel.
             .parallelStream()
@@ -129,7 +129,7 @@ public class ex20 {
      * pool adaptively when blocking occurs.
      */
     private File downloadAndStoreImageMB(URL url) {
-        // Create a one-element array so we can update it in the
+        // Create a one-element array, so we can update it in the
         // anonymous inner class instance below.
         final Image[] image = new Image[1];
 

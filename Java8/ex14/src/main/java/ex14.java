@@ -19,7 +19,7 @@ public class ex14 {
     /**
      * Number of iterations to run the timing tests.
      */
-    private static final int sMAX_ITERATIONS = 30;
+    private static final int sMAX_ITERATIONS = 50;
 
     /**
      * The complete works of William Shakespeare.
@@ -140,38 +140,31 @@ public class ex14 {
         testName += parallel ? " parallel" : " sequential";
 
         RunTimer
-            // Time how long it takes to split, rot13, and uppercase/lowercase
-            // a List of words using various List implementations.
+            // Record the time needed to split, rot13, and uppercase
+            // /lowercase a List of words using various List
+            // implementations.
             .timeRun(() -> {
                     IntStream
                         // Iterate sMAX_ITERATIONS times.
                         .range(0, sMAX_ITERATIONS)
 
-                        // Convert each int to an Integer.
-                        .boxed()
+                        // Each iteration create a List of transformed
+                        // words.
+                        .forEach(___ ->
+                                (parallel
+                                 // Convert List to a sequential or
+                                 // parallel Stream.
+                                 ? words.parallelStream()
+                                 : words.stream())
 
-                        // Convert each int to a Stream of transformed words.
-                        .mapMulti((i,
-                                          consumer) ->
-                                consumer
-                                    // Accept the transformed List of words
-                                    // into the output stream.
-                                    .accept((parallel
-                                             // Convert List to sequential or
-                                             // parallel stream.
-                                             ? words.parallelStream()
-                                             : words.stream())
+                                 // Modify each String to burn CPU
+                                 // time.
+                                 .map(string -> rot13
+                                      (string.toUpperCase())
+                                      .toLowerCase())
 
-                                            // Modify each string.
-                                            .map(string -> rot13(string.toUpperCase())
-                                                 .toLowerCase())
-
-                                            // Collect the stream into a list.
-                                            .toList()))
-
-                        // Trigger the intermediate operations and count the
-                        // number of iterations (should be sMAX_ITERATIONS).
-                        .count();
+                                 // Collect Stream into a List.
+                                 .toList());
                 },
                 testName);
     }
@@ -207,23 +200,18 @@ public class ex14 {
                             .getInput(sSHAKESPEARE_DATA_FILE,
                                       // Split input into "words" by
                                       // ignoring whitespace.
-                                    sSPLIT_WORDS));
-        // Create an empty list.
-        List<String> list = new ArrayList<>();
-
+                                      sSPLIT_WORDS));
         for (int i = 0; i < sMAX_ITERATIONS; i++)
-            // Append the new words to the end of the list.
-            list.addAll(words
-                        // Convert the list into a parallel stream
-                        // (which uses a spliterator internally).
-                        .parallelStream()
+            words
+                // Convert the List into a parallel stream
+                // (which uses a spliterator internally).
+                .parallelStream()
 
-                        // Uppercase each string.  A "real"
-                        // application would likely do something
-                        // interesting with the words at this point.
-                        .map(string -> string.toUpperCase())
-
-                        // Collect the stream into a list.
-                        .toList());
+                // Modify each string.  A "real"
+                // application would likely do something
+                // interesting with the words at this point.
+                .forEach(string -> rot13
+                     (string.toUpperCase())
+                     .toLowerCase());
     }
 }

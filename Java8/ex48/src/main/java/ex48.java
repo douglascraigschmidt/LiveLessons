@@ -1,99 +1,98 @@
+import utils.RunTimer;
+
 import java.util.List;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 /**
  * This example demonstrates what goes wrong when reduce() performs a
- * mutable reduction on a parallel stream and also shows how to fix
- * this problem by using collect().
+ * mutable reduction on a parallel stream and also shows various ways
+ * to fix this problem, e.g., by using collect().
  */
+@SuppressWarnings({"resource", "ResultOfMethodCallIgnored", "StructuralWrap"})
 public class ex48 {
     /**
      * Main entry point into the program.
      */
     public static void main(String[] argv) {
+        List<String> allStrings =
+            List.of("The quick brown fox jumps over the lazy dog\n",
+                    "A man, a plan, a canal: Panama\n",
+                    "Evil is a name of a foeman, as I live.\n",
+                    "Able was I, ere I saw Elba\n",
+                    "Now is the time for all good people\n",
+                    "to come to the aid of their party\n");
+
         // Reduce partial results into a string using a sequential
         // stream and the three-parameter version of reduce() along
         // with StringBuilder.
-        buggyStreamReduce3a(false);
+        buggyStreamReduce3a(allStrings, false);
 
         // Reduce partial results into a string using a parallel
         // stream and the three-parameter version of reduce() along
         // with StringBuilder..
-        buggyStreamReduce3a(true);
+        buggyStreamReduce3a(allStrings, true);
 
         // Reduce partial results into a string using a sequential
         // stream and the three-parameter version of reduce() along
         // with StringBuffer.
-        buggyStreamReduce3b(false);
+        buggyStreamReduce3b(allStrings, false);
 
         // Reduce partial results into a string using a parallel
         // stream and the three-parameter version of reduce() along
         // with StringBuffer.
-        buggyStreamReduce3b(true);
+        buggyStreamReduce3b(allStrings, true);
 
         // Reduce partial results into a string using a parallel
         // stream and a working version that uses StringBuilder.
-        streamReduceStringBuilder(true);
+        streamReduceStringBuilder(allStrings, false);
+
+        // Reduce partial results into a string using a parallel
+        // stream and a working version that uses StringBuilder.
+        streamReduceStringBuilder(allStrings, true);
 
         // Reduce partial results into a string using a sequential
         // stream and string concatenation with reduce().
-        streamReduceConcat(false);
+        streamReduceConcat(allStrings, false);
 
         // Reduce partial results into a string using a parallel
         // stream and string concatenation with reduce().
-        streamReduceConcat(true);
+        streamReduceConcat(allStrings, true);
 
         // Collect partial results into a string using a sequential
         // stream together with collect() and StringJoiner.
-        streamCollectJoining(false);
+        streamCollectJoining(allStrings, false);
 
         // Collect partial results into a string using a parallel
         // stream together with collect() and StringJoiner.
-        streamCollectJoining(true);
+        streamCollectJoining(allStrings, true);
     }
 
     /**
-     * Reduce partial results into a StringBuilder using the three
-     * parameter version of reduce().  If {@code parallel} is true
-     * then a parallel stream is used, else a sequential stream is
-     * used.  When a sequential stream is used the results of this
+     * Reduce partial results into a StringBuilder using the
+     * three-parameter version of reduce(). If {@code parallel} is
+     * true then a parallel stream is used, else a sequential stream
+     * is used.  When a sequential stream is used, the results of this
      * test will be correct even though a mutable object
      * (StringBuilder) is used with reduce().  When a parallel stream
      * is used, however, the results of this test will be incorrect
      * due to the use of a mutable object (StringBuilder) with
      * reduce(), which expects an immutable object.
      */
-    private static void buggyStreamReduce3a(boolean parallel) {
+    private static void buggyStreamReduce3a(List<String> allStrings,
+                                            boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "buggyStreamReduce3a implementation");
+                           + " buggyStreamReduce3a() implementation");
 
-        List<String> allStrings =
-            List.of("The quick brown fox jumps over the lazy dog\n",
-                    "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people\n",
-                    "to come to the aid of their party\n");
+        Runnable runnable = () -> {
+            // Convert allStrings into a Stream of String objects.
+            Stream<String> stringStream = getStringStream(allStrings, parallel);
 
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        Stream<String> stringStream = allStrings
-            // Convert the list into a stream (which uses a
-            // spliterator internally).
-            .stream();
-
-        if (parallel)
-            // Convert to a parallel stream.
-            stringStream.parallel();
-
-        // A "real" application would likely do something interesting
-        // with the strings at this point.
-
-        // Create a string that contains all the strings appended together.
-        String reducedString = stringStream
+            // Create a string that contains all the strings appended
+            // together.
+            String reducedString = stringStream
             // Use reduce() to append all the strings in the stream.
             // This implementation will fail when used with a parallel
             // stream since reduce() expects to do "immutable"
@@ -101,61 +100,48 @@ public class ex48 {
             .reduce(new StringBuilder(),
                     StringBuilder::append,
                     StringBuilder::append)
+
             // Create a string.
             .toString();
 
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+            // Check the results to see if they succeeded or failed.
+            checkResults(allStrings, reducedString);
+        };
 
-        System.out.println("The time to collect "
+        // Run the runnable and time it.
+        var elapsedTime = RunTimer.timeRun(runnable);;
+
+        System.out.println("The time to reduce "
                            + allStrings.size()
-                           + " strings into "
-                           + reducedString.split("\\n").length
                            + " strings took "
-                           + stopTime
-                           + " milliseconds.  Here are the strings:\n"
-                           + reducedString);
+                           + elapsedTime
+                           + " milliseconds.");
     }
 
     /**
-     * Reduce partial results into a StringBuffer using the three
-     * parameter version of reduce().  If {@code parallel} is true
-     * then a parallel stream is used, else a sequential stream is
-     * used.  When a sequential stream is used the results of this
+     * Reduce partial results into a StringBuffer using the
+     * three-parameter version of reduce(). If {@code parallel} is
+     * true then a parallel stream is used, else a sequential stream
+     * is used.  When a sequential stream is used the results of this
      * test will be correct even though a mutable object
      * (StringBuffer) is used with reduce().  When a parallel stream
      * is used, however, the results of this test will be incorrect
      * due to the use of a mutable object (StringBuffer) with
      * reduce(), which expects an immutable object.
      */
-    private static void buggyStreamReduce3b(boolean parallel) {
+    private static void buggyStreamReduce3b(List<String> allStrings,
+                                            boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "buggyStreamReduce3b implementation");
+                           + " buggyStreamReduce3b() implementation");
 
-        List<String> allStrings =
-            List.of("The quick brown fox jumps over the lazy dog\n",
-                    "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people\n",
-                    "to come to the aid of their party\n");
+        Runnable runnable = () -> {
+            // Convert allStrings into a Stream of String objects.
+            Stream<String> stringStream = getStringStream(allStrings, parallel);
 
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        Stream<String> stringStream = allStrings
-            // Convert the list into a stream (which uses a
-            // spliterator internally).
-            .stream();
-
-        if (parallel)
-            // Convert to a parallel stream.
-            stringStream.parallel();
-
-        // A "real" application would likely do something interesting
-        // with the strings at this point.
-
-        // Create a string that contains all the strings appended together.
-        String reducedString = stringStream
+            // Create a string that contains all the strings appended
+            // together.
+            String reducedString = stringStream
             // Use reduce() to append all the strings in the stream.
             // This implementation will fail when used with a parallel
             // stream since reduce() expects to do "immutable"
@@ -163,20 +149,22 @@ public class ex48 {
             .reduce(new StringBuffer(),
                     StringBuffer::append,
                     StringBuffer::append)
+
             // Create a string.
             .toString();
 
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+            // Check the results to see if they succeeded or failed.
+            checkResults(allStrings, reducedString);
+        };
 
-        System.out.println("The time to collect "
+        // Run the runnable and time it.
+        var elapsedTime = RunTimer.timeRun(runnable);;
+
+        System.out.println("The time to reduce "
                            + allStrings.size()
-                           + " strings into "
-                           + reducedString.split("\\n").length
                            + " strings took "
-                           + stopTime
-                           + " milliseconds.  Here are the strings:\n"
-                           + reducedString);
+                           + elapsedTime
+                           + " milliseconds.");
     }
 
     /**
@@ -187,56 +175,42 @@ public class ex48 {
      * creates a new instance of {@link StringBuilder} rather than
      * sharing one mutable instance.
      */
-    private static void streamReduceStringBuilder(boolean parallel) {
+    private static void streamReduceStringBuilder(List<String> allStrings,
+                                                  boolean parallel) {
         System.out.println("\n++Running the "
-                + (parallel ? "parallel" : "sequential")
-                + "streamReduceStringBuilder implementation");
+                           + (parallel ? "parallel" : "sequential")
+                           + " streamReduceStringBuilder() implementation");
 
-        List<String> allStrings =
-                List.of("The quick brown fox jumps over the lazy dog\n",
-                        "A man, a plan, a canal: Panama\n",
-                        "Now is the time for all good people\n",
-                        "to come to the aid of their party\n");
+        Runnable runnable = () -> {
+            // Convert allStrings into a Stream of String objects.
+            Stream<String> stringStream = getStringStream(allStrings, parallel);
 
-        // Record the start time.
-        long startTime = System.nanoTime();
+            // Create a string that contains all the strings appended
+            // together.
+            String reducedString = stringStream
+            // Use reduce() to append all the strings in the
+            // stream. This implementation will work when used
+            // with a parallel stream different instances of
+            // StringBuilder are used.
+            .reduce(new StringBuilder(),
+                    (acc, s) -> new StringBuilder(acc).append(s),
+                    (sb1, sb2) -> new StringBuilder(sb1).append(sb2))
 
-        Stream<String> stringStream = allStrings
-                // Convert the list into a stream (which uses a
-                // spliterator internally).
-                .stream();
+            // Create a string.
+            .toString();
 
-        if (parallel)
-            // Convert to a parallel stream.
-            stringStream.parallel();
+            // Check the results to see if they succeeded or failed.
+            checkResults(allStrings, reducedString);
+        };
 
-        // A "real" application would likely do something interesting
-        // with the strings at this point.
+        // Run the runnable and time it.
+        var elapsedTime = RunTimer.timeRun(runnable);;
 
-        // Create a string that contains all the strings appended
-        // together.
-        String reducedString = stringStream
-                // Use reduce() to append all the strings in the
-                // stream.  This implementation will work when used
-                // with a parallel stream different instances of
-                // StringBuilder are used.
-                .reduce(new StringBuilder(),
-                        (acc, s) -> new StringBuilder(acc).append(s),
-                        (sb1, sb2) -> new StringBuilder(sb1).append(sb2))
-                // Create a string.
-                .toString();
-
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to collect "
-                + allStrings.size()
-                + " strings into "
-                + reducedString.split("\\n").length
-                + " strings took "
-                + stopTime
-                + " milliseconds.  Here are the strings:\n"
-                + reducedString);
+        System.out.println("The time to reduce "
+                           + allStrings.size()
+                           + " strings took "
+                           + elapsedTime
+                           + " milliseconds.");
     }
 
     /**
@@ -246,35 +220,19 @@ public class ex48 {
      * is used.  This solution is correct, but inefficient due to the
      * overhead of string concatenation.
      */
-    private static void streamReduceConcat(boolean parallel) {
+    private static void streamReduceConcat(List<String> allStrings,
+                                           boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "streamReduceConcat implementation");
+                           + " streamReduceConcat() implementation");
 
-        List<String> allStrings =
-            List.of("The quick brown fox jumps over the lazy dog\n",
-                    "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people\n",
-                    "to come to the aid of their party\n");
+        Runnable runnable = () -> {
+            // Convert allStrings into a Stream of String objects.
+            Stream<String> stringStream = getStringStream(allStrings, parallel);
 
-        // Record the start time.
-        long startTime = System.nanoTime();
-
-        Stream<String> stringStream = allStrings
-            // Convert the list into a stream (which uses a
-            // spliterator internally).
-            .stream();
-
-        if (parallel)
-            // Convert to a parallel stream.
-            stringStream.parallel();
-
-        // A "real" application would likely do something interesting
-        // with the strings at this point.
-
-        // Create a string that contains all the strings appended
-        // together.
-        String reducedString = stringStream
+            // Create a string that contains all the strings appended
+            // together.
+            String reducedString = stringStream
             // Use reduce() to append all the strings in the stream.
             // This implementation works with both sequential and
             // parallel streams, but it's inefficient since it
@@ -282,17 +240,18 @@ public class ex48 {
             .reduce("",
                     (x, y) -> x + y);
 
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
+            // Check the results to see if they succeeded or failed.
+            checkResults(allStrings, reducedString);
+        };
 
-        System.out.println("The time to collect "
+        // Run the runnable and time it.
+        var elapsedTime = RunTimer.timeRun(runnable);;
+
+        System.out.println("The time to reduce "
                            + allStrings.size()
-                           + " strings into "
-                           + reducedString.split("\\n").length
                            + " strings took "
-                           + stopTime
-                           + " milliseconds.  Here are the strings:\n"
-                           + reducedString);
+                           + elapsedTime
+                           + " milliseconds.");
     }
 
     /**
@@ -304,20 +263,48 @@ public class ex48 {
      * mutable object (StringJoiner) with collect(), which works
      * correctly in this case.
      */
-    private static void streamCollectJoining(boolean parallel) {
+    private static void streamCollectJoining(List<String> allStrings,
+                                             boolean parallel) {
         System.out.println("\n++Running the "
                            + (parallel ? "parallel" : "sequential")
-                           + "streamCollectJoining implementation");
+                           + " streamCollectJoining() implementation");
 
-        List<String> allStrings =
-            List.of("The quick brown fox jumps over the lazy dog\n",
-                    "A man, a plan, a canal: Panama\n",
-                    "Now is the time for all good people\n",
-                    "to come to the aid of their party\n");
+        Runnable runnable = () -> {
+            // Convert allStrings into a Stream of String objects.
+            Stream<String> stringStream = getStringStream(allStrings, parallel);
 
-        // Record the start time.
-        long startTime = System.nanoTime();
+            // Create a string that contains all the strings appended
+            // together.
+            String reducedString = stringStream
+            // Use collect() to append all the strings in the stream.
+            // This implementation works when used with either a
+            // sequential or a parallel stream.
+            .collect(joining());
 
+            // Check the results to see if they succeeded or failed.
+            checkResults(allStrings, reducedString);
+        };
+
+        // Run the runnable and time it.
+        var elapsedTime = RunTimer.timeRun(runnable);;
+
+        System.out.println("The time to collect "
+                           + allStrings.size()
+                           + " strings took "
+                           + elapsedTime
+                           + " milliseconds.");
+    }
+
+    /**
+     * Returns a {@link Stream} of the {@code allStrings} {@link String} objects.
+     *
+     * @param allStrings The {@link List} of {@link String} objects to
+     *                   check against
+     * @param parallel Whether to use a parallel stream or not
+     * @return A {@link Stream} of {@link String} objects
+     */
+    private static Stream<String> getStringStream(List<String> allStrings,
+                                                  boolean parallel) {
         Stream<String> stringStream = allStrings
             // Convert the list into a stream (which uses a
             // spliterator internally).
@@ -326,28 +313,30 @@ public class ex48 {
         if (parallel)
             // Convert to a parallel stream.
             stringStream.parallel();
+        return stringStream;
+    }
 
-        // A "real" application would likely do something interesting
-        // with the strings at this point.
+    /**
+     * Checks to see if the reduction was correct or incorrect.
+     *
+     * @param allStrings The {@link } of {@link String} objects to check against
+     * @param reducedString The {@link String} to check against
+     */
+    private static void checkResults(List<String> allStrings,
+                                     String reducedString) {
+        // Determine how many reduced String objects were created.
+        int reduceStrings = reducedString.split("\\n").length;
 
-        // Create a string that contains all the strings appended
-        // together.
-        String reducedString = stringStream
-            // Use collect() to append all the strings in the stream.
-            // This implementation works when used with either a
-            // sequential or a parallel stream.
-            .collect(joining());
+        // Determine if f the reduction was correct or incorrect.
+        boolean correct = allStrings.size() == reduceStrings;
 
-        // Record the stop time.
-        long stopTime = (System.nanoTime() - startTime) / 1_000_000;
-
-        System.out.println("The time to collect "
-                           + allStrings.size()
-                           + " strings into "
-                           + reducedString.split("\\n").length
-                           + " strings took "
-                           + stopTime
-                           + " milliseconds.  Here are the strings:\n"
+        // Print the results.
+        System.out.println(allStrings.size()
+                           + " strings were "
+                           + (correct ? "correctly" : "incorrectly")
+                           + " split into the following "
+                           + reduceStrings
+                           + " strings:\n"
                            + reducedString);
     }
 }
