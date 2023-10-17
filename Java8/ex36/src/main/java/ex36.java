@@ -4,9 +4,11 @@ import utils.TestDataFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -77,7 +79,7 @@ public class ex36 {
                              TreeSet::new,
                              ex36::timeStreamCollect);
 
-        // Print the results.
+        // Print the results containing the unique words of Shakespeare.
         printResults(getResults(true,
                                 TestDataFactory
                                 .getInput(sSHAKESPEARE_DATA_FILE,
@@ -110,10 +112,10 @@ public class ex36 {
          Supplier<Set<String>> setSupplier,
          Supplier<Set<String>> concurrentSetSupplier,
          QuadFunction<String,
-         Boolean,
-         List<String>,
-         Collector<String, ?, Set<String>>,
-         Void> collect) {
+                      Boolean,
+                      List<String>,
+                      Collector<String, ?, Set<String>>,
+                      Void> collect) {
         Arrays
             // Create tests for different sizes of input data.
             .asList(1_000, 10_000, 100_000, 1_000_000)
@@ -204,32 +206,37 @@ public class ex36 {
         RunTimer
             // Time how long it takes to run the test.
             .timeRun(() -> {
-                    // Create an empty list.
-                    List<String> list = new ArrayList<>();
-
-                    IntStream
-                        // Iterate sMAX_ITERATIONS times.
+                    var list = IntStream
+                        // Run the test sMAX_ITERATIONS times.
                         .range(0, sMAX_ITERATIONS)
-                    
-                        // Perform the following action each iteration.
-                        .forEach((i) -> list
-                                 // Append new words to end of the list.
-                                 .addAll(getResults(parallel, words, collector)));
+
+                        // Convert the IntStream into a Stream of Integer objects.
+                        .boxed()
+
+                        // Run the test sMAX_ITERATIONS times.
+                        .mapMulti((Integer i, Consumer<String> consumer) ->
+                            // Run the test and accept the Set of results into
+                            // the Stream.
+                            getResults(parallel, words, collector)
+                                .forEach(consumer::accept))
+
+                        // Convert the Stream to a List.
+                        .toList();
                 },
                 testName);
         return null;
     }
 
     /**
-     * Perform computations that create a {@link List} of unique words
+     * Perform computations that create a {@link Set} of unique words
      * in Shakespeare's works.
      * 
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
-     * @param words A {@link List} of words to lowercase
+     * @param words A {@link List} of words to modify
      * @param collector The {@link Collector} used to combine the
      *                  results
-     * @return A {@link List} containing the unique words in
+     * @return A {@link Set} containing the unique words in
      *         Shakespeare's works
      */
     private static Set<String> getResults
@@ -245,7 +252,7 @@ public class ex36 {
             .map(word ->
                  rot13(rot13(word.toUpperCase()).toLowerCase()))
 
-            // Convert the Stream into a List.
+            // Convert the Stream into a Set.
             .collect(collector);
     }
 
@@ -276,20 +283,13 @@ public class ex36 {
      */
     private static void printResults(Set<String> results,
                                      String testName) {
-        // Convert the first sMAX_WORDS elements of the Map contents
-        // into a String.
-        var allWords = results
-            .stream()
-            .map(Objects::toString)
-            .toList();
-
         // Print the results.
         System.out.println("Results for "
                            + testName
                            + " of size "
                            + results.size()
                            + " was:\n"
-                           + allWords);
+                           + results);
     }
 
     /**
@@ -315,8 +315,9 @@ public class ex36 {
                         // (which uses a spliterator internally).
                         .parallelStream()
 
-                        // Lowercase each String.
-                        .map(word -> word.toString().toLowerCase())
+                        // Modify each word.
+                        .map(word ->
+                             rot13(rot13(word.toUpperCase()).toLowerCase()))
 
                         // Collect the Stream into a List.
                         .toList());

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 /**
  * This example shows the difference in overhead/performance for using
@@ -85,15 +86,15 @@ public class ex14 {
                     // LinkedList via a sequential stream (and thus a
                     // sequential spliterator).
                     timeStreamModifications("LinkedList",
-                                        linkedWords,
-                                        false);
+                                            linkedWords,
+                                            false);
 
                     // Compute the time required to split/uppercase an
                     // ArrayList via a sequential stream (and thus a
                     // sequential spliterator).
                     timeStreamModifications("ArrayList",
-                                        arrayWords,
-                                        false);
+                                            arrayWords,
+                                            false);
                     
                     // Compute the time required to split/uppercase a
                     // LinkedList via a parallel stream (and thus a
@@ -101,8 +102,8 @@ public class ex14 {
                     // test should be worse than the ArrayList test
                     // since a LinkedList splits poorly.
                     timeStreamModifications("LinkedList",
-                                        linkedWords,
-                                        true);
+                                            linkedWords,
+                                            true);
 
                     // Compute the time required to split/uppercase an
                     // ArrayList via a parallel stream (and thus a
@@ -112,8 +113,8 @@ public class ex14 {
                     // and an object creation) and also split evenly
                     // (leading to balanced computation trees).
                     timeStreamModifications("ArrayList",
-                                        arrayWords,
-                                        true);
+                                            arrayWords,
+                                            true);
 
                     // Print the results.
                     System.out.println("..printing results\n"
@@ -148,14 +149,14 @@ public class ex14 {
                         // Iterate sMAX_ITERATIONS times.
                         .range(0, sMAX_ITERATIONS)
 
-                        // Each iteration create a List of transformed
+                        // Each iteration creates a List of transformed
                         // words.
                         .forEach(___ ->
-                                (parallel
-                                 // Convert List to a sequential or
-                                 // parallel Stream.
-                                 ? words.parallelStream()
-                                 : words.stream())
+                                 (parallel
+                                  // Convert List to a sequential or
+                                  // parallel Stream.
+                                  ? words.parallelStream()
+                                  : words.stream())
 
                                  // Modify each String to burn CPU
                                  // time.
@@ -211,7 +212,7 @@ public class ex14 {
                 // application would likely do something
                 // interesting with the words at this point.
                 .forEach(string -> rot13
-                     (string.toUpperCase())
-                     .toLowerCase());
+                         (string.toUpperCase())
+                         .toLowerCase());
     }
 }

@@ -54,7 +54,7 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
      */
     @Override
     public BiConsumer<Set<E>, E> accumulator() {
-        // Add element to the map.
+        // Add the element to the map.
         return Set::add;
     }
 
