@@ -275,14 +275,14 @@ public class ex48 {
 
             // Create a string that contains all the strings appended
             // together.
-            String reducedString = stringStream
+            String collectedString = stringStream
             // Use collect() to append all the strings in the stream.
             // This implementation works when used with either a
             // sequential or a parallel stream.
             .collect(joining());
 
             // Check the results to see if they succeeded or failed.
-            checkResults(allStrings, reducedString);
+            checkResults(allStrings, collectedString);
         };
 
         // Run the runnable and time it.
@@ -313,25 +313,27 @@ public class ex48 {
         if (parallel)
             // Convert to a parallel stream.
             stringStream.parallel();
+
+        // Return the sequential or parallel stream.
         return stringStream;
     }
 
     /**
      * Checks to see if the reduction was correct or incorrect.
      *
-     * @param allStrings The {@link } of {@link String} objects to check against
+     * @param originalList The {@link } of {@link String} objects to check against
      * @param reducedString The {@link String} to check against
      */
-    private static void checkResults(List<String> allStrings,
+    private static void checkResults(List<String> originalList,
                                      String reducedString) {
         // Determine how many reduced String objects were created.
         int reduceStrings = reducedString.split("\\n").length;
 
         // Determine if f the reduction was correct or incorrect.
-        boolean correct = allStrings.size() == reduceStrings;
+        boolean correct = originalList.size() == reduceStrings;
 
         // Print the results.
-        System.out.println(allStrings.size()
+        System.out.println(originalList.size()
                            + " strings were "
                            + (correct ? "correctly" : "incorrectly")
                            + " split into the following "

@@ -214,7 +214,8 @@ public class ex36 {
                         .boxed()
 
                         // Run the test sMAX_ITERATIONS times.
-                        .mapMulti((Integer i, Consumer<String> consumer) ->
+                        .mapMulti((Integer ___,
+                                         Consumer<String> consumer) ->
                             // Run the test and accept the Set of results into
                             // the Stream.
                             getResults(parallel, words, collector)

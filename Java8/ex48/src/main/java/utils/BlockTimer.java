@@ -37,13 +37,5 @@ public class BlockTimer
     public long getElapsedTime() {
         return elapsedTime;
     }
-
-    /**
-     * @return The elapsed time as a {@link String}.
-     */
-    @Override
-    public String toString() {
-        return String.format("%d ms", elapsedTime);
-    }
 }
 

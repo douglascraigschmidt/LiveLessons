@@ -11,15 +11,20 @@ public class RunTimer {
      * @param runnable The {@link Runnable} to time
      * @return The time in milliseconds it took to run the {@link Runnable}
      */
-    public static BlockTimer timeRun(Runnable runnable) {
-        // Create a block timer within a try-with-resources block
-        // to track how long the runnable took to run.
-        try (BlockTimer blockTimer = new BlockTimer()) {
+    public static long timeRun(Runnable runnable) {
+        // Create a block timer to track how long the runnable took to run.
+        BlockTimer blockTimer = new BlockTimer();
+
+        // Use the blockTimer within a try-with-resources block
+        // so that it is automatically closed when the try block ends
+        // to record the elapsed time.
+        try (blockTimer) {
             // Run the runnable.
             runnable.run();
-
-            return blockTimer;
         }
+
+        // Return the elapsed time.
+        return blockTimer.getElapsedTime();
     }
 }
 

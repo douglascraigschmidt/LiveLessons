@@ -6,9 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 /**
  * This example shows the difference in overhead/performance for using
@@ -60,7 +58,7 @@ public class ex14 {
     private static void runSpliteratorTests() {
         Arrays
             // Create tests for different sizes of input data.
-            .asList(1000, 10000, 100000, 1000000)
+            .asList(1_000, 10_000, 100_000, 1_000_000)
 
             // For each input data size run the following tests.
             .forEach (limit -> {

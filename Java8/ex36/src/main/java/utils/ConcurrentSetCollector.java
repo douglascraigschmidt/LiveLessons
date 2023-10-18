@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * A concurrent collector that accumulates input elements of type
- * {@code E} into a {@link ConcurrentHashMap.KeySetView} and the returns a
- * type {@link S} that extends {@link Set}.
+ * A generic concurrent {@link Collector} that accumulates input elements of
+ * type {@code E} into a {@link ConcurrentHashMap.KeySetView} and then returns
+ * a type {@link S} that extends {@link Set}.
  */
 public class ConcurrentSetCollector<E, S extends Set<E>>
        implements Collector<E,
@@ -54,7 +54,11 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
      */
     @Override
     public BiConsumer<Set<E>, E> accumulator() {
-        // Add the element to the map.
+        // Add the element to the map, but do it in
+        // a thread-safe manner.  This is a very common
+        // operation in parallel streams.  Note that we
+        // don't need to worry about thread-safety for
+        // the set, since it's a ConcurrentHashMap's Set.
         return Set::add;
     }
 
@@ -70,8 +74,13 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
     public BinaryOperator<Set<E>> combiner() {
         // Merge the two sets together.
         return (first, second) -> {
-            first.addAll(second);
-            return first;
+            if (first.size() > second.size()) {
+                first.addAll(second);
+                return first;
+            } else {
+                second.addAll(first);
+                return second;
+            }
         };
     }
 
@@ -84,6 +93,7 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
      */
     @Override
     public Function<Set<E>, S> finisher() {
+        // The 'set' is the underlying mutable result container.
         return set -> {
             // Create the appropriate map.
             S newSet = mSetSupplier.get();
@@ -116,8 +126,9 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
     @Override
     public Set<Characteristics> characteristics() {
         return Collections
-            .unmodifiableSet(EnumSet.of(Collector.Characteristics.CONCURRENT,
-                                        Collector.Characteristics.UNORDERED));
+            .unmodifiableSet(EnumSet
+                .of(Collector.Characteristics.CONCURRENT,
+                    Collector.Characteristics.UNORDERED));
     }
 
     /**

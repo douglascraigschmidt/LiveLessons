@@ -6,8 +6,9 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * This example shows various issues associated with using the Java
- * stream reduce() terminal operation, including the need to use the
- * correct identity value and to ensure operations are associative.
+ * Streams {@code reduce()} terminal operation (especially for parallel
+ * Streams), including the need to use the correct identity value and to
+ * ensure operations are associative.
  */
 public class ex17 {
     /**
@@ -30,12 +31,6 @@ public class ex17 {
         // incorrect identity value.
         testSum(1L, true);
 
-        // Run the difference reduction test sequentially.
-        testDifferenceReduce(false);
-
-        // Run the difference reduction test in parallel.
-        testDifferenceReduce(true);
-
         // Run the product reduction test sequentially with the
         // correct identity value.
         testProd(1L, false);
@@ -51,28 +46,12 @@ public class ex17 {
         // Run the product reduction test in parallel with an
         // incorrect identity value.
         testProd(0L, true);
-    }
 
-    /**
-     * Print out the results of subtracting the first 100 numbers.  If
-     * {@code parallel} is true then a parallel stream is used, else a
-     * sequential stream is used.  The results for each of these tests
-     * will differ since subtraction is not associative.
-     */
-    private static void testDifferenceReduce(boolean parallel) {
-        LongStream rangeStream = LongStream
-            .rangeClosed(1, 100);
+        // Run the difference reduction test sequentially.
+        testDifferenceReduce(false);
 
-        if (parallel)
-            rangeStream.parallel();
-
-        long difference = rangeStream
-            .reduce(1L,
-                    (x, y) -> x - y);
-
-        System.out.println((parallel ? "Parallel" : "Sequential")
-                           + " difference of first 100 numbers = "
-                           + difference);
+        // Run the difference reduction test in parallel.
+        testDifferenceReduce(true);
     }
 
     /**
@@ -132,5 +111,27 @@ public class ex17 {
                            + identity
                            + " = "
                            + product);
+    }
+
+    /**
+     * Print out the results of subtracting the first 100 numbers.  If
+     * {@code parallel} is true then a parallel stream is used, else a
+     * sequential stream is used.  The results for each of these tests
+     * will differ since subtraction is not associative.
+     */
+    private static void testDifferenceReduce(boolean parallel) {
+        LongStream rangeStream = LongStream
+            .rangeClosed(1, 100);
+
+        if (parallel)
+            rangeStream.parallel();
+
+        long difference = rangeStream
+            .reduce(1L,
+                (x, y) -> x - y);
+
+        System.out.println((parallel ? "Parallel" : "Sequential")
+            + " difference of first 100 numbers = "
+            + difference);
     }
 }

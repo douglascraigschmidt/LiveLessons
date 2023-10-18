@@ -46,7 +46,7 @@ public class TestDataFactory {
                 .filter(((Predicate<String>) String::isEmpty).negate())
                 
                 // Collect the results into a string.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -84,7 +84,7 @@ public class TestDataFactory {
                 .limit(limit)
 
                 // Collect the results into a List of String objects.
-                .collect(toList());
+                .toList();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
