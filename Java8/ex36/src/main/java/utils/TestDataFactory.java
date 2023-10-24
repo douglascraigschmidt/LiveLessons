@@ -82,10 +82,10 @@ public class TestDataFactory {
                 // Filter out any empty strings.
                 .filter(((Predicate<String>) String::isEmpty).negate())
                 
-                // Only return up to 'limit' strings.
+                // Only return up to 'limit' words.
                 .limit(limit)
 
-                // Collect the results into a List of CharSequence objects.
+                // Collect the results into a List of String objects.
                 .toList();
         } catch (Exception e) {
             e.printStackTrace();

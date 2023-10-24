@@ -3,6 +3,7 @@ package livelessons.streams;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,15 +55,11 @@ public class ImageStreamParallel
             // pool is expanded to handle the blocking image download.
             .map(this::blockingDownload)
 
-            // Use map() to create a stream containing multiple
+            // Use mapMulti() to create a stream containing multiple
             // filtered versions of each image.
-            .map(this::applyFilters)
+            .mapMulti(this::applyFilters)
 
-            // Convert the stream of streams of images into a stream
-            // of images without using flatMap().
-            .reduce(Stream::concat).orElse(Stream.empty())
-
-            // Terminate the stream and collect the results into list
+            // Terminate the stream and collect the results into List
             // of images.
             .toList();
 
@@ -75,19 +72,29 @@ public class ImageStreamParallel
     }
 
     /**
-     * Apply all the image filters concurrently to each {@code image}
-     * @return a stream of filtered images
+     * Apply all the filters concurrently to each {@link Image}
+     * and accept the filtered results into the {@link Consumer}.
+     *
+     * @param image The image to apply all the filters to.
+     * @param consumer The {@link Consumer} that accepts all
+     *                 the filtered {@link Image} objects
      */
-    private Stream<Image> applyFilters(Image image) {
-        return mFilters
-           // Iterate through the list of image filters concurrently
-           // and apply each one to the image.
-           .parallelStream()
+    private void applyFilters(Image image,
+                              Consumer<Image> consumer) {
+        // Apply the Image filters concurrently to each image.
+        mFilters
+            // Iterate through the list of image filters concurrently
+            // and apply each one to the image.
+            .parallelStream()
 
-           // Use map() to create an OutputFilterDecorator for each
-           // image and run it to filter each image and store it in an
-           // output file.
-           .map(filter ->
-                makeFilterDecoratorWithImage(filter, image).run());
+            // Use map() to create an OutputFilterDecorator for each
+            // image and run it to filter each image and store it in an
+            // output file.
+            .map(filter ->
+                makeFilterDecoratorWithImage(filter, image).run())
+
+            // Iterate through the list of filtered images and accept
+            // each one into the consumer.
+            .forEach(consumer);
     }
 }

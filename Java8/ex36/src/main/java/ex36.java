@@ -186,7 +186,7 @@ public class ex36 {
      * @param testType The type of test, i.e., HashSet or TreeSet
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
-     * @param words A {@link List} of words to lowercase
+     * @param words A {@link List} of words of Shakespeare to manipulate
      * @param collector The {@link Collector} used to combine the
      *                  results
      */
@@ -234,7 +234,7 @@ public class ex36 {
      * 
      * @param parallel If true then a parallel stream is used, else a
      *                 sequential stream is used
-     * @param words A {@link List} of words to modify
+     * @param words A {@link List} of words of Shakespeare to modify
      * @param collector The {@link Collector} used to combine the
      *                  results
      * @return A {@link Set} containing the unique words in

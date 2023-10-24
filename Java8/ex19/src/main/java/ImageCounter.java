@@ -268,16 +268,17 @@ class ImageCounter {
             .stream()
 
             // Prepend the page URI to each image URL.
-            .map(img ->
-                 updatedPageUri + img.attr("src"))
+            .mapMulti((img, consumer) -> {
+                    var uri = updatedPageUri + img.attr("src");
 
-            // Filter out duplicate image URLs.
-            .filter(uri ->
-                    // If add() returns true the image URL is unique,
-                    // so count it.
-                    mUniqueUris.add(uri)
-                    // Otherwise, it's a duplicate, so ignore it.
-                    || print(depth, ": Already processed " + uri))
+                    // Filter out duplicate image URLs.
+                    if (mUniqueUris.add(uri)
+                        // Otherwise, it's a duplicate, so ignore it.
+                        || print(depth, ": Already processed " + uri))
+                        // If add() returns true the image URL is
+                        // unique, so accept it.
+                        consumer.accept(uri);
+                })
 
             // Count the unique images.
             .count();

@@ -114,7 +114,7 @@ public class Options {
             .flatMap(this::convertStringToUrls)
 
             // Create and return a list of a list of URLs.
-            .collect(toList());
+            .toList();
     }
 
     /**

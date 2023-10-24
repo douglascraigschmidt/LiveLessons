@@ -95,7 +95,7 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
     public Function<Set<E>, S> finisher() {
         // The 'set' is the underlying mutable result container.
         return set -> {
-            // Create the appropriate map.
+            // Create the appropriate Set (that's empty).
             S newSet = mSetSupplier.get();
 
             // Check whether we've been instantiated to return a
