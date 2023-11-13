@@ -47,7 +47,7 @@ public class CompletableFutureEx<T>
      *         {@link CompletionStage} method
      */
     @Override
-    public <T> CompletableFuture<T> newIncompleteFuture() {
+    public <U> CompletableFuture<U> newIncompleteFuture() {
         return new CompletableFutureEx<>();
     }
 

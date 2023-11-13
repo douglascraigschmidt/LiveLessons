@@ -24,9 +24,9 @@ import java.util.stream.Stream;
  * for more info.
  */
 public class FuturesCollectorIntStream
-      implements Collector<CompletableFuture<Integer>,
-                           List<CompletableFuture<Integer>>,
-                           CompletableFuture<IntStream>> {
+       implements Collector<CompletableFuture<Integer>,
+                            List<CompletableFuture<Integer>>,
+                            CompletableFuture<IntStream>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -53,7 +53,7 @@ public class FuturesCollectorIntStream
 
     /**
      * A function that accepts two partial results and merges them.
-     * The combiner function may fold state from one argument into the
+     * The combiner() function may fold state from one argument into the
      * other and return that, or may return a new result container.
      *
      * @return a function which combines two partial results into a combined
@@ -79,23 +79,25 @@ public class FuturesCollectorIntStream
     public Function<List<CompletableFuture<Integer>>, CompletableFuture<IntStream>>
         finisher() {
         return futures
-            -> CompletableFuture
-            // Use CompletableFuture.allOf() to obtain a
-            // CompletableFuture that will itself complete when all
-            // CompletableFutures in futures have completed.
-            .allOf(futures.toArray(new CompletableFuture[0]))
+            -> {
+            return CompletableFuture
+                // Use CompletableFuture.allOf() to obtain a
+                // CompletableFuture that will itself complete when all
+                // CompletableFutures in futures have completed.
+                .allOf(futures.toArray(new CompletableFuture[0]))
 
-            // When all futures have completed get a CompletableFuture
-            // to an array of joined elements of type T.
-            .thenApply(v -> futures
-                       // Convert futures into a stream of completable
-                       // futures.
-                       .stream()
+                // When all futures have completed get a CompletableFuture
+                // to an array of joined elements of type T.
+                .thenApply(v -> futures
+                    // Convert futures into a stream of completable
+                    // futures.
+                    .stream()
 
-                       // Use map() to join() all completable futures
-                       // and yield objects of type T.  Note that
-                       // join() should never block.
-                       .mapToInt(CompletableFuture::join));
+                    // Use map() to join() all completable futures
+                    // and yield objects of type T.  Note that
+                    // join() should never block.
+                    .mapToInt(CompletableFuture::join));
+        };
     }
 
     /**

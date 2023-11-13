@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.function.Function;
 
 /**
- * This helper class works around some deficiencies in the Jsoup
+ * This wrapper class works around some deficiencies in the Jsoup
  * library, which doesn't make web-based crawling and local filesystem
  * crawling transparent.
  */

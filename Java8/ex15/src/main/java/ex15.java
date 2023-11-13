@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * This example shows the limitations of using inherently sequential
  * Java Streams operations (such as {@code iterate()} and {@code
@@ -87,7 +85,7 @@ public class ex15 {
             .map(this::findSQRT)
 
             // Terminate the stream and collect results into a list.
-            .collect(toList());
+            .toList();
 
             assert maxNumber == result.size();
         };
@@ -133,7 +131,7 @@ public class ex15 {
 
             // Terminate the stream and collect results
             // into a list.
-            .collect(toList());
+            .toList();
 
             assert maxNumber == result.size();
         };
@@ -169,7 +167,7 @@ public class ex15 {
             .map(this::findSQRT)
 
             // Terminate the stream and collect results into a list.
-            .collect(toList());
+            .toList();
     }
 
     /**

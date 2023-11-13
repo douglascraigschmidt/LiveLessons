@@ -1,9 +1,14 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ex15" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="corretto-11" />
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ex15" />
-    <module name="Example 15" />
+    <module name="ex15.main" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

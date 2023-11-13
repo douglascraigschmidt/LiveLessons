@@ -43,8 +43,8 @@ class ImageCounter {
             // root Uri with an initial depth count of 1.
             .countImagesAsync(rootUri, 1)
 
-            // Handle outcome of previous stage by converting any
-            // exceptions into 0 and printing the total # of images.
+            // Handle the outcome of the previous stage by converting
+            // any exceptions into 0 and printing the total # of images.
             .handle((totalImages, ex) -> {
                     // Something's gone wrong here!
                     if (ex != null)
@@ -130,23 +130,20 @@ class ImageCounter {
                                int depth) {
         // Return false if we've reached the depth limit of the
         // crawling.
-        if (depth > Options.instance().maxDepth()) {
-            print(depth,
+        if (depth > Options.instance().maxDepth())
+            return print(depth,
                   ": Exceeded max depth of "
                   + Options.instance().maxDepth()
                   + " "
                   + pageUri);
-            return false;
-        }
         // Atomically check to see if we've already visited this URL
         // and add the new url to the hashset and return false to
         // avoid revisiting it again unnecessarily.
-        else if (!mUniqueUris.add(pageUri)) {
-            print(depth,
+        else if (!mUniqueUris.add(pageUri))
+            return print(depth,
                   ": Already processed "
                   + pageUri);
-            return false;
-        } else
+        else
             return true;
     }
 
@@ -177,30 +174,30 @@ class ImageCounter {
         (CompletableFuture<Document> pageFuture,
          String pageUri,
          int depth) {
-        return
+        return this
             // Return a count of the # of images on this page plus the
             // # of images on hyperlinks accessible via this page.
-            combineCounts(this
-                          // Asynchronously count the # of images on
-                          // this page and return a future to the
-                          // count.
-                          .countImagesInPageAsync(pageFuture,
-                                                  pageUri,
-                                                  depth)
-
-                          // Log what's happened, regardless of
-                          // whether an exception occurred or not.
-                          .whenComplete((totalImages, ex) ->
-                                        logResults(totalImages,
-                                                   ex,
+            .combineCounts(this
+                           // Asynchronously count the # of images on
+                           // this page and return a future to the
+                           // count.
+                           .countImagesInPageAsync(pageFuture,
                                                    pageUri,
-                                                   depth)),
+                                                   depth)
 
-                          // Asynchronously count the # of images
-                          // linked on this page and return a future
-                          // to this count.
-                          crawlLinksInPageAsync(pageFuture,
-                                                depth + 1));
+                           // Log what's happened, regardless of
+                           // whether an exception occurred or not.
+                           .whenComplete((totalImages, ex) ->
+                                         logResults(totalImages,
+                                                    ex,
+                                                    pageUri,
+                                                    depth)),
+
+                           // Asynchronously count the # of images
+                           // linked on this page and return a future
+                           // to this count.
+                           crawlLinksInPageAsync(pageFuture,
+                                                 depth + 1));
     }
 
     /**
@@ -267,7 +264,7 @@ class ImageCounter {
             // Convert the List to a Stream.
             .stream()
 
-            // Prepend the page URI to each image URL.
+            // Prepend the page URI to each image URL if it's unique.
             .mapMulti((img, consumer) -> {
                     var uri = updatedPageUri + img.attr("src");
 
@@ -275,7 +272,7 @@ class ImageCounter {
                     if (mUniqueUris.add(uri)
                         // Otherwise, it's a duplicate, so ignore it.
                         || print(depth, ": Already processed " + uri))
-                        // If add() returns true the image URL is
+                        // If add() returns true, the image URL is
                         // unique, so accept it.
                         consumer.accept(uri);
                 })

@@ -5,6 +5,9 @@ import java.text.BreakIterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -168,7 +171,7 @@ public class ex45 {
             .anyMatch(word -> word
                       .toLowerCase()
                       .equals(searchWord));
-    }  
+    }
 
     /**
      * Show the portions of the works of Shakespeare that match the
@@ -185,17 +188,9 @@ public class ex45 {
             // Convert List to a Stream.
             .stream()
 
-            // Map each work to a SimpleEntry contain the title of the work
-            // and the List of matches for that work.
-            .map(work -> new SimpleEntry<>
-                 (RegexUtils
-                  // Get the title of the work.
-                  .getFirstLine(work),
-                  // Get all lines that match the work.
-                  pattern.matcher(work).results().toList()))
-
-            // Filter out works that have no matches.
-            .filter(entry -> !entry.getValue().isEmpty())
+            // Map each work to a SimpleEntry contain the title of the
+            // work and the List of matches for that work.
+            .mapMulti(mapWork(pattern))
 
             // Convert the Stream of SimpleEntry objects to a Map
             // where the 'key' is the title of the work, and the
@@ -208,7 +203,7 @@ public class ex45 {
                            + allMatchResults.size()
                            + " out of a total of "
                            + bardWorksMatchingWord.size()
-                            + " works and the matches for each work are:");
+                           + " works and the matches for each work are:");
 
         allMatchResults
             // Iterate through the Map.
@@ -226,6 +221,50 @@ public class ex45 {
                                           + matchResult.start()
                                           + "]"));
                 });
+    }
+
+    /**
+     * This factory method returns a {@link BiConsumer} that maps each
+     * work to a {@link SimpleEntry} containing the title of the work
+     * and an associated {@link List} of {@code pattern} matches for
+     * that work. Only works that match the {@code pattern} are
+     * returned.
+     *
+     * @param pattern The compiled regular expression to search for
+     * @return A {@link BiConsumer} that maps the title of each work
+     *         with a {@link List} of non-empty matches for that work
+     */
+    private static BiConsumer<String,
+                              Consumer<SimpleEntry<String,
+                                       List<MatchResult>>>>
+    mapWork(Pattern pattern) {
+        return (String work,
+                Consumer<SimpleEntry<String, List<MatchResult>>> consumer) -> {
+            // Get a List of all matches for the work.
+            var matchList = pattern
+                // Associate the 'work' with the 'pattern'.
+                .matcher(work)
+
+                // Get a Stream of MatchResult objects.
+                .results()
+
+                // Convert the Stream into a List.
+                .toList();
+
+            // Filter out any work that has no matches.
+            if (!matchList.isEmpty()) {
+                // Get the title of the work.
+                var title = RegexUtils.getFirstLine(work);
+
+                // Create a SimpleEntry containing the title of the
+                // work and the List of matches for that work.
+                var entry = new SimpleEntry<String, List<MatchResult>>
+                    (title, matchList);
+
+                // Accept the entry into the consumer.
+                consumer.accept(entry);
+            }
+        };
     }
 }
 
