@@ -20,8 +20,11 @@ public class ex3 {
         // Test Observable exception handling via onErrorReturn().
         AsyncTaskBarrier.register(ObservableEx::testFractionException1);
 
-        // Test Observable exception handling via onErrorResumeNext().
+        // Test Observable exception handling via onErrorReturnNext().
         AsyncTaskBarrier.register(ObservableEx::testFractionException2);
+
+        // Test Observable exception handling via onErrorResumeNext().
+        AsyncTaskBarrier.register(ObservableEx::testFractionException3);
 
         // Use an asynchronous Observable stream and a pool of threads
         // to perform BigFraction multiplications and additions.

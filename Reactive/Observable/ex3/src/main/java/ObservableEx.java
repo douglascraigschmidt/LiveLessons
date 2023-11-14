@@ -70,7 +70,7 @@ public class ObservableEx {
                      .fromCallable(() -> BigFraction
                                    // Emit a random BigFraction that
                                    // throws ArithmeticException if
-                                   // denominator is 0.
+                                   // the denominator is 0.
                                    .valueOf(Math.abs(sRANDOM.nextInt()),
                                             denominator))
 
@@ -101,11 +101,58 @@ public class ObservableEx {
     }
 
     /**
-     * Test Observable exception handling via onErrorResumeNext().
+     * Test Observable exception handling via onErrorReturnItem().
      */
     public static Completable testFractionException2() {
         StringBuffer sb =
             new StringBuffer(">> Calling testFractionException2()\n");
+
+        // Create a list of denominators, including 0, which triggers
+        // an ArithmeticException.
+        List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
+
+        // Create a Function lambda to handle an ArithmeticException.
+        Function<Throwable,
+                 Observable<BigFraction>> logAndReturnEmptyObservable = t -> {
+            // Record the exception message.
+            sb.append("     exception = "
+                      + t.getMessage());
+
+            // Return an empty Observable when an exception occurs.
+            return Observable.empty();
+        };
+
+        return Observable
+            // Generate an Observable stream from the denominators
+            // list.
+            .fromIterable(denominators)
+
+            // Generate a random BigFraction.
+            .map(denominator -> BigFraction
+                 // Throws ArithmeticException if
+                 // denominator is 0.
+                 .valueOf(Math.abs(sRANDOM.nextInt()),
+                          denominator))
+
+            // Catch ArithmeticException and return BigFraction.ZERO,
+            // which terminates the stream at that point.
+            .onErrorReturnItem(BigFraction.ZERO)
+
+            // Collect the non-empty BigFractions into a list.
+            .collect(toList())
+
+            // Print the List and return a Completable that
+            // synchronizes with the AsyncTaskBarrier framework.
+            .flatMapCompletable(list -> BigFractionUtils
+                                .printList(list, sb));
+    }
+
+    /**
+     * Test Observable exception handling via onErrorResumeNext().
+     */
+    public static Completable testFractionException3() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionException3()\n");
 
         // Create a list of denominators, including 0, which triggers
         // an ArithmeticException.
