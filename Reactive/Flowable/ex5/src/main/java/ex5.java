@@ -17,7 +17,7 @@ public class ex5 {
     /**
      * Logging tag.
      */
-    private static final String TAG = ex2.class.getName();
+    private static final String TAG = ex5.class.getName();
 
     /**
      * The default exchange rate if a timeout occurs.
@@ -47,7 +47,7 @@ public class ex5 {
      */
     public static void main(String[] args) {
         // Run the test program.
-        new ex2().run();
+        new ex5().run();
     }
 
     /**
@@ -129,13 +129,13 @@ public class ex5 {
         for (int i = 0; i < sMAX_ITERATIONS; i++) {
             print("Iteration #" + i);
 
-            Flowable<Double> priceF = Flowable
+            var priceF = Flowable
                 // Asynchronously find the best price in US dollars
                 // from London to New York.
                 .just("LDN:NYC")
 
                 // Run the computation in the common fork-join pool.
-                .parallel().compose(RxUtils.commonPoolParallelFlowable())
+                .parallel().compose(RxUtils.commonPoolFlowable())
 
                 // Find the best price.
                 .map(this::findBestPrice)
@@ -143,7 +143,7 @@ public class ex5 {
                 // Convert back to sequential.
                 .sequential();
 
-            Flowable<Double> rateF = Flowable
+            var rateF = Flowable
                 // Asynchronously determine exchange rate from British
                 // pounds to US dollars.
                 .just("GBP:USA")

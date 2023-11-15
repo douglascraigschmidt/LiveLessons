@@ -31,7 +31,7 @@ public class RxUtils {
      * @return Schedule a parallel flowable to run on the common
      * fork-join pool.
      */
-    public static <T> ParallelTransformer<T, T> commonPoolParallelFlowable() {
+    public static <T> ParallelTransformer<T, T> commonPoolFlowable() {
         return flowable -> flowable
             .runOn(Schedulers.from(ForkJoinPool.commonPool()));
     }
