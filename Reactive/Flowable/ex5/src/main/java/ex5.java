@@ -134,8 +134,11 @@ public class ex5 {
                 // from London to New York.
                 .just("LDN:NYC")
 
+                // Convert the Flowable to a ParallelFlowable.
+                .parallel()
+
                 // Run the computation in the common fork-join pool.
-                .parallel().compose(RxUtils.commonPoolFlowable())
+                .compose(RxUtils.commonPoolFlowable())
 
                 // Find the best price.
                 .map(this::findBestPrice)
@@ -148,8 +151,11 @@ public class ex5 {
                 // pounds to US dollars.
                 .just("GBP:USA")
 
+                // Convert the Flowable to a ParallelFlowable.
+                .parallel()
+
                 // Run the computation in the common fork-join pool.
-                .parallel().runOn(Schedulers.from(ForkJoinPool.commonPool()))
+                .runOn(Schedulers.from(ForkJoinPool.commonPool()))
 
                 // Find the exchange rate.
                 .map(this::queryExchangeRateFor)
