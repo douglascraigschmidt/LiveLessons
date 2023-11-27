@@ -1,10 +1,6 @@
 package livelessons.streams;
 
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.ObservableTransformer;
-import io.reactivex.rxjava3.parallel.ParallelTransformer;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import livelessons.filters.Filter;
 import livelessons.utils.Image;
 import livelessons.utils.RxUtils;
@@ -13,7 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This implementation strategy customizes ImageStreamGang to use
@@ -51,7 +48,7 @@ public class ImageStreamRxJava2
 
             // Run this flow of operations in parallel in the common
             // fork-join pool.
-            .parallel().compose(RxUtils.commonPoolParallelFlowable())
+            .parallel().compose(RxUtils.commonPoolFlowable())
 
             // Use filter() to ignore URLs that are already cached
             // locally, i.e., only download non-cached images.
@@ -71,7 +68,8 @@ public class ImageStreamRxJava2
             .sequential()
 
             // Collect the downloaded and filtered images into a list.
-            .collectInto(new ArrayList<Image>(), List::add)
+            // .collectInto(new ArrayList<Image>(), List::add)
+            .collect(toList())
 
             // Print statistics in a blocking manner.
             .blockingSubscribe(filteredImages ->
@@ -95,7 +93,7 @@ public class ImageStreamRxJava2
 
             // Run this flow of operations in parallel in the common
             // fork-join pool.
-            .parallel().compose(RxUtils.commonPoolParallelFlowable())
+            .parallel().compose(RxUtils.commonPoolFlowable())
 
             // Use map() to create an OutputFilterDecorator for each
             // image and run it to filter each image and store it in

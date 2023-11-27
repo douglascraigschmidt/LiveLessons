@@ -1,11 +1,15 @@
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import utils.AsyncTaskBarrier;
+import utils.BigFraction;
 
 /**
- * This example shows how to reduce and/or multiply big fractions
- * asynchronously using the RxJava flatMap() concurrency idiom and
- * many RxJava {@link Observable} operators, including fromArray(),
+ * This example shows how to reduce and/or multiply {@link BigFraction}
+ * objects asynchronously using the RxJava flatMap() concurrency idiom
+ * and many RxJava {@link Observable} operators, including fromArray(),
  * map(), generate(), take(), flatMap(), fromCallable(), filter(),
- * reduce(), collectInto(), subscribeOn(), onErrorReturn(),
+ * reduce(), collect(), collectInto(), subscribeOn(), onErrorReturn(),
  * onErrorResumeNext(), and Schedulers.computation().  It also shows
  * how these operators can be used together with RxJava {@link Single}
  * and {@link Maybe} operators, including fromCallable(), ambArray(),

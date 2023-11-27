@@ -13,11 +13,11 @@ import static java.util.stream.Collectors.toList;
 import static utils.BigFractionUtils.*;
 
 /**
- * This class shows how to reduce and/or multiply big fractions
- * asynchronously using the RxJava flatMap() concurrency idiom and
- * many RxJava {@link Observable} operators, including fromArray(),
+ * This class shows how to reduce and/or multiply {@link BigFraction}
+ * objects asynchronously using the RxJava flatMap() concurrency idiom
+ * and many RxJava {@link Observable} operators, including fromArray(),
  * map(), generate(), take(), flatMap(), fromCallable(), filter(),
- * reduce(), collectInto(), subscribeOn(), onErrorReturn(),
+ * reduce(), collect(), collectInto(), subscribeOn(), onErrorReturn(),
  * onErrorResumeNext(), and Schedulers.computation().  It also shows
  * how these operators can be used together with RxJava {@link Single}
  * and {@link Maybe} operators, including fromCallable(), ambArray(),
@@ -110,17 +110,6 @@ public class ObservableEx {
         // Create a list of denominators, including 0, which triggers
         // an ArithmeticException.
         List<Integer> denominators = List.of(3, 4, 2, 0, 1, 5);
-
-        // Create a Function lambda to handle an ArithmeticException.
-        Function<Throwable,
-                 Observable<BigFraction>> logAndReturnEmptyObservable = t -> {
-            // Record the exception message.
-            sb.append("     exception = "
-                      + t.getMessage());
-
-            // Return an empty Observable when an exception occurs.
-            return Observable.empty();
-        };
 
         return Observable
             // Generate an Observable stream from the denominators
@@ -254,7 +243,7 @@ public class ObservableEx {
 
         sb.append("     Printing sorted results:");
 
-        // Process the function in a observable stream.
+        // Process the function in an observable stream.
         return Observable
             // Generate a stream of random unreduced big fractions.
             .generate((Emitter<BigFraction> emit) -> emit
