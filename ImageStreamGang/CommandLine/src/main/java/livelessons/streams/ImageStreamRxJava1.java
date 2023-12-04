@@ -50,7 +50,7 @@ public class ImageStreamRxJava1
             .flatMap(url ->
                      Observable
                      // Just omit this one object.
-                     .just(url)
+                     .fromCallable(() ->url)
 
                      // Run this flow of operations in the common
                      // fork-join pool.
@@ -100,7 +100,9 @@ public class ImageStreamRxJava1
             // item emitted by the source.
             .flatMap(filter -> Observable
                      // Just omit this one object.
-                     .just(filter)
+                     .fromCallable(() ->filter)
+
+                // Run this flow of operations in the common
 
                      // Run this flow of operations in the common
                      // fork-join pool.

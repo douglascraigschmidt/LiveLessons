@@ -5,6 +5,11 @@
     <option name="MAIN_CLASS_NAME" value="ex2" />
     <module name="flowable-ex2.main" />
     <option name="PROGRAM_PARAMETERS" value="-d true -c 1000 -r 100 -p 100" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -1,6 +1,8 @@
 package common;
 
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableEmitter;
 import io.reactivex.rxjava3.core.FlowableOnSubscribe;
 
 import java.util.Random;
@@ -39,7 +41,7 @@ public final class NonBackpressureEmitter {
         Random random = new Random();
 
         // Emit random integers without concern for backpressure.
-        return emitter -> Flowable
+        return (@NonNull FlowableEmitter<Integer> emitter) -> Flowable
             // Generate a stream of Integer objects from 1 to count, a
             // la a reactive for loop!
             .range(1, count)

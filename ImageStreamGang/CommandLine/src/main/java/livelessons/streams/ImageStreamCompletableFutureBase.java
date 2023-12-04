@@ -36,7 +36,8 @@ abstract class ImageStreamCompletableFutureBase
     CompletableFuture<Optional<URL>> checkUrlCachedAsync(URL url) {
         return CompletableFuture
             // Asynchronously check if the URL is cached.
-            .supplyAsync(() -> Optional.ofNullable(urlCached(url) ? null : url),
+            .supplyAsync(() -> Optional
+                         .ofNullable(urlCached(url) ? null : url),
                          getExecutor());
             
     }

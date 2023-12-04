@@ -16,7 +16,7 @@ import livelessons.filters.NullFilter;
  * (including strategies implemented via Java sequential streams,
  * parallel streams, completable futures, RxJava, and Project Reactor
  * frameworks) and provides apples-to-apples comparisons of these
- * strategies in terms of there performance and scalability.
+ * strategies in terms of their performance and scalability.
  */
 public class ImageStreamGangTest {
     /**
@@ -113,34 +113,24 @@ public class ImageStreamGangTest {
     private static ImageStreamGang makeImageStreamGang(Filter[] filters,
                                                        Iterator<List<URL>> urlIterator,
                                                        TestsToRun choice) {
-        switch (choice) {
-        case SEQUENTIAL_STREAM:
-            return new ImageStreamSequential(filters, 
-                                             urlIterator);
-        case PARALLEL_STREAM:
-            return new ImageStreamParallel(filters,
-                                           urlIterator);
-        case COMPLETABLE_FUTURES_1:
-            return new ImageStreamCompletableFuture1(filters,
-                                                     urlIterator);
-        case COMPLETABLE_FUTURES_2:
-            return new ImageStreamCompletableFuture2(filters,
-                                                     urlIterator);
-        case RXJAVA1:
-            return new ImageStreamRxJava1(filters,
-                                         urlIterator);
-        case RXJAVA2:
-                return new ImageStreamRxJava2(filters,
-                                              urlIterator);
-        case REACTOR1:
-                return new ImageStreamReactor1(filters,
-                                               urlIterator);
-
-        case REACTOR2:
-                return new ImageStreamReactor2(filters,
-                                               urlIterator);
-        }
-        return null;
+        return switch (choice) {
+            case SEQUENTIAL_STREAM -> new ImageStreamSequential(filters,
+                urlIterator);
+            case PARALLEL_STREAM -> new ImageStreamParallel(filters,
+                urlIterator);
+            case COMPLETABLE_FUTURES_1 -> new ImageStreamCompletableFuture1(filters,
+                urlIterator);
+            case COMPLETABLE_FUTURES_2 -> new ImageStreamCompletableFuture2(filters,
+                urlIterator);
+            case RXJAVA1 -> new ImageStreamRxJava1(filters,
+                urlIterator);
+            case RXJAVA2 -> new ImageStreamRxJava2(filters,
+                urlIterator);
+            case REACTOR1 -> new ImageStreamReactor1(filters,
+                urlIterator);
+            case REACTOR2 -> new ImageStreamReactor2(filters,
+                urlIterator);
+        };
     }
 
     /**

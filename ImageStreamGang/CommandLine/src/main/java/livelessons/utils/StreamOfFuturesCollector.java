@@ -23,8 +23,8 @@ import java.util.stream.Stream;
  */
 public class StreamOfFuturesCollector<T>
       implements Collector<CompletableFuture<T>,
-                 List<CompletableFuture<T>>,
-                 CompletableFuture<Stream<T>>> {
+                           List<CompletableFuture<T>>,
+                           CompletableFuture<Stream<T>>> {
     /**
      * A function that creates and returns a new mutable result
      * container that will hold all the CompletableFutures in the
@@ -73,7 +73,8 @@ public class StreamOfFuturesCollector<T>
      * the final result
      */
     @Override
-    public Function<List<CompletableFuture<T>>, CompletableFuture<Stream<T>>> finisher() {
+    public Function<List<CompletableFuture<T>>,
+                    CompletableFuture<Stream<T>>> finisher() {
         return futures
             -> CompletableFuture
             // Use CompletableFuture.allOf() to obtain a
@@ -102,9 +103,8 @@ public class StreamOfFuturesCollector<T>
      * @return An immutable set of collector characteristics, which in
      * this case is simply UNORDERED
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public Set characteristics() {
+    public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
 

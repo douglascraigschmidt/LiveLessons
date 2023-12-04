@@ -82,7 +82,7 @@ public class BackpressureSubscriber
     }
 
     /**
-     * Hook method called when next item arrives.  It prints the
+     * Hook method called when the next item arrives. It prints the
      * results of prime # checking and may issue the next request.
      */
     @Override

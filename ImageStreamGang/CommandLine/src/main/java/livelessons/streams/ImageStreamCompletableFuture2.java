@@ -81,7 +81,7 @@ public class ImageStreamCompletableFuture2
         List<URL> urls = getInput();
 
         // A future to a stream of URLs.
-        Stream<CompletableFuture<Optional<URL>>> urlStream = urls
+        var urlStream = urls
             // Convert the URLs in the input list into a sequential
             // stream.
             .parallelStream()
