@@ -83,12 +83,15 @@ public class BerraQuotesTest {
             .timeRun(() -> runQuotes(strategy),
                      strategyName + " Berra quotes");
 
-
         System.out.println(strategyName
                            + (berraQuotes.size() == 5
                               ? " successfully"
                               : " unsuccessfully")
                            + " received expected 5 Berra quote results");
+
+        printResults(berraQuotes,
+            strategyName
+                + " Berra search results");
 
         berraQuotes = RunTimer
             .timeRun(() -> runSearches(strategy, true),
@@ -113,12 +116,6 @@ public class BerraQuotesTest {
                            + " received expected "
                            + berraQuotes.size()
                            + " invalid Berra search results");
-
-        printResults(berraQuotes,
-                     strategyName
-                     + " Berra search results");
-
-
     }
 
     /**
@@ -144,6 +141,12 @@ public class BerraQuotesTest {
     /**
      * Factors out common code for running searches from the
      * microservice implementation identified by the {@code strategy}.
+     *
+     * @param strategy The requested strategy
+     * @param expectedResults True if the search is expected to
+     *                       return results, false if it's expected
+     *                       to return no results
+     * @return A list of {@link Quote}
      */
     private List<Quote> runSearches(int strategy,
                                     boolean expectedResults) {

@@ -62,8 +62,7 @@ public class BerraQuotesService {
         return mStrategy[strategy]
             // Forward to the given implementation strategy after
             // first decoding the query.
-            .search(URLDecoder.decode(query,
-                                     StandardCharsets.UTF_8));
+            .search(query);
     }
 
     /**

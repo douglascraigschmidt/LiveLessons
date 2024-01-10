@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 
 /**
  * This class provides the entry point into the Spring WebMVC-based
- * version of the prime check app server.
+ * version of the BerraQuotes app server.
  * 
  * The {@code @SpringBootApplication} annotation enables apps to use
  * auto-configuration, component scan, and to define extra

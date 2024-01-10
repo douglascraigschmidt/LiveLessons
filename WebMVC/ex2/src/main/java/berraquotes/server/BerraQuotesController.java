@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.net.URLDecoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static berraquotes.common.Constants.EndPoint.*;
@@ -92,7 +94,9 @@ public class BerraQuotesController {
                               @PathVariable String query) {
         return mService
             // Forward to the service.
-            .search(strategy, query);
+            .search(strategy,
+                URLDecoder.decode(query,
+                StandardCharsets.UTF_8));
     }
 
     /**
