@@ -26,7 +26,7 @@ public class BerraQuotesService {
     /**
      * This array contains concrete strategies whose methods are
      * implemented to provide Berra quotes.  The order of these
-     * strategies matter in this array since clients will provide
+     * strategies matters in this array since clients will provide
      * these indices in their HTTP requests.
      */
     BQAbstractStrategy[] mStrategy = {

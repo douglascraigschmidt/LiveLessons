@@ -5,6 +5,8 @@ import berraquotes.common.Quote;
 import java.util.List;
 
 import berraquotes.common.ServerBeans;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This abstract class defines methods used by various Berra quote

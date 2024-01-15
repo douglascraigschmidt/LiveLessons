@@ -28,7 +28,7 @@ public class ServerBeans {
     // @Bean
     static public List<Quote> getQuotes() {
         try {
-            // Although AtomicInteger is overkill we use it to
+            // Although AtomicInteger is overkill, we use it to
             // simplify incrementing the ID in the stream below.
             AtomicInteger idCount = new AtomicInteger(0);
 
