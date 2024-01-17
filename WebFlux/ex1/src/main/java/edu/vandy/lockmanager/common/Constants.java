@@ -3,14 +3,11 @@ package edu.vandy.lockmanager.common;
 /**
  * Constants shared by the client and server components.
  */
-public class Constants {
-    public static final String SERVER_BASE_URL = "http://localhost:8080";
+public interface Constants {
+	String SERVER_BASE_URL = "http://localhost:8080";
 
-    public static class Endpoints {
-        public static final String CREATE = "create";
-        public static final String ACQUIRE_LOCK = "acquireLock";
-        public static final String ACQUIRE_LOCKS = "acquireLocks";
-        public static final String RELEASE_LOCK = "releaseLock";
-        public static final String RELEASE_LOCKS = "releaseLocks";
-    }
+	public interface Endpoints {
+		String CREATE = "create", ACQUIRE_LOCK = "acquireLock", ACQUIRE_LOCKS = "acquireLocks",
+				RELEASE_LOCK = "releaseLock", RELEASE_LOCKS = "releaseLocks", ACQUIRE_LOCKS_TEST = "acquireLocksTest";
+	}
 }

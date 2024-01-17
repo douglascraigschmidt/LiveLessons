@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch API Example</title>
+</head>
+<body>
+
+  <button onclick="callMonoApi()">Call Mono API</button>
+  <textarea id="monoResult" rows="10" cols="50"></textarea>
+
+  <br><br>
+   <input type="text" id="paramInput" placeholder="Enter lockManagerName name">
+     <br><br>
+  <button onclick="callFluxApi()">Call Flux API</button>
+  <textarea id="fluxResult" rows="10" cols="50"></textarea>
+
+  <script>
+    function callMonoApi() {
+      
+
+      const monoUrl = `http://localhost:8080/create?permitCount=3`;
+
+      fetch(monoUrl)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('monoResult').value = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+          console.error('Error calling Mono API:', error);
+        });
+    }
+
+    function callFluxApi() {
+      const paramInput = document.getElementById('paramInput').value;
+      const fluxUrl = `http://localhost:8080/acquireLocksTest?permits=3&lockManagerName=${encodeURIComponent(paramInput)}&lockManagerPermitCount=2`;
+
+      fetch(fluxUrl)
+      .then(response => response.json())
+      .then(data => {
+    	  data.forEach(item => {
+        document.getElementById('fluxResult').value = JSON.stringify(data, null, 2);
+    	  });
+      })
+      .catch(error => {
+        console.error('Error calling Flux API:', error);
+      });
+    }
+  </script>
+
+</body>
+</html>
