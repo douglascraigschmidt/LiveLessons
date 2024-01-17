@@ -207,8 +207,9 @@ public class BerraQuotesTest {
             .forEach(quote -> System.out
                      .println("id = "
                               + quote.id()
-                              + " quote "
-                              + quote.quote()));
+                              + ", quote \""
+                              + quote.quote()
+                              + "\""));
     }
 }
     

@@ -10,7 +10,7 @@ import berraquotes.utils.WebUtils;
 import java.util.List;
 
 import static berraquotes.common.Constants.EndPoint.*;
-import static berraquotes.common.Constants.EndPoint.Params.QUOTE_IDS_PARAM;
+import static berraquotes.common.Constants.EndPoint.Params.*;
 
 /**
  * This class is a proxy to the {@code BerraQuotesApplication}
@@ -34,11 +34,10 @@ public class BerraQuotesProxy {
     public List<Quote> getAllQuotes(int strategy) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
-            // Create the path for the GET_ALL_QUOTES request,
-            // including the 'service'.
+            // Create the path for the GET_ALL_QUOTES request.
             .fromPath(GET_ALL_QUOTES)
             // Include the strategy.
-            .queryParam("strategy", strategy)
+            .queryParam(STRATEGY, strategy)
             // Build the URI.
             .build()
             // Convert the URI to a String.
@@ -66,19 +65,18 @@ public class BerraQuotesProxy {
                                  List<Integer> quoteIds) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
-            // Create the path for the GET_QUOTES request, including
-            // the 'service'.
+            // Create the path for the GET_QUOTES request.
             .fromPath(GET_QUOTES)
             // Include the strategy.
-            .queryParam("strategy", strategy)
+            .queryParam(STRATEGY, strategy)
             // Create the query param, which encodes the quote ids.
-            .queryParam(QUOTE_IDS_PARAM,
+            .queryParam(QUOTE_IDS,
                         WebUtils
                         // Convert List to String.
                         .list2String(quoteIds))
             // Build the URI.
             .build()
-            // Convert the URI to a String.
+            // Convert to a URI String.
             .toUriString();
 
         return WebUtils
@@ -103,12 +101,24 @@ public class BerraQuotesProxy {
                                     String query) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
+            // Create a builder initialized with the given URI string
+            .fromUriString(GET_SEARCH)
+            // Append an encoded query string as a path segment to
+            // the URI. The query string is URL-encoded to ensure
+            // it is a valid URI component.
+            .pathSegment(WebUtils.encodeQuery(query))
+            /*
+            // Here's an alternative approach.
             .fromPath(GET_SEARCH
                       + "/"
                       + WebUtils.encodeQuery(query))
+             */
             // Include the strategy.
-            .queryParam("strategy", strategy)
+            .queryParam(STRATEGY, strategy)
+            // Build a UriComponents instance from the various
+            // components contained in this builder.
             .build()
+            // Convert to a URI String.
             .toUriString();
 
         return WebUtils
@@ -133,13 +143,17 @@ public class BerraQuotesProxy {
                                     List<String> queries) {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
+            // Create the path for the GET_SEARCHES request.
             .fromPath(GET_SEARCHES)
             // Include the strategy.
-            .queryParam("strategy", strategy)
+            .queryParam(STRATEGY, strategy)
             // Encode the List of queries into the URI.
-            .queryParam("queries", WebUtils
+            .queryParam(QUERIES, WebUtils
                         .list2String(queries))
+            // Build a UriComponents instance from the various
+            // components contained in this builder.
             .build()
+            // Convert to a URI String.
             .toUriString();
 
         return WebUtils

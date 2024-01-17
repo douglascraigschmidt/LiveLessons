@@ -21,7 +21,9 @@ public class Constants {
          * Supported HTTP request parameters identifiers.
          */
         public static class Params {
-            public static final String QUOTE_IDS_PARAM = "quoteIds";
+            public static final String QUOTE_IDS = "quoteIds";
+            public static final String STRATEGY = "strategy";
+            public static final String QUERIES = "queries";
         }
     }
 

@@ -10,7 +10,7 @@ public class RunTimer {
     /**
      * Keep track of which SearchStreamGang performed the best.
      */
-    private static Map<String, Long> mResultsMap = new HashMap<>();
+    private static final Map<String, Long> mResultsMap = new HashMap<>();
 
     /**
      * Keeps track of how long the test has run.
