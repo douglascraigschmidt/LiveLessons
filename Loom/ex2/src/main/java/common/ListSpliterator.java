@@ -40,7 +40,7 @@ public class ListSpliterator
     @Override
     public boolean tryAdvance(Consumer<? super GCDParam> action) {
         // Return false if all elements have been processed, which
-        // terminates the spliterator .
+        // terminates the spliterator.
         if (mIndex >= mIntegers.size())
             return false;
         else {

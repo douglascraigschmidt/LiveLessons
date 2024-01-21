@@ -3,7 +3,6 @@ import utils.ShutdownOnNonNullSuccess;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import static utils.PrimeUtils.isPrime;

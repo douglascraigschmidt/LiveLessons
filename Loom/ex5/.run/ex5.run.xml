@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ex4" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/Library/Java/JavaVirtualMachines/openjdk-19/Contents/Home" />
+  <configuration default="false" name="ex5" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="ex4" />
-    <module name="ex4" />
-    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent " />
+    <option name="MAIN_CLASS_NAME" value="ex5" />
+    <module name="ex5.main" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
       <option name="region" />
