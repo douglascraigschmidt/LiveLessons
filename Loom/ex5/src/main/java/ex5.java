@@ -1,9 +1,11 @@
 import jdk.incubator.concurrent.StructuredTaskScope;
 import utils.ShutdownOnNonNullSuccess;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static utils.PrimeUtils.isPrime;
 
@@ -38,6 +40,7 @@ public class ex5 {
     public static void main(String[] argv)
         throws ExecutionException, InterruptedException {
         System.out.println("Entering test");
+
 
         // Demonstrate how apply a Java ShutdownOnSuccess including
         // odd numbers.

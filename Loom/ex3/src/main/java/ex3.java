@@ -1,16 +1,13 @@
 import jdk.incubator.concurrent.StructuredTaskScope;
+
 import utils.BigFraction;
 import utils.BigFractionUtils;
 import utils.Options;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
-import static utils.BigFractionUtils.makeBigFraction;
 import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.RandomUtils.generateRandomBigFractions;
 
