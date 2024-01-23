@@ -1,34 +1,35 @@
 package utils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
+import java.util.concurrent.StructuredTaskScope;
 
 /**
  * A Java utility class that provides helper methods for dealing with
- * Java {@link Future} objects.
+ * Java {@link StructuredTaskScope.Subtask} objects that extend {@link
+ * Supplier}.
  */
-public final class FutureUtils {
+public final class SupplierUtils {
     /**
      * A Java utility class should have a private constructor.
      */
-    private FutureUtils() {}
+    private SupplierUtils() {}
 
     /**
-     * Convert a {@link List} of {@link Future<T>} objects to a
+     * Convert a {@link List} of {@link Supplier<T>} objects to a
      * {@link List} of {@code T} objects.
      *
-     * @param list The {@link List} of {@link Future<T>} objects
+     * @param list The {@link List} of {@link Supplier<T>} objects
      * @return A {@link List} of {@code T} objects
      */
-    public static <T> List<T> futures2Objects(List<Future<T>> list) {
+    public static <T> List<T> suppliers2Objects(List<Supplier<T>> list) {
         return list
             // Convert the List to a Stream.
             .stream()
 
-            // Map the Future<Integer> to Integer.
-            .map(Future::resultNow)
+            // Map the Supplier<Integer> to Integer.
+            .map(Supplier::get)
 
             // Remove any nulls.
             .filter(Objects::nonNull)

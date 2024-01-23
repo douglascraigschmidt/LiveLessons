@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
-import static jdk.incubator.concurrent.StructuredTaskScope.*;
+import static java.util.concurrent.StructuredTaskScope.*;
 
 /**
  * This Java utility class contains static methods and fields useful
@@ -87,21 +87,21 @@ public final class BigFractionUtils {
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
-    public static void sortAndPrintList(List<Future<BigFraction>> list) {
+    public static void sortAndPrintList(List<Supplier<BigFraction>> list) {
         try (var scope = new ShutdownOnSuccess<List<BigFraction>>()) {
             // This implementation uses quick sort to order the list.
             scope
                 // Perform quick sort asynchronously.
-                .fork(() -> quickSort(FutureUtils
+                .fork(() -> quickSort(SupplierUtils
                                           // Convert List<Future> to List.
-                                          .futures2Objects(list)));
+                                          .suppliers2Objects(list)));
 
             // This implementation uses heap sort to order the list.
             scope
                 // Perform heap sort asynchronously.
-                .fork(() -> heapSort(FutureUtils
+                .fork(() -> heapSort(SupplierUtils
                                          // Convert List<Future> to List.
-                                         .futures2Objects(list)));
+                                         .suppliers2Objects(list)));
 
             // This barrier synchronizer waits for all threads to
             // finish or the task scope to shut down.

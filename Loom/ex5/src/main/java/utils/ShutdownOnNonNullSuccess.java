@@ -1,6 +1,6 @@
 package utils;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope;
 
 import java.util.concurrent.Future;
 
@@ -36,16 +36,16 @@ public class ShutdownOnNonNullSuccess<T>
      * Invoked when a task completes before the scope is shut down.
      * This method may be invoked by several threads concurrently.
      *
-     * @param future the completed task
+     * @param subtask the completed task
      */
     @Override
-    protected void handleComplete(Future<T> future) {
-        Future.State state = future.state();
-        if (state == Future.State.RUNNING) {
+    protected void handleComplete(Subtask<? extends T> subtask) {
+        var state = subtask.state();
+        if (state == StructuredTaskScope.Subtask.State.UNAVAILABLE) {
             throw new IllegalArgumentException("Task is not completed");
-        } else if (state == Future.State.SUCCESS) {
+        } else if (state == StructuredTaskScope.Subtask.State.SUCCESS) {
             // Get the result of the Future.
-            T result = future.resultNow();
+            T result = subtask.get();
 
             // The first non-null result is stored and the scope is
             // shutdown.

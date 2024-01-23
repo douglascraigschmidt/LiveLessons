@@ -1,4 +1,4 @@
-import jdk.incubator.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope;
 import utils.ShutdownOnNonNullSuccess;
 
 import java.util.ArrayList;
@@ -10,12 +10,13 @@ import java.util.concurrent.Future;
 import static utils.PrimeUtils.isPrime;
 
 /**
- * This example demonstrates how to use {@link StructuredTaskScope.ShutdownOnSuccess}, as
- * well as a custom {@link StructuredTaskScope}, to capture the result
- * of the first subtask to complete successfully (i.e., identify a
- * prime number without returning a {@code null}).  You'll need to
- * install JDK 19 (or beyond) with gradle version 7.6 (or beyond)
- * configured to run this example.
+ * This example demonstrates how to use {@link
+ * StructuredTaskScope.ShutdownOnSuccess}, as well as a custom {@link
+ * StructuredTaskScope}, to capture the result of the first subtask to
+ * complete successfully (i.e., identify a prime number without
+ * returning a {@code null}).  You'll need to install JDK 21 (or
+ * beyond) with gradle version 8.3 (or beyond) configured to run this
+ * example.
  */
 public class ex5 {
     /**

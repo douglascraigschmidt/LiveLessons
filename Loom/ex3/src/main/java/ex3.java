@@ -1,4 +1,4 @@
-import jdk.incubator.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope;
 
 import utils.BigFraction;
 import utils.BigFractionUtils;
@@ -6,22 +6,22 @@ import utils.Options;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import static utils.BigFractionUtils.sBigReducedFraction;
 import static utils.RandomUtils.generateRandomBigFractions;
 
 /**
- * This example demonstrates Java 19 Java structured concurrency
+ * This example demonstrates Java 21 Java structured concurrency
  * features, which enables a main task to split into several
  * concurrent sub-tasks that run concurrently to completion before the
- * main task can complete.  Java 19 supports structured concurrency
+ * main task can complete.  Java 21 supports structured concurrency
  * via the {@link StructuredTaskScope} class, which supports
  * AutoCloseable and defines several nested classes (such as {@link
  * StructuredTaskScope.ShutdownOnFailure} and {@link
  * StructuredTaskScope.ShutdownOnSuccess}) that supports structured
- * concurrency.  You'll need to install JDK 19 (or beyond) with gradle
- * version 7.6 (or beyond) configured to run this example.
+ * concurrency.  You'll need to install JDK 21 (or beyond) with gradle
+ * version 8.3 (or beyond) configured to run this example.
  */
 public class ex3 {
     /**
@@ -52,14 +52,14 @@ public class ex3 {
     public static void demoStructuredConcurrency(int count) {
         // Create a new scope to execute virtual threads.
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            // Create a List of Future<BigFraction> to hold the
+            // Create a List of Supplier<BigFraction> to hold the
             // results.
-            var results = new ArrayList<Future<BigFraction>>();
+            var results = new ArrayList<Supplier<BigFraction>>();
 
             // Iterate through all the random BigFraction objects.
             for (var bigFraction : generateRandomBigFractions(count))
                 results
-                    // Add the Future<BigFraction> to the ist.
+                    // Add the Supplier<BigFraction> to the ist.
                     .add(scope
                          // Fork a new virtual thread to reduce and
                          // multiply the BigFraction concurrently.
