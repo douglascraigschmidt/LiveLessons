@@ -3,6 +3,7 @@ import java.util.concurrent.StructuredTaskScope;
 import utils.BigFraction;
 import utils.BigFractionUtils;
 import utils.Options;
+import utils.SupplierUtils;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +51,8 @@ public class ex3 {
      *              BigFraction} objects to generate
      */
     public static void demoStructuredConcurrency(int count) {
-        // Create a new scope to execute virtual threads.
+        // Create a new scope to execute virtual threads via the
+        // "invoke-all" model.
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Create a List of Supplier<BigFraction> to hold the
             // results.
@@ -72,13 +74,14 @@ public class ex3 {
             scope.join().throwIfFailed();
 
             // Sort and print the results.
-            BigFractionUtils.sortAndPrintList(results);
+            BigFractionUtils.sortAndPrintList(SupplierUtils
+                // Convert List<Future> to List.
+                .suppliers2Objects(results));
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing virtual threads complete.
         } catch (Exception exception) {
-            System.out.println("Exception: " 
-                               + exception.getMessage());
+            System.out.println(STR."Exception: \{exception.getMessage()}");
         }
     }
 

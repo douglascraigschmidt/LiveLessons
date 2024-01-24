@@ -62,12 +62,11 @@ public class StructuredConcurrencyTest {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // A List of Supplier<Image> objects that complete when the
             // images have been downloaded asynchronously.
-            List<Supplier<Image>> downloadedImages
-                = new ArrayList<>();
+            List<Supplier<Image>> images = new ArrayList<>();
 
             // Iterate through the List of image URLs.
             for (URL url : urlList)
-                downloadedImages
+                images
                     // Add each Supplier the Supplier<Image> List.
                     .add(scope
                          // submit() starts a virtual thread to
@@ -86,7 +85,7 @@ public class StructuredConcurrencyTest {
 
             // Return the List of downloaded images, which have
             // finished downloading at this point.
-            return downloadedImages;
+            return images;
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
@@ -148,8 +147,7 @@ public class StructuredConcurrencyTest {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // A List of Supplier<File> objects that complete when the
             // images have been stored asynchronously.
-            List<Supplier<File>> storedFiles =
-                new ArrayList<>();
+            List<Supplier<File>> storedFiles = new ArrayList<>();
 
             // Iterate through the List of transformed image
             // suppliers.

@@ -87,23 +87,19 @@ public final class BigFractionUtils {
      * and then store the results in the {@code StringBuilder}
      * parameter.
      */
-    public static void sortAndPrintList(List<Supplier<BigFraction>> list) {
+    public static void sortAndPrintList(List<BigFraction> list) {
+        // Create a new scope to execute virtual threads via the
+        // "invoke-any" model.
         try (var scope = new ShutdownOnSuccess<List<BigFraction>>()) {
-            // This implementation uses quick sort to order the list.
-            scope
-                // Perform quick sort asynchronously.
-                .fork(() -> quickSort(SupplierUtils
-                                          // Convert List<Future> to List.
-                                          .suppliers2Objects(list)));
+            // This implementation uses quick sort to order the list
+            // asynchronously.
+            scope.fork(() -> quickSort(list));
 
-            // This implementation uses heap sort to order the list.
-            scope
-                // Perform heap sort asynchronously.
-                .fork(() -> heapSort(SupplierUtils
-                                         // Convert List<Future> to List.
-                                         .suppliers2Objects(list)));
+            // This implementation uses heap sort to order the list
+            // asynchronously.
+            scope.fork(() -> heapSort(list));
 
-            // This barrier synchronizer waits for all threads to
+            // This barrier synchronizer waits for the first virtual thread to
             // finish or the task scope to shut down.
             scope.join();
 
@@ -114,8 +110,7 @@ public final class BigFractionUtils {
                 .forEach(fraction -> System.out
                          .println(fraction.toMixedString()));
         } catch (Exception exception) {
-            System.out.println("Exception: " 
-                               + exception.getMessage());
+            System.out.println(STR."Exception: \{exception.getMessage()}");
         }
     }
 
