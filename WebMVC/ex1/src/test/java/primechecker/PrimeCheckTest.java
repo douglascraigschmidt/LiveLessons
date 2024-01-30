@@ -60,7 +60,7 @@ public class PrimeCheckTest {
             "-d",
             "false", // Disable debugging messages.
             "-c",
-            "100" // Generate and test 50 random large Integer objects.
+            "501", // Generate and test this many random large Integer objects.
     };
 
     /**
@@ -68,9 +68,10 @@ public class PrimeCheckTest {
      */
     @Test
     public void runTests() {
-        System.out.println("Entering runTests()");
-
         Options.instance().parseArgs(mArgv);
+
+        System.out.println("Entering runTests() with options set to\n"
+            + Options.instance().toString());
 
         // Generate a List of random Integer objects.
         List<Integer> randomIntegers = RandomUtils
@@ -79,6 +80,7 @@ public class PrimeCheckTest {
 
         assert (testClientPS != null);
 
+        /*
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClientPS::testIndividualCalls,
@@ -155,13 +157,14 @@ public class PrimeCheckTest {
                 randomIntegers,
                 false,
                 "individualCallsSequentialCFEx");
-
+*/
         // Test sending individual HTTP GET requests to the server in
         // parallel to check if an Integer is prime or not.
         timeTest(testClientCFEx::testIndividualCalls,
                 randomIntegers,
                 true,
                 "individualCallsParallelCFEx");
+        /*
 
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
@@ -170,6 +173,7 @@ public class PrimeCheckTest {
                 false,
                 "individualCallsSequentialSC");
 
+*/
         // Test sending individual HTTP GET requests to the server in
         // parallel to check if an Integer is prime or not.
         timeTest(testClientSC::testIndividualCalls,
@@ -177,6 +181,7 @@ public class PrimeCheckTest {
                 true,
                 "individualCallsParallelSC");
 
+        /*
         // Test sending a List in one HTTP GET request to the server,
         // which sequentially checks List elements for primality.
         timeTest(testClientSC::testListCall,
@@ -190,6 +195,7 @@ public class PrimeCheckTest {
                 randomIntegers,
                 true,
                 "listCallParallelSC");
+        */
 
         // Print the results in ascending order.
         System.out.println(RunTimer.getTimingResults());

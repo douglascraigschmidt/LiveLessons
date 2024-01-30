@@ -5,7 +5,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -30,32 +29,18 @@ public class ClientBeans {
     public RestTemplate getRestTemplate() {
         RestTemplate restTemplate;
 
-        var poolConnections = System.getenv("POOL_CONNECTIONS");
-        if (poolConnections != null
-            && poolConnections.equals("true")) {
-            PoolingHttpClientConnectionManager connectionManager =
-                new PoolingHttpClientConnectionManager();
-
-            connectionManager.setMaxTotal(100);
-            connectionManager.setDefaultMaxPerRoute(20);
-
-            RequestConfig requestConfig = RequestConfig
-                .custom()
-                .setConnectionRequestTimeout(5000) // timeout to get connection from pool
-                .setSocketTimeout(5000) // standard connection timeout
-                .setConnectTimeout(5000) // standard connection timeout
-                .build();
-
-            HttpClient httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig).build();
-
-            ClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory(httpClient);
-
-            restTemplate = new RestTemplate(requestFactory);
-        } else {
+        // Determine if a connection factory should be used.
+        if (!Options.instance().connectionPool()) {
+            // Create a RestTemplate that doesn't use a connection
+            // pool.
             restTemplate = new RestTemplate();
+        } else {
+            // Create a connection pool factory.
+            var requestFactory = getConnectionPoolFactory();
+
+            // Initialize a RestTemplate with the custom request
+            // factory.
+            restTemplate = new RestTemplate(requestFactory);
         }
 
         restTemplate
@@ -64,5 +49,50 @@ public class ClientBeans {
 
         // Return restTemplate.
         return restTemplate;
+    }
+
+    /**
+     * @return A {@link HttpComponentsClientHttpRequestFactory} that
+     *         creates a connection pool
+     */
+    private static HttpComponentsClientHttpRequestFactory 
+        getConnectionPoolFactory() {
+        var connectionManager =
+            new PoolingHttpClientConnectionManager();
+
+        // Set the maximum number of total open connections to 100.
+        connectionManager.setMaxTotal(100);
+
+        // Set the maximum number of concurrent connections per
+        // route, which is 20 by default.
+        connectionManager.setDefaultMaxPerRoute(20);
+
+        // Configure request parameters for the HttpClient.
+        var requestConfig = RequestConfig
+            .custom()
+            // 5 second timeout to get a connection from the pool.
+            .setConnectionRequestTimeout(5000) 
+
+            // 5 second timeout for waiting for data or, put
+            // differently, a maximum period inactivity between two
+            // consecutive data packets.
+            .setSocketTimeout(5000) 
+
+            // 5 second timeout to establish the connection with the
+            // remote host.
+            .setConnectTimeout(5000) 
+            .build();
+
+        // Build the HttpClient with the pooling connection manager
+        // and request configuration.
+        var httpClient = HttpClientBuilder
+            .create()
+            .setConnectionManager(connectionManager)
+            .setDefaultRequestConfig(requestConfig)
+            .build();
+
+        // Use the HttpClient to create a Spring
+        // ClientHttpRequestFactory.
+        return new HttpComponentsClientHttpRequestFactory(httpClient);
     }
 }

@@ -27,11 +27,6 @@ public class Options {
     private boolean mDebugging = false;
 
     /**
-     * Controls whether connections will be pooled.
-     */
-    private boolean mPoolConnections = true;
-
-    /**
      * Controls how many longs are generated.
      */
     private int mCount = 100;
@@ -40,6 +35,11 @@ public class Options {
      * Controls the max value of the random numbers.
      */
     private int mMaxValue = Integer.MAX_VALUE;
+
+    /**
+     * Controls whether a connection pool is used or not.
+     */
+    private Boolean mConnectionPool = null;
 
     /**
      * Method to return the one and only singleton uniqueInstance.
@@ -77,6 +77,21 @@ public class Options {
      */
     public int maxValue() {
         return mMaxValue;
+    }
+
+    /**
+     * @return True if a connection pool should be used, else false.
+     */
+    public boolean connectionPool() {
+        if (mConnectionPool == null) {
+            var poolConnections = System.getenv("POOL_CONNECTIONS");
+            if (poolConnections != null
+                && poolConnections.equals("true"))
+                mConnectionPool = Boolean.TRUE;
+            else
+                mConnectionPool = Boolean.FALSE;
+        }
+        return mConnectionPool;
     }
 
     /**
@@ -162,6 +177,13 @@ public class Options {
         }
     }
 
+    public String toString() {
+        return  "mDebugging = " + mDebugging
+            + "\nmCount = " + mCount
+            + "\nmMaxValue = " + mMaxValue
+            + "\nmConnectionPool = " + mConnectionPool;
+    }
+
     /**
      * Print out usage and default values.
      */
@@ -169,7 +191,7 @@ public class Options {
         System.out.println("Usage: ");
         System.out.println("-c [n] "
                            + "-d [true|false] "
-                           + "-m [maxValue] ");
+                           + "-m [maxValue]");
     }
 
     /**
