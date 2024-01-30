@@ -89,7 +89,11 @@ public class ex6 {
             // being multiplied asynchronously, which may run for a
             // while.
             .thenApplyAsync(reducedFraction -> reducedFraction
-                            .multiply(sBigReducedFraction));
+                            .multiply(sBigReducedFraction))
+
+            // Optionally display the results of this operation.
+            .whenComplete((bf, ex) ->
+                          Options.display(STR."= \{bf}"));
 
         sb.append("     Printing sorted results:");
 

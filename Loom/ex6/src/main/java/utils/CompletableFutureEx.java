@@ -1,9 +1,7 @@
 package utils;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -15,10 +13,30 @@ import java.util.function.Supplier;
 public class CompletableFutureEx<T>
        extends CompletableFuture<T> {
     /**
+     * Increment the count of virtual thread ids.
+     */
+    private static final AtomicInteger sVirtualThreadCount =
+        new AtomicInteger(0);
+
+    /**
+     * This {@link ThreadFactory} creates a new virtual thread
+     * each time its called.
+     */
+    private static final ThreadFactory sThreadFactory =
+        (Runnable runnable) -> {
+                // Return a new unstarted virtual thread with
+                // the given name.
+                return Thread
+                    .ofVirtual()
+                    .name(STR."VirtualThread-\{sVirtualThreadCount.getAndIncrement()}")
+                    .unstarted(runnable);
+        };
+
+    /**
      * Store the default {@link Executor}.
      */
     private static Executor sEXEC = Executors
-        .newVirtualThreadPerTaskExecutor();
+        .newThreadPerTaskExecutor(sThreadFactory);
 
     /**
      * Set the {@link Executor} that's used as the default.

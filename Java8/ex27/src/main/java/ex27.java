@@ -1,7 +1,6 @@
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * This example shows how to apply timeouts with the Java completable
@@ -126,7 +125,7 @@ public class ex27 {
               + " and "
               + destination);
 
-        // Simply return a constant.
+        // Just return a constant.
         return 1.20;
     }
 
@@ -155,7 +154,7 @@ public class ex27 {
      */
     private void print(String string) {
         System.out.println("Thread["
-                           + Thread.currentThread().getId()
+                           + Thread.currentThread().getName()
                            + "]: "
                            + string);
     }

@@ -1,11 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ex6" type="Application" factoryName="Application">
+  <configuration default="false" name="ex27" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="openjdk-21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="ex6" />
-    <module name="ex6.main" />
-    <option name="PROGRAM_PARAMETERS" value="-c 100 -d false" />
-    <option name="VM_PARAMETERS" value=" --enable-preview " />
+    <option name="MAIN_CLASS_NAME" value="ex27" />
+    <module name="ex27.main" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
       <option name="region" />

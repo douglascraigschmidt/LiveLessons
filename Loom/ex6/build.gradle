@@ -2,7 +2,6 @@ apply plugin: 'java'
 
 compileJava {
     options.compilerArgs.addAll(
-            ['--enable-preview',
-             '--add-modules', 'jdk.incubator.concurrent'
+            ['--enable-preview'
             ])
 }

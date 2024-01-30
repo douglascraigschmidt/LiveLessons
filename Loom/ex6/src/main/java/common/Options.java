@@ -76,10 +76,7 @@ public final class Options {
      */
     public static void display(String output) {
         if (Options.instance().getDiagnosticsEnabled())
-            System.out.println("["
-                               + Thread.currentThread().threadId()
-                               + "] "
-                               + output);
+            System.out.println(STR."[\{Thread.currentThread().getName()}] \{output}");
     }
 
     /**

@@ -94,9 +94,8 @@ public final class BigFractionUtils {
                                   // Print the results as mixed fractions.
                                   sortedList
                                           .forEach(fraction ->
-                                                  sb.append("\n     "
-                                                          + fraction
-                                                          .toMixedString()));
+                                                  sb.append(STR."\n     \{fraction
+                                                      .toMixedString()}"));
 
                                   display(sb.toString());
                               }
@@ -131,9 +130,6 @@ public final class BigFractionUtils {
      * Display the {@code string} after prepending the thread id.
      */
     public static void display(String string) {
-        System.out.println("["
-                           + Thread.currentThread().threadId()
-                           + "] "
-                           + string);
+        System.out.println(STR."[\{Thread.currentThread().getName()}] \{string}");
     }
 }
