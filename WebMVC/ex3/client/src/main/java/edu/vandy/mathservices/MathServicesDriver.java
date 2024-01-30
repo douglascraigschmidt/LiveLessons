@@ -1,13 +1,10 @@
 package edu.vandy.mathservices;
 
 import edu.vandy.mathservices.client.MathServicesClient;
-import edu.vandy.mathservices.common.Components;
 import edu.vandy.mathservices.common.GCDResult;
 import edu.vandy.mathservices.common.Options;
 import edu.vandy.mathservices.common.PrimeResult;
 import edu.vandy.mathservices.utils.RandomUtils;
-
-import jdk.incubator.concurrent.StructuredTaskScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,9 +12,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.StructuredTaskScope;
+import java.util.function.Supplier;
 
 /**
- * This program demonstrate Java's structured concurrency frameworks
+ * This program demonstrates Java's structured concurrency frameworks
  * by (1) checking the primality of a {@link List} of random {@link
  * Integer} objects and (2) computing the greatest common divisor
  * (GCD) of pairs of these {@link Integer} objects using Spring WebMVC
@@ -35,7 +34,7 @@ public class MathServicesDriver
     private MathServicesClient testClient;
 
     /**
-     * The main entry point into the Spring applicaition.
+     * The main entry point into the Spring application.
      */
     public static void main(String[] args) {
         // Run the Spring application.
@@ -76,11 +75,11 @@ public class MathServicesDriver
      *                       Integer} objects
      */
     public void runTests(List<Integer> randomIntegers) {
-        // Future to a List holding PrimeResult objects.
-        Future<List<PrimeResult>> primeCheckFuture = null;
+        // Supplier to a List holding PrimeResult objects.
+        Supplier<List<PrimeResult>> primeCheckFuture = null;
 
-        // Future to a List holding GCDResult objects.
-        Future<List<GCDResult>> gcdComputeFuture = null;
+        // Supplier to a List holding GCDResult objects.
+        Supplier<List<GCDResult>> gcdComputeFuture = null;
 
         // Create a new scope to execute virtual Thread-based tasks,
         // which exits only after all tasks complete.
@@ -104,29 +103,26 @@ public class MathServicesDriver
 
             Options.display("printing results");
 
-            // The Future.resultNow() calls below don't block since
+            // The Supplier.get() calls below don't block since
             // the scope.join() call above won't return until both
             // tasks complete.
 
             // Print the primality results.
             primeCheckFuture
-                .resultNow()
+                .get()
                 .forEach(primeResult -> System.out
-                         .println("result = "
-                                  + primeResult));
+                         .println(STR."result = \{primeResult}"));
 
             // Print the GCD results.
             gcdComputeFuture
-                .resultNow()
+                .get()
                 .forEach(gcdResult -> System.out
-                         .println("result = "
-                                  + gcdResult));
+                         .println(STR."result = \{gcdResult}"));
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing tasks complete.
         } catch (Exception exception) {
-            System.out.println("Exception: "
-                               + exception.getMessage());
+            System.out.println(STR."Exception: \{exception.getMessage()}");
             System.exit(1);
         }
         System.exit(0);

@@ -12,6 +12,7 @@ import java.util.List;
 
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME;
 import static primechecker.common.Constants.EndPoint.CHECK_IF_PRIME_LIST;
+import static primechecker.common.Constants.Params.*;
 
 /**
  * This class is a proxy to the {@link PCServerController}.
@@ -42,8 +43,8 @@ public class PCProxy {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
                 .fromPath(CHECK_IF_PRIME)
-                .queryParam("strategy", strategy)
-                .queryParam("primeCandidate", primeCandidate)
+                .queryParam(STRATEGY, strategy)
+                .queryParam(PRIME_CANDIDATE, primeCandidate)
                 .build()
                 .toUriString();
 
@@ -80,10 +81,10 @@ public class PCProxy {
         // Create the encoded URI.
         var uri = UriComponentsBuilder
                 .fromPath(CHECK_IF_PRIME_LIST)
-                .queryParam("strategy", strategy)
-                .queryParam("primeCandidates", WebUtils
+                .queryParam(STRATEGY, strategy)
+                .queryParam(PRIME_CANDIDATES, WebUtils
                         .list2String(primeCandidates))
-                .queryParam("parallel", parallel)
+                .queryParam(PARALLEL, parallel)
                 .build()
                 .toUriString();
 

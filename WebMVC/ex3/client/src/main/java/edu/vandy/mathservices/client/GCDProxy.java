@@ -13,6 +13,7 @@ import java.util.List;
 
 import static edu.vandy.mathservices.common.Constants.*;
 import static edu.vandy.mathservices.common.Constants.EndPoint.COMPUTE_GCD_LIST;
+import static edu.vandy.mathservices.common.Constants.Params.INTEGERS;
 
 /**
  * This class is a proxy to the {@code GCDApplication} microservice
@@ -44,7 +45,7 @@ public class GCDProxy {
             .port(GCD_MICROSERVICE_PORT)
             .host(HOST)
             .path(COMPUTE_GCD_LIST)
-            .queryParam("integers",
+            .queryParam(INTEGERS,
                         WebUtils
                         // Convert List to String.
                         .list2String(integers))

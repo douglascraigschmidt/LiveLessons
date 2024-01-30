@@ -53,7 +53,7 @@ public class PrimalityProxy {
             .build()
             .toUriString();
 
-        System.out.println ("URI = " + url);
+        System.out.println (STR."URI = \{url}");
 
         return WebUtils
             // Create and send a GET request to the server to check if

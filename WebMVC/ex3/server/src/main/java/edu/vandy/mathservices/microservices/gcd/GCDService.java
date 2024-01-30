@@ -1,21 +1,14 @@
 package edu.vandy.mathservices.microservices.gcd;
 
 import edu.vandy.mathservices.common.GCDParam;
+import edu.vandy.mathservices.common.GCDResult;
+import edu.vandy.mathservices.common.ListSpliterator;
 import edu.vandy.mathservices.common.Options;
 import edu.vandy.mathservices.utils.MathUtils;
-import jdk.incubator.concurrent.StructuredTaskScope;
-
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.stream.StreamSupport;
-
-import edu.vandy.mathservices.common.GCDResult;
-import edu.vandy.mathservices.common.ListSpliterator;
-
-import static edu.vandy.mathservices.utils.FutureUtils.convertFutures;
 
 /**
  * This class defines implementation methods that are called by the
@@ -66,12 +59,7 @@ public class GCDService {
             .gcd(param.int1(),
                  param.int2());
 
-        Options.display("GCD of "
-                        + param.int1()
-                        + " & "
-                        + param.int2()
-                        + " = "
-                        + result);
+        Options.display(STR."GCD of \{param.int1()} & \{param.int2()} = \{result}");
 
         // Create a GCDResult record to hold the results.
         return new GCDResult(param,

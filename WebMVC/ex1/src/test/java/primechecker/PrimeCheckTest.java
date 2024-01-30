@@ -60,7 +60,7 @@ public class PrimeCheckTest {
             "-d",
             "false", // Disable debugging messages.
             "-c",
-            "50" // Generate and test 50 random large Integer objects.
+            "100" // Generate and test 50 random large Integer objects.
     };
 
     /**
@@ -113,6 +113,7 @@ public class PrimeCheckTest {
                 randomIntegers,
                 false,
                 "listCallSequentialCF");
+
         // Test sending individual HTTP GET requests to the server
         // sequentially to check if an Integer is prime or not
         timeTest(testClientCF::testIndividualCalls,

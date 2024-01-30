@@ -15,7 +15,7 @@ import static utils.PrimeUtils.isPrime;
  * StructuredTaskScope}, to capture the result of the first subtask to
  * complete successfully (i.e., identify a prime number without
  * returning a {@code null}).  You'll need to install JDK 21 (or
- * beyond) with gradle version 8.3 (or beyond) configured to run this
+ * beyond) with Gradle version 8.3 (or beyond) configured to run this
  * example.
  */
 public class ex5 {
@@ -42,7 +42,6 @@ public class ex5 {
         throws ExecutionException, InterruptedException {
         System.out.println("Entering test");
 
-
         // Demonstrate how apply a Java ShutdownOnSuccess including
         // odd numbers.
         demoShutdownOnSuccess(sNumbers);
@@ -68,6 +67,7 @@ public class ex5 {
      * successfully, i.e., identify a prime number in {@code numbers}.
      */
     public static void demoShutdownOnSuccess(List<Long> numbers) {
+        System.out.println("Entering demoShutdownOnSuccess()");
         // Create a new scope to execute virtual threads.
         try (var scope = new StructuredTaskScope.ShutdownOnSuccess<Long>()) {
             numbers
@@ -90,12 +90,12 @@ public class ex5 {
             var result = scope.join().result();
 
             // Print the first prime number (or null).
-            System.out.println("First prime result = " + result);
+            System.out.println(STR."First prime result = \{result}");
             // Don't exit the try-with-resources scope until all
             // concurrently executing virtual threads complete.
         } catch (Exception exception) {
-            System.out.println("No prime results found "
-                               + exception.getMessage());
+            System.out.println(STR
+                ."No prime results found \{exception.getMessage()}");
         }
     }
 
@@ -106,6 +106,8 @@ public class ex5 {
      * numbers} without returning a {@code null}).
      */
     public static void demoCustomStructuredTaskScope(List<Long> numbers) {
+        System.out.println("Entering demoCustomStructuredTaskScope()");
+
         // Create a new scope to execute virtual threads.
         try (var scope = new ShutdownOnNonNullSuccess<Long>()) {
             numbers
@@ -126,15 +128,15 @@ public class ex5 {
 
             if (result != null)
                 // Print the first prime number (or null).
-                System.out.println("First prime result = " + result);
+                System.out.println(STR."First prime result = \{result}");
             else
                 System.out.println("No prime results found");
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing virtual threads complete.
         } catch (Exception exception) {
-            System.out.println("Exception: " 
-                               + exception.getMessage());
+            System.out.println(STR
+                ."Exception: \{exception.getMessage()}");
         }
     }
 

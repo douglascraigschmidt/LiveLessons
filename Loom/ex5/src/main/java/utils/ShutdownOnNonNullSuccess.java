@@ -44,7 +44,7 @@ public class ShutdownOnNonNullSuccess<T>
         if (state == StructuredTaskScope.Subtask.State.UNAVAILABLE) {
             throw new IllegalArgumentException("Task is not completed");
         } else if (state == StructuredTaskScope.Subtask.State.SUCCESS) {
-            // Get the result of the Future.
+            // Get the result of the Subtask.
             T result = subtask.get();
 
             // The first non-null result is stored and the scope is

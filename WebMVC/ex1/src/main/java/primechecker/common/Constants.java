@@ -20,4 +20,11 @@ public class Constants {
         public static final int COMPLETABLE_FUTURE = 2;
         public static final int COMPLETABLE_FUTURE_EX = 3;
     }
+
+    public static class Params {
+        public static final String PARALLEL = "parallel";
+        public static final String STRATEGY = "strategy";
+        public static final String PRIME_CANDIDATES = "primeCandidates";
+        public static final String PRIME_CANDIDATE = "primeCandidate";
+    }
 }

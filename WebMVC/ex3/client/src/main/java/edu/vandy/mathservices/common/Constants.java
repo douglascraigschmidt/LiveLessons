@@ -17,4 +17,8 @@ public class Constants {
         public static final String COMPUTE_GCD_LIST = "computeGCDList";
         public static final String CHECK_PRIMALITY_LIST = "checkPrimalityList";
     }
+
+    public static class Params {
+        public static final String INTEGERS = "integers";
+    }
 }
