@@ -59,7 +59,7 @@ public class GCDService {
             .gcd(param.int1(),
                  param.int2());
 
-        Options.display(STR."GCD of \{param.int1()} & \{param.int2()} = \{result}");
+        Options.display("GCD of " + param.int1() + " and " + param.int2() + " = " + result);
 
         // Create a GCDResult record to hold the results.
         return new GCDResult(param,

@@ -22,7 +22,7 @@ import static utils.BigFractionUtils.sortAndPrintList;
  * customize the Java completable futures framework to use arbitrary
  * {@link Executor} objects, including the new {@link Executors}
  * {@code newVirtualThreadPerTaskExecutor()} provided in Java 19.
- * You'll need to install JDK 19 (or beyond) with gradle version 7.6
+ * You'll need to install JDK 21 (or beyond) with gradle version 8.3
  * (or beyond) configured to run this example.
  */
 public class ex6 {
@@ -79,7 +79,7 @@ public class ex6 {
 
         // Function asynchronously reduces/multiplies a BigFraction.
         Function<BigFraction,
-            CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
+                 CompletableFuture<BigFraction>> reduceAndMultiplyFraction =
             unreducedFraction -> CompletableFutureEx
             // Perform BigFraction reduction asynchronously.
             .supplyAsync(() -> BigFraction

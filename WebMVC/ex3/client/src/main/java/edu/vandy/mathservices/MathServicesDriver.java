@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.StructuredTaskScope;
+import jdk.incubator.concurrent.StructuredTaskScope;
 import java.util.function.Supplier;
 
 /**
@@ -75,11 +75,11 @@ public class MathServicesDriver
      *                       Integer} objects
      */
     public void runTests(List<Integer> randomIntegers) {
-        // Supplier to a List holding PrimeResult objects.
-        Supplier<List<PrimeResult>> primeCheckFuture = null;
+        // Future to a List holding PrimeResult objects.
+        Future<List<PrimeResult>> primeCheckFuture = null;
 
-        // Supplier to a List holding GCDResult objects.
-        Supplier<List<GCDResult>> gcdComputeFuture = null;
+        // Future to a List holding GCDResult objects.
+        Future<List<GCDResult>> gcdComputeFuture = null;
 
         // Create a new scope to execute virtual Thread-based tasks,
         // which exits only after all tasks complete.
@@ -111,18 +111,18 @@ public class MathServicesDriver
             primeCheckFuture
                 .get()
                 .forEach(primeResult -> System.out
-                         .println(STR."result = \{primeResult}"));
+                         .println("result = " + primeResult));
 
             // Print the GCD results.
             gcdComputeFuture
                 .get()
                 .forEach(gcdResult -> System.out
-                         .println(STR."result = \{gcdResult}"));
+                         .println("result = " + gcdResult));
 
             // Don't exit the try-with-resources scope until all
             // concurrently executing tasks complete.
         } catch (Exception exception) {
-            System.out.println(STR."Exception: \{exception.getMessage()}");
+            System.out.println("Exception: " + exception.getMessage());
             System.exit(1);
         }
         System.exit(0);
