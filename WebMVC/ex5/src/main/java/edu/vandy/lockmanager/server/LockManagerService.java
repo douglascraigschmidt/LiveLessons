@@ -289,7 +289,8 @@ public class LockManagerService {
             return acquiredLocks.size();
         } else {
             // Not enough locks available (yet), so release
-            // the acquired locks;.
+            // the acquired locks and return 0 so the caller
+            // will keep trying.
             acquiredLocks
                 .forEach(availableLocks::offer);
 

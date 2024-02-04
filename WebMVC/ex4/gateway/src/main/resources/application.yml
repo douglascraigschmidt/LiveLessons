@@ -9,7 +9,7 @@ spring:
   application:
     name: gateway
   main:
-    # This is required for Spring API Gateways!
+    # This type is required for Spring API Gateways!
     web-application-type: reactive
 
 logging:

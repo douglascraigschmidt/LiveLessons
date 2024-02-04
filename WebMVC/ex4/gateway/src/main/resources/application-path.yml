@@ -5,25 +5,42 @@ spring:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_FIRST
       globalcors:
         cors-configurations:
+          # A URL pattern that matches all routes in the application, which means this
+          # CORS policy applies globally to all endpoints.
           '[/**]':
+            # Defines which origins are allowed to make requests to the application.
+            # In this case, only requests from "http://localhost:3000" are permitted.
             allowed-origins: "http://localhost:3000"
+
+            # Lists the HTTP methods allowed from the specified origins.
+            # Here, both GET and POST requests are allowed.
             allowed-methods:
               - "GET"
               - "POST"
+            # Specifies which headers can be included in requests from the
+            # allowed origins, with "Content-Type" being explicitly permitted.
             allowed-headers:
               - "Content-Type"
         add-to-simple-url-handler-mapping: true
       routes:
-        - id: handey
+        - id: handey # Identifies the first route ("handey") uniquely.
+          # Specifies the target URI to which requests matching this
+          # route should be forwarded.
           uri: http://localhost:9100
+          # Matches requests with paths starting with /handey/.
           predicates:
             - Path= /handey/**
+          # Removes the first part of the path before forwarding the request.
           filters:
             - StripPrefix=1 # ...
 
-        - id: zippy
+        - id: zippy # Identifies the first route ("zippy") uniquely.
+          # Specifies the target URI to which requests matching this
+          # route should be forwarded.
           uri: http://localhost:9101
+          # Matches requests with paths starting with /handey/.
           predicates:
               - Path= /zippy/**
+          # Removes the first part of the path before forwarding the request.
           filters:
             - StripPrefix=1 # ...

@@ -13,9 +13,9 @@ import java.util.List;
 import static edu.vandy.lockmanager.common.Constants.Endpoints.*;
 
 /**
- * An auto-generated proxy used by synchronous WebMVC clients to
- * access the capabilities of the {@link LockManagerApplication}
- * microservice.
+ * A proxy used by synchronous WebMVC clients to access the capabilities of
+ * the {@link LockManagerApplication} microservice. This interface uses the
+ * declarative Spring 6 HTTP interface features.
  */
 public interface LockAPI {
     /**
