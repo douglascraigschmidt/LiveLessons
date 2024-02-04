@@ -19,7 +19,7 @@ public class ClientBeans {
     /**
      * Set the timeout duration for blocking reads to be 60 seconds.
      */
-    private long sTIMEOUT_DURATION = 60;
+    private final long sTIMEOUT_DURATION = 60;
 
     /**
      * @return A new instance of the {@link LockAPI} that is used with
@@ -56,5 +56,4 @@ public class ClientBeans {
             // Create a new instance of the LockAPI interface.
             .createClient(LockAPI.class);
     }
-
 }

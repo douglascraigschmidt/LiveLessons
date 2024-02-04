@@ -2,6 +2,7 @@
   <configuration default="false" name="HandeyApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <module name="WebMVC.ex4.microservices.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="edu.vandy.quoteservices.microservices.handey.HandeyApplication" />
+    <option name="VM_PARAMETERS" value="--enable-preview --add-modules jdk.incubator.concurrent" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="edu.vandy.quoteservices.microservices.handey.*" />

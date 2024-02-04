@@ -21,7 +21,7 @@ import static utils.BigFractionUtils.sortAndPrintList;
  * CompletableFuture} superclass.  In particular, it shows how to
  * customize the Java completable futures framework to use arbitrary
  * {@link Executor} objects, including the new {@link Executors}
- * {@code newVirtualThreadPerTaskExecutor()} provided in Java 19.
+ * {@code newVirtualThreadPerTaskExecutor()} provided in Java 21.
  * You'll need to install JDK 21 (or beyond) with gradle version 8.3
  * (or beyond) configured to run this example.
  */
@@ -60,6 +60,9 @@ public class ex6 {
 
         // Run a test using the common fork-join pool executor.
         CompletableFutureEx.setExecutor(ForkJoinPool.commonPool());
+
+        // Reclaim memory.
+        System.gc();
 
         RunTimer.timeRun(() ->
                          testFractionMultiplications(list).join(),

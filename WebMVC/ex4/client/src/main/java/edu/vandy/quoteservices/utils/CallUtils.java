@@ -32,11 +32,11 @@ public class CallUtils {
             // Execute the call.
             Response<T> response = call.execute();
 
-            // If the request is successful return the body.
+            // If the request is successful, return the body.
             if (response.isSuccessful()) {
                 return response.body();
             } else {
-                // If there's a failure then find out what failed
+                // If there's a failure, then find out what failed
                 // throw IOException.
                 assert response.errorBody() != null;
                 String errorMessage = response.errorBody().string();

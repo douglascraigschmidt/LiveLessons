@@ -62,23 +62,25 @@ public class LockManagerController {
         log("LockController.acquire()");
 
         // Create a DeferredResult containing a Lock object.
-        DeferredResult<Lock> deferredResult =
-            new DeferredResult<>();
+        DeferredResult<Lock> deferredResult = new DeferredResult<>();
+
+        // Create a Callback to handle successful or failed lock operations.
+        Callback callback = new Callback() {
+            @Override
+            public void onSuccess(Lock lock) {
+                deferredResult.setResult(lock);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                deferredResult.setErrorResult(error);
+            }
+        };
 
         mService
             // Forward to the service, which runs this method and the
             // associated callback asynchronously.
-            .acquire(lockManager, new Callback() {
-                @Override
-                public void onSuccess(Lock lock) {
-                    deferredResult.setResult(lock);
-                }
-
-                @Override
-                public void onError(Throwable error) {
-                    deferredResult.setErrorResult(error);
-                }
-            });
+            .acquire(lockManager, callback);
 
         log("LockController.acquire() - returning deferredResult");
 

@@ -4,6 +4,7 @@ import utils.BardDataFactory;
 import java.text.BreakIterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -18,9 +19,9 @@ import static utils.RegexUtils.makeRegex;
 
 /**
  * This example shows how the Java regular expression methods can be
- * used in conjunction with Java sequential streams to search the
- * complete works of Shakespeare ({@code bardWorks}) for particular
- * words and phrases.
+ * used in conjunction with Java sequential streams and the Java
+ * {@link BreakIterator} class to search the complete works of
+ * Shakespeare ({@code bardWorks}) for given words and phrases.
  */
 public class ex45 {
     /**
@@ -39,7 +40,7 @@ public class ex45 {
         test.testRegexList();
 
         // Create a List of String objects containing the complete
-        // works of Shakespeare.
+        // works of Shakespeare, one work per String.
         List<String> bardWorks = BardDataFactory
             .getInput(sSHAKESPEARE_DATA_FILE,
                       // Split input into "works".
@@ -47,7 +48,7 @@ public class ex45 {
 
         // Search the works of Shakespeare for a certain word/phrase ("lord").
         test.processBardWorks(Objects.requireNonNull(bardWorks),
-                         "lord");
+                              "lord");
     }
 
     /**
@@ -64,8 +65,8 @@ public class ex45 {
             .of("Cat", "Dog", "Mouse", "sox");
 
         // Convert 'wordsToMatch' to a regular expression.
-        var regexString =
-            makeRegex(wordsToMatch);
+        var regexString = RegexUtils
+            .makeRegex(wordsToMatch);
 
         // Check whether 'quote' is matched by 'regexString'.
         var result = quote
@@ -77,7 +78,7 @@ public class ex45 {
                            + quote
                            + "\" "
                            + result
-                           + " the regex string \""
+                           + " the regex string \n\""
                            +  regexString
                            + "\"\n");
     }
@@ -118,9 +119,13 @@ public class ex45 {
             // Return the first match.
             .findFirst().orElse(null);
 
+        // Find all works of Shakespeare that match the pattern.
+        var matches = findRegexMatches(bardWorksMatchingWord, pattern);
+
         // Show the portions of the works of Shakespeare that match
         // the pattern.
-        showRegexMatches(bardWorksMatchingWord, pattern);
+        showAllMatches(bardWorksMatchingWord.size(),
+                       matches);
     }
 
     /**
@@ -141,11 +146,26 @@ public class ex45 {
         // Associate iterator with the 'work'.
         iterator.setText(work);
 
-        // Create a Stream of word boundaries and collect them in a
-        // List.
-        List<Integer> boundaries = Stream
-            // Iterate over the boundaries of 'work', beginning
-            // with the first boundary.
+        // Create a Stream of word boundaries and collect into a List.
+        List<Integer> boundaries = getWordBoundariesList(iterator);
+
+        // Create a Stream of words using the collected boundaries and
+        // return true if any of the words are 'searchWord'.
+        return isWordInWork(work, searchWord, boundaries);
+    }
+
+    /**
+     * Create a {@link Stream} of word boundaries and collect them in
+     * a {@link List}.
+     *
+     * @param iterator The {@link BreakIterator} that iterates through
+     *                 a work of Shakespeare
+     * @return A {@link List} of word boundaries
+     */
+    private static List<Integer> getWordBoundariesList(BreakIterator iterator) {
+        return Stream
+            // Iterate over the boundaries of 'work', beginning with
+            // the first boundary.
             .iterate(iterator.first(),
                      // Stop iterating when the iterator returns
                      // BreakIterator.DONE.
@@ -155,9 +175,21 @@ public class ex45 {
 
             // Convert the Stream of boundaries into a List.
             .toList();
+    }
 
-        // Create a Stream of words using the collected boundaries and
-        // return true if any of the words are 'searchWord'.
+    /**
+     * Create a {@link Stream} of words using the collected boundaries
+     * and return true if any of the words are {@code searchWord}.
+     *
+     * @param work A work of Shakespeare
+     * @param searchWord The word to search for in the {@code work}
+     * @param boundaries A {@link List} of word boundaries
+     * @return True if any of the words equal {@code searchWord}, else
+     *         false
+     */
+    private static boolean isWordInWork(String work,
+                                        String searchWord,
+                                        List<Integer> boundaries) {
         return IntStream
             // Iterate over the boundaries of 'work'.
             .range(0, boundaries.size() - 1)
@@ -174,39 +206,54 @@ public class ex45 {
     }
 
     /**
-     * Show the portions of the works of Shakespeare that match the
-     * {@link Pattern}.
+     * Find the works of Shakespeare that match the {@link Pattern}.
      *
      * @param bardWorksMatchingWord The Shakespeare works matching
-     *                              a search word       
+     *                              a search word
      * @param pattern The compiled regular expression to search for
+     * @return A {@link Map} containing all matching results
      */
-    private void showRegexMatches(List<String> bardWorksMatchingWord,
-                                  Pattern pattern) {
-        // Collect all match results across all works into a Map.
-        var allMatchResults = bardWorksMatchingWord
+    private Map<String, List<MatchResult>> findRegexMatches
+        (List<String> bardWorksMatchingWord,
+         Pattern pattern) {
+        // Collect and return all matching results across all works
+        // into a Map.
+        return bardWorksMatchingWord
             // Convert List to a Stream.
             .stream()
 
             // Map each work to a SimpleEntry contain the title of the
             // work and the List of matches for that work.
-            .mapMulti(mapWork(pattern))
+            .mapMulti(createWorkToMatchesMapper(pattern))
 
             // Convert the Stream of SimpleEntry objects to a Map
             // where the 'key' is the title of the work, and the
             // 'value' is the List of matches for each work.
             .collect(toMap(SimpleEntry::getKey,
                            SimpleEntry::getValue));
+    }
 
+    /**
+     * Show the portions of the works of Shakespeare that match the
+     * pattern.
+     *
+     * @param bardWorksMatchingWord The total number of works that
+     *                              match the search word
+     * @param allMatchingResults A {@link Map} containing all matching
+     *                           results
+     */
+    private void showAllMatches
+        (int bardWorksMatchingWord,
+         Map<String, List<MatchResult>> allMatchingResults) {
         // Print the total number of matches.
-        System.out.println("Number of works that match is "
-                           + allMatchResults.size()
-                           + " out of a total of "
-                           + bardWorksMatchingWord.size()
+        System.out.println("Matching works = "
+                           + allMatchingResults.size()
+                           + " out of "
+                           + bardWorksMatchingWord
                            + " works and the matches for each work are:");
 
-        allMatchResults
-            // Iterate through the Map.
+        allMatchingResults
+            // Iterate through the Map and print the results.
             .forEach((key, value) -> {
                     // Print out the title of the work.
                     System.out.println(key);
@@ -224,6 +271,16 @@ public class ex45 {
     }
 
     /**
+     * Create an interface tailored for processing text with a focus on
+     * pattern matching and result aggregation to simplify the return
+     * type of the {@code createWorkToMatchesMapper()} method below.
+     */
+    interface WorkPatternMatcherConsumer
+              extends BiConsumer<String,
+                                 Consumer<SimpleEntry<String,
+                                          List<MatchResult>>>> {}
+
+    /**
      * This factory method returns a {@link BiConsumer} that maps each
      * work to a {@link SimpleEntry} containing the title of the work
      * and an associated {@link List} of {@code pattern} matches for
@@ -234,10 +291,10 @@ public class ex45 {
      * @return A {@link BiConsumer} that maps the title of each work
      *         with a {@link List} of non-empty matches for that work
      */
-    private static BiConsumer<String,
-                              Consumer<SimpleEntry<String,
-                                       List<MatchResult>>>>
-    mapWork(Pattern pattern) {
+    private static WorkPatternMatcherConsumer
+    createWorkToMatchesMapper(Pattern pattern) {
+        // Return a BiConsumer that maps the title of each work with
+        // a List of non-empty matches for that work.
         return (String work,
                 Consumer<SimpleEntry<String, List<MatchResult>>> consumer) -> {
             // Get a List of all matches for the work.
@@ -257,12 +314,9 @@ public class ex45 {
                 var title = RegexUtils.getFirstLine(work);
 
                 // Create a SimpleEntry containing the title of the
-                // work and the List of matches for that work.
-                var entry = new SimpleEntry<String, List<MatchResult>>
-                    (title, matchList);
-
-                // Accept the entry into the consumer.
-                consumer.accept(entry);
+                // work and the List of matches for that work and
+                // accept the entry into the consumer.
+                consumer.accept(new SimpleEntry<>(title, matchList));
             }
         };
     }

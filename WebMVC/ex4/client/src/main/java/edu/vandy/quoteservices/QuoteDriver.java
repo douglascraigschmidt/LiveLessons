@@ -119,7 +119,7 @@ public class QuoteDriver
                         randomQuoteId.get(0)),
                 "first call to getQuote()");
 
-        // Call again and measure impact of caching.
+        // Call again and measure the impact of caching.
         RunTimer
             .timeRun(() -> quoteClient
                     .getQuote(ZIPPY,
