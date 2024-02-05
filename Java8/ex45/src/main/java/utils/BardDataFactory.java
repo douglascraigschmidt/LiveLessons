@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 /**
  * This utility class contains methods for obtaining test data.
  */
-public class BardDataFactory {
+public final class BardDataFactory {
     /**
      * A utility class should always define a private constructor.
      */

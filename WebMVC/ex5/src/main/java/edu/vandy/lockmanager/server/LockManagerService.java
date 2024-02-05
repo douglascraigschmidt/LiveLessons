@@ -6,7 +6,6 @@ import edu.vandy.lockmanager.common.LockManager;
 import edu.vandy.lockmanager.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -30,8 +29,9 @@ import static edu.vandy.lockmanager.utils.Utils.log;
 @Service
 public class LockManagerService {
     /**
-     * Obtain the underlying {@link AsyncTaskExecutor} created by
-     * Spring, which defaults to {@link SimpleAsyncTaskExecutor}.
+     * Obtain the underlying {@link AsyncTaskExecutor} created in
+     * {@link LockManagerApplication}, which uses {@code Executors
+     * .newVirtualThreadPerTaskExecutor()}.
      */
     @Autowired
     private AsyncTaskExecutor mExecutor;
@@ -41,33 +41,38 @@ public class LockManagerService {
      * the {@link ArrayBlockingQueue} that stores the state of the
      * semaphore.
      */
+    @Autowired
+    private Map<LockManager,
+                ArrayBlockingQueue<Lock>> mLockManagerMap;
+    /*
     private final Map<LockManager,
                       ArrayBlockingQueue<Lock>> mLockManagerMap =
         new ConcurrentHashMap<>();
+     */
 
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param permitCount The number of {@link Lock} objects to
+     * @param permits The number of {@link Lock} objects to
      *                    manage
      * @return A {@link LockManager} that uniquely identifies this
      *         semaphore
      */
-    public LockManager create(Integer permitCount) {
+    public LockManager create(Integer permits) {
         var availableLocks =
             // Make an ArrayBlockQueue with "fair" semantics that
             // limits concurrent access to the fixed number of
             // available locks.
-            new ArrayBlockingQueue<Lock>(permitCount,
+            new ArrayBlockingQueue<Lock>(permits,
                                          true);
 
         // Add each Lock to the queue.
-        availableLocks.addAll(makeLocks(permitCount));
+        availableLocks.addAll(makeLocks(permits));
 
         // Create a new LockManager with a unique name.
         var lockManager =
             new LockManager(Utils.generateUniqueId(),
-                            permitCount);
+                            permits);
 
         // Insert the new LockManager and the ArrayBlockingQueue into
         // the Map.
@@ -75,7 +80,7 @@ public class LockManagerService {
                             availableLocks);
 
         log("LockService.create("
-            + permitCount
+            + permits
             + ") "
             + " - made "
             + lockManager
@@ -89,12 +94,12 @@ public class LockManagerService {
     /**
      * Create the requested number of {@link Lock} objects.
      *
-     * @param permitCount The number of {@link Lock} objects to create
+     * @param permits The number of {@link Lock} objects to create
      */
-    private List<Lock> makeLocks(int permitCount) {
+    private List<Lock> makeLocks(int permits) {
         return IntStream
-            // Iterate from 0 to permitCount - 1.
-            .range(0, permitCount)
+            // Iterate from 0 to permits - 1.
+            .range(0, permits)
 
             // Convert Integer to String for use as the Lock id.
             .mapToObj(Integer::toString)
@@ -193,7 +198,7 @@ public class LockManagerService {
 
         // Create a DeferredResult containing the List of Lock
         // objects.
-        DeferredResult<List<Lock>> deferredResult = new DeferredResult<>();
+        var deferredResult = new DeferredResult<List<Lock>>();
 
         // Try to get the locks associated with the lockManager.
         var availableLocks =
@@ -230,22 +235,22 @@ public class LockManagerService {
 
     /**
      * This factory method returns a {@link Runnable} that executes
-     * asynchronously via the {@link SimpleAsyncTaskExecutor}.
+     * asynchronously via a virtual thread.
      *
      * @param permits The number of permits to acquire
      * @param availableLocks The locks associated with the {@link LockManager}
      * @param deferredResult A {@link DeferredResult} containing the {@link List}
      *                      of {@link Lock} objects
-     * @return A {@link Runnable} that executes asynchronously via the
-     *         {@code SimpleAsyncTaskExecutor}
+     * @return A {@link Runnable} that executes asynchronously via a
+     *         virtual thread
      */
     private Runnable getRunnable(int permits,
                                  ArrayBlockingQueue<Lock> availableLocks,
                                  DeferredResult<List<Lock>> deferredResult) {
         return () -> {
             // Create a List to hold the acquired Lock objects.
-            List<Lock> acquiredLocks =
-                new ArrayList<>(permits);
+             var acquiredLocks =
+                new ArrayList<Lock>(permits);
 
             // Keep trying to acquire 'permit' number of locks until we succeed.
             while (tryAcquireLock(availableLocks,

@@ -5,7 +5,6 @@ import edu.vandy.lockmanager.common.LockManager;
 import edu.vandy.lockmanager.server.LockManagerApplication;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
@@ -21,13 +20,13 @@ public interface LockAPI {
     /**
      * Initialize the {@link Lock} manager.
      *
-     * @param permitCount The total number of {@link Lock}
+     * @param permits The total number of {@link Lock}
      *                    objects to create
      * @return A {@link LockManager} that is associated with
      *         the state of the semaphore it manages
      */
-    @GetExchange(CREATE)
-    LockManager create(@RequestParam Integer permitCount);
+    @PostExchange(CREATE)
+    LockManager create(@RequestParam Integer permits);
 
     /**
      * Acquire a {@link Lock}, blocking until one is available.
@@ -36,7 +35,7 @@ public interface LockAPI {
      *                    with the state of the semaphore it manages
      * @return A newly acquired {@link Lock}
      */
-    @GetExchange(ACQUIRE_LOCK)
+    @PostExchange(ACQUIRE_LOCK)
     Lock acquire(@RequestParam LockManager lockManager);
 
     /**
@@ -48,7 +47,7 @@ public interface LockAPI {
      * @return A {@link List} containing {@code permits} newly
      *         acquired {@link Lock} objects
      */
-    @GetExchange(ACQUIRE_LOCKS)
+    @PostExchange(ACQUIRE_LOCKS)
     List<Lock> acquire(@RequestParam LockManager lockManager,
                        @RequestParam Integer permits);
 
@@ -62,7 +61,7 @@ public interface LockAPI {
      *         the {@link Lock} was released properly and {@link
      *         Boolean#FALSE} otherwise
      */
-    @GetExchange(RELEASE_LOCK)
+    @PostExchange(RELEASE_LOCK)
     Boolean release(@RequestParam LockManager lockManager,
                     @RequestParam Lock lock);
 

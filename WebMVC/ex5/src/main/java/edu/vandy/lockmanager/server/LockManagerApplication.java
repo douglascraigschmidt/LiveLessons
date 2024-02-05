@@ -2,8 +2,11 @@ package edu.vandy.lockmanager.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import java.util.concurrent.Executors;
 
 /**
  * This microservice provides a lock manager microservice that
@@ -41,6 +44,8 @@ public class LockManagerApplication {
                               args);
     }
 }
+
+
 
 
 

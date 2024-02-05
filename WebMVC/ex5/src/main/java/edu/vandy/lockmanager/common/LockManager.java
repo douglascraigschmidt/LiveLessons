@@ -1,11 +1,12 @@
 package edu.vandy.lockmanager.common;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- * This class is used to keep track of allocated
- * {@link ArrayBlockingQueue} objects.
+ * This class is used in conjunction with a {@link Map} to keep track of
+ * allocated {@link ArrayBlockingQueue} objects.
  */
 public class LockManager {
     /**
