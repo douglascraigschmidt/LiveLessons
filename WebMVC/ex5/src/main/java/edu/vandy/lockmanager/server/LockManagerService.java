@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.utils.Utils.log;
@@ -44,11 +43,6 @@ public class LockManagerService {
     @Autowired
     private Map<LockManager,
                 ArrayBlockingQueue<Lock>> mLockManagerMap;
-    /*
-    private final Map<LockManager,
-                      ArrayBlockingQueue<Lock>> mLockManagerMap =
-        new ConcurrentHashMap<>();
-     */
 
     /**
      * Initialize the {@link Lock} manager.
@@ -253,7 +247,7 @@ public class LockManagerService {
                 new ArrayList<Lock>(permits);
 
             // Keep trying to acquire 'permit' number of locks until we succeed.
-            while (tryAcquireLock(availableLocks,
+            while (tryAcquire(availableLocks,
                                   acquiredLocks) != permits)
                 continue;
 
@@ -280,7 +274,7 @@ public class LockManagerService {
      * @return The number of {@link Lock} objects in {@code
      *         acquiredLocks}
      */
-    private Integer tryAcquireLock
+    private Integer tryAcquire
         (ArrayBlockingQueue<Lock> availableLocks,
          List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
