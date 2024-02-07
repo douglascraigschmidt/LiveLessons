@@ -40,7 +40,7 @@ class LockManagerTests {
     /**
      * Number of permits to acquire and release simultaneously.
      */
-    private static final int sMULTIPLE_PERMITS = 2;
+    private static final int sPERMIT_COUNT = 2;
 
     /**
      * Test the {@link LockManagerApplication} microservice's ability
@@ -69,8 +69,7 @@ class LockManagerTests {
 
             // Perform this action for each client.
             .forEach(client ->
-                     acquireAndReleaseSingleLocks(client,
-                                                  lockManager));
+                     testSingleLock(client, lockManager));
 
         log("testSingleAcquireAndRelease() finished");
     }
@@ -103,21 +102,21 @@ class LockManagerTests {
 
             // Perform this action for each client.
             .forEach(client ->
-                     acquireAndReleaseMultipleLocks(client,
-                                                    lockManager,
-                                                    maxPermits));
+                     testMultipleLocks(client,
+                                       lockManager,
+                                       maxPermits));
 
         log("testMultipleAcquireAndRelease() finished");
     }
 
     /**
-     * Acquire and release single {@link Lock} objects.
+     * Acquire and release a single {@link Lock} object.
      *
      * @param client      The test client
      * @param lockManager The {@link LockManager} associated with this
      *                    test run
      */
-    private void acquireAndReleaseSingleLocks
+    private void testSingleLock
         (int client,
          LockManager lockManager) {
         log("Starting client " + client);
@@ -139,7 +138,7 @@ class LockManagerTests {
      * @param maxPermits The number of permits to acquire and release
      *                   simultaneously
      */
-    private void acquireAndReleaseMultipleLocks
+    private void testMultipleLocks
         (int client,
          LockManager lockManager,
          int maxPermits) {
