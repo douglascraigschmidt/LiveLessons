@@ -63,10 +63,9 @@ public class ConcurrentSetCollector<E, S extends Set<E>>
     }
 
     /**
-     * A method that accepts two partial results and merges them.  This
-     * method isn't really necessary when a parallel stream is used!
-     * However, we also use it with a sequential stream, so we need to
-     * provide an implementation here.
+     * A method that accepts two partial results and merges them.
+     * This method won't be called because {@link ConcurrentSetCollector}
+     * is defined with the {@code CONCURRENT} characteristic.
      *
      * @return A {@link BinaryOperator} that merges two maps together
      */

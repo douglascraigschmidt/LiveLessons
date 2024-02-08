@@ -132,7 +132,7 @@ public class LockManagerService {
         else {
             try {
                 // Try to acquire a lock without blocking, but block if that
-                // doesn't work
+                // doesn't work.
                 tryAcquire(callback, availableLocks);
             } catch (Exception e) {
                 // Set the error.
@@ -248,7 +248,7 @@ public class LockManagerService {
 
             // Keep trying to acquire 'permit' number of locks until we succeed.
             while (tryAcquire(availableLocks,
-                                  acquiredLocks) != permits)
+                              acquiredLocks) != permits)
                 continue;
 
             log("LockService - got all "
