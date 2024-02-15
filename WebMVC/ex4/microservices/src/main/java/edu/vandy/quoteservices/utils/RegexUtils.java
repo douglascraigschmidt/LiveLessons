@@ -56,15 +56,15 @@ public final class RegexUtils {
      */
     public static String makeAllMatchRegex(List<String> queries) {
         // Create a regular expression pattern that matches any string
-        // containing allx the keywords as whole words.
+        // containing all the queries as whole words.
         var regex = queries
             // Convert the List to a Stream.
             .stream()
 
-            // Use the map operation to transform each keyword into a
-            // positive lookahead pattern that matches the keyword as
+            // Use the map operation to transform each query into a
+            // positive lookahead pattern that matches the query as
             // a whole word.
-            .map(keyword -> "(?=.*\\b" + keyword + "\\b)")
+            .map(query -> "(?=.*\\b" + query + "\\b)")
 
             // Concatenate all the positive lookahead patterns into a
             // single string using the joining() collector.

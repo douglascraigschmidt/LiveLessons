@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * @@ Monte, what is the purpose of this class?
+ * This file parses the application.yml file in the resources folder.
  */
 public class YamlPropertySourceFactory
        implements PropertySourceFactory {

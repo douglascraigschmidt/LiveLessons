@@ -2,40 +2,62 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+    # This setting allows Spring to override bean definitions by name,
+    # which is useful in scenarios where multiple configurations might
+    # define a bean with the same name, typically in large projects or
+    # when integrating third-party libraries.
 
 ---
 
-# Handy microservice profile.
-
+# Defines a profile for a microservice named "handey" with specific
+# configurations.
 server:
   port: 9100
+  # Sets the server port to 9100. This is the port on which the
+  # microservice will listen for incoming requests.
 
 spring:
   application:
     name: handey
+    # Assigns the application name as "handey". This name is used for
+    # identification in logging, monitoring, etc.
   config:
     activate:
       on-profile: handey
+      # Activates this set of configurations only when the "handey"
+      # profile is active. Profiles help in maintaining environment
+      # -specific configurations.
 
 app:
   dataset: handey/handey-quotes.txt
+  # Specifies the location of the dataset file used by the application,
+  # allowing the application to load or use this specific file.
+
 ---
 
-# Zippy microservice profile.
-
+# Defines another profile for a microservice named "zippy" with its
+# own configurations, including database settings.
 server:
   port: 9101
+  # Sets the server port to 9101 for the "zippy" microservice.
 
 spring:
   application:
     name: zippy
+    # Assigns the application name as "zippy".
+
   config:
     activate:
       on-profile: zippy
-  # Common Database properties
+      # Activates this configuration only when "zippy" profile is active.
+
   datasource:
     driverClassName: org.h2.Driver
     url: jdbc:h2:mem:zippy;DB_CLOSE_ON_EXIT=TRUE
+    # Configures the datasource for the H2 database, including
+    # the driver class name and the JDBC URL for an in-memory
+    # database named "zippy".
+
   sql:
     init:
       platform: h2
@@ -44,17 +66,24 @@ spring:
       mode: always
       data-locations: classpath:zippy/data.sql
       schema-locations: classpath:zippy/schema.sql
-  # Use JPA database.
+      # Specifies SQL initialization settings, including the
+      # platform, credentials, and locations of SQL scripts for
+      # data and schema setup.
 
   jpa:
     hibernate:
       ddl-auto: none
+      # Disables automatic schema generation by Hibernate.
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
+    # Configures JPA to use the H2Dialect, and enables logging
+    # of SQL statements.
 
-  # Allow use of H2 console at localhost:port/h2-console for debugging.
   h2:
     console:
       settings:
         web-allow-others: true
       enabled: true
+      # Enables the H2 console, allowing it to be accessed from the
+      # web, and configures it to allow connections from other hosts.
+

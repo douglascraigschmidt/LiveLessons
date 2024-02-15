@@ -124,12 +124,12 @@ public class HandeyService
             // Convert Flux to a ParallelFlux.
             .parallel()
             
-            // Perform processing on appropriate Scheduler.
+            // Perform processing on the appropriate Scheduler.
             .runOn(parallel
                     ? Schedulers.parallel()
                     : Schedulers.single())
 
-            // Only keep movies who title matches any of the
+            // Only keep quotes whose 'quote' field matches any of the
             // 'queries'.
             .filter(quote ->
                     findAnyMatch(quote, regexQuery))

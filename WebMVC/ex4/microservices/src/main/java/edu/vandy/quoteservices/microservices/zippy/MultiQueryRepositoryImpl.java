@@ -70,7 +70,7 @@ public class MultiQueryRepositoryImpl
      * Get a {@link Predicate} that "ands" all the {@code queries}
      * together.
      * 
-     * @param queries The {@lin List} of queries
+     * @param queries The {@link List} of queries
      * @param criteriaBuilder Create the {@link CriteriaQuery} used to
      *                        search for quotes
      * @param quoteExpression The lower-cased "quote" column of the
