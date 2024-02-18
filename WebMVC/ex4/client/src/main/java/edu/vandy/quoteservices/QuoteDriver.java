@@ -71,7 +71,6 @@ public class QuoteDriver
         // Measure the impact of caching.
         timeZippyQuotesCaching();
 
-        /*
         // Record how long it takes to get the Zippy quotes.
         timeZippyQuotes(false);
         timeZippyQuotes(true);
@@ -79,8 +78,6 @@ public class QuoteDriver
         // Record how long it takes to get the Handey quotes.
         timeHandeyQuotes(false);
         timeHandeyQuotes(true);
-
-         */
 
         // Print the results.
         System.out.println(RunTimer.getTimingResults());
@@ -98,13 +95,13 @@ public class QuoteDriver
         var quotes = RunTimer
             .timeRun(() -> quoteClient
                     .getAllQuotes(ZIPPY),
-                "first call to getAllQuotes()");
+                "first (uncached) call to getAllQuotes()");
 
         // Call again and measure impact of caching.
         quotes = RunTimer
             .timeRun(() -> quoteClient
                     .getAllQuotes(ZIPPY),
-                "second call to getAllQuotes()");
+                "second (cached) call to getAllQuotes()");
 
         // Get a random Integer that's within the
         // range of the number of Zippy quotes.
@@ -117,14 +114,14 @@ public class QuoteDriver
             .timeRun(() -> quoteClient
                     .getQuote(ZIPPY,
                         randomQuoteId.get(0)),
-                "first call to getQuote()");
+                "first (uncached) call to getQuote()");
 
         // Call again and measure the impact of caching.
         RunTimer
             .timeRun(() -> quoteClient
                     .getQuote(ZIPPY,
                         randomQuoteId.get(0)),
-                "second call to getQuote()");
+                "second (cached) call to getQuote()");
     }
 
     /**
