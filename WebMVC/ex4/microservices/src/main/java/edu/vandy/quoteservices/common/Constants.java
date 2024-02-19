@@ -6,7 +6,6 @@ package edu.vandy.quoteservices.common;
  */
 public class Constants {
     public static final String HANDEY_QUOTES = "handey/handey-quotes.txt";
-    public static final String ZIPPY_QUOTES = "zippy/zippy-quotes.txt";
     public static final String ZIPPY_CACHE = "ZippyCache";
 
     /**

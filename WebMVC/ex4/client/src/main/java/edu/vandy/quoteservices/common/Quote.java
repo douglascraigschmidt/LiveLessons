@@ -7,7 +7,7 @@ import lombok.Value;
 /**
  * This class stores quotes.
  *
- * The {@code @Value} annotation generates all the boilerplate that is
+ * The {@code @Value} annotation generates all the boilerplate
  * normally associated with simple Plain Old Java Objects (POJOs) and
  * beans, including getters for all fields and setters for all
  * non-final fields.

@@ -43,7 +43,7 @@ public class GatewayApplication {
      * The static main() entry point runs this Spring application.
      */
     public static void main(String[] args) {
-        // Launch this application.
+        // Launch the API Gateway application.
         SpringApplication.run(GatewayApplication.class, 
                               args);
     }

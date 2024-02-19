@@ -1,4 +1,4 @@
-pluginManagement {
+ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
@@ -7,5 +7,6 @@ pluginManagement {
 
 include ':microservices'
 include ':gateway'
+include ':eureka'
 include ':client'
 

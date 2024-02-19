@@ -19,8 +19,9 @@ import static edu.vandy.quoteservices.common.Constants.ZIPPY_CACHE;
  * quotes.
  *
  * This class implements the abstract methods in {@link BaseService}
- * using the Java sequential streams framework.  It also demonstrates
- * the use of Spring server-side caching.
+ * using the Jakarta Persistence API (JPA) and the Java sequential
+ * streams framework. It also demonstrates the use of Spring
+ * server-side caching.
  *
  * This class is annotated as a Spring {@code @Service}, which enables
  * the automatic detection and wiring of dependent implementation
@@ -32,14 +33,14 @@ import static edu.vandy.quoteservices.common.Constants.ZIPPY_CACHE;
 public class ZippyService
        implements BaseService<List<Quote>> {
     /**
-     * Spring-injected repository that contains all quotes.
+     * Spring-injected repository containing all the Zippy quotes.
      */
     @Autowired
-    private JPAQuoteRepository mRepository;
+    private ZippyQuoteRepository mRepository;
 
     /**
-     * Return all the {@link Quote} objects.  This method enables
-     * server-side catching.
+     * Return all the {@link Quote} objects.  The {@code Cachable}
+     * annotation on this method enables server-side catching.
      *
      * @return A {@link List} of all {@link Quote} objects
      */
@@ -61,14 +62,15 @@ public class ZippyService
     }
 
     /**
-     * Get a {@link Quote} associated with the given
-     * {@code quoteId}.  This method enables server-side
-     * catching at the level of a given {@code quoteId}.
+     * Get a {@link Quote} associated with the given {@code quoteId}.
+     * This method enables server-side catching at the level of a
+     * given {@code quoteId}.  The {@code Cachable} annotation on this
+     * method enables server-side catching.
      *
-     * @param quoteId An {@link Integer} containing the given
-     *                {@code quoteId}
-     * @return A {@link Quote} containing the requested
-     *         {@code quoteId}
+     * @param quoteId An {@link Integer} containing the given {@code
+     *                quoteId}
+     * @return A {@link Quote} containing the requested {@code
+     *         quoteId}
      */
     @Cacheable(value = ZIPPY_CACHE, key = "#quoteId")
     @Override
@@ -84,7 +86,9 @@ public class ZippyService
         }
         return mRepository
             // Forward to the repository.
-            .findById(quoteId).orElseThrow(IllegalArgumentException::new);
+            .findById(quoteId)
+            // Throw IllegalArgumentException if quoteId not found.
+            .orElseThrow(IllegalArgumentException::new);
     }
 
     /**
@@ -143,19 +147,18 @@ public class ZippyService
     }
 
     /**
-     * Search for quotes containing all the given {@link String} and
-     * return a {@link List} that contains the matching {@link Quote}
-     * objects.
+     * Search for quotes that match all the given {@code queries} and
+     * return the {@link List} of matches (if any).
      *
      * @param queries The search queries
      * @return A {@code List} containing {@link Quote} objects
-     *         matching the given {@code queries}
+     *         matching all the given {@code queries}
      */
     @Override
     public List<Quote> searchEx(List<String> queries,
                                 Boolean notUsed) {
          return mRepository
-             // Forward to the repository.
+             // Forward to the custom query method.
              .findAllByQuoteContainingIgnoreCaseAllIn(queries);
      }
 }

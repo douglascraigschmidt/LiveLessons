@@ -38,8 +38,14 @@ app:
 # Defines another profile for a microservice named "zippy" with its
 # own configurations, including database settings.
 server:
-  port: 9101
-  # Sets the server port to 9101 for the "zippy" microservice.
+  port: 0
+  # Sets the server port to 0 for the "zippy" microservice, which
+  # instructs it to use the Eureka server-side discovery service.
+
+eureka:
+  client:
+    # Make this microservice use eureka.
+    enabled: true
 
 spring:
   application:

@@ -8,9 +8,24 @@ spring:
     active: path # See the application-path.yml file.
   application:
     name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: 'true'
+          lower-case-service-id: 'true'
   main:
     # This type is required for Spring API Gateways!
     web-application-type: reactive
+
+# Registers Gateway Application with Eureka.
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: false
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
 
 logging:
   level:

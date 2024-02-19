@@ -7,15 +7,14 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * A persistent repository that contains information about {@link
- * Quote} objects.
+ * A JPA repository that contains the {@link Quote} objects.
  *
  * The {@code @Repository} annotation indicates that this class
  * provides the mechanism for storage, retrieval, search, update and
  * delete operation on {@link Quote} objects.
  */
 @Repository
-public interface JPAQuoteRepository
+public interface ZippyQuoteRepository
        extends JpaRepository<Quote, Integer>,
                MultiQueryRepository {
     /**

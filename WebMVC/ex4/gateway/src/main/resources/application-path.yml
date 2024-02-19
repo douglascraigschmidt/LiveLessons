@@ -33,14 +33,3 @@ spring:
           # Removes the first part of the path before forwarding the request.
           filters:
             - StripPrefix=1 # ...
-
-        - id: zippy # Identifies the first route ("zippy") uniquely.
-          # Specifies the target URI to which requests matching this
-          # route should be forwarded.
-          uri: http://localhost:9101
-          # Matches requests with paths starting with /handey/.
-          predicates:
-              - Path= /zippy/**
-          # Removes the first part of the path before forwarding the request.
-          filters:
-            - StripPrefix=1 # ...
