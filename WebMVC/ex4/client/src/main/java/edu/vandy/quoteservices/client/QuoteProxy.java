@@ -42,7 +42,6 @@ public class QuoteProxy {
      *                 {@code quoteId}
      * @return A {@link Quote} containing the requested {@code quoteId}
      */
-
     public Quote getQuote(String route,
                           Integer quoteId) {
         return CallUtils
@@ -98,8 +97,8 @@ public class QuoteProxy {
     }
 
     /**
-     * Search the Zippy microservice for quotes containing all the
-     * given {@link List} of {@code queries} using a custom SQL method.
+     * Search for quotes containing all the given {@link List} of
+     * {@code queries}.
      *
      * @param route The microservice that performs the request
      * @param queries The {@link List} of {@code queries} to search

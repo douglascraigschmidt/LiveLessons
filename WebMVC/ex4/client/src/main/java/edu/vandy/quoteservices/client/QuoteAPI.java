@@ -7,6 +7,8 @@ import retrofit2.http.*;
 import java.util.List;
 
 import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
+import static edu.vandy.quoteservices.common.Constants.Params.PARALLEL;
+import static edu.vandy.quoteservices.common.Constants.Params.ROUTENAME;
 
 /**
  * This interface provides the contract for the RESTful {@code
@@ -67,9 +69,9 @@ public interface QuoteAPI {
      *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_QUOTES)
-    Call<List<Quote>> postQuotes(@Path("routename") String routename,
+    Call<List<Quote>> postQuotes(@Path(ROUTENAME) String routename,
                                  @Body List<Integer> quoteIds,
-                                 @Query("parallel") Boolean parallel);
+                                 @Query(PARALLEL) Boolean parallel);
 
     /**
      * Search for quotes containing any of the given {@link List} of
@@ -89,13 +91,13 @@ public interface QuoteAPI {
      *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_SEARCHES)
-    Call<List<Quote>> search(@Path("routename") String routename,
+    Call<List<Quote>> search(@Path(ROUTENAME) String routename,
                              @Body List<String> queries,
-                             @Query("parallel") Boolean parallel);
+                             @Query(PARALLEL) Boolean parallel);
 
     /**
      * Search for quotes containing all the given {@link List} of
-     * {@code queries} using a custom SQL query.
+     * {@code queries}.
      *
      * @param routename The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
@@ -111,7 +113,7 @@ public interface QuoteAPI {
      *         an error message on failure
      */
     @POST("{routename}" + "/" + POST_SEARCHES_EX)
-    Call<List<Quote>> searchEx(@Path("routename") String routename,
+    Call<List<Quote>> searchEx(@Path(ROUTENAME) String routename,
                                @Body List<String> queries,
-                               @Query("parallel") Boolean parallel);
+                               @Query(PARALLEL) Boolean parallel);
 }

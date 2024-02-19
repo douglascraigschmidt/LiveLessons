@@ -3,6 +3,8 @@ package edu.vandy.quoteservices.common;
 import edu.vandy.quoteservices.client.QuoteAPI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -14,6 +16,25 @@ import static edu.vandy.quoteservices.common.Constants.GATEWAY_BASE_URL;
  */
 @Component
 public class ClientBeans {
+    /**
+     * This factory method returns a new {@link RestTemplate}, which
+     * enables a client to perform HTTP requests synchronously.
+     *
+     * @return A new {@link RestTemplate}
+     */
+    @Bean
+    public RestTemplate getRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate
+            // Set the base URL for the RestTemplate.
+            .setUriTemplateHandler
+            (new DefaultUriBuilderFactory(GATEWAY_BASE_URL));
+
+        // Return restTemplate.
+        return restTemplate;
+    }
+
     /**
      * Create an instance of the {@link QuoteAPI} Retrofit client,
      * which is then used to making HTTP requests to the {@code

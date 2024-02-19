@@ -17,13 +17,6 @@ public class Constants {
         public static final String POST_QUOTES = "postQuotes";
         public static final String POST_SEARCHES = "postSearchQuotes";
         public static final String POST_SEARCHES_EX = "postSearchQuotesEx";
-
-        /**
-         * Supported HTTP request parameters identifiers.
-         */
-        public static class Params {
-            public static final String QUOTE_IDS_PARAM = "quoteIds";
-        }
     }
 
     /**

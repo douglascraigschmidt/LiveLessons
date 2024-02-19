@@ -26,4 +26,13 @@ public class Constants {
         public static final String ZIPPY = "zippy";
         public static final String HANDEY = "handey";
     }
+
+    /**
+     * Supported HTTP request parameters identifiers.
+     */
+    public static class Params {
+        public static final String ROUTENAME = "routename";
+        public static final String PARALLEL = "parallel";
+        public static final String QUOTE_ID = "quoteId";
+    }
 }
