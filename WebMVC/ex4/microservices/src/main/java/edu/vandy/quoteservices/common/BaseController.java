@@ -33,7 +33,7 @@ public abstract class BaseController<T> {
     /**
      * @return The {@link BaseService} encapsulated by the controller
      */
-    public BaseService<T> getService() {
+    protected BaseService<T> getService() {
         return mService;
     }
 
@@ -55,7 +55,7 @@ public abstract class BaseController<T> {
      * @return A {@link Quote} containing the requested {@code quoteId}
      */
     @GetMapping(GET_QUOTE)
-    Quote getQuote(@RequestParam Integer quoteId) {
+    public Quote getQuote(@RequestParam Integer quoteId) {
         return getService()
             // Forward request to the service.
             .getQuote(quoteId);
@@ -71,7 +71,7 @@ public abstract class BaseController<T> {
      * @return A {@code T} containing the requested quotes
      */
     @PostMapping(POST_QUOTES)
-    T postQuotes(@RequestBody List<Integer> quoteIds,
+    public T postQuotes(@RequestBody List<Integer> quoteIds,
                  Boolean parallel) {
         return getService()
             // Forward request to the service.

@@ -59,7 +59,7 @@ public final class Emitter {
                                   + pendingItems);
 
                 // Only publish an item if the sink hasn't been
-                // cancelled.
+                // canceled.
                 if (!sink.isCancelled())
                     // Publish the next item.
                     sink.next(item);

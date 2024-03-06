@@ -19,6 +19,8 @@ public class Publisher {
      *
      * @param scheduler {@link Scheduler} to publish the random
      *                  numbers on
+     * @param randomIntegers The {@link List} of random {@link Integer}
+     *                       objects to publish
      * @return Return a {@link Flux} that publishes random numbers
      */
     public static Flux<Integer> publishIntegers

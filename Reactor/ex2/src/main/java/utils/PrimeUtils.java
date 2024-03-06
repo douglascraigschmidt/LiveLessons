@@ -54,12 +54,13 @@ public class PrimeUtils {
      * {@code primeCandidate} and either 0 if it's prime or its
      * smallest factor if it's not prime.
      */
-    public static PrimeUtils.Result checkIfPrime(Integer primeCandidate,
-                                                 Function<Integer, Integer> primeChecker) {
+    public static PrimeUtils.Result checkIfPrime
+        (Integer primeCandidate,
+         Function<Integer, Integer> primeChecker) {
         // Return a tuple containing the prime candidate and the
         // result of checking if it's prime.
         return new Result(primeCandidate,
-            primeChecker.apply(primeCandidate));
+              primeChecker.apply(primeCandidate));
     }
 
     /**

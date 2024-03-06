@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * version of the Zippy quote microservice.
  *
  * The {@code @SpringBootApplication} annotation enables apps to use
- * autoconfiguration, component scan, and to define extra
+ * auto-configuration, component scan, and to define extra
  * configurations on their "application" class.
  *
  * The {@code @ComponentScan} annotation configures Spring to scan for
@@ -26,12 +26,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * scan for components within the packages of the {@link
  * ZippyApplication} and {@link ServerBeans} classes.
  *
- * The {@code EntityScan} annotation configures the base packages used
- * for scanning entities. Specifically, it directs Spring to look for
- * JPA entities in the package containing the {@link Quote} class,
- * which is useful when entities are located in a package that is not
- * automatically scanned by Spring.
- *
  * The {@code EnableJpaRepositories} annotation enables Spring Data
  * JPA repositories. It configures the base packages used for scanning
  * Spring Data repositories. In this case, Spring is directed to scan
@@ -39,7 +33,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * ZippyQuoteRepository} class.  This annotation is essential for
  * integrating Spring Data JPA into the application, allowing for the
  * use of repository interfaces to abstract data layer access.
- * 
+ *
+ * The {@code EntityScan} annotation configures the base packages used
+ * for scanning entities. Specifically, it directs Spring to look for
+ * JPA entities in the package containing the {@link Quote} class,
+ * which is useful when entities are located in a package that is not
+ * automatically scanned by Spring.
+ *
  * The {@code EnableCaching} annotation enables caching in a Spring
  * application. This annotation allows Spring to detect caching
  * configurations and to intercept methods where caching behavior is
@@ -52,8 +52,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     ZippyApplication.class,
     ServerBeans.class
 })
-@EntityScan(basePackageClasses = {Quote.class})
 @EnableJpaRepositories(basePackageClasses = {ZippyQuoteRepository.class})
+@EntityScan(basePackageClasses = {Quote.class})
 @EnableCaching
 public class ZippyApplication
        extends BaseApplication {

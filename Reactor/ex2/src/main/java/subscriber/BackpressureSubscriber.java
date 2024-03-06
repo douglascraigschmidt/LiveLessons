@@ -14,6 +14,7 @@ import java.util.function.Consumer;
  * that handles blocking (which is otherwise not well-supported by
  * Project Reactor).
  */
+@SuppressWarnings({"UnusedReturnValue", "BlockingMethodInNonBlockingContext", "CallToPrintStackTrace"})
 public class BackpressureSubscriber<T>
     implements CoreSubscriber<T>,
                Disposable {
@@ -95,7 +96,9 @@ public class BackpressureSubscriber<T>
     public void onSubscribe(Subscription subscription) {
         mSubscription = subscription;
 
-        // Set the backpressure value.
+        // Set the backpressure value (mRequestSize could be
+        // Long.MAX_VALUE, in which case there is no back-
+        // pressure at all.
         mSubscription.request(mRequestSize);
     }
 
@@ -110,6 +113,9 @@ public class BackpressureSubscriber<T>
         mConsumer.accept(element);
 
         mTotalEvents.incrementAndGet();
+
+        // This code is only called for truly backpressure aware
+        // applications.
         if (mEventsProcessedThusFar.incrementAndGet() == mRequestSize) {
             mSubscription.request(mRequestSize);
             mEventsProcessedThusFar.set(0);
@@ -135,7 +141,7 @@ public class BackpressureSubscriber<T>
      */
     @Override
     public void onComplete() {
-        // Run the completeRunnable's hook method.
+        // Run the mCompleteRunnable's hook method.
         mCompleteRunnable.run();
 
         // Release the latch.
@@ -157,6 +163,8 @@ public class BackpressureSubscriber<T>
      */
     public Mono<Void> await() {
         try {
+            // This await() call will block until all the
+            // asynchronous processing completes.
             mLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();

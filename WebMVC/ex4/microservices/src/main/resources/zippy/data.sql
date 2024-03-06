@@ -754,7 +754,7 @@ insert into QUOTE (
 	(default, 'Yow!  We''re going to a new disco!'),
 	(default, 'YOW!!'),
 	(default, 'Yow!!  "Janitor trapped in sewer uses ESP to find decayed burger"!!'),
-	(default, 'YOW!!  Everybody out of the GENETIC POOL!'),
+        (default, 'YOW!!  Everybody out of the GENETIC POOL!'),
 	(default, 'YOW!!  I am having FUN!!'),
 	(default, 'YOW!!  I''m in a very clever and adorable INSANE ASYLUM!!'),
 	(default, 'Yow!!  It''s LIBERACE and TUESDAY WELD!!  High on a HILL... driving a  LITTLE CAR...  I wanna be in that LITTLE CAR, too!!  I wanna drive off  with LIBBY and TUESDAY!'),

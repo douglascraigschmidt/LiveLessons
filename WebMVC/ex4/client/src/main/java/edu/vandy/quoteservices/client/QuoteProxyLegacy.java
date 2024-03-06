@@ -56,7 +56,8 @@ public class QuoteProxyLegacy {
      *
      * @param quoteId An {@link Integer} containing the given
      *                 {@code quoteId}
-     * @return A {@link Quote} containing the requested {@code quoteId}
+     * @return A {@link Quote} containing the requested {@code
+     *         quoteId}
      */
     public Quote getQuote(String route,
                           Integer quoteId) {
@@ -70,8 +71,8 @@ public class QuoteProxyLegacy {
         // Invoke the remote call and return the result.
         return WebUtils
             .makeGetRequest(mRestTemplate,
-                                uri,
-                                Quote.class);
+                            uri,
+                            Quote.class);
     }
 
     /**

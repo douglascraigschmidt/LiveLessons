@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 
 /**
- * This class realizes the "Repository Implementation Pattern" to
+ * This class realizes the "Repository Implementation" pattern to
  * define a method that returns a {@link List} of {@link Quote}
  * objects in the database containing at least one of the {@code
  * queries} (ignoring case).
@@ -95,7 +95,7 @@ public class MultiQueryRepositoryImpl
                  .like(quoteExpression,
                        "%" + query + "%"))
 
-            // Reduce the list of predicates to a single conjunction
+            // Reduce the Stream of predicates to a single conjunction
             // (and) predicate.
             .reduce(criteriaBuilder.conjunction(),
                     criteriaBuilder::and);

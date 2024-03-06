@@ -13,12 +13,13 @@ import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomi
 import java.util.concurrent.Executors;
 
 import static java.util.Collections.singletonMap;
+import static org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME;
 
 /**
- * A static class with a single {@link #run} static method that is used by all
- * microservices to build a Spring Boot application instance and to give a
- * unique name that is used as a path component in URLs and for routing by the
- * gateway application.
+ * A static class with a single {@link #run} static method that is
+ * used by all microservices to build a Spring Boot application
+ * instance and to give a unique name that is used as a path component
+ * in URLs and for routing by the gateway application.
  */
 @Configuration
 @PropertySource(
@@ -36,7 +37,8 @@ public class BaseApplication {
     public static void run(Class<?> clazz, String[] args) {
         var name = getName(clazz);
         var app = new SpringApplicationBuilder(clazz)
-            .properties(singletonMap("spring.application.name", name))
+            .properties(singletonMap("spring.application.name",
+                                            name))
             .build();
         app.setAdditionalProfiles(name);
         app.setLazyInitialization(true);
@@ -48,8 +50,8 @@ public class BaseApplication {
      * package name.
      *
      * @param clazz Any microservice {@link Class} type
-     * @return A {@link String} containing the application name, which is the
-     * last part of package name
+     * @return A {@link String} containing the application name, which
+     *         is the last part of package name
      */
     private static String getName(Class<?> clazz) {
         // Get the package name.
@@ -63,21 +65,33 @@ public class BaseApplication {
      * Configure the use of Java virtual threads to handle all
      * incoming HTTP requests.
      */
-    @Bean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+    @Bean(APPLICATION_TASK_EXECUTOR_BEAN_NAME)
     public AsyncTaskExecutor asyncTaskExecutor() {
+        // Creates a TaskExecutorAdapter with a new virtual thread per
+        // task executor.  Virtual threads are lightweight and
+        // designed for high concurrency, enabling efficient handling
+        // of numerous asynchronous tasks without the overhead
+        // associated with traditional threads.
         return new TaskExecutorAdapter(Executors
-                .newVirtualThreadPerTaskExecutor());
+                                       .newVirtualThreadPerTaskExecutor());
     }
 
     /**
-     * Customize the ProtocolHandler on the TomCat Connector to
-     * use Java virtual threads to handle all incoming HTTP requests.
+     * Customize the ProtocolHandler on the TomCat Connector to use
+     * Java virtual threads to handle all incoming HTTP requests.
      */
     @Bean
-    public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
+    public TomcatProtocolHandlerCustomizer<?>
+        protocolHandlerVirtualThreadExecutorCustomizer() {
+        // Customize the Tomcat server to handle all incoming HTTP
+        // requests with a virtual thread per task executor. This
+        // approach is particularly beneficial for applications with
+        // high request volumes, as it leverages virtual threads'
+        // efficiency and scalability, reducing the resource
+        // consumption and context-switching overhead.
         return protocolHandler -> {
             protocolHandler
-                    .setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+                .setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         };
     }
 }

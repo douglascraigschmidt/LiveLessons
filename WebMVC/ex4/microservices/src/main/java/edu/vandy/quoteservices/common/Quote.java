@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 /**
- * This class stores quotes.
+ * This class stores quotes (either persistently or non-persistently) and
+ * can also be passed between clients and the microservices.
  *
  * The {@code @Value} annotation indicates that all fields of this
  * class are treated as immutable, i.e., they should be declared as
@@ -25,7 +26,7 @@ import lombok.Value;
  * The {@code @NoArgsConstructor(force = true)} annotation generates a
  * no-argument constructor with default values for all fields. The
  * {@code force = true} parameter sets all final fields to their
- * default values (0 / false / null), which is useful for frameworks
+ * default values (0/false/null), which is useful for frameworks
  * and libraries that require a no-argument constructor, such as JPA.
  *
  * The {@code @Entity} annotation marks this class as a JPA entity,

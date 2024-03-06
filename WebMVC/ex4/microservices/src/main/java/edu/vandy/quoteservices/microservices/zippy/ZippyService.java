@@ -124,7 +124,7 @@ public class ZippyService
     public List<Quote> search(List<String> queries,
                               Boolean parallel) {
         // Use a Java sequential or parallel stream and the JPA to
-        // locate all quotes whose 'id' matches the List of 'queries'
+        // locate all quotes whose 'quote' matches the List of 'queries'
         // and return them as a List of Quote objects.
         return StreamSupport
             // Convert the List to a Stream.

@@ -14,10 +14,12 @@ import utils.ReactorUtils;
 import java.util.function.Function;
 
 /**
- * This program applies Project Reactor features to check the primality
- * of randomly generate {@link Integer} objects via a publisher and
- * a subscriber that (conditionally) run in different threads/schedulers.
+ * This program applies Project Reactor features to check the
+ * primality of randomly generate {@link Integer} objects via a
+ * publisher and a subscriber that (conditionally) run in different
+ * threads/schedulers.
  */
+@SuppressWarnings("ReactiveStreamsUnusedPublisher")
 public class ex2 {
     /**
      * Debugging tag used by the logger.
@@ -32,9 +34,9 @@ public class ex2 {
         .newParallel("publisher", 1);
 
     /**
-     * The {@link Scheduler} used to consume random integers by checking
-     * if they are prime or not.  This {@link Scheduler} can be either
-     * sequential or parallel, depending on program options.
+     * The {@link Scheduler} used to consume random integers by
+     * checking if they are prime or not.  This {@link Scheduler} can
+     * be either sequential or parallel, depending on program options.
      */
     private final Scheduler mSubscriberScheduler;
 
@@ -51,14 +53,15 @@ public class ex2 {
                     // Print the results of prime number checking.
                     PrimeUtils.printResult(result);
                     Options.debug(TAG, "subscriber pending items: "
-                        + pendingItems);
+                                  + pendingItems);
                 }
-        },
-        throwable -> {
-            Options.print("failure " + throwable);
-        },
-        () -> Options.print("completed"),
-        Integer.MAX_VALUE);
+            },
+            throwable -> {
+                Options.print("failure " + throwable);
+            },
+            () -> Options.print("completed"),
+            // Disable backpressure.
+            Integer.MAX_VALUE);
 
     /**
      * Track all disposables to dispose them all at once.
@@ -71,7 +74,7 @@ public class ex2 {
     static public void main(String[] argv) {
         // Create an instance to run the test.
         new ex2(argv).run(PrimeUtils::isPrime,
-            "pub/sub prime checker");
+                          "pub/sub prime checker");
     }
 
     /**
@@ -83,17 +86,18 @@ public class ex2 {
 
         // Conditionally run the subscriber in a different thread.
         mSubscriberScheduler = Options.instance().parallel()
-            // Choose a different scheduler if we're running in parallel.
+            // Choose a different scheduler if we're running in
+            // parallel.
             ? Schedulers.newParallel("subscriber",
-            Options.instance().parallelism())
+                                     Options.instance().parallelism())
 
-            // Otherwise run everything on the publisher's scheduler.
+            // Otherwise, run everything on the publisher's scheduler.
             : mPublisherScheduler;
 
         mDisposables = Disposables
             .composite(mPublisherScheduler,
-                mSubscriberScheduler,
-                mSubscriber);
+                       mSubscriberScheduler,
+                       mSubscriber);
     }
 
     /**
@@ -106,19 +110,19 @@ public class ex2 {
      */
     @SuppressWarnings("SameParameterValue")
     private void run
-    (Function<Integer, Integer> primeChecker,
-     String testName) {
+        (Function<Integer, Integer> primeChecker,
+         String testName) {
         Options.print("Starting "
-            + testName
-            + " with count = "
-            + Options.instance().count());
+                      + testName
+                      + " with count = "
+                      + Options.instance().count());
 
         // Generate a list of 'count' odd random Integers whose values
         // don't exceed the given maximum.
         var randomIntegers = RandomUtils
             .generateRandomIntegers(Options.instance().count(),
-                Options.instance().maxValue(),
-                true);
+                                    Options.instance().maxValue(),
+                                    true);
 
         // This Function asynchronously determines if a random # is
         // prime or not.
@@ -129,15 +133,15 @@ public class ex2 {
             // Create a publisher that runs on its own scheduler and
             // returns a Flux that emits random Integer objects.
             .publishIntegers(mPublisherScheduler,
-                randomIntegers)
+                             randomIntegers)
 
             // Conditionally enable logging.
             .transform(ReactorUtils
-                // Conditionally enable logging.
-                .logIf(Options.instance().loggingEnabled()))
+                       // Conditionally enable logging.
+                       .logIf(Options.instance().loggingEnabled()))
 
-            // Concurrently (maybe) check each random # to see if it's
-            // prime.  This operation may run on the subscriber's
+            // Check each random # (potentially concurrenty) to see if
+            // it's prime.  This operation may run on the subscriber's
             // scheduler, depending on the options used to run the
             // program.
             .flatMap(check4Prime)
@@ -163,12 +167,12 @@ public class ex2 {
      *
      * @param primeChecker A {@link Function} that checks a number's
      *                     primality
-     * @return A {@link Function} that  asynchronously determines if a
-     * random # is prime or not
+     * @return A {@link Function} that asynchronously determines if a
+     *         random # is prime or not
      */
     private Function<Integer,
-        Mono<PrimeUtils.Result>> makePrimeCheckFunction
-    (Function<Integer, Integer> primeChecker) {
+                     Mono<PrimeUtils.Result>> makePrimeCheckFunction
+        (Function<Integer, Integer> primeChecker) {
         return number -> Mono
             .fromSupplier(() -> number)
 
@@ -177,8 +181,8 @@ public class ex2 {
 
             // Check if the # is prime.
             .map(__ -> PrimeUtils
-                .checkIfPrime(number,
-                    primeChecker));
+                 .checkIfPrime(number,
+                               primeChecker));
     }
 
     /**
@@ -187,8 +191,9 @@ public class ex2 {
      *
      * @return The formatted exit string
      */
-    private String makeExitString(String testName,
-                                  Function<Integer, Integer> primeChecker) {
+    private String makeExitString
+        (String testName,
+         Function<Integer, Integer> primeChecker) {
         return "Leaving "
             + testName
             + " with "

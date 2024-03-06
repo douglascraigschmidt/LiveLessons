@@ -31,7 +31,8 @@ public class Constants {
      * Supported HTTP request parameters identifiers.
      */
     public static class Params {
-        public static final String ROUTENAME = "routename";
+        public static final String SERVICE = "service";
+        public static final String SERVICE_PREFIX = "{service}";
         public static final String PARALLEL = "parallel";
         public static final String QUOTE_ID = "quoteId";
     }

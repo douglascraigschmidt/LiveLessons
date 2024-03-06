@@ -7,8 +7,7 @@ import retrofit2.http.*;
 import java.util.List;
 
 import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
-import static edu.vandy.quoteservices.common.Constants.Params.PARALLEL;
-import static edu.vandy.quoteservices.common.Constants.Params.ROUTENAME;
+import static edu.vandy.quoteservices.common.Constants.Params.*;
 
 /**
  * This interface provides the contract for the RESTful {@code
@@ -30,15 +29,15 @@ public interface QuoteAPI {
      * Get a {@link List} containing the requested {@link Quote}
      * objects.
      *
-     * @param routename The microservice that performs the request,
+     * @param service The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
      *                  the {@code Path} annotation
      * @return An {@link Call} object that yields a {@link List}
      *         containing all the {@link Quote} objects on success and
      *         an error message on failure
      */
-    @GET("{routename}" + "/" + GET_ALL_QUOTES)
-    Call<List<Quote>> getAllQuotes(@Path("routename") String routename);
+    @GET(SERVICE_PREFIX + "/" + GET_ALL_QUOTES)
+    Call<List<Quote>> getAllQuotes(@Path(SERVICE) String service);
 
     /**
      * Get a {@link Quote} corresponding to the given id.
@@ -47,15 +46,15 @@ public interface QuoteAPI {
      *                 {@code quoteId}
      * @return A {@link Quote} containing the requested {@code quoteId}
      */
-    @GET("{routename}" + "/" + GET_QUOTE)
-    Call<Quote> getQuote(@Path("routename") String routename,
+    @GET(SERVICE_PREFIX + "/" + GET_QUOTE)
+    Call<Quote> getQuote(@Path(SERVICE) String service,
                          @Query("quoteId") Integer quoteId);
 
     /**
      * Get a {@link List} containing the requested {@link Quote}
      * objects.
      *
-     * @param routename The microservice that performs the request,
+     * @param service The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
      *                  the {@code Path} annotation
      * @param quoteIds A {@link List} containing the given random
@@ -68,8 +67,8 @@ public interface QuoteAPI {
      *         containing the {@link Quote} objects on success and
      *         an error message on failure
      */
-    @POST("{routename}" + "/" + POST_QUOTES)
-    Call<List<Quote>> postQuotes(@Path(ROUTENAME) String routename,
+    @POST(SERVICE_PREFIX + "/" + POST_QUOTES)
+    Call<List<Quote>> postQuotes(@Path(SERVICE) String service,
                                  @Body List<Integer> quoteIds,
                                  @Query(PARALLEL) Boolean parallel);
 
@@ -77,7 +76,7 @@ public interface QuoteAPI {
      * Search for quotes containing any of the given {@link List} of
      * {@code queries}.
      *
-     * @param routename The microservice that performs the request,
+     * @param service The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
      *                  the {@code Path} annotation
      * @param queries The {@link List} of {@code queries} to search
@@ -90,8 +89,8 @@ public interface QuoteAPI {
      *         containing all the {@link Quote} objects on success and
      *         an error message on failure
      */
-    @POST("{routename}" + "/" + POST_SEARCHES)
-    Call<List<Quote>> search(@Path(ROUTENAME) String routename,
+    @POST(SERVICE_PREFIX + "/" + POST_SEARCHES)
+    Call<List<Quote>> search(@Path(SERVICE) String service,
                              @Body List<String> queries,
                              @Query(PARALLEL) Boolean parallel);
 
@@ -99,7 +98,7 @@ public interface QuoteAPI {
      * Search for quotes containing all the given {@link List} of
      * {@code queries}.
      *
-     * @param routename The microservice that performs the request,
+     * @param service The microservice that performs the request,
      *                  which is dynamically inserted into the URI via
      *                  the {@code Path} annotation
      * @param queries The {@link List} of {@code queries} to search
@@ -112,8 +111,8 @@ public interface QuoteAPI {
      *         containing the {@link Quote} objects on success and
      *         an error message on failure
      */
-    @POST("{routename}" + "/" + POST_SEARCHES_EX)
-    Call<List<Quote>> searchEx(@Path(ROUTENAME) String routename,
+    @POST(SERVICE_PREFIX + "/" + POST_SEARCHES_EX)
+    Call<List<Quote>> searchEx(@Path(SERVICE) String service,
                                @Body List<String> queries,
                                @Query(PARALLEL) Boolean parallel);
 }
