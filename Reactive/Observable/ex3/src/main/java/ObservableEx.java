@@ -4,9 +4,11 @@ import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import utils.BigFraction;
 import utils.BigFractionUtils;
+import utils.MultimapCollector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 
 import static java.util.stream.Collectors.toList;
@@ -237,9 +239,9 @@ public class ObservableEx {
      * and a pool of threads to perform BigFraction reductions and
      * multiplications.
      */
-    public static Completable testFractionReductionMultiplications() {
+    public static Completable testFractionReductionMultiplications1() {
         StringBuffer sb =
-            new StringBuffer(">> Calling testFractionReductionMultiplications()\n");
+            new StringBuffer(">> Calling testFractionReductionMultiplications1()\n");
 
         sb.append("     Printing sorted results:");
 
@@ -269,6 +271,47 @@ public class ObservableEx {
                                 // Sort/print results after all async
                                 // fraction operations complete.
                                 sortAndPrintList(list, sb));
+    }
+
+    /**
+     * Test an asynchronous Observable stream consisting of
+     * generate(), take(), flatMap(), collect() with a
+     * MultimapCollector, flatMapCompletable() and a pool of threads
+     * to perform BigFraction reductions and multiplications.
+     */
+    public static Completable testFractionReductionMultiplications2() {
+        StringBuffer sb =
+            new StringBuffer(">> Calling testFractionMultiplications2()\n");
+
+        // Process the function in a flux stream.
+        return Observable
+            // Generate a stream of random, large, and unreduced big
+            // fractions.
+            .generate((Emitter<BigFraction> emitter) -> emitter
+                      // Emit a random big fraction every time a
+                      // request is made.
+                      .onNext(BigFractionUtils.makeBigFraction(sRANDOM,
+                                                             false)))
+
+            // Stop after generating sMAX_FRACTIONS big fractions.
+            .take(sMAX_FRACTIONS)
+
+            // Reduce and multiply these big fractions asynchronously
+            // using the flatMap() concurrency idiom.
+            .flatMap(unreducedFraction ->
+                     reduceAndMultiplyFraction(unreducedFraction,
+                                               Schedulers.computation()))
+
+            // Collect the results into a
+            // Single<Map<BigInteger, Collection<BigInteger>>>.
+            .collect(MultimapCollector.toMap(BigFraction::getNumerator,
+                                        BigFraction::getDenominator,
+                HashMap::new))
+
+            // Process the results of the collected multimap and return a
+            // Completable that's used to synchronize with the
+            // AsyncTaskBarrier framework.
+            .flatMapCompletable(map -> BigFractionUtils.printMap(map, sb));
     }
 
     /**

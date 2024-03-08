@@ -1,12 +1,17 @@
 package utils;
 
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A utility class containing helpful methods for manipulating various
@@ -133,7 +138,7 @@ public class BigFractionUtils {
             // Display the list.
             .doOnSuccess(displayList)
                 
-            // Return Completable to synchronize with the
+            // Return a Completable to synchronize with the
             // AsyncTaskBarrier framework.
             .ignoreElement();
     }
@@ -230,5 +235,41 @@ public class BigFractionUtils {
                             + bigFraction
                             + "\n");
         BigFractionUtils.display(stringBuffer.toString());
+    }
+
+    /**
+     * Iterate through the contents of the {@link Map} param and then
+     * store and print the results in the {@link StringBuffer}
+     * parameter.
+     */
+    public static Completable printMap(Map<BigInteger, Collection<BigInteger>> map,
+                                       StringBuffer sb) {
+        // Display the results as mixed fractions.
+        Consumer<Map<BigInteger, Collection<BigInteger>>> displayMap = ___ -> {
+            // Iterate through each BigFraction in the map.
+            map.forEach((numerator, denominators) ->
+                        denominators
+                        .forEach(denominator -> sb
+                                 .append("\n     "
+                                         + BigFraction
+                                         .valueOf(numerator,
+                                                  denominator,
+                                                  true)
+                                         .toMixedString()
+                                         + " ")));
+            sb.append("\n");
+            display(sb.toString());
+        };
+
+        return Single
+            // Create a Single that emits the map.
+            .just(map)
+
+            // Use doOnSuccess() to display the map.
+            .doOnSuccess(displayMap)
+                
+            // Return a Completable to synchronize with the
+            // AsyncTaskBarrier framework.
+            .ignoreElement();
     }
 }

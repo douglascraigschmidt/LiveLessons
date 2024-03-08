@@ -78,7 +78,7 @@ public class BigFractionUtils {
      */
     public static Mono<Void> sortAndPrintList(List<BigFraction> list,
                                               StringBuffer sb) {
-        // Quick sort the list asynchronously.
+        // Quicksort the list asynchronously.
         var quickSortM = Mono
             // Use the fromCallable() factory method to obtain the
             // results of quick sorting the list.
@@ -88,7 +88,7 @@ public class BigFractionUtils {
             // parallel thread pool.
             .subscribeOn(Schedulers.parallel());
 
-        // Heap sort the list asynchronously.
+        // Heapsort the list asynchronously.
         var heapSortM =  Mono
             // Use the fromCallable() factory method to obtain the
             // results of heap sorting the list.
@@ -188,7 +188,7 @@ public class BigFractionUtils {
      */
     public static void display(String string) {
         System.out.println("["
-                           + Thread.currentThread().getId()
+                           + Thread.currentThread().threadId()
                            + "] "
                            + string);
     }

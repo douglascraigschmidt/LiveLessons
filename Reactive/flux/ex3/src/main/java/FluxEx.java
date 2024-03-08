@@ -19,10 +19,11 @@ import static utils.BigFractionUtils.*;
  * This class shows how to apply Project Reactor features
  * asynchronously to perform a range of Flux operations, including
  * fromIterable(), generate(), map(), flatMap(), onErrorResume(),
- * onErrorStop(), onErrorContinue(), collectList(), collect(), reduce(),
- * take(), filter(), and various types of thread pools.  It also shows
- * various Mono operations, such as flatMap(), firstWithSignal(),
- * subscribeOn(), and the parallel thread pool.
+ * onErrorStop(), onErrorContinue(), collectList(), collect(),
+ * collectMultimap(), reduce(), take(), filter(), and various types of
+ * thread pools.  It also shows various Mono operations, such as
+ * flatMap(), firstWithSignal(), subscribeOn(), and the parallel
+ * thread pool.
  */
 @SuppressWarnings("ALL")
 public class FluxEx {
@@ -284,8 +285,8 @@ public class FluxEx {
 
     /**
      * Test an asynchronous Flux stream consisting of generate(),
-     * take(), flatMap(), collectMap(), and a pool of threads to perform
-     * BigFraction reductions and multiplications.
+     * take(), flatMap(), collectMultimap(), and a pool of threads to
+     * perform BigFraction reductions and multiplications.
      */
     public static Mono<Void> testFractionMultiplications3() {
         StringBuffer sb =

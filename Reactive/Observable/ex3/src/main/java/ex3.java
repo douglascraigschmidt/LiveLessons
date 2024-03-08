@@ -30,13 +30,22 @@ public class ex3 {
         // Test Observable exception handling via onErrorResumeNext().
         AsyncTaskBarrier.register(ObservableEx::testFractionException3);
 
-        // Use an asynchronous Observable stream and a pool of threads
-        // to perform BigFraction multiplications and additions.
+        // Test an asynchronous Observable stream and a pool of
+        // threads that perform BigFraction multiplications and
+        // additions.
         AsyncTaskBarrier.register(ObservableEx::testFractionMultiplications);
 
-        // Use an asynchronous Observable stream and a pool of threads
-        // to perform BigFraction reductions and multiplications.
-        AsyncTaskBarrier.register(ObservableEx::testFractionReductionMultiplications);
+        // Test an asynchronous Observable stream consisting of
+        // generate(), take(), flatMap(), collect(),
+        // flatMapCompletable(), and a pool of threads to perform
+        // BigFraction reductions and multiplications.
+        AsyncTaskBarrier.register(ObservableEx::testFractionReductionMultiplications1);
+
+        // Test an asynchronous Observable stream consisting of
+        // generate(), take(), flatMap(), collect() with a
+        // MultimapCollector, and a pool of threads to perform
+        // BigFraction reductions and multiplications.
+        AsyncTaskBarrier.register(ObservableEx::testFractionReductionMultiplications2);
 
         long testCount = AsyncTaskBarrier
             // Run all the tests.
