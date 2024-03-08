@@ -6,10 +6,10 @@ import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
- * This generic custom collector accumulates input elements
- * of type {@code T} into a {@link Map} parameterized
- * with {@code K} and {@code Collection<V>} types and returns
- * that {@link Map}.
+ * This generic custom collector accumulates input elements of type
+ * {@code T} into a multimap, which is a {@link Map} parameterized
+ * with {@code K} and {@code Collection<V>} types and returns that
+ * {@link Map}.
  */
 public class MultimapCollector<T, K, V>
        implements Collector<T,
@@ -39,8 +39,8 @@ public class MultimapCollector<T, K, V>
      *
      * If the mapped keys contain duplicates (according to {@link
      * Object#equals(Object)}), the value mapping function is applied
-     * to each equal element, and the results are merged using the
-     * provided merging function.
+     * to each equal element, and the results are merged into the
+     * {@link Collection<V>}.
      *
      * @param <T> the type of the input elements
      * @param <K> the output type of the key mapping function
@@ -86,10 +86,11 @@ public class MultimapCollector<T, K, V>
 
     /**
      * A factory method that creates and returns a new mutable result
-     * container of type {@link ConcurrentHashMap} that holds all the
-     * elements in the stream.
+     * container of type {@link Map} that holds all the elements in
+     * the stream.
      *
-     * @return a function which returns a new, mutable result container
+     * @return A {@link Supplier} that returns a new, mutable result
+     *         container
      */
     @Override
     public Supplier<Map<K, Collection<V>>> supplier() {
@@ -97,11 +98,10 @@ public class MultimapCollector<T, K, V>
     }
 
     /**
-     * A method that folds an element into the {@link
-     * ConcurrentHashMap}.
+     * A method that folds an element into the {@link Map}.
      *
-     * @return a {@link BiConsumer} that folds a value into the
-     * mutable result container
+     * @return A {@link BiConsumer} that folds a value into the
+     *         mutable result container
      */
     @Override
     public BiConsumer<Map<K, Collection<V>>, T> accumulator() {
@@ -142,7 +142,7 @@ public class MultimapCollector<T, K, V>
      * This method is a no-op given the {@link Characteristics} set as
      * {@code IDENTITY_FINISH}.
      *
-     * @return Null
+     * @return {@link Function#identity()}
      */
     @Override
     public Function<Map<K, Collection<V>>, Map<K, Collection<V>>> finisher() {
@@ -151,11 +151,11 @@ public class MultimapCollector<T, K, V>
 
     /**
      * Returns a {@link Set} of {@link Collector.Characteristics}
-     * indicating the characteristics of this Collector.  This set is
-     * immutable.
+     * indicating the characteristics of this Collector.  This {@link
+     * Set} is immutable.
      *
-     * @return An immutable set of {@link Collector} characteristics,
-     *         which in this case is {@code
+     * @return An immutable {@link Set} of {@link Collector}
+     *         characteristics, which in this case is {@code
      *         [UNORDERED|IDENTITY_FINISH]}
      */
     @Override
