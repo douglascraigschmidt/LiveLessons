@@ -48,10 +48,10 @@ public class FluxEx {
             BigFraction.valueOf(100, 1)
         };
 
-        // Create a blocking subscriber that processes various
-        // types of signals have this subscribe not be aware
-        // of backpressure and it logs the results.
-        BackpressureSubscriber<BigFraction> backpressureSubscriber =
+        // Create a blocking subscriber that processes various types
+        // of signals and log the results. This subscriber is not
+        // aware of backpressure.
+        var blockingSubscriber =
             makeBlockingSubscriber(sb,
                                    Long.MAX_VALUE,
                                    true);
@@ -68,8 +68,8 @@ public class FluxEx {
                          // Generate a stream of BigFractions.
                          .fromArray(bigFractionArray)
 
-                         // Perform the Project Reactor
-                         // flatMap() concurrency idiom.
+                         // Perform the Project Reactor flatMap()
+                         // concurrency idiom.
                          .flatMap(bf2 ->
                                   multiplyFraction(bf1,
                                                    bf2,
@@ -78,12 +78,12 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(backpressureSubscriber);
+            .subscribe(blockingSubscriber);
 
         // Wait for all async computations to complete and return an
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
-        return backpressureSubscriber.await();
+        return blockingSubscriber.await();
     }
 
     /**
@@ -97,7 +97,7 @@ public class FluxEx {
 
         // Create a blocking subscriber that processes various
         // types of signals and is "backpressure aware."
-        BackpressureSubscriber<BigFraction> backpressureSubscriber =
+        var backpressureSubscriber =
             makeBlockingSubscriber(sb,
                                    2,
                                    true);
@@ -107,12 +107,12 @@ public class FluxEx {
             .fromSupplier(() -> BigFractionUtils
                           .makeBigFraction(sRANDOM, true))
 
-            // Generate a total of sMAX_FRACTIONS BigFraction objects.
+            // Generate sMAX_FRACTIONS random BigFraction objects.
             .repeat(sMAX_FRACTIONS - 1)
 
-            // Use the "flatMap() concurrency idiom" to transform the items
-            // emitted by this Flux into a Publisher and then forward its
-            // emissions into the returned Flux.
+            // Use the "flatMap() concurrency idiom" to transform the
+            // items emitted by this Flux into a Publisher and then
+            // forward its emissions into the returned Flux.
             .flatMap(bf1 -> BigFractionUtils
                      .multiplyFraction(bf1,
                                        sBigReducedFraction,
@@ -131,8 +131,8 @@ public class FluxEx {
 
     /**
      * A test of BigFraction multiplication using an asynchronous Flux
-     * stream and a blocking Subscriber implementation that applies
-     * a backpressure strategy.
+     * stream and a blocking Subscriber implementation that applies a
+     * backpressure strategy.
      */
     public static Mono<Void> testFractionMultiplicationsOverflowStrategy() {
         StringBuffer sb =
@@ -140,9 +140,9 @@ public class FluxEx {
 
         // Create a blocking subscriber that processes various
         // types of signals and is backpressure "unaware".
-        BackpressureSubscriber<BigFraction> backpressureSubscriber =
+        var blockingSubscriber =
             makeBlockingSubscriber(sb,
-                                   Integer.MAX_VALUE,
+                                   Long.MAX_VALUE,
                                    true);
 
         // Set the count to something reasonably large.
@@ -166,11 +166,11 @@ public class FluxEx {
 
             // Use subscribe() to initiate all the processing and
             // handle the results asynchronously.
-            .subscribe(backpressureSubscriber);
+            .subscribe(blockingSubscriber);
 
         // Wait for all async computations to complete and return an
         // empty mono to indicate to the AsyncTaskBarrier that all the
         // processing is done.
-        return backpressureSubscriber.await();
+        return blockingSubscriber.await();
     }
 }

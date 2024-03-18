@@ -196,7 +196,7 @@ public class BigFractionUtils {
 
     /**
      * This factory method creates a {@link BackpressureSubscriber} with
-     * the given parameters.
+     * the given parameters that is used to block the client thread.
      *
      * @param sb The {@link StringBuffer} to record output
      * @param requestSize The size to pass to {@link Flow.Subscription#request}

@@ -171,7 +171,7 @@ public class ParallelFluxEx {
             .doOnComplete(() -> System.out.println(sb))
 
             // Collect the downloaded images into a List.
-            .collect(Collectors.toList())
+            .collectList()
 
             // Process the List on success.
             .doOnSuccess(imageFiles -> Options

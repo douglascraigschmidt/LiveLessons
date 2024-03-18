@@ -39,13 +39,13 @@ public final class Emitter {
      *
      * @param count Number of items to emit
      * @return A {@link Consumer} to a {@link FluxSink} that emits a
-     *         {@link Flux} stream of random integers without concern
-     *         for backpressure
+     *         {@link Flux} stream of random {@link BigFraction} objects
+     *         without concern for backpressure
      */
     public static Consumer<FluxSink<BigFraction>>
     makeEmitter(int count,
                 StringBuffer sb) {
-        // Create an emitter that just blasts out random integers.
+        // Create an emitter that just blasts out random BigFraction objects.
         return sink -> {
             // Keep going while the iterator is not done.
             for (int i = 0; i < count; ++i) {
