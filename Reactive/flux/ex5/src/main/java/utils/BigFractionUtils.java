@@ -153,7 +153,8 @@ public class BigFractionUtils {
      * @param unreducedFraction An unreduced {@link BigFraction}
      * @param scheduler         The {@link Scheduler} to perform the
      *                          computation in
-     * @param sb                The {@link StringBuffer} to store logging messages
+     * @param sb                The {@link StringBuffer} to store logging
+     *                          messages
      * @return A {@link Mono<BigFraction>} that's signaled when the
      *         asynchronous computation completes
      */
