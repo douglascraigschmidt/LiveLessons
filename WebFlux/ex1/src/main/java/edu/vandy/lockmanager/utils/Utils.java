@@ -1,18 +1,21 @@
 package edu.vandy.lockmanager.utils;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
-public class Utils {
-    public static void log(String text) {
-        var thread = Thread.currentThread(); //.threadId();
-        System.out.println(text
-            + " [" + thread + "]: ");
-    }
+public interface Utils {
 
-    /**
-     * @return A unique {@link String} id
-     */
-    public static String generateUniqueId() {
-        return UUID.randomUUID().toString();
-    }
+	Logger logger = Logger.getLogger(Utils.class.getName());
+
+	static void log(String text) {
+		var thread = Thread.currentThread(); // .threadId();
+		logger.info(text + " [" + thread + "]: ");
+	}
+
+	/**
+	 * @return A unique {@link String} id
+	 */
+	static String generateUniqueId() {
+		return UUID.randomUUID().toString();
+	}
 }
