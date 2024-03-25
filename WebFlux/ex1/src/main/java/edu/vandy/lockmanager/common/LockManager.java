@@ -65,7 +65,7 @@ public class LockManager {
     @Override
     public boolean equals(Object object) {
         return object instanceof LockManager other
-            && this.name.equals(other.name);
+            && Objects.equals(this.name, other.name);
     }
 
     /**

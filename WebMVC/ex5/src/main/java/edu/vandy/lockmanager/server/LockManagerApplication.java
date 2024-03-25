@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import java.util.concurrent.Executors;
 
 /**
- * This microservice provides a lock manager microservice that
- * implements a semaphore that can be acquired and released by
- * multiple clients concurrently.
+ * This microservice provides a lock manager microservice that uses
+ * Spring WebMVC to implement a semaphore that can be acquired and
+ * released by multiple clients concurrently.
  *
  * The {@code @SpringBootApplication} annotation is used to indicate
  * that a class is the main configuration class for a Spring Boot

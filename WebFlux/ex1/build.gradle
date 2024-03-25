@@ -33,7 +33,7 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 test {
@@ -46,20 +46,15 @@ tasks.named('test') {
 
 compileJava {
     options.compilerArgs.addAll(
-                                ['--enable-preview',
-                                 '--add-modules', 'jdk.incubator.concurrent'
-                                 ])
+                                ['--enable-preview'])
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['--enable-preview',
-                             '--add-modules', 'jdk.incubator.concurrent']
+    options.compilerArgs += ['--enable-preview']
 }
 
 tasks.withType(Test).configureEach {
     jvmArgs += '--enable-preview'
-    jvmArgs += '--add-modules'
-    jvmArgs += 'jdk.incubator.concurrent'
 }
 
 tasks.withType(JavaExec).configureEach {

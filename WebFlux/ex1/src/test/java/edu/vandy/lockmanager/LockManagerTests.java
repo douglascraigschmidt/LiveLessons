@@ -53,7 +53,7 @@ class LockManagerTests {
             .flatMap(lockManager -> {
                     log("The LockManager's id = " + lockManager);
                     return Flux
-                        // Run maxClients tests in parallel.
+                        // Run maxClients tests asynchronously.
                         .range(0, maxClients)
 
                         // Call acquireAndReleaseLocks() each client.
@@ -93,7 +93,7 @@ class LockManagerTests {
                 log("The LockManager's id = " + lockManager);
                 return
                     Flux
-                        // Run maxClients tests in parallel.
+                        // Run maxClients tests in asynchronously.
                         .range(0, maxClients)
 
                         // Call acquireAndReleaseLocks() each client.
@@ -163,7 +163,7 @@ class LockManagerTests {
         log("Starting client " + client);
 
         return mLockAPI
-            // Asynchronously acquire a lock.
+            // Asynchronously acquire a maxPermits number of locks.
             .acquire(lockManager, maxPermits)
 
             // Collect the locks into a Mono to a List.

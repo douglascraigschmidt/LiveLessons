@@ -2,22 +2,19 @@ package edu.vandy.lockmanager.server;
 
 import edu.vandy.lockmanager.common.Lock;
 import edu.vandy.lockmanager.common.LockManager;
-import edu.vandy.lockmanager.utils.Utils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
 
 import static edu.vandy.lockmanager.utils.Utils.generateUniqueId;
 import static edu.vandy.lockmanager.utils.Utils.log;
 import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 /**
  * This Spring {@code Service} implements the {@link
@@ -26,7 +23,7 @@ import static java.lang.Boolean.TRUE;
  * objects associated with the {@link ArrayBlockingQueue} objects that
  * store the state of each semaphore.
  */
-@SuppressWarnings("BlockingMethodInNonBlockingContext")
+@SuppressWarnings({"BlockingMethodInNonBlockingContext", "StringTemplateMigration"})
 @Service
 public class LockManagerService {
     /**
@@ -87,18 +84,21 @@ public class LockManagerService {
      * @param count The number of {@link Lock} objects to create
      */
     private List<Lock> makeLocks(int count) {
-        return IntStream
-            // Iterate from 0 to count - 1.
+        return Flux
+            // Generate a range of integers from 0 to count - 1.
             .range(0, count)
 
-            // Convert Integer to String.
-            .mapToObj(Integer::toString)
+            // Convert each integer to a String.
+            .map(Object::toString)
 
-            // Create a new Lock.
+            // Create a new Lock for each string.
             .map(Lock::new)
 
-            // Convert the Stream to a List.
-            .toList();
+            // Collect the Flux stream into a List.
+            .collectList()
+
+            // Block until the List is fully populated.
+            .block();
     }
 
     /**
@@ -148,7 +148,7 @@ public class LockManagerService {
             .doOnError(exception ->
                        log("LockService error - "
                            + exception.getMessage()))
-            .doOnSuccess(mono ->
+            .doOnSuccess(_ ->
                          log("LockService - returning Mono"));
     }
 
@@ -202,6 +202,7 @@ public class LockManagerService {
                                 + ") = "
                                 + result);
                     })
+
                 // Transform Flux<Integer> to Flux<Lock> that emits
                 // the acquired Lock objects as individual elements.
                 .thenMany(Flux.fromIterable(acquiredLocks));
@@ -222,8 +223,9 @@ public class LockManagerService {
      * @return The number of {@link Lock} objects in {@code
      *         acquiredLocks}
      */
-    private Integer tryAcquireLock(ArrayBlockingQueue<Lock> availableLocks,
-                                   List<Lock> acquiredLocks) {
+    private Integer tryAcquireLock
+        (ArrayBlockingQueue<Lock> availableLocks,
+         List<Lock> acquiredLocks) {
         // Perform a non-blocking poll().
         var lock = availableLocks.poll();
 
@@ -305,17 +307,15 @@ public class LockManagerService {
             return Mono
                 .just(FALSE);
         else {
-            boolean allReleased = locks
-                // Convert List to a Stream.
-                .stream()
+            return Flux
+                // Convert List to a Flux stream.
+                .fromIterable(locks)
 
-                // Return true if all locks are put back into
-                // mAvailableLocks successfully (does not block).
-                .allMatch(availableLocks::offer);
+                // Check if all locks are put back successfully.
+                .all(availableLocks::offer)
 
-            return Mono
-                // Return the result, either true or false.
-                .just(allReleased);
+                // Return Mono<Boolean> result.
+                .flatMap(Mono::just);
         }
     }
 }

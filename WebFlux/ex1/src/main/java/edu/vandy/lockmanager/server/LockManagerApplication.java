@@ -12,6 +12,23 @@ import java.util.concurrent.Executors;
 
 import static org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME;
 
+/**
+ * This microservice provides a lock manager microservice that uses
+ * Spring WebFlux to implement a semaphore that can be acquired and
+ * released by multiple clients concurrently.
+ *
+ * The {@code @SpringBootApplication} annotation is used to indicate
+ * that a class is the main configuration class for a Spring Boot
+ * application.  It enables auto-configuration and component scanning
+ * by default, and is equivalent to using {@code @Configuration},
+ * {@code @EnableAutoConfiguration}, and {@code @ComponentScan}
+ * together.
+ *
+ * The {@code @ComponentScan} annotation is used to specify the base
+ * package for component scanning in a Spring application.  It tells
+ * Spring where to look for components such as controllers, services,
+ * and repositories.
+ */
 @SpringBootApplication
 @ComponentScan("edu.vandy.lockmanager")
 public class LockManagerApplication {
@@ -34,8 +51,8 @@ public class LockManagerApplication {
     }
 
     /**
-     * Customize the ProtocolHandler on the TomCat Connector to
-     * use Java virtual threads to handle all incoming HTTP requests.
+     * Customize the ProtocolHandler on the TomCat Connector to use
+     * Java virtual threads to handle all incoming HTTP requests.
      */
     @Bean
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {

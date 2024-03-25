@@ -17,6 +17,7 @@ import static edu.vandy.lockmanager.utils.Utils.log;
  * lock manager for a semaphore that can be shared amongst multiple
  * asynchronous Spring WebFlux clients.
  */
+@SuppressWarnings("StringTemplateMigration")
 @RestController
 public class LockManagerController {
     /**
