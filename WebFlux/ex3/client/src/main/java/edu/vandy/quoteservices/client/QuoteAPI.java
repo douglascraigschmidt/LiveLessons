@@ -41,7 +41,7 @@ public interface QuoteAPI {
      * @return An {@link Flux} that emits all the {@link Quote}
      *         objects
      */
-    @GetExchange("{routename}" + "/" + GET_ALL_QUOTES)
+    @GetExchange(ROUTENAME + "/" + GET_ALL_QUOTES)
     Flux<Quote> getAllQuotes(@PathVariable String routename);
 
     /**
@@ -52,7 +52,7 @@ public interface QuoteAPI {
      * @return An {@link Flux} that emits the requested {@link Quote}
      *         objects
      */
-    @PostExchange("{routename}" + "/" + POST_QUOTES)
+    @PostExchange(ROUTENAME + "/" + POST_QUOTES)
     Flux<Quote> postQuotes(@PathVariable String routename, @RequestBody List<Integer> quoteIds);
 
     /**
@@ -64,7 +64,7 @@ public interface QuoteAPI {
      * @return A {@link Flux} that emits {@link Quote} objects
      *         matching the queries
      */
-    @PostExchange("{routename}" + "/" + POST_SEARCHES)
+    @PostExchange(ROUTENAME + "/" + POST_SEARCHES)
     Flux<Quote> search(@PathVariable String routename, @RequestBody List<String> queries);
 
     /**
@@ -77,6 +77,6 @@ public interface QuoteAPI {
      * @return A {@link Flux} that emits {@link Quote} objects
      *         matching the queries
      */
-    @PostExchange("{routename}" + "/" + POST_SEARCHES_EX)
+    @PostExchange(ROUTENAME + "/" + POST_SEARCHES_EX)
     Flux<Quote> searchEx(@PathVariable String routename, @RequestBody List<String> queries);
 }

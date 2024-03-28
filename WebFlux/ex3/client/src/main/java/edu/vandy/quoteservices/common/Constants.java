@@ -16,6 +16,7 @@ public class Constants {
         public static final String POST_QUOTES = "quotes";
         public static final String POST_SEARCHES = "searchQuotes";
         public static final String POST_SEARCHES_EX = "searchQuotesEx";
+        public static final String ROUTENAME = "{routename}";
     }
 
     /**
