@@ -1,7 +1,7 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.repository.JPAQuoteRepository;
+import edu.vandy.quoteservices.repository.ZippyQuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +29,7 @@ public class ZippyService {
      * Spring-injected repository that contains all quotes.
      */
     @Autowired
-    private JPAQuoteRepository mRepository;
+    private ZippyQuoteRepository mRepository;
 
     /**
      * @return A {@link Flux} that emits all {@link Quote} objects

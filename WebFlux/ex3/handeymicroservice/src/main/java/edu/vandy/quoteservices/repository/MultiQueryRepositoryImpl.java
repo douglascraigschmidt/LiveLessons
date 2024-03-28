@@ -39,7 +39,7 @@ public class MultiQueryRepositoryImpl
      */
     @Override
     public Flux<Quote> findAllByQuoteContainingIgnoreCaseAllIn
-    (List<String> queries) {
+        (List<String> queries) {
         // Build an SQL query String that will match Quote objects in
         // the database containing all the queries.
         String sql = buildQueryString
@@ -142,7 +142,7 @@ public class MultiQueryRepositoryImpl
                     row.get("quote", String.class)))
 
             // This call should not block, but instead will return the
-            // Quote objects as they appear and stream them back to
+            // Quote objects as they are emitted and stream them back to
             // the client.
             .all();
     }

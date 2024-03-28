@@ -1,7 +1,7 @@
 package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.common.*;
-import edu.vandy.quoteservices.repository.ReactiveQuoteRepository;
+import edu.vandy.quoteservices.repository.HandeyQuoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -27,7 +27,7 @@ public class HandeyService {
      * Spring-injected repository that contains all quotes.
      */
     @Autowired
-    private ReactiveQuoteRepository mRepository;
+    private HandeyQuoteRepository mRepository;
 
     /**
      * @return A {@link Flux} of all {@link Quote} objects

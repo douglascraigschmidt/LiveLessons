@@ -1,6 +1,7 @@
 package edu.vandy.quoteservices.client;
 
 import edu.vandy.quoteservices.common.Quote;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
@@ -10,15 +11,15 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 import static edu.vandy.quoteservices.common.Constants.EndPoint.*;
-import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
+import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
 
 /**
  * This interface provides the contract for the RESTful {@code
- * ZippyController} microservice used in conjunction with the {@code
+ * HandeyController} microservice used in conjunction with the {@code
  * GatewayApplication}.  It defines the HTTP GET and POST methods that
- * can be used to interact with the {@code ZippyController} API,
+ * can be used to interact with the {@code HandeyController} API,
  * along with the expected request and response parameters for each
- * method.  However, since clients access the {@code ZippyController}
+ * method.  However, since clients access the {@code HandeyController}
  * API via the {@code GatewayApplication} it's necessary to add a
  * {@code HANDEY} prefix to each URL mapping via the {@code
  * HttpExchange} annotation.
@@ -33,16 +34,15 @@ import static edu.vandy.quoteservices.common.Constants.Service.ZIPPY;
  * an implementation of the interface that the client uses to make
  * asynchronous HTTP requests to the API.
  */
-@HttpExchange(url = ZIPPY + "/")
-public interface ZippyQuoteAPI {
+public interface QuoteAPI {
     /**
      * Get a {@link Flux} that emits the requested quotes.
      *
      * @return An {@link Flux} that emits all the {@link Quote}
      *         objects
      */
-    @GetExchange(GET_ALL_QUOTES)
-    Flux<Quote> getAllQuotes();
+    @GetExchange("{routename}" + "/" + GET_ALL_QUOTES)
+    Flux<Quote> getAllQuotes(@PathVariable String routename);
 
     /**
      * Get a {@link List} containing the requested quotes.
@@ -52,8 +52,8 @@ public interface ZippyQuoteAPI {
      * @return An {@link Flux} that emits the requested {@link Quote}
      *         objects
      */
-    @PostExchange(POST_QUOTES)
-    Flux<Quote> postQuotes(@RequestBody List<Integer> quoteIds);
+    @PostExchange("{routename}" + "/" + POST_QUOTES)
+    Flux<Quote> postQuotes(@PathVariable String routename, @RequestBody List<Integer> quoteIds);
 
     /**
      * Search for quotes containing any of the given {@link List} of
@@ -64,8 +64,8 @@ public interface ZippyQuoteAPI {
      * @return A {@link Flux} that emits {@link Quote} objects
      *         matching the queries
      */
-    @PostExchange(POST_SEARCHES)
-    Flux<Quote> search(@RequestBody List<String> queries);
+    @PostExchange("{routename}" + "/" + POST_SEARCHES)
+    Flux<Quote> search(@PathVariable String routename, @RequestBody List<String> queries);
 
     /**
      * Search the Zippy microservice for quotes containing all the
@@ -77,6 +77,6 @@ public interface ZippyQuoteAPI {
      * @return A {@link Flux} that emits {@link Quote} objects
      *         matching the queries
      */
-    @PostExchange(POST_SEARCHES_EX)
-    Flux<Quote> searchEx(@RequestBody List<String> queries);
+    @PostExchange("{routename}" + "/" + POST_SEARCHES_EX)
+    Flux<Quote> searchEx(@PathVariable String routename, @RequestBody List<String> queries);
 }

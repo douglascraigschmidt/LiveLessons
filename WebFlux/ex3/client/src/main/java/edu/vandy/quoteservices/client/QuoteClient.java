@@ -24,19 +24,12 @@ import static edu.vandy.quoteservices.common.Constants.Service.HANDEY;
 public class QuoteClient {
     /**
      * This auto-wired field connects the {@link QuoteClient} to the
-     * {@link HandeyQuoteAPI} that exchanges HTTP requests with the
-     * {@code HandeyApplication} microservice asynchronously.
+     * {@link QuoteAPI} that exchanges HTTP requests with the
+     * {@code HandeyApplication} and {@code ZippyApplication}
+     * microservices asynchronously.
      */
     @Autowired
-    private HandeyQuoteAPI mHandeyQuoteAPI;
-
-    /**
-     * This auto-wired field connects the {@link QuoteClient} to the
-     * {@link ZippyQuoteAPI} that exchanges HTTP requests with the
-     * {@code ZippyApplication} microservice asynchronously.
-     */
-    @Autowired
-    private ZippyQuoteAPI mZippyQuoteAPI;
+    private QuoteAPI mQuoteAPI;
 
     /**
      * Get a {@link Flux} that emits the requested quotes.
@@ -46,11 +39,8 @@ public class QuoteClient {
      *         objects
      */
     public Flux<Quote> getAllQuotes(String routename) {
-        return routename.equals(HANDEY)
-            // Forward to the Handey proxy.
-            ? mHandeyQuoteAPI.getAllQuotes()
-            // Forward to the Zippy proxy.
-            : mZippyQuoteAPI.getAllQuotes();
+        // Forward to the gateway.
+        return mQuoteAPI.getAllQuotes(routename);
     }
 
     /**
@@ -64,11 +54,8 @@ public class QuoteClient {
      */
     public Flux<Quote> postQuotes(String routename,
                                   List<Integer> quoteIds) {
-        return routename.equals(HANDEY)
-            // Forward to the Handey proxy.
-            ? mHandeyQuoteAPI.postQuotes(quoteIds)
-            // Forward to the Zippy proxy.
-            : mZippyQuoteAPI.postQuotes(quoteIds);
+        // Forward to the gateway.
+        return mQuoteAPI.postQuotes(routename, quoteIds);
     }
 
     /**
@@ -82,11 +69,8 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotes(String routename,
                                     List<String> queries) {
-        return routename.equals(HANDEY)
-            // Forward to the Handey proxy.
-            ? mHandeyQuoteAPI.search(queries)
-            // Forward to the Zippy proxy.
-            : mZippyQuoteAPI.search(queries);
+        // Forward to the gateway.
+        return mQuoteAPI.search(routename, queries);
     }
 
     /**
@@ -100,10 +84,7 @@ public class QuoteClient {
      */
     public Flux<Quote> searchQuotesEx(String routename,
                                       List<String> queries) {
-        return routename.equals(HANDEY)
-            // Forward to the Handey proxy.
-            ? mHandeyQuoteAPI.searchEx(queries)
-            // Forward to Zippy proxy.
-            : mZippyQuoteAPI.searchEx(queries);
+        // Forward to the gateway.
+        return mQuoteAPI.searchEx(routename, queries);
     }
 }

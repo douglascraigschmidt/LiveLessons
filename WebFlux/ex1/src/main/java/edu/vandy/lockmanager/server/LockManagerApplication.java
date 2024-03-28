@@ -14,8 +14,8 @@ import static org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfi
 
 /**
  * This microservice provides a lock manager microservice that uses
- * Spring WebFlux to implement a semaphore that can be acquired and
- * released by multiple clients concurrently.
+ * Spring WebFlux to implement a distribute semaphore that can be acquired
+ * and released by multiple clients concurrently.
  *
  * The {@code @SpringBootApplication} annotation is used to indicate
  * that a class is the main configuration class for a Spring Boot
@@ -42,7 +42,7 @@ public class LockManagerApplication {
 
     /**
      * Configure the use of Java virtual threads to handle all
-     * incoming HTTP requests.
+     * incoming HTTP requests from clients.
      */
     @Bean(APPLICATION_TASK_EXECUTOR_BEAN_NAME)
     public AsyncTaskExecutor asyncTaskExecutor() {

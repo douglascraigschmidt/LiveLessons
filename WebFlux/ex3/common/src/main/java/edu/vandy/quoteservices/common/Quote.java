@@ -3,6 +3,7 @@ package edu.vandy.quoteservices.common;
 import jakarta.persistence.*;
 
 import java.util.Objects;
+import java.util.Comparator;
 
 /**
  * This class stores {@link Quote} objects in the JPA and R2DBC
@@ -16,6 +17,7 @@ import java.util.Objects;
  * database with which each {@link Quote} entity is mapped.
  *
  */
+@SuppressWarnings("LombokGetterMayBeUsed")
 @Entity
 @Table(name = "QUOTE")
 public class Quote
@@ -69,12 +71,13 @@ public class Quote
      */
     @Override
     public int compareTo(Quote other) {
-        assert this.id != null;
-        assert other.id != null;
-        return this.quote
-            // Compare the quote field of this Quote with the quote
-            // field of the other Quote and return the results.
-            .compareTo(other.quote);
+        // Compare quote field of this Quote with quote field of the
+        // other Quote and return the results in a null-safe way.
+        Comparator<String> nullSafeStringComparator = Comparator
+            .nullsFirst(String::compareToIgnoreCase);
+
+        return nullSafeStringComparator.compare(this.quote, 
+                                                other.quote);
     }
 
     /**
@@ -88,7 +91,7 @@ public class Quote
     @Override
     public boolean equals(Object object) {
         return object instanceof Quote other
-            && this.quote.equals(other.quote);
+            && Objects.equals(this.id, other.id);
     }
 
     /**

@@ -9,7 +9,7 @@ overview of what's included:
         features in Spring framework 6, which enables the definition
         of declarative HTTP services using Java interfaces.
 
-. ex1 - This example shows how Spring WebFlux can be used to send and
+. ex2 - This example shows how Spring WebFlux can be used to send and
         receive HTTP GET requests via the Project Reactor Flux and
         ParallelFlux reactive types.  These requests are mapped to
         methods that determine the primality of large Integer objects.

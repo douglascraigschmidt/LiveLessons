@@ -28,7 +28,7 @@ public interface LockAPI {
      * @return A {@link Mono} that emits a {@link LockManager}
      *         associated with the state of the semaphore it manages
      */
-    @GetExchange(CREATE)
+    @PostExchange(CREATE)
     Mono<LockManager> create(@RequestParam Integer permitCount);
 
     /**
@@ -38,7 +38,7 @@ public interface LockAPI {
      *                    with the state of the semaphore it manages
      * @return A {@link Mono} that emits a newly acquired {@link Lock}
      */
-    @GetExchange(ACQUIRE_LOCK)
+    @PostExchange(ACQUIRE_LOCK)
     Mono<Lock> acquire(@RequestParam LockManager lockManager);
 
     /**
@@ -50,7 +50,7 @@ public interface LockAPI {
      * @return A {@link Flux} that emits a {@link List} containing
      *         {@code permits} newly acquired {@link Lock} objects
      */
-    @GetExchange(ACQUIRE_LOCKS)
+    @PostExchange(ACQUIRE_LOCKS)
     Flux<Lock> acquire(@RequestParam LockManager lockManager,
                        @RequestParam Integer permits);
 
@@ -64,7 +64,7 @@ public interface LockAPI {
      *         {@link Boolean#TRUE} if the {@link Lock} was released
      *         properly and {@link Boolean#FALSE} otherwise
      */
-    @GetExchange(RELEASE_LOCK)
+    @PostExchange(RELEASE_LOCK)
     Mono<Boolean> release(@RequestParam LockManager lockManager,
                           @RequestParam Lock lock);
 

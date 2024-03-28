@@ -35,7 +35,7 @@ public class LockManagerController {
      * @return A {@link Mono} that emits the {@link LockManager}
      *         associated with the state of the semaphore it manages
      */
-    @GetMapping(CREATE)
+    @PostMapping(CREATE)
     public Mono<LockManager> create
         (@RequestParam Integer permitCount) {
         log("LockController.create()");
@@ -52,7 +52,7 @@ public class LockManagerController {
      *         with the state of the semaphore it manages
      * @return A {@link Mono} that emits an acquired {@link Lock}
      */
-    @GetMapping(ACQUIRE_LOCK)
+    @PostMapping(ACQUIRE_LOCK)
     public Mono<Lock> acquire(@RequestParam LockManager lockManager) {
         log("LockController.acquire()");
 
@@ -70,9 +70,9 @@ public class LockManagerController {
      * @return A {@link Flux} that emits {@code permits} number of
      *         acquired {@link Lock} objects
      */
-    @GetMapping(ACQUIRE_LOCKS)
+    @PostMapping(ACQUIRE_LOCKS)
     Flux<Lock> acquire(@RequestParam LockManager lockManager,
-                       Integer permits) {
+                       @RequestParam Integer permits) {
         log("LockController.acquire("
                   + permits
                   + ")");
@@ -92,7 +92,7 @@ public class LockManagerController {
      *         the {@link Lock} was released properly and
      *         {@link Boolean#FALSE} otherwise.
      */
-    @GetMapping(RELEASE_LOCK)
+    @PostMapping(RELEASE_LOCK)
     public Mono<Boolean> release(@RequestParam LockManager lockManager,
                                  @RequestParam Lock lock) {
         log("LockController.release("

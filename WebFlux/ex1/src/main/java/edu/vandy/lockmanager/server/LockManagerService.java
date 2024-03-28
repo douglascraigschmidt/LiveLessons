@@ -210,6 +210,8 @@ public class LockManagerService {
             log("LockService.acquire("
                 + permits
                 + ") returning Flux");
+
+            // Return the Flux, which will emit the Locks it contains.
             return flux;
         }
     }

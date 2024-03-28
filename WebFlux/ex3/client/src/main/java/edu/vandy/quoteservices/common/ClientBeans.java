@@ -1,7 +1,6 @@
 package edu.vandy.quoteservices.common;
 
-import edu.vandy.quoteservices.client.HandeyQuoteAPI;
-import edu.vandy.quoteservices.client.ZippyQuoteAPI;
+import edu.vandy.quoteservices.client.QuoteAPI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,40 +16,10 @@ import static edu.vandy.quoteservices.common.Constants.GATEWAY_BASE_URL;
 @Component
 public class ClientBeans {
     /**
-     * @return A new instance of the {@link HandeyQuoteAPI}
+     * @return A new instance of the {@link QuoteAPI}
      */
     @Bean
-    public HandeyQuoteAPI getHandeyQuoteAPI() {
-            var webClient = WebClient
-                // Create a new WebClient.
-                .builder()
-
-                // Add the base URL for the GatewayApplication microservice.
-                .baseUrl(GATEWAY_BASE_URL)
-
-                // Finish initializing the WebClient.
-                .build();
-
-            // Return a new instance of HandeyQuoteAPI that makes HTTP
-            // requests using the provided WebClient object.
-            return HttpServiceProxyFactory
-                // Create an instance of the HttpServiceProxyFactory class
-                // and build a new WebClientAdapter.
-                .builder(WebClientAdapter
-                    .forClient(webClient))
-
-                // Build the HttpServiceProxyFactory instance.
-                .build()
-
-                // Create a new instance of the HandeyQuoteAPI interface.
-                .createClient(HandeyQuoteAPI.class);
-        }
-
-    /**
-     * @return A new instance of the {@link ZippyQuoteAPI}
-     */
-    @Bean
-    public ZippyQuoteAPI getZippyQuoteAPI() {
+    public QuoteAPI getQuoteAPI() {
         var webClient = WebClient
             // Create a new WebClient.
             .builder()
@@ -73,7 +42,7 @@ public class ClientBeans {
             // Build the HttpServiceProxyFactory instance.
             .build()
 
-            // Create a new instance of the ZippyQuoteAPI interface.
-            .createClient(ZippyQuoteAPI.class);
+            // Create a new instance of the QuoteAPI interface.
+            .createClient(QuoteAPI.class);
     }
 }

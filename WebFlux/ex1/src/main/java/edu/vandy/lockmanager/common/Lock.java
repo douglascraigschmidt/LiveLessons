@@ -2,11 +2,11 @@ package edu.vandy.lockmanager.common;
 
 /**
  * Define an object that clients can use as a lock in a
- * distributed system.
+ * distributed semaphore service.
  */
 public class Lock {
     /**
-     * The identity of the {@link Lock}
+     * The identity of the {@link Lock}.
      */
     public String id;
 

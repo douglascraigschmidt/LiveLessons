@@ -17,9 +17,9 @@ import static edu.vandy.lockmanager.utils.Utils.log;
  * microservice, which uses Spring WebFlux to provide a distributed
  * lock manager for asynchronous Spring applications using
  * asynchronous controller methods that return Project Reactor {@link
- * Mono} and {@link Flux} reactive objects.  It also shows how to use the asynchronous
- * HTTP interface features in Spring framework 6, which enables the
- * definition of declarative HTTP services using Java interfaces.
+ * Mono} and {@link Flux} reactive objects.  It also shows how to use the
+ * asynchronous HTTP interface features in Spring framework 6, which enables
+ * the definition of declarative HTTP services using Java interfaces.
  */
 @SpringBootTest(classes = LockManagerApplication.class,
                 webEnvironment = SpringBootTest

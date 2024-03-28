@@ -2,10 +2,11 @@ package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.utils.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.repository.JPAQuoteRepository;
+import edu.vandy.quoteservices.repository.ZippyQuoteRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
  */
 @SpringBootApplication
 @EntityScan(basePackageClasses = {Quote.class})
-@EnableJpaRepositories(basePackageClasses = {JPAQuoteRepository.class})
+@EnableJpaRepositories(basePackageClasses = {ZippyQuoteRepository.class})
 public class ZippyApplication 
        extends BaseApplication {
     /**
@@ -40,9 +41,10 @@ public class ZippyApplication
     }
 
     // @Bean
-    public CommandLineRunner demo(JPAQuoteRepository repository) {
+    public CommandLineRunner demo(ZippyQuoteRepository repository) {
         return args -> {
-            repository.findAllById(List.of(1, 2))
+            // repository.findAllById(List.of(1, 2))
+            repository.findAll()
                       .forEach(it -> System.out.println(it.quote));
         };
     }

@@ -2,11 +2,10 @@ package edu.vandy.quoteservices.microservice;
 
 import edu.vandy.quoteservices.utils.BaseApplication;
 import edu.vandy.quoteservices.common.Quote;
-import edu.vandy.quoteservices.repository.ReactiveQuoteRepository;
+import edu.vandy.quoteservices.repository.HandeyQuoteRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.List;
 @EntityScan(basePackageClasses =
     {Quote.class})
 @EnableR2dbcRepositories(basePackageClasses =
-    {ReactiveQuoteRepository.class})
+    {HandeyQuoteRepository.class})
 public class HandeyApplication 
        extends BaseApplication {
     /**
@@ -43,7 +42,7 @@ public class HandeyApplication
     }
 
     // @Bean
-    public CommandLineRunner demo(ReactiveQuoteRepository repository) {
+    public CommandLineRunner demo(HandeyQuoteRepository repository) {
         return args -> {
             repository.findAllById(List.of(1, 2))
                       .subscribe(it -> System.out.println(it.quote));

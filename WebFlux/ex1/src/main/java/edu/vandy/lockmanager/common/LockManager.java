@@ -1,10 +1,12 @@
 package edu.vandy.lockmanager.common;
 
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * This class is used to keep track of allocated {@link LockManager}
- * objects.
+ * objects that are associated with an {@link ArrayBlockingQueue} used
+ * to implement the distributed semaphore.
  */
 public class LockManager {
     /**
@@ -19,11 +21,10 @@ public class LockManager {
 
     /**
      * @return The unique name of the {@link LockManager}
-     *
+     */
     public String getName() {
-        return mName;
+        return name;
     }
-    */
 
     /**
      * Set the unique name of the {@link LockManager}.
