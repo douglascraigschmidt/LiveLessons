@@ -112,7 +112,7 @@ public class ZippyService {
         // the List of 'queries' and return them as a Flux of Quote
         // objects.
         return Flux
-            // Convert the List to a Stream.
+            // Convert the List to a Flux.
             .fromIterable(mRepository
                 // Forward to the repository.
                 .findAllByQuoteContainingIgnoreCaseAllIn(queries));

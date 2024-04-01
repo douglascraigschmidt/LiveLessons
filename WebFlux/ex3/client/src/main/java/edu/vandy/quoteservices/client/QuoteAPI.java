@@ -53,7 +53,8 @@ public interface QuoteAPI {
      *         objects
      */
     @PostExchange(ROUTENAME + "/" + POST_QUOTES)
-    Flux<Quote> postQuotes(@PathVariable String routename, @RequestBody List<Integer> quoteIds);
+    Flux<Quote> postQuotes(@PathVariable String routename,
+                           @RequestBody List<Integer> quoteIds);
 
     /**
      * Search for quotes containing any of the given {@link List} of
@@ -65,7 +66,8 @@ public interface QuoteAPI {
      *         matching the queries
      */
     @PostExchange(ROUTENAME + "/" + POST_SEARCHES)
-    Flux<Quote> search(@PathVariable String routename, @RequestBody List<String> queries);
+    Flux<Quote> search(@PathVariable String routename,
+                       @RequestBody List<String> queries);
 
     /**
      * Search the Zippy microservice for quotes containing all the
@@ -78,5 +80,6 @@ public interface QuoteAPI {
      *         matching the queries
      */
     @PostExchange(ROUTENAME + "/" + POST_SEARCHES_EX)
-    Flux<Quote> searchEx(@PathVariable String routename, @RequestBody List<String> queries);
+    Flux<Quote> searchEx(@PathVariable String routename,
+                         @RequestBody List<String> queries);
 }
