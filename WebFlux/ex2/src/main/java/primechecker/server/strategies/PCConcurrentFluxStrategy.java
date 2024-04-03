@@ -6,8 +6,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 /*
- * This strategy uses the Project Reactor flatMap() concurrency idiom to check
- * all the elements in a {@link Flux} for primality.
+ * This strategy uses the Project Reactor flatMap() concurrency idiom to
+ * check all the elements in a {@link Flux} for primality.
  */
 public class PCConcurrentFluxStrategy
        implements PCAbstractStrategy {

@@ -27,22 +27,30 @@ public final class RandomUtils {
     public static List<Integer> generateRandomIntegers(int count,
                                                        int maxValue,
                                                        boolean oddOnly) {
-        return new Random()
-            // Generate "infinite" random ints.
-            .ints(// Try to generate duplicates.
-                maxValue - count,
-                maxValue)
+        // Initialize a new Random object for generating random numbers.
+        Random random = new Random();
 
-            // Only generate odd numbers if 'oddOnly' is true.
-            .filter(n -> !oddOnly || n % 2 != 0)
+        // Define the minimum value to ensure the range is
+        // (maxValue - count) to maxValue.
+        int minValue = maxValue - count;
 
-            // Only take 'count' numbers.
-            .limit(count)
+        // Create a Flux to generate an infinite stream of random integers,
+        // process the stream, and collect the results into a List.
+        return Flux
+            // Generate an infinite stream of random Integers.
+            .<Integer>generate(sink -> sink
+                .next(minValue + random.nextInt(count)))
 
-            // Convert each primitive int to Integer.
-            .boxed()
+            // Filter the stream to include only odd numbers if oddOnly is true.
+            .filter(n -> !oddOnly || (int) n % 2 != 0)
 
-            // Trigger intermediate operations and collect into list.
-            .toList();
+            // Limit the Flux to only 'count' number of elements.
+            .take(count)
+
+            // Collect the Flux stream into a List.
+            .collectList()
+
+            // Block until the processing is done and return the List.
+            .block();
     }
 }

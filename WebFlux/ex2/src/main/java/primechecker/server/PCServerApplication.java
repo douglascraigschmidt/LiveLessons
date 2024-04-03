@@ -36,7 +36,7 @@ public class PCServerApplication {
         Options.instance().parseArgs(argv);
 
         SpringApplication
-            // Launch the ServerApplication within Spring WebMVC.
+            // Launch the ServerApplication within Spring WebFlux.
             .run(PCServerApplication.class, argv);
     }
 }

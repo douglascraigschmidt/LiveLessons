@@ -32,7 +32,6 @@ public class PCParallelFluxStrategy
     public Flux<Integer> checkIfPrimeFlux
         (Flux<Integer> primeCandidates) {
         return primeCandidates
-
             // Convert Flux to ParallelFlux.
             .parallel()
 

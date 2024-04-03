@@ -53,7 +53,7 @@ public class PrimeCheckTest {
         "-d",
         "false", // Disable debugging messages.
         "-c",
-        "1000" // Generate and test 1000 random large odd Integer objects.
+        "1000" // Generate and test 1,000 random large odd Integer objects.
     };
 
     /**
